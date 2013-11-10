@@ -118,6 +118,12 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         ensureAliveUpdateHandler();
     }
 
+    @Override
+    public void clearCaches() {
+        this.connector.clearCaches();
+        this.idCache.clear();
+    }
+
     /**
      * used for debugging
      */

@@ -72,6 +72,11 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     }
 
     @Override
+    public void clearCaches() {
+        // we do not have a direct access to the caches here, thus we simply do nothing.
+    }
+
+    @Override
     public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = params.get("q");
@@ -134,4 +139,5 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         }
         System.exit(0);
     }
+
 }

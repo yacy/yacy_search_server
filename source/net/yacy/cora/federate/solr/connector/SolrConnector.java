@@ -36,7 +36,12 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
-
+   
+    /**
+     * clear all caches: inside solr and ouside solr within the implementations of this interface
+     */
+    public void clearCaches();
+    
     /**
      * get the size of the index
      * @return number of results if solr is queries with a catch-all pattern

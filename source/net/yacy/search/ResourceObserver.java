@@ -129,7 +129,7 @@ public class ResourceObserver {
     	if(MemoryControl.properState()) return Space.HIGH;
     	
         // clear some caches - @all: are there more of these, we could clear here?
-		this.sb.index.clearCache();
+		this.sb.index.clearCaches();
         SearchEventCache.cleanupEvents(true);
         this.sb.trail.clear();
         Switchboard.urlBlacklist.clearblacklistCache();

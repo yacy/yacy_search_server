@@ -41,7 +41,10 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.index.RowHandleSet;
 
 public class BookmarksDB {
 
@@ -147,11 +150,6 @@ public class BookmarksDB {
             ConcurrentLog.logException(e);
         }
     }
-    public String addBookmark(final Bookmark bookmark){
-        saveBookmark(bookmark);
-        return bookmark.getUrlHash();
-
-    }
 
     public Bookmark getBookmark(final String urlHash) throws IOException {
         try {
@@ -214,18 +212,13 @@ public class BookmarksDB {
         final TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
         final String tagHash=BookmarkHelper.tagHash(tagName);
         final Tag tag=getTag(tagHash);
-        Set<String> hashes=new HashSet<String>();
-        if (tag != null) {
-            hashes=getTag(tagHash).getUrlHashes();
-        }
+        RowHandleSet hashes = tag == null ? new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10) : tag.getUrlHashes();
         if (priv) {
-            set.addAll(hashes);
+            for (byte[] hash: hashes) set.add(ASCII.String(hash));
         } else {
-        	final Iterator<String> it=hashes.iterator();
-            Bookmark bm;
-            while(it.hasNext()){
+            for (byte[] hash: hashes) {
                 try {
-                    bm = getBookmark(it.next());
+                    Bookmark bm = getBookmark(ASCII.String(hash));
                     if (bm != null && bm.getPublic()) {
                         set.add(bm.getUrlHash());
                     }
@@ -249,7 +242,7 @@ public class BookmarksDB {
      * retrieve an object of type Tag from the the tagCache, if object is not cached return loadTag(hash)
      * @param hash an object of type String, containing a tagHash
      */
-    public Tag getTag(final String hash){
+    private Tag getTag(final String hash){
         return this.tags.get(hash); //null if it does not exists
     }
 
@@ -257,7 +250,7 @@ public class BookmarksDB {
      * store a Tag in tagsTable or remove an empty tag
      * @param tag an object of type Tag to be stored/removed
      */
-    public void putTag(final Tag tag){
+    private void putTag(final Tag tag){
     	if (tag == null) return;
         if (tag.isEmpty()) {
             this.tags.remove(tag.getTagHash());
@@ -266,7 +259,7 @@ public class BookmarksDB {
         }
     }
 
-    public void removeTag(final String hash) {
+    private void removeTag(final String hash) {
         this.tags.remove(hash);
     }
 
@@ -301,7 +294,7 @@ public class BookmarksDB {
     	return set.iterator();
     }
 
-    public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp) {
+    private Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp) {
     	final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	Iterator<String> it=null;
     	final Iterator<String> bit=getBookmarksIterator(tagName, priv);
@@ -347,14 +340,14 @@ public class BookmarksDB {
 
     	final Tag oldTag=getTag(BookmarkHelper.tagHash(oldName));
     	if (oldTag != null) {
-            final Set<String> urlHashes = oldTag.getUrlHashes();	// preserve urlHashes of oldTag
+            final RowHandleSet urlHashes = oldTag.getUrlHashes();	// preserve urlHashes of oldTag
             removeTag(BookmarkHelper.tagHash(oldName));							// remove oldHash from TagsDB
 
             Bookmark bookmark;
             Set<String> tagSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-            for (final String urlHash : urlHashes) {									// looping through all bookmarks which were tagged with oldName
+            for (final byte[] urlHash : urlHashes) {									// looping through all bookmarks which were tagged with oldName
                 try {
-                    bookmark = getBookmark(urlHash);
+                    bookmark = getBookmark(ASCII.String(urlHash));
                     tagSet = bookmark.getTags();
                     tagSet.remove(oldName);
                     bookmark.setTags(tagSet, true);                     // might not be needed, but doesn't hurt
@@ -371,9 +364,9 @@ public class BookmarksDB {
     public void addTag(final String selectTag, final String newTag) {
 
     	Bookmark bookmark;
-    	for (final String urlHash : getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes()) {	// looping through all bookmarks which were tagged with selectTag
+    	for (final byte[] urlHash : getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes()) {	// looping through all bookmarks which were tagged with selectTag
             try {
-                bookmark = getBookmark(urlHash);
+                bookmark = getBookmark(ASCII.String(urlHash));
                 bookmark.addTag(newTag);
                 saveBookmark(bookmark);
             } catch (final IOException e) {
@@ -389,51 +382,24 @@ public class BookmarksDB {
      * Subclass of bookmarksDB, which provides the Tag object-type
      */
     public class Tag {
-        public static final String URL_HASHES = "urlHashes";
-        public static final String TAG_NAME =  "tagName";
         private final String tagHash;
-        private final Map<String, String> mem;
-        private Set<String> urlHashes;
+        private final String tagName;
+        private RowHandleSet urlHashes;
 
-        public Tag(final String hash, final Map<String, String> map){
-            this.tagHash = hash;
-            this.mem = map;
-            if (this.mem.containsKey(URL_HASHES)) {
-                this.urlHashes = ListManager.string2set(this.mem.get(URL_HASHES));
-            } else {
-                this.urlHashes = new HashSet<String>();
-            }
-        }
-
-        public Tag(final String name, final HashSet<String> entries){
+        private Tag(final String name) {
             this.tagHash = BookmarkHelper.tagHash(name);
-            this.mem = new HashMap<String, String>();
-            //mem.put(URL_HASHES, listManager.arraylist2string(entries));
-            this.urlHashes = entries;
-            this.mem.put(TAG_NAME, name);
-        }
-
-        public Tag(final String name){
-            this(name, new HashSet<String>());
-        }
-
-        public Map<String, String> getMap(){
-            this.mem.put(URL_HASHES, ListManager.collection2string(this.urlHashes));
-            return this.mem;
+            this.tagName = name;
+            this.urlHashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
         }
 
         /**
          * get the lowercase Tagname
          */
         public String getTagName(){
-            /*if(this.mem.containsKey(TAG_NAME)){
-                return (String) this.mem.get(TAG_NAME);
-            }
-            return "";*/
             return getFriendlyName().toLowerCase();
         }
 
-        public String getTagHash(){
+        private String getTagHash(){
             return this.tagHash;
         }
 
@@ -441,37 +407,33 @@ public class BookmarksDB {
          * @return the tag name, with all uppercase chars
          */
         public String getFriendlyName(){
-            /*if(this.mem.containsKey(TAG_FRIENDLY_NAME)){
-                return (String) this.mem.get(TAG_FRIENDLY_NAME);
-            }
-            return getTagName();*/
-            if(this.mem.containsKey(TAG_NAME)){
-                return this.mem.get(TAG_NAME);
-            }
-            return "notagname";
+            return this.tagName;
         }
 
-        public Set<String> getUrlHashes(){
+        private RowHandleSet getUrlHashes(){
             return this.urlHashes;
         }
 
-        public boolean hasPublicItems(){
+        private boolean hasPublicItems(){
             return getBookmarksIterator(getTagName(), false).hasNext();
         }
 
-        public void addUrl(final String urlHash){
-            this.urlHashes.add(urlHash);
+        private void addUrl(final String urlHash){
+            try {
+                this.urlHashes.put(ASCII.getBytes(urlHash));
+            } catch (SpaceExceededException e) {
+            }
         }
 
-        public void delete(final String urlHash){
-            this.urlHashes.remove(urlHash);
+        private void delete(final String urlHash){
+            this.urlHashes.remove(ASCII.getBytes(urlHash));
         }
 
         public int size(){
             return this.urlHashes.size();
         }
 
-        public boolean isEmpty() {
+        private boolean isEmpty() {
             return this.urlHashes.isEmpty();
         }
     }
@@ -481,26 +443,18 @@ public class BookmarksDB {
      */
     public class Bookmark {
 
-        public static final String BOOKMARK_URL = "bookmarkUrl";
+        private static final String BOOKMARK_URL = "bookmarkUrl";
         public static final String BOOKMARK_TITLE = "bookmarkTitle";
         public static final String BOOKMARK_DESCRIPTION = "bookmarkDesc";
-        public static final String BOOKMARK_TAGS = "bookmarkTags";
-        public static final String BOOKMARK_PUBLIC = "bookmarkPublic";
-        public static final String BOOKMARK_TIMESTAMP = "bookmarkTimestamp";
-        public static final String BOOKMARK_OWNER = "bookmarkOwner";
-        public static final String BOOKMARK_IS_FEED = "bookmarkIsFeed";
+        private static final String BOOKMARK_TAGS = "bookmarkTags";
+        private static final String BOOKMARK_PUBLIC = "bookmarkPublic";
+        private static final String BOOKMARK_TIMESTAMP = "bookmarkTimestamp";
+        private static final String BOOKMARK_OWNER = "bookmarkOwner";
+        private static final String BOOKMARK_IS_FEED = "bookmarkIsFeed";
         private final String urlHash;
         private Set<String> tagNames;
         private long timestamp;
         private final Map<String, String> entry;
-
-        public Bookmark(final String urlHash, final Map<String, String> map) {
-            this.entry = map;
-            this.urlHash = urlHash;
-            this.tagNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-            if (map.containsKey(BOOKMARK_TAGS)) this.tagNames.addAll(ListManager.string2set(map.get(BOOKMARK_TAGS)));
-            loadTimestamp();
-        }
 
         public Bookmark(final DigestURL url) {
             this.entry = new HashMap<String, String>();
@@ -529,11 +483,15 @@ public class BookmarksDB {
             this(new DigestURL((url.indexOf("://") < 0) ? "http://" + url : url));
         }
 
-        public Bookmark(final Map<String, String> map) throws MalformedURLException {
-            this(ASCII.String((new DigestURL(map.get(BOOKMARK_URL))).hash()), map);
+        private Bookmark(final Map<String, String> map) throws MalformedURLException {
+            this.entry = map;
+            this.urlHash = ASCII.String((new DigestURL(map.get(BOOKMARK_URL))).hash());
+            this.tagNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+            if (map.containsKey(BOOKMARK_TAGS)) this.tagNames.addAll(ListManager.string2set(map.get(BOOKMARK_TAGS)));
+            loadTimestamp();
         }
 
-        Map<String, String> toMap() {
+        private Map<String, String> toMap() {
             this.entry.put(BOOKMARK_TAGS, ListManager.collection2string(this.tagNames));
             this.entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
             return this.entry;
@@ -688,11 +646,11 @@ public class BookmarksDB {
     /**
      * Subclass of bookmarksDB, which provides the bookmarkIterator object-type
      */
-    public class bookmarkIterator implements Iterator<Bookmark> {
+    private class bookmarkIterator implements Iterator<Bookmark> {
 
         Iterator<byte[]> bookmarkIter;
 
-        public bookmarkIterator(final boolean up) throws IOException {
+        private bookmarkIterator(final boolean up) throws IOException {
             //flushBookmarkCache(); //XXX: this will cost performance
             this.bookmarkIter = BookmarksDB.this.bookmarks.keys(up, false);
             //this.nextEntry = null;
@@ -722,14 +680,14 @@ public class BookmarksDB {
     /**
      * Comparator to sort objects of type Bookmark according to their timestamps
      */
-    public class bookmarkComparator implements Comparator<String> {
+    private class bookmarkComparator implements Comparator<String> {
 
         private final boolean newestFirst;
 
         /**
          * @param newestFirst newest first, or oldest first?
          */
-        public bookmarkComparator(final boolean newestFirst){
+        private bookmarkComparator(final boolean newestFirst){
             this.newestFirst = newestFirst;
         }
 
@@ -752,13 +710,13 @@ public class BookmarksDB {
         }
     }
 
-    public static final TagComparator tagComparator = new TagComparator();
-    public static final TagSizeComparator tagSizeComparator = new TagSizeComparator();
+    private static final TagComparator tagComparator = new TagComparator();
+    private static final TagSizeComparator tagSizeComparator = new TagSizeComparator();
 
     /**
      * Comparator to sort objects of type Tag according to their names
      */
-    public static class TagComparator implements Comparator<Tag>, Serializable {
+    private static class TagComparator implements Comparator<Tag>, Serializable {
 
     	/**
          * generated serial
@@ -772,7 +730,7 @@ public class BookmarksDB {
 
     }
 
-    public static class TagSizeComparator implements Comparator<Tag>, Serializable {
+    private static class TagSizeComparator implements Comparator<Tag>, Serializable {
 
     	/**
          * generated serial

@@ -503,10 +503,10 @@ public class Segment {
         }
     }
     
-    public void clearCache() {
+    public void clearCaches() {
         if (this.urlCitationIndex != null) this.urlCitationIndex.clearCache();
         if (this.termIndex != null) this.termIndex.clearCache();
-        this.fulltext.clearCache();
+        this.fulltext.clearCaches();
     }
 
     public File getLocation() {

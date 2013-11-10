@@ -38,7 +38,7 @@ public class RankingSolr_p {
 
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
-        sb.index.clearCache(); // every time the ranking is changed we need to remove old orderings
+        sb.index.clearCaches(); // every time the ranking is changed we need to remove old orderings
 
         int profileNr = 0;
         if (post != null) profileNr = post.getInt("profileNr", profileNr);
