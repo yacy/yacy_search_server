@@ -250,6 +250,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread, 
         return Integer.parseInt(extendedPortString);
     }
 
+    @Override
     public InetSocketAddress generateSocketAddress(String extendedPortString) throws SocketException {
 
         // parsing the port configuration
@@ -971,6 +972,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread, 
         if ((currentThread instanceof serverCore.Session) && ((serverCore.Session)currentThread).isStopped()) throw new InterruptedException();
     }
 
+    @Override
     public void reconnect(final int delay) {
         final Thread restart = new Restarter(delay);
         restart.start();
