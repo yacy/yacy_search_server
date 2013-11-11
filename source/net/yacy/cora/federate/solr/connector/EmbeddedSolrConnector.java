@@ -23,7 +23,9 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -62,7 +64,7 @@ import org.apache.solr.util.RefCounted;
 
 public class EmbeddedSolrConnector extends SolrServerConnector implements SolrConnector {
 
-    static Set<String> SOLR_ID_FIELDS = new HashSet<String>();
+    private static Set<String> SOLR_ID_FIELDS = new HashSet<String>();
     static {
         SOLR_ID_FIELDS.add(CollectionSchema.id.getSolrFieldName());
     }
@@ -145,8 +147,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @return
      */
     public SolrQueryRequest request(final SolrParams params) {
-        SolrQueryRequest req = null;
-        req = new SolrQueryRequestBase(this.core, params){};
+        SolrQueryRequest req = new SolrQueryRequestBase(this.core, params){};
         req.getContext().put("path", SELECT);
         req.getContext().put("webapp", CONTEXT);
         return req;
@@ -247,16 +248,56 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     @Override
     public Set<String> existsByIds(Set<String> ids) {
         boolean debug = Switchboard.getSwitchboard().getConfigBool("debug.search.profiling", false);
+        if (!debug) return existsByIdsNew(ids);
         long debugSingleTime = 0; int debugSingleCount = 0;
-        if (debug) {
-            // run this also with single exist queries which might be faster (but we don't know, thats the reason we test that here)
-            long start = System.currentTimeMillis();
-            Set <String> idsr = new HashSet<String>();
-            for (String id: ids) if (existsById(id)) idsr.add(id);
-            debugSingleTime = System.currentTimeMillis() - start;
-            debugSingleCount = idsr.size();
-        }
         long start = System.currentTimeMillis();
+        Set<String> idsrn = existsByIdsNew(ids);
+        debugSingleTime = System.currentTimeMillis() - start;
+        debugSingleCount = idsrn.size();
+        start = System.currentTimeMillis();
+        Set<String> idsro = existsByIdsOld(ids); 
+        long debugCollectionTime = System.currentTimeMillis() - start;
+        // check if they are equal
+        boolean eq = idsrn.size() == idsro.size();
+        if (eq) {
+            Iterator<String> n = idsrn.iterator();
+            Iterator<String> o = idsro.iterator();
+            while (n.hasNext()) if (!n.next().equals(o.next())) {eq = false; break;} 
+        }
+        ConcurrentLog.info("EmbeddedSolrConnector",
+                           "Comparisment of existsByIds: input=" + ids.size() + " records, singleTime=" + debugSingleTime + ", collectionTime=" + debugCollectionTime + ", singleCount=" + debugSingleCount + ", collectionCount=" + idsro.size() + ", " + (eq ? "equal" : "not equal") + " result sets");
+        return idsro;
+    }
+
+    public Set<String> existsByIdsNew(Set<String> ids) {
+        if (ids == null || ids.size() == 0) return new HashSet<String>();
+        if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
+        Set<String> idsr = new TreeSet<String>();
+        final SolrQuery params = new SolrQuery();
+        params.setRows(0);
+        params.setStart(0);
+        params.setFacet(false);
+        params.clearSorts();
+        params.setFields(CollectionSchema.id.getSolrFieldName());
+        params.setIncludeScore(false);
+        SolrQueryRequest req = new SolrQueryRequestBase(this.core, params){};
+        req.getContext().put("path", SELECT);
+        req.getContext().put("webapp", CONTEXT);
+        for (String id: ids) {
+            params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
+            SolrQueryResponse rsp = new SolrQueryResponse();
+            //NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
+            //responseHeader.add("params", req.getOriginalParams().toNamedList());
+            //rsp.add("responseHeader", responseHeader);
+            this.requestHandler.handleRequest(req, rsp);
+            DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
+            if (response.matches() > 0) idsr.add(id);
+        }
+        req.close();
+        return idsr;
+    }
+    
+    public Set<String> existsByIdsOld(Set<String> ids) {
         if (ids == null || ids.size() == 0) return new HashSet<String>();
         if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
         StringBuilder sb = new StringBuilder(); // construct something like "({!raw f=id}Ij7B63g-gSHA) OR ({!raw f=id}PBcGI3g-gSHA)"
@@ -265,11 +306,10 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         }
         if (sb.length() > 0) sb.setLength(sb.length() - 4); // cut off the last 'or'
         DocListSearcher docListSearcher = new DocListSearcher(sb.toString(), 0, ids.size(), CollectionSchema.id.getSolrFieldName());
-        //int numFound = docListSearcher.response.matches();
         int responseCount = docListSearcher.response.size();
         SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
         DocIterator iterator = docListSearcher.response.iterator();
-        HashSet<String> idsr = new HashSet<String>();
+        Set<String> idsr = new TreeSet<String>();
         try {
         for (int i = 0; i < responseCount; i++) {
             Document doc = searcher.doc(iterator.nextDoc(), SOLR_ID_FIELDS);
@@ -279,11 +319,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         } finally {
             docListSearcher.close();
         }
-        long debugCollectionTime = System.currentTimeMillis() - start;
-        if (debug) {
-            ConcurrentLog.info("EmbeddedSolrConnector", "Comparisment of existsByIds: input=" + ids.size() + " records, output=" + idsr.size() + " records, singleTime=" + debugSingleTime + ", collectionTime=" + debugCollectionTime + ", singleCount=" + debugSingleCount + ", collectionCount=" + idsr.size());
-        }
-        // construct a new id list from that
         return idsr;
     }
     
