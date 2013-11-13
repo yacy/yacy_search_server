@@ -64,7 +64,7 @@ import net.yacy.cora.util.ConcurrentLog;
 
 public class RasterPlotter {
 
-    public final ConcurrentLog log = new ConcurrentLog("RasterPlotter");
+    public static final ConcurrentLog log = new ConcurrentLog("RasterPlotter");
 
     public static final double PI180 = Math.PI / 180.0d;
     public static final double PI4 = Math.PI / 4.0d;
@@ -289,7 +289,7 @@ public class RasterPlotter {
             setPixel(x, y, c);
         }
         } catch (final ArrayIndexOutOfBoundsException e) {
-            this.log.warn(e.getMessage() + ": x = " + x + ", y = " + y);
+            log.warn(e.getMessage() + ": x = " + x + ", y = " + y);
         } // may appear when pixel coordinate is out of bounds
     }
 
