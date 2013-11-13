@@ -11,17 +11,18 @@
          if(!(dist || recv)) {
             //robinson-mode
             document.getElementById("ConfigForm").network[1].checked = true;
-         }
-         else {
+         } else {
             //p2p-mode
             document.getElementById("ConfigForm").network[0].checked = true;
          }
+         document.getElementById("ConfigForm").indexReceiveSearch[recv ? 0 : 1].checked = true;
       }
       
       function EnableRobinson() {
          if(document.getElementById("ConfigForm").network[1].checked) {
             document.getElementById("ConfigForm").indexDistribute.checked = false;
             document.getElementById("ConfigForm").indexReceive.checked = false;
+            document.getElementById("ConfigForm").indexReceiveSearch[1].checked = true;
          }
       }
       
@@ -29,7 +30,7 @@
          if(document.getElementById("ConfigForm").network[0].checked) {
             document.getElementById("ConfigForm").indexDistribute.checked = true;
             document.getElementById("ConfigForm").indexReceive.checked = true;
-            document.getElementById("ConfigForm").crawlResponse.checked = true;
+            document.getElementById("ConfigForm").indexReceiveSearch[0].checked = true;
          }
       }
     //-->
@@ -143,7 +144,15 @@
           <input type="radio" value="off" id="indexReceiveBlockBlacklistOff"
                  name="indexReceiveBlockBlacklist"
                  #(indexReceiveBlockBlacklistChecked.off)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.off)#/>
-          <label for="indexReceiveBlockBlacklistOff">accept transmitted URLs that match your blacklist</label>.
+          <label for="indexReceiveBlockBlacklistOff">accept transmitted URLs that match your blacklist</label>.<br />
+          <input type="radio" value="on" id="indexReceiveSearchOn"
+                 name="indexReceiveSearch"
+                 #(indexReceiveSearchChecked)#::checked="checked"#(/indexReceiveSearchChecked)#/>
+          <label for="indexReceiveSearchOn">allow</label> /
+          <input type="radio" value="off" id="indexReceiveSearchOff"
+                 name="indexReceiveSearch"
+                 #(indexReceiveSearchChecked)#checked="checked"::#(/indexReceiveSearchChecked)#/>
+          <label for="indexReceiveSearchOff">deny remote search</label>.
         </dd>
         <dt></dt>
         <dd>

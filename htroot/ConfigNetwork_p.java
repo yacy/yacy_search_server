@@ -89,6 +89,7 @@ public class ConfigNetwork_p
                 // DHT control
                 boolean indexDistribute = "on".equals(post.get("indexDistribute", ""));
                 boolean indexReceive = "on".equals(post.get("indexReceive", ""));
+                boolean indexReceiveSearch = "on".equals(post.get("indexReceiveSearch", ""));
                 if ( !indexReceive ) {
                     // remove heuristics
                     sb.setConfig(SwitchboardConstants.HEURISTIC_SITE, false);
@@ -114,47 +115,21 @@ public class ConfigNetwork_p
                     }
                 }
 
-                if ( indexDistribute ) {
-                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
-                } else {
-                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, indexDistribute);
+                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "on".equals(post.get("indexDistributeWhileCrawling", "")));
+                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "on".equals(post.get("indexDistributeWhileIndexing", "")));
+                sb.peers.mySeed().setFlagAcceptRemoteIndex(indexReceive);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, indexReceive);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, indexReceiveSearch);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
+
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_BLOCK_BLACKLIST, "on".equals(post.get("indexReceiveBlockBlacklist", "")));
+
+                if (post.containsKey("peertags")) {
+                    sb.peers.mySeed().setPeerTags(MapTools.string2set(normalizedList(post.get("peertags")), ","));
                 }
 
-                if ( "on".equals(post.get("indexDistributeWhileCrawling", "")) ) {
-                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true);
-                } else {
-                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, false);
-                }
-
-                if ( "on".equals(post.get("indexDistributeWhileIndexing", "")) ) {
-                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true);
-                } else {
-                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, false);
-                }
-
-                if ( indexReceive ) {
-                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-                    sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
-                } else {
-                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-                    sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
-                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
-                }
-
-                if ( "on".equals(post.get("indexReceiveBlockBlacklist", "")) ) {
-                    sb.setConfig("indexReceiveBlockBlacklist", true);
-                } else {
-                    sb.setConfig("indexReceiveBlockBlacklist", false);
-                }
-
-                if ( post.containsKey("peertags") ) {
-                    sb.peers.mySeed().setPeerTags(
-                        MapTools.string2set(normalizedList(post.get("peertags")), ","));
-                }
-
-                sb.setConfig("cluster.mode", post.get(
-                    SwitchboardConstants.CLUSTER_MODE,
-                    SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER));
+                sb.setConfig("cluster.mode", post.get(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER));
                 sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));
                 sb.setConfig(
                     "cluster.peers.yacydomain",
@@ -176,37 +151,28 @@ public class ConfigNetwork_p
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
 
-        final boolean indexDistribute = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
-        final boolean indexReceive = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-        prop.put("indexDistributeChecked", (indexDistribute) ? "1" : "0");
-        prop.put(
-            "indexDistributeWhileCrawling.on",
-            (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true)) ? "1" : "0");
-        prop.put(
-            "indexDistributeWhileCrawling.off",
-            (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true)) ? "0" : "1");
-        prop.put(
-            "indexDistributeWhileIndexing.on",
-            (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true)) ? "1" : "0");
-        prop.put(
-            "indexDistributeWhileIndexing.off",
-            (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true)) ? "0" : "1");
-        prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
-        prop.put(
-            "indexReceiveBlockBlacklistChecked.on",
-            (sb.getConfigBool("indexReceiveBlockBlacklist", true)) ? "1" : "0");
-        prop.put(
-            "indexReceiveBlockBlacklistChecked.off",
-            (sb.getConfigBool("indexReceiveBlockBlacklist", true)) ? "0" : "1");
+        prop.put("indexDistributeWhileCrawling.on", sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true));
+        prop.put("indexDistributeWhileCrawling.off", !sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true));
+        prop.put("indexDistributeWhileIndexing.on", sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true));
+        prop.put("indexDistributeWhileIndexing.off", !sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true));
+        prop.put("indexReceiveBlockBlacklistChecked.on", sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_BLACKLIST, true));
+        prop.put("indexReceiveBlockBlacklistChecked.off", !sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_BLACKLIST, true));
         prop.putHTML("peertags", MapTools.set2string(sb.peers.mySeed().getPeerTags(), ",", false));
 
+        final boolean indexDistribute = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
+        final boolean indexReceive = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+        final boolean indexReceiveSearch = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true);
+        prop.put("indexDistributeChecked", indexDistribute);
+        prop.put("indexReceiveChecked", indexReceive);
+        prop.put("indexReceiveSearchChecked", indexReceiveSearch);
+        
         // set seed information directly
         sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
         sb.peers.mySeed().setFlagAcceptRemoteIndex(indexReceive);
 
         // set p2p/robinson mode flags and values
-        prop.put("p2p.checked", (indexDistribute || indexReceive) ? "1" : "0");
-        prop.put("robinson.checked", (indexDistribute || indexReceive) ? "0" : "1");
+        prop.put("p2p.checked", indexDistribute || indexReceive);
+        prop.put("robinson.checked", !(indexDistribute || indexReceive));
         prop.putHTML("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
         prop.putHTML("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
         StringBuilder hashes = new StringBuilder();
@@ -220,15 +186,9 @@ public class ConfigNetwork_p
         prop.put("cluster.peers.yacydomain.hashes", hashes.toString());
 
         // set p2p mode flags
-        prop.put(
-            "privatepeerChecked",
-            (SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) ? "1" : "0");
-        prop.put(
-            "publicclusterChecked",
-            (SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) ? "1" : "0");
-        prop.put(
-            "publicpeerChecked",
-            (SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) ? "1" : "0");
+        prop.put("privatepeerChecked", SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "")));
+        prop.put("publicclusterChecked", SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "")));
+        prop.put("publicpeerChecked", SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "")));
 
         // set network configuration
         prop.putHTML("network.unit.definition", sb.getConfig("network.unit.definition", ""));

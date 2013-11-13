@@ -245,7 +245,7 @@ public final class SearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localSearchThread = null;
-        this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)));
+        this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false)));
         this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
         this.local_rwi_stored     = new AtomicInteger(0);
         this.local_solr_available = new AtomicInteger(0);
@@ -343,7 +343,7 @@ public final class SearchEvent {
         } else {
             this.primarySearchThreadsL = null;
             this.nodeSearchThreads = null;
-            this.pollImmediately = !query.getSegment().connectedRWI() || !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+            this.pollImmediately = !query.getSegment().connectedRWI() || !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false);
             if ( generateAbstracts ) {
                 // we need the results now
                 try {
