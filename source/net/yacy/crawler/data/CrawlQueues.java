@@ -62,9 +62,10 @@ import net.yacy.search.index.ErrorCache;
 import net.yacy.search.schema.CollectionConfiguration;
 
 public class CrawlQueues {
+    
+    private final static ConcurrentLog log = new ConcurrentLog("CRAWLER");
 
     private Switchboard sb;
-    private ConcurrentLog log;
     private Map<Integer, Loader> workers; // mapping from url hash to Worker thread object
     private final ArrayList<String> remoteCrawlProviderHashes;
 
@@ -74,12 +75,11 @@ public class CrawlQueues {
 
     public CrawlQueues(final Switchboard sb, final File queuePath) {
         this.sb = sb;
-        this.log = new ConcurrentLog("CRAWLER");
         this.workers = new ConcurrentHashMap<Integer, Loader>();
         this.remoteCrawlProviderHashes = new ArrayList<String>();
 
         // start crawling management
-        this.log.config("Starting Crawling Management");
+        log.config("Starting Crawling Management");
         this.noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
         this.errorURL = new ErrorCache(sb.index.fulltext());
         this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
@@ -214,7 +214,7 @@ public class CrawlQueues {
             for (int i = 0; i < toshift; i++) {
                 this.noticeURL.shift(NoticedURL.StackType.GLOBAL, NoticedURL.StackType.LOCAL, this.sb.crawler, this.sb.robots);
             }
-            this.log.info("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
+            CrawlQueues.log.info("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
                     ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "") +
                     ", robinsonMode=" + ((this.sb.isRobinsonMode()) ? "on" : "off"));
         }
@@ -222,15 +222,15 @@ public class CrawlQueues {
         final String queueCheckCore = loadIsPossible(NoticedURL.StackType.LOCAL);
         final String queueCheckNoload = loadIsPossible(NoticedURL.StackType.NOLOAD);
         if (queueCheckCore != null && queueCheckNoload != null) {
-            if (this.log.isFine()) {
-                this.log.fine("omitting de-queue/local: " + queueCheckCore + ":" + queueCheckNoload);
+            if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("omitting de-queue/local: " + queueCheckCore + ":" + queueCheckNoload);
             }
             return false;
         }
 
         if (isPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-            if (this.log.isFine()) {
-                this.log.fine("omitting de-queue/local: paused");
+            if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("omitting de-queue/local: paused");
             }
             return false;
         }
@@ -252,12 +252,12 @@ public class CrawlQueues {
                     }
                     final String profileHandle = urlEntry.profileHandle();
                     if (profileHandle == null) {
-                        this.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+                        CrawlQueues.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
                     }
                     final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(profileHandle));
                     if (profile == null) {
-                        this.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+                        CrawlQueues.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
                     }
                     this.sb.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(new Response(urlEntry, profile), null, null));
@@ -272,13 +272,13 @@ public class CrawlQueues {
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
                 // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
                 if (urlEntry.profileHandle() == null) {
-                    this.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+                    CrawlQueues.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
                 }
                 load(urlEntry, stats);
                 return true;
             } catch (final IOException e) {
-                this.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
+                CrawlQueues.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
                 if (e.getMessage().indexOf("hash is null",0) > 0) {
                     this.noticeURL.clear(NoticedURL.StackType.LOCAL);
                 }
@@ -303,8 +303,8 @@ public class CrawlQueues {
             final DigestURL url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
             if (this.sb.loader.isSupportedProtocol(urlProtocol)) {
-                if (this.log.isFine()) {
-                    this.log.fine(stats + ": URL=" + urlEntry.url()
+                if (CrawlQueues.log.isFine()) {
+                    CrawlQueues.log.fine(stats + ": URL=" + urlEntry.url()
                             + ", initiator=" + ((urlEntry.initiator() == null) ? "" : ASCII.String(urlEntry.initiator()))
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
@@ -316,7 +316,7 @@ public class CrawlQueues {
 
                 // work off one Crawl stack entry
                 if (urlEntry == null || urlEntry.url() == null) {
-                    this.log.info(stats + ": urlEntry = null");
+                    CrawlQueues.log.info(stats + ": urlEntry = null");
                 } else {
                     if (!this.workers.containsKey(Integer.valueOf(urlEntry.hashCode()))) {
                         Loader loader = new Loader(urlEntry);
@@ -331,10 +331,10 @@ public class CrawlQueues {
                 }
 
             } else {
-                this.log.severe("Unsupported protocol in URL '" + url.toString());
+                CrawlQueues.log.severe("Unsupported protocol in URL '" + url.toString());
             }
         } else {
-            if (this.log.isFine()) this.log.fine(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+            if (CrawlQueues.log.isFine()) CrawlQueues.log.fine(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
         }
     }
 
@@ -407,30 +407,30 @@ public class CrawlQueues {
         }
         // check again
         if (this.workers.size() >= this.sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 20)) {
-            if (this.log.isFine()) {
-                this.log.fine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + ConnectionInfo.getCount());
+            if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + ConnectionInfo.getCount());
             }
             return false;
         }
 
         final String cautionCause = this.sb.onlineCaution();
         if (cautionCause != null) {
-            if (this.log.isFine()) {
-                this.log.fine("remoteCrawlLoaderJob: online caution for " + cautionCause + ", omitting processing");
+            if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("remoteCrawlLoaderJob: online caution for " + cautionCause + ", omitting processing");
             }
             return false;
         }
 
         if (remoteTriggeredCrawlJobSize() > 200) {
-            if (this.log.isFine()) {
-                this.log.fine("remoteCrawlLoaderJob: the remote-triggered crawl job queue is filled, omitting processing");
+            if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("remoteCrawlLoaderJob: the remote-triggered crawl job queue is filled, omitting processing");
             }
             return false;
         }
 
         if (coreCrawlJobSize() > 0 /*&& sb.indexingStorageProcessor.queueSize() > 0*/) {
-            if (this.log.isFine()) {
-                this.log.fine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
+            if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
             }
             return false;
         }
@@ -521,7 +521,7 @@ public class CrawlQueues {
                         item.getSize()
                 ));
             } else {
-                this.log.warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
+                CrawlQueues.log.warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
             }
         }
         return true;
@@ -554,15 +554,15 @@ public class CrawlQueues {
         // or there is no global crawl on the stack
         final String queueCheck = loadIsPossible(NoticedURL.StackType.REMOTE);
         if (queueCheck != null) {
-            if (this.log.isFinest()) {
-                this.log.finest("omitting de-queue/remote: " + queueCheck);
+            if (CrawlQueues.log.isFinest()) {
+                CrawlQueues.log.finest("omitting de-queue/remote: " + queueCheck);
             }
             return false;
         }
 
         if (isPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-            if (this.log.isFinest()) {
-                this.log.finest("omitting de-queue/remote: paused");
+            if (CrawlQueues.log.isFinest()) {
+                CrawlQueues.log.finest("omitting de-queue/remote: paused");
             }
             return false;
         }
@@ -576,7 +576,7 @@ public class CrawlQueues {
             load(urlEntry, stats);
             return true;
         } catch (final IOException e) {
-            this.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
+            CrawlQueues.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
             if (e.getMessage().indexOf("hash is null",0) > 0) {
                 this.noticeURL.clear(NoticedURL.StackType.REMOTE);
             }
@@ -632,8 +632,8 @@ public class CrawlQueues {
                         final Response response = CrawlQueues.this.sb.loader.load(this.request, profile == null ? CacheStrategy.IFEXIST : profile.cacheStrategy(), BlacklistType.CRAWLER, this.profile.getAgent());
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
-                            if (CrawlQueues.this.log.isFine()) {
-                                CrawlQueues.this.log.fine("problem loading " + this.request.url().toString() + ": no content (possibly caused by cache policy)");
+                            if (CrawlQueues.log.isFine()) {
+                                CrawlQueues.log.fine("problem loading " + this.request.url().toString() + ": no content (possibly caused by cache policy)");
                             }
                             result = "no content (possibly caused by cache policy)";
                         } else {
@@ -644,8 +644,8 @@ public class CrawlQueues {
                         }
                     } catch (final IOException e) {
                         this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
-                        if (CrawlQueues.this.log.isFine()) {
-                            CrawlQueues.this.log.fine("problem loading " + this.request.url().toString() + ": " + e.getMessage());
+                        if (CrawlQueues.log.isFine()) {
+                            CrawlQueues.log.fine("problem loading " + this.request.url().toString() + ": " + e.getMessage());
                         }
                         result = "load error - " + e.getMessage();
                     }

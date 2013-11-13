@@ -41,7 +41,7 @@ import net.yacy.cora.util.ConcurrentLog;
  */
 public class LanguageStatistics {
     
-    private static ConcurrentLog logger = new ConcurrentLog("LANGUAGESTATISTICS");
+    private final static ConcurrentLog logger = new ConcurrentLog("LANGUAGESTATISTICS");
 
     /** This variable holds the name of the language. */
     private String langName = null;

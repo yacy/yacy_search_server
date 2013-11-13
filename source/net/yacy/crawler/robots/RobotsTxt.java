@@ -54,7 +54,7 @@ import net.yacy.repository.Blacklist.BlacklistType;
 
 public class RobotsTxt {
 
-    private static ConcurrentLog log = new ConcurrentLog(RobotsTxt.class.getName());
+    private final static ConcurrentLog log = new ConcurrentLog(RobotsTxt.class.getName());
 
     protected static final String ROBOTS_DB_PATH_SEPARATOR = ";";
     protected static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);

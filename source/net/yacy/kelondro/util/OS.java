@@ -102,6 +102,8 @@ public final class OS {
 		return maxmem;
 	}
 
+	private final static ConcurrentLog memchecklog = new ConcurrentLog("MEMCHECK");
+	
 	/**
 	 * checks heap (may cause high system load)
 	 * @param mem heap to check in -Xmx<i>[heap]</i>m
@@ -115,7 +117,7 @@ public final class OS {
         processArgs.add("-Xms4m");
         processArgs.add("-Xmx" + Integer.toString(mem) + "m");
         try {
-    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, new ConcurrentLog("MEMCHECK"));
+    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, memchecklog);
 		} catch (final IOException e) {
 			return false;
 		}

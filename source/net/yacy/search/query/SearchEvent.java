@@ -113,7 +113,7 @@ public final class SearchEvent {
     }
     */
 
-    public static ConcurrentLog log = new ConcurrentLog("SEARCH");
+    public final static ConcurrentLog log = new ConcurrentLog("SEARCH");
 
     public static final int SNIPPET_MAX_LENGTH = 220;
     private static final int MAX_TOPWORDS = 12; // default count of words for topicnavigagtor

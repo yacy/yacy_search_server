@@ -37,9 +37,10 @@ import net.yacy.server.serverSwitch;
 
 public class termlist_p {
 
+    private final static ConcurrentLog log = new ConcurrentLog("TERMLIST");
+    
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
-    	final ConcurrentLog log = new ConcurrentLog("TERMLIST");
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         Segment segment = sb.index;
