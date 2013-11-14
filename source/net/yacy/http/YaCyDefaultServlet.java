@@ -127,7 +127,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     protected boolean _dirAllowed = true;
     protected boolean _pathInfoOnly = false;
     protected boolean _etags = false;
-    protected boolean _gzip = true;
+  //  protected boolean _gzip = true;
     protected Resource _resourceBase;
     protected MimeTypes _mimeTypes;
     protected String[] _welcomes;    
@@ -176,7 +176,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
         }
 
         _etags = getInitBoolean("etags", _etags);
-        _gzip=getInitBoolean("gzip",_gzip);
+//        _gzip=getInitBoolean("gzip",_gzip);
         
         if (ConcurrentLog.isFine("FILEHANDLER")) {
             ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + _resourceBase);

@@ -71,13 +71,6 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
     	
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
-
-        /*  this is now handled by YaCyDefaultServlet
-        ResourceHandler resource_handler = new ResourceHandler();
-        resource_handler.setDirectoriesListed(true);
-        resource_handler.setWelcomeFiles(new String[]{"index.html"});
-        resource_handler.setResourceBase("htroot/");
-        */
         
         //add SolrServlet
         ServletContextHandler solrContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -93,7 +86,6 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         ServletHolder sholder = new ServletHolder(Jetty8YaCyDefaultServlet.class);
         sholder.setInitParameter("resourceBase", "htroot");
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
-        sholder.setInitParameter("gzip","false");
         htrootContext.addServlet(sholder,"/*");    
         
         // add proxy?url= servlet
@@ -104,15 +96,10 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         ServletHolder gsaholder = new ServletHolder (GSAsearchServlet.class);
         htrootContext.addServlet(gsaholder,"/gsa/search");
 
-        // assemble the servlet handlers
-        ContextHandlerCollection servletContext = new ContextHandlerCollection();                
-        servletContext.setHandlers(new Handler[] { solrContext, htrootContext });        
-
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] 
-           {domainHandler, new ProxyCacheHandler(), new ProxyHandler()
-            /*, resource_handler, new DefaultHandler() */}); 
+           {domainHandler, new ProxyCacheHandler(), new ProxyHandler()}); 
 
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         ContextHandler context = new ContextHandler();
@@ -123,7 +110,8 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
         ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
         allrequesthandlers.addHandler(context);
-        allrequesthandlers.addHandler(servletContext);
+        allrequesthandlers.addHandler(solrContext);
+        allrequesthandlers.addHandler(htrootContext);    
         allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
         
         // wrap all handlers by security handler

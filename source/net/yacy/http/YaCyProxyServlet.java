@@ -191,16 +191,15 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                     final Pattern p = Pattern.compile("(href=\"|src=\")([^\"]+)|(href='|src=')([^']+)|(url\\(')([^']+)|(url\\(\")([^\"]+)|(url\\()([^\\)]+)");
                     final Matcher m = p.matcher(sbuffer);
                     final StringBuffer result = new StringBuffer(80);
-                    String init, url;
                     Switchboard sb = Switchboard.getSwitchboard();
                     while (m.find()) {
-                        init = null;
+                        String init = null;
                         if (m.group(1) != null) { init = m.group(1); }
                         if (m.group(3) != null) { init = m.group(3); }
                         if (m.group(5) != null) { init = m.group(5); }
                         if (m.group(7) != null) { init = m.group(7); }
                         if (m.group(9) != null) { init = m.group(9); }
-                        url = null;
+                        String url = null;
                         if (m.group(2) != null) { url = m.group(2); }
                         if (m.group(4) != null) { url = m.group(4); }
                         if (m.group(6) != null) { url = m.group(6); }
@@ -314,40 +313,16 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
 
 
     /**
-     * get a destination url from a querysting with parameter &url=_destinationurl_
-     *
-     * @param querystring
-     * @return destinationURL
-     * @throws MalformedURLException
+     * get destination url (from query parameter &url=http://....)
+     * override to prevent calculating destination url from request
+     * 
+     * @param request 
+     * @param uri not used
+     * @return destination url from query parameter &url=_destinationurl_
+     * @throws MalformedURLException 
      */
-    protected HttpURI proxyHttpURIfromQueryString(String querystring) throws MalformedURLException {
-        URL newurl = null;
-        String strARGS = querystring;
-        String action;
-        if (strARGS.startsWith("action=")) {
-            int detectnextargument = strARGS.indexOf("&");
-            action = strARGS.substring(7, detectnextargument);
-            strARGS = strARGS.substring(detectnextargument + 1);
-        }
-        if (strARGS.startsWith("url=")) {
-            final String strUrl = strARGS.substring(4); // strip url=
-
-            try {
-                newurl = new URL(strUrl);
-            } catch (final MalformedURLException e) {
-
-            }
-        }
-        int port = newurl.getPort();
-        if (port < 1) {
-            port = newurl.getDefaultPort();
-        }
-        return proxyHttpURI(newurl.getProtocol(), newurl.getHost(), port, newurl.getPath());
-    }
-
     @Override
     protected HttpURI proxyHttpURI(HttpServletRequest request, String uri) throws MalformedURLException {
-        URL newurl = null;
         String strARGS = request.getQueryString();
         if (strARGS.startsWith("action=")) {
             int detectnextargument = strARGS.indexOf("&");
@@ -357,16 +332,17 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             final String strUrl = strARGS.substring(4); // strip url=
 
             try {
-                newurl = new URL(strUrl);
+                URL newurl = new URL(strUrl);
+                int port = newurl.getPort();
+                if (port < 1) {
+                    port = newurl.getDefaultPort();
+                }
+                return proxyHttpURI(newurl.getProtocol(), newurl.getHost(), port, newurl.getPath());
             } catch (final MalformedURLException e) {
-
+                ConcurrentLog.fine("PROXY", "url parameter missing");
             }
         }
-        int port = newurl.getPort();
-        if (port < 1) {
-            port = newurl.getDefaultPort();
-        }
-        return proxyHttpURI(newurl.getProtocol(), newurl.getHost(), port, newurl.getPath());
+        return null;
     }
 
     @Override

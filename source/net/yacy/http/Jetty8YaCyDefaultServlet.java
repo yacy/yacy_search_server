@@ -39,7 +39,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.eclipse.jetty.http.HttpContent;
-import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.Buffer;
@@ -77,9 +76,6 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *
  *  welcomeFile       name of the welcome file (default is "index.html", "welcome.html")
  *
- *  gzip              If set to true, then static content will be served as
- *                    gzip content encoded if a matching resource is
- *                    found ending with ".gz"
  *
  *  resourceBase      Set to replace the context resource base
  *
@@ -108,8 +104,8 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String servletPath = null;
-        String pathInfo = null;
+        String servletPath;
+        String pathInfo;
         Enumeration<String> reqRanges = null;
         boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null; 
         if (included) {
@@ -138,29 +134,8 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
         Resource resource = null;
         HttpContent content = null;
         try {
-            // is gzip enabled?
-            String pathInContextGz = null;
-            boolean gzip = false;
-            if (!included && _gzip && reqRanges == null && !endsWithSlash) {
-                // Look for a gzip resource
-                pathInContextGz = pathInContext + ".gz";
-                resource = getResource(pathInContextGz);
-
-                // Does a gzip resource exist?
-                if (resource != null && resource.exists() && !resource.isDirectory()) {
-                    // Tell caches that response may vary by accept-encoding
-                    response.addHeader(HttpHeaders.VARY, HeaderFramework.ACCEPT_ENCODING);
-
-                    // Does the client accept gzip?
-                    String accept = request.getHeader(HeaderFramework.ACCEPT_ENCODING);
-                    if (accept != null && accept.indexOf(HeaderFramework.CONTENT_ENCODING_GZIP) >= 0) {
-                        gzip = true;
-                    }
-                }
-            }
-
             // find resource
-            if (!gzip) resource = getResource(pathInContext);
+            resource = getResource(pathInContext);
 
             // Look for a class resource
             boolean hasClass = false;
@@ -204,13 +179,6 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                         handleTemplate(pathInfo, request, response);
                     } else {
                         if (included || passConditionalHeaders(request, response, resource, content)) {
-                            if (gzip) {
-                                response.setHeader(HeaderFramework.CONTENT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
-                                String mt = _servletContext.getMimeType(pathInContext);
-                                if (mt != null) {
-                                    response.setContentType(mt);
-                                }
-                            }
                             sendData(request, response, included, resource, content, reqRanges);
                         }
                     }
@@ -412,9 +380,8 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
             content_length = content.getContentLength();
         }
 
-
         // Get the output stream (or writer)
-        OutputStream out = null;
+        OutputStream out;
         boolean written;
         try {
             out = response.getOutputStream();
