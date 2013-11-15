@@ -411,6 +411,7 @@ public final class QueryParams {
         // set facet query attributes
         if (getFacets && this.facetfields.size() > 0) {
             params.setFacet(true);
+            params.setFacetMinCount(1);
             params.setFacetLimit(this.maxfacets);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
             params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
