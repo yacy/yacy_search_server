@@ -187,6 +187,8 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segment.ClickdepthCache;
+import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -2279,6 +2281,8 @@ public final class Switchboard extends serverSwitch {
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
                 int proccount = 0;
+                ReferenceReportCache rrCache = index.getReferenceReportCache();
+                ClickdepthCache clickdepthCache = index.getClickdepthCache(rrCache);
                 if (index.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s.getSolrFieldName())) {
                     Set<String> deletionCandidates = this.crawler.getFinishesProfiles(this.crawlQueues);
                     int cleanup = deletionCandidates.size();
@@ -2286,8 +2290,8 @@ public final class Switchboard extends serverSwitch {
                         // run postprocessing on these profiles
                         postprocessingRunning = true;
                         for (String profileHash: deletionCandidates) {
-                            proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, profileHash);
-                            proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, profileHash);
+                            proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, rrCache, clickdepthCache, profileHash);
+                            proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, clickdepthCache, profileHash);
                         }
                         
                         this.crawler.cleanProfiles(deletionCandidates);
@@ -2297,8 +2301,8 @@ public final class Switchboard extends serverSwitch {
                     if (this.crawler.allCrawlsFinished(this.crawlQueues)) {
                         // run postprocessing on all profiles
                         postprocessingRunning = true;
-                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, null);
-                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, null);
+                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, rrCache, clickdepthCache, null);
+                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, clickdepthCache, null);
                         
                         this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
                         log.info("cleanup post-processed " + proccount + " documents");
