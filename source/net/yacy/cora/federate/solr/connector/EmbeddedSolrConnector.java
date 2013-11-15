@@ -23,7 +23,6 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
@@ -32,7 +31,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.SolrInstance;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
@@ -57,6 +55,7 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocSet;
+import org.apache.solr.search.DocSlice;
 import org.apache.solr.search.QueryResultKey;
 import org.apache.solr.search.SolrCache;
 import org.apache.solr.search.SolrIndexSearcher;
@@ -223,7 +222,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             // query the server
             this.request = request(params);
             SolrQueryResponse rsp = query(request);
-            this.response = ((ResultContext) rsp.getValues().get("response")).docs;
+            @SuppressWarnings("rawtypes")
+            NamedList nl = rsp.getValues();
+            ResultContext resultContext = (ResultContext) nl.get("response");
+            if (resultContext == null) log.warn("DocListSearcher: no response for query '" + querystring + "'");
+            this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
         }
         public void close() {
             if (this.request != null) this.request.close();

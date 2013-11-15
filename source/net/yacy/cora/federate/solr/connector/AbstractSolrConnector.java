@@ -115,8 +115,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                             try {queue.put(d);} catch (final InterruptedException e) {break;}
                             count++;
                         }
-                        if (sdl.size() < pagesize) break;
-                        o += pagesize;
+                        if (sdl.size() <= 0) break;
+                        o += sdl.size();
                     } catch (final SolrException e) {
                         break;
                     } catch (final IOException e) {
@@ -144,8 +144,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         for (SolrDocument d: sdl) {
                             try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
                         }
-                        if (sdl.size() < pagesize) break;
-                        o += pagesize;
+                        if (sdl.size() <= 0) break;
+                        o += sdl.size();
                     } catch (final SolrException e) {
                         break;
                     } catch (final IOException e) {
@@ -305,6 +305,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setRows(0);
         params.setStart(0);
         params.setFacet(true);
+        params.setFacetMinCount(1); // there are many 0-count facets in the uninverted index cache
         params.setFacetLimit(maxresults);
         params.setFacetSort(FacetParams.FACET_SORT_COUNT);
         params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
