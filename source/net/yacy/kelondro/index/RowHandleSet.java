@@ -89,6 +89,11 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
         return this.index.exportCollection();
     }
 
+    @Override
+    public void optimize() {
+        this.index.sort();
+    }
+    
     /**
      * initialize a HandleSet with the content of a dump
      * @param keylength
