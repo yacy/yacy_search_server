@@ -890,8 +890,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (!segment.connectedCitation() && !segment.fulltext().writeToWebgraph()) return 0;
         SolrConnector collectionConnector = segment.fulltext().getDefaultConnector();
         SolrConnector webgraphConnector = segment.fulltext().getWebgraphConnector();
-        collectionConnector.commit(true); // make sure that we have latest information that can be found
-        if (webgraphConnector != null) webgraphConnector.commit(true);
+        collectionConnector.commit(false); // make sure that we have latest information that can be found
+        if (webgraphConnector != null) webgraphConnector.commit(false);
         Map<byte[], CRV> ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
         ReversibleScoreMap<String> hostscore = null;
         try {
@@ -1241,6 +1241,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             } else {
                                 // Output a warning that d[] is empty
                                 ConcurrentLog.warn("COLLECTION", "d[] is empty, iid="  + iid);
+                                break;
                             }
                         }
                     }
