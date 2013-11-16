@@ -108,9 +108,16 @@ function handleStatus(){
 
 	postprocessing=getFirstChild(statusTag, "postprocessing");
 	document.getElementById("postprocessing_status").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "status"));
-	document.getElementById("postprocessing_collection").firstChild.nodeValue="collection: " + getValue(getFirstChild(postprocessing, "collectionRemainingCount"));
-	document.getElementById("postprocessing_webgraph").firstChild.nodeValue="webgraph: " + getValue(getFirstChild(postprocessing, "webgraphRemainingCount"));
-	document.getElementById("postprocessing_time").firstChild.nodeValue="";
+	document.getElementById("postprocessing_collection").firstChild.nodeValue="pending in collection: " + getValue(getFirstChild(postprocessing, "collectionRemainingCount"));
+	document.getElementById("postprocessing_webgraph").firstChild.nodeValue="pending in webgraph: " + getValue(getFirstChild(postprocessing, "webgraphRemainingCount"));
+	document.getElementById("postprocessing_remainingTimeMinutes").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "remainingTimeMinutes"));
+	document.getElementById("postprocessing_remainingTimeSeconds").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "remainingTimeSeconds"));
+	postprocessingElapsedTime=getValue(getFirstChild(postprocessing, "postprocessingElapsedTime"));
+	postprocessingRemainingTime=getValue(getFirstChild(postprocessing, "postprocessingRemainingTime"));
+	p = 100 * postprocessingElapsedTime / (postprocessingElapsedTime + postprocessingRemainingTime);
+	bar="<progress id='postprocessingBar' max='" + p + "' value='100' style='width:94%;'/>";
+	document.getElementById("postprocessing_bar").firstChild.nodeValue=bar;
+	//document.getElementById("postprocessing_speed").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "speed"));
 	
 	load=getFirstChild(statusTag, "load");
 	document.getElementById("load").firstChild.nodeValue=getValue(load);

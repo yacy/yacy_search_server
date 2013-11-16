@@ -255,7 +255,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     if (clearResources != null) clearResources.invoke(null);
                 }
             } catch (Throwable e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

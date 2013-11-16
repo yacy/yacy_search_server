@@ -2368,8 +2368,8 @@ public final class Switchboard extends serverSwitch {
                         log.info("cleanup post-processed " + proccount + " documents");
                     }
                 }
-                postprocessingStartTime = new long[]{0,0}; // the start time for the processing; not started = 0
-                
+                this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
+                postprocessingStartTime = new long[]{0,0}; // the start time for the processing; not started = 0                
                 postprocessingRunning = false;
             }
 

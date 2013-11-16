@@ -21,7 +21,7 @@
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler</h2>
 <noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
-<fieldset style="width:180px;height:180px;float:left;">
+<fieldset style="width:180px;height:190px;float:left;">
 <legend>Queues</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -75,7 +75,7 @@
       </table>
       <div class="warning" id="message">&nbsp;#[queuemessage]#<div>
 </fieldset>
-<fieldset style="width:220px;height:180px;float:left;">
+<fieldset style="width:270px;height:190px;float:left;">
 <legend>Index Size</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -85,12 +85,12 @@
             <th width="40">Seg-<br/>ments</th>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">Documents<br/><a href="/solr/select?core=collection1&q=*:*&start=0&rows=3">solr search api</a></td>
+            <td align="left">Documents<br/><a href="#[urlpublictextSolrURL]#">solr search api</a></td>
             <td align="right"><span id="urlpublictextSize">#[urlpublictextSize]#</span></td>
             <td align="right"><span id="urlpublictextSegmentCount">#[urlpublictextSegmentCount]#</span></td>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">Webgraph Edges<br/><a href="/solr/select?core=webgraph&q=*:*&start=0&rows=3">solr search api</a></td>
+            <td align="left">Webgraph Edges<br/><a href="#[webgraphSolrURL]#">solr search api</a></td>
             <td align="right"><span id="webgraphSize">#[webgraphSize]#</span></td>
             <td align="right"><span id="webgraphSegmentCount">#[webgraphSegmentCount]#</span></td>
           </tr>
@@ -107,17 +107,17 @@
         </tbody>
       </table>
 </fieldset>
-<fieldset style="width:430px;height:180px;;float:left;">
+<fieldset style="width:480px;height:190px;;float:left;">
 <legend>Progress</legend>
       <form action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
-            <th width="100">Indicator<br/>&nbsp;</th>
+            <th width="120">Indicator<br/>&nbsp;</th>
             <th width="300" colspan="4">Level<br/>&nbsp;</th>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">Speed</td>
+            <td align="left">Speed / PPM<br/>(Pages Per Minute)</td>
             <td align="left" colspan="4">
             <input #(crawlingSpeedMinChecked)#::class="TableCellDark"#(/crawlingSpeedMinChecked)# type="submit" name="crawlingPerformance" value="minimum" />
             <input #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)# id="customPPM" name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" />
@@ -125,11 +125,23 @@
             </td>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">PPM (Pages Per Minute)</td>
+            <td align="left">Crawler PPM</td>
             <td align="left" width="40"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
             <td align="left" width="260px" colspan="3">
             	<progress id="ppmbar" max="30000" value="0" style="width:94%;"/>
             </td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left" valign="top" rowspan="2">Postprocessing Progress <span id="postprocessing_speed">&nbsp;</span></td>
+            <td align="left" width="40"><span id="postprocessing_status">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="260px" colspan="3">
+                <span id="postprocessing_bar"><progress id="postprocessingBar" max="30000" value="0" style="width:94%;"/></span>
+            </td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left"><span id="postprocessing_remainingTimeMinutes">0</span>:<span id="postprocessing_remainingTimeSeconds">0</span></td>
+            <td align="left"><span id="postprocessing_collection">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left"><span id="postprocessing_webgraph">&nbsp;&nbsp;&nbsp;</span></td>
           </tr>
           <tr class="TableCellLight">
             <td align="left">Traffic (Crawler)</td>
@@ -140,13 +152,6 @@
             <td align="left">Load</td>
             <td align="left"><span id="load">&nbsp;&nbsp;&nbsp;</span></td>
             <td colspan="3">&nbsp;</td>
-          </tr>
-          <tr class="TableCellLight">
-            <td align="left">Postprocessing</td>
-            <td align="left"><span id="postprocessing_status">&nbsp;&nbsp;&nbsp;</span></td>
-            <td align="left"><span id="postprocessing_collection">&nbsp;&nbsp;&nbsp;</span></td>
-            <td align="left"><span id="postprocessing_webgraph">&nbsp;&nbsp;&nbsp;</span></td>
-            <td align="left"><span id="postprocessing_time">&nbsp;&nbsp;&nbsp;</span></td>
           </tr>
         </tbody>
       </table>

@@ -74,16 +74,12 @@
   <postprocessing>
     <collectionRemainingCount>#[postprocessingCollectionRemainingCount]#</collectionRemainingCount>
     <webgraphRemainingCount>#[postprocessingWebgraphRemainingCount]#</webgraphRemainingCount>
-    #(postprocessingRunning)#
-    <status>idle</status>::
-    <status>busy</status>
-    <collectionSpeed>#[collectionSpeed]#</collectionSpeed>
-    <collectionRemainingTimeMinutes>#[collectionRemainingTimeMinutes]#</collectionRemainingTimeMinutes>
-    <collectionRemainingTimeSeconds>#[collectionRemainingTimeSeconds]#</collectionRemainingTimeSeconds>
-    <webgraphSpeed>#[webgraphSpeed]#</webgraphSpeed>
-    <webgraphRemainingTimeMinutes>#[webgraphRemainingTimeMinutes]#</webgraphRemainingTimeMinutes>
-    <webgraphRemainingTimeSeconds>#[webgraphRemainingTimeSeconds]#</webgraphRemainingTimeSeconds>
-    #(/postprocessingRunning)#
+    <status>#(postprocessingRunning)#idle::busy:#[activity]##(/postprocessingRunning)#</status>
+    <speed>#[postprocessingSpeed]#</speed>
+    <elapsedTime>#[postprocessingElapsedTime]#</elapsedTime>
+    <remainingTime>#[postprocessingRemainingTime]#</remainingTime>
+    <remainingTimeMinutes>#[postprocessingRemainingTimeMinutes]#</remainingTimeMinutes>
+    <remainingTimeSeconds>#[postprocessingRemainingTimeSeconds]#</remainingTimeSeconds>
   </postprocessing>
   
 </status>
