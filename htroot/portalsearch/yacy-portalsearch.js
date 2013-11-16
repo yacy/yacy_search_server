@@ -242,6 +242,7 @@ function yacysearch(clear) {
 		param[i] = item;
 	});
 	param[param.length] = { name : 'startRecord', value : startRecord };
+	ycurr = ycurr.replace("<"," ").replace(">"," ");
 	
 	$.ajaxSetup({ 
         timeout: 10000,
@@ -274,7 +275,7 @@ function yacysearch(clear) {
 			else data = json;			
 			
 			var searchTerms = "";
-			searchTerms = data.channels[0].searchTerms;			
+			searchTerms = data.channels[0].searchTerms.replace("<"," ").replace(">"," ");;			
 						
 			if($.trim(ycurr.replace(/ /g,"+")) != searchTerms) {
 				return false;				
