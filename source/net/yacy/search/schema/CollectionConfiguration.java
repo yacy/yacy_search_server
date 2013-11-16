@@ -970,7 +970,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     String query = "{!raw f=" + WebgraphSchema.source_host_s.getSolrFieldName() + "}" + host;
                     long count = webgraphConnector.getCountByQuery(query);
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph");
-                    BlockingQueue<SolrDocument> docs = webgraphConnector.concurrentDocumentsByQuery(query, 0, 10000000, 600000, 100);
+                    BlockingQueue<SolrDocument> docs = webgraphConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
                     int countcheck = 0;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                         boolean changed = false;
@@ -1016,7 +1016,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         try {
             long count = collectionConnector.getCountByQuery(query);
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
-            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, 0, 10000000, 600000, 100);
+            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
             int countcheck = 0;
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
