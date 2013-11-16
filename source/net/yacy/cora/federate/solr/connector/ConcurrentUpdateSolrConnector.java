@@ -96,7 +96,10 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                         updateIdCache((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                         for (int i = 0; i < getmore; i++) {
                             SolrInputDocument d = ConcurrentUpdateSolrConnector.this.updateQueue.take();
-                            if (d == POISON_DOCUMENT) break;
+                            if (d == POISON_DOCUMENT) {
+                                ConcurrentUpdateSolrConnector.this.updateQueue.put(POISON_DOCUMENT); // make sure that the outer loop terminates as well
+                                break;
+                            }
                             docs.add(d);
                             updateIdCache((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                         }
