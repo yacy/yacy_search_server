@@ -21,7 +21,7 @@
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler</h2>
 <noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
-<fieldset style="width:180px;height:160px;float:left;">
+<fieldset style="width:180px;height:180px;float:left;">
 <legend>Queues</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -75,12 +75,12 @@
       </table>
       <div class="warning" id="message">&nbsp;#[queuemessage]#<div>
 </fieldset>
-<fieldset style="width:220px;height:160px;float:left;">
+<fieldset style="width:220px;height:180px;float:left;">
 <legend>Index Size</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
-            <th width="140">Database<br/>&nbsp;</th>
+            <th width="160">Database<br/>&nbsp;</th>
             <th width="80">Entries<br/>&nbsp;</th>
             <th width="40">Seg-<br/>ments</th>
           </tr>
@@ -95,6 +95,11 @@
             <td align="right"><span id="webgraphSegmentCount">#[webgraphSegmentCount]#</span></td>
           </tr>
           <tr class="TableCellLight"> 
+            <td align="left">Citations<br/>(reverse link index)</td>
+            <td align="right"><span id="citationSize">#[citationSize]#</span></td>
+            <td align="right"><span id="citationSegmentCount">#[citationSegmentCount]#</span></td>
+          </tr>
+          <tr class="TableCellLight"> 
             <td align="left">RWIs<br/>(P2P Chunks)</td>
             <td align="right"><span id="rwipublictextSize">#[rwipublictextSize]#</span></td>
             <td align="right"><span id="rwipublictextSegmentCount">#[rwipublictextSegmentCount]#</span></td>
@@ -102,7 +107,7 @@
         </tbody>
       </table>
 </fieldset>
-<fieldset style="width:430px;height:160px;;float:left;">
+<fieldset style="width:430px;height:180px;;float:left;">
 <legend>Progress</legend>
       <form action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
@@ -134,9 +139,14 @@
           <tr class="TableCellLight">
             <td align="left">Load</td>
             <td align="left"><span id="load">&nbsp;&nbsp;&nbsp;</span></td>
-            <td align="left" width="100">Postprocessing</td>
-            <td align="left"><span id="postprocessing">&nbsp;&nbsp;&nbsp;</span></td>
-            <td>&nbsp;</td>
+            <td colspan="3">&nbsp;</td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left">Postprocessing</td>
+            <td align="left"><span id="postprocessing_status">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left"><span id="postprocessing_collection">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left"><span id="postprocessing_webgraph">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left"><span id="postprocessing_time">&nbsp;&nbsp;&nbsp;</span></td>
           </tr>
         </tbody>
       </table>

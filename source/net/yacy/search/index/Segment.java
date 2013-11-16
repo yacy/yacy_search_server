@@ -196,6 +196,14 @@ public class Segment {
         this.urlCitationIndex = null;
     }
 
+    public int citationCount() {
+        return this.urlCitationIndex == null ? 0 : this.urlCitationIndex.size();
+    }
+    
+    public long citationSegmentCount() {
+        return this.urlCitationIndex == null ? 0 : this.urlCitationIndex.getSegmentCount();
+    }
+    
     public void connectUrlDb(final boolean useTailCache, final boolean exceed134217727) {
         this.fulltext.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
     }

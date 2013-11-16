@@ -93,17 +93,24 @@ function handleStatus(){
 	urlpublictextSegmentCount=getValue(getFirstChild(dbsize, "urlpublictextSegmentCount"));
 	webgraph=getValue(getFirstChild(dbsize, "webgraph"));
 	webgraphSegmentCount=getValue(getFirstChild(dbsize, "webgraphSegmentCount"));
+	citation=getValue(getFirstChild(dbsize, "citation"));
+	citationSegmentCount=getValue(getFirstChild(dbsize, "citationSegmentCount"));
 	rwipublictext=getValue(getFirstChild(dbsize, "rwipublictext"));
 	rwipublictextSegmentCount=getValue(getFirstChild(dbsize, "rwipublictextSegmentCount"));
 	document.getElementById("urlpublictextSize").firstChild.nodeValue=urlpublictext;
 	document.getElementById("urlpublictextSegmentCount").firstChild.nodeValue=urlpublictextSegmentCount;
 	document.getElementById("webgraphSize").firstChild.nodeValue=webgraph;
 	document.getElementById("webgraphSegmentCount").firstChild.nodeValue=webgraphSegmentCount;
+	document.getElementById("citationSize").firstChild.nodeValue=citation;
+	document.getElementById("citationSegmentCount").firstChild.nodeValue=citationSegmentCount;
 	document.getElementById("rwipublictextSize").firstChild.nodeValue=rwipublictext;
 	document.getElementById("rwipublictextSegmentCount").firstChild.nodeValue=rwipublictextSegmentCount;
 
 	postprocessing=getFirstChild(statusTag, "postprocessing");
-	document.getElementById("postprocessing").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "status"));
+	document.getElementById("postprocessing_status").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "status"));
+	document.getElementById("postprocessing_collection").firstChild.nodeValue="collection: " + getValue(getFirstChild(postprocessing, "collectionRemainingCount"));
+	document.getElementById("postprocessing_webgraph").firstChild.nodeValue="webgraph: " + getValue(getFirstChild(postprocessing, "webgraphRemainingCount"));
+	document.getElementById("postprocessing_time").firstChild.nodeValue="";
 	
 	load=getFirstChild(statusTag, "load");
 	document.getElementById("load").firstChild.nodeValue=getValue(load);
