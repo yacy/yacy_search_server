@@ -96,7 +96,7 @@ public class User{
         		prop.putHTML("logged-in_returnto", post.get("returnto"));
             final String username=post.get("username");
             final String password=post.get("password");
-            prop.put("logged-in_username", username);
+            prop.putHTML("logged-in_username", username);
 
             entry=sb.userDB.passwordAuth(username, password);
             final boolean staticAdmin = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").equals(
@@ -160,7 +160,7 @@ public class User{
             	prop.authenticationRequired();
             }
             if(post.containsKey("returnto")){
-                prop.put(serverObjects.ACTION_LOCATION, post.get("returnto"));
+                prop.putHTML(serverObjects.ACTION_LOCATION, post.get("returnto"));
             }
         }
         // return rewrite properties
