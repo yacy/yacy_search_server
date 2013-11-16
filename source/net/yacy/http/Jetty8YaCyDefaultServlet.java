@@ -275,7 +275,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                             Response r = Response.getResponse(response);
                             r.reset(true);
                             r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            r.getHttpFields().put(HttpHeaders.ETAG_BUFFER, ifnm);
+                            r.getHttpFields().put(HttpHeaders.ETAG_BUFFER, ifnm);                            
                             return false;
                         }
 
@@ -403,7 +403,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 // See if a direct methods can be used?
                 if (content != null && !written && out instanceof HttpOutput) {
                     if (response instanceof Response) {
-                        writeOptionHeaders(((Response) response).getHttpFields());
+                        writeOptionHeaders(response);
                         ((AbstractHttpConnection.Output) out).sendContent(content);
                     } else {
                         Buffer buffer = direct ? content.getDirectBuffer() : content.getIndirectBuffer();

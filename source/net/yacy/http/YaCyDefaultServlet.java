@@ -70,7 +70,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.eclipse.jetty.http.HttpContent;
-import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
@@ -97,10 +96,6 @@ import org.eclipse.jetty.util.resource.Resource;
  *                    welcome file is found. Else 403 Forbidden.
  *  
  *  welcomeFile       name of the welcome file (default is "index.html", "welcome.html")
- *
- *  gzip              If set to true, then static content will be served as
- *                    gzip content encoded if a matching resource is
- *                    found ending with ".gz"
  * 
  *  resourceBase      Set to replace the context resource base
  *
@@ -127,7 +122,6 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     protected boolean _dirAllowed = true;
     protected boolean _pathInfoOnly = false;
     protected boolean _etags = false;
-  //  protected boolean _gzip = true;
     protected Resource _resourceBase;
     protected MimeTypes _mimeTypes;
     protected String[] _welcomes;    
@@ -176,7 +170,6 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
         }
 
         _etags = getInitBoolean("etags", _etags);
-//        _gzip=getInitBoolean("gzip",_gzip);
         
         if (ConcurrentLog.isFine("FILEHANDLER")) {
             ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + _resourceBase);
@@ -301,8 +294,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
 
         String dir = resource.getListHTML(base, pathInContext.length() > 1);
         if (dir == null) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "No directory");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "No directory");
             return;
         }
 
@@ -344,13 +336,6 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
 
         if (_etags) {
             response.setHeader(HeaderFramework.ETAG, content.getETag().toString());
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    protected void writeOptionHeaders(HttpFields fields) {
-        if (_acceptRanges) {
-            fields.put(HeaderFramework.ACCEPT_RANGES, "bytes");
         }
     }
 
