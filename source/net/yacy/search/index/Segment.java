@@ -197,7 +197,7 @@ public class Segment {
     }
 
     public int citationCount() {
-        return this.urlCitationIndex == null ? 0 : this.urlCitationIndex.size();
+        return this.urlCitationIndex == null ? 0 : this.urlCitationIndex.sizesMax();
     }
     
     public long citationSegmentCount() {
