@@ -67,6 +67,7 @@ import net.yacy.search.Switchboard;
 public final class LoaderDispatcher {
 
     private final static int accessTimeMaxsize = 1000;
+    private final static ConcurrentLog log = new ConcurrentLog("LOADER");
     private static final ConcurrentHashMap<String, Long> accessTime = new ConcurrentHashMap<String, Long>(); // to protect targets from DDoS
 
     private final Switchboard sb;
@@ -76,18 +77,16 @@ public final class LoaderDispatcher {
     private final SMBLoader smbLoader;
     private final FileLoader fileLoader;
     private final ConcurrentHashMap<DigestURL, Semaphore> loaderSteering; // a map that delivers a 'finish' semaphore for urls
-    private final ConcurrentLog log;
 
     public LoaderDispatcher(final Switchboard sb) {
         this.sb = sb;
         this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp","smb","file"}));
 
         // initiate loader objects
-        this.log = new ConcurrentLog("LOADER");
-        this.httpLoader = new HTTPLoader(sb, this.log);
-        this.ftpLoader = new FTPLoader(sb, this.log);
-        this.smbLoader = new SMBLoader(sb, this.log);
-        this.fileLoader = new FileLoader(sb, this.log);
+        this.httpLoader = new HTTPLoader(sb, LoaderDispatcher.log);
+        this.ftpLoader = new FTPLoader(sb, LoaderDispatcher.log);
+        this.smbLoader = new SMBLoader(sb, LoaderDispatcher.log);
+        this.fileLoader = new FileLoader(sb, LoaderDispatcher.log);
         this.loaderSteering = new ConcurrentHashMap<DigestURL, Semaphore>();
     }
 
@@ -224,7 +223,7 @@ public final class LoaderDispatcher {
                     // well, just take the cache and don't care about freshness of the content
                     final byte[] content = Cache.getContent(url.hash());
                     if (content != null) {
-                        this.log.info("cache hit/useall for: " + url.toNormalform(true));
+                        LoaderDispatcher.log.info("cache hit/useall for: " + url.toNormalform(true));
                         response.setContent(content);
                         return response;
                     }
@@ -235,14 +234,14 @@ public final class LoaderDispatcher {
                 if (response.isFreshForProxy()) {
                     final byte[] content = Cache.getContent(url.hash());
                     if (content != null) {
-                        this.log.info("cache hit/fresh for: " + url.toNormalform(true));
+                        LoaderDispatcher.log.info("cache hit/fresh for: " + url.toNormalform(true));
                         response.setContent(content);
                         return response;
                     }
                 }
-                this.log.info("cache hit/stale for: " + url.toNormalform(true));
+                LoaderDispatcher.log.info("cache hit/stale for: " + url.toNormalform(true));
             } else if (cachedResponse != null) {
-                this.log.warn("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
+                LoaderDispatcher.log.warn("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
             }
         }
 
@@ -266,7 +265,7 @@ public final class LoaderDispatcher {
                 cleanupAccessTimeTable(untilTime);
                 if (System.currentTimeMillis() < untilTime) {
                     long frcdslp = untilTime - System.currentTimeMillis();
-                    this.log.info("Forcing sleep of " + frcdslp + " ms for host " + host);
+                    LoaderDispatcher.log.info("Forcing sleep of " + frcdslp + " ms for host " + host);
                     try {Thread.sleep(frcdslp);} catch (final InterruptedException ee) {}
                 }
             }
@@ -310,10 +309,10 @@ public final class LoaderDispatcher {
             try {
                 Cache.store(url, response.getResponseHeader(), response.getContent());
             } catch (final IOException e) {
-                this.log.warn("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
+                LoaderDispatcher.log.warn("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
             }
         } else {
-            this.log.warn("cannot write " + response.url() + " to Cache (4): " + storeError);
+            LoaderDispatcher.log.warn("cannot write " + response.url() + " to Cache (4): " + storeError);
         }
         return response;
     }

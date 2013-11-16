@@ -36,7 +36,7 @@ public class ResponseHeader extends HeaderFramework {
     // response header properties
 
     private static final long serialVersionUID = 0L;
-    private static ConcurrentLog log = new ConcurrentLog(ResponseHeader.class.getName());
+    private static final ConcurrentLog log = new ConcurrentLog(ResponseHeader.class.getName());
 
     public ResponseHeader(final int statusCode) {
         super();

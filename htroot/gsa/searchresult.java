@@ -163,7 +163,7 @@ public class searchresult {
                 CollectionSchema.last_modified.getSolrFieldName() + ',' +
                 CollectionSchema.size_i.getSolrFieldName());
         post.put("hl", "true");
-        post.put("hl.q", originalQuery);
+        post.put("hl.q", qg.getIncludeString());
         post.put("hl.fl", CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName());
         post.put("hl.alternateField", CollectionSchema.description_txt.getSolrFieldName());
         post.put("hl.simple.pre", "<b>");

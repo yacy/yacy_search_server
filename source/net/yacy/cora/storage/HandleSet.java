@@ -36,6 +36,7 @@ public interface HandleSet extends Iterable<byte[]>, Cloneable, Serializable {
 
     public byte[] export();
 
+    public void optimize();
 
     /**
      * write a dump of the set to a file. All entries are written in order

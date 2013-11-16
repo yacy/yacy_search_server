@@ -35,12 +35,13 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.rwi.IndexCell;
-import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment.ReferenceReport;
+import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -138,31 +139,28 @@ public class webstructure {
 
                 // citations
                 prop.put("citations", 1);
-            	IndexCell<CitationReference> citationReferences = sb.index.urlCitation();
-            	ReferenceContainer<CitationReference> citations = null;
-            	// citationReferences.count(urlhash) would give to the number of references good for ranking
-                try {
-                    citations = citationReferences != null ? citationReferences.get(urlhash, null) : null;
-                } catch (final IOException e) {
-                }
-            	if (citations != null) {
+                ReferenceReportCache rrc = sb.index.getReferenceReportCache();
+                ReferenceReport rr = null;
+                try {rr = rrc.getReferenceReport(urlhash, true);} catch (IOException e) {}
+            	if (rr != null && rr.getInternalCount() > 0 && rr.getExternalCount() > 0) {
                     prop.put("citations_count", 1);
                     prop.put("citations_documents", 1);
                     prop.put("citations_documents_0_hash", urlhash);
-                    prop.put("citations_documents_0_count", citations.size());
-                    prop.put("citations_documents_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(citations.lastWrote())));
+                    prop.put("citations_documents_0_count", rr.getInternalCount() + rr.getExternalCount());
+                    prop.put("citations_documents_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date())); // superfluous?
                     prop.put("citations_documents_0_urle", url == null ? 0 : 1);
                     if (url != null) prop.putXML("citations_documents_0_urle_url", url.toNormalform(true));
                     int d = 0;
-                    Iterator<CitationReference> i = citations.entries();
+                    HandleSet ids = rr.getInternallIDs();
+                    try {ids.putAll(rr.getExternalIDs());} catch (SpaceExceededException e) {}
+                    Iterator<byte[]> i = ids.iterator();
             		while (i.hasNext()) {
-                    	CitationReference cr = i.next();
-                    	byte[] refhash = cr.urlhash();
+                    	byte[] refhash = i.next();
                     	DigestURL refurl = authenticated ? sb.getURL(refhash) : null;
                     	prop.put("citations_documents_0_anchors_" + d + "_urle", refurl == null ? 0 : 1);
                     	if (refurl != null) prop.putXML("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true));
                     	prop.put("citations_documents_0_anchors_" + d + "_urle_hash", refhash);
-                    	prop.put("citations_documents_0_anchors_" + d + "_urle_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(cr.lastModified())));
+                    	prop.put("citations_documents_0_anchors_" + d + "_urle_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date())); // superfluous?
                     	d++;
             		}
                     prop.put("citations_documents_0_count", d);

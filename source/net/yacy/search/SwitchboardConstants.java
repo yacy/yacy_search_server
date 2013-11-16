@@ -243,6 +243,9 @@ public final class SwitchboardConstants {
      */
     public static final String INDEX_DIST_ALLOW                 = "allowDistributeIndex";
     public static final String INDEX_RECEIVE_ALLOW              = "allowReceiveIndex";
+    public static final String INDEX_RECEIVE_ALLOW_SEARCH       = "allowReceiveIndex.search";
+    public static final String INDEX_RECEIVE_BLOCK_BLACKLIST    = "indexReceiveBlockBlacklist";
+    
     /**
      * <p><code>public static final String <strong>INDEX_DIST_ALLOW_WHILE_CRAWLING</strong> = "allowDistributeIndexWhileCrawling"</code></p>
      * <p>Name of the setting whether Index Distribution shall be allowed while crawling is in progress, i.e.

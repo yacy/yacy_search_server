@@ -180,6 +180,7 @@ public class ConfigBasic {
                 // switch to p2p mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true);
                 // set default behavior for search verification
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh"); // nocache,iffresh,ifexist,cacheonly,false
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
@@ -190,6 +191,7 @@ public class ConfigBasic {
                 // switch to robinson mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false);
                 // set default behavior for search verification
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "ifexist"); // nocache,iffresh,ifexist,cacheonly,false
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
@@ -200,6 +202,7 @@ public class ConfigBasic {
                 // switch to p2p mode: enable ad-hoc networks between intranet users
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false);
                 // set default behavior for search verification
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "cacheonly"); // nocache,iffresh,ifexist,cacheonly,false
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");

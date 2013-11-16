@@ -71,7 +71,7 @@ import net.yacy.cora.util.ConcurrentLog;
 
 public class FTPClient {
 
-    private static ConcurrentLog log = new ConcurrentLog("FTPClient");
+    private static final ConcurrentLog log = new ConcurrentLog("FTPClient");
 
     private static final String vDATE = "20100823";
 

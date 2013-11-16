@@ -25,6 +25,8 @@
     <urlpublictextSegmentCount>#[urlpublictextSegmentCount]#</urlpublictextSegmentCount>
     <webgraph>#[webgraphSize]#</webgraph>
     <webgraphSegmentCount>#[webgraphSegmentCount]#</webgraphSegmentCount>
+    <citation>#[citationSize]#</citation>
+    <citationSegmentCount>#[citationSegmentCount]#</citationSegmentCount>
     <rwipublictext>#[rwipublictextSize]#</rwipublictext>    
     <rwipublictextSegmentCount>#[rwipublictextSegmentCount]#</rwipublictextSegmentCount>    
   </dbsize>
@@ -70,7 +72,14 @@
 #(/crawlProfiles)#
   
   <postprocessing>
-    <status>#(postprocessingRunning)#idle::busy#(/postprocessingRunning)#</status>
+    <collectionRemainingCount>#[postprocessingCollectionRemainingCount]#</collectionRemainingCount>
+    <webgraphRemainingCount>#[postprocessingWebgraphRemainingCount]#</webgraphRemainingCount>
+    <status>#(postprocessingRunning)#idle::busy:#[activity]##(/postprocessingRunning)#</status>
+    <speed>#[postprocessingSpeed]#</speed>
+    <elapsedTime>#[postprocessingElapsedTime]#</elapsedTime>
+    <remainingTime>#[postprocessingRemainingTime]#</remainingTime>
+    <remainingTimeMinutes>#[postprocessingRemainingTimeMinutes]#</remainingTimeMinutes>
+    <remainingTimeSeconds>#[postprocessingRemainingTimeSeconds]#</remainingTimeSeconds>
   </postprocessing>
   
 </status>

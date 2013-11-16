@@ -260,10 +260,7 @@ public class yacysearchitem {
                 prop.put("content_loc_lon", result.lon());
             }
             final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
-            final boolean indexReceiveGranted =
-                sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
-                    || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
-                    || clustersearch;
+            final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
             boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
             boolean stealthmode = p2pmode && theSearch.query.isLocal();
             if ((sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ||

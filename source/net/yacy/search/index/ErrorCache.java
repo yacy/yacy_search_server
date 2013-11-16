@@ -46,7 +46,7 @@ import net.yacy.search.schema.CollectionSchema;
 
 public class ErrorCache {
 
-    private static ConcurrentLog log = new ConcurrentLog("REJECTED");
+    private static final ConcurrentLog log = new ConcurrentLog("REJECTED");
     private static final int maxStackSize = 1000;
 
     // the class object

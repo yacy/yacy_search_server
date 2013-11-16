@@ -25,6 +25,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -35,7 +37,10 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -51,11 +56,12 @@ public class status_p {
         final boolean html = post != null && post.containsKey("html");
         prop.setLocalized(html);
         Segment segment = sb.index;
+        Fulltext fulltext = segment.fulltext();
 
         prop.put("rejected", "0");
         sb.updateMySeed();
         final int cacheMaxSize = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
-        prop.putNum("ppm", Switchboard.currentPPM());
+        prop.put("ppm", Switchboard.currentPPM()); // we don't format the ppm here because that will cause that the progress bar shows nothing if the number is > 999
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
         prop.putNum("wordCacheSize", segment.RWIBufferCount());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);
@@ -73,10 +79,12 @@ public class status_p {
 		prop.put("trafficCrawler", ByteCount.getAccountCount(ByteCount.CRAWLER));
 
         // index size
-        prop.putNum("urlpublictextSize", segment.fulltext().collectionSize());
-        prop.putNum("urlpublictextSegmentCount", segment.fulltext().getDefaultConnector().getSegmentCount());
-        prop.putNum("webgraphSize", segment.fulltext().writeToWebgraph() ? segment.fulltext().webgraphSize() : 0);
-        prop.putNum("webgraphSegmentCount", segment.fulltext().writeToWebgraph() ? segment.fulltext().getWebgraphConnector().getSegmentCount() : 0);
+        prop.putNum("urlpublictextSize", fulltext.collectionSize());
+        prop.putNum("urlpublictextSegmentCount", fulltext.getDefaultConnector().getSegmentCount());
+        prop.putNum("webgraphSize", fulltext.writeToWebgraph() ? fulltext.webgraphSize() : 0);
+        prop.putNum("webgraphSegmentCount", fulltext.writeToWebgraph() ? fulltext.getWebgraphConnector().getSegmentCount() : 0);
+        prop.putNum("citationSize", segment.citationCount());
+        prop.putNum("citationSegmentCount", segment.citationSegmentCount());
         prop.putNum("rwipublictextSize", segment.RWICount());
         prop.putNum("rwipublictextSegmentCount", segment.RWISegmentCount());
 
@@ -120,8 +128,39 @@ public class status_p {
         prop.put("crawlProfiles_list", count);
         prop.put("crawlProfiles_count", count);
         prop.put("crawlProfiles", count == 0 ? 0 : 1);
-        
+
         prop.put("postprocessingRunning", Switchboard.postprocessingRunning ? 1 : 0);
+        
+        boolean processCollection =  sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.process_sxt) && (sb.index.connectedCitation() || sb.index.fulltext().writeToWebgraph());
+        boolean processWebgraph =  sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.process_sxt) && sb.index.fulltext().writeToWebgraph();
+
+        long collectionTimeSinceStart = processCollection && Switchboard.postprocessingRunning ? System.currentTimeMillis() - Switchboard.postprocessingStartTime[0] : 0;
+        long webgraphTimeSinceStart = processWebgraph && Switchboard.postprocessingRunning ? System.currentTimeMillis() - Switchboard.postprocessingStartTime[1] : 0;
+
+        long collectionRemainingCount = 0;
+        if (processCollection) try {collectionRemainingCount = sb.index.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]");} catch (IOException e) {}
+        long collectionCountSinceStart = Switchboard.postprocessingRunning ? Switchboard.postprocessingCount[0] - collectionRemainingCount : 0;
+        int collectionSpeed = collectionTimeSinceStart == 0 ? 0 : (int) (60000 * collectionCountSinceStart / collectionTimeSinceStart); // pages per minute
+        long collectionRemainingTime = collectionSpeed == 0 ? 0 : 60000 * collectionRemainingCount / collectionSpeed; // millis
+        int collectionRemainingTimeMinutes = (int) (collectionRemainingTime / 60000);
+        int collectionRemainingTimeSeconds = (int) ((collectionRemainingTime - (collectionRemainingTimeMinutes * 60000)) / 1000);
+
+        long webgraphRemainingCount = 0;
+        if (processWebgraph) try {webgraphRemainingCount = sb.index.fulltext().getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]");} catch (IOException e) {}
+        long webgraphCountSinceStart = Switchboard.postprocessingRunning ? Switchboard.postprocessingCount[1] - webgraphRemainingCount : 0;
+        int webgraphSpeed = webgraphTimeSinceStart == 0 ? 0 : (int) (60000 * webgraphCountSinceStart / webgraphTimeSinceStart); // pages per minute
+        long webgraphRemainingTime = webgraphSpeed == 0 ? 0 : 60000 * webgraphRemainingCount / webgraphSpeed; // millis
+        int webgraphRemainingTimeMinutes = (int) (webgraphRemainingTime / 60000);
+        int webgraphRemainingTimeSeconds = (int) ((webgraphRemainingTime - (webgraphRemainingTimeMinutes * 60000)) / 1000);
+
+        prop.put("postprocessingCollectionRemainingCount", collectionRemainingCount);
+        prop.put("postprocessingWebgraphRemainingCount", webgraphRemainingCount);
+        prop.put("postprocessingRunning_activity", collectionTimeSinceStart > 0 ? "collection" : "webgraph");
+        prop.put("postprocessingSpeed", collectionTimeSinceStart > 0 ? collectionSpeed : webgraphSpeed);
+        prop.put("postprocessingElapsedTime", collectionTimeSinceStart > 0 ? collectionTimeSinceStart : webgraphTimeSinceStart);
+        prop.put("postprocessingRemainingTime", collectionTimeSinceStart > 0 ? collectionRemainingTime : webgraphRemainingTime);
+        prop.put("postprocessingRemainingTimeMinutes", collectionTimeSinceStart > 0 ? collectionRemainingTimeMinutes : webgraphRemainingTimeMinutes);
+        prop.put("postprocessingRemainingTimeSeconds", collectionTimeSinceStart > 0 ? collectionRemainingTimeSeconds : webgraphRemainingTimeSeconds);
         
         // return rewrite properties
         return prop;

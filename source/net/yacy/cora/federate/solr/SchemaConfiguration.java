@@ -41,6 +41,7 @@ import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segment.ClickdepthCache;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.schema.CollectionSchema;
@@ -177,14 +178,14 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         }
         return changed;
     }
-
-    public boolean postprocessing_clickdepth(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURL url, SchemaDeclaration clickdepthfield) {
+    
+    public boolean postprocessing_clickdepth(ClickdepthCache clickdepthCache, SolrInputDocument sid, DigestURL url, SchemaDeclaration clickdepthfield, int maxtime) {
         if (!this.contains(clickdepthfield)) return false;
         // get new click depth and compare with old
-        Integer oldclickdepth = (Integer) doc.getFieldValue(clickdepthfield.getSolrFieldName());
+        Integer oldclickdepth = (Integer) sid.getFieldValue(clickdepthfield.getSolrFieldName());
         if (oldclickdepth != null && oldclickdepth.intValue() != 999) return false; // we do not want to compute that again
         try {
-            int clickdepth = segment.getClickDepth(url);
+            int clickdepth = clickdepthCache.getClickdepth(url, maxtime);
             if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) {
                 sid.setField(clickdepthfield.getSolrFieldName(), clickdepth);
                 return true;
@@ -194,15 +195,15 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return false;
     }
 
-    public boolean postprocessing_references(ReferenceReportCache rrCache, SolrDocument doc, SolrInputDocument sid, DigestURL url, Map<String, Long> hostExtentCount) {
+    public boolean postprocessing_references(ReferenceReportCache rrCache, SolrInputDocument sid, DigestURL url, Map<String, Long> hostExtentCount) {
         if (!(this.contains(CollectionSchema.references_i) ||
               this.contains(CollectionSchema.references_internal_i) ||
               this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;
-        Integer all_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
-        Integer internal_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
-        Integer external_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
-        Integer exthosts_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
-        Integer hostextc_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.host_extent_i.getSolrFieldName());
+        Integer all_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
+        Integer internal_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
+        Integer external_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
+        Integer exthosts_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
+        Integer hostextc_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.host_extent_i.getSolrFieldName());
         try {
             ReferenceReport rr = rrCache.getReferenceReport(url.hash(), false);
             List<String> internalIDs = new ArrayList<String>();

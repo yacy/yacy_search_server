@@ -96,7 +96,7 @@ public final class transferRWI {
         final int entryc      = post.getInt("entryc", 0);                 // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfigBool("allowReceiveIndex", false);
-        final boolean blockBlacklist = sb.getConfigBool("indexReceiveBlockBlacklist", false);
+        final boolean blockBlacklist = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_BLACKLIST, false);
         final long cachelimit = sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
         final Seed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));

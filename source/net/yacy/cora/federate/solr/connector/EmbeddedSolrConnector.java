@@ -24,6 +24,7 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -54,6 +55,7 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocSet;
+import org.apache.solr.search.DocSlice;
 import org.apache.solr.search.QueryResultKey;
 import org.apache.solr.search.SolrCache;
 import org.apache.solr.search.SolrIndexSearcher;
@@ -61,7 +63,7 @@ import org.apache.solr.util.RefCounted;
 
 public class EmbeddedSolrConnector extends SolrServerConnector implements SolrConnector {
 
-    static Set<String> SOLR_ID_FIELDS = new HashSet<String>();
+    private static Set<String> SOLR_ID_FIELDS = new HashSet<String>();
     static {
         SOLR_ID_FIELDS.add(CollectionSchema.id.getSolrFieldName());
     }
@@ -144,8 +146,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @return
      */
     public SolrQueryRequest request(final SolrParams params) {
-        SolrQueryRequest req = null;
-        req = new SolrQueryRequestBase(this.core, params){};
+        SolrQueryRequest req = new SolrQueryRequestBase(this.core, params){};
         req.getContext().put("path", SELECT);
         req.getContext().put("webapp", CONTEXT);
         return req;
@@ -221,7 +222,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             // query the server
             this.request = request(params);
             SolrQueryResponse rsp = query(request);
-            this.response = ((ResultContext) rsp.getValues().get("response")).docs;
+            @SuppressWarnings("rawtypes")
+            NamedList nl = rsp.getValues();
+            ResultContext resultContext = (ResultContext) nl.get("response");
+            if (resultContext == null) log.warn("DocListSearcher: no response for query '" + querystring + "'");
+            this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
         }
         public void close() {
             if (this.request != null) this.request.close();
@@ -247,27 +252,25 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public Set<String> existsByIds(Set<String> ids) {
         if (ids == null || ids.size() == 0) return new HashSet<String>();
         if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
-        StringBuilder sb = new StringBuilder(); // construct something like "({!raw f=id}Ij7B63g-gSHA) OR ({!raw f=id}PBcGI3g-gSHA)"
+        Set<String> idsr = new TreeSet<String>();
+        final SolrQuery params = new SolrQuery();
+        params.setRows(0);
+        params.setStart(0);
+        params.setFacet(false);
+        params.clearSorts();
+        params.setFields(CollectionSchema.id.getSolrFieldName());
+        params.setIncludeScore(false);
+        SolrQueryRequest req = new SolrQueryRequestBase(this.core, params){};
+        req.getContext().put("path", SELECT);
+        req.getContext().put("webapp", CONTEXT);
         for (String id: ids) {
-            sb.append("({!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id).append(") OR ");
+            params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
+            SolrQueryResponse rsp = new SolrQueryResponse();
+            this.requestHandler.handleRequest(req, rsp);
+            DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
+            if (response.matches() > 0) idsr.add(id);
         }
-        if (sb.length() > 0) sb.setLength(sb.length() - 4); // cut off the last 'or'
-        DocListSearcher docListSearcher = new DocListSearcher(sb.toString(), 0, ids.size(), CollectionSchema.id.getSolrFieldName());
-        //int numFound = docListSearcher.response.matches();
-        int responseCount = docListSearcher.response.size();
-        SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
-        DocIterator iterator = docListSearcher.response.iterator();
-        HashSet<String> idsr = new HashSet<String>();
-        try {
-        for (int i = 0; i < responseCount; i++) {
-            Document doc = searcher.doc(iterator.nextDoc(), SOLR_ID_FIELDS);
-            idsr.add(doc.get(CollectionSchema.id.getSolrFieldName()));
-        }
-        } catch (IOException e) {
-        } finally {
-            docListSearcher.close();
-        }
-        // construct a new id list from that
+        req.close();
         return idsr;
     }
     

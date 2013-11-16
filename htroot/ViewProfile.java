@@ -69,7 +69,7 @@ public class ViewProfile {
             prop.put("success", "0");
             return prop;
         }
-        prop.put("hash", hash);
+        prop.putHTML("hash", hash);
 
         // get the profile
         Map<String, String> profile = null;

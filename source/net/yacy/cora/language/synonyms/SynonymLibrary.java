@@ -42,7 +42,7 @@ import net.yacy.cora.util.ConcurrentLog;
  */
 public class SynonymLibrary {
 
-    ConcurrentLog log = new ConcurrentLog(SynonymLibrary.class.getName());
+    private final static ConcurrentLog log = new ConcurrentLog(SynonymLibrary.class.getName());
     private Map<String, List<Set<String>>> lib;
     
     public SynonymLibrary(final File path) {

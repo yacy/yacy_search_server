@@ -44,7 +44,7 @@ import net.yacy.cora.util.ConcurrentLog;
 
 public class gzip {
 
-    private static ConcurrentLog logger = new ConcurrentLog("GZIP");
+    private final static ConcurrentLog logger = new ConcurrentLog("GZIP");
 
     public static void gzipFile(final String inFile, final String outFile) {
 	try {

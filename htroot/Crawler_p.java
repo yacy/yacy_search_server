@@ -55,6 +55,8 @@ import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Fulltext;
+import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -69,12 +71,23 @@ public class Crawler_p {
         // inital values for AJAX Elements (without JavaScript)
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
-        prop.put("urlpublictextSize", 0);
-        prop.put("urlpublictextSegmentCount", 0);
-        prop.put("webgraphSize", 0);
-        prop.put("webgraphSegmentCount", 0);
-        prop.put("rwipublictextSize", 0);
-        prop.put("rwipublictextSegmentCount", 0);
+
+        Segment segment = sb.index;
+        Fulltext fulltext = segment.fulltext();
+        String localSolr = "/solr/select?core=collection1&q=*:*&start=0&rows=3";
+        String remoteSolr = env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, localSolr);
+        if (!remoteSolr.endsWith("/")) remoteSolr = remoteSolr + "/";
+        prop.put("urlpublictextSolrURL", fulltext.connectedLocalSolr() ? localSolr : remoteSolr + "collection1/select?&q=*:*&start=0&rows=3");
+        prop.putNum("urlpublictextSize", fulltext.collectionSize());
+        prop.putNum("urlpublictextSegmentCount", fulltext.getDefaultConnector().getSegmentCount());
+        prop.put("webgraphSolrURL", fulltext.connectedLocalSolr() ? localSolr.replace("collection1", "webgraph") : remoteSolr + "webgraph/select?&q=*:*&start=0&rows=3");
+        prop.putNum("webgraphSize", fulltext.writeToWebgraph() ? fulltext.webgraphSize() : 0);
+        prop.putNum("webgraphSegmentCount", fulltext.writeToWebgraph() ? fulltext.getWebgraphConnector().getSegmentCount() : 0);
+        prop.putNum("citationSize", segment.citationCount());
+        prop.putNum("citationSegmentCount", segment.citationSegmentCount());
+        prop.putNum("rwipublictextSize", segment.RWICount());
+        prop.putNum("rwipublictextSegmentCount", segment.RWISegmentCount());
+        
         prop.put("list", "0");
         prop.put("loaderSize", 0);
         prop.put("loaderMax", 0);
@@ -264,7 +277,7 @@ public class Crawler_p {
 
                 env.setConfig("storeHTCache", storeHTCache);
                 
-                String agentName = post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName);
+                String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
                 ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
 
                 CacheStrategy cachePolicy = CacheStrategy.parse(post.get("cachePolicy", "iffresh"));

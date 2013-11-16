@@ -78,6 +78,7 @@ import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segment.ClickdepthCache;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
@@ -884,13 +885,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param urlCitation
      * @return
      */
-    public int postprocessing(final Segment segment, String harvestkey) {
+    public int postprocessing(final Segment segment, ReferenceReportCache rrCache, ClickdepthCache clickdepthCache, String harvestkey) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
-        if (!segment.connectedCitation()) return 0;
+        if (!segment.connectedCitation() && !segment.fulltext().writeToWebgraph()) return 0;
         SolrConnector collectionConnector = segment.fulltext().getDefaultConnector();
         SolrConnector webgraphConnector = segment.fulltext().getWebgraphConnector();
-        collectionConnector.commit(true); // make sure that we have latest information that can be found
-        ReferenceReportCache rrCache = segment.getReferenceReportCache();
+        collectionConnector.commit(false); // make sure that we have latest information that can be found
+        if (webgraphConnector != null) webgraphConnector.commit(false);
         Map<byte[], CRV> ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
         ReversibleScoreMap<String> hostscore = null;
         try {
@@ -907,7 +908,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
                 String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + ":[* TO *]";
                 long patchquerycount = collectionConnector.getCountByQuery(patchquery);
-                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, 0, 10000000, 60000L, 50,
+                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, 0, 10000000, 600000, 100,
                         CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
                 SolrDocument doc_B;
                 int patchquerycountcheck = 0;
@@ -917,21 +918,25 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         DigestURL doc_C_url = new DigestURL((String) doc_B.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()));
                         byte[] doc_B_id = ASCII.getBytes(((String) doc_B.getFieldValue(CollectionSchema.id.getSolrFieldName())));
                         // we remove all references to B, because these become references to C
-                        ReferenceContainer<CitationReference> doc_A_ids = segment.urlCitation().remove(doc_B_id);
-                        if (doc_A_ids == null) {
-                            //System.out.println("*** document with canonical but no referrer: " + doc_B.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
-                            continue; // the document has a canonical tag but no referrer?
-                        }
-                        Iterator<CitationReference> doc_A_ids_iterator = doc_A_ids.entries();
-                        // for each of the referrer A of B, set A as a referrer of C
-                        while (doc_A_ids_iterator.hasNext()) {
-                            CitationReference doc_A_citation = doc_A_ids_iterator.next();
-                            segment.urlCitation().add(doc_C_url.hash(), doc_A_citation);
+                        if (segment.connectedCitation()) {
+                            ReferenceContainer<CitationReference> doc_A_ids = segment.urlCitation().remove(doc_B_id);
+                            if (doc_A_ids == null) {
+                                //System.out.println("*** document with canonical but no referrer: " + doc_B.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                                continue; // the document has a canonical tag but no referrer?
+                            }
+                            Iterator<CitationReference> doc_A_ids_iterator = doc_A_ids.entries();
+                            // for each of the referrer A of B, set A as a referrer of C
+                            while (doc_A_ids_iterator.hasNext()) {
+                                CitationReference doc_A_citation = doc_A_ids_iterator.next();
+                                segment.urlCitation().add(doc_C_url.hash(), doc_A_citation);
+                            }
                         }
                         patchquerycountcheck++;
                     }
                 } catch (InterruptedException e) {
+                    ConcurrentLog.logException(e);
                 } catch (SpaceExceededException e) {
+                    ConcurrentLog.logException(e);
                 }
                 if (patchquerycount != patchquerycountcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous patchquery count for host " + host + ": expected=" + patchquerycount + ", counted=" + patchquerycountcheck);
                 
@@ -962,10 +967,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 for (String host: hostscore.keyList(true)) {
                     if (hostscore.get(host) <= 0) continue;
                     // select all webgraph edges and modify their cr value
-                    String query = WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + host + "\"";
+                    String query = "{!raw f=" + WebgraphSchema.source_host_s.getSolrFieldName() + "}" + host;
                     long count = webgraphConnector.getCountByQuery(query);
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph");
-                    BlockingQueue<SolrDocument> docs = webgraphConnector.concurrentDocumentsByQuery(query, 0, 10000000, 60000, 50);
+                    BlockingQueue<SolrDocument> docs = webgraphConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
                     int countcheck = 0;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                         boolean changed = false;
@@ -983,9 +988,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             changed = true;
                         }
                         if (changed) try {
+                            sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
+                            sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
                             webgraphConnector.add(sid);
                         } catch (SolrException e) {
+                            ConcurrentLog.logException(e);
                         } catch (IOException e) {
+                            ConcurrentLog.logException(e);
                         }
                         countcheck++;
                     }
@@ -1007,7 +1016,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         try {
             long count = collectionConnector.getCountByQuery(query);
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
-            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, 0, 10000, 60000, 50);
+            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
             int countcheck = 0;
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
@@ -1023,7 +1032,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
                         if (tagtype == ProcessType.CLICKDEPTH) {
-                            if (postprocessing_clickdepth(segment, doc, sid, url, CollectionSchema.clickdepth_i)) proccount_clickdepthchange++;
+                            if (postprocessing_clickdepth(clickdepthCache, sid, url, CollectionSchema.clickdepth_i, 100)) proccount_clickdepthchange++;
                         }
 
                         if (tagtype == ProcessType.CITATION) {
@@ -1050,7 +1059,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         long hostExtentCount = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
                         hostExtentCache.put(hosthash, hostExtentCount);
                     }
-                    if (postprocessing_references(rrCache, doc, sid, url, hostExtentCache)) proccount_referencechange++;
+                    if (postprocessing_references(rrCache, sid, url, hostExtentCache)) proccount_referencechange++;
                     
                     // all processing steps checked, remove the processing and harvesting key
                     sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
@@ -1062,10 +1071,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     
                     proccount++;
                 } catch (final Throwable e1) {
+                    ConcurrentLog.logException(e1);
                 }
                 countcheck++;
             }
-            if (count != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck);
+            if (count != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck); // big gap for harvestkey = null
             ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
                         proccount_clickdepthchange + " clickdepth changes, " +
                         proccount_referencechange + " reference-count changes, " +
@@ -1113,7 +1123,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             this.crt = new TreeMap<byte[], double[]>(Base64Order.enhancedCoder);
             try {
                 // select all documents for each host
-                BlockingQueue<String> ids = connector.concurrentIDsByQuery("{!raw f=" + CollectionSchema.host_s.getSolrFieldName() + "}" + host, 0, 1000000, 600000);
+                BlockingQueue<String> ids = connector.concurrentIDsByQuery("{!raw f=" + CollectionSchema.host_s.getSolrFieldName() + "}" + host, 0, 10000000, 600000);
                 String id;
                 while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
                     this.crt.put(ASCII.getBytes(id), new double[]{0.0d,0.0d}); //{old value, new value}
@@ -1226,11 +1236,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         if (ilc > 0) { // if (ilc == 0) then the reference report is wrong!
                             double[] d = this.crt.get(iid);
                             // d[] could be empty at some situations
-                            if (d.length > 0) {
+                            if (d != null && d.length > 0) {
                                 ncr += d[0] / ilc;
                             } else {
                                 // Output a warning that d[] is empty
                                 ConcurrentLog.warn("COLLECTION", "d[] is empty, iid="  + iid);
+                                break;
                             }
                         }
                     }

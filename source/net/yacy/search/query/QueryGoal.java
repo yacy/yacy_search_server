@@ -45,7 +45,7 @@ public class QueryGoal {
     private static char space = ' ';
     private static char sq = '\'';
     private static char dq = '"';
-    private static String seps = ".,/&_";
+    private static String seps = ".:;#'*`,!$%()=?^<>/&_";
     
     private String query_original;
     private HandleSet include_hashes, exclude_hashes;
@@ -163,6 +163,17 @@ public class QueryGoal {
     public HandleSet getExcludeHashes() {
         if (exclude_hashes == null) exclude_hashes = Word.words2hashesHandles(exclude_words);
         return exclude_hashes;
+    }
+   
+    /**
+     * the include string may be useful (and better) for highlight/snippet computation 
+     * @return the query string containing only the positive literals (includes) and without whitespace characters
+     */
+    public String getIncludeString() {
+        if (this.include_strings.size() == 0) return "";
+        StringBuilder sb = new StringBuilder(10 * include_strings.size());
+        for (String s: this.include_strings) sb.append(s).append(' ');
+        return sb.toString().substring(0, sb.length() - 1);
     }
    
     public ArrayList<String> getIncludeStrings() {

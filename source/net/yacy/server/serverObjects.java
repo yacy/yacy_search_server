@@ -204,6 +204,10 @@ public class serverObjects implements Serializable, Cloneable {
         map.getMap().put(key, aa);
         return;
     }
+
+    public void put(final String key, final boolean value) {
+        put(key, value ? "1" : "0");
+    }
     
     public void put(final String key, final String value) {
         if (key == null) {

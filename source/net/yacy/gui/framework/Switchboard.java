@@ -56,7 +56,7 @@ public class Switchboard {
      */
     private static Properties properties = new Properties();
     
-    public static ConcurrentLog log = new ConcurrentLog(Switchboard.class.getName());
+    public final static ConcurrentLog log = new ConcurrentLog(Switchboard.class.getName());
 
     
     public static void startInfoUpdater() {

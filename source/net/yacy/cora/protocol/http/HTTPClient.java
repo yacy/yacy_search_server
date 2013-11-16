@@ -162,7 +162,7 @@ public class HTTPClient {
 		builder.setDefaultCookieStore(null);
 		builder.disableCookieManagement();
 		
-		// add cutom keep alive strategy
+		// add custom keep alive strategy
 		builder.setKeepAliveStrategy(customKeepAliveStrategy());
 		
 		// ask for gzip
@@ -738,15 +738,9 @@ public class HTTPClient {
 	private static ConnectionKeepAliveStrategy customKeepAliveStrategy() {
 		return new DefaultConnectionKeepAliveStrategy() {
 			@Override
-			public long getKeepAliveDuration(HttpResponse response,
-					HttpContext context) {
+			public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
 				long keepAlive = super.getKeepAliveDuration(response, context);
-				if (keepAlive < 1) {
-					// Keep connections alive 5 seconds if a keep-alive value
-					// has not be explicitly set by the server
-					keepAlive = 5000;
-				}
-				return Math.min(keepAlive, 25000);
+				return Math.min(Math.max(keepAlive, 5000), 25000);
 			}
 		};
 	}

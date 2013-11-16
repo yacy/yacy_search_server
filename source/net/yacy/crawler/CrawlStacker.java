@@ -63,7 +63,6 @@ import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionConfiguration;
 
@@ -72,8 +71,8 @@ public final class CrawlStacker {
     public static String ERROR_NO_MATCH_MUST_MATCH_FILTER = "url does not match must-match filter ";
     public static String ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER = "url matches must-not-match filter ";
     
-
-    private final ConcurrentLog log = new ConcurrentLog("STACKCRAWL");
+    private final static ConcurrentLog log = new ConcurrentLog("STACKCRAWL");
+    
     private final RobotsTxt robots;
     private final WorkflowProcessor<Request>  requestQueue;
     public  final CrawlQueues       nextQueue;
@@ -103,13 +102,13 @@ public final class CrawlStacker {
         this.acceptGlobalURLs = acceptGlobalURLs;
         this.domainList = domainList;
         this.requestQueue = new WorkflowProcessor<Request>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, WorkflowProcessor.availableCPU);
-        this.log.info("STACKCRAWL thread initialized.");
+        CrawlStacker.log.info("STACKCRAWL thread initialized.");
     }
-
 
     public int size() {
         return this.requestQueue.getQueueSize();
     }
+    
     public boolean isEmpty() {
         if (!this.requestQueue.queueIsEmpty()) return false;
         return true;
@@ -120,15 +119,15 @@ public final class CrawlStacker {
     }
 
     public void announceClose() {
-        this.log.info("Flushing remaining " + size() + " crawl stacker job entries.");
+        CrawlStacker.log.info("Flushing remaining " + size() + " crawl stacker job entries.");
         this.requestQueue.shutdown();
     }
 
     public synchronized void close() {
-        this.log.info("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
+        CrawlStacker.log.info("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
         this.requestQueue.shutdown();
 
-        this.log.info("Shutdown. Closing stackCrawl queue.");
+        CrawlStacker.log.info("Shutdown. Closing stackCrawl queue.");
 
         clear();
     }
@@ -155,7 +154,7 @@ public final class CrawlStacker {
                 this.nextQueue.errorURL.push(entry.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
         } catch (final Exception e) {
-            CrawlStacker.this.log.warn("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
+            CrawlStacker.log.warn("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
             return null;
         }
         return null;
@@ -164,7 +163,7 @@ public final class CrawlStacker {
     public void enqueueEntry(final Request entry) {
 
         // DEBUG
-        if (this.log.isFinest()) this.log.finest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
+        if (CrawlStacker.log.isFinest()) CrawlStacker.log.finest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
         this.requestQueue.enQueue(entry);
     }
     public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final List<AnchorURL> hyperlinks) {
@@ -310,7 +309,7 @@ public final class CrawlStacker {
         String error;
         if (profile == null) {
             error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
-            this.log.warn(error);
+            CrawlStacker.log.warn(error);
             return error;
         }
 
@@ -334,7 +333,7 @@ public final class CrawlStacker {
 
         if (!local && !global && !remote && !proxy) {
             error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", profile.handle = " + profile.handle();
-            this.log.severe(error);
+            CrawlStacker.log.severe(error);
             return error;
         }
 
@@ -362,20 +361,20 @@ public final class CrawlStacker {
 
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
-            if (proxy) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
-            if (remote) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (proxy) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
+            if (remote) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.GLOBAL, entry, profile, this.robots);
         } else if (local) {
-            if (proxy) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
-            if (remote) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (proxy) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
+            if (remote) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, profile, this.robots);
         } else if (proxy) {
-            if (remote) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (remote) CrawlStacker.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, profile, this.robots);
         } else if (remote) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry, profile, this.robots);
         }
-        if (warning != null && this.log.isFine()) this.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
+        if (warning != null && CrawlStacker.log.isFine()) CrawlStacker.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
 
         return null;
     }
@@ -405,8 +404,8 @@ public final class CrawlStacker {
         } else {
             final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
             if (recrawl) {
-                if (this.log.isInfo())
-                    this.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
+                if (CrawlStacker.log.isInfo())
+                    CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                         ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
             } else {
                 if (dbocc == null) {
@@ -414,10 +413,10 @@ public final class CrawlStacker {
                 }
                 if (dbocc == HarvestProcess.ERRORS) {
                     final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
-                    if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.getFailReason());
+                    if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.getFailReason());
                     return "double in: errors (" + errorEntry.getFailReason() + "), oldDate = " + oldDate.toString();
                 }
-                if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
+                if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
                 return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();
             }
         }
@@ -427,7 +426,7 @@ public final class CrawlStacker {
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
             final AtomicInteger dp = profile.getCount(url.getHost());
             if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
-                if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
                 return "crawl stack domain counter exceeded (test by profile)";
             }
 
@@ -455,44 +454,44 @@ public final class CrawlStacker {
         final String urlProtocol = url.getProtocol();
         final String urlstring = url.toString();
         if (!Switchboard.getSwitchboard().loader.isSupportedProtocol(urlProtocol)) {
-            this.log.severe("Unsupported protocol in URL '" + urlstring + "'.");
+            CrawlStacker.log.severe("Unsupported protocol in URL '" + urlstring + "'.");
             return "unsupported protocol";
         }
 
         // check if ip is local ip address
         final String urlRejectReason = urlInAcceptedDomain(url);
         if (urlRejectReason != null) {
-            if (this.log.isFine()) this.log.fine("denied_(" + urlRejectReason + ")");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("denied_(" + urlRejectReason + ")");
             return "denied_(" + urlRejectReason + ")";
         }
 
         // check blacklist
         if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, url)) {
-            this.log.fine("URL '" + urlstring + "' is in blacklist.");
+            CrawlStacker.log.fine("URL '" + urlstring + "' is in blacklist.");
             return "url in blacklist";
         }
 
         // filter with must-match for URLs
         if ((depth > 0) && !profile.urlMustMatchPattern().matcher(urlstring).matches()) {
-            if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + profile.urlMustMatchPattern().toString() + "'.");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + profile.urlMustMatchPattern().toString() + "'.");
             return ERROR_NO_MATCH_MUST_MATCH_FILTER + profile.urlMustMatchPattern().toString();
         }
 
         // filter with must-not-match for URLs
         if ((depth > 0) && profile.urlMustNotMatchPattern().matcher(urlstring).matches()) {
-            if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.urlMustNotMatchPattern().toString() + "'.");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.urlMustNotMatchPattern().toString() + "'.");
             return ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER + profile.urlMustNotMatchPattern().toString();
         }
 
         // deny cgi
         if (url.isIndividual() && !profile.crawlingQ())  { // TODO: make special property for crawlingIndividual
-            if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' is CGI URL.");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' is CGI URL.");
             return "individual url (sessionid etc) not wanted";
         }
 
         // deny post properties
         if (url.isPOST() && !profile.crawlingQ())  {
-            if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' is post URL.");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' is post URL.");
             return "post url not allowed";
         }
 
@@ -501,13 +500,13 @@ public final class CrawlStacker {
 
         // filter with must-match for IPs
         if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_ALL_PATTERN && url.getHost() != null && !profile.ipMustMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
-            if (this.log.isFine()) this.log.fine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
             return "ip " + url.getInetAddress().getHostAddress() + " of url does not match must-match filter";
         }
 
         // filter with must-not-match for IPs
         if ((depth > 0) && profile.ipMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && url.getHost() != null && profile.ipMustNotMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
-            if (this.log.isFine()) this.log.fine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.ipMustNotMatchPattern().toString() + "'.");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.ipMustNotMatchPattern().toString() + "'.");
             return "ip " + url.getInetAddress().getHostAddress() + " of url matches must-not-match filter";
         }
 
@@ -525,7 +524,7 @@ public final class CrawlStacker {
                     }
                 }
                 if (!granted) {
-                    if (this.log.isFine()) this.log.fine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+                    if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
                     return "country " + c0 + " of url does not match must-match filter for countries";
                 }
             }

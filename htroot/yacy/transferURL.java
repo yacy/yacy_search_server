@@ -46,6 +46,7 @@ import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -69,7 +70,7 @@ public final class transferURL {
 //      final String key      = post.get("key", "");      // transmission key
         final int urlc        = post.getInt("urlc", 0);    // number of transported urls
         final boolean granted = sb.getConfigBool("allowReceiveIndex", false);
-        final boolean blockBlacklist = sb.getConfigBool("indexReceiveBlockBlacklist", false);
+        final boolean blockBlacklist = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_BLACKLIST, false);
 
         // response values
         String result = "";
