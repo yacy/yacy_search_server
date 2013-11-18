@@ -154,6 +154,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
         _dirAllowed = getInitBoolean("dirAllowed", _dirAllowed);
         _pathInfoOnly = getInitBoolean("pathInfoOnly", _pathInfoOnly);
 
+        Resource.setDefaultUseCaches(false); // caching is handled internally (prevent double caching)
         _relativeResourceBase = getInitParameter("relativeResourceBase");
 
         String rb = getInitParameter("resourceBase");
@@ -168,7 +169,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
                 throw new UnavailableException(e.toString());
             }
         }
-
+        
         _etags = getInitBoolean("etags", _etags);
         
         if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -423,9 +424,12 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
                 serverSwitch.class};
             m = c.getMethod("respond", params);
 
-            // store the method into the cache
-            templateMethodCache.put(classFile, new SoftReference<Method>(m));
-
+            if (MemoryControl.shortStatus()) {
+                templateMethodCache.clear();
+            } else {
+                // store the method into the cache
+                templateMethodCache.put(classFile, new SoftReference<Method>(m));
+            }
         } catch (final ClassNotFoundException e) {
             ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());

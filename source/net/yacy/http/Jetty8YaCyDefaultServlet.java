@@ -54,7 +54,6 @@ import org.eclipse.jetty.util.MultiPartOutputStream;
 import org.eclipse.jetty.util.QuotedStringTokenizer;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.resource.ResourceFactory;
 
 /* ------------------------------------------------------------ */
 /**
@@ -95,7 +94,7 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  * </PRE>
  *
  */
-public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements ResourceFactory {
+public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
 
     private static final long serialVersionUID = 4900000000000001110L;
     
