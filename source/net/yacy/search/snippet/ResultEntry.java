@@ -141,7 +141,12 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return (this.alternative_urlname == null) ? MultiProtocolURL.unescape(this.urlentry.url().toNormalform(true)) : this.alternative_urlname;
     }
     public String title() {
-        return this.urlentry.dc_title();
+        String titlestr = this.urlentry.dc_title();
+        // if title is empty use filename as title
+        if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
+            titlestr = this.urlentry.url() != null ? this.urlentry.url().getFileName() : "";
+        }
+        return titlestr;
     }
     public String publisher() {
         // dc:publisher
