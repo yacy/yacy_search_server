@@ -1102,8 +1102,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final String r = toString();
         final String z = crypt.simpleEncode(r, key, 'z');
         final String b = crypt.simpleEncode(r, key, 'b');
-        // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
-        // take simply that string that is shorter
+        // the compressed string may be longer than the uncompressed if there is too much overhead for compression meta-info
+        // take simply that string which is shorter
         return ( b.length() < z.length() ) ? b : z;
     }
 

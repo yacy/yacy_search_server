@@ -33,6 +33,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -403,7 +404,7 @@ public final class SeedDB implements AlternativeDomainNames {
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedActiveDB, minVersion);
     }
 
-    private Iterator<Seed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final double minVersion) {
+    public Iterator<Seed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final double minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedPassiveDB, minVersion);
     }
@@ -716,39 +717,12 @@ public final class SeedDB implements AlternativeDomainNames {
         try {
 
             pw = new PrintWriter(new BufferedWriter(new FileWriter(seedFile)));
-
-            // store own peer seed
+            List<Seed> seedlist = getSeedlist(Integer.MAX_VALUE, addMySeed);
             String line;
-            if (this.mySeed == null) initMySeed();
-            if (addMySeed) {
-                line = this.mySeed.genSeedStr(null);
+            for (Seed seed: seedlist) {
+                line = seed.genSeedStr(null);
                 v.add(line);
                 pw.print(line + serverCore.CRLF_STRING);
-            }
-
-            // store active peer seeds
-            Seed ys;
-            Iterator<Seed> se = seedsConnected(true, false, null, (float) 0.0);
-            while (se.hasNext()) {
-                ys = se.next();
-                if (ys != null) {
-                    line = ys.genSeedStr(null);
-                    v.add(line);
-                    pw.print(line + serverCore.CRLF_STRING);
-                }
-            }
-
-            // store some of the not-so-old passive peer seeds (limit: 1 day)
-            se = seedsDisconnected(true, false, null, (float) 0.0);
-            final long timeout = System.currentTimeMillis() - (1000L * 60L * 60L * 24L);
-            while (se.hasNext()) {
-                ys = se.next();
-                if (ys != null) {
-                    if (ys.getLastSeenUTC() < timeout) continue;
-                    line = ys.genSeedStr(null);
-                    v.add(line);
-                    pw.print(line + serverCore.CRLF_STRING);
-                }
             }
             pw.flush();
         } finally {
@@ -757,6 +731,35 @@ public final class SeedDB implements AlternativeDomainNames {
         return v;
     }
 
+    public ArrayList<Seed> getSeedlist(int maxcount, boolean addMySeed) {
+        final ArrayList<Seed> v = new ArrayList<Seed>(this.seedActiveDB.size() + 1000);
+ 
+        // store own peer seed
+        if (addMySeed) v.add(this.mySeed);
+
+        // store active peer seeds
+        Seed ys;
+        Iterator<Seed> se = this.seedsConnected(true, false, null, (float) 0.0);
+        while (se.hasNext() && v.size() < maxcount) {
+            ys = se.next();
+            if (ys != null) v.add(ys);
+        }
+
+        // store some of the not-so-old passive peer seeds (limit: 1 day)
+        se = this.seedsDisconnected(true, false, null, (float) 0.0);
+        final long timeout = System.currentTimeMillis() - (1000L * 60L * 60L * 24L);
+        while (se.hasNext() && v.size() < maxcount) {
+            ys = se.next();
+            if (ys != null && ys.getLastSeenUTC() >= timeout) v.add(ys);
+        }
+
+        final StringBuilder encoded = new StringBuilder(1024);
+        for (Seed seed: v) {
+            encoded.append(seed.genSeedStr(null)).append(serverCore.CRLF_STRING);
+        }
+        return v;
+    }
+    
     protected String uploadSeedList(final yacySeedUploader uploader,
             final serverSwitch sb,
             final SeedDB seedDB,

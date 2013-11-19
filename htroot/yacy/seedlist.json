@@ -1,0 +1,7 @@
+#[jsonp-start]#{
+"peers":[#{peers}#{
+#{map}#"#[k]#"="#[v]#"#(c)#::,#(/c)#
+#{/map}#}#(c)#::,#(/c)##{/peers}#
+]
+}#[jsonp-end]#
+
