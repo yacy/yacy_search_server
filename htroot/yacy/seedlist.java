@@ -39,10 +39,12 @@ import net.yacy.server.serverSwitch;
  */
 public final class seedlist {
 
+    private static final int LISTMAX = 1000;
+    
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
-        int maxcount = post == null ? Integer.MAX_VALUE : post.getInt("maxcount", Integer.MAX_VALUE);
+        int maxcount = Math.min(LISTMAX, post == null ? Integer.MAX_VALUE : post.getInt("maxcount", Integer.MAX_VALUE));
         final ArrayList<Seed> v = sb.peers.getSeedlist(maxcount, true);
         final serverObjects prop = new serverObjects();
         
@@ -61,8 +63,11 @@ public final class seedlist {
             }
             // construct json property lists
             for (int i = 0; i < v.size(); i++) {
+                prop.putJSON("peers_" + i + "_map_0_k", Seed.HASH);
+                prop.putJSON("peers_" + i + "_map_0_v", v.get(i).hash);
+                prop.put("peers_" + i + "_map_0_c", 1);
                 Map<String, String> map = v.get(i).getMap();
-                int c = 0;
+                int c = 1;
                 for (Map.Entry<String, String> m: map.entrySet()) {
                     prop.putJSON("peers_" + i + "_map_" + c + "_k", m.getKey());
                     prop.putJSON("peers_" + i + "_map_" + c + "_v", m.getValue());
