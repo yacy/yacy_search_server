@@ -141,7 +141,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /** the name of the peer (user-set) */
     public static final String NAME = "Name";
-    private static final String HASH = "Hash";
+    public static final String HASH = "Hash";
     /** Birthday - first startup */
     private static final String BDATE = "BDate";
     /** UTC-Offset */
@@ -169,6 +169,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public static final String IP = "IP";
     public static final String PORT = "Port";
     public static final String SEEDLISTURL = "seedURL";
+    public static final String NEWS = "news"; // news attachment
+    public static final String DCT = "dct"; // disconnect time
+    
     /** zero-value */
     private static final String ZERO = "0";
 
