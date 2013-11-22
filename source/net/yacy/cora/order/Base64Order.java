@@ -20,8 +20,10 @@
 
 package net.yacy.cora.order;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Random;
 
 import net.yacy.cora.document.encoding.UTF8;
 
@@ -51,18 +53,18 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public static final Base64Order standardCoder = new Base64Order(true, true);
     public static final Base64Order enhancedCoder = new Base64Order(true, false);
 
-    private final boolean rfc1113compliant;
+    private final boolean rfc1521compliant;
     private final byte[] alpha;
     private final byte[] ahpla;
     private final byte[] ab; // decision table for comparisments
 
-    public Base64Order(final boolean up, final boolean rfc1113compliant) {
-        // if we choose not to be rfc1113compliant,
+    public Base64Order(final boolean up, final boolean rfc1521compliant) {
+        // if we choose not to be rfc1521compliant,
         // then we get shorter base64 results which are also filename-compatible
-        this.rfc1113compliant = rfc1113compliant;
+        this.rfc1521compliant = rfc1521compliant;
         this.asc = up;
-        this.alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
-        this.ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
+        this.alpha = (rfc1521compliant) ? alpha_standard : alpha_enhanced;
+        this.ahpla = (rfc1521compliant) ? ahpla_standard : ahpla_enhanced;
         this.ab = new byte[1 << 14];
         byte acc, bcc;
         byte c;
@@ -90,7 +92,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
 
     @Override
     public Order<byte[]> clone() {
-        final Base64Order o = new Base64Order(this.asc, this.rfc1113compliant);
+        final Base64Order o = new Base64Order(this.asc, this.rfc1521compliant);
         o.rotate(this.zero);
         return o;
     }
@@ -121,10 +123,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
 
     @Override
     public final String signature() {
-        if ((!this.asc) && (!this.rfc1113compliant)) return "Bd";
-        if ((!this.asc) && ( this.rfc1113compliant)) return "bd";
-        if (( this.asc) && (!this.rfc1113compliant)) return "Bu";
-        if (( this.asc) && ( this.rfc1113compliant)) return "bu";
+        if ((!this.asc) && (!this.rfc1521compliant)) return "Bd";
+        if ((!this.asc) && ( this.rfc1521compliant)) return "bd";
+        if (( this.asc) && (!this.rfc1521compliant)) return "Bu";
+        if (( this.asc) && ( this.rfc1521compliant)) return "bu";
         return null;
     }
 
@@ -218,7 +220,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
         // now there may be remaining bytes
         if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLongSB((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLongSB((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
-        if (this.rfc1113compliant) while (out.length() % 4 > 0) out.append("=");
+        if (this.rfc1521compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
         //assert lene == out.length() : "lene = " + lene + ", out.len = " + out.length();
         return out.toString();
@@ -247,7 +249,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             }
         }
 
-        if (this.rfc1113compliant) while (writepos % 4 > 0 && writepos < sublen) out[writepos] = '=';
+        if (this.rfc1521compliant) while (writepos % 4 > 0 && writepos < sublen) out[writepos] = '=';
         //assert encode(in).substring(0, sublen).equals(ASCII.String(out));
         return out;
     }
@@ -261,7 +263,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         try {
             int posIn = 0;
             int posOut = 0;
-            if (this.rfc1113compliant) while (in.charAt(in.length() - 1) == '=') in = in.substring(0, in.length() - 1);
+            if (this.rfc1521compliant) while (in.charAt(in.length() - 1) == '=') in = in.substring(0, in.length() - 1);
             final byte[] out = new byte[in.length() / 4 * 3 + (((in.length() % 4) == 0) ? 0 : in.length() % 4 - 1)];
             long l;
             while (posIn + 3 < in.length()) {
@@ -594,6 +596,37 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         if ("-cn".equals(s[0])) {
             // return the cardinal of a given string as normalized float 0 .. 1 with the enhanced encoder
             System.out.println(((double) Base64Order.enhancedCoder.cardinal(s[1].getBytes())) / ((double) Long.MAX_VALUE));
+        }
+        if ("-test".equals(s[0])) {
+            // do some checks
+            Random r = new Random(System.currentTimeMillis());
+            
+            // encode with enhancedCoder, decode with standard RFC 1521 base64
+            sun.misc.BASE64Decoder rfc1521Decoder = new sun.misc.BASE64Decoder();
+            for (int i = 0; i < 100000; i++) {
+                String challenge = Long.toString(r.nextLong());
+                String eb64 = enhancedCoder.encode(UTF8.getBytes(challenge));
+                String rfc1521 = new String(eb64);
+                while (rfc1521.length() % 4 != 0) rfc1521 += "=";
+                rfc1521 = rfc1521.replace('-', '+').replace('_', '/');
+                System.out.println("Encode enhancedB64 + Decode RFC1521: Challenge=" + challenge + ", eb64=" + eb64 + ", rfc1521=" + rfc1521);
+                try {
+                    if (!UTF8.String(rfc1521Decoder.decodeBuffer(rfc1521)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
+                } catch (IOException e) {}
+            }
+            
+            // encode with enhancedCoder, decode with standard RFC 1521 base64
+            sun.misc.BASE64Encoder rfc1521Encoder = new sun.misc.BASE64Encoder();
+            for (int i = 0; i < 100000; i++) {
+                // encode with enhancedCoder, decode with standard RFC 1521 base64
+                String challenge = Long.toString(r.nextLong());
+                String rfc1521 = rfc1521Encoder.encode(UTF8.getBytes(challenge));
+                String eb64 = new String(rfc1521);
+                while (eb64.endsWith("=")) eb64 = eb64.substring(0, eb64.length() - 1);
+                eb64 = eb64.replace('+', '-').replace('/', '_');
+                System.out.println("Encode RFC1521 + Decode enhancedB64: Challenge=" + challenge + ", rfc1521=" + rfc1521 + ", eb64=" + eb64);
+                if (!UTF8.String(enhancedCoder.decode(eb64)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
+            }
         }
     }
 }
