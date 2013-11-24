@@ -213,6 +213,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String filename = digestURL.getFileName();
         String extension = MultiProtocolURL.getFileExtension(filename);
         String filenameStub = filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename;
+        // remove possible jsession (or other url parm like "img.jpg;jsession=123") 
+        // TODO: consider to implement ";jsession=123" check in getFileExtension()
+        if (extension.indexOf(';') >= 0) extension = extension.substring(0,extension.indexOf(';'));
+        
         if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
         if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURL.getProtocol());
         if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURL.getPaths());
