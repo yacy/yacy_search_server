@@ -69,7 +69,6 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
@@ -99,9 +98,6 @@ import org.eclipse.jetty.util.resource.Resource;
  * 
  *  resourceBase      Set to replace the context resource base
  *
- *  resourceCache     If set, this is a context attribute name, which the servlet
- *                    will use to look for a shared ResourceCache instance.
- *
  *  relativeResourceBase
  *                    Set with a pathname relative to the base of the
  *                    servlet context root. Useful for only serving static content out
@@ -121,7 +117,6 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     protected boolean _acceptRanges = true;
     protected boolean _dirAllowed = true;
     protected boolean _pathInfoOnly = false;
-    protected boolean _etags = false;
     protected Resource _resourceBase;
     protected MimeTypes _mimeTypes;
     protected String[] _welcomes;    
@@ -164,13 +159,11 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             }
             try {
                 _resourceBase = Resource.newResource(rb);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 ConcurrentLog.logException(e);
                 throw new UnavailableException(e.toString());
             }
         }
-        
-        _etags = getInitBoolean("etags", _etags);
         
         if (ConcurrentLog.isFine("FILEHANDLER")) {
             ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + _resourceBase);
@@ -277,7 +270,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     /* ------------------------------------------------------------ */
     /* Check modification date headers.
      */
-    abstract protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource, HttpContent content)
+    abstract protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
             throws IOException;
 
     /* ------------------------------------------------------------------- */
@@ -300,7 +293,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
         }
 
         byte[] data = dir.getBytes("UTF-8");
-        response.setContentType("text/html; charset=UTF-8");
+        response.setContentType(MimeTypes.TEXT_HTML_UTF_8);
         response.setContentLength(data.length);
         response.getOutputStream().write(data);
     }
@@ -310,17 +303,17 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             HttpServletResponse response,
             boolean include,
             Resource resource,
-            HttpContent content,
             Enumeration<String> reqRanges)
             throws IOException;
 
     /* ------------------------------------------------------------ */
-    protected void writeHeaders(HttpServletResponse response, HttpContent content, long count) {
-        if (content.getContentType() != null && response.getContentType() == null) {
-            response.setContentType(content.getContentType().toString());
+    protected void writeHeaders(HttpServletResponse response, Resource resource, long count) {
+        if (response.getContentType() == null) {
+            String mime = _mimeTypes.getMimeByExtension(resource.getName()).toString();
+            response.setContentType(mime);
         }
 
-        long lml = content.getResource().lastModified();
+        long lml = resource.lastModified();
         if (lml >= 0) {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
         }
@@ -333,21 +326,12 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             }
         }
 
-        writeOptionHeaders(response);
-
-        if (_etags) {
-            response.setHeader(HeaderFramework.ETAG, content.getETag().toString());
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    protected void writeOptionHeaders(HttpServletResponse response) {
         if (_acceptRanges) {
             response.setHeader(HeaderFramework.ACCEPT_RANGES, "bytes");
         }
     }
 
-
+    
     protected Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
@@ -523,7 +507,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
-                final String mimeType = Classification.ext2mime(targetExt, "text/html");
+                final String mimeType = Classification.ext2mime(targetExt, MimeTypes.TEXT_HTML);
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -577,7 +561,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             templatePatterns.put("p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
 
             if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
-                String mimeType = Classification.ext2mime(targetExt, "text/html");
+                String mimeType = Classification.ext2mime(targetExt, MimeTypes.TEXT_HTML);
 
                 InputStream fis;
                 long fileSize = targetFile.length();

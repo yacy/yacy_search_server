@@ -44,12 +44,9 @@ import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.AbstractHttpConnection;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.server.Response;
-import org.eclipse.jetty.server.nio.NIOConnector;
-import org.eclipse.jetty.server.ssl.SslConnector;
 import org.eclipse.jetty.util.MultiPartOutputStream;
 import org.eclipse.jetty.util.QuotedStringTokenizer;
 import org.eclipse.jetty.util.URIUtil;
@@ -77,9 +74,6 @@ import org.eclipse.jetty.util.resource.Resource;
  *
  *
  *  resourceBase      Set to replace the context resource base
- *
- *  resourceCache     If set, this is a context attribute name, which the servlet
- *                    will use to look for a shared ResourceCache instance.
  *
  *  relativeResourceBase
  *                    Set with a pathname relative to the base of the
@@ -129,9 +123,9 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
         String pathInContext = URIUtil.addPaths(servletPath, pathInfo);
         boolean endsWithSlash = (pathInfo == null ? request.getServletPath() : pathInfo).endsWith(URIUtil.SLASH);
 
-        // Find the resource and content
+        // Find the resource 
         Resource resource = null;
-        HttpContent content = null;
+
         try {
             // find resource
             resource = getResource(pathInContext);
@@ -151,7 +145,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
             }
 
             if (ConcurrentLog.isFine("FILEHANDLER")) {
-                ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: uri=" + request.getRequestURI() + " resource=" + resource + (content != null ? " content" : ""));
+                ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: uri=" + request.getRequestURI() + " resource=" + resource);
             }
 
             // Handle resource
@@ -169,23 +163,18 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                     }
                     response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(_servletContext.getContextPath(), pathInContext)));
                 } else {
-                    // ensure we have content
-                    if (content == null) {
-                        content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), response.getBufferSize(), _etags);
-                    }
-
                     if (hasClass) { // this is a YaCy servlet, handle the template
                         handleTemplate(pathInfo, request, response);
                     } else {
-                        if (included || passConditionalHeaders(request, response, resource, content)) {
-                            sendData(request, response, included, resource, content, reqRanges);
+                        if (included || passConditionalHeaders(request, response, resource)) {
+                            sendData(request, response, included, resource, reqRanges);
                         }
                     }
                 }
-            } else {
-                String welcome = null;
+            } else { // resource is directory
+                String welcome;
 
-                if (!endsWithSlash || (pathInContext.length() == 1 && request.getAttribute("org.eclipse.jetty.server.nullPathInfo") != null)) {
+                if (!endsWithSlash || (pathInContext.length() == 1)) {
                     StringBuffer buf = request.getRequestURL();
                     synchronized (buf) {
                         int param = buf.lastIndexOf(";");
@@ -212,13 +201,11 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                         if (included) {
                             dispatcher.include(request, response);
                         } else {
-                            request.setAttribute("org.eclipse.jetty.server.welcome", welcome);
                             dispatcher.forward(request, response);
                         }
                     }
                 } else {
-                    content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), _etags);
-                    if (included || passConditionalHeaders(request, response, resource, content)) {
+                    if (included || passConditionalHeaders(request, response, resource)) {
                         sendDirectory(request, response, resource, pathInContext);
                     }
                 }
@@ -229,9 +216,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                 response.sendError(500, e.getMessage());
             }
         } finally {
-            if (content != null) {
-                content.release();
-            } else if (resource != null) {
+            if (resource != null) {
                 resource.release();
             }
         }
@@ -241,69 +226,11 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
     /* Check modification date headers.
      */
     @Override
-    protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource, HttpContent content)
+    protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
             throws IOException {
         try {
             if (!request.getMethod().equals(HttpMethods.HEAD)) {
-                if (_etags) {
-                    String ifm = request.getHeader(HttpHeaders.IF_MATCH);
-                    if (ifm != null) {
-                        boolean match = false;
-                        if (content != null && content.getETag() != null) {
-                            QuotedStringTokenizer quoted = new QuotedStringTokenizer(ifm, ", ", false, true);
-                            while (!match && quoted.hasMoreTokens()) {
-                                String tag = quoted.nextToken();
-                                if (content.getETag().toString().equals(tag)) {
-                                    match = true;
-                                }
-                            }
-                        }
-
-                        if (!match) {
-                            Response r = Response.getResponse(response);
-                            r.reset(true);
-                            r.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                            return false;
-                        }
-                    }
-
-                    String ifnm = request.getHeader(HttpHeaders.IF_NONE_MATCH);
-                    if (ifnm != null && content != null && content.getETag() != null) {
-                        // Look for GzipFiltered version of etag
-                        if (content.getETag().toString().equals(request.getAttribute("o.e.j.s.GzipFilter.ETag"))) {
-                            Response r = Response.getResponse(response);
-                            r.reset(true);
-                            r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            r.getHttpFields().put(HttpHeaders.ETAG_BUFFER, ifnm);                            
-                            return false;
-                        }
-
-
-                        // Handle special case of exact match.
-                        if (content.getETag().toString().equals(ifnm)) {
-                            Response r = Response.getResponse(response);
-                            r.reset(true);
-                            r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            r.getHttpFields().put(HttpHeaders.ETAG_BUFFER, content.getETag());
-                            return false;
-                        }
-
-                        // Handle list of tags
-                        QuotedStringTokenizer quoted = new QuotedStringTokenizer(ifnm, ", ", false, true);
-                        while (quoted.hasMoreTokens()) {
-                            String tag = quoted.nextToken();
-                            if (content.getETag().toString().equals(tag)) {
-                                Response r = Response.getResponse(response);
-                                r.reset(true);
-                                r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                                r.getHttpFields().put(HttpHeaders.ETAG_BUFFER, content.getETag());
-                                return false;
-                            }
-                        }
-
-                        return true;
-                    }
-                }
+                HttpContent content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), response.getBufferSize());
 
                 String ifms = request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
                 if (ifms != null) {
@@ -316,9 +243,6 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                             if (ifms.equals(mdlm.toString())) {
                                 r.reset(true);
                                 r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                                if (_etags) {
-                                    r.getHttpFields().add(HttpHeaders.ETAG_BUFFER, content.getETag());
-                                }
                                 r.flushBuffer();
                                 return false;
                             }
@@ -330,9 +254,6 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                         if (resource.lastModified() / 1000 <= ifmsl / 1000) {
                             r.reset(true);
                             r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            if (_etags) {
-                                r.getHttpFields().add(HttpHeaders.ETAG_BUFFER, content.getETag());
-                            }
                             r.flushBuffer();
                             return false;
                         }
@@ -348,7 +269,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                         return false;
                     }
                 }
-
+                if (content != null) content.release();
             }
         } catch (IllegalArgumentException iae) {
             if (!response.isCommitted()) {
@@ -365,19 +286,10 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
             HttpServletResponse response,
             boolean include,
             Resource resource,
-            HttpContent content,
             Enumeration reqRanges)
             throws IOException {
-        boolean direct;
-        long content_length;
-        if (content == null) {
-            direct = false;
-            content_length = resource.length();
-        } else {
-            Connector connector = AbstractHttpConnection.getCurrentConnection().getConnector();
-            direct = connector instanceof NIOConnector && ((NIOConnector) connector).getUseDirectBuffers() && !(connector instanceof SslConnector);
-            content_length = content.getContentLength();
-        }
+
+        final long content_length = resource.length();
 
         // Get the output stream (or writer)
         OutputStream out;
@@ -399,33 +311,8 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
             if (include) {
                 resource.writeTo(out, 0, content_length);
             } else {
-                // See if a direct methods can be used?
-                if (content != null && !written && out instanceof HttpOutput) {
-                    if (response instanceof Response) {
-                        writeOptionHeaders(response);
-                        ((AbstractHttpConnection.Output) out).sendContent(content);
-                    } else {
-                        Buffer buffer = direct ? content.getDirectBuffer() : content.getIndirectBuffer();
-                        if (buffer != null) {
-                            writeHeaders(response, content, content_length);
-                            ((AbstractHttpConnection.Output) out).sendContent(buffer);
-                        } else {
-                            writeHeaders(response, content, content_length);
-                            resource.writeTo(out, 0, content_length);
-                        }
-                    }
-                } else {
-                    // Write headers normally
-                    writeHeaders(response, content, written ? -1 : content_length);
-
-                    // Write content normally
-                    Buffer buffer = (content == null) ? null : content.getIndirectBuffer();
-                    if (buffer != null) {
-                        buffer.writeTo(out);
-                    } else {
-                        resource.writeTo(out, 0, content_length);
-                    }
-                }
+                writeHeaders(response, resource, written ? -1 : content_length);
+                resource.writeTo(out, 0, content_length);
             }
         } else {
             // Parse the satisfiable ranges
@@ -433,7 +320,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
 
             //  if there are no satisfiable ranges, send 416 response
             if (ranges == null || ranges.size() == 0) {
-                writeHeaders(response, content, content_length);
+                writeHeaders(response, resource, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                 response.setHeader(HttpHeaders.CONTENT_RANGE,
                         InclusiveByteRange.to416HeaderRangeString(content_length));
@@ -447,7 +334,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                 InclusiveByteRange singleSatisfiableRange =
                         (InclusiveByteRange) ranges.get(0);
                 long singleLength = singleSatisfiableRange.getSize(content_length);
-                writeHeaders(response, content, singleLength);
+                writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 response.setHeader(HttpHeaders.CONTENT_RANGE,
                         singleSatisfiableRange.toHeaderRangeString(content_length));
@@ -459,8 +346,8 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
             //  216 response which does not require an overall
             //  content-length header
             //
-            writeHeaders(response, content, -1);
-            String mimetype = (content.getContentType() == null ? null : content.getContentType().toString());
+            writeHeaders(response, resource, -1);
+            String mimetype = response.getContentType();
             if (mimetype == null) {
                 ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: Unknown mimetype for " + request.getRequestURI());
             }
