@@ -46,6 +46,7 @@ import net.yacy.data.MessageBoard;
 import net.yacy.data.UserDB;
 import net.yacy.data.BlogBoard.BlogEntry;
 import net.yacy.peers.Network;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -95,7 +96,7 @@ public class BlogComments {
                 if (sb.peers.mySeed() == null) {
                     strAuthor = "anonymous";
                 } else {
-                    strAuthor = sb.peers.mySeed().get("Name", "anonymous");
+                    strAuthor = sb.peers.mySeed().get(Seed.NAME, "anonymous");
                 }
             }
         }

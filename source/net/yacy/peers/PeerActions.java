@@ -207,7 +207,7 @@ public class PeerActions {
         if (Network.log.isFine()) Network.log.fine("connect: no contact to a " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
         synchronized (this.seedDB) {
             if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
-            peer.put("dct", Long.toString(System.currentTimeMillis()));
+            peer.put(Seed.DCT, Long.toString(System.currentTimeMillis()));
             this.seedDB.addDisconnected(peer); // update info
         }
         EventChannel.channels(EventChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
@@ -223,7 +223,7 @@ public class PeerActions {
     }
 
     private void processPeerArrival(final Seed peer) {
-        final String recordString = peer.get("news", null);
+        final String recordString = peer.get(Seed.NEWS, null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
         if ((recordString == null) || (recordString.isEmpty())) return;
         final String decodedString = net.yacy.utils.crypt.simpleDecode(recordString);

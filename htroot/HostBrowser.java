@@ -137,13 +137,13 @@ public class HostBrowser {
                         sb.crawler.defaultProxyProfile.handle(),
                         0, 0, 0, 0
                     ));
-                prop.put("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
+                prop.putHTML("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
                 if (wait) for (int i = 0; i < 30; i++) {
                     if (sb.index.exists(ASCII.String(url.hash()))) break;
                     try {Thread.sleep(100);} catch (final InterruptedException e) {}
                 }
             } catch (final MalformedURLException e) {
-                prop.put("result", "bad url '" + load + "'");
+                prop.putHTML("result", "bad url '" + load + "'");
             }
         }
 
@@ -192,7 +192,7 @@ public class HostBrowser {
                 String host;
                 while (i.hasNext() && c < maxcount) {
                     host = i.next();
-                    prop.put("hosts_list_" + c + "_host", host);
+                    prop.putHTML("hosts_list_" + c + "_host", host);
                     boolean inCrawler = crawler.containsKey(host);
                     int exclcount = exclscore.get(host);
                     int failcount = failscore.get(host);
@@ -234,13 +234,13 @@ public class HostBrowser {
                 if (p > 0) path = path.substring(0, p + 1);
             }
             prop.put("files_complete", complete ? 1 : 0);
-            prop.put("files_complete_path", path);
+            prop.putHTML("files_complete_path", path);
             p = path.substring(0, path.length() - 1).lastIndexOf('/');
             if (p < 8) {
                 prop.put("files_root", 1);
             } else {
                 prop.put("files_root", 0);
-                prop.put("files_root_path", path.substring(0, p + 1));
+                prop.putHTML("files_root_path", path.substring(0, p + 1));
             }
             try {
                 // generate file list from path
@@ -420,7 +420,7 @@ public class HostBrowser {
                     if (entry.getValue() instanceof StoreType) {
                         // this is a file
                         prop.put("files_list_" + c + "_type", 0);
-                        prop.put("files_list_" + c + "_type_url", entry.getKey());
+                        prop.putHTML("files_list_" + c + "_type_url", entry.getKey());
                         StoreType type = (StoreType) entry.getValue();
                         try {uri = new DigestURL(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
                         HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash());
@@ -439,7 +439,7 @@ public class HostBrowser {
                                 FailType failType = errorDocs.get(entry.getKey());
                                 if (failType == null) {
                                     // maybe this is only in the errorURL
-                                    prop.put("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(ASCII.String(uri.hash())).getFailReason() : "unknown error");
+                                    prop.putHTML("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(ASCII.String(uri.hash())).getFailReason() : "unknown error");
                                 } else {
                                     String ids = ASCII.String(uri.hash());
                                     InfoCacheEntry ice = infoCache.get(ids);
@@ -447,8 +447,8 @@ public class HostBrowser {
                                 }
                             }
                             if (loadRight) {
-                                prop.put("files_list_" + c + "_type_stored_load_url", entry.getKey());
-                                prop.put("files_list_" + c + "_type_stored_load_path", path);
+                                prop.putHTML("files_list_" + c + "_type_stored_load_url", entry.getKey());
+                                prop.putHTML("files_list_" + c + "_type_stored_load_path", path);
                             }
                             if (++c >= maxcount) break;
                         }
@@ -471,7 +471,7 @@ public class HostBrowser {
                     Iterator<String> i = score.keys(false);
                     while (i.hasNext() && c < maxcount) {
                         host = i.next();
-                        prop.put("inbound_list_" + c + "_host", sb.webStructure.hostHash2hostName(host));
+                        prop.putHTML("inbound_list_" + c + "_host", sb.webStructure.hostHash2hostName(host));
                         prop.put("inbound_list_" + c + "_count", score.get(host));
                         c++;
                     }
@@ -490,7 +490,7 @@ public class HostBrowser {
                     Iterator<String> i = score.keys(false);
                     while (i.hasNext() && c < maxcount) {
                         host = i.next();
-                        prop.put("outbound_list_" + c + "_host", host);
+                        prop.putHTML("outbound_list_" + c + "_host", host);
                         prop.put("outbound_list_" + c + "_count", score.get(host));
                         prop.put("outbound_list_" + c + "_link", outboundHosts.get(host).getMinKey());
                         c++;

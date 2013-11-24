@@ -141,7 +141,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /** the name of the peer (user-set) */
     public static final String NAME = "Name";
-    private static final String HASH = "Hash";
+    public static final String HASH = "Hash";
     /** Birthday - first startup */
     private static final String BDATE = "BDate";
     /** UTC-Offset */
@@ -169,6 +169,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public static final String IP = "IP";
     public static final String PORT = "Port";
     public static final String SEEDLISTURL = "seedURL";
+    public static final String NEWS = "news"; // news attachment
+    public static final String DCT = "dct"; // disconnect time
+    
     /** zero-value */
     private static final String ZERO = "0";
 
@@ -1102,8 +1105,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final String r = toString();
         final String z = crypt.simpleEncode(r, key, 'z');
         final String b = crypt.simpleEncode(r, key, 'b');
-        // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
-        // take simply that string that is shorter
+        // the compressed string may be longer than the uncompressed if there is too much overhead for compression meta-info
+        // take simply that string which is shorter
         return ( b.length() < z.length() ) ? b : z;
     }
 

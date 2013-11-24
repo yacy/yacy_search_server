@@ -46,6 +46,7 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.data.Diff;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.peers.NewsPool;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -79,7 +80,7 @@ public class Wiki {
         if (author.equals(ANONYMOUS)) {
             author = WikiBoard.guessAuthor(ip);
             if (author == null) {
-                author = (sb.peers.mySeed() == null) ? ANONYMOUS : sb.peers.mySeed().get("Name", ANONYMOUS);
+                author = (sb.peers.mySeed() == null) ? ANONYMOUS : sb.peers.mySeed().get(Seed.NAME, ANONYMOUS);
             }
         }
 

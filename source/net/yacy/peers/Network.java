@@ -427,9 +427,9 @@ public class Network
             try {
                 final NewsDB.Record record = this.sb.peers.newsPool.myPublication();
                 if ( record == null ) {
-                    this.sb.peers.mySeed().put("news", "");
+                    this.sb.peers.mySeed().put(Seed.NEWS, "");
                 } else {
-                    this.sb.peers.mySeed().put("news", net.yacy.utils.crypt.simpleEncode(record.toString()));
+                    this.sb.peers.mySeed().put(Seed.NEWS, net.yacy.utils.crypt.simpleEncode(record.toString()));
                 }
             } catch (final Exception e ) {
                 log.severe("publishMySeed: problem with news encoding", e);
