@@ -68,7 +68,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
 
     @Override
     public String getContentType(final SolrQueryRequest request, final SolrQueryResponse response) {
-        return CONTENT_TYPE_XML_UTF8;
+        return "text/html";
     }
 
     @Override
