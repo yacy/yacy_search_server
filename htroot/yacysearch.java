@@ -524,9 +524,9 @@ public class yacysearch {
             final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? qg.getIncludeHashes().size() - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(qg.getIncludeStrings(), Switchboard.stopwords); //find matching stopwords
+            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(qg.getIncludeWords(), Switchboard.stopwords); //find matching stopwords
             if ( !filtered.isEmpty() ) {
-                SetTools.excludeDestructiveByTestSmallInLarge(qg.getIncludeStrings(), filtered); //remove stopwords
+                SetTools.excludeDestructiveByTestSmallInLarge(qg.getIncludeWords(), filtered); //remove stopwords
             }
 
             // if a minus-button was hit, remove a special reference first
