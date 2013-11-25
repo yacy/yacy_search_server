@@ -30,6 +30,7 @@ import net.yacy.cora.federate.solr.instance.ShardInstance;
 
 import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.impl.BinaryResponseParser;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -38,25 +39,28 @@ import org.apache.solr.common.util.NamedList;
 
 public class RemoteSolrConnector extends SolrServerConnector implements SolrConnector {
 
-    SolrInstance instance;
-    String corename;
+    private final SolrInstance instance;
+    private final String corename;
+    private final boolean useBinaryResponseWriter;
     
     /**
      * create a new solr connector
      * @param instance the instance of the remote solr url, like http://192.168.1.60:8983/solr/ or http://admin:pw@192.168.1.60:8983/solr/
      * @throws IOException
      */
-    public RemoteSolrConnector(final SolrInstance instance) throws IOException {
+    public RemoteSolrConnector(final SolrInstance instance, final boolean useBinaryResponseWriter) throws IOException {
         super();
         this.instance = instance;
+        this.useBinaryResponseWriter = useBinaryResponseWriter;
         this.corename = this.instance.getDefaultCoreName();
         SolrServer s = instance.getServer(this.corename);
         super.init(s);
     }
     
-    public RemoteSolrConnector(final SolrInstance instance, String corename) {
+    public RemoteSolrConnector(final SolrInstance instance, final boolean useBinaryResponseWriter, String corename) {
         super();
         this.instance = instance;
+        this.useBinaryResponseWriter = useBinaryResponseWriter;
         this.corename = corename == null ? this.instance.getDefaultCoreName() : corename;
         SolrServer s = instance.getServer(this.corename);
         super.init(s);
@@ -84,14 +88,14 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         if (q != null) Thread.currentThread().setName("solr query: q = " + q);
         
         QueryRequest request = new QueryRequest(params);
-        ResponseParser responseParser = new XMLResponseParser();
+        ResponseParser responseParser = useBinaryResponseWriter ? new BinaryResponseParser() : new XMLResponseParser();
         request.setResponseParser(responseParser);
         long t = System.currentTimeMillis();
         NamedList<Object> result = null;
         try {
             result = this.server.request(request);
         } catch (final Throwable e) {
-            //Log.logException(e);
+            //ConcurrentLog.logException(e);
             throw new IOException(e.getMessage());
             /*
             Log.logException(e);
@@ -117,7 +121,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
             RemoteInstance instance = new RemoteInstance("http://127.0.0.1:8983/solr/", null, "collection1", 10000);
             ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
             instances.add(instance);
-            solr = new RemoteSolrConnector(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5), "solr");
+            solr = new RemoteSolrConnector(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5), true, "solr");
             solr.clear();
             final File exampleDir = new File("test/parsertest/");
             long t, t0, a = 0;

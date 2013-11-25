@@ -1054,10 +1054,11 @@ public final class Protocol {
                 }
             } else {
                 try {
-                    String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
+                    boolean myseed = target == event.peers.mySeed();
+                    String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress();
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
                     instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
-                    solrConnector = new RemoteSolrConnector(instance, "solr");
+                    solrConnector = new RemoteSolrConnector(instance, myseed ? true : target.getVersion() >= 1.63, "solr");
                     rsp = solrConnector.getResponseByParams(solrQuery);
                     docList = rsp.getResults();
                     solrConnector.close();

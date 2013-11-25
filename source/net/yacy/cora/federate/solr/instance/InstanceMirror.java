@@ -144,7 +144,7 @@ public class InstanceMirror {
         String defaultCoreName = this.getDefaultCoreName();
         if (defaultCoreName == null) return null;
         EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, defaultCoreName);
-        RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, defaultCoreName);
+        RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, true, defaultCoreName);
         this.defaultConnector = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 1000000);
         this.connectorCache.put(defaultCoreName, this.defaultConnector);
         return this.defaultConnector;
@@ -154,7 +154,7 @@ public class InstanceMirror {
         SolrConnector msc = this.connectorCache.get(corename);
         if (msc != null) return msc;
         EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, corename);
-        RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, corename);
+        RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, true, corename);
         msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 1000000);
         this.connectorCache.put(corename, msc);
         return msc;

@@ -206,7 +206,7 @@ public final class Fulltext {
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
         if (this.solrInstances.getSolr1() == null) return null;
         try {
-            return new RemoteSolrConnector(this.solrInstances.getSolr1());
+            return new RemoteSolrConnector(this.solrInstances.getSolr1(), true);
         } catch (final IOException e) {
             return null;
         }
@@ -258,7 +258,7 @@ public final class Fulltext {
         synchronized (this.solrInstances) {
             ShardInstance instance = this.solrInstances.getSolr1();
             if (instance != null) {
-                for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, name).clear();
+                for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, true, name).clear();
             }
             this.solrInstances.clearCaches();
         }
