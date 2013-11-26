@@ -209,13 +209,13 @@ public class QueryGoal {
     }
 
     public int getIncludeSize() {
-        assert this.include_hashes.size() == this.include_words.size();
-        return this.include_words.size();
+        assert this.include_hashes == null || this.include_words.size() == 0 || this.include_hashes.size() == this.include_words.size();
+        return this.include_hashes == null ? this.include_words.size() : this.include_hashes.size();
     }
 
     public int getExcludeSize() {
-        assert this.exclude_hashes.size() == this.exclude_words.size();
-        return this.exclude_words.size();
+        assert this.exclude_hashes == null || this.exclude_words.size() == 0 || this.exclude_hashes.size() == this.exclude_words.size();
+        return this.exclude_hashes == null ? this.exclude_words.size() : this.exclude_hashes.size();
     }
     
     /**
