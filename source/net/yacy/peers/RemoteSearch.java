@@ -273,6 +273,7 @@ public class RemoteSearch extends Thread {
                     final Seed targetPeer,
                     final Blacklist blacklist) {
 
+        assert solrQuery != null;
         // check own peer status
         if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
         // prepare seed targets and threads

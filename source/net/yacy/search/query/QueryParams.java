@@ -320,16 +320,16 @@ public final class QueryParams {
     private final boolean matchesText(final String text) {
         boolean ret = false;
         QueryGoal.NormalizedWords words = new QueryGoal.NormalizedWords(Condenser.getWords(text, null).keySet());
-        if (!SetTools.anymatch(words, this.queryGoal.getExcludeWords())) {
+        if (!SetTools.anymatchByTest(this.queryGoal.getExcludeWords(), words)) {
             ret = SetTools.totalInclusion(this.queryGoal.getIncludeWords(), words);
         }
         return ret;
     }
     
-    protected static final boolean anymatch(final String text, final QueryGoal.NormalizedWords keywords) {
-        if (keywords == null || keywords.isEmpty()) return false;
+    protected static final boolean anymatch(final String text, final Iterator<String> keywords) {
+        if (keywords == null || !keywords.hasNext()) return false;
         final SortedSet<String> textwords = (SortedSet<String>) Condenser.getWords(text, null).keySet();
-        return SetTools.anymatch(textwords, keywords);
+        return SetTools.anymatchByTest(keywords, textwords);
     }
 
     public SolrQuery solrQuery(final ContentDomain cd, final boolean getFacets, final boolean excludeintext_image) {
@@ -343,7 +343,7 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeWords().size() == 0) return null;
+        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
@@ -368,7 +368,7 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeWords().size() == 0) return null;
+        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);

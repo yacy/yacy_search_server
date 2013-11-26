@@ -525,10 +525,8 @@ public class yacysearch {
 
             // filter out stopwords
             final SortedSet<String> filtered = SetTools.joinConstructiveByTest(qg.getIncludeWords(), Switchboard.stopwords); //find matching stopwords
-            if ( !filtered.isEmpty() ) {
-                SetTools.excludeDestructiveByTestSmallInLarge(qg.getIncludeWords(), filtered); //remove stopwords
-            }
-
+            qg.removeIncludeWords(filtered);
+            
             // if a minus-button was hit, remove a special reference first
             if ( post != null && post.containsKey("deleteref") ) {
                 try {

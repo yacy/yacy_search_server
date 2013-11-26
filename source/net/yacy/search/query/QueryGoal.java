@@ -25,8 +25,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -39,12 +41,12 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.util.SetTools;
 import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 
 public class QueryGoal {
-
 
     private static char space = ' ';
     private static char sq = '\'';
@@ -193,8 +195,8 @@ public class QueryGoal {
      * if possible, use getIncludeWords instead
      */
     public HandleSet getIncludeHashes() {
-        if (include_hashes == null) include_hashes = Word.words2hashesHandles(include_words);
-        return include_hashes;
+        if (this.include_hashes == null) this.include_hashes = Word.words2hashesHandles(include_words);
+        return this.include_hashes;
     }
 
     /**
@@ -202,38 +204,56 @@ public class QueryGoal {
      * if possible, use getExcludeWords instead
      */
     public HandleSet getExcludeHashes() {
-        if (exclude_hashes == null) exclude_hashes = Word.words2hashesHandles(exclude_words);
-        return exclude_hashes;
+        if (this.exclude_hashes == null) this.exclude_hashes = Word.words2hashesHandles(exclude_words);
+        return this.exclude_hashes;
     }
 
+    public int getIncludeSize() {
+        assert this.include_hashes.size() == this.include_words.size();
+        return this.include_words.size();
+    }
+
+    public int getExcludeSize() {
+        assert this.exclude_hashes.size() == this.exclude_words.size();
+        return this.exclude_words.size();
+    }
+    
     /**
      * @return a set of words to be included in the search result
      */
-    public NormalizedWords getIncludeWords() {
-        return include_words;
+    public Iterator<String> getIncludeWords() {
+        return this.include_words.iterator();
     }
 
     /**
      * @return a set of words to be excluded in the search result
      */
-    public NormalizedWords getExcludeWords() {
-        return exclude_words;
+    public Iterator<String> getExcludeWords() {
+        return this.exclude_words.iterator();
     }
    
     /**
      * @return a list of include strings which reproduces the original order of the search words and quotation
      */
-    public ArrayList<String> getIncludeStrings() {
-        return include_strings;
+    public Iterator<String> getIncludeStrings() {
+        return this.include_strings.iterator();
     }
 
     /**
      * @return a list of exclude strings which reproduces the original order of the search words and quotation
      */
-    public ArrayList<String> getExcludeStrings() {
-        return exclude_strings;
+    public Iterator<String> getExcludeStrings() {
+        return this.exclude_strings.iterator();
     }
    
+    public void removeIncludeWords(Set<String> words) {
+        if (!words.isEmpty()) {
+            SetTools.excludeDestructiveByTestSmallInLarge(this.exclude_words, words); //remove stopwords
+            SetTools.excludeDestructiveByTestSmallInLarge(this.exclude_strings, words); //remove stopwords
+            if (include_hashes != null) for (String word: words) this.include_hashes.remove(Word.word2hash(word));
+        }
+    }
+    
     /**
      * the include string may be useful (and better) for highlight/snippet computation 
      * @return the query string containing only the positive literals (includes) and without whitespace characters
@@ -251,13 +271,20 @@ public class QueryGoal {
         return (Segment.catchallString.equals(w));
     }
     
+    public boolean containsInclude(String word) {
+        if (word == null || word.length() == 0) return false;
+        
+        String t = word.toLowerCase(Locale.ENGLISH);
+        return this.include_strings.contains(t) || this.include_words.contains(t);
+    }
+    
     public boolean matches(String text) {
         if (text == null || text.length() == 0) return false;
         
         // parse special requests
         if (isCatchall()) return true;
         
-        String t = text.toLowerCase();
+        String t = text.toLowerCase(Locale.ENGLISH);
         for (String i: this.include_strings) if (t.indexOf(i.toLowerCase()) < 0) return false;
         for (String e: this.exclude_strings) if (t.indexOf(e.toLowerCase()) >= 0) return false;
         return true;

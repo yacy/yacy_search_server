@@ -25,8 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
-import java.util.List;
-
+import java.util.Iterator;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -218,11 +217,9 @@ public class yacysearchitem {
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
-            final List<String> query = theSearch.query.getQueryGoal().getIncludeStrings();
-            final StringBuilder s = new StringBuilder(query.size() * 20);
-            for (final String t: query) {
-                s.append('+').append(t);
-            }
+            final Iterator<String> query = theSearch.query.getQueryGoal().getIncludeStrings();
+            final StringBuilder s = new StringBuilder(theSearch.query.getQueryGoal().getIncludeSize() * 20);
+            while (query.hasNext()) s.append('+').append(query.next());
             final String words = (s.length() > 0) ? s.substring(1) : "";
             prop.putHTML("content_words", words);
             prop.putHTML("content_showParser_words", words);

@@ -1079,7 +1079,7 @@ public final class SearchEvent {
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
-            if (!this.query.getQueryGoal().getExcludeWords().isEmpty() &&
+            if (this.query.getQueryGoal().getExcludeSize() != 0 &&
                 ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeWords()))
                 || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeWords()))
                 || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeWords())))) {
@@ -1295,7 +1295,7 @@ public final class SearchEvent {
         // apply query-in-result matching
         final QueryGoal.NormalizedWords urlcomph = new QueryGoal.NormalizedWords(urlcomps);
         final QueryGoal.NormalizedWords descrcomph = new QueryGoal.NormalizedWords(descrcomps);
-        final Iterator<String> shi = this.query.getQueryGoal().getIncludeWords().iterator();
+        final Iterator<String> shi = this.query.getQueryGoal().getIncludeWords();
         String queryword;
         while (shi.hasNext()) {
             queryword = shi.next();
@@ -1641,7 +1641,7 @@ public final class SearchEvent {
             if ( word.length() > 2
                 && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
                     .indexOf(word) < 0
-                && !this.query.getQueryGoal().getIncludeWords().contains(word)
+                && !this.query.getQueryGoal().containsInclude(word)
                 && lettermatch.matcher(word).matches()
                 && !Switchboard.badwords.contains(word)
                 && !Switchboard.stopwords.contains(word) ) {
