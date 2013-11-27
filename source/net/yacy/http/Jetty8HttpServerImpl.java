@@ -77,7 +77,6 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         solrContext.setContextPath("/solr");       
         solrContext.addServlet(new ServletHolder(Servlet404.class),"/*");  
      
-        SolrServlet.initCore(sb.index.fulltext().getDefaultEmbeddedConnector());
         solrContext.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
 
         // configure root context

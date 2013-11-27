@@ -48,9 +48,11 @@ import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 import org.apache.solr.common.SolrDocumentList;
 
 import org.apache.solr.common.SolrException;
@@ -74,10 +76,6 @@ public class SolrServlet implements Filter {
     private final Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
     
     public SolrServlet() { 
-    }
-
-    public static void initCore(EmbeddedSolrConnector c) {
-        connector = c;
     }
 
     @Override
@@ -134,15 +132,22 @@ public class SolrServlet implements Filter {
             throw new ServletException("Unsupported method: " + hrequest.getMethod());
         }
 
+     
+        // prepare request to solr        
+        MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString()); 
+        String corename = mmsp.get("core",CollectionSchema.CORE_NAME);
+
+        // get the embedded connector
+        boolean defaultConnector = corename.equals(CollectionSchema.CORE_NAME);
+        connector = defaultConnector ? Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector() : Switchboard.getSwitchboard().index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
+
         SolrCore core = connector.getCore();
         if (core == null) {
             hresponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "core not initialized");
             return;
         }
-     
-        // prepare request to solr
+        
         hrequest.setAttribute("org.apache.solr.CoreContainer", core);
-        MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString()); 
         String wt = mmsp.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml            
         QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt); // check local response writer
         if (responseWriter == null) {
@@ -155,7 +160,7 @@ public class SolrServlet implements Filter {
         }        
         Map<String,String[]> map = mmsp.getMap(); // get modifiable parameter map
         // add default search field if missing (required by edismax)
-        if (!map.containsKey(CommonParams.DF)) map.put (CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
+        if (!map.containsKey(CommonParams.DF)) map.put (CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});        
         // if this is a call to YaCys special search formats, enhance the query with field assignments
         if ((responseWriter instanceof YJsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(mmsp.get("hl", "true"))) {
             // add options for snippet generation
