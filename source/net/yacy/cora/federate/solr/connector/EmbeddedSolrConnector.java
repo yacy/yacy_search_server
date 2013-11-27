@@ -281,27 +281,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     @Override
-    public String getFieldById(final String id, final String field) throws IOException {
-    	String ret = null;
-    	DocListSearcher docListSearcher = null;
-    	try {
-            docListSearcher = new DocListSearcher("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, 0, 1, CollectionSchema.id.getSolrFieldName());
-	        int numFound = docListSearcher.response.matches();
-	        if (numFound > 0) {
-		        Set<String> solrFields = new HashSet<String>();
-		        solrFields.add(field);
-	            Document doc = docListSearcher.request.getSearcher().doc(docListSearcher.response.iterator().nextDoc(), solrFields);
-	            ret = doc.get(field);
-	        }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (docListSearcher != null) docListSearcher.close();
-        }
-        return ret;
-    }
-    
-    @Override
     public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime) {
         final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!

@@ -138,15 +138,6 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void add(final Collection<SolrInputDocument> solrdoc) throws IOException, SolrException;
     
     /**
-     * get a field value from solr by given key for the id-field and a field name
-     * @param key
-     * @param field one field
-     * @return one result or null if no result exists
-     * @throws IOException
-     */
-    public String getFieldById(final String key, final String field) throws IOException;
-    
-    /**
      * get a document from solr by given key for the id-field
      * @param key
      * @param fields list of fields

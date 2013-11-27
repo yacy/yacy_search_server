@@ -410,16 +410,6 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
-    public String getFieldById(String id, String field) throws IOException {
-        if (existIdFromDeleteQueue(id)) return null;
-        SolrInputDocument doc = getFromUpdateQueue(id);
-        if (doc != null) {cacheSuccessSign(); return doc.getFieldValue(field).toString();}
-        String val = this.connector.getFieldById(id, field);
-        if (val != null) updateIdCache(id);
-        return val;
-    }
-
-    @Override
     public SolrDocument getDocumentById(String id, String... fields) throws IOException {
         if (existIdFromDeleteQueue(id)) return null;
         SolrInputDocument idoc = getFromUpdateQueue(id);
