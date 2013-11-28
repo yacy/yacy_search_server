@@ -360,24 +360,29 @@ public class Segment {
             this.externalHosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
             this.internalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
             this.externalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
-            if (connectedCitation()) {
-                // read the references from the citation index
-                ReferenceContainer<CitationReference> references;
-                references = urlCitation().get(id, null);
-                if (references == null) return; // no references at all
-                Iterator<CitationReference> ri = references.entries();
-                while (ri.hasNext()) {
-                    CitationReference ref = ri.next();
-                    byte[] hh = ref.hosthash(); // host hash
-                    if (ByteBuffer.equals(hh, 0, id, 6, 6)) {
-                        internalIDs.put(ref.urlhash());
-                        internal++;
-                    } else {
-                        externalHosts.put(hh);
-                        externalIDs.put(ref.urlhash());
-                        external++;
+            try {
+                if (connectedCitation()) {
+                    // read the references from the citation index
+                    ReferenceContainer<CitationReference> references;
+                    references = urlCitation().get(id, null);
+                    if (references == null) return; // no references at all
+                    Iterator<CitationReference> ri = references.entries();
+                    while (ri.hasNext()) {
+                        CitationReference ref = ri.next();
+                        byte[] hh = ref.hosthash(); // host hash
+                        if (ByteBuffer.equals(hh, 0, id, 6, 6)) {
+                            internalIDs.put(ref.urlhash());
+                            internal++;
+                        } else {
+                            externalHosts.put(hh);
+                            externalIDs.put(ref.urlhash());
+                            external++;
+                        }
                     }
                 }
+            } catch (SpaceExceededException e) {
+                // the Citation Index got too large, we ignore the problem and hope that a second solr index is attached which will take over now
+                if (Segment.this.fulltext.writeToWebgraph()) internalIDs.clear();
             }
             if ((internalIDs.size() == 0 || !connectedCitation()) && Segment.this.fulltext.writeToWebgraph()) {
                 // reqd the references from the webgraph
