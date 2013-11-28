@@ -127,6 +127,7 @@ public class RemoteInstance implements SolrInstance {
         if (solraccount.length() > 0) {
             org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
             cm.setMaxTotal(100);
+            cm.setDefaultMaxPerRoute(100);
             
             this.client = new org.apache.http.impl.client.DefaultHttpClient(cm) {
                 @Override

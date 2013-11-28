@@ -1091,7 +1091,7 @@ federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 # the lazy attribute causes that fields containing "" or 0 are not added and not written
 federated.service.solr.indexing.lazy = true
-federated.service.solr.indexing.timeout = 6000
+federated.service.solr.indexing.timeout = 60000
 
 # temporary definition of backend services to use.
 # After the migration a rwi+solr combination is used, the solr contains the content of the previously used metadata-db.
