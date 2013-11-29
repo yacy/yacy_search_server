@@ -269,14 +269,17 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         SolrQueryRequest req = new SolrQueryRequestBase(this.core, params){};
         req.getContext().put("path", SELECT);
         req.getContext().put("webapp", CONTEXT);
-        for (String id: ids) {
-            params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
-            SolrQueryResponse rsp = new SolrQueryResponse();
-            this.requestHandler.handleRequest(req, rsp);
-            DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
-            if (response.matches() > 0) idsr.add(id);
+        try {
+	        for (String id: ids) {
+	            params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
+	            SolrQueryResponse rsp = new SolrQueryResponse();
+	            this.requestHandler.handleRequest(req, rsp);
+	            DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
+	            if (response.matches() > 0) idsr.add(id);
+	        }
+        } finally {
+        	req.close();
         }
-        req.close();
         return idsr;
     }
     
