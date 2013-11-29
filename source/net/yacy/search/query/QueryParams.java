@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -318,19 +319,17 @@ public final class QueryParams {
      */
     private final boolean matchesText(final String text) {
         boolean ret = false;
-        final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
-        if (!SetTools.anymatch(wordhashes, this.queryGoal.getExcludeHashes())) {
-            ret = SetTools.totalInclusion(this.queryGoal.getIncludeHashes(), wordhashes);
+        QueryGoal.NormalizedWords words = new QueryGoal.NormalizedWords(Condenser.getWords(text, null).keySet());
+        if (!SetTools.anymatchByTest(this.queryGoal.getExcludeWords(), words)) {
+            ret = SetTools.totalInclusion(this.queryGoal.getIncludeWords(), words);
         }
         return ret;
     }
-
-    protected static final boolean anymatch(final String text, final HandleSet keyhashes) {
-    	// returns true if any of the word hashes in keyhashes appear in the String text
-    	// to do this, all words in the string must be recognized and transcoded to word hashes
-        if (keyhashes == null || keyhashes.isEmpty()) return false;
-    	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
-    	return SetTools.anymatch(wordhashes, keyhashes);
+    
+    protected static final boolean anymatch(final String text, final Iterator<String> keywords) {
+        if (keywords == null || !keywords.hasNext()) return false;
+        final SortedSet<String> textwords = (SortedSet<String>) Condenser.getWords(text, null).keySet();
+        return SetTools.anymatchByTest(keywords, textwords);
     }
 
     public SolrQuery solrQuery(final ContentDomain cd, final boolean getFacets, final boolean excludeintext_image) {
@@ -344,7 +343,7 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeStrings().size() == 0) return null;
+        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
@@ -369,7 +368,7 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeStrings().size() == 0) return null;
+        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);

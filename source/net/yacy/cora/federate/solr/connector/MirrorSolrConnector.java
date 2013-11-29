@@ -364,15 +364,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         return s;
     }
 
-    @Override
-    public String getFieldById(String key, String field) throws IOException {
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.getFieldById(key, field);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.getFieldById(key, field);
-        String value = this.solr0.getFieldById(key, field);
-        if (value != null) return value;
-        return this.solr1.getFieldById(key, field);
-    }
-
     /*
     @Override
     public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(String querystring, int offset, int maxcount, long maxtime, int buffersize, String... fields) {

@@ -98,7 +98,7 @@ public class HostBrowser {
         }
 
         String path = post == null ? "" : post.get("path", "").trim();
-        sb.index.fulltext().commit(true);
+        if (admin) sb.index.fulltext().commit(true);
         if (post == null || env == null) {
             prop.putNum("ucount", fulltext.collectionSize());
             return prop;

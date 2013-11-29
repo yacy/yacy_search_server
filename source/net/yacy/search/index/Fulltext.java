@@ -206,7 +206,7 @@ public final class Fulltext {
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
         if (this.solrInstances.getSolr1() == null) return null;
         try {
-            return new RemoteSolrConnector(this.solrInstances.getSolr1());
+            return new RemoteSolrConnector(this.solrInstances.getSolr1(), true);
         } catch (final IOException e) {
             return null;
         }
@@ -258,7 +258,7 @@ public final class Fulltext {
         synchronized (this.solrInstances) {
             ShardInstance instance = this.solrInstances.getSolr1();
             if (instance != null) {
-                for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, name).clear();
+                for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, true, name).clear();
             }
             this.solrInstances.clearCaches();
         }
@@ -308,31 +308,30 @@ public final class Fulltext {
 
     public Date getLoadDate(final String urlHash) {
         if (urlHash == null) return null;
-        Date x;
         try {
-            String d = this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
+            SolrDocument doc = this.getDefaultConnector().getDocumentById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
+            Object d = doc == null ? null : doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
             if (d == null) return null;
-            x = new Date(Long.parseLong(d));
+            assert d instanceof Date : "d = " + d.toString();
+            if (d instanceof Date) return (Date) d;
+            if (d instanceof Long) return new Date(((Long) d).longValue());
+            return null;
         } catch (final IOException e) {
             return null;
         }
-        return x;
     }
 
     public DigestURL getURL(final byte[] urlHash) {
         if (urlHash == null || this.getDefaultConnector() == null) return null;
         
-        String x;
         try {
-            x = this.getDefaultConnector().getFieldById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
-        } catch (final IOException e) {
+            SolrDocument doc = this.getDefaultConnector().getDocumentById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
+            Object u = doc == null ? null : doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+            if (u == null) return null;
+            assert u instanceof String : "u = " + u.toString();
+            if (u instanceof String) return new DigestURL((String) u, urlHash);
             return null;
-        }
-        if (x == null) return null;
-        try {
-            DigestURL uri = new DigestURL(x, urlHash);
-            return uri;
-        } catch (final MalformedURLException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -645,9 +644,10 @@ public final class Fulltext {
 
     public String failReason(final String urlHash) throws IOException {
         if (urlHash == null) return null;
-        String reason = this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.failreason_s.getSolrFieldName());
+        SolrDocument doc = this.getDefaultConnector().getDocumentById(urlHash, CollectionSchema.failreason_s.getSolrFieldName());
+        Object reason = doc == null ? null : doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
         if (reason == null) return null;
-        return reason.length() == 0 ? null : reason;
+        return reason instanceof String && ((String) reason).length() == 0 ? null : (String) reason;
     }
     
     public List<File> dumpFiles() {

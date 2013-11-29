@@ -214,18 +214,17 @@ public final class SetTools {
 
         // start most efficient method
         if (stepsEnum > stepsTest) {
-        	if (set1.size() < set2.size()) return joinConstructiveByTest(set1, set2);
-        	return joinConstructiveByTest(set2, set1);
+        	if (set1.size() < set2.size()) return joinConstructiveByTest(set1.iterator(), set2);
+        	return joinConstructiveByTest(set2.iterator(), set1);
         }
         return joinConstructiveByEnumeration(set1, set2);
     }
 
-    public static <A> SortedSet<A> joinConstructiveByTest(final Collection<A> small, final SortedSet<A> large) {
-    	final Iterator<A> mi = small.iterator();
+    public static <A> SortedSet<A> joinConstructiveByTest(final Iterator<A> small, final SortedSet<A> large) {
     	final SortedSet<A> result = new TreeSet<A>(large.comparator());
     	A o;
-    	while (mi.hasNext()) {
-    		o = mi.next();
+    	while (small.hasNext()) {
+    		o = small.next();
     		if (large.contains(o)) result.add(o);
     	}
     	return result;
@@ -264,9 +263,9 @@ public final class SetTools {
      * @param large
      * @return true if the small set is completely included in the large set
      */
-    public static <A> boolean totalInclusion(final Set<A> small, final Set<A> large) {
-        for (A o: small) {
-            if (!large.contains(o)) return false;
+    public static <A> boolean totalInclusion(final Iterator<A> small, final Set<A> large) {
+        while (small.hasNext()) {
+            if (!large.contains(small.next())) return false;
         }
         return true;
     }
@@ -305,8 +304,7 @@ public final class SetTools {
 
 		// start most efficient method
 		if (stepsEnum > stepsTest) {
-			if (set1.size() < set2.size()) return anymatchByTest(set1, set2);
-			return anymatchByTest(set2, set1);
+			return (set1.size() < set2.size()) ? anymatchByTest(set1.iterator(), set2) : anymatchByTest(set2.iterator(), set1);
 		}
 		return anymatchByEnumeration(set1, set2);
 	}
@@ -337,12 +335,9 @@ public final class SetTools {
         return anymatchByEnumeration(set1, set2);
     }
 
-    private static <A> boolean anymatchByTest(final SortedSet<A> small, final SortedSet<A> large) {
-        final Iterator<A> mi = small.iterator();
-        A o;
-        while (mi.hasNext()) {
-            o = mi.next();
-            if (large.contains(o)) return true;
+    public static <A> boolean anymatchByTest(final Iterator<A> small, final SortedSet<A> large) {
+        while (small.hasNext()) {
+            if (large.contains(small.next())) return true;
         }
         return false;
     }

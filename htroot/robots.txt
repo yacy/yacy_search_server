@@ -4,6 +4,7 @@ User-agent: *
 
 Disallow: /*query=
 Disallow: /proxy.html
+Disallow: /HostBrowser.html
 
 #(all)#
 

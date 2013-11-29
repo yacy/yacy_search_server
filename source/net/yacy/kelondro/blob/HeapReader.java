@@ -539,7 +539,13 @@ public class HeapReader {
             try {
                 blob = new byte[len];
             } catch (final OutOfMemoryError e) {
-                throw new SpaceExceededException(len, "HeapReader.get()/blob");
+                // try once again after GC
+                MemoryControl.gc(1000, "HeapReader.get()/blob");
+                try {
+                    blob = new byte[len];
+                } catch (final OutOfMemoryError ee) {
+                    throw new SpaceExceededException(len, "HeapReader.get()/blob");
+                }
             }
             this.file.readFully(blob, 0, blob.length);
 

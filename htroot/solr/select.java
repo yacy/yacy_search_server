@@ -25,11 +25,8 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
@@ -76,10 +73,8 @@ import org.apache.solr.util.FastWriter;
  */
 public class select {
 
-    private static SolrServlet solrServlet = new SolrServlet();
     private final static Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
     static {
-        try {solrServlet.init(null);} catch (final ServletException e) {}
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
         OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
@@ -218,38 +213,35 @@ public class select {
         // do the solr request, generate facets if we use a special YaCy format
         SolrParams params = post.toSolrParams(/*responseWriter instanceof JsonResponseWriter ? new YaCySchema[]{YaCySchema.host_s, YaCySchema.url_file_ext_s, YaCySchema.url_protocol_s} :*/ null);
         SolrQueryRequest req = connector.request(params);
+        Writer ow = null;
         SolrQueryResponse response = null;
-        Exception e = null;
-        try {response = connector.query(req);} catch (final SolrException ee) {e = ee;}
-        if (response != null) e = response.getException();
-        if (e != null) {
-            ConcurrentLog.logException(e);
-            if (req != null) req.close();
+        try {
+	        response = connector.query(req);
+	        if (response != null) {
+	        	Exception e = response.getException();
+	        	if (e != null) {
+	        		ConcurrentLog.logException(e);
+	        	} else {
+		        	
+			        // write the result directly to the output stream
+		        	if (responseWriter instanceof BinaryResponseWriter) {
+			            ((BinaryResponseWriter) responseWriter).write(out, req, response);
+			        } else {
+			            ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
+			            responseWriter.write(ow, req, response);
+		                ow.flush();
+			        }
+	        	}
+	        }
+        } catch (final SolrException e) {
+        	ConcurrentLog.logException(e);
+        } catch (final IOException e1) {
+        } finally {
+        	req.close();
             SolrRequestInfo.clearRequestInfo();
-            return null;
+            if (ow != null) try {ow.close();} catch (final IOException e1) {}
         }
-
-        // write the result directly to the output stream
-        if (responseWriter instanceof BinaryResponseWriter) {
-            try {
-                ((BinaryResponseWriter) responseWriter).write(out, req, response);
-            } catch (final IOException e1) {
-            } finally {
-                req.close();
-                SolrRequestInfo.clearRequestInfo();
-            }
-        } else {
-            Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
-            try {
-                responseWriter.write(ow, req, response);
-                ow.flush();
-            } catch (final IOException e1) {
-            } finally {
-                req.close();
-                SolrRequestInfo.clearRequestInfo();
-                try {ow.close();} catch (final IOException e1) {}
-            }
-        }
+        if (response == null) return null;
 
         // log result
         Object rv = response.getValues().get("response");

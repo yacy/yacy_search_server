@@ -188,38 +188,41 @@ public class searchresult {
         // do the solr request
         SolrQueryRequest req = connector.request(post.toSolrParams(null));
         SolrQueryResponse response = null;
-        Exception e = null;
-        try {response = connector.query(req);} catch (final SolrException ee) {e = ee;}
-        if (response != null) e = response.getException();
-        if (e != null) {
-            ConcurrentLog.logException(e);
-            if (req != null) req.close();
-            SolrRequestInfo.clearRequestInfo();
-            return null;
-        }
-
-        // set some context for the writer
-        /*
-        Map<Object,Object> context = req.getContext();
-        context.put("ip", header.get("CLIENTIP", ""));
-        context.put("client", "vsm_frontent");
-        context.put("sort", sort.sort);
-        context.put("site", site == null ? "" : site);
-        context.put("access", access == null ? "p" : access[0]);
-        context.put("entqr", entqr == null ? "3" : entqr[0]);
-        */
-        
-        // write the result directly to the output stream
-        Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
+        Writer ow = null;
         try {
-            responseWriter.write(ow, req, response);
-            ow.flush();
+        	response = connector.query(req);
+	        if (response != null) {
+	        	Exception e = response.getException();
+		        if (e != null) {
+		            ConcurrentLog.logException(e);
+		        } else {
+		
+			        // set some context for the writer
+			        /*
+			        Map<Object,Object> context = req.getContext();
+			        context.put("ip", header.get("CLIENTIP", ""));
+			        context.put("client", "vsm_frontent");
+			        context.put("sort", sort.sort);
+			        context.put("site", site == null ? "" : site);
+			        context.put("access", access == null ? "p" : access[0]);
+			        context.put("entqr", entqr == null ? "3" : entqr[0]);
+			        */
+			        
+			        // write the result directly to the output stream
+			        ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
+		            responseWriter.write(ow, req, response);
+		            ow.flush();
+		        }
+	        }
+        } catch (final SolrException e) {
+        	ConcurrentLog.logException(e);
         } catch (final IOException e1) {
         } finally {
             req.close();
             SolrRequestInfo.clearRequestInfo();
-            try {ow.close();} catch (final IOException e1) {}
+            if (ow != null) try {ow.close();} catch (final IOException e1) {}
         }
+        if (response == null) return null;
 
         // log result
         Object rv = response.getValues().get("response");

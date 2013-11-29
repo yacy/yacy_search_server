@@ -71,7 +71,6 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -1080,10 +1079,10 @@ public final class SearchEvent {
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
-            if (!this.query.getQueryGoal().getExcludeHashes().isEmpty() &&
-                ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeHashes()))
-                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeHashes()))
-                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeHashes())))) {
+            if (this.query.getQueryGoal().getExcludeSize() != 0 &&
+                ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeWords()))
+                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeWords()))
+                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeWords())))) {
                 if (log.isFine()) log.fine("dropped RWI: no match with query goal exclusion");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
@@ -1294,14 +1293,14 @@ public final class SearchEvent {
         }
 
         // apply query-in-result matching
-        final HandleSet urlcomph = Word.words2hashesHandles(urlcomps);
-        final HandleSet descrcomph = Word.words2hashesHandles(descrcomps);
-        final Iterator<byte[]> shi = this.query.getQueryGoal().getIncludeHashes().iterator();
-        byte[] queryhash;
+        final QueryGoal.NormalizedWords urlcomph = new QueryGoal.NormalizedWords(urlcomps);
+        final QueryGoal.NormalizedWords descrcomph = new QueryGoal.NormalizedWords(descrcomps);
+        final Iterator<String> shi = this.query.getQueryGoal().getIncludeWords();
+        String queryword;
         while (shi.hasNext()) {
-            queryhash = shi.next();
-            if (urlcomph.has(queryhash)) r += 256 << this.query.ranking.coeff_appurl;
-            if (descrcomph.has(queryhash)) r += 256 << this.query.ranking.coeff_app_dc_title;
+            queryword = shi.next();
+            if (urlcomph.contains(queryword)) r += 256 << this.query.ranking.coeff_appurl;
+            if (descrcomph.contains(queryword)) r += 256 << this.query.ranking.coeff_app_dc_title;
         }
         return r;
     }
@@ -1642,7 +1641,7 @@ public final class SearchEvent {
             if ( word.length() > 2
                 && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
                     .indexOf(word) < 0
-                && !this.query.getQueryGoal().getIncludeHashes().has(Word.word2hash(word))
+                && !this.query.getQueryGoal().containsInclude(word)
                 && lettermatch.matcher(word).matches()
                 && !Switchboard.badwords.contains(word)
                 && !Switchboard.stopwords.contains(word) ) {

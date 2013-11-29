@@ -51,12 +51,11 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
-@SuppressWarnings("deprecation") //TODO: switch to 4.3-Stuff
+@SuppressWarnings("deprecation")
 public class RemoteInstance implements SolrInstance {
     
     private String solrurl;
-    private final org.apache.http.impl.client.DefaultHttpClient client;
-// 4.3    private final CloseableHttpClient client;
+    private final Object client; // not declared as org.apache.http.impl.client.DefaultHttpClient to avoid warnings during compilation. TODO: switch to org.apache.http.impl.client.HttpClientBuilder
     private final String defaultCoreName;
     private final HttpSolrServer defaultServer;
     private final Collection<String> coreNames;
@@ -126,56 +125,9 @@ public class RemoteInstance implements SolrInstance {
             }
         }
         if (solraccount.length() > 0) {
-// 4.3:
-//        	final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-//        	cm.setMaxTotal(100);
-//        	
-//        	final RequestConfig.Builder reqBuilder = RequestConfig.custom();
-//        	reqBuilder.setSocketTimeout(timeout);
-//        	reqBuilder.setConnectTimeout(timeout);
-//        	reqBuilder.setConnectionRequestTimeout(timeout);
-//        	
-//        	final BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
-//            credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
-//        	
-//        	final HttpClientBuilder builder = HttpClientBuilder.create();
-//        	builder.setConnectionManager(cm);
-//        	builder.setDefaultRequestConfig(reqBuilder.build());
-//        	builder.setDefaultCredentialsProvider(credsProvider);
-//        	builder.disableAutomaticRetries(); // no retries needed; we expect connections to fail; therefore we should not retry
-//        	// ask for gzip - why not using net.yacy.cora.protocol.http.GzipRequestInterceptor?
-//    		builder.addInterceptorLast(new HttpRequestInterceptor() {
-//                @Override
-//                public void process(final HttpRequest request, final HttpContext context) throws IOException {
-//                    if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
-//                    if (!request.containsHeader("Connection")) request.addHeader("Connection", "close"); // prevent CLOSE_WAIT
-//                }
-//
-//            });
-//    		// uncompress gzip - why not using net.yacy.cora.protocol.http.GzipResponseInterceptor?
-//    		builder.addInterceptorLast(new HttpResponseInterceptor() {
-//                @Override
-//                public void process(final HttpResponse response, final HttpContext context) throws IOException {
-//                    HttpEntity entity = response.getEntity();
-//                    if (entity != null) {
-//                        Header ceheader = entity.getContentEncoding();
-//                        if (ceheader != null) {
-//                            HeaderElement[] codecs = ceheader.getElements();
-//                            for (HeaderElement codec : codecs) {
-//                                if (codec.getName().equalsIgnoreCase("gzip")) {
-//                                    response.setEntity(new GzipDecompressingEntity(response.getEntity()));
-//                                    return;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            });
-//    		this.client = builder.build();
-        	
-// old Stuff START
             org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
             cm.setMaxTotal(100);
+            cm.setDefaultMaxPerRoute(100);
             
             this.client = new org.apache.http.impl.client.DefaultHttpClient(cm) {
                 @Override
@@ -190,10 +142,10 @@ public class RemoteInstance implements SolrInstance {
                     return context;
                 }
             };
-            org.apache.http.params.HttpParams params = this.client.getParams();
+            org.apache.http.params.HttpParams params = ((org.apache.http.impl.client.DefaultHttpClient) this.client).getParams();
             org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
             org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
-            this.client.addRequestInterceptor(new HttpRequestInterceptor() {
+            ((org.apache.http.impl.client.DefaultHttpClient) this.client).addRequestInterceptor(new HttpRequestInterceptor() {
                 @Override
                 public void process(final HttpRequest request, final HttpContext context) throws IOException {
                     if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
@@ -201,7 +153,7 @@ public class RemoteInstance implements SolrInstance {
                 }
 
             });
-            this.client.addResponseInterceptor(new HttpResponseInterceptor() {
+            ((org.apache.http.impl.client.DefaultHttpClient) this.client).addResponseInterceptor(new HttpResponseInterceptor() {
                 @Override
                 public void process(final HttpResponse response, final HttpContext context) throws IOException {
                     HttpEntity entity = response.getEntity();
@@ -221,8 +173,7 @@ public class RemoteInstance implements SolrInstance {
             });
             org.apache.http.impl.client.BasicCredentialsProvider credsProvider = new org.apache.http.impl.client.BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
-            this.client.setCredentialsProvider(credsProvider);
-// old Stuff END
+            ((org.apache.http.impl.client.DefaultHttpClient) this.client).setCredentialsProvider(credsProvider);
         } else {
             this.client = null;
         }
@@ -275,7 +226,7 @@ public class RemoteInstance implements SolrInstance {
             String solrpath = u.getPath();
             String p = "http://" + host + ":" + port + solrpath;
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
-            s = new HttpSolrServer(p, client);
+            s = new HttpSolrServer(p, ((org.apache.http.impl.client.DefaultHttpClient) this.client));
         } else {
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
             s = new HttpSolrServer(this.solrurl + name);
@@ -290,14 +241,7 @@ public class RemoteInstance implements SolrInstance {
 
     @Override
     public void close() {
-    	if (this.client != null) this.client.getConnectionManager().shutdown();
-// 4.3
-//    	if (this.client != null)
-//			try {
-//				this.client.close();
-//			} catch (final IOException e) {
-//				// TODO Auto-generated catch block
-//			}
+    	if (this.client != null) ((org.apache.http.impl.client.DefaultHttpClient) this.client).getConnectionManager().shutdown();
     }
 
 }
