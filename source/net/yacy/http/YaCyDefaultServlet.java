@@ -70,6 +70,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 
@@ -309,8 +310,10 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     /* ------------------------------------------------------------ */
     protected void writeHeaders(HttpServletResponse response, Resource resource, long count) {
         if (response.getContentType() == null) {
-            String mime = _mimeTypes.getMimeByExtension(resource.getName()).toString();
-            response.setContentType(mime);
+            Buffer extensionmime;
+            if ((extensionmime = _mimeTypes.getMimeByExtension(resource.getName())) != null) {
+                response.setContentType(extensionmime.toString());
+            }
         }
 
         long lml = resource.lastModified();
