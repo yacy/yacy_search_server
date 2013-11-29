@@ -113,7 +113,8 @@ public class SolrServlet implements Filter {
         if (reqMethod == null || (reqMethod != Method.GET && reqMethod != Method.HEAD)) {
             throw new ServletException("Unsupported method: " + hrequest.getMethod());
         }
-
+        
+        Writer out = null;
         try {
             SolrCore core = connector.getCore();
             if (core == null) {
@@ -146,7 +147,7 @@ public class SolrServlet implements Filter {
             }
 
             // write response body
-            Writer out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
+            out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
 
             //debug
             @SuppressWarnings("unchecked")
@@ -171,16 +172,14 @@ public class SolrServlet implements Filter {
 
             responseWriter.write(out, req, rsp);
             out.flush();
-            return;
-
         } catch (final Throwable ex) {
             sendError(hresponse, ex);
-            return;
         } finally {
             if (req != null) {
                 req.close();
             }
             SolrRequestInfo.clearRequestInfo();
+            if (out != null) try {out.close();} catch (final IOException e1) {}
         }
     }
 
