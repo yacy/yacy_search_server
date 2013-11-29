@@ -25,11 +25,8 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
@@ -76,10 +73,8 @@ import org.apache.solr.util.FastWriter;
  */
 public class select {
 
-    private static SolrServlet solrServlet = new SolrServlet();
     private final static Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
     static {
-        try {solrServlet.init(null);} catch (final ServletException e) {}
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
         OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
