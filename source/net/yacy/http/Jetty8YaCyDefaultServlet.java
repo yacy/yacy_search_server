@@ -48,7 +48,6 @@ import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.MultiPartOutputStream;
-import org.eclipse.jetty.util.QuotedStringTokenizer;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 
@@ -81,9 +80,6 @@ import org.eclipse.jetty.util.resource.Resource;
  *                    of only specific subdirectories.
  *
  *  pathInfoOnly      If true, only the path info will be applied to the resourceBase
- *
- *
- *  etags             If True, weak etags will be generated and handled.
  *
  * </PRE>
  *

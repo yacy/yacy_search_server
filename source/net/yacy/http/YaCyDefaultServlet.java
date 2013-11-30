@@ -106,9 +106,6 @@ import org.eclipse.jetty.util.resource.Resource;
  *
  *  pathInfoOnly      If true, only the path info will be applied to the resourceBase
  *
- *
- *  etags             If True, weak etags will be generated and handled.
- *
  * </PRE>
  */
 public abstract class YaCyDefaultServlet extends HttpServlet  {

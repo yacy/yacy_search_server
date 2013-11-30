@@ -24,6 +24,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +77,7 @@ public class GSAsearchServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType(QueryResponseWriter.CONTENT_TYPE_XML_UTF8);
         response.setStatus(HttpServletResponse.SC_OK);
-        respond(request, new serverObjects(), Switchboard.getSwitchboard(), response.getOutputStream());
+        respond(request, Switchboard.getSwitchboard(), response.getOutputStream());
     }
     
     // ------------------------------------------
@@ -85,7 +87,7 @@ public class GSAsearchServlet extends HttpServlet {
      */
     
  
-    public static serverObjects respond(final HttpServletRequest header, serverObjects post, final Switchboard sb, final OutputStream out) {
+    public static void respond(final HttpServletRequest header, final Switchboard sb, final OutputStream out) {
 
         // remember the peer contact for peer statistics
         String clientip = header.getHeader(HeaderFramework.CONNECTION_PROP_CLIENTIP);
@@ -100,8 +102,17 @@ public class GSAsearchServlet extends HttpServlet {
         // final boolean searchAllowed = authenticated || sb.getConfigBool("publicSearchpage", true);
         // if (!searchAllowed) return null;
 
-        // check post
-        if (post == null) {post = new serverObjects(); post.put("q", ""); post.put("num", "0");}
+        // create post
+        serverObjects post = new serverObjects();
+        post.put("q", ""); post.put("num", "0");
+        // convert servletrequest parameter to old style serverObjects map
+        Map<String, String[]> map = header.getParameterMap();
+        Iterator<Map.Entry<String, String[]>> it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String[]> param = it.next();
+            post.put(param.getKey(), param.getValue()); // hint: post.put uses String[] for String value anyways
+        }     
+
         ConcurrentLog.info("GSA Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
@@ -186,7 +197,7 @@ public class GSAsearchServlet extends HttpServlet {
         
         // get the embedded connector
         EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultEmbeddedConnector();
-        if (connector == null) return null;
+        if (connector == null) return;
 
         // do the solr request
         SolrQueryRequest req = connector.request(post.toSolrParams(null));
@@ -198,7 +209,7 @@ public class GSAsearchServlet extends HttpServlet {
             ConcurrentLog.logException(e);
             if (req != null) req.close();
             SolrRequestInfo.clearRequestInfo();
-            return null;
+            return;
         }
 
         // set some context for the writer
@@ -234,7 +245,5 @@ public class GSAsearchServlet extends HttpServlet {
         }
         AccessTracker.addToDump(originalQuery, Integer.toString(matches));
         ConcurrentLog.info("GSA Query", "results: " + matches + ", for query:" + post.toString());
-        
-        return null;
     }
 }
