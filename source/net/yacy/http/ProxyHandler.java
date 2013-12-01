@@ -82,8 +82,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 	}
 	
 	private void cleanResponseHeader(HttpResponse headers) {
-		headers.removeHeaders("Content-Encoding");
-		headers.removeHeaders("Content-Length");
+		headers.removeHeaders(HeaderFramework.CONTENT_ENCODING);
+		headers.removeHeaders(HeaderFramework.CONTENT_LENGTH);
 	}
 
 	@Override
@@ -105,11 +105,11 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		try {
 			String queryString = request.getQueryString()!=null ? "?" + request.getQueryString() : "";
                         String url = request.getRequestURL().toString() + queryString;
-			if (request.getMethod().equals("GET")) {
+			if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
 				client.GET(url);
-			} else if (request.getMethod().equals("POST")) {
+			} else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
 				client.POST(url, request.getInputStream(), request.getContentLength());
-			} else if (request.getMethod().equals("HEAD")) {
+			} else if (request.getMethod().equals(HeaderFramework.METHOD_HEAD)) {
 				client.HEADResponse(url);
 			} else {
 				throw new ServletException("Unsupported Request Method");
