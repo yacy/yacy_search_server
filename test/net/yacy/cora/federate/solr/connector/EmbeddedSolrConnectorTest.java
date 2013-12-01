@@ -2,27 +2,12 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.EnumSet;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.DispatcherType;
-import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.bio.SocketConnector;
-import org.eclipse.jetty.server.session.HashSessionIdManager;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +15,6 @@ import static org.junit.Assert.*;
 
 public class EmbeddedSolrConnectorTest {
 
-    Server jetty; // Jetty server
     EmbeddedSolrConnector solr;
 
     public EmbeddedSolrConnectorTest() {
@@ -45,10 +29,7 @@ public class EmbeddedSolrConnectorTest {
         try {
             EmbeddedInstance localCollectionInstance = new EmbeddedInstance(solr_config, storage, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
             solr = new EmbeddedSolrConnector(localCollectionInstance);
-
-            // start a server
-            jetty = startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
-
+           
         } catch (final IOException ex) {
             fail("IOException starting Jetty");
         }
@@ -56,13 +37,6 @@ public class EmbeddedSolrConnectorTest {
 
     @After
     public void tearDown() {
-        if (jetty != null) {
-            try {
-                jetty.stop();
-            } catch (final Exception ex) {
-                fail("Exception stopping Jetty");
-            }
-        }
         solr.close();
     }
 
@@ -95,96 +69,5 @@ public class EmbeddedSolrConnectorTest {
         } catch (final IOException ex) {
             fail("Solr query no result");
         }
-    }
-
-    public static void waitForSolr(String context, int port) throws Exception {
-        // A raw term query type doesn't check the schema
-        URL url = new URL("http://127.0.0.1:" + port + context + "/select?q={!raw+f=test_query}ping");
-
-        Exception ex = null;
-        // Wait for a total of 20 seconds: 100 tries, 200 milliseconds each
-        for (int i = 0; i < 600; i++) {
-            try {
-                InputStream stream = url.openStream();
-                stream.close();
-            } catch (final IOException e) {
-                ex = e;
-                Thread.sleep(200);
-                continue;
-            }
-            return;
-        }
-        throw new RuntimeException("Jetty/Solr unresponsive", ex);
-    }
-
-    /**
-     * from org.apache.solr.client.solrj.embedded.JettySolrRunner
-     */
-    public static Server startServer(String context, int port, EmbeddedSolrConnector c) {
-        Server server = new Server(port);    
-        server.setStopAtShutdown(true);
-        
-        SocketConnector connector = new SocketConnector();
-        connector.setPort(port);
-        connector.setReuseAddress(true);
-        server.setConnectors(new Connector[] { connector });
-        server.setSessionIdManager(new HashSessionIdManager(new Random()));
-        server.setStopAtShutdown(true);
-        
-        ServletContextHandler root = new ServletContextHandler(ServletContextHandler.SESSIONS); //new Context(server, context, Context.SESSIONS);
-        root.setContextPath(context);
-        root.addServlet(SolrServlet.Servlet404.class, "/*");
-
-        // attach org.apache.solr.response.XMLWriter to search requests
-        SolrServlet.initCore(c);
-        root.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
-        server.setHandler(root);
-        if (!server.isRunning()) {
-            try {
-                server.start();
-                waitForSolr(context, port);
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return server;
-    }
-
-    public static void main(String[] args) {
-        File solr_config = new File("defaults/solr");
-        File storage = new File("DATA/INDEX/webportal/SEGMENTS/text/solr/");
-        storage.mkdirs();
-        try {
-            EmbeddedInstance localCollectionInstance = new EmbeddedInstance(solr_config, storage, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
-            EmbeddedSolrConnector solr = new EmbeddedSolrConnector(localCollectionInstance);
-            SolrInputDocument doc = new SolrInputDocument();
-            doc.addField(CollectionSchema.id.name(), "ABCD0000abcd");
-            doc.addField(CollectionSchema.title.name(), "Lorem ipsum");
-            doc.addField(CollectionSchema.host_s.name(), "yacy.net");
-            doc.addField(CollectionSchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-            solr.add(doc);
-            solr.commit(true);
-            // start a server
-            startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
-
-            // do a normal query
-            SolrDocumentList select = solr.getDocumentListByQuery(CollectionSchema.text_t.name() + ":tempor", 0, 10);
-            for (SolrDocument d : select) {
-                System.out.println("***TEST SELECT*** " + d.toString());
-            }
-
-            // do a facet query
-            select = solr.getDocumentListByQuery(CollectionSchema.text_t.name() + ":tempor", 0, 10);
-            for (SolrDocument d : select) {
-                System.out.println("***TEST SELECT*** " + d.toString());
-            }
-
-
-            // try http://127.0.0.1:8091/solr/select?q=ping
-            solr.close();            
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-
     }
 }
