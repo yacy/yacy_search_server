@@ -99,8 +99,9 @@ import net.yacy.search.snippet.TextSnippet.ResultClass;
 import org.apache.solr.common.SolrDocument;
 
 public final class SearchEvent {
-    
+
     private static final int max_results_rwi = 3000;
+    private static final int max_results_node = 150;
 
     /*
     private static long noRobinsonLocalRWISearch = 0;
@@ -219,7 +220,7 @@ public final class SearchEvent {
         this.workTables = workTables;
         this.query = query;
         this.loader = loader;
-        this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(100, false);
+        this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(max_results_node, false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
@@ -391,7 +392,7 @@ public final class SearchEvent {
         this.deleteIfSnippetFail = deleteIfSnippetFail;
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
-        this.resultList = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(1000, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.resultList = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(max_results_node, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
 
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search       

@@ -143,7 +143,7 @@ public class Segment {
                 new String[] {},
                 this,
                 "putDocument",
-                10,
+                30,
                 null,
                 1);
     }
