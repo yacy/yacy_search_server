@@ -87,7 +87,7 @@ public class IndexControlURLs_p {
         prop.put("cleanup", post == null ? 1 : 0);
         prop.put("cleanup_solr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
         prop.put("cleanup_rwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
-        prop.put("cleanup_citation", segment.urlCitation() != null && !segment.urlCitation().isEmpty() ? 1 : 0);
+        prop.put("cleanup_citation", segment.connectedCitation() && !segment.urlCitation().isEmpty() ? 1 : 0);
         
         // show export messages
         final Fulltext.Export export = segment.fulltext().export();
@@ -159,7 +159,7 @@ public class IndexControlURLs_p {
                 if (segment.termIndex() != null) try {segment.termIndex().clear();} catch (final IOException e) {}
             }
             if ( post.get("deleteCitation", "").equals("on")) {
-                if (segment.urlCitation() != null) try {segment.urlCitation().clear();} catch (final IOException e) {}
+                if (segment.connectedCitation()) try {segment.urlCitation().clear();} catch (final IOException e) {}
             }
             if ( post.get("deleteCrawlQueues", "").equals("on") ) {
                 sb.crawlQueues.clear();

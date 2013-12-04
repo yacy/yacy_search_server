@@ -328,6 +328,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
     
+    /**
+     * a SolrVector is a SolrInputDocument with the ability
+     * to store also the webgraph that is associated with
+     * the web document in the Solr document.
+     */
     public static class SolrVector extends SolrInputDocument {
         private static final long serialVersionUID = -210901881471714939L;
         private List<SolrInputDocument> webgraphDocuments;
@@ -891,9 +896,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      */
     public int postprocessing(final Segment segment, ReferenceReportCache rrCache, ClickdepthCache clickdepthCache, String harvestkey) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
-        if (!segment.connectedCitation() && !segment.fulltext().writeToWebgraph()) return 0;
+        if (!segment.connectedCitation() && !segment.fulltext().useWebgraph()) return 0;
         SolrConnector collectionConnector = segment.fulltext().getDefaultConnector();
-        SolrConnector webgraphConnector = segment.fulltext().getWebgraphConnector();
+        SolrConnector webgraphConnector = segment.fulltext().useWebgraph() ? segment.fulltext().getWebgraphConnector() : null;
         collectionConnector.commit(false); // make sure that we have latest information that can be found
         if (webgraphConnector != null) webgraphConnector.commit(false);
         Map<byte[], CRV> ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);

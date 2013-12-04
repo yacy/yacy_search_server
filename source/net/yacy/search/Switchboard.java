@@ -505,7 +505,7 @@ public final class Switchboard extends serverSwitch {
             this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             try {this.index.fulltext().connectLocalSolr();} catch (final IOException e) {ConcurrentLog.logException(e);}
         }
-        this.index.fulltext().writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
+        this.index.fulltext().setUseWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
@@ -1328,7 +1328,7 @@ public final class Switchboard extends serverSwitch {
                 this.index.fulltext().connectLocalSolr();
                 this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             }
-            this.index.fulltext().writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
+            this.index.fulltext().setUseWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 
             // set up the solr interface
             final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
@@ -2327,11 +2327,11 @@ public final class Switchboard extends serverSwitch {
                 Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
                         this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
                 int cleanupByHarvestkey = deletionCandidates.size();
-                boolean processCollection =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.writeToWebgraph());
-                boolean processWebgraph =  webgraphConfiguration.contains(WebgraphSchema.process_sxt) && fulltext.writeToWebgraph();
+                boolean processCollection =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.useWebgraph());
+                boolean processWebgraph =  webgraphConfiguration.contains(WebgraphSchema.process_sxt) && fulltext.useWebgraph();
                 if ((processCollection || processWebgraph) && (cleanupByHarvestkey > 0 || allCrawlsFinished)) {
                     //full optimization of webgraph, if exists
-                    if (fulltext.writeToWebgraph()) fulltext.getWebgraphConnector().optimize(1);
+                    if (fulltext.useWebgraph()) fulltext.getWebgraphConnector().optimize(1);
                     if (cleanupByHarvestkey > 0) {
                         // run postprocessing on these profiles
                         postprocessingRunning = true;

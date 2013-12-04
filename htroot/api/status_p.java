@@ -81,8 +81,8 @@ public class status_p {
         // index size
         prop.putNum("urlpublictextSize", fulltext.collectionSize());
         prop.putNum("urlpublictextSegmentCount", fulltext.getDefaultConnector().getSegmentCount());
-        prop.putNum("webgraphSize", fulltext.writeToWebgraph() ? fulltext.webgraphSize() : 0);
-        prop.putNum("webgraphSegmentCount", fulltext.writeToWebgraph() ? fulltext.getWebgraphConnector().getSegmentCount() : 0);
+        prop.putNum("webgraphSize", fulltext.useWebgraph() ? fulltext.webgraphSize() : 0);
+        prop.putNum("webgraphSegmentCount", fulltext.useWebgraph() ? fulltext.getWebgraphConnector().getSegmentCount() : 0);
         prop.putNum("citationSize", segment.citationCount());
         prop.putNum("citationSegmentCount", segment.citationSegmentCount());
         prop.putNum("rwipublictextSize", segment.RWICount());
@@ -131,8 +131,8 @@ public class status_p {
 
         prop.put("postprocessingRunning", Switchboard.postprocessingRunning ? 1 : 0);
         
-        boolean processCollection =  sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.process_sxt) && (sb.index.connectedCitation() || sb.index.fulltext().writeToWebgraph());
-        boolean processWebgraph =  sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.process_sxt) && sb.index.fulltext().writeToWebgraph();
+        boolean processCollection =  sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.process_sxt) && (sb.index.connectedCitation() || sb.index.fulltext().useWebgraph());
+        boolean processWebgraph =  sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.process_sxt) && sb.index.fulltext().useWebgraph();
 
         long collectionTimeSinceStart = processCollection && Switchboard.postprocessingRunning ? System.currentTimeMillis() - Switchboard.postprocessingStartTime[0] : 0;
         long webgraphTimeSinceStart = processWebgraph && Switchboard.postprocessingRunning ? System.currentTimeMillis() - Switchboard.postprocessingStartTime[1] : 0;

@@ -126,7 +126,7 @@ public class yacydoc {
         prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words", entry.wordCount());
-        prop.put("yacy_citations", sb.index.urlCitation()!= null ? sb.index.urlCitation().count(entry.hash()) : 0);
+        prop.put("yacy_citations", sb.index.connectedCitation() ? sb.index.urlCitation().count(entry.hash()) : 0);
         prop.put("yacy_inbound", entry.llocal());
         prop.put("yacy_outbound", entry.lother());
 
