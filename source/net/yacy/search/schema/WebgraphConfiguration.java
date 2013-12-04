@@ -120,7 +120,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
             final String sourceName) {
         boolean allAttr = this.isEmpty();
-        boolean generalNofollow = responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
+        boolean generalNofollow = responseHeader == null ? false : responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
         int target_order = 0;
         for (final AnchorURL target_url: links) {
             SolrInputDocument edge = getEdge(
