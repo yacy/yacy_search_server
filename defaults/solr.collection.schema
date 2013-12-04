@@ -437,13 +437,13 @@ host_extent_i
 ## citation ranking
 
 ## the number of documents within a single host
-cr_host_count_i
+#cr_host_count_i
 
 ## the chance to click on this page when randomly clicking on links within on one host
-cr_host_chance_d
+#cr_host_chance_d
 
 ## normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10
-cr_host_norm_i
+#cr_host_norm_i
 
 ## custom rating; to be set with external rating information
 rating_i

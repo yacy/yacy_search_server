@@ -214,7 +214,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
             add(edge, WebgraphSchema.source_path_folders_sxt, paths);
         }
-        if (this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+        if (this.contains(WebgraphSchema.source_clickdepth_i) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
             add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
             if (clickdepth_source < 0 || clickdepth_source > 1) processTypes.add(ProcessType.CLICKDEPTH);
         }
@@ -336,7 +336,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
                         if (tagtype == ProcessType.CLICKDEPTH) {
-                            if (this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+                            if (this.contains(WebgraphSchema.source_clickdepth_i) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
                                 protocol = (String) doc.getFieldValue(WebgraphSchema.source_protocol_s.getSolrFieldName());
                                 urlstub = (String) doc.getFieldValue(WebgraphSchema.source_urlstub_s.getSolrFieldName());
                                 id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
@@ -347,7 +347,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                                 }
                                 //ConcurrentLog.info("WebgraphConfiguration", "postprocessing webgraph source id " + id + ", url=" + protocol + "://" + urlstub + ", result: " + (changed ? "changed" : "not changed"));
                             }
-                            if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
+                            if (this.contains(WebgraphSchema.target_clickdepth_i) && this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
                                 protocol = (String) doc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName());
                                 urlstub = (String) doc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
                                 id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
