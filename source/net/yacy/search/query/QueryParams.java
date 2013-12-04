@@ -340,7 +340,6 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
@@ -365,7 +364,6 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
