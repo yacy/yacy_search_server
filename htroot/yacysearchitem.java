@@ -26,6 +26,7 @@
 
 import java.net.MalformedURLException;
 import java.util.Iterator;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -39,6 +40,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.crawler.data.Cache;
 import net.yacy.data.URLLicense;
 import net.yacy.kelondro.util.Formatter;
@@ -261,8 +263,8 @@ public class yacysearchitem {
             boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
             boolean stealthmode = p2pmode && theSearch.query.isLocal();
             if ((sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ||
-                    (sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) && sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ENABLED, false))) &&
-                 !stealthmode) sb.heuristicSearchResults(resultUrlstring);
+                (sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) && sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ENABLED, false) && Memory.load() < 1.0)) &&
+                !stealthmode) sb.heuristicSearchResults(resultUrlstring);
             theSearch.query.transmitcount = item + 1;
             return prop;
         }
