@@ -79,7 +79,7 @@ public class ConfigHTCache_p {
         prop.put("HTCachePath", env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT));
         prop.put("actualCacheSize", Cache.getActualCacheSize() / 1024 / 1024);
         prop.put("actualCacheDocCount", Cache.getActualCacheDocCount());
-        prop.put("docSizeAverage", Cache.getActualCacheSize() / Cache.getActualCacheDocCount() / 1024);
+        prop.put("docSizeAverage", Cache.getActualCacheDocCount() == 0 ? 0 : Cache.getActualCacheSize() / Cache.getActualCacheDocCount() / 1024);
         prop.put("maxCacheSize", env.getConfigLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64));
         // return rewrite properties
         return prop;
