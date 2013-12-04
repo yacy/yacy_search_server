@@ -44,13 +44,17 @@ public class PerformanceGraph {
         final int width = post.getInt("width", 660);
         final int height = post.getInt("height", 240);
         final boolean showMemory = !post.containsKey("nomem");
+        final boolean showPeers = !post.containsKey("nopeers");
 
         long t = System.currentTimeMillis();
         if (t - indexSizeTime > 10000) {
             indeSizeCache = sb.index.fulltext().collectionSize();
             indexSizeTime = t;
         }
-        RasterPlotter graph = ProfilingGraph.performanceGraph(width, height, indeSizeCache + " URLS / " + sb.index.RWICount() + " WORDS IN INDEX / " + sb.index.RWIBufferCount() + " WORDS IN CACHE", showMemory);
+        RasterPlotter graph = ProfilingGraph.performanceGraph(
+                width, height,
+                indeSizeCache + " URLS / " + sb.index.RWICount() + " WORDS IN INDEX / " + sb.index.RWIBufferCount() + " WORDS IN CACHE",
+                showMemory, showPeers);
         return graph;
     }
 

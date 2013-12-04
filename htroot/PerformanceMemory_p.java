@@ -49,7 +49,7 @@ public class PerformanceMemory_p {
     private static final long KB = 1024;
     private static final long MB = 1024 * KB;
     private static Map<String, String> defaultSettings = null;
-
+    
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -58,18 +58,22 @@ public class PerformanceMemory_p {
         }
 
         prop.put("gc", "0");
+        prop.put("autoreload.checked", "0");
         if (post != null) {
             if (post.containsKey("gc")) {
                 System.gc();
                 prop.put("gc", "1");
+                prop.put("autoreload.checked", "1");
             } else {
-                MemoryControl.setSimulatedShortStatus(post.containsKey("simulatedshortmemory"));
+                boolean simulatedshortmemory = post.containsKey("simulatedshortmemory");
+                MemoryControl.setSimulatedShortStatus(simulatedshortmemory);
+                if (simulatedshortmemory) prop.put("autoreload.checked", "1");
                 final boolean std = post.containsKey("useStandardmemoryStrategy");
                 env.setConfig("memory.standardStrategy", std);
                 MemoryControl.setStandardStrategy(std);
             }
         }
-
+        
         prop.put("simulatedshortmemory.checked", MemoryControl.getSimulatedShortStatus() ? 1 : 0);
         prop.put("useStandardmemoryStrategy.checked", env.getConfigBool("memory.standardStrategy", true) ? 1 : 0);
         prop.put("memoryStrategy", MemoryControl.getStrategyName());

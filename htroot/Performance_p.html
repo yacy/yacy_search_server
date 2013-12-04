@@ -9,7 +9,7 @@
     <script type="text/javascript"><!--
     function reloadGraph() {
       if(document.forms["optionreloadGraph"].option.checked)
-        document.images["graph"].src="PerformanceGraph.png?time="+(new Date()).getTime();
+        document.images["graph"].src="PerformanceGraph.png?nopeers=&time="+(new Date()).getTime();
       window.status="";
     }
     window.setInterval("reloadGraph()", 1000);
@@ -18,7 +18,7 @@
     #%env/templates/submenuConfig.template%#
     <h2>Performance Settings</h2>
   
-    <p><img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/></p>
+    <p><img src="PerformanceGraph.png?nopeers=" id="graph" alt="PerformanceGraph" width="660" height="240"/></p>
     <form id="optionreloadGraph" action="" method="get"><p><input type="checkbox" name="option" id="autoreload"/> <label for="autoreload">refresh graph</label></p></form>
   
   
