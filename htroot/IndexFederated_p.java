@@ -70,7 +70,7 @@ public class IndexFederated_p {
                 sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
             boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH);
-            sb.index.fulltext().writeWebgraph(webgraph);
+            sb.index.fulltext().setUseWebgraph(webgraph);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
         }
 

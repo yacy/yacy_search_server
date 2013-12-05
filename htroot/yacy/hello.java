@@ -48,15 +48,27 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public final class hello {
-
+    
     // example:
-    // http://localhost:8090/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,IPType=&empty;,Port=8090,IP=,Uptime=8,rI=190,Version=0.10004882,PeerType=junior,UTC=+0200,RCount=0,sI=0,LastSeen=20080605103333,Name=intratest,CCount=5.0,SCount=40,news=,USpeed=0,CRTCnt=0,CRWCnt=0,BDate=20080605081349,rU=190,LCount=187,dct=1212668923654,ICount=2,sU=0,ISpeed=0,RSpeed=0.0,NCount=0,Flags=oooo}
+    // http://localhost:8090/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,Port=8090,PeerType=junior}
     // http://localhost:8090/yacy/hello.html?count=10&seed=z|H4sIAAAAAAAAADWQW2vDMAyF_81eJork3GyGX-YxGigly2WFvZTQijbQJsHx1pWx_z7nMj1J4ug7B_2s6-GsP5q3G-G6vBz2e0iz8t6zfuBr7-5PUNanQfulhqyzTkuUCFXvmitrBJtq4ed3tkPTtRpXhIiRDAmq0uhHFIiQMduJ-NXYU9NCbrrP1vnjIdUqgk09uIK51V6rMBRIilAo2NajwzfhGcx8QUKsEIp5iCJo-eaTVUXPfPQ4k5dm4pp8NzaESsLzS-14QVNIMlA-ka2m1JuZJJWIBRwPo0GIIiYp4zCSkC5GQSLiJIah0p6X_rvlS-MTbWdhkCSBIni9jA_rfP3-Ae1Oye9dAQAA
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final long start = System.currentTimeMillis();
         prop.put("message", "none");
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final InetAddress ias = Domains.dnsResolve(clientip);
+        long time = System.currentTimeMillis();
+        final long time_dnsResolve = System.currentTimeMillis() - time;
+        if (ias == null) {
+            Network.log.info("hello/server: failed contacting seed; clientip not resolvable (clientip=" + clientip + ", time_dnsResolve=" + time_dnsResolve + ")");
+            prop.put("message", "cannot resolve your IP from your reported location " + clientip);
+            return prop;
+        }
+        prop.put("yourip", ias.getHostAddress());
+        prop.put(Seed.YOURTYPE, Seed.PEERTYPE_VIRGIN); // a default value
+        prop.put("seedlist", "");
         if ((post == null) || (env == null)) {
             prop.put("message", "no post or no enviroment");
             return prop;
@@ -73,15 +85,6 @@ public final class hello {
         int  count            = post.getInt("count", 0);
         final long  magic           = post.getLong("magic", 0);
 //      final Date remoteTime = yacyCore.parseUniversalDate(post.get(MYTIME)); // read remote time
-        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
-        long time = System.currentTimeMillis();
-        final InetAddress ias = Domains.dnsResolve(clientip);
-        final long time_dnsResolve = System.currentTimeMillis() - time;
-        if (ias == null) {
-            Network.log.info("hello/server: failed contacting seed; clientip not resolvable (clientip=" + clientip + ", time_dnsResolve=" + time_dnsResolve + ")");
-            prop.put("message", "cannot resolve your IP from your reported location " + clientip);
-            return prop;
-        }
         if (seed.length() > Seed.maxsize) {
         	Network.log.info("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + Seed.maxsize + ", time_dnsResolve=" + time_dnsResolve + ")");
             prop.put("message", "your seed is too long (" + seed.length() + ")");

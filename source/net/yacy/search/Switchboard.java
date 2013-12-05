@@ -505,7 +505,7 @@ public final class Switchboard extends serverSwitch {
             this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             try {this.index.fulltext().connectLocalSolr();} catch (final IOException e) {ConcurrentLog.logException(e);}
         }
-        this.index.fulltext().writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
+        this.index.fulltext().setUseWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
@@ -1328,7 +1328,7 @@ public final class Switchboard extends serverSwitch {
                 this.index.fulltext().connectLocalSolr();
                 this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             }
-            this.index.fulltext().writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
+            this.index.fulltext().setUseWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 
             // set up the solr interface
             final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
@@ -2292,46 +2292,15 @@ public final class Switchboard extends serverSwitch {
                 
                 // we optimize first because that is useful for postprocessing
                 int proccount = 0;
-                boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
-                if (allCrawlsFinished) {
-                    postprocessingRunning = true;
-                    // flush caches
-                    Domains.clear();
-                    this.crawlQueues.noticeURL.clear();
-                    
-                    // do solr optimization
-                    long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
-                    long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
-                    long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
-                    boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
-                    int opts = Math.max(1, (int) (fulltext.collectionSize() / 5000000));
-                    
-                    log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
-                    if (idleAdmin > 600000) {
-                        // only run optimization if the admin is idle (10 minutes)
-                        if (proccount > 0) {
-                            opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
-                            optimizeRequired = true;
-                        }
-                        if (optimizeRequired) {
-                            if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
-                            log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
-                            fulltext.optimize(opts);
-                            this.optimizeLastRun = System.currentTimeMillis();
-                        }
-                    }
-                }
-                
                 ReferenceReportCache rrCache = index.getReferenceReportCache();
                 ClickdepthCache clickdepthCache = index.getClickdepthCache(rrCache);
                 Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
                         this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
                 int cleanupByHarvestkey = deletionCandidates.size();
-                boolean processCollection =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.writeToWebgraph());
-                boolean processWebgraph =  webgraphConfiguration.contains(WebgraphSchema.process_sxt) && fulltext.writeToWebgraph();
+                boolean processCollection =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.useWebgraph());
+                boolean processWebgraph =  webgraphConfiguration.contains(WebgraphSchema.process_sxt) && fulltext.useWebgraph();
+                boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
                 if ((processCollection || processWebgraph) && (cleanupByHarvestkey > 0 || allCrawlsFinished)) {
-                    //full optimization of webgraph, if exists
-                    if (fulltext.writeToWebgraph()) fulltext.getWebgraphConnector().optimize(1);
                     if (cleanupByHarvestkey > 0) {
                         // run postprocessing on these profiles
                         postprocessingRunning = true;
@@ -2371,6 +2340,34 @@ public final class Switchboard extends serverSwitch {
                     }
                 }
                 this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
+                if (allCrawlsFinished) {
+                    postprocessingRunning = true;
+                    // flush caches
+                    Domains.clear();
+                    this.crawlQueues.noticeURL.clear();
+                    
+                    // do solr optimization
+                    long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
+                    long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
+                    long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
+                    boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
+                    int opts = Math.max(1, (int) (fulltext.collectionSize() / 5000000));
+                    
+                    log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
+                    if (idleAdmin > 600000) {
+                        // only run optimization if the admin is idle (10 minutes)
+                        if (proccount > 0) {
+                            opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
+                            optimizeRequired = true;
+                        }
+                        if (optimizeRequired) {
+                            if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
+                            log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
+                            fulltext.optimize(opts);
+                            this.optimizeLastRun = System.currentTimeMillis();
+                        }
+                    }
+                }
                 postprocessingStartTime = new long[]{0,0}; // the start time for the processing; not started = 0                
                 postprocessingRunning = false;
             }

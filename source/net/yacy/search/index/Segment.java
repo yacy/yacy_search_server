@@ -143,7 +143,7 @@ public class Segment {
                 new String[] {},
                 this,
                 "putDocument",
-                10,
+                30,
                 null,
                 1);
     }
@@ -382,9 +382,9 @@ public class Segment {
                 }
             } catch (SpaceExceededException e) {
                 // the Citation Index got too large, we ignore the problem and hope that a second solr index is attached which will take over now
-                if (Segment.this.fulltext.writeToWebgraph()) internalIDs.clear();
+                if (Segment.this.fulltext.useWebgraph()) internalIDs.clear();
             }
-            if ((internalIDs.size() == 0 || !connectedCitation()) && Segment.this.fulltext.writeToWebgraph()) {
+            if ((internalIDs.size() == 0 || !connectedCitation()) && Segment.this.fulltext.useWebgraph()) {
                 // reqd the references from the webgraph
                 SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
                 BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), 0, 10000000, 1000, 100, WebgraphSchema.source_id_s.getSolrFieldName());
@@ -663,9 +663,8 @@ public class Segment {
         final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, this.fulltext.getWebgraphConfiguration(), sourceName);
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
-        if (this.connectedCitation()) {
-            this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);
-        }
+        this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);
+        
         // STORE TO SOLR
         String error = null;
         this.putDocumentInQueue(vector);
@@ -673,7 +672,7 @@ public class Segment {
         if (webgraph != null && webgraph.size() > 0) {
             
             // write the edges to the webgraph solr index
-            if (this.fulltext.writeToWebgraph()) {
+            if (this.fulltext.useWebgraph()) {
                 tryloop: for (int i = 0; i < 20; i++) {
                     try {
                         error = null;

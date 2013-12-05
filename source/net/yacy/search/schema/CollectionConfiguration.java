@@ -328,6 +328,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
     
+    /**
+     * a SolrVector is a SolrInputDocument with the ability
+     * to store also the webgraph that is associated with
+     * the web document in the Solr document.
+     */
     public static class SolrVector extends SolrInputDocument {
         private static final long serialVersionUID = -210901881471714939L;
         private List<SolrInputDocument> webgraphDocuments;
@@ -891,19 +896,35 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      */
     public int postprocessing(final Segment segment, ReferenceReportCache rrCache, ClickdepthCache clickdepthCache, String harvestkey) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
-        if (!segment.connectedCitation() && !segment.fulltext().writeToWebgraph()) return 0;
+        if (!segment.connectedCitation() && !segment.fulltext().useWebgraph()) return 0;
         SolrConnector collectionConnector = segment.fulltext().getDefaultConnector();
-        SolrConnector webgraphConnector = segment.fulltext().getWebgraphConnector();
         collectionConnector.commit(false); // make sure that we have latest information that can be found
-        if (webgraphConnector != null) webgraphConnector.commit(false);
-        Map<byte[], CRV> ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
-        ReversibleScoreMap<String> hostscore = null;
+        if (segment.fulltext().useWebgraph()) segment.fulltext().getWebgraphConnector().commit(false);
+        CollectionConfiguration collection = segment.fulltext().getDefaultConfiguration();
+        WebgraphConfiguration webgraph = segment.fulltext().getWebgraphConfiguration();
+        
+ 
+        // collect hosts from index which shall take part in citation computation
+        String query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString();
+        ReversibleScoreMap<String> hostscore;
         try {
-            // collect hosts from index which shall take part in citation computation
-            String query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-                    CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString();
             hostscore = collectionConnector.getFacets(query, 10000000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+        } catch (final IOException e2) {
+            ConcurrentLog.logException(e2);
+            hostscore = new ClusteredScoreMap<String>();
+        }
+        
+        // create the ranking map
+        Map<byte[], CRV> ranking = null;
+        if ((segment.fulltext().useWebgraph() &&
+             ((webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) ||
+              (webgraph.contains(WebgraphSchema.target_id_s) && webgraph.contains(WebgraphSchema.target_cr_host_norm_i))) ||
+            (collection.contains(CollectionSchema.cr_host_count_i) &&
+             collection.contains(CollectionSchema.cr_host_chance_d) &&
+             collection.contains(CollectionSchema.cr_host_norm_i)))) try {
             ConcurrentLog.info("CollectionConfiguration", "collecting " + hostscore.size() + " hosts");
+            ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
             int countcheck = 0;
             for (String host: hostscore.keyList(true)) {
                 // Patch the citation index for links with canonical tags.
@@ -961,40 +982,42 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             if (hostscore.size() != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous host count: expected=" + hostscore.size() + ", counted=" + countcheck);
         } catch (final IOException e2) {
+            ConcurrentLog.logException(e2);
             hostscore = new ClusteredScoreMap<String>();
         }
         
         // process all documents at the webgraph for the outgoing links of this document
         SolrDocument doc;
-        if (webgraphConnector != null) {
+        if (segment.fulltext().useWebgraph()) {
             try {
                 for (String host: hostscore.keyList(true)) {
                     if (hostscore.get(host) <= 0) continue;
                     // select all webgraph edges and modify their cr value
-                    String query = "{!raw f=" + WebgraphSchema.source_host_s.getSolrFieldName() + "}" + host;
-                    long count = webgraphConnector.getCountByQuery(query);
+                    query = "{!raw f=" + WebgraphSchema.source_host_s.getSolrFieldName() + "}" + host;
+                    long count = segment.fulltext().getWebgraphConnector().getCountByQuery(query);
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph");
-                    BlockingQueue<SolrDocument> docs = webgraphConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
+                    BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
                     int countcheck = 0;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                        boolean changed = false;
-                        SolrInputDocument sid = segment.fulltext().getWebgraphConfiguration().toSolrInputDocument(doc, null);
-                        byte[] id = ASCII.getBytes((String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName()));
-                        CRV crv = ranking.get(id);
-                        if (crv != null) {
-                            sid.setField(WebgraphSchema.source_cr_host_norm_i.getSolrFieldName(), crv.crn);
-                            changed = true;
+                        SolrInputDocument sid = webgraph.toSolrInputDocument(doc, null);
+                        if (webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) {
+                            byte[] id = ASCII.getBytes((String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName()));
+                            CRV crv = ranking.get(id);
+                            if (crv != null) {
+                                sid.setField(WebgraphSchema.source_cr_host_norm_i.getSolrFieldName(), crv.crn);
+                            }
                         }
-                        id = ASCII.getBytes((String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName()));
-                        crv = ranking.get(id);
-                        if (crv != null) {
-                            sid.setField(WebgraphSchema.target_cr_host_norm_i.getSolrFieldName(), crv.crn);
-                            changed = true;
+                        if (webgraph.contains(WebgraphSchema.target_id_s) && webgraph.contains(WebgraphSchema.target_cr_host_norm_i)) {
+                            byte[] id = ASCII.getBytes((String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName()));
+                            CRV crv = ranking.get(id);
+                            if (crv != null) {
+                                sid.setField(WebgraphSchema.target_cr_host_norm_i.getSolrFieldName(), crv.crn);
+                            }
                         }
-                        if (changed) try {
+                        try {
                             sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
                             sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
-                            webgraphConnector.add(sid);
+                            segment.fulltext().getWebgraphConnector().add(sid);
                         } catch (SolrException e) {
                             ConcurrentLog.logException(e);
                         } catch (IOException e) {
@@ -1012,7 +1035,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         // process all documents in collection
-        String query = (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+        query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
                 CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]";
         int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
         Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
@@ -1039,7 +1062,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             if (postprocessing_clickdepth(clickdepthCache, sid, url, CollectionSchema.clickdepth_i, 100)) proccount_clickdepthchange++;
                         }
 
-                        if (tagtype == ProcessType.CITATION) {
+                        if (tagtype == ProcessType.CITATION &&
+                            collection.contains(CollectionSchema.cr_host_count_i) &&
+                            collection.contains(CollectionSchema.cr_host_chance_d) &&
+                            collection.contains(CollectionSchema.cr_host_norm_i)) {
                             CRV crv = ranking.get(id);
                             if (crv != null) {
                                 sid.setField(CollectionSchema.cr_host_count_i.getSolrFieldName(), crv.count);

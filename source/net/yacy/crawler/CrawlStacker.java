@@ -57,7 +57,6 @@ import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -138,11 +137,14 @@ public final class CrawlStacker {
 
         // record the link graph for this request; this can be overwritten, replaced and enhanced by an index writing process in Segment.storeDocument
         byte[] anchorhash = entry.url().hash();
-        IndexCell<CitationReference> urlCitationIndex = this.indexSegment.urlCitation();
-        if (urlCitationIndex != null && entry.referrerhash() != null) try {
-            urlCitationIndex.add(anchorhash, new CitationReference(entry.referrerhash(), entry.appdate().getTime()));
-        } catch (final Exception e) {
-            ConcurrentLog.logException(e);
+        if (entry.referrerhash() != null) {
+            if (this.indexSegment.connectedCitation()) try {
+                this.indexSegment.urlCitation().add(anchorhash, new CitationReference(entry.referrerhash(), entry.appdate().getTime()));
+            } catch (final Exception e) {
+                ConcurrentLog.logException(e);
+            }
+            
+            // TODO: write to webgraph??
         }
         
         try {

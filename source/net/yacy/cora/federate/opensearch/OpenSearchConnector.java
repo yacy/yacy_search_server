@@ -181,12 +181,12 @@ public class OpenSearchConnector {
         if (sb == null) {
             return false;
         }
-        final SolrConnector connector = sb.index.fulltext().writeToWebgraph() ? null : sb.index.fulltext().getWebgraphConnector();
         // check if needed Solr fields are available (selected)
-        if (connector == null) {
+        if (!sb.index.fulltext().useWebgraph()) {
             ConcurrentLog.severe("OpenSearchConnector.Discover", "Error on connecting to embedded Solr webgraph index");
             return false;
         }
+        final SolrConnector connector = sb.index.fulltext().getWebgraphConnector();
         final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name()) 
                 && ( sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()) ) 
                 && sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);

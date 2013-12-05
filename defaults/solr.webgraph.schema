@@ -75,7 +75,7 @@ source_id_s
 #source_clickdepth_i
 
 ## copy of the citation rank norm value from the source link
-source_cr_host_norm_i
+#source_cr_host_norm_i
 
 
 ## host of the url (source)
@@ -176,7 +176,7 @@ target_path_folders_sxt
 #target_clickdepth_i
 
 ## copy of the citation rank norm value from the target link; this is only filled if the target host is identical to the source host
-target_cr_host_norm_i
+#target_cr_host_norm_i
 
 
 ## host of the url (target)

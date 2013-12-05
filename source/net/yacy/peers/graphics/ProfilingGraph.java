@@ -55,7 +55,7 @@ public class ProfilingGraph {
         return max;
     }
 
-    public static RasterPlotter performanceGraph(final int width, final int height, final String subline, final boolean showMemory) {
+    public static RasterPlotter performanceGraph(final int width, final int height, final String subline, final boolean showMemory, final boolean showPeers) {
         // find maximum values for automatic graph dimension adoption
         final int maxppm = (int) maxPayload(EventTracker.EClass.PPM, 25);
         final int maxwords = (int) maxPayload(EventTracker.EClass.WORDCACHE, 12000);
@@ -171,22 +171,24 @@ public class ProfilingGraph {
             }
 
             // draw peer ping
-            events = EventTracker.getHistory(EventTracker.EClass.PEERPING);
-            x0 = 1; y0 = 0;
-            if (events != null) {
-                EventTracker.Event event;
-                EventPing ping;
-                String pingPeer;
-                while (events.hasNext()) {
-                    event = events.next();
-                    time = event.time - now;
-                    ping = (EventPing) event.payload;
-                    x1 = (int) (time/1000);
-                    y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;
-                    pingPeer = ping.outgoing ? "-> " + ping.toPeer.toUpperCase() : "<- " + ping.fromPeer.toUpperCase();
-                    chart.setColor(Long.parseLong("444444", 16));
-                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT2, x1, y1, 2, pingPeer + (ping.newPeers > 0 ? "(+" + ping.newPeers + ")" : ""), 0);
-                    x0 = x1; y0 = y1;
+            if (showPeers) {
+                events = EventTracker.getHistory(EventTracker.EClass.PEERPING);
+                x0 = 1; y0 = 0;
+                if (events != null) {
+                    EventTracker.Event event;
+                    EventPing ping;
+                    String pingPeer;
+                    while (events.hasNext()) {
+                        event = events.next();
+                        time = event.time - now;
+                        ping = (EventPing) event.payload;
+                        x1 = (int) (time/1000);
+                        y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;
+                        pingPeer = ping.outgoing ? "-> " + ping.toPeer.toUpperCase() : "<- " + ping.fromPeer.toUpperCase();
+                        chart.setColor(Long.parseLong("9999AA", 16));
+                        chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT2, x1, y1, 2, pingPeer + (ping.newPeers > 0 ? "(+" + ping.newPeers + ")" : ""), 0);
+                        x0 = x1; y0 = y1;
+                    }
                 }
             }
 

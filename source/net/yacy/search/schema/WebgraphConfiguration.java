@@ -120,185 +120,198 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
             final String sourceName) {
         boolean allAttr = this.isEmpty();
+        boolean generalNofollow = responseHeader == null ? false : responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
         int target_order = 0;
-        boolean generalNofollow = responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
         for (final AnchorURL target_url: links) {
-
-            Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
-            
-            final String name = target_url.getNameProperty(); // the name attribute
-            final String text = target_url.getTextProperty(); // the text between the <a></a> tag
-            String rel = target_url.getRelProperty();         // the rel-attribute
-            int ioidx = inbound ? 0 : 1;
-            if (generalNofollow) {
-                // patch the rel attribute since the header makes nofollow valid for all links
-                if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
-            }
-            
-            // index organization
-            StringBuilder idi = new StringBuilder(8);
-            idi.append(Integer.toHexString((name + text + rel).hashCode()).toLowerCase());
-            while (idi.length() < 8) idi.insert(0, '0');
-            String source_id = ASCII.String(source.hash());
-            String target_id = ASCII.String(target_url.hash());
-            StringBuilder id = new StringBuilder(source_id).append(target_id).append(idi);
-            SolrInputDocument edge = new SolrInputDocument();
-            add(edge, WebgraphSchema.id, id.toString());
-            add(edge, WebgraphSchema.target_order_i, target_order++);
-            if (allAttr || contains(WebgraphSchema.load_date_dt)) {
-                Date loadDate = new Date();
-                Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
-                if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
-                add(edge, WebgraphSchema.load_date_dt, loadDate);
-            }
-            if (allAttr || contains(WebgraphSchema.last_modified)) add(edge, WebgraphSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
-            final String source_url_string = source.toNormalform(false);
-            if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.size() > 0) {
-                List<String> cs = new ArrayList<String>();
-                for (Map.Entry<String, Pattern> e: collections.entrySet()) {
-                    if (e.getValue().matcher(source_url_string).matches()) cs.add(e.getKey());
-                }
-                add(edge, WebgraphSchema.collection_sxt, cs);
-            }
-
-            // add the source attributes
-            add(edge, WebgraphSchema.source_id_s, source_id);
-            int pr_source = source_url_string.indexOf("://",0);
-            if (allAttr || contains(WebgraphSchema.source_protocol_s)) add(edge, WebgraphSchema.source_protocol_s, source_url_string.substring(0, pr_source));
-            if (allAttr || contains(WebgraphSchema.source_urlstub_s)) add(edge, WebgraphSchema.source_urlstub_s, source_url_string.substring(pr_source + 3));
-            Map<String, String> source_searchpart = source.getSearchpartMap();
-            if (source_searchpart == null) {
-                if (allAttr || contains(WebgraphSchema.source_parameter_count_i)) add(edge, WebgraphSchema.source_parameter_count_i, 0);
-            } else {
-                if (allAttr || contains(WebgraphSchema.source_parameter_count_i)) add(edge, WebgraphSchema.source_parameter_count_i, source_searchpart.size());
-                if (allAttr || contains(WebgraphSchema.source_parameter_key_sxt)) add(edge, WebgraphSchema.source_parameter_key_sxt, source_searchpart.keySet().toArray(new String[source_searchpart.size()]));
-                if (allAttr || contains(WebgraphSchema.source_parameter_value_sxt)) add(edge, WebgraphSchema.source_parameter_value_sxt, source_searchpart.values().toArray(new String[source_searchpart.size()]));
-            }
-            if (allAttr || contains(WebgraphSchema.source_chars_i)) add(edge, WebgraphSchema.source_chars_i, source_url_string.length());
-            String source_host = null;
-            if ((source_host = source.getHost()) != null) {
-                String dnc = Domains.getDNC(source_host);
-                String subdomOrga = source_host.length() - dnc.length() <= 0 ? "" : source_host.substring(0, source_host.length() - dnc.length() - 1);
-                int pp = subdomOrga.lastIndexOf('.');
-                String subdom = (pp < 0) ? "" : subdomOrga.substring(0, pp);
-                String orga = (pp < 0) ? subdomOrga : subdomOrga.substring(pp + 1);
-                if (allAttr || contains(WebgraphSchema.source_host_s)) add(edge, WebgraphSchema.source_host_s, source_host);
-                if (allAttr || contains(WebgraphSchema.source_host_id_s)) add(edge, WebgraphSchema.source_host_id_s, source.hosthash());
-                if (allAttr || contains(WebgraphSchema.source_host_dnc_s)) add(edge, WebgraphSchema.source_host_dnc_s, dnc);
-                if (allAttr || contains(WebgraphSchema.source_host_organization_s)) add(edge, WebgraphSchema.source_host_organization_s, orga);
-                if (allAttr || contains(WebgraphSchema.source_host_organizationdnc_s)) add(edge, WebgraphSchema.source_host_organizationdnc_s, orga + '.' + dnc);
-                if (allAttr || contains(WebgraphSchema.source_host_subdomain_s)) add(edge, WebgraphSchema.source_host_subdomain_s, subdom);
-            }
-            if (allAttr || contains(WebgraphSchema.source_file_ext_s) || contains(WebgraphSchema.source_file_name_s)) {
-                String source_file_name = source.getFileName();
-                String source_file_ext = MultiProtocolURL.getFileExtension(source_file_name);
-                add(edge, WebgraphSchema.source_file_name_s, source_file_name.toLowerCase().endsWith("." + source_file_ext) ? source_file_name.substring(0, source_file_name.length() - source_file_ext.length() - 1) : source_file_name);
-                add(edge, WebgraphSchema.source_file_ext_s, source_file_ext);
-            }
-            if (allAttr || contains(WebgraphSchema.source_path_s)) add(edge, WebgraphSchema.source_path_s, source.getPath());
-            if (allAttr || contains(WebgraphSchema.source_path_folders_count_i) || contains(WebgraphSchema.source_path_folders_sxt)) {
-                String[] paths = source.getPaths();
-                add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
-                add(edge, WebgraphSchema.source_path_folders_sxt, paths);
-            }
-            if (this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
-                add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
-                if (clickdepth_source < 0 || clickdepth_source > 1) processTypes.add(ProcessType.CLICKDEPTH);
-            }
-            
-            // add the source attributes about the target
-            if (allAttr || contains(WebgraphSchema.target_inbound_b)) add(edge, WebgraphSchema.target_inbound_b, inbound);
-            if (allAttr || contains(WebgraphSchema.target_name_t)) add(edge, WebgraphSchema.target_name_t, name.length() > 0 ? name : "");
-            if (allAttr || contains(WebgraphSchema.target_rel_s)) add(edge, WebgraphSchema.target_rel_s, rel.length() > 0 ? rel : "");
-            if (allAttr || contains(WebgraphSchema.target_relflags_i)) add(edge, WebgraphSchema.target_relflags_i, relEval(rel.length() > 0 ? rel : ""));
-            if (allAttr || contains(WebgraphSchema.target_linktext_t)) add(edge, WebgraphSchema.target_linktext_t, text.length() > 0 ? text : "");
-            if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, text.length());
-            if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
-            
-            ImageEntry ientry = null;
-            for (ImageEntry ie: images) {
-                if (ie.linkurl() != null && ie.linkurl().equals(target_url)) {ientry = ie; break;}
-            }
-            String alttext = ientry == null ? "" : ientry.alt();
-            if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, alttext);
-            if (allAttr || contains(WebgraphSchema.target_alt_charcount_i)) add(edge, WebgraphSchema.target_alt_charcount_i, alttext.length());
-            if (allAttr || contains(WebgraphSchema.target_alt_wordcount_i)) add(edge, WebgraphSchema.target_alt_wordcount_i, alttext.length() > 0 ? CommonPattern.SPACE.split(alttext).length : 0);
-            
-            // add the target attributes            
-            add(edge, WebgraphSchema.target_id_s, target_id);
-            final String target_url_string = target_url.toNormalform(false);
-            int pr_target = target_url_string.indexOf("://",0);
-            subgraph.urlProtocols[ioidx].add(target_url_string.substring(0, pr_target));
-            subgraph.urlStubs[ioidx].add(target_url_string.substring(pr_target + 3));
-            subgraph.urlAnchorTexts[ioidx].add(text);
-            if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
-            if (allAttr || contains(WebgraphSchema.target_urlstub_s)) add(edge, WebgraphSchema.target_urlstub_s, target_url_string.substring(pr_target + 3));
-            Map<String, String> target_searchpart = target_url.getSearchpartMap();
-            if (target_searchpart == null) {
-                if (allAttr || contains(WebgraphSchema.target_parameter_count_i)) add(edge, WebgraphSchema.target_parameter_count_i, 0);
-            } else {
-                if (allAttr || contains(WebgraphSchema.target_parameter_count_i)) add(edge, WebgraphSchema.target_parameter_count_i, target_searchpart.size());
-                if (allAttr || contains(WebgraphSchema.target_parameter_key_sxt)) add(edge, WebgraphSchema.target_parameter_key_sxt, target_searchpart.keySet().toArray(new String[target_searchpart.size()]));
-                if (allAttr || contains(WebgraphSchema.target_parameter_value_sxt)) add(edge, WebgraphSchema.target_parameter_value_sxt,  target_searchpart.values().toArray(new String[target_searchpart.size()]));
-            }
-            if (allAttr || contains(WebgraphSchema.target_chars_i)) add(edge, WebgraphSchema.target_chars_i, target_url_string.length());
-            String target_host = null;
-            if ((target_host = target_url.getHost()) != null) {
-                String dnc = Domains.getDNC(target_host);
-                String subdomOrga = target_host.length() - dnc.length() <= 0 ? "" : target_host.substring(0, target_host.length() - dnc.length() - 1);
-                int pp = subdomOrga.lastIndexOf('.');
-                String subdom = (pp < 0) ? "" : subdomOrga.substring(0, pp);
-                String orga = (pp < 0) ? subdomOrga : subdomOrga.substring(pp + 1);
-                if (allAttr || contains(WebgraphSchema.target_host_s)) add(edge, WebgraphSchema.target_host_s, target_host);
-                if (allAttr || contains(WebgraphSchema.target_host_id_s)) add(edge, WebgraphSchema.target_host_id_s, target_url.hosthash());
-                if (allAttr || contains(WebgraphSchema.target_host_dnc_s)) add(edge, WebgraphSchema.target_host_dnc_s, dnc);
-                if (allAttr || contains(WebgraphSchema.target_host_organization_s)) add(edge, WebgraphSchema.target_host_organization_s, orga);
-                if (allAttr || contains(WebgraphSchema.target_host_organizationdnc_s)) add(edge, WebgraphSchema.target_host_organizationdnc_s, orga + '.' + dnc);
-                if (allAttr || contains(WebgraphSchema.target_host_subdomain_s)) add(edge, WebgraphSchema.target_host_subdomain_s, subdom);
-            }
-            if (allAttr || contains(WebgraphSchema.target_file_ext_s) || contains(WebgraphSchema.target_file_name_s)) {
-                String target_file_name = target_url.getFileName();
-                String target_file_ext = MultiProtocolURL.getFileExtension(target_file_name);
-                add(edge, WebgraphSchema.target_file_name_s, target_file_name.toLowerCase().endsWith("." + target_file_ext) ? target_file_name.substring(0, target_file_name.length() - target_file_ext.length() - 1) : target_file_name);
-                add(edge, WebgraphSchema.target_file_ext_s, target_file_ext);
-            }
-            if (allAttr || contains(WebgraphSchema.target_path_s)) add(edge, WebgraphSchema.target_path_s, target_url.getPath());
-            if (allAttr || contains(WebgraphSchema.target_path_folders_count_i) || contains(WebgraphSchema.target_path_folders_sxt)) {
-                String[] paths = target_url.getPaths();
-                add(edge, WebgraphSchema.target_path_folders_count_i, paths.length);
-                add(edge, WebgraphSchema.target_path_folders_sxt, paths);
-            }
-
-            if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
-                if ((allAttr || contains(WebgraphSchema.target_clickdepth_i))) {
-                    if (target_url.probablyRootURL()) {
-                        boolean lc = this.lazy; this.lazy = false;
-                        add(edge, WebgraphSchema.target_clickdepth_i, 0);
-                        this.lazy = lc;
-                    } else {
-                        add(edge, WebgraphSchema.target_clickdepth_i, 999);
-                        processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
-                    }
-                }
-            }
-            
-            if (allAttr || contains(WebgraphSchema.process_sxt)) {
-                List<String> pr = new ArrayList<String>();
-                for (ProcessType t: processTypes) pr.add(t.name());
-                add(edge, WebgraphSchema.process_sxt, pr);
-                if (allAttr || contains(CollectionSchema.harvestkey_s)) {
-                    add(edge, CollectionSchema.harvestkey_s, sourceName);
-                }
-            }
-            
+            SolrInputDocument edge = getEdge(
+                    subgraph, source, responseHeader, collections, clickdepth_source, images, inbound,
+                    sourceName, allAttr, generalNofollow, target_order, target_url);
+            target_order++;
             // add the edge to the subgraph
             subgraph.edges.add(edge);
         }
     }
     
+    public SolrInputDocument getEdge(
+            final Subgraph subgraph,
+            final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
+            final List<ImageEntry> images, final boolean inbound,
+            final String sourceName, boolean allAttr, boolean generalNofollow, int target_order, AnchorURL target_url) {
+
+        Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
+        final String name = target_url.getNameProperty(); // the name attribute
+        final String text = target_url.getTextProperty(); // the text between the <a></a> tag
+        String rel = target_url.getRelProperty();         // the rel-attribute
+        int ioidx = inbound ? 0 : 1;
+        if (generalNofollow) {
+            // patch the rel attribute since the header makes nofollow valid for all links
+            if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
+        }
+        
+        // index organization
+        StringBuilder idi = new StringBuilder(8);
+        idi.append(Integer.toHexString((name + text + rel).hashCode()).toLowerCase());
+        while (idi.length() < 8) idi.insert(0, '0');
+        String source_id = ASCII.String(source.hash());
+        String target_id = ASCII.String(target_url.hash());
+        StringBuilder id = new StringBuilder(source_id).append(target_id).append(idi);
+        SolrInputDocument edge = new SolrInputDocument();
+        add(edge, WebgraphSchema.id, id.toString());
+        add(edge, WebgraphSchema.target_order_i, target_order);
+        if (allAttr || contains(WebgraphSchema.load_date_dt)) {
+            Date loadDate = new Date();
+            Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
+            if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
+            add(edge, WebgraphSchema.load_date_dt, loadDate);
+        }
+        if (allAttr || contains(WebgraphSchema.last_modified)) add(edge, WebgraphSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
+        final String source_url_string = source.toNormalform(false);
+        if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.size() > 0) {
+            List<String> cs = new ArrayList<String>();
+            for (Map.Entry<String, Pattern> e: collections.entrySet()) {
+                if (e.getValue().matcher(source_url_string).matches()) cs.add(e.getKey());
+            }
+            add(edge, WebgraphSchema.collection_sxt, cs);
+        }
+
+        // add the source attributes
+        add(edge, WebgraphSchema.source_id_s, source_id);
+        int pr_source = source_url_string.indexOf("://",0);
+        if (allAttr || contains(WebgraphSchema.source_protocol_s)) add(edge, WebgraphSchema.source_protocol_s, source_url_string.substring(0, pr_source));
+        if (allAttr || contains(WebgraphSchema.source_urlstub_s)) add(edge, WebgraphSchema.source_urlstub_s, source_url_string.substring(pr_source + 3));
+        Map<String, String> source_searchpart = source.getSearchpartMap();
+        if (source_searchpart == null) {
+            if (allAttr || contains(WebgraphSchema.source_parameter_count_i)) add(edge, WebgraphSchema.source_parameter_count_i, 0);
+        } else {
+            if (allAttr || contains(WebgraphSchema.source_parameter_count_i)) add(edge, WebgraphSchema.source_parameter_count_i, source_searchpart.size());
+            if (allAttr || contains(WebgraphSchema.source_parameter_key_sxt)) add(edge, WebgraphSchema.source_parameter_key_sxt, source_searchpart.keySet().toArray(new String[source_searchpart.size()]));
+            if (allAttr || contains(WebgraphSchema.source_parameter_value_sxt)) add(edge, WebgraphSchema.source_parameter_value_sxt, source_searchpart.values().toArray(new String[source_searchpart.size()]));
+        }
+        if (allAttr || contains(WebgraphSchema.source_chars_i)) add(edge, WebgraphSchema.source_chars_i, source_url_string.length());
+        String source_host = null;
+        if ((source_host = source.getHost()) != null) {
+            String dnc = Domains.getDNC(source_host);
+            String subdomOrga = source_host.length() - dnc.length() <= 0 ? "" : source_host.substring(0, source_host.length() - dnc.length() - 1);
+            int pp = subdomOrga.lastIndexOf('.');
+            String subdom = (pp < 0) ? "" : subdomOrga.substring(0, pp);
+            String orga = (pp < 0) ? subdomOrga : subdomOrga.substring(pp + 1);
+            if (allAttr || contains(WebgraphSchema.source_host_s)) add(edge, WebgraphSchema.source_host_s, source_host);
+            if (allAttr || contains(WebgraphSchema.source_host_id_s)) add(edge, WebgraphSchema.source_host_id_s, source.hosthash());
+            if (allAttr || contains(WebgraphSchema.source_host_dnc_s)) add(edge, WebgraphSchema.source_host_dnc_s, dnc);
+            if (allAttr || contains(WebgraphSchema.source_host_organization_s)) add(edge, WebgraphSchema.source_host_organization_s, orga);
+            if (allAttr || contains(WebgraphSchema.source_host_organizationdnc_s)) add(edge, WebgraphSchema.source_host_organizationdnc_s, orga + '.' + dnc);
+            if (allAttr || contains(WebgraphSchema.source_host_subdomain_s)) add(edge, WebgraphSchema.source_host_subdomain_s, subdom);
+        }
+        if (allAttr || contains(WebgraphSchema.source_file_ext_s) || contains(WebgraphSchema.source_file_name_s)) {
+            String source_file_name = source.getFileName();
+            String source_file_ext = MultiProtocolURL.getFileExtension(source_file_name);
+            add(edge, WebgraphSchema.source_file_name_s, source_file_name.toLowerCase().endsWith("." + source_file_ext) ? source_file_name.substring(0, source_file_name.length() - source_file_ext.length() - 1) : source_file_name);
+            add(edge, WebgraphSchema.source_file_ext_s, source_file_ext);
+        }
+        if (allAttr || contains(WebgraphSchema.source_path_s)) add(edge, WebgraphSchema.source_path_s, source.getPath());
+        if (allAttr || contains(WebgraphSchema.source_path_folders_count_i) || contains(WebgraphSchema.source_path_folders_sxt)) {
+            String[] paths = source.getPaths();
+            add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
+            add(edge, WebgraphSchema.source_path_folders_sxt, paths);
+        }
+        if (this.contains(WebgraphSchema.source_clickdepth_i) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+            add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
+            if (clickdepth_source < 0 || clickdepth_source > 1) processTypes.add(ProcessType.CLICKDEPTH);
+        }
+        
+        // add the source attributes about the target
+        if (allAttr || contains(WebgraphSchema.target_inbound_b)) add(edge, WebgraphSchema.target_inbound_b, inbound);
+        if (allAttr || contains(WebgraphSchema.target_name_t)) add(edge, WebgraphSchema.target_name_t, name.length() > 0 ? name : "");
+        if (allAttr || contains(WebgraphSchema.target_rel_s)) add(edge, WebgraphSchema.target_rel_s, rel.length() > 0 ? rel : "");
+        if (allAttr || contains(WebgraphSchema.target_relflags_i)) add(edge, WebgraphSchema.target_relflags_i, relEval(rel.length() > 0 ? rel : ""));
+        if (allAttr || contains(WebgraphSchema.target_linktext_t)) add(edge, WebgraphSchema.target_linktext_t, text.length() > 0 ? text : "");
+        if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, text.length());
+        if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
+        
+        ImageEntry ientry = null;
+        for (ImageEntry ie: images) {
+            if (ie.linkurl() != null && ie.linkurl().equals(target_url)) {ientry = ie; break;}
+        }
+        String alttext = ientry == null ? "" : ientry.alt();
+        if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, alttext);
+        if (allAttr || contains(WebgraphSchema.target_alt_charcount_i)) add(edge, WebgraphSchema.target_alt_charcount_i, alttext.length());
+        if (allAttr || contains(WebgraphSchema.target_alt_wordcount_i)) add(edge, WebgraphSchema.target_alt_wordcount_i, alttext.length() > 0 ? CommonPattern.SPACE.split(alttext).length : 0);
+        
+        // add the target attributes            
+        add(edge, WebgraphSchema.target_id_s, target_id);
+        final String target_url_string = target_url.toNormalform(false);
+        int pr_target = target_url_string.indexOf("://",0);
+        subgraph.urlProtocols[ioidx].add(target_url_string.substring(0, pr_target));
+        subgraph.urlStubs[ioidx].add(target_url_string.substring(pr_target + 3));
+        subgraph.urlAnchorTexts[ioidx].add(text);
+        if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
+        if (allAttr || contains(WebgraphSchema.target_urlstub_s)) add(edge, WebgraphSchema.target_urlstub_s, target_url_string.substring(pr_target + 3));
+        Map<String, String> target_searchpart = target_url.getSearchpartMap();
+        if (target_searchpart == null) {
+            if (allAttr || contains(WebgraphSchema.target_parameter_count_i)) add(edge, WebgraphSchema.target_parameter_count_i, 0);
+        } else {
+            if (allAttr || contains(WebgraphSchema.target_parameter_count_i)) add(edge, WebgraphSchema.target_parameter_count_i, target_searchpart.size());
+            if (allAttr || contains(WebgraphSchema.target_parameter_key_sxt)) add(edge, WebgraphSchema.target_parameter_key_sxt, target_searchpart.keySet().toArray(new String[target_searchpart.size()]));
+            if (allAttr || contains(WebgraphSchema.target_parameter_value_sxt)) add(edge, WebgraphSchema.target_parameter_value_sxt,  target_searchpart.values().toArray(new String[target_searchpart.size()]));
+        }
+        if (allAttr || contains(WebgraphSchema.target_chars_i)) add(edge, WebgraphSchema.target_chars_i, target_url_string.length());
+        String target_host = null;
+        if ((target_host = target_url.getHost()) != null) {
+            String dnc = Domains.getDNC(target_host);
+            String subdomOrga = target_host.length() - dnc.length() <= 0 ? "" : target_host.substring(0, target_host.length() - dnc.length() - 1);
+            int pp = subdomOrga.lastIndexOf('.');
+            String subdom = (pp < 0) ? "" : subdomOrga.substring(0, pp);
+            String orga = (pp < 0) ? subdomOrga : subdomOrga.substring(pp + 1);
+            if (allAttr || contains(WebgraphSchema.target_host_s)) add(edge, WebgraphSchema.target_host_s, target_host);
+            if (allAttr || contains(WebgraphSchema.target_host_id_s)) add(edge, WebgraphSchema.target_host_id_s, target_url.hosthash());
+            if (allAttr || contains(WebgraphSchema.target_host_dnc_s)) add(edge, WebgraphSchema.target_host_dnc_s, dnc);
+            if (allAttr || contains(WebgraphSchema.target_host_organization_s)) add(edge, WebgraphSchema.target_host_organization_s, orga);
+            if (allAttr || contains(WebgraphSchema.target_host_organizationdnc_s)) add(edge, WebgraphSchema.target_host_organizationdnc_s, orga + '.' + dnc);
+            if (allAttr || contains(WebgraphSchema.target_host_subdomain_s)) add(edge, WebgraphSchema.target_host_subdomain_s, subdom);
+        }
+        if (allAttr || contains(WebgraphSchema.target_file_ext_s) || contains(WebgraphSchema.target_file_name_s)) {
+            String target_file_name = target_url.getFileName();
+            String target_file_ext = MultiProtocolURL.getFileExtension(target_file_name);
+            add(edge, WebgraphSchema.target_file_name_s, target_file_name.toLowerCase().endsWith("." + target_file_ext) ? target_file_name.substring(0, target_file_name.length() - target_file_ext.length() - 1) : target_file_name);
+            add(edge, WebgraphSchema.target_file_ext_s, target_file_ext);
+        }
+        if (allAttr || contains(WebgraphSchema.target_path_s)) add(edge, WebgraphSchema.target_path_s, target_url.getPath());
+        if (allAttr || contains(WebgraphSchema.target_path_folders_count_i) || contains(WebgraphSchema.target_path_folders_sxt)) {
+            String[] paths = target_url.getPaths();
+            add(edge, WebgraphSchema.target_path_folders_count_i, paths.length);
+            add(edge, WebgraphSchema.target_path_folders_sxt, paths);
+        }
+
+        if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
+            if ((allAttr || contains(WebgraphSchema.target_clickdepth_i))) {
+                if (target_url.probablyRootURL()) {
+                    boolean lc = this.lazy; this.lazy = false;
+                    add(edge, WebgraphSchema.target_clickdepth_i, 0);
+                    this.lazy = lc;
+                } else {
+                    add(edge, WebgraphSchema.target_clickdepth_i, 999);
+                    processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+                }
+            }
+        }
+        
+        if (allAttr || contains(WebgraphSchema.process_sxt)) {
+            List<String> pr = new ArrayList<String>();
+            for (ProcessType t: processTypes) pr.add(t.name());
+            add(edge, WebgraphSchema.process_sxt, pr);
+            if (allAttr || contains(CollectionSchema.harvestkey_s)) {
+                add(edge, CollectionSchema.harvestkey_s, sourceName);
+            }
+        }
+        
+        // return the edge
+        return edge;
+    }
+    
+    
     public int postprocessing(final Segment segment, ClickdepthCache clickdepthCache, final String harvestkey) {
         if (!this.contains(WebgraphSchema.process_sxt)) return 0;
-        if (!segment.fulltext().writeToWebgraph()) return 0;
+        if (!segment.fulltext().useWebgraph()) return 0;
         SolrConnector webgraphConnector = segment.fulltext().getWebgraphConnector();
         // that means we must search for those entries.
         webgraphConnector.commit(true); // make sure that we have latest information that can be found
@@ -323,7 +336,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
                         if (tagtype == ProcessType.CLICKDEPTH) {
-                            if (this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+                            if (this.contains(WebgraphSchema.source_clickdepth_i) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
                                 protocol = (String) doc.getFieldValue(WebgraphSchema.source_protocol_s.getSolrFieldName());
                                 urlstub = (String) doc.getFieldValue(WebgraphSchema.source_urlstub_s.getSolrFieldName());
                                 id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
@@ -334,7 +347,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                                 }
                                 //ConcurrentLog.info("WebgraphConfiguration", "postprocessing webgraph source id " + id + ", url=" + protocol + "://" + urlstub + ", result: " + (changed ? "changed" : "not changed"));
                             }
-                            if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
+                            if (this.contains(WebgraphSchema.target_clickdepth_i) && this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
                                 protocol = (String) doc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName());
                                 urlstub = (String) doc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
                                 id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());

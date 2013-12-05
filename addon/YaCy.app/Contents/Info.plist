@@ -25,7 +25,7 @@
 	<key>Java</key>
 	<dict>
 		<key>VMOptions</key>
-		<string>-Xmx600m -Xms180m -Xss256k -XX:MaxPermSize=256m -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8</string>
+		<string>-Xmx600m -Xms90m -Dsolr.directoryFactory=solr.MMapDirectoryFactory -Dfile.encoding=UTF-8</string>
 		<key>WorkingDirectory</key>
 		<string>$APP_PACKAGE/Contents/Resources/Java</string>
 		<key>MainClass</key>

@@ -110,11 +110,11 @@ public final class Fulltext {
         this.writeWebgraph = false;
     }
     
-    public void writeWebgraph(boolean check) {
+    public void setUseWebgraph(boolean check) {
         this.writeWebgraph = check;
     }
     
-    public boolean writeToWebgraph() {
+    public boolean useWebgraph() {
         return this.writeWebgraph;
     }
 
@@ -403,7 +403,7 @@ public final class Fulltext {
     }
 
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
-        if (!this.writeToWebgraph()) return;
+        if (!this.useWebgraph()) return;
         if (edges == null || edges.size() == 0) return;
         try {
             this.getWebgraphConnector().add(edges);

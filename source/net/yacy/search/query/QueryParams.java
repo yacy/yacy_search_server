@@ -178,16 +178,13 @@ public final class QueryParams {
         }
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
         if (this.urlMask_isCatchall) {
-            if (modifier.protocol != null) {
-                this.urlMask = Pattern.compile(modifier.protocol + ".*");
-                this.urlMask_isCatchall = false;
-            }
-            if (tld != null) {
-                this.urlMask = Pattern.compile(".*\\." + tld + ".*");
-                this.urlMask_isCatchall = false;
-            }
-            if (modifier.filetype != null) {
-                this.urlMask = Pattern.compile(".*" + modifier.filetype + ".*");
+            String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
+            String defaulthostprefix = modifier.protocol == null ? "www" : modifier.protocol;
+            String hostfilter = modifier.sitehost == null && tld == null ? ".*" : modifier.sitehost == null ? ".*\\." + tld : modifier.sitehost.startsWith(defaulthostprefix + ".") ? "(" + defaulthostprefix + "\\.)?" + modifier.sitehost.substring(4) : "(" + defaulthostprefix + "\\.)?" + modifier.sitehost;
+            String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*";
+            String filter = protocolfilter + "://" + hostfilter + "/" + filefilter;
+            if (!filter.equals(".*://.*/.*")) {
+                this.urlMask = Pattern.compile(filter);
                 this.urlMask_isCatchall = false;
             }
         }
@@ -343,7 +340,6 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
@@ -368,7 +364,6 @@ public final class QueryParams {
             if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
-        if (this.queryGoal.getIncludeSize() == 0) return null;
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
