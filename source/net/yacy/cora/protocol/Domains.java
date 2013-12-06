@@ -638,7 +638,7 @@ public class Domains {
         host = host.toLowerCase().trim();
 
         // try to simply parse the address
-        InetAddress ip = parseInetAddress(host);
+        InetAddress ip = InetAddress.getByName(host);
         if (ip != null) return ip;
 
         // trying to resolve host by doing a name cache lookup
@@ -716,8 +716,14 @@ public class Domains {
         if (host0 == null || host0.isEmpty()) return null;
         final String host = host0.toLowerCase().trim();
         // try to simply parse the address
-        InetAddress ip = parseInetAddress(host);
-        if (ip != null) return ip;
+        InetAddress ip;
+        try {
+            ip = InetAddress.getByName(host);
+            return ip;
+        } catch (UnknownHostException e1) {
+            // we expected that InetAddress.getByName may fail if this is not a raw address.
+            // We silently ignore this and go on.
+        }
 
         /*
         if (MemoryControl.shortStatus()) {
@@ -833,30 +839,6 @@ public class Domains {
         	NAME_CACHE_HIT.clear();
         	NAME_CACHE_MISS.clear();
         } catch (final IOException e) {}
-    }
-    
-
-    public static final InetAddress parseInetAddress(String ip) {
-        if (ip == null || ip.length() < 8) return null;
-        ip = ip.trim();
-        if (ip.charAt(0) == '[' && ip.charAt(ip.length() - 1) == ']') ip = ip.substring(1, ip.length() - 1);
-        if ("localhost".equals(ip)) ip = "127.0.0.1"; // normalize to IPv4 here since that is the way to calculate the InetAddress
-        final String[] ips = CommonPattern.DOT.split(ip);
-        if (ips.length != 4) return null; // TODO: parse IPv6 addresses
-        final byte[] ipb = new byte[4];
-        try {
-            ipb[0] = (byte) Integer.parseInt(ips[0]);
-            ipb[1] = (byte) Integer.parseInt(ips[1]);
-            ipb[2] = (byte) Integer.parseInt(ips[2]);
-            ipb[3] = (byte) Integer.parseInt(ips[3]);
-        } catch (final NumberFormatException e) {
-            return null;
-        }
-        try {
-            return InetAddress.getByAddress(ipb);
-        } catch (final UnknownHostException e) {
-            return null;
-        }
     }
 
     /**

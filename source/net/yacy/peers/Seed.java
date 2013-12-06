@@ -303,11 +303,16 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( ipport == null ) {
             return;
         }
-        final int p = ipport.indexOf(':');
+        final int p = ipport.lastIndexOf(':');
         if ( p < 0 ) {
             this.alternativeIP = ipport;
         } else {
             this.alternativeIP = ipport.substring(0, p);
+        }
+
+        if (this.alternativeIP.charAt(0) == '[' && this.alternativeIP.charAt(this.alternativeIP.length() - 1) == ']') {
+            // IPv6 patch
+            this.alternativeIP = this.alternativeIP.substring(1, this.alternativeIP.length() - 1);
         }
     }
 
@@ -574,19 +579,26 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public final String getPublicAddress() {
         String ip = getIP();
-        if ( ip == null || ip.length() < 8 || ip.length() > 60 ) {
-            ip = Domains.LOCALHOST;
-        }
+        if (ip == null) ip = Domains.LOCALHOST; // that should not happen
 
         final String port = this.dna.get(Seed.PORT);
         if ( port == null || port.length() < 2 || port.length() > 5 ) {
             return null;
         }
 
-        final StringBuilder sb = new StringBuilder(ip.length() + port.length() + 1);
-        sb.append(ip);
-        sb.append(':');
-        sb.append(port);
+        final StringBuilder sb = new StringBuilder(ip.length() + port.length() + 3);
+        if (ip.indexOf(':') >= 0) {
+            // IPv6 Address!, see: http://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
+            sb.append('[');
+            sb.append(ip);
+            sb.append(']');
+            sb.append(':');
+            sb.append(port);
+        } else {
+            sb.append(ip);
+            sb.append(':');
+            sb.append(port);
+        }
         return sb.toString();
     }
 
@@ -604,11 +616,24 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
 
         final String port = this.dna.get(Seed.PORT);
-        if ( (port == null) || (port.length() < 2) ) {
+        if ( port == null || port.length() < 2 || port.length() > 5 ) {
             return null;
         }
 
-        return this.alternativeIP + ":" + port;
+        final StringBuilder sb = new StringBuilder(this.alternativeIP.length() + port.length() + 3);
+        if (this.alternativeIP.indexOf(':') >= 0) {
+            // IPv6 Address!, see: http://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
+            sb.append('[');
+            sb.append(this.alternativeIP);
+            sb.append(']');
+            sb.append(':');
+            sb.append(port);
+        } else {
+            sb.append(this.alternativeIP);
+            sb.append(':');
+            sb.append(port);
+        }
+        return sb.toString();
     }
 
     /**
@@ -618,7 +643,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return Domains.dnsResolve(getIP());
     }
 
-    /** @return the portnumber of this seed or <code>-1</code> if not present */
+    /** @return the port number of this seed or <code>-1</code> if not present */
     public final int getPort() {
         final String port = this.dna.get(Seed.PORT);
         if ( port == null ) {
