@@ -38,15 +38,11 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 
-import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpHeaders;
-import org.eclipse.jetty.http.HttpMethods;
-import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.AbstractHttpConnection;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.InclusiveByteRange;
-import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.MultiPartOutputStream;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
@@ -216,64 +212,6 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet {
                 resource.release();
             }
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    /* Check modification date headers.
-     */
-    @Override
-    protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
-            throws IOException {
-        try {
-            if (!request.getMethod().equals(HttpMethods.HEAD)) {
-                HttpContent content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), response.getBufferSize());
-
-                String ifms = request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
-                if (ifms != null) {
-                    //Get jetty's Response impl
-                    Response r = Response.getResponse(response);
-
-                    if (content != null) {
-                        Buffer mdlm = content.getLastModified();
-                        if (mdlm != null) {
-                            if (ifms.equals(mdlm.toString())) {
-                                r.reset(true);
-                                r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                                r.flushBuffer();
-                                return false;
-                            }
-                        }
-                    }
-
-                    long ifmsl = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
-                    if (ifmsl != -1) {
-                        if (resource.lastModified() / 1000 <= ifmsl / 1000) {
-                            r.reset(true);
-                            r.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            r.flushBuffer();
-                            return false;
-                        }
-                    }
-                }
-
-                // Parse the if[un]modified dates and compare to resource
-                long date = request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
-
-                if (date != -1) {
-                    if (resource.lastModified() / 1000 > date / 1000) {
-                        response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
-                        return false;
-                    }
-                }
-                if (content != null) content.release();
-            }
-        } catch (IllegalArgumentException iae) {
-            if (!response.isCommitted()) {
-                response.sendError(400, iae.getMessage());
-            }
-            throw iae;
-        }
-        return true;
     }
 
     /* ------------------------------------------------------------ */

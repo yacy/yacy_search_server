@@ -68,6 +68,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.eclipse.jetty.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpMethods;
 
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.io.Buffer;
@@ -267,9 +269,45 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     } 
     /* ------------------------------------------------------------ */
     /* Check modification date headers.
+     * send a 304 response instead of content if not modified since
      */
-    abstract protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
-            throws IOException;
+    protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
+            throws IOException {
+        try {
+            if (!request.getMethod().equals(HttpMethods.HEAD)) {
+
+                String ifms = request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                if (ifms != null) {
+
+                    long ifmsl = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                    if (ifmsl != -1) {
+                        if (resource.lastModified() / 1000 <= ifmsl / 1000) {
+                            response.reset();
+                            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            response.flushBuffer();
+                            return false;
+                        }
+                    }
+                }
+
+                // Parse the if[un]modified dates and compare to resource
+                long date = request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
+
+                if (date != -1) {
+                    if (resource.lastModified() / 1000 > date / 1000) {
+                        response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
+                        return false;
+                    }
+                }
+            }
+        } catch (IllegalArgumentException iae) {
+            if (!response.isCommitted()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, iae.getMessage());
+            }
+            throw iae;
+        }
+        return true;
+    }
 
     /* ------------------------------------------------------------------- */
     protected void sendDirectory(HttpServletRequest request,
