@@ -82,7 +82,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         // configure root context
         ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         htrootContext.setContextPath("/");  
-        ServletHolder sholder = new ServletHolder(Jetty8YaCyDefaultServlet.class);
+        ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
         sholder.setInitParameter("resourceBase", "htroot");
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder,"/*");    
