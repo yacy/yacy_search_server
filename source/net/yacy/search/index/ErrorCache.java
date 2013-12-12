@@ -164,7 +164,7 @@ public class ErrorCache {
             if (doc == null) return false;
             // check if the document contains a value in the field CollectionSchema.failreason_s
             Object failreason = doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
-            return failreason == null || failreason.toString().length() == 0;
+            return failreason != null && failreason.toString().length() > 0;
         } catch (IOException e) {
             return false;
         }
