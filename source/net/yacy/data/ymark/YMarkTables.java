@@ -259,7 +259,7 @@ public class YMarkTables {
     	while(bit.hasNext()) {
     		bmk_row = bit.next();
     		if(bmk_row.containsKey(YMarkEntry.BOOKMARK.FOLDERS.key())) {
-    			final String[] folderArray = (new String(bmk_row.get(YMarkEntry.BOOKMARK.FOLDERS.key()),"UTF8")).split(YMarkUtil.TAGS_SEPARATOR);
+    			final String[] folderArray = YMarkUtil.TAGS_SEPARATOR_PATTERN.split(new String(bmk_row.get(YMarkEntry.BOOKMARK.FOLDERS.key()),"UTF8"));
     	        for (final String folder : folderArray) {
     	        	if(folder.length() > root.length() && folder.substring(0, root.length()+1).equals(r)) {
     	                if(!folders.contains(folder)) {

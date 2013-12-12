@@ -29,6 +29,7 @@ package net.yacy.data.ymark;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
@@ -40,6 +41,9 @@ public class YMarkUtil {
     public final static String SPACE = " ";
     public final static String EMPTY_STRING = new String();
 
+    public final static Pattern TAGS_SEPARATOR_PATTERN = Pattern.compile(TAGS_SEPARATOR);
+    public final static Pattern FOLDERS_SEPARATOR_PATTERN = Pattern.compile(FOLDERS_SEPARATOR);
+    
     /**
      * conveniance function to generate url hashes for YMark bookmarks
      * @param url a string representation of a valid url

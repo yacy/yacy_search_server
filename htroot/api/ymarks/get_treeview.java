@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.UTF8;
@@ -98,11 +97,11 @@ public class get_treeview {
 				} catch (final IOException e) {
 					ConcurrentLog.logException(e);
 				}
-	        	int n = Pattern.compile(YMarkUtil.FOLDERS_SEPARATOR).split(root, 0).length;
+	        	int n = YMarkUtil.FOLDERS_SEPARATOR_PATTERN.split(root, 0).length;
 	        	if (n == 0) n = 1;
 	        	while (it.hasNext()) {
 	        		final String folder = it.next();
-	        		foldername = folder.split(YMarkUtil.FOLDERS_SEPARATOR);
+	        		foldername = YMarkUtil.FOLDERS_SEPARATOR_PATTERN.split(folder);
 	        		if (foldername.length == n+1) {
 	        			prop.put("folders_"+count+"_foldername", foldername[n]);
 	    	    		prop.put("folders_"+count+"_expanded", "false");

@@ -52,7 +52,7 @@ public class get_xbel {
         		root = "";
         	}
 
-        	final int root_depth = root.split(YMarkUtil.FOLDERS_SEPARATOR).length - 1;
+        	final int root_depth = YMarkUtil.FOLDERS_SEPARATOR_PATTERN.split(root).length - 1;
     		// Log.logInfo(YMarkTables.BOOKMARKS_LOG, "root: "+root+" root_depth: "+root_depth);
         	Iterator<String> fit = null;
         	Iterator<Tables.Row> bit = null;
@@ -67,7 +67,7 @@ public class get_xbel {
 
 			while (fit.hasNext()) {
         		final String folder = fit.next();
-        		foldername = folder.split(YMarkUtil.FOLDERS_SEPARATOR);
+        		foldername = YMarkUtil.FOLDERS_SEPARATOR_PATTERN.split(folder);
         		final int len = foldername.length -1;
         		if(n > root_depth) {
         			for (; len <= n; n--) {
