@@ -288,7 +288,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).charAt(0);
     }
 
-    public final Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php|/home.htm(l?)|/home.php|/default.htm(l?)|/default.php");
+    public final static Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php|/home.htm(l?)|/home.php|/default.htm(l?)|/default.php");
     
     public final boolean probablyRootURL() {
         return this.path.length() <= 1 || rootPattern.matcher(this.path).matches();
