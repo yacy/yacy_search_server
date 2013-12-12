@@ -38,6 +38,10 @@ public class ResponseHeader extends HeaderFramework {
     private static final long serialVersionUID = 0L;
     private static final ConcurrentLog log = new ConcurrentLog(ResponseHeader.class.getName());
 
+    private Date date_cache_Date = null;
+    private Date date_cache_Expires = null;
+    private Date date_cache_LastModified = null;
+    
     public ResponseHeader(final int statusCode) {
         super();
         this.put(HeaderFramework.STATUS_CODE, Integer.toString(statusCode));
@@ -69,21 +73,27 @@ public class ResponseHeader extends HeaderFramework {
             return 200;
         }
     }
-
+    
     public Date date() {
+        if (this.date_cache_Date != null) return this.date_cache_Date;
         final Date d = headerDate(HeaderFramework.DATE);
         final Date now = new Date();
-        return (d == null) ? now : d.after(now) ? now : d;
+        this.date_cache_Date = (d == null) ? now : d.after(now) ? now : d;
+        return this.date_cache_Date;
     }
 
     public Date expires() {
-        return headerDate(EXPIRES);
+        if (this.date_cache_Expires != null) return this.date_cache_Expires;
+        this.date_cache_Expires = headerDate(HeaderFramework.EXPIRES);
+        return this.date_cache_Expires;
     }
 
     public Date lastModified() {
-        final Date d = headerDate(LAST_MODIFIED);
+        if (this.date_cache_LastModified != null) return this.date_cache_LastModified;
+        final Date d = headerDate(HeaderFramework.LAST_MODIFIED);
         final Date now = new Date();
-        return (d == null) ? date() : d.after(now) ? now : d;
+        this.date_cache_LastModified = (d == null) ? date() : d.after(now) ? now : d;
+        return this.date_cache_LastModified;
     }
 
     public long age() {
@@ -94,8 +104,8 @@ public class ResponseHeader extends HeaderFramework {
     }
 
     public boolean gzip() {
-        return ((containsKey(CONTENT_ENCODING)) &&
-        ((get(CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
+        return ((containsKey(HeaderFramework.CONTENT_ENCODING)) &&
+        ((get(HeaderFramework.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
     }
 
     public static Object[] parseResponseLine(final String respLine) {
