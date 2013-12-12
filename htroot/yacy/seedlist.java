@@ -46,10 +46,11 @@ public final class seedlist {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         int maxcount = Math.min(LISTMAX, post == null ? Integer.MAX_VALUE : post.getInt("maxcount", Integer.MAX_VALUE));
+        float minversion = Math.min(LISTMAX, post == null ? 0.0f : post.getFloat("minversion", 0.0f));
         boolean nodeonly = post == null || !post.containsKey("node") ? false : post.getBoolean("node");
         boolean includeme = post == null || !post.containsKey("me") ? true : post.getBoolean("me");
         boolean addressonly = post == null || !post.containsKey("address") ? false : post.getBoolean("address");
-        final ArrayList<Seed> v = sb.peers.getSeedlist(maxcount, includeme, nodeonly);
+        final ArrayList<Seed> v = sb.peers.getSeedlist(maxcount, includeme, nodeonly, minversion);
         final serverObjects prop = new serverObjects();
         
         // write simple-encoded seed lines or json

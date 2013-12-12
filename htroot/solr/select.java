@@ -152,6 +152,12 @@ public class select {
         }
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
+        // count remote searches if this was part of a p2p search
+        if (post.containsKey("partitions")) {
+            final int partitions = post.getInt("partitions", 30);
+            sb.searchQueriesGlobal += 1.0f / partitions; // increase query counter
+        }
+        
         // get the ranking profile id
         int profileNr = post.getInt("profileNr", 0);
         

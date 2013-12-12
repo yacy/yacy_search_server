@@ -165,29 +165,30 @@ public class RemoteSearch extends Thread {
                 nodePeers.add(s);
             }
         }
-
-        // start solr searches
-        if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
-            nodePeers.clear();
-            nodePeers.add(event.peers.mySeed());
-        }
-        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
-            final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
-            for (Seed s: nodePeers) {
-                Thread t = solrRemoteSearch(event, solrQuery, start, count, s, blacklist);
-                event.nodeSearchThreads.add(t);
-            }
-        }
-                
+        
         if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
             dhtPeers.clear();
             dhtPeers.add(event.peers.mySeed());
         }
+        
+        if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
+            nodePeers.clear();
+            nodePeers.add(event.peers.mySeed());
+        }
+
+        // start solr searches
+        final int targets = dhtPeers.size() + nodePeers.size();
+        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
+            final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
+            for (Seed s: nodePeers) {
+                Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
+                event.nodeSearchThreads.add(t);
+            }
+        }
+        
         // start search to YaCy DHT peers
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
-            final int targets = dhtPeers.size();
-            if (targets == 0) return;
-            for (int i = 0; i < targets; i++) {
+            for (int i = 0; i < dhtPeers.size(); i++) {
                 if (dhtPeers.get(i) == null || dhtPeers.get(i).hash == null) continue;
                 try {
                     RemoteSearch rs = new RemoteSearch(
@@ -271,6 +272,7 @@ public class RemoteSearch extends Thread {
                     final int start,
                     final int count,
                     final Seed targetPeer,
+                    final int partitions,
                     final Blacklist blacklist) {
 
         assert solrQuery != null;
@@ -290,6 +292,7 @@ public class RemoteSearch extends Thread {
                                         start,
                                         count,
                                         targetPeer,
+                                        partitions,
                                         blacklist);
                         if (urls >= 0) {
                             // urls is an array of url hashes. this is only used for log output

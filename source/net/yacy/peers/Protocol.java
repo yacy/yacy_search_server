@@ -1006,13 +1006,14 @@ public final class Protocol {
             final int offset,
             final int count,
             Seed target,
+            final int partitions,
             final Blacklist blacklist) {
 
         if (event.query.getQueryGoal().getOriginalQueryString(false) == null || event.query.getQueryGoal().getOriginalQueryString(false).length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
         event.addExpectedRemoteReferences(count);
-        
+        if (partitions > 0) solrQuery.set("partitions", partitions);
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
         
