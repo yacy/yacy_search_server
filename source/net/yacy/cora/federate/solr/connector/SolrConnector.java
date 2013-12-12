@@ -112,14 +112,6 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      */
     public Set<String> existsByIds(Set<String> ids) throws IOException;
-    
-    /**
-     * check if a given document exists in solr
-     * @param solrquery
-     * @return true if any entry in solr exists
-     * @throws IOException
-     */
-    public boolean existsByQuery(final String solrquery) throws IOException;
 
     /**
      * add a solr input document

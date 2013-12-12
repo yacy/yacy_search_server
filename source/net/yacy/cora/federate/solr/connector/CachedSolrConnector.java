@@ -122,34 +122,6 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
         this.clearCaches();
         this.solr.deleteByQuery(querystring);
     }
-
-    @Override
-    public boolean existsByQuery(final String query) throws IOException {
-        if (this.hitCache.containsKey(query)) {
-            this.hitCache_Hit++;
-            return true;
-        }
-        this.hitCache_Miss++;
-        if (this.documentCache.containsKey(query)) {
-            this.documentCache_Hit++;
-            return true;
-        }
-        this.documentCache_Miss++;
-        if (this.missCache.containsKey(query)) {
-            this.missCache_Hit++;
-            return false;
-        }
-        this.missCache_Miss++;
-        if (solr != null && solr.existsByQuery(query)) {
-            this.missCache.remove(query);
-            this.hitCache.put(query, EXIST);
-            this.hitCache_Insert++;
-            return true;
-        }
-        this.missCache.put(query, EXIST);
-        this.missCache_Insert++;
-        return false;
-    }
     
     @Override
     public SolrDocument getDocumentById(final String id, final String ... fields) throws IOException {

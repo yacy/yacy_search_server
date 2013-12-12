@@ -158,14 +158,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 != null) this.solr0.deleteByQuery(querystring);
         if (this.solr1 != null) this.solr1.deleteByQuery(querystring);
     }
-
-    @Override
-    public boolean existsByQuery(final String query) throws IOException {
-        if ((solr0 != null && solr0.existsByQuery(query)) || (solr1 != null && solr1.existsByQuery(query))) {
-            return true;
-        }
-        return false;
-    }
     
     @Override
     public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException {

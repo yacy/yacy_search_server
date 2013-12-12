@@ -393,7 +393,7 @@ public final class CrawlStacker {
         final String urlstring = url.toString();
         // check if the url is double registered
         final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
-        final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash()));
+        final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash())); // TODO: combine the exists-query with this one
         if (oldDate == null) {
             if (dbocc != null) {
                 // do double-check

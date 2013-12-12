@@ -71,16 +71,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     protected final static int pagesize = 100;
     
-    @Override
-    public boolean existsByQuery(final String query) throws IOException {
-        try {
-            long count = getCountByQuery(query);
-            return count > 0;
-        } catch (final Throwable e) {
-            return false;
-        }
-    }
-    
     /**
      * Get a query result from solr as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.

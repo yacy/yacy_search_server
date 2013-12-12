@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 
@@ -158,17 +157,15 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                         continue uniquecheck;
                     }
                     try {
-                        if (segment.fulltext().getDefaultConnector().existsByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"")) {
+                        final SolrDocument doc = segment.fulltext().getDefaultConnector().getDocumentById(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"");
+                        if (doc != null) {
                             // switch unique attribute in new document
                             sid.setField(uniquefield.getSolrFieldName(), false);
-                            // switch attribute also in all existing documents (which should be exactly only one!)
-                            SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\" AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
-                            for (SolrDocument doc: docs) {
-                                SolrInputDocument sidContext = segment.fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
-                                sidContext.setField(uniquefield.getSolrFieldName(), false);
-                                segment.putDocumentInQueue(sidContext);
-                                changed = true;
-                            }
+                            // switch attribute in existing document
+                            SolrInputDocument sidContext = segment.fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+                            sidContext.setField(uniquefield.getSolrFieldName(), false);
+                            segment.putDocumentInQueue(sidContext);
+                            changed = true;
                         } else {
                             sid.setField(uniquefield.getSolrFieldName(), true);
                         }

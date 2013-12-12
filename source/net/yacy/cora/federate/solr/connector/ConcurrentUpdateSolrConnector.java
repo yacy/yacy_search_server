@@ -376,12 +376,6 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         e.addAll(e1);
         return e;
     }
-    
-    @Override
-    public boolean existsByQuery(String solrquery) throws IOException {
-        // this is actually wrong but to make it right we need to wait until all queues are flushed. But that may take very long when the queues are filled again all the time.
-        return this.connector.existsByQuery(solrquery);
-    }
 
     @Override
     public void add(SolrInputDocument solrdoc) throws IOException, SolrException {

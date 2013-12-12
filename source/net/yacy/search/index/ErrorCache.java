@@ -160,7 +160,11 @@ public class ErrorCache {
 
     public boolean exists(final byte[] urlHash) {
         try {
-            return this.fulltext.getDefaultConnector().existsByQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + ASCII.String(urlHash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
+            final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(ASCII.String(urlHash), CollectionSchema.failreason_s.getSolrFieldName());
+            if (doc == null) return false;
+            // check if the document contains a value in the field CollectionSchema.failreason_s
+            Object failreason = doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
+            return failreason == null || failreason.toString().length() == 0;
         } catch (IOException e) {
             return false;
         }
