@@ -98,7 +98,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void deleteByQuery(final String querystring) throws IOException;
 
     /**
-     * check if a given document, identified by url hash as ducument id exists
+     * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
      * @return true if any entry in solr exists
      * @throws IOException
@@ -139,12 +139,32 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException;
 
     /**
-     * get a query response from solr
+     * get a "full" query response from solr. Please compare to getSolrDocumentListByParams which may be much more efficient
      * @param query
      * @throws IOException
      */
     public QueryResponse getResponseByParams(final ModifiableSolrParams query) throws IOException, SolrException;
 
+    /**
+     * get the solr document list from a query response
+     * This differs from getResponseByParams in such a way that it does only create the fields of the response but
+     * never search snippets and there are also no facets generated.
+     * @param params
+     * @return
+     * @throws IOException
+     * @throws SolrException
+     */
+    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException;
+
+    /**
+     * get the number of results for a query response
+     * @param params
+     * @return
+     * @throws IOException
+     * @throws SolrException
+     */
+    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException;
+    
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"

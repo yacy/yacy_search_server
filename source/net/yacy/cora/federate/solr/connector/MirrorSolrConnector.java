@@ -275,6 +275,49 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         // TODO: combine both
         return rsp1;
     }
+
+    @Override
+    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams query) throws IOException, SolrException {
+        Integer count0 = query.getInt(CommonParams.ROWS);
+        int count = count0 == null ? 10 : count0.intValue();
+        Integer start0 = query.getInt(CommonParams.START);
+        int start = start0 == null ? 0 : start0.intValue();
+        if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
+
+        if (this.solr0 != null && this.solr1 == null) {
+            SolrDocumentList list = this.solr0.getDocumentListByParams(query);
+            return list;
+        }
+        if (this.solr1 != null && this.solr0 == null) {
+            SolrDocumentList list = this.solr1.getDocumentListByParams(query);
+            return list;
+        }
+
+        // combine both lists
+        final SolrDocumentList l = this.solr0.getDocumentListByParams(query);
+        if (l.size() >= count) return l;
+
+        // at this point we need to know how many results are in solr0
+        // compute this with a very bad hack; replace with better method later
+        int size0 = 0;
+        { //bad hack - TODO: replace
+            query.set(CommonParams.START, 0);
+            query.set(CommonParams.ROWS, Integer.MAX_VALUE);
+            final SolrDocumentList lHack = this.solr0.getDocumentListByParams(query);
+            query.set(CommonParams.START, start);
+            query.set(CommonParams.ROWS, count);
+            size0 = lHack.size();
+        }
+
+        // now use the size of the first query to do a second query
+        query.set(CommonParams.START, start + l.size() - size0);
+        query.set(CommonParams.ROWS, count - l.size());
+        final SolrDocumentList l1 = this.solr1.getDocumentListByParams(query);
+        query.set(CommonParams.START, start);
+        query.set(CommonParams.ROWS, count);
+        // TODO: combine both
+        return l1;
+    }
     
     @Override
     public long getCountByQuery(final String querystring) throws IOException {
