@@ -1365,7 +1365,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             this.collections = new HashMap<String, Pattern>();
             Collection<Object> c = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
-            for (Object cn: c) this.collections.put((String) cn, QueryParams.catchall_pattern);
+            if (c != null) for (Object cn: c) if (cn != null) this.collections.put((String) cn, QueryParams.catchall_pattern);
             this.failReason = (String) doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
             this.failType = FailType.valueOf((String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName()));
             this.httpstatus = (Integer) doc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName());

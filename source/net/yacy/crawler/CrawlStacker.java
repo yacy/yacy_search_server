@@ -392,13 +392,14 @@ public final class CrawlStacker {
 
         final String urlstring = url.toString();
         // check if the url is double registered
+        String urlhash = ASCII.String(url.hash());
         final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
-        final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash()));
+        final Date oldDate = this.indexSegment.fulltext().getLoadDate(urlhash); // TODO: combine the exists-query with this one
         if (oldDate == null) {
             if (dbocc != null) {
                 // do double-check
                 if (dbocc == HarvestProcess.ERRORS) {
-                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
+                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
                     return "double in: errors (" + errorEntry.getFailReason() + ")";
                 }
                 return "double in: " + dbocc.toString();
@@ -414,7 +415,7 @@ public final class CrawlStacker {
                     return "double in: LURL-DB, oldDate = " + oldDate.toString();
                 }
                 if (dbocc == HarvestProcess.ERRORS) {
-                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
+                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
                     if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.getFailReason());
                     return "double in: errors (" + errorEntry.getFailReason() + "), oldDate = " + oldDate.toString();
                 }

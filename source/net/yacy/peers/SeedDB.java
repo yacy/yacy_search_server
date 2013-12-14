@@ -717,7 +717,7 @@ public final class SeedDB implements AlternativeDomainNames {
         try {
 
             pw = new PrintWriter(new BufferedWriter(new FileWriter(seedFile)));
-            List<Seed> seedlist = getSeedlist(Integer.MAX_VALUE, addMySeed);
+            List<Seed> seedlist = getSeedlist(Integer.MAX_VALUE, addMySeed, false, 0.0f);
             String line;
             for (Seed seed: seedlist) {
                 line = seed.genSeedStr(null);
@@ -731,7 +731,7 @@ public final class SeedDB implements AlternativeDomainNames {
         return v;
     }
 
-    public ArrayList<Seed> getSeedlist(int maxcount, boolean addMySeed) {
+    public ArrayList<Seed> getSeedlist(int maxcount, boolean addMySeed, boolean nodeonly, float minversion) {
         final ArrayList<Seed> v = new ArrayList<Seed>(this.seedActiveDB.size() + 1000);
  
         // store own peer seed
@@ -739,10 +739,10 @@ public final class SeedDB implements AlternativeDomainNames {
 
         // store active peer seeds
         Seed ys;
-        Iterator<Seed> se = this.seedsConnected(true, false, null, (float) 0.0);
+        Iterator<Seed> se = this.seedsConnected(true, false, null, minversion);
         while (se.hasNext() && v.size() < maxcount) {
             ys = se.next();
-            if (ys != null) v.add(ys);
+            if (ys != null && (!nodeonly || ys.getFlagRootNode())) v.add(ys);
         }
 
         // store some of the not-so-old passive peer seeds (limit: 1 day)
@@ -750,7 +750,7 @@ public final class SeedDB implements AlternativeDomainNames {
         final long timeout = System.currentTimeMillis() - (1000L * 60L * 60L * 24L);
         while (se.hasNext() && v.size() < maxcount) {
             ys = se.next();
-            if (ys != null && ys.getLastSeenUTC() >= timeout) v.add(ys);
+            if (ys != null && ys.getLastSeenUTC() >= timeout && (!nodeonly || ys.getFlagRootNode())) v.add(ys);
         }
 
         final StringBuilder encoded = new StringBuilder(1024);

@@ -60,7 +60,7 @@ public class YMarkDMOZImporter extends YMarkImporter {
 	}
 	
 	public void setDepth(int d) {
-		this.depth = d + this.targetFolder.split(YMarkUtil.FOLDERS_SEPARATOR).length-1;
+		this.depth = d + YMarkUtil.FOLDERS_SEPARATOR_PATTERN.split(this.targetFolder).length-1;
 	}
 	
 	public class DMOZParser extends DefaultHandler {

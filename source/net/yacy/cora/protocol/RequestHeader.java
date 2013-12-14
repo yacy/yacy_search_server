@@ -58,6 +58,8 @@ public class RequestHeader extends HeaderFramework {
         HTML, JSON, XML
     }
 
+    private Date date_cache_IfModifiedSince = null;
+    
     public RequestHeader() {
         super();
     }
@@ -86,8 +88,11 @@ public class RequestHeader extends HeaderFramework {
         return url.getHost();
     }
 
+    
     public Date ifModifiedSince() {
-        return headerDate(IF_MODIFIED_SINCE);
+        if (this.date_cache_IfModifiedSince != null) return date_cache_IfModifiedSince;
+        this.date_cache_IfModifiedSince = headerDate(RequestHeader.IF_MODIFIED_SINCE);
+        return this.date_cache_IfModifiedSince;
     }
 
     public Object ifRange() {

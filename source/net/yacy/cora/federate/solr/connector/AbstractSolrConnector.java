@@ -46,6 +46,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.FacetParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class AbstractSolrConnector implements SolrConnector {
 
@@ -70,16 +71,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setStart(0);
     }
     protected final static int pagesize = 100;
-    
-    @Override
-    public boolean existsByQuery(final String query) throws IOException {
-        try {
-            long count = getCountByQuery(query);
-            return count > 0;
-        } catch (final Throwable e) {
-            return false;
-        }
-    }
     
     /**
      * Get a query result from solr as a stream of documents.
@@ -189,11 +180,16 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setIncludeScore(false);
         
         // query the server
-        QueryResponse rsp = getResponseByParams(params);
-        final SolrDocumentList docs = rsp.getResults();
+        final SolrDocumentList docs = getDocumentListByParams(params);
         return docs;
     }
 
+    @Override
+    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
+        final SolrDocumentList sdl = getDocumentListByParams(params);
+        return sdl == null ? 0 : sdl.getNumFound();
+    }
+    
     /**
      * check if a given document, identified by url hash as ducument id exists
      * @param id the url hash and document id
@@ -215,10 +211,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setIncludeScore(false);
 
         // query the server
-        QueryResponse rsp = getResponseByParams(params);
-        final SolrDocumentList docs = rsp.getResults();
-        boolean exist = docs == null ? false : docs.getNumFound() > 0;
-        return exist;
+        return getDocumentCountByParams(params) > 0;
     }
 
     /**
@@ -247,8 +240,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setIncludeScore(false);
 
         // query the server
-        QueryResponse rsp = getResponseByParams(params);
-        final SolrDocumentList docs = rsp.getResults();
+        final SolrDocumentList docs = getDocumentListByParams(params);
         // construct a new id list from that
         HashSet<String> idsr = new HashSet<String>();
         for (SolrDocument doc : docs) {
@@ -276,9 +268,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setIncludeScore(false);
 
         // query the server
-        QueryResponse rsp = getResponseByParams(params);
-        final SolrDocumentList docs = rsp.getResults();
-        return docs == null ? 0 : docs.getNumFound();
+        return getDocumentCountByParams(params);
     }
 
     /**
@@ -335,12 +325,12 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
         // query the server
         try {
-            final QueryResponse rsp = getResponseByParams(query);
-            final SolrDocumentList docs = rsp.getResults();
-            if (docs.isEmpty()) return null;
+            final SolrDocumentList docs = getDocumentListByParams(query);
+            if (docs == null || docs.isEmpty()) return null;
             return docs.get(0);
         } catch (final Throwable e) {
             throw new IOException(e.getMessage(), e);
         }
     }
+
 }

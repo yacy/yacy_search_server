@@ -36,6 +36,7 @@ import net.yacy.server.serverSwitch;
  * or to generate json (or jsonp) with
  * http://localhost:8090/yacy/seedlist.json
  * http://localhost:8090/yacy/seedlist.json?callback=seedlist
+ * http://localhost:8090/yacy/seedlist.json?node=true&me=false&address=true
  */
 public final class seedlist {
 
@@ -45,7 +46,11 @@ public final class seedlist {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         int maxcount = Math.min(LISTMAX, post == null ? Integer.MAX_VALUE : post.getInt("maxcount", Integer.MAX_VALUE));
-        final ArrayList<Seed> v = sb.peers.getSeedlist(maxcount, true);
+        float minversion = Math.min(LISTMAX, post == null ? 0.0f : post.getFloat("minversion", 0.0f));
+        boolean nodeonly = post == null || !post.containsKey("node") ? false : post.getBoolean("node");
+        boolean includeme = post == null || !post.containsKey("me") ? true : post.getBoolean("me");
+        boolean addressonly = post == null || !post.containsKey("address") ? false : post.getBoolean("address");
+        final ArrayList<Seed> v = sb.peers.getSeedlist(maxcount, includeme, nodeonly, minversion);
         final serverObjects prop = new serverObjects();
         
         // write simple-encoded seed lines or json
@@ -66,16 +71,21 @@ public final class seedlist {
                 prop.putJSON("peers_" + i + "_map_0_k", Seed.HASH);
                 prop.putJSON("peers_" + i + "_map_0_v", v.get(i).hash);
                 prop.put("peers_" + i + "_map_0_c", 1);
-                Map<String, String> map = v.get(i).getMap();
+                Seed seed = v.get(i);
+                Map<String, String> map = seed.getMap();
                 int c = 1;
-                for (Map.Entry<String, String> m: map.entrySet()) {
-                    prop.putJSON("peers_" + i + "_map_" + c + "_k", m.getKey());
-                    prop.putJSON("peers_" + i + "_map_" + c + "_v", m.getValue());
-                    prop.put("peers_" + i + "_map_" + c + "_c", 1);
-                    c++;
+                if (!addressonly) {
+                    for (Map.Entry<String, String> m: map.entrySet()) {
+                        prop.putJSON("peers_" + i + "_map_" + c + "_k", m.getKey());
+                        prop.putJSON("peers_" + i + "_map_" + c + "_v", m.getValue());
+                        prop.put("peers_" + i + "_map_" + c + "_c", 1);
+                        c++;
+                    }
                 }
-                prop.put("peers_" + i + "_map_" + (c - 1) + "_c", 0);
-                prop.put("peers_" + i + "_map", c);
+                prop.putJSON("peers_" + i + "_map_" + c + "_k", "Address");
+                prop.putJSON("peers_" + i + "_map_" + c + "_v", seed.getPublicAddress());
+                prop.put("peers_" + i + "_map_" + c + "_c", 0);
+                prop.put("peers_" + i + "_map", c + 1);
                 prop.put("peers_" + i + "_c", i < v.size() - 1 ? 1 : 0);
             }
             prop.put("peers", v.size());

@@ -287,7 +287,7 @@ public final class SearchEvent {
 
         // start a local solr search
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), 0, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), 0, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
         }
         this.localsolroffset = this.query.itemsPerPage;
         
@@ -1375,7 +1375,7 @@ public final class SearchEvent {
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
             if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
             if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
+                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, nextitems, null /*this peer*/, 0, Switchboard.urlBlacklist);
             }
             this.localsolroffset += nextitems;
         }
@@ -1396,7 +1396,7 @@ public final class SearchEvent {
             if (this.localsolrsearch == null || !this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
                 if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
                 }
                 this.localsolroffset += this.query.itemsPerPage;
             }
