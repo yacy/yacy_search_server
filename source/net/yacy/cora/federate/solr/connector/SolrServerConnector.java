@@ -30,8 +30,11 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.analysis.NumericTokenStream;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
@@ -41,6 +44,7 @@ import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.request.LukeRequest;
 import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 import org.apache.solr.client.solrj.response.LukeResponse;
+import org.apache.solr.client.solrj.response.QueryResponse;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -283,6 +287,35 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     throw new IOException(ee);
                 }
             }
+        }
+    }
+
+    /**
+     * get the solr document list from a query response
+     * This differs from getResponseByParams in such a way that it does only create the fields of the response but
+     * never search snippets and there are also no facets generated.
+     * @param params
+     * @return
+     * @throws IOException
+     * @throws SolrException
+     */
+    @Override
+    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
+        if (this.server == null) throw new IOException("server disconnected");
+        // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
+        String q = params.get("q");
+        String threadname = Thread.currentThread().getName();
+        if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+        QueryResponse rsp;
+        try {
+            rsp = this.server.query(params);
+            if (q != null) Thread.currentThread().setName(threadname);
+            if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
+            return rsp.getResults();
+        } catch (final SolrServerException e) {
+            throw new SolrException(ErrorCode.UNKNOWN, e);
+        } catch (final Throwable e) {
+            throw new IOException("Error executing query", e);
         }
     }
     

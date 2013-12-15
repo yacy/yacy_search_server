@@ -221,6 +221,12 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
         QueryResponse list = this.solr.getResponseByParams(query);
         return list;
     }
+
+    @Override
+    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
+        SolrDocumentList sdl = this.solr.getDocumentListByParams(params);
+        return sdl;
+    }
     
     @Override
     public long getCountByQuery(final String querystring) throws IOException {

@@ -419,6 +419,18 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
+    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
+        SolrDocumentList sdl = this.connector.getDocumentListByParams(params);
+        return sdl;
+    }
+
+    @Override
+    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
+        final SolrDocumentList sdl = getDocumentListByParams(params);
+        return sdl == null ? 0 : sdl.getNumFound();
+    }
+    
+    @Override
     public SolrDocumentList getDocumentListByQuery(String querystring, int offset, int count, String... fields) throws IOException, SolrException {
         return this.connector.getDocumentListByQuery(querystring, offset, count, fields);
     }
