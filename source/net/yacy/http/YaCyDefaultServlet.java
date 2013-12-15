@@ -105,11 +105,6 @@ import org.eclipse.jetty.util.resource.Resource;
  * 
  *  resourceBase      Set to replace the context resource base
  *
- *  relativeResourceBase
- *                    Set with a pathname relative to the base of the
- *                    servlet context root. Useful for only serving static content out
- *                    of only specific subdirectories.
- *
  *  pathInfoOnly      If true, only the path info will be applied to the resourceBase
  *
  * </PRE>
@@ -124,7 +119,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected Resource _resourceBase;
     protected MimeTypes _mimeTypes;
     protected String[] _welcomes;    
-    protected String _relativeResourceBase;
     
     protected File _htLocalePath;
     protected File _htDocsPath;    
@@ -154,21 +148,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
         _pathInfoOnly = getInitBoolean("pathInfoOnly", _pathInfoOnly);
 
         Resource.setDefaultUseCaches(false); // caching is handled internally (prevent double caching)
-        _relativeResourceBase = getInitParameter("relativeResourceBase");
 
         String rb = getInitParameter("resourceBase");
-        if (rb != null) {
-            if (_relativeResourceBase != null) {
-                throw new UnavailableException("resourceBase & relativeResourceBase given, only one allowed");
-            }
-            try {
+        try {
+            if (rb != null) {
                 _resourceBase = Resource.newResource(rb);
-            } catch (IOException e) {
-                ConcurrentLog.logException(e);
-                throw new UnavailableException(e.toString());
+            } else {
+                _resourceBase = Resource.newResource(Switchboard.getSwitchboard().getConfig("htRootPath", "htroot")); //default
             }
+        } catch (IOException e) {
+            ConcurrentLog.severe("FILEHANDLER", "YaCyDefaultServlet: resource base (htRootPath) missing");
+            ConcurrentLog.logException(e);
+            throw new UnavailableException(e.toString());
         }
-        
         if (ConcurrentLog.isFine("FILEHANDLER")) {
             ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + _resourceBase);
         }
@@ -200,10 +192,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
      */
     public Resource getResource(String pathInContext) {
         Resource r = null;
-        if (_relativeResourceBase != null) {
-            pathInContext = URIUtil.addPaths(_relativeResourceBase, pathInContext);
-        }
-
         try {
             if (_resourceBase != null) {
                 r = _resourceBase.addPath(pathInContext);
