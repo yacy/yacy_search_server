@@ -316,7 +316,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final SolrQuery query = new SolrQuery();
         assert id.length() == 12;
         // construct query
-        query.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
+        StringBuilder sb = new StringBuilder(23);
+        sb.append("{!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id);
+        query.setQuery(sb.toString());
         query.clearSorts();
         query.setRows(1);
         query.setStart(0);
