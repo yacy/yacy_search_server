@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPInputStream;
@@ -140,7 +141,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         } else if ("value".equals(tag)) {
             this.buffer.setLength(0);
             this.parsingValue = true;
-        } else if (tag.startsWith("dc:") || tag.startsWith("geo:")) {
+        } else if (tag.startsWith("dc:") || tag.startsWith("geo:") || tag.startsWith("md:")) {
             // parse dublin core attribute
             this.elementName = tag;
             this.parsingValue = true;
@@ -173,15 +174,18 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
-        } else if (tag.startsWith("dc:") || tag.startsWith("geo:")) {
+        } else if (tag.startsWith("dc:") || tag.startsWith("geo:") || tag.startsWith("md:")) {
             final String value = buffer.toString().trim();
             if (this.elementName != null && tag.equals(this.elementName)) {
-                value.replaceAll(";", ",");
-                String oldcontent = this.surrogate.get(this.elementName);
-                if (oldcontent == null) {
-                    this.surrogate.getMap().put(this.elementName, new String[]{value});
+                Map<String,String[]> map = this.surrogate.getMap();
+                String[] oldcontent = map.get(this.elementName);
+                if (oldcontent == null || oldcontent.length == 0) {
+                    map.put(this.elementName, new String[]{value});
                 } else {
-                    this.surrogate.getMap().put(this.elementName, new String[]{oldcontent + ";" + value});
+                    String[] newcontent = new String[oldcontent.length + 1];
+                    System.arraycopy(oldcontent, 0, newcontent, 0, oldcontent.length);
+                    newcontent[oldcontent.length] = value;
+                    map.put(this.elementName, newcontent);
                 }
             }
             this.buffer.setLength(0);

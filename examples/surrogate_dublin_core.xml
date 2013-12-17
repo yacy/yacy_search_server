@@ -15,7 +15,9 @@
 -->
 
 <surrogates
-  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:md="http://localhost:8090/api/schema.xml?core=collection1"
+>
 
   <record>
     <dc:Title><![CDATA[Alan Smithee]]></dc:Title>
@@ -23,6 +25,15 @@
     <dc:Description><![CDATA[Der als Filmregisseur oft genannte '''Alan Smithee''' ist ein Anagramm von „The Alias Men“.]]></dc:Description>
     <dc:Language>de</dc:Language>
     <dc:Date>2009-03-02T11:12:36Z</dc:Date> <!-- date is in ISO 8601 -->
+    <md:h1_txt>Alan Smithee</md:h1_txt>
+    <md:h2_txt>Geschichte</md:h2_txt>
+    <md:h3_txt>Entstehung</md:h3_txt>
+    <md:h3_txt>Aufdeckung und Abkehr</md:h3_txt>
+    <md:h2_txt>Verwendung</md:h2_txt>
+    <md:h2_txt>Literatur</md:h2_txt>
+    <md:h2_txt>Weblinks</md:h2_txt>
+    <md:h2_txt>Referenzen</md:h2_txt>
+    <md:collection_sxt>surrogate</md:collection_sxt>
   </record>
 
 </surrogates>
