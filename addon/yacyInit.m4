@@ -63,13 +63,7 @@ JAVA_ARGS="-server -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfi
 HUGEPAGESTOTAL="$(cat /proc/meminfo | grep HugePages_Total | sed s/[^0-9]//g)"
 if [ -n "$HUGEPAGESTOTAL" ] && [ $HUGEPAGESTOTAL -ne 0 ]
 then 
-  JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages"
-fi
-
-#turn on MMap for Solr if OS is a 64bit OS
-if [ -n "`uname -m | grep 64`" ]
-then
-  JAVA_ARGS="$JAVA_ARGS -d64 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"
+  JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages -d64 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"
 fi
 
 ifdef(`openSUSE', `dnl
