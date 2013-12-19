@@ -65,7 +65,7 @@
 			<string>$JAVAROOT/lib/jcl-over-slf4j-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/jempbox-1.8.3.jar</string>
 			<string>$JAVAROOT/lib/jena-2.6.4.jar</string>
-			<string>$JAVAROOT/lib/jsch-0.1.42.jar</string>
+			<string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.jar</string>
 			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/lucene-analyzers-common-4.6.0.jar</string>

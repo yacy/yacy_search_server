@@ -22,7 +22,6 @@
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.6-20091214.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-145.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-145.jar"/>
-	<classpathentry kind="lib" path="lib/jsch-0.1.42.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
@@ -70,6 +69,7 @@
 	<classpathentry kind="lib" path="lib/fontbox-1.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/jempbox-1.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.3.jar"/>
+	<classpathentry kind="lib" path="lib/jsch-0.1.50.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
