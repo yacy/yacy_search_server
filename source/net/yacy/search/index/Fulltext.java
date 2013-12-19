@@ -84,8 +84,8 @@ import org.apache.lucene.util.Version;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_45"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44"};
+    private static final String SOLR_PATH = "solr_46"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45"};
     
     // class objects
 	private final File                    segmentPath;
