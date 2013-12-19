@@ -84,7 +84,6 @@
 			<string>$JAVAROOT/lib/lucene-spatial-4.6.0.jar</string>
 			<string>$JAVAROOT/lib/lucene-suggest-4.6.0.jar</string>
 			<string>$JAVAROOT/lib/metadata-extractor-2.6.2.jar</string>
-			<string>$JAVAROOT/lib/mysql-connector-java-5.1.12-bin.jar</string>
 			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
 			<string>$JAVAROOT/lib/pdfbox-1.8.3.jar</string>
 			<string>$JAVAROOT/lib/poi-3.6-20091214.jar</string>

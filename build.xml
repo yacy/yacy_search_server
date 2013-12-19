@@ -209,7 +209,6 @@
     	<pathelement location="${lib}/lucene-spatial-4.6.0.jar" />
     	<pathelement location="${lib}/lucene-suggest-4.6.0.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.6.2.jar" />
-    	<pathelement location="${lib}/mysql-connector-java-5.1.12-bin.jar" />
     	<pathelement location="${lib}/noggit-0.5.jar" />
         <pathelement location="${lib}/pdfbox-1.8.3.jar" />
     	<pathelement location="${lib}/poi-3.6-20091214.jar" />

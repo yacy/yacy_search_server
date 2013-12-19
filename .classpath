@@ -24,7 +24,6 @@
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-145.jar"/>
 	<classpathentry kind="lib" path="lib/jsch-0.1.42.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.12-bin.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.jar"/>
