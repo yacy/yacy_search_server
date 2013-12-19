@@ -49,7 +49,7 @@
 			<string>$JAVAROOT/lib/commons-jxpath-1.3.jar</string>
 			<string>$JAVAROOT/lib/commons-lang-2.6.jar</string>
 			<string>$JAVAROOT/lib/commons-logging-1.1.3.jar</string>
-			<string>$JAVAROOT/lib/fontbox-1.8.2.jar</string>
+			<string>$JAVAROOT/lib/fontbox-1.8.3.jar</string>
 			<string>$JAVAROOT/lib/geronimo-stax-api_1.0_spec-1.0.1.jar</string>
 			<string>$JAVAROOT/lib/guava-13.0.1.jar</string>
 			<string>$JAVAROOT/lib/htmllexer.jar</string>
@@ -63,7 +63,7 @@
 			<string>$JAVAROOT/lib/jaudiotagger-2.0.4-20111207.115108-15.jar</string>
 			<string>$JAVAROOT/lib/jcifs-1.3.17.jar</string>
 			<string>$JAVAROOT/lib/jcl-over-slf4j-1.7.2.jar</string>
-			<string>$JAVAROOT/lib/jempbox-1.8.2.jar</string>
+			<string>$JAVAROOT/lib/jempbox-1.8.3.jar</string>
 			<string>$JAVAROOT/lib/jena-2.6.4.jar</string>
 			<string>$JAVAROOT/lib/jsch-0.1.42.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.jar</string>
@@ -86,7 +86,7 @@
 			<string>$JAVAROOT/lib/metadata-extractor-2.6.2.jar</string>
 			<string>$JAVAROOT/lib/mysql-connector-java-5.1.12-bin.jar</string>
 			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
-			<string>$JAVAROOT/lib/pdfbox-1.8.2.jar</string>
+			<string>$JAVAROOT/lib/pdfbox-1.8.3.jar</string>
 			<string>$JAVAROOT/lib/poi-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/sax-2.0.1.jar</string>
