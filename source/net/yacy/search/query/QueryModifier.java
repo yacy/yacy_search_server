@@ -23,6 +23,7 @@ package net.yacy.search.query;
 import java.util.ArrayList;
 
 import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
@@ -148,10 +149,11 @@ public class QueryModifier {
     public String toString() {
         return this.modifier.toString();
     }
+
     
-    public void apply(serverObjects post) {
+    private StringBuilder apply(String FQ) {
         
-        final StringBuilder fq = new StringBuilder(post.get(CommonParams.FQ,""));
+        final StringBuilder fq = new StringBuilder(FQ);
         
         if (this.sitehost != null && this.sitehost.length() > 0 && fq.indexOf(CollectionSchema.host_s.getSolrFieldName()) < 0) {
             // consider to search for hosts with 'www'-prefix, if not already part of the host name
@@ -179,11 +181,29 @@ public class QueryModifier {
             fq.append(" AND ").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(":\"").append(this.protocol).append('\"');
         }
 
+        return fq;
+    }
+    public void apply(serverObjects post) {
+        
+        final StringBuilder fq = apply(post.get(CommonParams.FQ,""));
+        
         if (fq.length() > 0) {
             String fqs = fq.toString();
             if (fqs.startsWith(" AND ")) fqs = fqs.substring(5);
             post.remove(CommonParams.FQ);
             post.put(CommonParams.FQ, fqs);
+        }
+    }
+
+    public void apply(MultiMapSolrParams mmsp) {
+
+        final StringBuilder fq = apply(mmsp.get(CommonParams.FQ,""));
+
+        if (fq.length() > 0) {
+            String fqs = fq.toString();
+            if (fqs.startsWith(" AND ")) fqs = fqs.substring(5);
+            mmsp.getMap().remove(CommonParams.FQ);
+            mmsp.getMap().put(CommonParams.FQ, new String[]{fqs});
         }
     }
     

@@ -59,7 +59,10 @@ import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
 import org.apache.solr.util.FastWriter;
 
-
+/*
+ * taken from the Solr 3.6.0 code, which is now deprecated;
+ * this is now done in Solr 4.x.x with org.apache.solr.servlet.SolrDispatchFilter
+ */
 public class SolrServlet implements Filter {
 
     private static final QueryResponseWriter responseWriter = new XMLResponseWriter();

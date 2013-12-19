@@ -70,7 +70,6 @@ import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
-import org.apache.solr.common.params.SolrParams;
 
 
 public class serverObjects implements Serializable, Cloneable {
@@ -544,7 +543,7 @@ public class serverObjects implements Serializable, Cloneable {
         return param.toString();
     }
 
-    public SolrParams toSolrParams(CollectionSchema[] facets) {
+    public MultiMapSolrParams toSolrParams(CollectionSchema[] facets) {
         // check if all required post fields are there
         if (!this.containsKey(CommonParams.DF)) this.put(CommonParams.DF, CollectionSchema.text_t.getSolrFieldName()); // set default field to the text field
         if (!this.containsKey(CommonParams.START)) this.put(CommonParams.START, "0"); // set default start item
