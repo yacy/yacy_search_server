@@ -39,8 +39,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.yacy.cora.document.encoding.UTF8;
 
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
@@ -53,14 +53,15 @@ import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
-import org.apache.solr.common.SolrDocumentList;
 
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
+import org.apache.solr.response.BinaryResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
@@ -193,10 +194,14 @@ public class SolrServlet implements Filter {
         }
 
         // write response body
-        Writer out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
-        responseWriter.write(out, req, rsp);
-        out.flush();
-
+        if (responseWriter instanceof BinaryResponseWriter) {
+            ((BinaryResponseWriter) responseWriter).write(response.getOutputStream(), req, rsp);
+        } else {
+            Writer out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
+            responseWriter.write(out, req, rsp);
+            out.flush();
+        }
+        
         // log result
         Object rv = rsp.getValues().get("response");
         int matches = 0;
