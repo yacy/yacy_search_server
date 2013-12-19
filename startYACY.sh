@@ -19,13 +19,7 @@ else
     ID="id"
 fi
 
-if [ "`$ID -u`" -eq 0 ]
-then
-	echo
-	echo "For security reasons you should not run this script as root!"
-	echo
-	exit 1
-elif [ ! -x "$JAVA" ]
+if [ ! -x "$JAVA" ]
 then
 	echo "The java command is not executable."
 	echo "Either you have not installed java or it is not in your PATH"
@@ -139,7 +133,7 @@ then
 fi
 
 #turn on MMap for Solr if OS is a 64bit OS
-if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
+if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -d64 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
 
 if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
 then
