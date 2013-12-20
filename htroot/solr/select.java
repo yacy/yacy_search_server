@@ -22,16 +22,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
-import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -52,15 +47,12 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
-import org.apache.solr.common.util.NamedList;
-import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.BinaryResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.response.XSLTResponseWriter;
 import org.apache.solr.util.FastWriter;
 
 
@@ -73,23 +65,6 @@ import org.apache.solr.util.FastWriter;
  */
 public class select {
 
-    private final static Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
-    static {
-        RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
-        XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
-        OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
-        @SuppressWarnings("rawtypes")
-        NamedList initArgs = new NamedList();
-        xsltWriter.init(initArgs);
-        RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
-        RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
-        RESPONSE_WRITER.put("html", new HTMLResponseWriter());
-        RESPONSE_WRITER.put("grephtml", new GrepHTMLResponseWriter());
-        RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
-        RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
-        RESPONSE_WRITER.put("yjson", new YJsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
-        RESPONSE_WRITER.put("gsa", new GSAResponseWriter());
-    }
 
     /**
      * get the right mime type for this streamed result page
@@ -199,7 +174,7 @@ public class select {
         
         // get a response writer for the result
         String wt = mmsp.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
-        QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
+        QueryResponseWriter responseWriter = SolrServlet.RESPONSE_WRITER.get(wt);
         if (responseWriter == null) return null;
         if (responseWriter instanceof OpensearchResponseWriter) {
             // set the title every time, it is possible that it has changed
