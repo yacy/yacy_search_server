@@ -70,6 +70,7 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.SentenceReader;
+import net.yacy.document.content.DCEntry;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
@@ -786,6 +787,22 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             // publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de
             if (allAttr || contains(CollectionSchema.publisher_url_s) && html.getPublisherLink() != null) {
                 add(doc, CollectionSchema.publisher_url_s, html.getPublisherLink().toNormalform(true));
+            }
+        }
+
+        if (parser instanceof DCEntry) {
+            // the document was created with a surrogate parsing; overwrite all md: -entries to Solr
+            DCEntry dcentry = (DCEntry) parser;
+            for (Map.Entry<String, String[]> entry: dcentry.getMap().entrySet()) {
+                String tag = entry.getKey();
+                if (!tag.startsWith("md:") || tag.length() < 4) continue;
+                CollectionSchema solr_field = CollectionSchema.valueOf(tag.substring(3));
+                if (solr_field == null) continue;
+                String[] values = entry.getValue();
+                if (values == null || values.length == 0) continue;
+                if (allAttr || contains(solr_field)) {
+                    add(doc, solr_field, values);
+                }
             }
         }
         

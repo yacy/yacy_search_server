@@ -64,6 +64,8 @@ import org.apache.solr.util.FastWriter;
  */
 public class GSAsearchServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 7835985518515673885L;
+    
     private final static GSAResponseWriter responseWriter = new GSAResponseWriter();
 
     @Override

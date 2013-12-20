@@ -57,12 +57,13 @@ SHUTDOWN_TIMEOUT=50
 # Default niceness if not set in config file
 NICE_VAL=0
 
-JAVA_ARGS="-server -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+JAVA_ARGS="-server -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+
 #check if system supports large memory pages and enable it if possible
 HUGEPAGESTOTAL="$(cat /proc/meminfo | grep HugePages_Total | sed s/[^0-9]//g)"
 if [ -n "$HUGEPAGESTOTAL" ] && [ $HUGEPAGESTOTAL -ne 0 ]
 then 
-  JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages"
+  JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages -d64 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"
 fi
 
 ifdef(`openSUSE', `dnl
