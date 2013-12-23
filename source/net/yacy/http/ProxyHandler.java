@@ -59,7 +59,7 @@ import net.yacy.server.http.MultiOutputStream;
  */
 public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 	
-	static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
+	public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
 		RequestHeader result = new RequestHeader();
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while(headerNames.hasMoreElements()) {

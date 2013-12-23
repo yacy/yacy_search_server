@@ -31,13 +31,18 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import javax.servlet.DispatcherType;
-import net.yacy.cora.federate.solr.SolrServlet;
-import net.yacy.cora.federate.solr.SolrServlet.Servlet404;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.Switchboard;
-import org.eclipse.jetty.server.Connector;
 
+import javax.servlet.DispatcherType;
+
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.servlets.GSAsearchServlet;
+import net.yacy.http.servlets.SolrServlet;
+import net.yacy.http.servlets.YaCyDefaultServlet;
+import net.yacy.http.servlets.YaCyProxyServlet;
+import net.yacy.http.servlets.SolrServlet.Servlet404;
+import net.yacy.search.Switchboard;
+
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;

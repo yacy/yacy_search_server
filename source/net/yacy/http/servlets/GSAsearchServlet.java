@@ -17,7 +17,7 @@
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.yacy.http;
+package net.yacy.http.servlets;
 
 import java.io.IOException;
 import java.io.OutputStream;

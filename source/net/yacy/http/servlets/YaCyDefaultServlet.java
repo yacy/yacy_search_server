@@ -16,7 +16,7 @@
 //  along with this program in the file lgpl21.txt
 //  If not, see <http://www.gnu.org/licenses/>.
 //
-package net.yacy.http;
+package net.yacy.http.servlets;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -51,6 +51,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.Seed;
