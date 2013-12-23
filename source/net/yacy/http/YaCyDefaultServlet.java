@@ -45,6 +45,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -65,13 +66,13 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 import net.yacy.visualization.RasterPlotter;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.eclipse.jetty.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpMethods;
-
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.WriterOutputStream;
@@ -470,7 +471,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             HttpServletResponse response,
             boolean include,
             Resource resource,
-            Enumeration reqRanges)
+            Enumeration<String> reqRanges)
             throws IOException {
 
         final long content_length = resource.length();
@@ -494,7 +495,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         } else {
             // Parse the satisfiable ranges
-            List ranges = InclusiveByteRange.satisfiableRanges(reqRanges, content_length);
+            List<?> ranges = InclusiveByteRange.satisfiableRanges(reqRanges, content_length);
 
             //  if there are no satisfiable ranges, send 416 response
             if (ranges == null || ranges.size() == 0) {
@@ -727,7 +728,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         if ((targetClass != null)) {
             serverObjects args = new serverObjects();
-            @SuppressWarnings("unchecked")
             Enumeration<String> argNames = request.getParameterNames();
             while (argNames.hasMoreElements()) {
                 String argName = argNames.nextElement();
@@ -735,7 +735,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
             //TODO: for SSI request, local parameters are added as attributes, put them back as parameter for the legacy request
             //      likely this should be implemented via httpservletrequestwrapper to supply complete parameters  
-            @SuppressWarnings("unchecked")
             Enumeration<String> attNames = request.getAttributeNames();
             while (attNames.hasMoreElements()) {
                 String argName = attNames.nextElement();
@@ -900,7 +899,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 	
     // parse SSI line and include resource
-    protected void parseSSI(final net.yacy.cora.util.ByteBuffer in, final int off, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void parseSSI(final net.yacy.cora.util.ByteBuffer in, final int off, HttpServletRequest request, HttpServletResponse response) throws ServletException {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
             final int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {

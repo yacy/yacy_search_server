@@ -52,7 +52,7 @@ public final class hello {
     // example:
     // http://localhost:8090/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,Port=8090,PeerType=junior}
     // http://localhost:8090/yacy/hello.html?count=10&seed=z|H4sIAAAAAAAAADWQW2vDMAyF_81eJork3GyGX-YxGigly2WFvZTQijbQJsHx1pWx_z7nMj1J4ug7B_2s6-GsP5q3G-G6vBz2e0iz8t6zfuBr7-5PUNanQfulhqyzTkuUCFXvmitrBJtq4ed3tkPTtRpXhIiRDAmq0uhHFIiQMduJ-NXYU9NCbrrP1vnjIdUqgk09uIK51V6rMBRIilAo2NajwzfhGcx8QUKsEIp5iCJo-eaTVUXPfPQ4k5dm4pp8NzaESsLzS-14QVNIMlA-ka2m1JuZJJWIBRwPo0GIIiYp4zCSkC5GQSLiJIah0p6X_rvlS-MTbWdhkCSBIni9jA_rfP3-Ae1Oye9dAQAA
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final long start = System.currentTimeMillis();
@@ -146,7 +146,6 @@ public final class hello {
             !clientip.equals(reportedip) &&
             clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING &&
             magic != 0) {
-            serverCore.checkInterruption();
 
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
@@ -171,7 +170,6 @@ public final class hello {
             }
 
             if (isNotLocal) {
-                serverCore.checkInterruption();
 
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
@@ -221,7 +219,6 @@ public final class hello {
                                                         "' to '" + prop.get(Seed.YOURTYPE) + "'.");
         }
 
-        serverCore.checkInterruption();
         final StringBuilder seeds = new StringBuilder(768);
         // attach some more seeds, as requested
         if (sb.peers.sizeConnected() > 0) {

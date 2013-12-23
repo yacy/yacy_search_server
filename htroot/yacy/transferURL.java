@@ -47,13 +47,12 @@ import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public final class transferURL {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final long start = System.currentTimeMillis();
         long freshdate = 0;
         try {freshdate = GenericFormatter.SHORT_DAY_FORMATTER.parse("20061101").getTime();} catch (final ParseException e1) {}
@@ -94,7 +93,6 @@ public final class transferURL {
             URIMetadataRow lEntry;
             Map<String, URIMetadataRow> lEm = new HashMap<String, URIMetadataRow>();
             for (int i = 0; i < urlc; i++) {
-                serverCore.checkInterruption();
 
                 // read new lurl-entry
                 urls = post.get("url" + i);

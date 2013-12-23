@@ -64,8 +64,6 @@ import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverCore;
-import net.yacy.server.http.HTTPDemon;
-
 import com.google.common.io.Files;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -349,23 +347,7 @@ public final class yacy {
             try {
                 // start http server
             	YaCyHttpServer httpServer;
-                // default jetty (alternative "anomichttpd")
-                if (sb.getConfig("defaulthttpserver","jetty").equalsIgnoreCase("jetty")) {
-                    httpServer = new Jetty8HttpServerImpl(port);
-                } else {   
-                final HTTPDemon protocolHandler = new HTTPDemon(sb);
-                httpServer = new serverCore(
-                        timeout /*control socket timeout in milliseconds*/,
-                        true /* block attacks (wrong protocol) */,
-                        protocolHandler /*command class*/,
-                        sb,
-                        30000 /*command max length incl. GET args*/);
-                ((serverCore) httpServer).setName("httpd:"+port);
-                ((serverCore) httpServer).setPriority(Thread.MAX_PRIORITY);
-                ((serverCore) httpServer).setObeyIntermission(false);
-                // start the server
-                //sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);             
-                }
+                httpServer = new Jetty8HttpServerImpl(port);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
                 ConcurrentLog.info("STARTUP",httpServer.getVersion());

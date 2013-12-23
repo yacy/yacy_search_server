@@ -60,9 +60,8 @@ public class YaCyLegacyCredential extends Credential {
 		if(credentials instanceof String) {
 			final String pw = (String) credentials;
 			return calcHash(pw).equals(this.hash);
-		} else {
-			throw new UnsupportedOperationException();
 		}
+        throw new UnsupportedOperationException();
 	}
 	
 	/**

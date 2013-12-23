@@ -26,13 +26,15 @@ package net.yacy.http;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import net.yacy.cora.document.id.MultiProtocolURL;
 
+import javax.servlet.http.HttpServletResponse;
+
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.search.Switchboard;
+
 import org.eclipse.jetty.http.HttpSchemes;
 import org.eclipse.jetty.security.RoleInfo;
-
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.UserDataConstraint;
 import org.eclipse.jetty.server.AbstractHttpConnection;
@@ -86,7 +88,7 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
                 response.sendRedirect(url);
             }
             else
-                response.sendError(Response.SC_FORBIDDEN,"!Integral");
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,"!Integral");
 
             request.setHandled(true);
             return false;
@@ -109,7 +111,7 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
                 response.sendRedirect(url);
             }
             else
-                response.sendError(Response.SC_FORBIDDEN,"!Confidential");
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,"!Confidential");
 
             request.setHandled(true);
             return false;

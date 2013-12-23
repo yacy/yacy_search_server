@@ -446,7 +446,6 @@ public final class HTTPDProxyHandler {
 
     private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURL url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond, final ClientIdentification.Agent agent) {
         try {
-        	final boolean proxyAugmentation = sb.getConfigBool("proxyAugmentation", false);
             final int reqID = requestHeader.hashCode();
 
             String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
@@ -504,12 +503,6 @@ public final class HTTPDProxyHandler {
                 	throw new Exception(client.getHttpResponse().getStatusLine().toString());
                 }
 
-                if (proxyAugmentation && AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
-                    // enable chunk encoding, because we don't know the length after annotating
-                    responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
-                    responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
-                }
-
                 ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, statusCode, respond);
 
                 // the cache does either not exist or is (supposed to be) stale
@@ -545,11 +538,6 @@ public final class HTTPDProxyHandler {
 //                prepareResponseHeader(responseHeader, res.getHttpVer());
                 prepareResponseHeader(responseHeader, client.getHttpResponse().getProtocolVersion().toString());
 
-                if(proxyAugmentation && AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
-                	// chunked encoding disables somewhere, add it again
-                    responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
-                }
-
                 // sending the respond header back to the client
                 if (chunkedOut != null) {
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
@@ -578,9 +566,6 @@ public final class HTTPDProxyHandler {
                     final boolean storeHTCache = response.profile().storeHTCache();
                     final String supportError = TextParser.supports(response.url(), response.getMimeType());
 
-                    if(proxyAugmentation && AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
-                        outStream = new AugmentedHtmlStream(outStream, responseHeader.getCharSet(), url, requestHeader);
-                    }
                     if (
                             /*
                              * Now we store the response into the htcache directory if
@@ -736,11 +721,6 @@ public final class HTTPDProxyHandler {
                 // send cached header with replaced date and added length
                 HTTPDemon.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
-
-                if(sb.getConfigBool("proxyAugmentation", false)
-                		&& AugmentedHtmlStream.supportsMime(cachedResponseHeader.mime())) {
-                    respond = new AugmentedHtmlStream(respond, cachedResponseHeader.getCharSet(), url, requestHeader);
-                }
 
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket

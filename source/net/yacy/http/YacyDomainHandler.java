@@ -125,7 +125,6 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
             return super.getHeader(name);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public Enumeration<String> getHeaders(String name) {
             if (name.equals("Host")) {

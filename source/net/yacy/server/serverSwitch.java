@@ -52,7 +52,6 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.server.serverAccessTracker.Track;
-import net.yacy.server.serverCore.Session;
 
 public class serverSwitch
 {
@@ -438,43 +437,6 @@ public class serverSwitch
             while ( e.hasNext() ) {
                 ((WorkflowThread) this.workerThreads.get(e.next())).terminate(true);
                 e.remove();
-            }
-        }
-    }
-
-    public void closeSessions(String sessionName) {
-        if ( sessionName == null ) {
-            return;
-        }
-
-        for ( final Session s : serverCore.getJobList() ) {
-            if ( (s.isAlive()) && (s.getName().equals(sessionName)) ) {
-                // try to stop session
-                s.setStopped(true);
-                try {
-                    Thread.sleep(100);
-                } catch (final InterruptedException ex ) {
-                }
-
-                // try to interrupt session
-                s.interrupt();
-                try {
-                    Thread.sleep(100);
-                } catch (final InterruptedException ex ) {
-                }
-
-                // try to close socket
-                if ( s.isAlive() ) {
-                    s.close();
-                }
-
-                // wait for session to finish
-                if ( s.isAlive() ) {
-                    try {
-                        s.join(500);
-                    } catch (final InterruptedException ex ) {
-                    }
-                }
             }
         }
     }

@@ -53,13 +53,12 @@ import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public final class transferRWI {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -170,7 +169,6 @@ public final class transferRWI {
             int count = 0;
             Set<String> testids = new HashSet<String>();
             while (it.hasNext()) {
-                serverCore.checkInterruption();
                 estring = it.next();
                 count++;
                 if (count > 1000) break; // protection against flooding
@@ -208,7 +206,6 @@ public final class transferRWI {
                 } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 }
-                serverCore.checkInterruption();
 
                 // check if we need to ask for the corresponding URL
                 testids.add(ASCII.String(urlHash));

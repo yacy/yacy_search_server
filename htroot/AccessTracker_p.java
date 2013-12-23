@@ -42,7 +42,6 @@ import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.serverAccessTracker.Track;
@@ -93,16 +92,6 @@ public class AccessTracker_p {
             prop.put("page_num", entCount);
 
             entCount = 0;
-            try {
-                for (final Map.Entry<String, Integer> bfe: serverCore.bfHost.entrySet()) {
-                    prop.putHTML("page_bflist_" + entCount + "_host", bfe.getKey());
-                    prop.putNum("page_bflist_" + entCount + "_countSecond", bfe.getValue());
-                    entCount++;
-                }
-            } catch (final ConcurrentModificationException e) {
-                // we don't want to synchronize this
-                ConcurrentLog.logException(e);
-            }
             prop.put("page_bflist", entCount);
         } else if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");

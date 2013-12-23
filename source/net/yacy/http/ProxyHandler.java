@@ -61,11 +61,9 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 	
 	static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
 		RequestHeader result = new RequestHeader();
-		@SuppressWarnings("unchecked")
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while(headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
-			@SuppressWarnings("unchecked")
 			Enumeration<String> headers = request.getHeaders(headerName);
 			while(headers.hasMoreElements()) {
 				String header = headers.nextElement();
@@ -94,7 +92,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                 final String httpVer = request.getHeader(HeaderFramework.CONNECTION_PROP_HTTP_VER);
                 setViaHeader (proxyHeaders, httpVer);
 		proxyHeaders.remove(RequestHeader.KEEP_ALIVE);
-		proxyHeaders.remove(RequestHeader.CONTENT_LENGTH);
+		proxyHeaders.remove(HeaderFramework.CONTENT_LENGTH);
 
 		final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
 		int timeout = 60000;

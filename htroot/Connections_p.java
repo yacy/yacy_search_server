@@ -27,9 +27,6 @@
 //javac -classpath .:../classes Network.java
 //if the shell's current path is HTROOT
 
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,15 +34,10 @@ import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.http.YaCyHttpServer;
-import net.yacy.peers.PeerActions;
-import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-import net.yacy.server.serverCore.Session;
 
 public final class Connections_p {
 
@@ -64,7 +56,6 @@ public final class Connections_p {
             doNameLookup = post.getBoolean("nameLookup");
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
-                sb.closeSessions(sessionName);
                 prop.put(serverObjects.ACTION_LOCATION,"");
                 return prop;
             }
@@ -73,69 +64,7 @@ public final class Connections_p {
         }
 
         // waiting for all threads to finish
-        int idx = 0, numActiveRunning = 0, numActivePending = 0;
-        boolean dark = true;
-        for (final Session s: serverCore.getJobList()) {
-            if (!s.isAlive()) continue;
-
-            // get the session runtime
-            final long sessionTime = s.getTime();
-
-            // get the request command line
-            String commandLine = s.getCommandLine();
-            final boolean blockingRequest = (commandLine == null);
-            final int commandCount = s.getCommandCount();
-
-            // get the source ip address and port
-            final InetAddress userAddress = s.getUserAddress();
-            final int userPort = s.getUserPort();
-            if (userAddress == null) {
-                continue;
-            }
-
-            String prot = "http"; // only httpd sessions listed
-
-            // determining if the source is a yacy host
-            Seed seed = null;
-            if (doNameLookup) {
-                seed = sb.peers.lookupByIP(userAddress, -1, true, false, false);
-                if (seed != null && (seed.hash.equals(sb.peers.mySeed().hash)) &&
-                        (!seed.get(Seed.PORT,"").equals(Integer.toString(userPort)))) {
-                    seed = null;
-                }
-            }
-
-            prop.put("list_" + idx + "_dark", dark ? "1" : "0");
-            dark = !dark;
-            try {
-                prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
-            } catch (final UnsupportedEncodingException e) {
-                // TODO Auto-generated catch block
-                ConcurrentLog.logException(e);
-            }
-            prop.putHTML("list_" + idx + "_sessionName", s.getName());
-            prop.put("list_" + idx + "_proto", prot);
-            if (sessionTime > 1000*60) {
-                prop.put("list_" + idx + "_ms", "0");
-                prop.put("list_" + idx + "_ms_duration",PeerActions.formatInterval(sessionTime));
-            } else {
-                prop.put("list_" + idx + "_ms", "1");
-                prop.putNum("list_" + idx + "_ms_duration", sessionTime);
-            }
-            prop.putHTML("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
-            prop.putHTML("list_" + idx + "_dest", "-");
-            if (blockingRequest) {
-                prop.put("list_" + idx + "_running", "0");
-                prop.putNum("list_" + idx + "_running_reqNr", commandCount+1);
-                numActivePending++;
-            } else {
-                prop.put("list_" + idx + "_running", "1");
-                prop.put("list_" + idx + "_running_command", commandLine==null ? "" :commandLine);
-                numActiveRunning++;
-            }
-            prop.putNum("list_" + idx + "_used", commandCount);
-            idx++;
-        }
+        int idx = 0, numActivePending = 0;
         prop.put("list", idx);
 
         prop.putNum("numMax", httpd.getMaxSessionCount());
