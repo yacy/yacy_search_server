@@ -59,6 +59,7 @@ import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.http.HTTPDFileHandler;
 import net.yacy.server.http.HTTPDemon;
 import net.yacy.server.http.TemplateEngine;
 import net.yacy.server.serverClassLoader;
@@ -251,8 +252,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         Resource resource = null;
 
         try {
-            // find resource
-            resource = getResource(pathInContext);
 
             // Look for a class resource
             boolean hasClass = false;
@@ -267,11 +266,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                 }
             }
+            
+            // find resource
+            resource = getResource(pathInContext);
 
+            if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
+                // try to get this in the alternative htDocsPath
+                resource = Resource.newResource(new File(HTTPDFileHandler.htDocsPath, pathInContext));
+            }
+            
             if (ConcurrentLog.isFine("FILEHANDLER")) {
                 ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: uri=" + request.getRequestURI() + " resource=" + resource);
             }
-
+            
             // Handle resource
             if (!hasClass && (resource == null || !resource.exists())) {
                 if (included) {

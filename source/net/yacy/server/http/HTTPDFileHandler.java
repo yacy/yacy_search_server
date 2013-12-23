@@ -72,7 +72,7 @@ public final class HTTPDFileHandler {
     private static serverSwitch switchboard = null;
 
     private static File     htRootPath     = null;
-    private static File     htDocsPath     = null;
+    public  static File     htDocsPath     = null;
     private static String[] defaultFiles   = null;
     private static File     htDefaultPath  = null;
     private static File     htLocalePath   = null;
