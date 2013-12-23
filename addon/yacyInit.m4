@@ -58,7 +58,6 @@ SHUTDOWN_TIMEOUT=50
 NICE_VAL=0
 
 JAVA_ARGS="-server -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8 -d64 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"
-fi
 
 ifdef(`openSUSE', `dnl
 . /etc/rc.status
