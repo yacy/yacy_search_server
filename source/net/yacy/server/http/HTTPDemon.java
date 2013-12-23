@@ -102,7 +102,8 @@ public final class HTTPDemon {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in) throws IOException {
+    public
+    static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in) throws IOException {
 
         final InputStream body = prepareBody(header, in);
 
@@ -220,7 +221,7 @@ public final class HTTPDemon {
 
     }
 
-    public static final void sendRespondError(
+    static final void sendRespondError(
             final HashMap<String, Object> conProp,
             final OutputStream respond,
             final int errorcase,
@@ -243,7 +244,7 @@ public final class HTTPDemon {
         );
     }
 
-    public static final void sendRespondError(
+    static final void sendRespondError(
             final HashMap<String, Object> conProp,
             final OutputStream respond,
             final int httpStatusCode,
@@ -401,7 +402,7 @@ public final class HTTPDemon {
         }
     }
 
-    public static final void sendRespondHeader(
+    private static final void sendRespondHeader(
             final HashMap<String, Object> conProp,
             final OutputStream respond,
             final String httpVersion,
@@ -460,7 +461,7 @@ public final class HTTPDemon {
         sendRespondHeader(conProp, respond, httpVersion, httpStatusCode, httpStatusText, headers);
     }
 
-    public static final void sendRespondHeader(
+    static final void sendRespondHeader(
             final HashMap<String, Object> conProp,
             final OutputStream respond,
             final String httpVersion,
@@ -470,7 +471,7 @@ public final class HTTPDemon {
         sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,null,header);
     }
 
-    public static final void sendRespondHeader(
+    static final void sendRespondHeader(
             final HashMap<String, Object> conProp,
             final OutputStream respond,
             String httpVersion,

@@ -46,7 +46,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -55,7 +54,6 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -69,7 +67,6 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
@@ -77,8 +74,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.protocol.http.ProxySettings;
-import net.yacy.cora.protocol.http.ProxySettings.Protocol;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Request;
@@ -92,7 +87,6 @@ import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 
 public final class HTTPDProxyHandler {
@@ -742,253 +736,6 @@ public final class HTTPDProxyHandler {
         return;
     }
 
-    public static void doHead(final HashMap<String, Object> conProp, final RequestHeader requestHeader, OutputStream respond, final ClientIdentification.Agent agent) {
-
-//        ResponseContainer res = null;
-        DigestURL url = null;
-        try {
-            final int reqID = requestHeader.hashCode();
-            // remembering the starting time of the request
-            final Date requestDate = new Date(); // remember the time...
-            conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) net.yacy.peers.Network.triggerOnlineAction();
-            sb.proxyLastAccess = System.currentTimeMillis();
-
-            // using an ByteCount OutputStream to count the send bytes
-            respond = new ByteCountOutputStream(respond,((String) conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE)).length() + 2,"PROXY");
-
-            String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-            final String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);
-            final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);
-            final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-
-            int port, pos;
-            if ((pos = host.indexOf(':')) < 0) {
-                port = 80;
-            } else {
-                port = Integer.parseInt(host.substring(pos + 1));
-                host = host.substring(0, pos);
-            }
-
-            try {
-                url = new DigestURL("http", host, port, (args == null) ? path : path + "?" + args);
-            } catch (final MalformedURLException e) {
-                final String errorMsg = "ERROR: internal error with url generation: host=" +
-                                  host + ", port=" + port + ", path=" + path + ", args=" + args;
-                log.severe(errorMsg);
-                HTTPDemon.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
-                return;
-            }
-            if (log.isFine()) log.fine(reqID +" HEAD "+ url);
-            if (log.isFinest()) log.finest(reqID +"    header: "+ requestHeader);
-
-            // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
-            final String hostlow = host.toLowerCase();
-
-            // re-calc the url path
-            final String remotePath = (args == null) ? path : (path + "?" + args);
-
-            if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostlow, remotePath)) {
-                HTTPDemon.sendRespondError(conProp,respond,4,403,null,
-                        "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
-                log.info("AGIS blocking of host '" + hostlow + "'");
-                return;
-            }
-
-            prepareRequestHeader(conProp, requestHeader, hostlow);
-
-            // resolve yacy and yacyh domains
-            String yAddress = resolveYacyDomains(host);
-
-            // remove yacy-subdomain-path, when accessing /env
-            if ( (yAddress != null)
-            		&& (remotePath.startsWith("/env"))
-            		&& ((pos = yAddress.indexOf('/')) != -1)
-            ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
-
-            modifyProxyHeaders(requestHeader, httpVer);
-
-            // generate request-url
-            final String connectHost = hostPart(host, port, yAddress);
-            final String getUrl = "http://"+ connectHost + remotePath;
-            if (log.isFinest()) log.finest(reqID +"    using url: "+ getUrl);
-
-            final HTTPClient client = setupHttpClient(requestHeader, agent, connectHost);
-
-            // send request
-//            try {
-//            res = client.HEAD(getUrl);
-//            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
-            client.HEADResponse(getUrl);
-            if (log.isFinest()) log.finest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
-
-            // determine if it's an internal error of the httpc
-//            final ResponseHeader responseHeader = res.getResponseHeader();
-//            if (responseHeader.isEmpty()) {
-//                throw new Exception(res.getStatusLine());
-//            }
-            int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-            final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-            if (responseHeader.isEmpty()) {
-                throw new Exception(client.getHttpResponse().getStatusLine().toString());
-            }
-
-//            prepareResponseHeader(responseHeader, res.getHttpVer());
-            prepareResponseHeader(responseHeader, client.getHttpResponse().getStatusLine().getProtocolVersion().toString());
-
-            // sending the server respond back to the client
-            if (log.isFinest()) log.finest(reqID +"    sending response header: "+ responseHeader);
-//            HTTPDemon.sendRespondHeader(conProp,respond,httpVer,res.getStatusCode(),res.getStatusLine().substring(4),responseHeader);
-            HTTPDemon.sendRespondHeader(
-            		conProp,
-            		respond,
-            		httpVer,
-            		statusCode,
-            		client.getHttpResponse().getStatusLine().toString(),
-            		responseHeader);
-            respond.flush();
-//            } finally {
-//                if(res != null) {
-//                    // ... close connection
-//                    res.closeStream();
-//                }
-//            }
-        } catch (final Exception e) {
-            handleProxyException(e,conProp,respond,url);
-        }
-    }
-
-    public static void doPost(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream respond, final InputStream body, final ClientIdentification.Agent agent) throws IOException {
-        assert conProp != null : "precondition violated: conProp != null";
-        assert requestHeader != null : "precondition violated: requestHeader != null";
-        assert body != null : "precondition violated: body != null";
-        DigestURL url = null;
-        ByteCountOutputStream countedRespond = null;
-        try {
-            final int reqID = requestHeader.hashCode();
-            // remembering the starting time of the request
-            final Date requestDate = new Date(); // remember the time...
-            conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) net.yacy.peers.Network.triggerOnlineAction();
-            sb.proxyLastAccess = System.currentTimeMillis();
-
-            // using an ByteCount OutputStream to count the send bytes
-            countedRespond  = new ByteCountOutputStream(respond,((String) conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE)).length() + 2,"PROXY");
-
-            String host    = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-            final String path    = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);
-            final String args    = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); // may be null if no args were given
-            final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-
-            int port, pos;
-            if ((pos = host.indexOf(':')) < 0) {
-                port = 80;
-            } else {
-                port = Integer.parseInt(host.substring(pos + 1));
-                host = host.substring(0, pos);
-            }
-
-            try {
-                url = new DigestURL("http", host, port, (args == null) ? path : path + "?" + args);
-            } catch (final MalformedURLException e) {
-                final String errorMsg = "ERROR: internal error with url generation: host=" +
-                                  host + ", port=" + port + ", path=" + path + ", args=" + args;
-                log.severe(errorMsg);
-                HTTPDemon.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
-                return;
-            }
-            if (log.isFine()) log.fine(reqID +" POST "+ url);
-            if (log.isFinest()) log.finest(reqID +"    header: "+ requestHeader);
-
-            prepareRequestHeader(conProp, requestHeader, host.toLowerCase());
-
-            String yAddress = resolveYacyDomains(host);
-
-            // re-calc the url path
-            final String remotePath = (args == null) ? path : (path + "?" + args);
-
-            // remove yacy-subdomain-path, when accessing /env
-            if ( (yAddress != null)
-            		&& (remotePath.startsWith("/env"))
-            		&& ((pos = yAddress.indexOf('/')) != -1)
-            ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
-
-            modifyProxyHeaders(requestHeader, httpVer);
-
-            final String connectHost = hostPart(host, port, yAddress);
-            final String getUrl = "http://"+ connectHost + remotePath;
-            if (log.isFinest()) log.finest(reqID +"    using url: "+ getUrl);
-
-            // the CONTENT_LENGTH will be added by entity and cause a ClientProtocolException if set
-            final int contentLength = requestHeader.getContentLength();
-            requestHeader.remove(HeaderFramework.CONTENT_LENGTH);
-
-            final HTTPClient client = setupHttpClient(requestHeader, agent, connectHost);
-
-            // check input
-            if(body == null) {
-                log.severe("no body to POST!");
-            }
-            try {
-	            // sending the request
-	            client.POST(getUrl, body, contentLength);
-	            if (log.isFinest()) log.finest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
-
-                int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-	            final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-	            // determine if it's an internal error of the httpc
-	            if (responseHeader.isEmpty()) {
-	            	throw new Exception(client.getHttpResponse().getStatusLine().toString());
-	            }
-
-	            final ChunkedOutputStream chunked = setTransferEncoding(conProp, responseHeader, client.getHttpResponse().getStatusLine().getStatusCode(), countedRespond);
-
-	            prepareResponseHeader(responseHeader, client.getHttpResponse().getProtocolVersion().toString());
-
-	            // sending the respond header back to the client
-	            if (chunked != null) {
-	                responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
-	            }
-
-	            // sending response headers
-	            if (log.isFinest()) log.finest(reqID +"    sending response header: "+ responseHeader);
-	            HTTPDemon.sendRespondHeader(conProp,
-                        countedRespond,
-                        httpVer,
-                        statusCode,
-                        client.getHttpResponse().getStatusLine().toString(), // status text
-                        responseHeader);
-
-	            final OutputStream outStream = (chunked != null) ? chunked : countedRespond;
-	            client.writeTo(outStream);
-
-	            if (chunked != null) {
-	                chunked.finish();
-	            }
-	            outStream.flush();
-            } catch(final SocketException se) {
-        	// connection closed by client, abort download
-            	client.finish();
-            } finally {
-            	client.finish();
-            }
-        } catch (final Exception e) {
-            handleProxyException(e,conProp,countedRespond,url);
-        } finally {
-            if(countedRespond != null) {
-                countedRespond.flush();
-                countedRespond.finish();
-            }
-            if(respond != null) {
-                respond.flush();
-            }
-
-            conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_END, Long.valueOf(System.currentTimeMillis()));
-            conProp.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE,(countedRespond != null) ? Long.toString(countedRespond.getCount()) : "-1");
-            logProxyAccess(conProp);
-        }
-    }
-
     /**
      * resolve yacy and yacyh domains
      *
@@ -1193,151 +940,6 @@ public final class HTTPDProxyHandler {
 
             // storing header back
             header.put(HeaderFramework.VIA, viaValue.toString());
-        }
-    }
-
-    public static void doConnect(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final InputStream clientIn, final OutputStream clientOut, final ClientIdentification.Agent agent) throws IOException {
-
-        sb.proxyLastAccess = System.currentTimeMillis();
-
-        String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-        final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-        String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);
-        final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);
-        if (args != null) { path = path + "?" + args; }
-
-        int port, pos;
-        if ((pos = host.indexOf(':')) < 0) {
-            port = 80;
-        } else {
-            port = Integer.parseInt(host.substring(pos + 1));
-            host = host.substring(0, pos);
-        }
-
-        // check the blacklist
-        // blacklist idea inspired by [AS]:
-        // respond a 404 for all AGIS ("all you get is shit") servers
-        final String hostlow = host.toLowerCase();
-        if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostlow, path)) {
-            HTTPDemon.sendRespondError(conProp,clientOut,4,403,null,
-                    "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
-            log.info("AGIS blocking of host '" + hostlow + "'");
-            forceConnectionClose(conProp);
-            return;
-        }
-
-        // possibly branch into PROXY-PROXY connection
-        if (ProxySettings.useForHost(host, Protocol.HTTPS)) {
-        	final HTTPClient remoteProxy = setupHttpClient(requestHeader, agent, host);
-
-            try {
-            	remoteProxy.HEADResponse("http://" + host + ":" + port);
-                int statusCode = remoteProxy.getHttpResponse().getStatusLine().getStatusCode();
-            	final ResponseHeader header = new ResponseHeader(statusCode, remoteProxy.getHttpResponse().getAllHeaders());
-
-                // outputs a logline to the serverlog with the current status
-            	log.info("CONNECT-RESPONSE: status=" + remoteProxy.getHttpResponse().getStatusLine() + ", header=" + header.toString());
-            	final boolean success = statusCode >= 200 && statusCode <= 399;
-                if (success) {
-                    // replace connection details
-                    host = ProxySettings.host;
-                    port = ProxySettings.port;
-                    // go on (see below)
-                } else {
-                    // pass error response back to client
-                	HTTPDemon.sendRespondHeader(
-                			conProp,
-                			clientOut,
-                			httpVersion,
-                			remoteProxy.getHttpResponse().getStatusLine().getStatusCode(),
-                			remoteProxy.getHttpResponse().getStatusLine().toString(),
-                			header);
-                    //respondHeader(clientOut, response.status, response.responseHeader);
-                    forceConnectionClose(conProp);
-                    return;
-                }
-            } catch (final Exception e) {
-                throw new IOException(e.getMessage());
-            }
-        }
-
-        // try to establish connection to remote host
-        final Socket sslSocket = new Socket(host, port);
-        sslSocket.setSoTimeout(timeout); // waiting time for write
-        sslSocket.setSoLinger(true, timeout); // waiting time for read
-        final InputStream promiscuousIn  = sslSocket.getInputStream();
-        final OutputStream promiscuousOut = sslSocket.getOutputStream();
-
-        // now then we can return a success message
-        clientOut.write(UTF8.getBytes(httpVersion + " 200 Connection established" + serverCore.CRLF_STRING +
-                "Proxy-agent: YACY" + serverCore.CRLF_STRING +
-                serverCore.CRLF_STRING));
-
-        log.info("SSL connection to " + host + ":" + port + " established.");
-
-        // start stream passing with mediate processes
-        final Mediate cs = new Mediate(sslSocket, clientIn, promiscuousOut);
-        final Mediate sc = new Mediate(sslSocket, promiscuousIn, clientOut);
-        cs.start();
-        sc.start();
-        while ((sslSocket != null) &&
-               (sslSocket.isBound()) &&
-               (!(sslSocket.isClosed())) &&
-               (sslSocket.isConnected()) &&
-               (!sslSocket.isInputShutdown() && !sslSocket.isOutputShutdown()) &&
-               ((cs.isAlive()) || (sc.isAlive()))) {
-            // idle
-            try {Thread.sleep(1000);} catch (final InterruptedException e) {} // wait a while
-        }
-        // set stop mode
-        cs.pleaseTerminate();
-        sc.pleaseTerminate();
-        // wake up thread
-        cs.interrupt();
-        sc.interrupt();
-        // ...hope they have terminated...
-        if (sslSocket != null) sslSocket.close();
-    }
-
-    public static class Mediate extends Thread {
-
-        boolean terminate;
-        Socket socket;
-        InputStream in;
-        OutputStream out;
-
-        public Mediate(final Socket socket, final InputStream in, final OutputStream out) {
-            this.terminate = false;
-            this.in = in;
-            this.out = out;
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            final byte[] buffer = new byte[512];
-            int len;
-            try {
-                while ((this.socket != null) &&
-                        (this.socket.isBound()) &&
-                        (!(this.socket.isClosed())) &&
-                        (this.socket.isConnected()) &&
-                        (!(this.terminate)) &&
-                        (this.in != null) &&
-                        (this.out != null) &&
-                        ((len = this.in.read(buffer)) >= 0)
-                ) {
-                    this.out.write(buffer, 0, len);
-                }
-            } catch (final IOException e) {
-                // do nothing
-            } catch (final Exception e) {
-                ConcurrentLog.logException(e);
-            }
-        }
-
-        public void pleaseTerminate() {
-            this.terminate = true;
         }
     }
 
