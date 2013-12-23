@@ -37,15 +37,6 @@
 		<key>ClassPath</key>
 			<array>
 			<string>$JAVAROOT/htroot</string>
-                        <string>$JAVAROOT/lib/jetty-continuation-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/jetty-http-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/jetty-io-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/jetty-security-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/jetty-server-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/jetty-servlet-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/jetty-servlets-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/jetty-util-8.1.13.v20130916.jar</string>
-                        <string>$JAVAROOT/lib/javax.servlet-3.0.0.v201112011016.jar</string>                    
 			<string>$JAVAROOT/lib/activation.jar</string>
 			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
 			<string>$JAVAROOT/lib/arq-2.8.7.jar</string>
@@ -70,10 +61,19 @@
 			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
 			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
 			<string>$JAVAROOT/lib/jaudiotagger-2.0.4-20111207.115108-15.jar</string>
+			<string>$JAVAROOT/lib/javax.servlet-3.0.0.v201112011016.jar</string>
 			<string>$JAVAROOT/lib/jcifs-1.3.17.jar</string>
 			<string>$JAVAROOT/lib/jcl-over-slf4j-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/jempbox-1.8.3.jar</string>
 			<string>$JAVAROOT/lib/jena-2.6.4.jar</string>
+			<string>$JAVAROOT/lib/jetty-continuation-8.1.13.v20130916.jar</string>
+			<string>$JAVAROOT/lib/jetty-http-8.1.13.v20130916.jar</string>
+			<string>$JAVAROOT/lib/jetty-io-8.1.13.v20130916.jar</string>
+			<string>$JAVAROOT/lib/jetty-security-8.1.13.v20130916.jar</string>
+			<string>$JAVAROOT/lib/jetty-server-8.1.13.v20130916.jar</string>
+			<string>$JAVAROOT/lib/jetty-servlet-8.1.13.v20130916.jar</string>
+			<string>$JAVAROOT/lib/jetty-servlets-8.1.13.v20130916.jar</string>
+			<string>$JAVAROOT/lib/jetty-util-8.1.13.v20130916.jar</string>
 			<string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.1.jar</string>
 			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.2.jar</string>
