@@ -24,9 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.openjena.atlas.logging.Log;
-
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
 /**
@@ -91,7 +90,7 @@ public class Ranking {
                 this.fieldBoosts.put(field, factor);
             } catch (IllegalArgumentException e) {
                 // boostkey is unknown; ignore it but print warning
-                Log.warn("Ranking", "unknwon boost key '" + boostkey + "'");
+                ConcurrentLog.warn("Ranking", "unknwon boost key '" + boostkey + "'");
             }
         }
     }

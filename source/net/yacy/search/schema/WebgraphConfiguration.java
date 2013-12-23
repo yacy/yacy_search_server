@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.openjena.atlas.logging.Log;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
@@ -367,7 +366,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                     webgraphConnector.add(sid);
                     proccount++;
                 } catch (Throwable e1) {
-                    Log.warn(WebgraphConfiguration.class, "postprocessing failed", e1);
+                    ConcurrentLog.warn(WebgraphConfiguration.class.getName(), "postprocessing failed", e1);
                 }
             }
             ConcurrentLog.info("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " + proccount_clickdepthchange + " clickdepth values changed.");

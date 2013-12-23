@@ -38,8 +38,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.openjena.atlas.logging.Log;
-
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
@@ -488,7 +486,7 @@ public class Balancer {
                     }
                     w = Latency.waitingRemaining(crawlEntry.url(), robots, profileEntry.getAgent());
                 } catch (final IOException e1) {
-                    Log.warn("Balancer", e1.getMessage(), e1);
+                    ConcurrentLog.warn("Balancer", e1.getMessage(), e1);
                     continue;
                 }
 
