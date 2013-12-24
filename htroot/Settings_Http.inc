@@ -41,15 +41,6 @@
     <td>HTTP Server Version:</td>
     <td><b>#[httpservername]#</b></td>
   </tr>
-  <tr>
-    <td>set default server to</td>
-    <td><select name="defaulthttpserver">
-           <option value="jetty">Jetty</optioon>
-           <option value="anomic">YaCy Anomic HTTPD</option>
-        </select>
-        <input type="submit" name="setdefaulthttpserver" value="Submit" /></td>
-    <td><em>Changes effective after a restart</em></td>
-  </tr> 
 </table>
 </fieldset>
 </form><br />

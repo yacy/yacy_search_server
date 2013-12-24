@@ -191,10 +191,7 @@ public final class Settings_p {
         prop.putHTML("crawler.file.maxFileSize",sb.getConfig("crawler.file.maxFileSize", "-1"));
         
         prop.put("httpservername",sb.getHttpServer().getVersion());
-        if (post != null && post.containsKey("setdefaulthttpserver")) {
-            String server = post.get("defaulthttpserver","jetty");
-            sb.setConfig("defaulthttpserver",server);            
-        }        
+        
         // return rewrite properties
         return prop;
     }
