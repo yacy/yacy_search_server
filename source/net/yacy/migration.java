@@ -38,8 +38,6 @@ import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.storage.Configuration.Entry;
@@ -79,12 +77,13 @@ public class migration {
 
         // ssl/https support currently on hardcoded default port 8443 (v1.67/9563)
         // make sure YaCy can start (disable ssl/https support if port is used)
-        try {
-            if (TimeoutRequest.ping("127.0.0.1", 8443, 3000)) {
-                sb.setConfig("server.https", false);
-                ConcurrentLog.info("MIGRATION", "disabled https support (reason: default port 8443 already used)");
-            }
-        } catch (ExecutionException ex) {
+        if (sb.getConfigBool("server.https", false)) {
+            try {
+                if (TimeoutRequest.ping("127.0.0.1", 8443, 3000)) {
+                    sb.setConfig("server.https", false);
+                    ConcurrentLog.info("MIGRATION", "disabled https support (reason: default port 8443 already used)");
+                }
+            } catch (ExecutionException ex) { }
         }
     }
     /*
