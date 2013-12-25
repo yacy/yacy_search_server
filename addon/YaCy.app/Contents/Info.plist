@@ -95,8 +95,8 @@
 			<string>$JAVAROOT/lib/metadata-extractor-2.6.2.jar</string>
 			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
 			<string>$JAVAROOT/lib/pdfbox-1.8.3.jar</string>
-			<string>$JAVAROOT/lib/poi-3.6-20091214.jar</string>
-			<string>$JAVAROOT/lib/poi-scratchpad-3.6-20091214.jar</string>
+			<string>$JAVAROOT/lib/poi-3.9-20121203.jar</string>
+			<string>$JAVAROOT/lib/poi-scratchpad-3.9-20121203.jar</string>
 			<string>$JAVAROOT/lib/sax-2.0.1.jar</string>
 			<string>$JAVAROOT/lib/slf4j-api-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.2.jar</string>
