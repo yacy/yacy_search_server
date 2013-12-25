@@ -24,13 +24,18 @@
 
 package net.yacy.http;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.KeyStore;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 
 import javax.servlet.DispatcherType;
 
@@ -41,6 +46,7 @@ import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.http.servlets.YaCyProxyServlet;
 import net.yacy.http.servlets.SolrServlet.Servlet404;
 import net.yacy.search.Switchboard;
+import net.yacy.utils.PKCS12Tool;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -50,9 +56,11 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 /**
  * class to embedded Jetty 8 http server into YaCy
@@ -60,6 +68,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
     private final Server server;
+    private final int sslport = 8443; // the port to use for https
 
     /**
      * @param port TCP Port to listen for http requests
@@ -71,9 +80,25 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         SelectChannelConnector connector = new SelectChannelConnector();
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
-        //connector.setThreadPool(new QueuedThreadPool(20));
         server.addConnector(connector);
-    	
+        
+        // add ssl/https connector
+        boolean useSSL = sb.getConfigBool("server.https", false);
+        if (useSSL) {
+            final SslContextFactory sslContextFactory = new SslContextFactory();
+            final SSLContext sslContext = initSslContext(sb);
+            if (sslContext != null) {
+                sslContextFactory.setSslContext(sslContext);
+
+                SslSelectChannelConnector sslconnector = new SslSelectChannelConnector(sslContextFactory);
+                sslconnector.setPort(sslport);
+                sslconnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
+
+                server.addConnector(sslconnector);
+                ConcurrentLog.info("SERVER", "SSL support initialized successfully on port " + sslport);
+            }
+        }
+
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
         
@@ -153,10 +178,19 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
     }
 
     @Override
-    public boolean withSSL() {
-        return false; // TODO:
+    public boolean withSSL() {        
+        Connector[] clist = server.getConnectors(); 
+        for (Connector c:clist) {
+            if (c.getName().startsWith("ssl")) return true;
+        }
+        return false;
     }
   
+    @Override
+    public int getSslPort() {
+        return sslport;
+    }
+    
     /**
      * reconnect with new port settings (after waiting milsec) - routine returns
      * immediately
@@ -265,4 +299,104 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         return "Jetty " + Server.getVersion();
     }
 
+    /**
+     * Init SSL Context from config settings
+     * @param sb Switchboard
+     * @return default or sslcontext according to config
+     */
+    private SSLContext initSslContext(Switchboard sb) {
+
+        // getting the keystore file name
+        String keyStoreFileName = sb.getConfig("keyStore", "").trim();
+ 
+        // getting the keystore pwd
+        String keyStorePwd = sb.getConfig("keyStorePassword", "").trim();
+ 
+        // take a look if we have something to import
+        final String pkcs12ImportFile = sb.getConfig("pkcs12ImportFile", "").trim();
+        
+        // if no keyStore and no import is defined, then set the default key
+        if (keyStoreFileName.isEmpty() && keyStorePwd.isEmpty() && pkcs12ImportFile.isEmpty()) {
+            keyStoreFileName = "defaults/freeworldKeystore";
+            keyStorePwd = "freeworld";
+            sb.setConfig("keyStore", keyStoreFileName);
+            sb.setConfig("keyStorePassword", keyStorePwd);
+        } 
+        
+        if (pkcs12ImportFile.length() > 0) {
+            ConcurrentLog.info("SERVER", "Import certificates from import file '" + pkcs12ImportFile + "'.");
+ 
+            try {
+                // getting the password
+                final String pkcs12ImportPwd = sb.getConfig("pkcs12ImportPwd", "").trim();
+ 
+                // creating tool to import cert
+                final PKCS12Tool pkcsTool = new PKCS12Tool(pkcs12ImportFile,pkcs12ImportPwd);
+ 
+                // creating a new keystore file
+                if (keyStoreFileName.isEmpty()) {
+                    // using the default keystore name
+                    keyStoreFileName = "DATA/SETTINGS/myPeerKeystore";
+ 
+                    // creating an empty java keystore
+                    final KeyStore ks = KeyStore.getInstance("JKS");
+                    ks.load(null,keyStorePwd.toCharArray());
+                    final FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
+                    ks.store(ksOut, keyStorePwd.toCharArray());
+                    ksOut.close();
+ 
+                    // storing path to keystore into config file
+                    sb.setConfig("keyStore", keyStoreFileName);
+                }
+ 
+                // importing certificate
+                pkcsTool.importToJKS(keyStoreFileName, keyStorePwd);
+ 
+                // removing entries from config file
+                sb.setConfig("pkcs12ImportFile", "");
+                sb.setConfig("keyStorePassword", "");
+ 
+                // deleting original import file
+                // TODO: should we do this
+ 
+            } catch (final Exception e) {
+                ConcurrentLog.severe("SERVER", "Unable to import certificate from import file '" + pkcs12ImportFile + "'.",e);
+            }
+        } else if (keyStoreFileName.isEmpty()) return null;
+ 
+ 
+        // get the ssl context
+        try {
+            ConcurrentLog.info("SERVER","Initializing SSL support ...");
+ 
+            // creating a new keystore instance of type (java key store)
+            if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER", "Initializing keystore ...");
+            final KeyStore ks = KeyStore.getInstance("JKS");
+ 
+            // loading keystore data from file
+            if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Loading keystore file " + keyStoreFileName);
+            final FileInputStream stream = new FileInputStream(keyStoreFileName);
+            ks.load(stream, keyStorePwd.toCharArray());
+            stream.close();
+ 
+            // creating a keystore factory
+            if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Initializing key manager factory ...");
+            final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(ks,keyStorePwd.toCharArray());
+ 
+            // initializing the ssl context
+            if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Initializing SSL context ...");
+            final SSLContext sslcontext = SSLContext.getInstance("TLS");
+            sslcontext.init(kmf.getKeyManagers(), null, null);
+
+            return sslcontext;
+        } catch (final Exception e) {
+            final String errorMsg = "FATAL ERROR: Unable to initialize the SSL Socket factory. " + e.getMessage();
+            ConcurrentLog.severe("SERVER",errorMsg);
+            System.out.println(errorMsg);
+            System.exit(0);
+            return null;
+        }
+    }
+    
 }

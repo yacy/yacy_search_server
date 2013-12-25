@@ -102,7 +102,8 @@ public class ConfigBasic {
             port = env.getConfigLong("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
             ssl = env.getConfigBool("server.https", false);
         }
-
+        if (ssl) prop.put("withsslenabled_sslport",env.getHttpServer().getSslPort());
+        
         // check if peer name already exists
         final Seed oldSeed = sb.peers.lookupByName(peerName);
         if (oldSeed == null &&
@@ -134,7 +135,7 @@ public class ConfigBasic {
             final YaCyHttpServer theServerCore =  env.getHttpServer();
             env.setConfig("port", port);
             env.setConfig("server.https", ssl);
-
+            
             // redirect the browser to the new port
             reconnect = true;
 

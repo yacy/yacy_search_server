@@ -23,6 +23,7 @@ public interface YaCyHttpServer {
     abstract InetSocketAddress generateSocketAddress(String port) throws SocketException;
     abstract int getMaxSessionCount();
     abstract int getJobCount();
+    abstract int getSslPort();
     abstract boolean withSSL();
     abstract void reconnect(int milsec);
     abstract String getVersion();

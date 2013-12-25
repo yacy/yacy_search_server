@@ -93,7 +93,7 @@
               <dt><label for="port">Peer Port: </label></dt>
               <dd>
                 <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" />&nbsp;&nbsp;&nbsp;
-                <input type="checkbox" name="withssl" id="withssl" #(withsslenabled)#::checked="checked"#(/withsslenabled)#>with SSL (https enabled)
+                <input type="checkbox" name="withssl" id="withssl" #(withsslenabled)#::checked="checked"#(/withsslenabled)#>with SSL (https enabled#(withsslenabled)#:: on port #[sslport]# #(/withsslenabled)#)
               </dd>
               #(upnp)#::<dt>
                 <label for="enableUpnp">Configure your router for YaCy:&nbsp;</label>

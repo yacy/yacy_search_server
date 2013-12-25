@@ -358,7 +358,7 @@ public final class yacy {
                     final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
                     //boolean properPW = (sb.getConfig("adminAccount", "").isEmpty()) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                    Browser.openBrowser((false?"https":"http") + "://localhost:" + port + "/" + browserPopUpPage);
+                    Browser.openBrowser((httpServer.withSSL()?"https://localhost:"+httpServer.getSslPort():"http://localhost:"+port) + "/" + browserPopUpPage);
                    // Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
                 } catch (final Throwable e) {
                     // cannot open browser. This may be normal in headless environments
