@@ -53,6 +53,7 @@ public class docParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-msword");
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
             final String charset, final InputStream source)
