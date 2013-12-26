@@ -19,7 +19,7 @@
     <td><label for="via_header">Send "Via" Header</label>:</td>
     <td><input type="checkbox" name="proxy.sendViaHeader" id="via_header" #(proxy.sendViaHeader)#::checked="checked" #(/proxy.sendViaHeader)#/></td>
     <td>
-      Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a>
+      Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>
       http header according to RFC 2616 Sect 14.45.
     </td>
   </tr> 

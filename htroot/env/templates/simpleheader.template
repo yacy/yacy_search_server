@@ -5,7 +5,7 @@
 <li style="width:15%;"><a href="/yacyinteractive.html" onclick="this.href='/yacyinteractive.html?handover='+document.searchform.search.value" class="MenuItemLink">File Search</a></li>
 <li style="width:15%;"><a href="/HostBrowser.html?hosts=" class="MenuItemLink">HostBrowser</a></li>
 <li style="width:15%;"><a href="/ViewProfile.html?hash=localhash" class="MenuItemLink">About Us</a></li>
-<li style="width:9%;"><a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink">Help / YaCy Wiki</a></li>
+<li style="width:9%;"><a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink" target="_blank">Help / YaCy Wiki</a></li>
 </ul>
 </div>
 <div style="clear:left; padding:10px;">
