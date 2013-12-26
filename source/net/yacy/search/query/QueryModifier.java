@@ -27,6 +27,7 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
@@ -74,21 +75,11 @@ public class QueryModifier {
             add("/file");
         }
         
+        // parse 'common search mistakes' like guessed regular expressions
+        querystring = filetypeParser(querystring, "*");
+        
         // parse filetype
-        final int ftp = querystring.indexOf("filetype:", 0);
-        if ( ftp >= 0 ) {
-            int ftb = querystring.indexOf(' ', ftp);
-            if ( ftb == -1 ) {
-                ftb = querystring.length();
-            }
-            filetype = querystring.substring(ftp + 9, ftb);
-            querystring = querystring.replace("filetype:" + filetype, "");
-            while ( !filetype.isEmpty() && filetype.charAt(0) == '.' ) {
-                filetype = filetype.substring(1);
-            }
-            add("filetype:" + filetype);
-            if (filetype.isEmpty()) filetype = null;
-        }
+        querystring = filetypeParser(querystring, "filetype:");
         
         // parse site
         final int sp = querystring.indexOf("site:", 0);
@@ -139,6 +130,23 @@ public class QueryModifier {
         }
         
         return querystring.trim();
+    }
+    
+    private String filetypeParser(String querystring, final String filetypePrefix) {
+        final int ftp = querystring.indexOf(filetypePrefix, 0);
+        if ( ftp >= 0 ) {
+            int ftb = querystring.indexOf(' ', ftp);
+            if ( ftb < 0 ) ftb = querystring.length();
+            filetype = querystring.substring(ftp + filetypePrefix.length(), ftb);
+            querystring = querystring.replace(filetypePrefix + filetype, "");
+            while ( !filetype.isEmpty() && filetype.charAt(0) == '.' ) {
+                filetype = filetype.substring(1);
+            }
+            add("filetype:" + filetype);
+            if (filetype.isEmpty()) filetype = null;
+            if (querystring.length() == 0) querystring = "*";
+        }
+        return querystring;
     }
     
     public void add(String m) {
