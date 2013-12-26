@@ -73,7 +73,7 @@ public final class HTTPDFileHandler {
 
     private static File     htRootPath     = null;
     public  static File     htDocsPath     = null;
-    private static String[] defaultFiles   = null;
+    public  static String[] defaultFiles   = null;
     private static File     htDefaultPath  = null;
     private static File     htLocalePath   = null;
     public  static String   indexForward   = "";
