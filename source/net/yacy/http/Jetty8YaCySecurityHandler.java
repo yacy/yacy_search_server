@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
 
 import org.eclipse.jetty.http.HttpSchemes;
@@ -189,13 +190,12 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
             protectedPage = pathInContext.startsWith("/solr/") || pathInContext.startsWith("/gsa/");                        
         }
         //final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
-        //final boolean yacyBot = request.getHeader("User-Agent").startsWith("yacybot");
      
         if (protectedPage) { // TODO: none public site
             if (!grantedForLocalhost) {
                 RoleInfo roleinfo = new RoleInfo();
                 roleinfo.setChecked(true); // RoleInfo.setChecked() : in Jetty this means - marked to have any security constraint
-                roleinfo.addRole("admin"); //YaCyLoginService assigns "admin" role to admin user
+                roleinfo.addRole(AccessRight.ADMIN_RIGHT.toString()); // use AccessRights as role
                 return roleinfo;
             } // can omit else, as if grantedForLocalhost==true no constraint applies
               // TODO: is this correct or adminAccountBase64MD5 not empty check neccessary ?

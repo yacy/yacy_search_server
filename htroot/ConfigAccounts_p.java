@@ -67,6 +67,7 @@ public class ConfigAccounts_p {
                 // check passed. set account:
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig("adminAccount", "");
+                env.setConfig("adminAccountUserName",user);
             }
 
             if (localhostAccess) {

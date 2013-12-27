@@ -384,6 +384,7 @@ use_proxyAccounts=true
 #adminAccount=admin:mysecretpassword
 adminAccount=
 adminAccountBase64MD5=
+adminAccountUserName=admin
 
 # special access handling for users from localhost:
 # access from localhost may be granted with administration authority

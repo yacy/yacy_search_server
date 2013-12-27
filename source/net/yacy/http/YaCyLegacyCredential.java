@@ -35,49 +35,59 @@ import org.eclipse.jetty.util.security.Credential;
  */
 public class YaCyLegacyCredential extends Credential {
 	
-	private static final long serialVersionUID = -3527894085562480001L;
-	private String hash;
-        private String foruser; // remember the user as YaCy credential is username:pwd (not just pwd)
-        
-	/**
-	 * internal hash function
-	 * @param clear password
-	 * @return hash string
-	 */
-	private static String calcHash(String pw) {
-            return Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(pw));
-	}
+    private static final long serialVersionUID = -3527894085562480001L;
+    private String hash;
+    private String foruser; // remember the user as YaCy credential is username:pwd (not just pwd)
+    private boolean isBase64enc; // remember hash encoding  false = encodeMD5Hex(usr:pwd) ; true = encodeMD5Hex(Base64Order.standardCoder.encodeString(usr:pw))
 
-	@Override
-	public boolean check(Object credentials) {
-		if(credentials instanceof String) {
-			final String pw = (String) credentials;
-			return calcHash(foruser+":"+pw).equals(this.hash);
-		}
+    /**
+     * internal hash function
+     *
+     * @param clear password
+     * @return hash string
+     */
+    private static String calcHash(String pw) {
+        return Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(pw));
+    }
+
+    @Override
+    public boolean check(Object credentials) {
+        if (credentials instanceof String) {
+            final String pw = (String) credentials;
+            if (isBase64enc) { // for adminuser
+                return calcHash(foruser + ":" + pw).equals(this.hash);                
+            } else { // for user
+                return Digest.encodeMD5Hex(foruser + ":" + pw).equals(this.hash);
+            }
+        }
         throw new UnsupportedOperationException();
-	}
+    }
 	
 	/**
 	 * create Credential object from config file hash
-	 * @param configHash hash as in config file
+	 * @param configHash hash as in config file hash(adminuser:pwd)
 	 * @return
 	 */
-	public static Credential getCredentialsFromConfig(String user, String configHash) {
+	public static Credential getCredentialsFromConfig(String username, String configHash) {
 		YaCyLegacyCredential c = new YaCyLegacyCredential();
-                c.foruser=user;
+                c.foruser=username;
+                c.isBase64enc=true;
 		c.hash = configHash;
 		return c;
 	}
 	
 	/**
 	 * create Credential object from password
-	 * @param password
+         * @param username
+	 * @param configHash encodeMD5Hex("user:pwd") as stored in UserDB
 	 * @return
 	 */
-	public static Credential getCredentials(String user, String password) {
+	public static Credential getCredentials(String username, String configHash) {
 		YaCyLegacyCredential c = new YaCyLegacyCredential();
-                c.foruser=user;
-		c.hash = calcHash(user + ":" + password);
+                c.foruser=username;
+                c.isBase64enc = false;
+                c.hash = configHash;
+		//c.hash = calcHash(user + ":" + password);
 		return c;
 	}
 
