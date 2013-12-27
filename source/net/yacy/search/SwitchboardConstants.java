@@ -308,19 +308,20 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
 
-    public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED = "federated.service.solr.indexing.enabled";
-    public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL = "federated.service.solr.indexing.url";
-    public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING = "federated.service.solr.indexing.sharding";
-    public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";
-    public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT = "federated.service.solr.indexing.timeout";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING     = "federated.service.solr.indexing.sharding";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY         = "federated.service.solr.indexing.lazy";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT      = "federated.service.solr.indexing.timeout";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED = "federated.service.solr.indexing.writeEnabled";
 
     //public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
     //public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";
-    public static final String CORE_SERVICE_FULLTEXT = "core.service.fulltext";
-    public static final String CORE_SERVICE_RWI = "core.service.rwi.tmp";
-    public static final String CORE_SERVICE_CITATION = "core.service.citation.tmp";
-    public static final String CORE_SERVICE_WEBGRAPH = "core.service.webgraph.tmp";
-    public static final String CORE_SERVICE_JENA = "core.service.jena.tmp";
+    public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
+    public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";
+    public static final String CORE_SERVICE_CITATION            = "core.service.citation.tmp";
+    public static final String CORE_SERVICE_WEBGRAPH            = "core.service.webgraph.tmp";
+    public static final String CORE_SERVICE_JENA                = "core.service.jena.tmp";
 
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
@@ -333,7 +334,7 @@ public final class SwitchboardConstants {
     /**
      * debug flags
      */
-    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF        = "debug.search.local.dht.off"; // =true: do not use the local dht/rwi index (which is not done if we do remote searches)
+    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF       = "debug.search.local.dht.off"; // =true: do not use the local dht/rwi index (which is not done if we do remote searches)
     public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off"; // =true: do not use solr
     public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off"; // =true: do not use dht/rwi
     public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
