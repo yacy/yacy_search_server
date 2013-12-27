@@ -96,7 +96,7 @@ public class ConfigAccounts_p {
         prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
         prop.put("account.checked", (localhostAccess) ? 0 : 1);
         prop.put("statusPassword", localhostAccess ? "0" : "1");
-        prop.put("defaultUser", "admin");
+        prop.put("defaultUser", env.getConfig("adminAccountUserName", "admin"));
 
         //default values
         prop.put("current_user", "newuser");
