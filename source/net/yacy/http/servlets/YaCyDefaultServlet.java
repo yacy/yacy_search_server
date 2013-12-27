@@ -142,7 +142,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         _mimeTypes = new MimeTypes(); 
         String tmpstr = this.getServletContext().getInitParameter("welcomeFile");
         if (tmpstr == null) { 
-            _welcomes = new String[]{"index.html", "welcome.html"}; // set a default welcome file name
+            _welcomes = HTTPDFileHandler.defaultFiles;
         } else {
             _welcomes = new String[]{tmpstr,"index.html"};
         }
@@ -305,7 +305,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             } else { // resource is directory
                 String welcome;
 
-                if (!endsWithSlash || (pathInContext.length() == 1)) {
+                if (!endsWithSlash) {
                     StringBuffer buf = request.getRequestURL();
                     synchronized (buf) {
                         int param = buf.lastIndexOf(";");

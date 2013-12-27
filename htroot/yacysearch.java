@@ -370,7 +370,12 @@ public class yacysearch {
             
             int stp = querystring.indexOf('*');
             if (stp >= 0) {
-                querystring = querystring.substring(0, stp) + Segment.catchallString + querystring.substring(stp + 1);
+                // if the star appears as a single entry, use the catchallstring
+                if (querystring.length() == 1) {
+                    querystring = Segment.catchallString;
+                } else {
+                    querystring = querystring.replace('*', ' ').replaceAll("  ", " ");
+                }
             }
             if ( querystring.indexOf("/near", 0) >= 0 ) {
                 querystring = querystring.replace("/near", "");
