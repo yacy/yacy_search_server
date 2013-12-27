@@ -26,7 +26,6 @@ package net.yacy.http;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
-import net.yacy.kelondro.util.MapTools;
 import org.eclipse.jetty.util.security.Credential;
 
 
@@ -38,28 +37,22 @@ public class YaCyLegacyCredential extends Credential {
 	
 	private static final long serialVersionUID = -3527894085562480001L;
 	private String hash;
-	
-    /**
-     * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
-     * <p>Name of the setting holding the authentication hash for the static <code>admin</code>-account. It is calculated
-     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
-     */
-    public static final String ADMIN_ACCOUNT_B64MD5 = "adminAccountBase64MD5";
-
+        private String foruser; // remember the user as YaCy credential is username:pwd (not just pwd)
+        
 	/**
 	 * internal hash function
 	 * @param clear password
 	 * @return hash string
 	 */
 	private static String calcHash(String pw) {
-		return Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString("admin:" + pw));
+            return Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(pw));
 	}
 
 	@Override
 	public boolean check(Object credentials) {
 		if(credentials instanceof String) {
 			final String pw = (String) credentials;
-			return calcHash(pw).equals(this.hash);
+			return calcHash(foruser+":"+pw).equals(this.hash);
 		}
         throw new UnsupportedOperationException();
 	}
@@ -69,8 +62,9 @@ public class YaCyLegacyCredential extends Credential {
 	 * @param configHash hash as in config file
 	 * @return
 	 */
-	public static Credential getCredentialsFromConfig(String configHash) {
+	public static Credential getCredentialsFromConfig(String user, String configHash) {
 		YaCyLegacyCredential c = new YaCyLegacyCredential();
+                c.foruser=user;
 		c.hash = configHash;
 		return c;
 	}
@@ -80,9 +74,10 @@ public class YaCyLegacyCredential extends Credential {
 	 * @param password
 	 * @return
 	 */
-	public static Credential getCredentials(String password) {
+	public static Credential getCredentials(String user, String password) {
 		YaCyLegacyCredential c = new YaCyLegacyCredential();
-		c.hash = calcHash(password);
+                c.foruser=user;
+		c.hash = calcHash(user + ":" + password);
 		return c;
 	}
 
