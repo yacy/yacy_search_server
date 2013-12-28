@@ -839,7 +839,7 @@ public class yacysearch {
                 ConcurrentLog.logException(e);
             }
 
-            prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);
+            prop.put("num-results_offset", startRecord);
             prop.put("num-results_itemscount", Formatter.number(startRecord + theSearch.query.itemsPerPage > theSearch.getResultCount() ? startRecord + theSearch.getResultCount() % theSearch.query.itemsPerPage : startRecord + theSearch.query.itemsPerPage, true));
             prop.put("num-results_itemsPerPage", Formatter.number(itemsPerPage));
             prop.put("num-results_totalcount", Formatter.number(theSearch.getResultCount()));
