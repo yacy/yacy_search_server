@@ -3664,7 +3664,7 @@ public final class Switchboard extends serverSwitch {
         mySeed.put(Seed.UTC, GenericFormatter.UTCDiffString());
         mySeed.setFlagAcceptRemoteCrawl(getConfigBool("crawlResponse", true));
         mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
-        mySeed.setFlagSSLAvailable(this.getHttpServer().withSSL() && getConfigBool("server.https", false));
+        mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
     }
 
     public void loadSeedLists() {
