@@ -115,6 +115,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
+import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.util.ConcurrentLog;
@@ -2962,7 +2963,11 @@ public final class Switchboard extends serverSwitch {
         if (url.isFTP()) {
             try {
                 this.crawler.putActive(handle, profile);
-                this.crawlStacker.enqueueEntriesFTP(this.peers.mySeed().hash.getBytes(), profile.handle(), url.getHost(), url.getPort(), false);
+                String userInfo = url.getUserInfo();
+                int p = userInfo == null ? -1 : userInfo.indexOf(':');
+                String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
+                String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
+                this.crawlStacker.enqueueEntriesFTP(this.peers.mySeed().hash.getBytes(), profile.handle(), url.getHost(), url.getPort(), user, pw, false);
                 return null;
             } catch (final Exception e) {
                 // mist

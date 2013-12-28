@@ -179,7 +179,7 @@ public class FTPLoader {
     private boolean openConnection(final FTPClient ftpClient, final DigestURL entryUrl) {
         // get username and password
         final String userInfo = entryUrl.getUserInfo();
-        String userName = "anonymous", userPwd = "anonymous";
+        String userName = FTPClient.ANONYMOUS, userPwd = "anomic";
         if (userInfo != null) {
             final int pos = userInfo.indexOf(':',0);
             if (pos != -1) {

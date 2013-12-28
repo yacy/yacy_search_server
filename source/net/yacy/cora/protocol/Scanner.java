@@ -131,7 +131,7 @@ public class Scanner {
                             final FTPClient ftpClient = new FTPClient();
                             try {
                                 ftpClient.open(this.getInetAddress().getHostAddress(), this.getProtocol().port);
-                                ftpClient.login("anonymous", "anomic@");
+                                ftpClient.login(FTPClient.ANONYMOUS, "anomic@");
                                 final List<String> list = ftpClient.list("/", false);
                                 ftpClient.CLOSE();
                                 access = list == null || list.isEmpty() ? Access.empty : Access.granted;

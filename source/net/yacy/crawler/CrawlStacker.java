@@ -212,7 +212,11 @@ public final class CrawlStacker {
 
             if (url.getProtocol().equals("ftp")) {
                 // put the whole ftp site on the crawl stack
-                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), replace);
+                String userInfo = url.getUserInfo();
+                int p = userInfo == null ? -1 : userInfo.indexOf(':');
+                String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
+                String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
+                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), user, pw, replace);
             } else {
                 // put entry on crawl stack
                 enqueueEntry(new Request(
@@ -231,7 +235,7 @@ public final class CrawlStacker {
         }
     }
 
-    public void enqueueEntriesFTP(final byte[] initiator, final String profileHandle, final String host, final int port, final boolean replace) {
+    public void enqueueEntriesFTP(final byte[] initiator, final String profileHandle, final String host, final int port, final String user, final String pw, final boolean replace) {
         final CrawlQueues cq = this.nextQueue;
         new Thread() {
             @Override
@@ -239,14 +243,14 @@ public final class CrawlStacker {
                 Thread.currentThread().setName("enqueueEntriesFTP");
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
-                    queue = FTPClient.sitelist(host, port);
+                    queue = FTPClient.sitelist(host, port, user, pw);
                     FTPClient.entryInfo entry;
                     while ((entry = queue.take()) != FTPClient.POISON_entryInfo) {
 
                         // delete old entry, if exists to force a re-load of the url (thats wanted here)
                         DigestURL url = null;
                         try {
-                            url = new DigestURL("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURL.escape(entry.name));
+                            url = new DigestURL("ftp://" + user + ":" + pw + "@" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURL.escape(entry.name));
                         } catch (final MalformedURLException e) {
                             continue;
                         }
@@ -271,6 +275,7 @@ public final class CrawlStacker {
                                 ));
                     }
                 } catch (final IOException e1) {
+                    ConcurrentLog.logException(e1);
                 } catch (final InterruptedException e) {
                 }
             }

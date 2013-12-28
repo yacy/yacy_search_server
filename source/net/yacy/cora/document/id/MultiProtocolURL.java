@@ -927,7 +927,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         u.append(this.protocol);
         u.append("://");
         if (h != null) {
-            if (this.userInfo != null) {
+            if (this.userInfo != null && !(this.isFTP() && this.userInfo.startsWith(FTPClient.ANONYMOUS))) {
                 u.append(this.userInfo);
                 u.append("@");
             }

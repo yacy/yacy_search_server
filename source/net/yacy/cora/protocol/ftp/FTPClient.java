@@ -71,6 +71,7 @@ import net.yacy.cora.util.ConcurrentLog;
 
 public class FTPClient {
 
+    public static final String ANONYMOUS = "anonymous";
     private static final ConcurrentLog log = new ConcurrentLog("FTPClient");
 
     private static final String vDATE = "20100823";
@@ -2537,10 +2538,10 @@ public class FTPClient {
      * @return a list of entryInfo from all files of the ftp server
      * @throws IOException
      */
-    public static BlockingQueue<entryInfo> sitelist(final String host, final int port) throws IOException {
+    public static BlockingQueue<entryInfo> sitelist(final String host, final int port, final String user, final String pw) throws IOException {
         final FTPClient ftpClient = new FTPClient();
         ftpClient.open(host, port);
-        ftpClient.login("anonymous", "anomic@");
+        ftpClient.login(user, pw);
         final LinkedBlockingQueue<entryInfo> queue = new LinkedBlockingQueue<entryInfo>();
         new Thread() {
             @Override
@@ -2603,7 +2604,7 @@ public class FTPClient {
             final String pwd = pwd();
             final List<String> list = list(remotePath, true);
             if (this.remotesystem == null) try {sys();} catch (final IOException e) {}
-            final String base = "ftp://" + ((this.account.equals("anonymous")) ? "" : (this.account + ":" + this.password + "@"))
+            final String base = "ftp://" + ((this.account.equals(ANONYMOUS)) ? "" : (this.account + ":" + this.password + "@"))
                     + this.host + ((this.port == 21) ? "" : (":" + this.port)) + ((remotePath.length() > 0 && remotePath.charAt(0) == '/') ? "" : pwd + "/")
                     + remotePath;
 
@@ -2742,7 +2743,7 @@ public class FTPClient {
     }
 
     public static void getAnonymous(final String host, final String remoteFile, final File localPath) {
-        get(host, remoteFile, localPath, "anonymous", "anomic");
+        get(host, remoteFile, localPath, ANONYMOUS, "anomic");
     }
 
     /**
@@ -2812,7 +2813,7 @@ public class FTPClient {
                 final FTPClient ftpClient = new FTPClient();
                 try {
                     ftpClient.open("192.168.1.90", 21);
-                    ftpClient.login("anonymous", "anomic@");
+                    ftpClient.login(ANONYMOUS, "anomic@");
                     final byte[] b = ftpClient.get("/Movie/ATest Ordner/Unterordner/test file.txt");
                     System.out.println(UTF8.String(b));
                 } catch (final IOException e) {
@@ -2823,10 +2824,10 @@ public class FTPClient {
             printHelp();
         } else if (args.length == 3) {
             if (args[0].equals("-dir")) {
-                dir(args[1], args[2], "anonymous", "anomic@");
+                dir(args[1], args[2], ANONYMOUS, "anomic@");
             } else if (args[0].equals("-htmldir")) {
                 try {
-                    final StringBuilder page = dirhtml(args[1], 21, args[2], "anonymous", "anomic@");
+                    final StringBuilder page = dirhtml(args[1], 21, args[2], ANONYMOUS, "anomic@");
                     final File file = new File("dirindex.html");
                     FileOutputStream fos;
                     fos = new FileOutputStream(file);
@@ -2839,7 +2840,7 @@ public class FTPClient {
                 }
             } else if (args[0].equals("-sitelist")) {
                 try {
-                    final BlockingQueue<entryInfo> q = sitelist(args[1], Integer.parseInt(args[2]));
+                    final BlockingQueue<entryInfo> q = sitelist(args[1], Integer.parseInt(args[2]), ANONYMOUS, "anomic");
                     entryInfo entry;
                     while ((entry = q.take()) != FTPClient.POISON_entryInfo) {
                         System.out.println(entry.toString());
