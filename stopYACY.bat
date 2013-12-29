@@ -2,7 +2,7 @@
 title YaCy
 
 Rem Setting the classpath
-Set CLASSPATH=classes;lib\yacycore.jar;htroot
+Set CLASSPATH=lib\yacycore.jar;htroot
 
 Rem Stopping yacy
 Echo Generated Classpath:%CLASSPATH%
