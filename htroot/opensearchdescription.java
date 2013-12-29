@@ -28,7 +28,6 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -41,7 +40,7 @@ public class opensearchdescription {
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
 
         String thisaddress = header.get("Host", Domains.LOCALHOST);
-        if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
+        if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + env.getConfig("port", "8090");
 
         final serverObjects prop = new serverObjects();
         prop.put("compareyacy", post != null && post.getBoolean("compare_yacy") ? 1 : 0);

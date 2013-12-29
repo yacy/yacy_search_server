@@ -33,7 +33,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -122,7 +121,7 @@ public class yacysearch_location {
             String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
             if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
             String hostName = header.get("Host", Domains.LOCALHOST);
-            if (hostName.indexOf(':',0) == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
+            if (hostName.indexOf(':',0) == -1) hostName += ":" + env.getConfig("port", "8090");
             final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
             final boolean global = post.get("kml_resource", "local").equals("global");
 

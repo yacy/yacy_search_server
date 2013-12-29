@@ -85,7 +85,6 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.query.SearchEventType;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -147,7 +146,7 @@ public class yacysearch {
         // adding some additional properties needed for the rss feed
         String hostName = header.get("Host", Domains.LOCALHOST);
         if ( hostName.indexOf(':', 0) == -1 ) {
-            hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
+            hostName += ":" + env.getConfig("port", "8090");
         }
         prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
         prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
@@ -982,7 +981,7 @@ public class yacysearch {
         // hostname and port (assume locahost if nothing helps)
         final InetAddress hostIP = Domains.myPublicLocalIP();
         prop.put("myhost", hostIP != null ? hostIP.getHostAddress() : Domains.LOCALHOST);
-        prop.put("myport", serverCore.getPortNr(sb.getConfig("port", "8090")));
+        prop.put("myport", sb.getConfig("port", "8090"));
 
         // return rewrite properties
         return prop;

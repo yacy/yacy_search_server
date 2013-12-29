@@ -41,13 +41,4 @@ public final class serverCore {
 
     public static boolean useStaticIP = false;
 
-    public static int getPortNr(String extendedPortString) {
-        int pos = -1;
-        if ((pos = extendedPortString.indexOf(':'))!= -1) {
-            extendedPortString = extendedPortString.substring(pos+1);
-        }
-        return Integer.parseInt(extendedPortString);
-    }
-
-
 }

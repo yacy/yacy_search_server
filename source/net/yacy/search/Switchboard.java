@@ -3632,7 +3632,7 @@ public final class Switchboard extends serverSwitch {
     private static long indeSizeCache = 0;
     private static long indexSizeTime = 0;
     public void updateMySeed() {
-        this.peers.mySeed().put(Seed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8090"))));
+        this.peers.mySeed().put(Seed.PORT, getConfig("port", "8090"));
 
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;

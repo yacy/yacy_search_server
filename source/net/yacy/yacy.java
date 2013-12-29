@@ -63,7 +63,6 @@ import net.yacy.peers.operation.yacyRelease;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import com.google.common.io.Files;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -542,7 +541,7 @@ public final class yacy {
         final Properties config = configuration("COMMAND-STEERING", homePath);
 
         // read port
-        final int port = serverCore.getPortNr(config.getProperty("port", "8090"));
+        final int port = Integer.parseInt(config.getProperty("port", "8090"));
 
         // read password
         String encodedPassword = (String) config.get(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5);

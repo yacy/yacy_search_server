@@ -44,7 +44,6 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -185,7 +184,7 @@ public class Status
         // hostname and port
         final String extendedPortString = sb.getConfig("port", "8090");
         final int pos = extendedPortString.indexOf(':', 0);
-        prop.put("port", serverCore.getPortNr(extendedPortString));
+        prop.put("port", extendedPortString);
         if ( pos != -1 ) {
             prop.put("extPortFormat", "1");
             prop.putHTML("extPortFormat_extPort", extendedPortString);
