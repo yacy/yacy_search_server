@@ -357,6 +357,8 @@
         <include name="startYACY_debug.bat"/>
         <include name="stopYACY.bat"/>
       	<include name="getWin32MaxHeap.bat"/>
+        <include name="installYaCyWindowsService.bat" />
+        <include name="uninstallYaCyWindowsService.bat" />
       </fileset>
     </copy>
 
