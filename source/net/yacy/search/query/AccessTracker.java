@@ -122,7 +122,7 @@ public class AccessTracker {
         }
     }
 
-    private static void addToDump(String querystring, String resultcount, Date d) {
+    public static void addToDump(String querystring, String resultcount, Date d) {
         //if (query.resultcount == 0) return;
         if (querystring == null || querystring.isEmpty()) return;
         final StringBuilder sb = new StringBuilder(40);
