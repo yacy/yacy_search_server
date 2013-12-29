@@ -84,7 +84,7 @@ public class IndexControlURLs_p {
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
-        prop.put("cleanup", post == null ? 1 : 0);
+        prop.put("cleanup", post == null || post.size() == 0 ? 1 : 0);
         prop.put("cleanup_solr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
         prop.put("cleanup_rwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
         prop.put("cleanup_citation", segment.connectedCitation() && !segment.urlCitation().isEmpty() ? 1 : 0);
