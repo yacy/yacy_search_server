@@ -442,10 +442,11 @@ public final class QueryParams {
         }
 
         // add vocabulary facets
-        for (Tagging.Metatag tag: this.metatags) {
-            fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
+        if (this.metatags != null) {
+            for (Tagging.Metatag tag : this.metatags) {
+                fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
+            }
         }
-        
         // add author facets
         if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author_sxt)) {
             fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
