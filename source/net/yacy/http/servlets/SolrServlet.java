@@ -27,7 +27,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Filter;
@@ -49,8 +51,10 @@ import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
@@ -62,13 +66,16 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.BinaryResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.response.XSLTResponseWriter;
+import org.apache.solr.search.DocList;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
@@ -161,8 +168,9 @@ public class SolrServlet implements Filter {
             int profileNr = mmsp.getInt("profileNr", 0);
             
             // rename post fields according to result style
+            String querystring = "";
             if (!mmsp.getMap().containsKey(CommonParams.Q) && mmsp.getMap().containsKey("query")) {
-                String querystring = mmsp.get("query", "");
+                querystring = mmsp.get("query", "");
                 mmsp.getMap().remove("query");
                 QueryModifier modifier = new QueryModifier();
                 querystring = modifier.parse(querystring);
@@ -172,6 +180,7 @@ public class SolrServlet implements Filter {
                 mmsp.getMap().put(CommonParams.Q, new String[]{solrQ.toString()}); // sru patch
             }
             String q = mmsp.get(CommonParams.Q, "");
+            if (querystring.length() == 0) querystring = q;
             if (!mmsp.getMap().containsKey(CommonParams.START)) {
                 int startRecord = mmsp.getFieldInt("startRecord", "0");
                 mmsp.getMap().remove("startRecord");
@@ -239,10 +248,17 @@ public class SolrServlet implements Filter {
 
             // check error
             if (rsp.getException() != null) {
+                AccessTracker.addToDump(querystring, "0", new Date());
                 sendError(hresponse, rsp.getException());
                 return;
             }
+            
 
+            NamedList<?> values = rsp.getValues();
+            DocList r = ((ResultContext) values.get("response")).docs;
+            int numFound = r.matches();
+            AccessTracker.addToDump(querystring, Integer.toString(numFound), new Date());
+            
             // write response header
             final String contentType = responseWriter.getContentType(req, rsp);
             if (null != contentType) response.setContentType(contentType);
