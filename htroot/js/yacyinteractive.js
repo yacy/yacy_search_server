@@ -225,7 +225,7 @@ function resultLine(type, item, linenumber) {
     html += "<td align=\"left\">" + protocol + "</td>"; // Protocol
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>"; // Host
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + path + "\">" + path + "</a></td>"; // Path 
-    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + item.link + "</a></td>"; // URL
+    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + unescape(item.link) + "</a></td>"; // URL
     if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>"; // Size
     html += "<td align=\"right\">" + pd + "</td>"; // Date
     html += "</tr>";
