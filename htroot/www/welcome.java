@@ -35,7 +35,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -55,7 +54,7 @@ public class welcome {
         prop.putHTML("peeraddress", sb.peers.mySeed().getPublicAddress());
         prop.put("hostname", env.myPublicIP());
         prop.put("hostip", Domains.dnsResolve(env.myPublicIP()).getHostAddress());
-        prop.put("port", serverCore.getPortNr(env.getConfig("port","8090")));
+        prop.put("port", env.getConfig("port","8090"));
         prop.put("clientip", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
 
         final String peertype = (sb.peers.mySeed() == null) ? Seed.PEERTYPE_JUNIOR : sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);

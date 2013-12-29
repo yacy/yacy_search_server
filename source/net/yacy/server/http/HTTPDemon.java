@@ -54,7 +54,6 @@ import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -324,13 +323,13 @@ public final class HTTPDemon {
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);
             if (hostAddress == null) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8090"))));
+                tp.put("port", switchboard.getConfig("port", "8090"));
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8090"))));
+                tp.put("port", switchboard.getConfig("port", "8090"));
             } else {
                 tp.put("host", switchboard.myPublicIP());
-                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8090"))));
+                tp.put("port", switchboard.getConfig("port", "8090"));
             }
 
             tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());
