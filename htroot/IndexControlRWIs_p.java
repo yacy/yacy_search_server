@@ -58,6 +58,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -524,7 +525,7 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_urlList", i);
             prop.putHTML("genUrlList_keyString", keystring);
             prop.put("genUrlList_count", i);
-            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath));
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER));
         }
     }
 

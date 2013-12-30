@@ -26,11 +26,14 @@
       You may also provide your blacklist to other peers by sharing them; in return you may
       collect blacklist entries from other peers.
     </p>
-    <h3>Active list: #(disabled)#<em>#[currentBlacklist]#</em>::<span class="error">No blacklist selected</span>#(/disabled)#</h3>
-    <p>Used Blacklist engine: <span class="settingsValue">#[blacklistEngine]#</span></p>
+    <h3>Active list: #(disabled)#
+      #{blackLists}#      
+      &nbsp;[&nbsp;<em>#[name]#</em>&nbsp;]&nbsp;
+      #{/blackLists}#
+      ::<span class="error">No blacklist selected</span>#(/disabled)#</h3>
     <!-- blacklist selection -->
     <fieldset class="selectList">
-      <legend>Select list:</legend>
+      <legend>Select list to edit:</legend>
       #(disabled)#
       <form id="selectListName" action="Blacklist_p.html" method="post" enctype="multipart/form-data"><fieldset>
         <select name="selectedListName" size="1" onchange="document.getElementById('selectListName').submit();">
@@ -63,7 +66,7 @@
     <br /><br />
 #(disabled)#
     <fieldset class="editList">
-      <legend>Edit this list</legend>
+        <legend>Edit list <b><em>#[currentBlacklist]#</em></b></legend>
       <!-- Blacklist configuration -->
       #(edit)#
 

@@ -82,9 +82,9 @@ This function provides an URL filter to the proxy; any blacklisted URL is blocke
 from being loaded. You can define several blacklists and activate them separately.==Sie können mehrere Blacklists anlegen und getrennt aktivieren.
 You may also provide your blacklist to other peers by sharing them; in return you may==Sie können ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
 collect blacklist entries from other peers.==Im Gegenzug können Sie sich selber von anderen Peers Blacklists runterladen.
-Active list:==Aktivierte Liste:
+Active list:==Aktive Liste(n):
 No blacklist selected==Keine Blacklist gewählt
-Select list:==Liste auswählen:
+Select list to edit:==Liste auswählen:
 not shared::shared==nicht freigegeben::freigegeben
 "select"=="wählen"
 Create new list:==Neue Liste anlegen:
@@ -93,7 +93,7 @@ Settings for this list==Einstellungen dieser Liste
 "Save"=="Speichern"
 Share/don't share this list==Liste freigeben/nicht freigeben
 Delete this list==Liste löschen
-Edit this list==Diese Liste bearbeiten
+Edit list==Bearbeite Liste
 These are the domain name/path patterns in==Dies sind die Domainnamen/-pfade in
 Blacklist Pattern==Blacklisteintrag
 Edit selected pattern\(s\)==Bearbeite gewählten Eintrag
