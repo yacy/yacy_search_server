@@ -31,11 +31,9 @@
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -64,53 +62,12 @@ public class Blacklist_p {
 
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());
 
         // do all post operations
         if (post != null) {
 
             final String action = post.get("action", "");
 
-            if(post.containsKey("testList")) {
-            	prop.put("testlist", "1");
-            	String urlstring = post.get("testurl", "");
-            	if (!urlstring.startsWith("http://") &&
-                        !urlstring.startsWith("https://") &&
-                        !urlstring.startsWith("ftp://") &&
-                        !urlstring.startsWith("smb://") &&
-                        !urlstring.startsWith("file://")) {
-                    urlstring = "http://"+urlstring;
-                }
-                DigestURL testurl;
-                try {
-                    testurl = new DigestURL(urlstring);
-                } catch (final MalformedURLException e) {
-                    testurl = null;
-                }
-                if(testurl != null) {
-                    prop.putHTML("testlist_url",testurl.toString());
-                    if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl)) {
-                            prop.put("testlist_listedincrawler", "1");
-                    }
-                    if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, testurl)) {
-                            prop.put("testlist_listedindht", "1");
-                    }
-                    if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, testurl)) {
-                            prop.put("testlist_listedinnews", "1");
-                    }
-                    if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, testurl)) {
-                            prop.put("testlist_listedinproxy", "1");
-                    }
-                    if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, testurl)) {
-                            prop.put("testlist_listedinsearch", "1");
-                    }
-                    if (Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, testurl)) {
-                            prop.put("testlist_listedinsurftips", "1");
-                    }
-                } else {
-                    prop.put("testlist_url","not valid");
-                }
-            }
             if (post.containsKey("selectList")) {
                 blacklistToUse = post.get("selectedListName");
                 if (blacklistToUse != null && blacklistToUse.isEmpty()) {

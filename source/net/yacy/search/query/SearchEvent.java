@@ -1059,7 +1059,7 @@ public final class SearchEvent {
             }
             
             // Check for blacklist
-            if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page)) {
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page.url())) {
                 if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;

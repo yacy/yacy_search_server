@@ -759,7 +759,7 @@ public final class Protocol {
             if ( urlEntry.hash().length != 12 ) {
                 continue; // bad url hash
             }
-            if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry) ) {
+            if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry.url()) ) {
                 if ( Network.log.isInfo() ) {
                     Network.log.info("remote search: filtered blacklisted url " + urlEntry.url() + " from peer " + target.getName());
                 }
@@ -1122,7 +1122,7 @@ public final class Protocol {
             }
             URIMetadataNode urlEntry = new URIMetadataNode(doc);
 
-            if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry) ) {
+            if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry.url()) ) {
                 if ( Network.log.isInfo() ) {
                     if (localsearch) {
                         Network.log.info("local search (solr): filtered blacklisted url " + urlEntry.url());
