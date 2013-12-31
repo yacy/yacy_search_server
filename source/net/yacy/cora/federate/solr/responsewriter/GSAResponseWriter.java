@@ -325,12 +325,15 @@ public class GSAResponseWriter implements QueryResponseWriter {
     }
 
     public static String highlight(String text, String query) {
-        String[] q = CommonPattern.SPACE.split(CommonPattern.PLUS.matcher(query.trim().toLowerCase()).replaceAll(" "));
-        for (String s: q) {
-            int p = text.toLowerCase().indexOf(s.toLowerCase());
-            if (p < 0) continue;
-            text = text.substring(0, p) + "<b>" + text.substring(p, p + s.length()) + "</b>" + text.substring(p + s.length());
-        }
-        return text.replaceAll(Pattern.quote("</b> <b>"), " ");
+        if (query != null) {
+            String[] q = CommonPattern.SPACE.split(CommonPattern.PLUS.matcher(query.trim().toLowerCase()).replaceAll(" "));
+            for (String s: q) {
+                int p = text.toLowerCase().indexOf(s.toLowerCase());
+                if (p < 0) continue;
+                text = text.substring(0, p) + "<b>" + text.substring(p, p + s.length()) + "</b>" + text.substring(p + s.length());
+            }
+            return text.replaceAll(Pattern.quote("</b> <b>"), " ");
+        } 
+        return text;
     }
 }
