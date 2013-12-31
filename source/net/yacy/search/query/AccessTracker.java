@@ -48,6 +48,35 @@ public class AccessTracker {
     private static final int maxSize = 1000;
     private static final int maxAge = 24 * 60 * 60 * 1000;
 
+    public static class QueryEvent {
+        final public String address;
+        final public String userAgent;
+        final public String query;
+        final public Date date;
+        final public short offset;
+        final public short requestedResults;
+        final public short returnedResults;
+        final public short knownResults;
+        final public short executionTime;
+        
+        public QueryEvent(
+                final String address, final String userAgent,
+                final String query, final Date date,
+                final short offset, final short requestedResults,
+                final short returnedResults, final short knownResults,
+                final short executionTime) {
+            this.address = address;
+            this.userAgent = userAgent;
+            this.query = query;
+            this.date = date;
+            this.offset = offset;
+            this.requestedResults = requestedResults;
+            this.returnedResults = returnedResults;
+            this.knownResults = knownResults;
+            this.executionTime = executionTime;
+        }
+    }
+    
     public enum Location {local, remote}
 
     private static final LinkedList<QueryParams> localSearches = new LinkedList<QueryParams>();
