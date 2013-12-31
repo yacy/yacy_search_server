@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -24,6 +25,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -78,6 +80,10 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         final HttpServletRequest request = (HttpServletRequest) req;
         final HttpServletResponse response = (HttpServletResponse) res;
 
+        String remoteHost = req.getRemoteHost();
+        InetAddress remoteIP = Domains.dnsResolve(remoteHost);
+        if (!remoteIP.isAnyLocalAddress()) throw new ServletException("access denied");
+        
         if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
             handleConnect(request, response);
         } else {
