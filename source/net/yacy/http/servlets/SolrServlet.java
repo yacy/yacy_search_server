@@ -31,9 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -81,8 +78,10 @@ import org.apache.solr.util.FastWriter;
 /*
  * taken from the Solr 3.6.0 code, which is now deprecated;
  * this is now done in Solr 4.x.x with org.apache.solr.servlet.SolrDispatchFilter
+ * implemented as servlet (we don't use multicore)
  */
-public class SolrServlet implements Filter {
+public class SolrServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
     
     public final static Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
     static {
@@ -102,50 +101,14 @@ public class SolrServlet implements Filter {
         RESPONSE_WRITER.put("gsa", new GSAResponseWriter());
     }
 
-    public SolrServlet() {
-    }
-
     @Override
-    public void init(FilterConfig config) throws ServletException {
-    }
-
-    @Override
-    public void destroy() {
-
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-
-        if (!(request instanceof HttpServletRequest)) {
-            if (chain != null) chain.doFilter(request, response);
-            return;
-        }
+    public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
         HttpServletRequest hrequest = (HttpServletRequest) request;
         HttpServletResponse hresponse = (HttpServletResponse) response;
         SolrQueryRequest req = null;
 
-        // check if this servlet was called correctly
-        String pathInfo = hrequest.getPathInfo();
-        String path = pathInfo == null ? hrequest.getServletPath() : hrequest.getServletPath() + pathInfo; // should be "/select" after this
-
-        if (!EmbeddedSolrConnector.SELECT.equals(path)) {
-            // this is not for this servlet
-            if (chain != null) chain.doFilter(request, response);
-            return;
-        }
-        if (!EmbeddedSolrConnector.CONTEXT.equals(hrequest.getContextPath())) {
-            // this is not for this servlet
-            if (chain != null) chain.doFilter(request, response);
-            return;
-        }
-
-        // reject POST which is not supported here
         final Method reqMethod = Method.getMethod(hrequest.getMethod());
-        if (reqMethod == null || (reqMethod != Method.GET && reqMethod != Method.HEAD)) {
-            throw new ServletException("Unsupported method: " + hrequest.getMethod());
-        }
         
         Writer out = null;
         try {

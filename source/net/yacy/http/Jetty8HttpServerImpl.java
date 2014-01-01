@@ -32,19 +32,15 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.KeyStore;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-
-import javax.servlet.DispatcherType;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.http.servlets.GSAsearchServlet;
 import net.yacy.http.servlets.SolrServlet;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.http.servlets.YaCyProxyServlet;
-import net.yacy.http.servlets.SolrServlet.Servlet404;
 import net.yacy.search.Switchboard;
 import net.yacy.utils.PKCS12Tool;
 
@@ -57,7 +53,6 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -101,13 +96,6 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
-        
-        //add SolrServlet
-        ServletContextHandler solrContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        solrContext.setContextPath("/solr");       
-        solrContext.addServlet(new ServletHolder(Servlet404.class),"/*");  
-     
-        solrContext.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
 
         // configure root context
         ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -117,13 +105,14 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder,"/*");    
         
+        //add SolrServlet
+        htrootContext.addServlet(SolrServlet.class,"/solr/select");        
+
         // add proxy?url= servlet
-        ServletHolder proxyholder= new ServletHolder(YaCyProxyServlet.class);
-        htrootContext.addServlet(proxyholder,"/proxy.html");
+        htrootContext.addServlet(YaCyProxyServlet.class,"/proxy.html");
         
         // add GSA servlet
-        ServletHolder gsaholder = new ServletHolder (GSAsearchServlet.class);
-        htrootContext.addServlet(gsaholder,"/gsa/search");
+        htrootContext.addServlet(GSAsearchServlet.class,"/gsa/search");
 
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
@@ -139,7 +128,6 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
         ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
         allrequesthandlers.addHandler(context);
-        allrequesthandlers.addHandler(solrContext);
         allrequesthandlers.addHandler(htrootContext);    
         allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
         
