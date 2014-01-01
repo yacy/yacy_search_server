@@ -208,6 +208,7 @@ import net.yacy.utils.UPnP;
 import net.yacy.utils.crypt;
 
 import com.google.common.io.Files;
+import net.yacy.http.YaCyHttpServer;
 
 
 public final class Switchboard extends serverSwitch {
@@ -1127,18 +1128,23 @@ public final class Switchboard extends serverSwitch {
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
         this.trail = new LinkedBlockingQueue<String>();
-        
-        // finally start jobs which shall be started after start-up
-        new Thread() {
-            public void run() {
-                try {Thread.sleep(10000);} catch (final InterruptedException e) {} // we must wait until the httpd comes up
-                execAPIActions(); // trigger startup actions
-            }
-        }.start();
 
         this.log.config("Finished Switchboard Initialization");
     }
 
+    @Override
+    public void setHttpServer(YaCyHttpServer server) {
+        super.setHttpServer(server);
+        
+        // finally start jobs which shall be started after start-up
+        new Thread() {
+            public void run() {
+                try {Thread.sleep(10000);} catch (final InterruptedException e) {} // needs httpd up
+                execAPIActions(); // trigger startup actions
+            }
+        }.start();        
+    }
+    
     public int getIndexingProcessorsQueueSize() {
         return this.indexingDocumentProcessor.getQueueSize()
             + this.indexingCondensementProcessor.getQueueSize()
