@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -40,8 +41,11 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.data.ResultURLs.InitExecEntry;
+import net.yacy.data.ListManager;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
@@ -105,7 +109,8 @@ public class CrawlResults {
                 return prop;
             }
         }
-
+        
+        String selectedblacklist = post.get("selectedblacklist",Blacklist.defaultBlacklist(ListManager.listsPath));
         if (post != null) {
             // custom number of lines
             if (post.containsKey("count")) {
@@ -123,13 +128,19 @@ public class CrawlResults {
                 }
             }
 
-            if (post.containsKey("deletedomain")) {
+            if (post.containsKey("deletedomain") || post.containsKey("delandaddtoblacklist")) {
                 final String domain = post.get("domain", null);
                 if (domain != null) {
+                    selectedblacklist = post.get("blacklistname");
                     Set<String> hostnames = new HashSet<String>();
                     hostnames.add(domain);
                     sb.index.fulltext().deleteStaleDomainNames(hostnames, null);
                     ResultURLs.deleteDomain(tabletype, domain);
+                    
+                    // handle addtoblacklist
+                    if (post.containsKey("delandaddtoblacklist")) {
+                       Switchboard.urlBlacklist.add(selectedblacklist, domain, ".*");
+                    }
                 }
             }
 
@@ -297,11 +308,33 @@ public class CrawlResults {
                 prop.put("table_domains_" + cnt + "_tabletype", tabletype.getCode());
                 prop.put("table_domains_" + cnt + "_domain", domain);
                 prop.put("table_domains_" + cnt + "_count", ResultURLs.domainCount(tabletype, domain));
+                prop.put("table_domains_" + cnt + "_blacklistname", selectedblacklist);
                 dark = !dark;
                 cnt++;
             }
             prop.put("table_domains", cnt);
+
+            // load all blacklist files located in the directory
+            List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
+            int blacklistCount = 0;
+            if (dirlist != null) {
+                for (final String element : dirlist) {
+                    if (element.equals(selectedblacklist)) {
+                        prop.put("table_blacklists_" + blacklistCount + "_selected", "selected");
+                    } else {
+                        prop.put("table_blacklists_" + blacklistCount + "_selected", "");
+                    }
+                    prop.putXML("table_blacklists_" + blacklistCount + "_name", element);
+
+                    blacklistCount++;
+                }
+                prop.put("table_blacklists", blacklistCount);
+            }           
         }
+                
+
+        
+
         prop.put("process", tabletype.getCode());
         // return rewrite properties
         return prop;

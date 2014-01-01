@@ -354,6 +354,53 @@ public class Blacklist {
         }
     }
 
+    /**
+     * appends a entry to the backlist source file
+     * 
+     * @param blacklistSourcefile name of the blacklist file (LISTS/*.black)
+     * @param host host or host pattern
+     * @param path path or path pattern
+     */
+    public final void add (final String blacklistSourcefile, final String host, final String path) {
+        // TODO: check sourcefile synced with cache.ser files ?
+        if (host == null) {
+            throw new IllegalArgumentException("host may not be null");
+        }
+        if (path == null) {
+            throw new IllegalArgumentException("path may not be null");
+        }
+        
+        String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
+
+        // avoid PatternSyntaxException e
+        final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+        if (!p.isEmpty() && p.charAt(0) == '*') {
+            p = "." + p;
+        }
+        Pattern pattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE); 
+        // Append the line to the file.
+        PrintWriter pw = null;
+        try {
+            final String newEntry = h + "/" + pattern;
+            if (!blacklistFileContains(blacklistRootPath, blacklistSourcefile, newEntry)) {
+                pw = new PrintWriter(new FileWriter(new File(blacklistRootPath, blacklistSourcefile), true));
+                pw.println(newEntry);
+                pw.close();
+            }
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
+        } finally {
+            if (pw != null) {
+                try {
+                    pw.close();
+                } catch (final Exception e) {
+                    ConcurrentLog.warn("Blacklist", "could not close stream to "
+                            + blacklistSourcefile + "! " + e.getMessage());
+                }
+            }
+        }
+    }
+    
     public final int blacklistCacheSize() {
         int size = 0;
         final Iterator<BlacklistType> iter = this.cachedUrlHashs.keySet().iterator();

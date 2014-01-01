@@ -73,9 +73,19 @@
     <p><em>Statistics about #[domains]# domains in this stack:</em></p>
     <table cellpadding="2" cellspacing="1" >
       <tr class="TableHeader">
-   		<td align="center"></td>
+   	<td align="center"></td>
         <td><strong>Domain</strong></td>
         <td><strong>URLs</strong></td>
+        <td>Blacklist to use 
+          <form name="selectblacklistform" action="#[feedbackpage]#">
+              <select name="selectedblacklist" onchange="forms.selectblacklistform.submit();">
+                #{blacklists}#
+                <option #[selected]# value="#[name]#">#[name]#</option>
+                #{/blacklists}#
+            </select>
+            <input type="hidden" name="process" value="#[tabletype]#" />
+          </form>
+        </td>
       </tr>
       #{domains}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
@@ -84,12 +94,23 @@
             <div>
               <input type="hidden" name="process" value="#[tabletype]#" />
               <input type="hidden" name="domain" value="#[domain]#" />
+              <input type="hidden" name="blacklistname" value="#[blacklistname]#" />
               <input type="submit" name="deletedomain" value="delete all" />
             </div>
           </form>
         </td>
         <td><a href="http://#[domain]#/" target="_blank">#[domain]#</a></td>
         <td>#[count]#</td>
+        <td>
+          <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <div align="center">
+              <input type="hidden" name="process" value="#[tabletype]#" />
+              <input type="hidden" name="domain" value="#[domain]#" />
+              <input type="hidden" name="blacklistname" value="#[blacklistname]#" />
+              <input type="submit" name="delandaddtoblacklist" value="del & blacklist" />
+            </div>
+          </form>  
+        </td>
       </tr>
       #{/domains}#
     </table><br />
