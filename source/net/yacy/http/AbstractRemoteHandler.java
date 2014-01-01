@@ -82,6 +82,9 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
             HttpServletResponse response) throws IOException, ServletException {
         String host = request.getHeader("Host");
         if (host == null) return; // no proxy request, continue processing by handlers
+        
+        if (!Switchboard.getSwitchboard().getConfigBool("isTransparentProxy", false)) return;
+        
         int hostSplitPos = host.indexOf(':');
         String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
 
@@ -91,7 +94,13 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
             localVirtualHostNames.add(sb.peers.myIP()); // not available on init, add it now for quickcheck
             return;
         }
+        
+        String remoteHost = request.getRemoteHost();
+        InetAddress remoteIP = Domains.dnsResolve(remoteHost);
+        if (!remoteIP.isAnyLocalAddress()) return;
+        
         handleRemote(target, baseRequest, request, response);
+
     }
 
 }
