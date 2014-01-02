@@ -83,8 +83,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         String host = request.getHeader("Host");
         if (host == null) return; // no proxy request, continue processing by handlers
         
-        if (!Switchboard.getSwitchboard().getConfigBool("isTransparentProxy", false)) return;
-        
+           
         int hostSplitPos = host.indexOf(':');
         String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
 
@@ -94,13 +93,30 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
             localVirtualHostNames.add(sb.peers.myIP()); // not available on init, add it now for quickcheck
             return;
         }
+              
+        // from here we can assume it is a proxy request
+        // should check proxy use permission        
+ 
+        if (!Switchboard.getSwitchboard().getConfigBool("isTransparentProxy", false)) {
+            // transparent proxy not swiched on
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed.");
+            baseRequest.setHandled(true);
+            return;
+        }
         
         String remoteHost = request.getRemoteHost();
         InetAddress remoteIP = Domains.dnsResolve(remoteHost);
-        if (!remoteIP.isAnyLocalAddress() && !remoteIP.isLoopbackAddress()) return;
+        if (!remoteIP.isAnyLocalAddress() && !remoteIP.isLoopbackAddress()) {
+            // access not from local IP 
+            // TODO: should .isLinkLocalAddress() be check ? & handle proxy account  ~ ? use proxyClient config instead fix of localIP?
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "proxy use not granted for IP " + remoteIP.getHostAddress() + " (see Server Proxy Access settings).");
+            baseRequest.setHandled(true);
+            return;
+        }
         
         handleRemote(target, baseRequest, request, response);
 
     }
-
+    
 }
