@@ -215,7 +215,7 @@ public final class HTTPDProxyHandler {
      * Special logger instance for proxy access logging much similar
      * to the squid access.log file
      */
-    private static final ConcurrentLog proxyLog = new ConcurrentLog("PROXY.access");
+    public static final ConcurrentLog proxyLog = new ConcurrentLog("PROXY.access");
 
     /**
      * Reusable {@link StringBuilder} for logging

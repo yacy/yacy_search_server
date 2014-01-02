@@ -29,11 +29,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketException;
+import java.util.Date;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -51,6 +53,7 @@ import org.eclipse.jetty.server.Request;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.server.http.HTTPDProxyHandler;
 import net.yacy.server.http.MultiOutputStream;
 
 /**
@@ -234,8 +237,9 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		}
 		
         // we handled this request, break out of handler chain
-		baseRequest.setHandled(true);
-	}
+        logProxyAccess(request);
+	baseRequest.setHandled(true);
+        }
         
     private void setViaHeader(final HeaderFramework header, final String httpVer) {
         if (!sb.getConfigBool("proxy.sendViaHeader", true)) return;
@@ -262,5 +266,33 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             header.put(HeaderFramework.VIA, viaValue.toString());
         }
     }
+    
+    public final static synchronized void logProxyAccess(HttpServletRequest request) {
 
+        final StringBuilder logMessage = new StringBuilder(80);
+
+        // Timestamp
+        logMessage.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
+        logMessage.append(' ');
+
+        // Remote Host
+        final String clientIP = request.getRemoteAddr();
+        logMessage.append(clientIP);
+        logMessage.append(' ');
+
+        // Method
+        final String requestMethod = request.getMethod();
+        logMessage.append(requestMethod);
+        logMessage.append(' ');
+
+        // URL
+        logMessage.append(request.getRequestURL());
+        final String requestArgs = request.getQueryString();
+         if (requestArgs != null) {
+            logMessage.append("?").append(requestArgs);
+        }
+
+        HTTPDProxyHandler.proxyLog.fine(logMessage.toString());
+
+    }
 }

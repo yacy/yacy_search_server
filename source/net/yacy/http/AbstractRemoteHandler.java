@@ -97,7 +97,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         
         String remoteHost = request.getRemoteHost();
         InetAddress remoteIP = Domains.dnsResolve(remoteHost);
-        if (!remoteIP.isAnyLocalAddress()) return;
+        if (!remoteIP.isAnyLocalAddress() && !remoteIP.isLoopbackAddress()) return;
         
         handleRemote(target, baseRequest, request, response);
 
