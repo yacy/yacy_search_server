@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -45,10 +44,6 @@ import org.eclipse.jetty.servlets.ProxyServlet;
  * Servlet to implement proxy via url parameter "/proxy.html?url=xyz_urltoproxy"
  * this implementation uses the existing proxy functions from YaCy HTTPDProxyHandler
  * 
- * InitParameters
- *    ProxyHost : hostname of proxy host, default is "localhost"
- *    ProxyPort : port of the proxy host, default 8090
- * 
  * functionality
  *  - get parameters
  *  - convert headers to YaCy style headers and parameters
@@ -80,10 +75,18 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         final HttpServletRequest request = (HttpServletRequest) req;
         final HttpServletResponse response = (HttpServletResponse) res;
 
-        String remoteHost = req.getRemoteHost();
-        InetAddress remoteIP = Domains.dnsResolve(remoteHost);
-        if (!remoteIP.isAnyLocalAddress()) throw new ServletException("access denied");
+        if (!Switchboard.getSwitchboard().getConfigBool("proxyURL", false)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed.");
+            return;
+        }
         
+        String remoteHost = req.getRemoteHost();
+        if (!Domains.isThisHostIP(remoteHost)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "proxy use not granted for IP " + req.getRemoteAddr());
+            return;
+        }
+
         if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
             handleConnect(request, response);
         } else {

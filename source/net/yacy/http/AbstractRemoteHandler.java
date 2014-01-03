@@ -33,7 +33,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.util.ConcurrentLog;
 
 import net.yacy.search.Switchboard;
 
@@ -81,10 +80,10 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
             HttpServletResponse response) throws IOException, ServletException {
+        
         String host = request.getHeader("Host");
         if (host == null) return; // no proxy request, continue processing by handlers
-        
-           
+                   
         int hostSplitPos = host.indexOf(':');
         String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
 
@@ -98,7 +97,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         InetAddress resolvedIP = Domains.dnsResolve(hostOnly); // during testing isLocal() failed to resolve domain against publicIP  
         if (sb.myPublicIP().equals(resolvedIP.getHostAddress())) {
             localVirtualHostNames.add(resolvedIP.getHostName()); // remember resolved hostname
-            //localVirtualHostNames.add(resolved.getHostAddress()); 
+            //localVirtualHostNames.add(resolved.getHostAddress()); // might change ?
             return;  
         }
 
@@ -113,12 +112,10 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         }
         
         String remoteHost = request.getRemoteHost();
-        InetAddress remoteIP = Domains.dnsResolve(remoteHost);
-        if (!remoteIP.isAnyLocalAddress() && !remoteIP.isLoopbackAddress()) {
-            // access not from local IP 
-            // TODO: should .isLinkLocalAddress() be check ? & handle proxy account  ~ ? use proxyClient config instead fix of localIP?
+        if (!Domains.isThisHostIP(remoteHost)) { // isThisHostIP checks resolves & isAnyLocal & isLoopback IP
+            // TODO: handle proxy account  ~ ? use proxyClient config instead fix of localIP?
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "proxy use not granted for IP " + remoteIP.getHostAddress() + " (see Server Proxy Access settings).");
+                    "proxy use not granted for IP " + request.getRemoteAddr() + " (see Server Proxy Access settings).");
             baseRequest.setHandled(true);
             return;
         }
