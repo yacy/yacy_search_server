@@ -196,7 +196,8 @@ public class Status
 
         // ssl support
         prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() || !sb.getConfigBool("server.https", false) ? 0 : 1);
-
+        if (sb.getConfigBool("server.https", false)) prop.put("sslSupport_sslPort", sb.getHttpServer().getSslPort());
+        
         if ( sb.getConfigBool("remoteProxyUse", false) ) {
             prop.put("remoteProxy", "1");
             prop.putXML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));

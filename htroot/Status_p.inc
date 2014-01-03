@@ -29,7 +29,7 @@
     </dd>
     
     <dt>Address</dt>
-    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#<br />
+    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled (port #[sslPort]#)#(/sslSupport)#<br />
     #(peerAddress)#
       peer address not assigned
       ::
