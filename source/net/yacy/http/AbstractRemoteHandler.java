@@ -33,6 +33,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.ConcurrentLog;
 
 import net.yacy.search.Switchboard;
 
@@ -93,7 +94,14 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
             localVirtualHostNames.add(sb.peers.myIP()); // not available on init, add it now for quickcheck
             return;
         }
-              
+        
+        InetAddress resolvedIP = Domains.dnsResolve(hostOnly); // during testing isLocal() failed to resolve domain against publicIP  
+        if (sb.myPublicIP().equals(resolvedIP.getHostAddress())) {
+            localVirtualHostNames.add(resolvedIP.getHostName()); // remember resolved hostname
+            //localVirtualHostNames.add(resolved.getHostAddress()); 
+            return;  
+        }
+
         // from here we can assume it is a proxy request
         // should check proxy use permission        
  
