@@ -12,13 +12,12 @@
 	<channel>
 		<title>#[promoteSearchPageGreeting]#: #[rss_query]#</title>
 		<description>Search for #[rss_query]#</description>
-		<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#</link>
+		<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[search.verify]#</link>
 		<image>
 			<url>#[rssYacyImageURL]#</url>
 			<title>Search for #[rss_query]#</title>
-			<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#</link>
+			<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[search.verify]#</link>
 		</image>
-		<opensearch:totalResults>#[num-results_totalcount]#</opensearch:totalResults>
 		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>
 		<opensearch:itemsPerPage>#[num-results_itemsPerPage]#</opensearch:itemsPerPage>
 		<atom:link rel="search" href="http://#[thisaddress]#/opensearchdescription.xml" type="application/opensearchdescription+xml"/>
