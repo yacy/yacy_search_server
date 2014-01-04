@@ -763,7 +763,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
             // eof modification to read attribute
             Object tmp;
             try {
-                tmp = invokeServlet(targetClass, legacyRequestHeader, args);
+                if (args.isEmpty()) {
+                    // yacy servlets typically test for args != null (but not for args .isEmpty())
+                    tmp = invokeServlet(targetClass, legacyRequestHeader, null); 
+                } else {
+                    tmp = invokeServlet(targetClass, legacyRequestHeader, args);
+                }
             } catch (InvocationTargetException e) {
                 ConcurrentLog.logException(e);
                 throw new ServletException();
