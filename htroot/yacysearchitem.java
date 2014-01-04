@@ -158,7 +158,7 @@ public class yacysearchitem {
 
 // START interaction
             String modifyURL = resultUrlstring;
-			if (sb.getConfigBool("proxyURL.useforresults", false)) {
+			if (sb.getConfigBool("proxyURL.useforresults", false) && sb.getConfigBool("proxyURL", false)) {
 				// check if url is allowed to view
 				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("all")) {
 					modifyURL = "./proxy.html?url="+modifyURL;

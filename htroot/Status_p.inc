@@ -42,9 +42,10 @@
     <dd>#[host]#:#[port]# (#(status)#broken::connected#(/status)#)</dd>
     #(/portForwarding)#
     
-    <dt>Remote Proxy</dt>
-    <dd>#(remoteProxy)#not used::#[host]#:#[port]# | Used for YaCy -> YaCy communication: #(4Yacy)#Yes::No #(/4Yacy)# #(/remoteProxy)#</dd>
-    
+    <dt>Proxy</dt>
+    <dd>Transparent <a href="Settings_p.html?page=http">#[info_isTransparentProxy]#</a>&nbsp;&nbsp;
+        URL <a href="AugmentedBrowsing_p.html">#[info_proxyURL]#</a></dd>
+    <dd>Remote: <a href="Settings_p.html?page=proxy">#(remoteProxy)#not used::#[host]#:#[port]# | Used for YaCy -> YaCy communication: #(4Yacy)#Yes::No #(/4Yacy)# #(/remoteProxy)#</a></dd>
     <dt>Auto-popup on start-up</dt>
     <dd>
     #(popup)#
@@ -77,7 +78,7 @@
     <dt><a href="Connections_p.html">Incoming Connections</a></dt>
     <dd>Active: #[connectionsActive]# | Max: #[connectionsMax]#</dd>
     
-    <dt>Queues</dt>
+    <dt><a href="Crawler_p.html">Queues</a></dt>
     <dd>
     <a href="IndexCreateLoaderQueue_p.html">Loader Queue</a>:
     <table>

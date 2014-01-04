@@ -198,6 +198,7 @@ public class Status
         prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() || !sb.getConfigBool("server.https", false) ? 0 : 1);
         if (sb.getConfigBool("server.https", false)) prop.put("sslSupport_sslPort", sb.getHttpServer().getSslPort());
         
+        // proxy information
         if ( sb.getConfigBool("remoteProxyUse", false) ) {
             prop.put("remoteProxy", "1");
             prop.putXML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));
@@ -206,7 +207,9 @@ public class Status
         } else {
             prop.put("remoteProxy", "0"); // not used
         }
-
+        prop.put("info_isTransparentProxy", sb.getConfigBool("isTransparentProxy", false) ? "on" : "off");          
+        prop.put("info_proxyURL", sb.getConfigBool("proxyURL", false) ? "on" : "off");       
+        
         // peer information
         String thisHash = "";
         final String thisName = sb.peers.mySeed().getName();
