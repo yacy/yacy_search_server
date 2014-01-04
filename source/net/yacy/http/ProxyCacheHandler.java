@@ -47,7 +47,7 @@ import net.yacy.crawler.retrieval.Response;
 public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler {
 
     private void handleRequestFromCache(HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
-        System.err.println("handle from cache");
+
         // TODO: check if-modified
         for (Entry<String, String> entry : cachedResponseHeader.entrySet()) {
             response.addHeader(entry.getKey(), entry.getValue());

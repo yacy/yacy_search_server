@@ -892,7 +892,7 @@ public final class HTTPDProxyHandler {
      * @param requestHeader
      * @param httpVer
      */
-    private static void modifyProxyHeaders(final HeaderFramework requestHeader, final String httpVer) {
+    public static void modifyProxyHeaders(final HeaderFramework requestHeader, final String httpVer) {
         removeHopByHopHeaders(requestHeader);
         setViaHeader(requestHeader, httpVer);
     }

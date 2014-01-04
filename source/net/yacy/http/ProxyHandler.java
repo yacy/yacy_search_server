@@ -27,34 +27,34 @@ package net.yacy.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.util.Date;
 import java.util.Enumeration;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
-
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.TextParser;
-
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.server.http.HTTPDProxyHandler;
+import net.yacy.server.http.MultiOutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-
-import net.yacy.crawler.data.Cache;
-import net.yacy.crawler.retrieval.Response;
-import net.yacy.peers.operation.yacyBuildProperties;
-import net.yacy.server.http.HTTPDProxyHandler;
-import net.yacy.server.http.MultiOutputStream;
+import org.eclipse.jetty.util.IO;
 
 /**
  * jetty http handler
@@ -91,38 +91,44 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 	public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
 
-		RequestHeader proxyHeaders = convertHeaderFromJetty(request);
-                final String httpVer = request.getHeader(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-                setViaHeader (proxyHeaders, httpVer);
-		proxyHeaders.remove(RequestHeader.KEEP_ALIVE);
-		proxyHeaders.remove(HeaderFramework.CONTENT_LENGTH);
-
-		final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
-		int timeout = 60000;
-		client.setTimout(timeout);
-		client.setHeader(proxyHeaders.entrySet());
-		client.setRedirecting(false);
-		// send request
-		try {
-			String queryString = request.getQueryString()!=null ? "?" + request.getQueryString() : "";
-                        String url = request.getRequestURL().toString() + queryString;
-			if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
-				client.GET(url);
-			} else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
-				client.POST(url, request.getInputStream(), request.getContentLength());
-			} else if (request.getMethod().equals(HeaderFramework.METHOD_HEAD)) {
-				client.HEADResponse(url);
-			} else {
-				throw new ServletException("Unsupported Request Method");
-			}
-			HttpResponse responseHeader = client.getHttpResponse();
-            final ResponseHeader responseHeaderLegacy = new ResponseHeader(200, client.getHttpResponse().getAllHeaders());
+            if (request.getMethod().equals(HeaderFramework.METHOD_CONNECT)) {
+                handleConnect(request, response);
+                return;
+            }
             
-			cleanResponseHeader(responseHeader);
-			
-			// TODO: is this fast, if not, use value from ProxyCacheHandler
-			DigestURL digestURI = new DigestURL(url);
-			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI.hash());
+            RequestHeader proxyHeaders = convertHeaderFromJetty(request);
+            setProxyHeaderForClient(request, proxyHeaders);
+
+            final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
+            int timeout = 60000;
+            client.setTimout(timeout);
+            client.setHeader(proxyHeaders.entrySet());
+            client.setRedirecting(false);
+            // send request
+            try {
+                String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
+                String url = request.getRequestURL().toString() + queryString;
+                if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
+                    client.GET(url);
+                } else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
+                    client.POST(url, request.getInputStream(), request.getContentLength());
+                } else if (request.getMethod().equals(HeaderFramework.METHOD_HEAD)) {
+                    client.HEADResponse(url);
+                } else {
+                    throw new ServletException("Unsupported Request Method");
+                }
+                HttpResponse clientresponse = client.getHttpResponse();
+                int statusCode = clientresponse.getStatusLine().getStatusCode();
+                final ResponseHeader responseHeaderLegacy = new ResponseHeader(statusCode, clientresponse.getAllHeaders());
+
+                if (responseHeaderLegacy.isEmpty()) {
+                    throw new SocketException(clientresponse.getStatusLine().toString());
+                }
+                cleanResponseHeader(clientresponse);
+
+                // TODO: is this fast, if not, use value from ProxyCacheHandler
+                DigestURL digestURI = new DigestURL(url);
+                ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI.hash());
 
             // the cache does either not exist or is (supposed to be) stale
             long sizeBeforeDelete = -1;
@@ -175,10 +181,10 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             ) {
                 // we don't write actually into a file, only to RAM, and schedule writing the file.
             	int l = responseHeaderLegacy.size();
-                final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);
-                
+                final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);                
                 final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {response.getOutputStream(), byteStream});
-                
+                convertHeaderToJetty(clientresponse, response);
+ 		response.setStatus(statusCode);
                 client.writeTo(toClientAndMemory);
                 
              // cached bytes
@@ -224,9 +230,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                         " StoreError=" + ((storeError==null)?"None":storeError) +
                         " StoreHTCache=" + storeHTCache +
                         " SupportError=" + supportError);*/
-    			convertHeaderToJetty(responseHeader, response);
-    			//response.setContentType(responseHeader.getFirstHeader(HeaderFramework.CONTENT_TYPE).getValue());
-    			response.setStatus(responseHeader.getStatusLine().getStatusCode());
+    			convertHeaderToJetty(clientresponse, response);
+    			response.setStatus(statusCode);
     			
     			client.writeTo(response.getOutputStream());
             }
@@ -240,31 +245,30 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         logProxyAccess(request);
 	baseRequest.setHandled(true);
         }
+       
+    /**
+     * adds specific header elements for the connection of the internal
+     * httpclient to the remote server according to local config
+     *
+     * @param header header für http client (already preset with headers from
+     * original ServletRequest
+     * @param origServletRequest original request/header
+     */
+    private void setProxyHeaderForClient(final HttpServletRequest origServletRequest, final HeaderFramework header) {
+    
+        header.remove(RequestHeader.KEEP_ALIVE);
+        header.remove(HeaderFramework.CONTENT_LENGTH);
         
-    private void setViaHeader(final HeaderFramework header, final String httpVer) {
-        if (!sb.getConfigBool("proxy.sendViaHeader", true)) return;
-        
-        final String myAddress = (sb.peers == null) ? null : sb.peers.myAlternativeAddress();
-        if (myAddress != null) {
-
-            // getting header set by other proxies in the chain
-            final StringBuilder viaValue = new StringBuilder(80);
-            if (header.containsKey(HeaderFramework.VIA)) {
-                viaValue.append(header.get(HeaderFramework.VIA));
+        // setting the X-Forwarded-For header
+        if (sb.getConfigBool("proxy.sendXForwardedForHeader", true)) {
+            String ip = origServletRequest.getRemoteAddr();
+            if (!Domains.isThisHostIP(ip)) { // if originator is local host no user ip to forward (= request from localhost)
+                header.put(HeaderFramework.X_FORWARDED_FOR, origServletRequest.getRemoteAddr());
             }
-            if (viaValue.length() > 0) {
-                viaValue.append(", ");
-            }
+        }        
 
-            // appending info about this peer
-            viaValue
-                    .append(httpVer).append(" ")
-                    .append(myAddress).append(" ")
-                    .append("(YaCy ").append(yacyBuildProperties.getVersion()).append(")");
-
-            // storing header back
-            header.put(HeaderFramework.VIA, viaValue.toString());
-        }
+        String httpVersion = origServletRequest.getProtocol();
+        HTTPDProxyHandler.modifyProxyHeaders(header, httpVersion);
     }
     
     public final static synchronized void logProxyAccess(HttpServletRequest request) {
@@ -294,5 +298,45 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 
         HTTPDProxyHandler.proxyLog.fine(logMessage.toString());
 
+    }
+    
+    public void handleConnect(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // taken from Jetty ProxyServlet                
+        String uri = request.getRequestURI();
+
+        String port = "";
+        String host = "";
+
+        int c = uri.indexOf(':');
+        if (c >= 0) {
+            port = uri.substring(c + 1);
+            host = uri.substring(0, c);
+            if (host.indexOf('/') > 0) {
+                host = host.substring(host.indexOf('/') + 1);
+            }
+        }
+
+        // TODO - make this async!
+        InetSocketAddress inetAddress = new InetSocketAddress(host, Integer.parseInt(port));
+
+        // if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
+        // {
+        // sendForbid(request,response,uri);
+        // }
+        // else
+        {
+            InputStream in = request.getInputStream();
+            OutputStream out = response.getOutputStream();
+
+            Socket socket = new Socket(inetAddress.getAddress(), inetAddress.getPort());
+
+            response.setStatus(200);
+            response.setHeader("Connection", "close");
+            response.flushBuffer();
+            // TODO prevent real close!
+
+            IO.copyThread(socket.getInputStream(), out);
+            IO.copy(in, socket.getOutputStream());
+        }
     }
 }
