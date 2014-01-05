@@ -28,13 +28,14 @@ import java.io.IOException;
 import java.security.Principal;
 
 import javax.security.auth.Subject;
+
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
-
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import org.eclipse.jetty.security.IdentityService;
+import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.security.MappedLoginService;
 import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.util.security.Credential;
@@ -42,11 +43,16 @@ import org.eclipse.jetty.util.security.Credential;
 /**
  * jetty login service, provides one admin user
  */
-public class YaCyLoginService extends MappedLoginService {
+public class YaCyLoginService extends MappedLoginService implements LoginService {
 
     @Override
-    protected UserIdentity loadUser(String username) {
-
+    public String getName() {
+        return "YaCy 'admin' Account (reset your password with bin/passwd.sh <new password>)";
+    }
+    
+    @Override
+    protected UserIdentity loadUser(String username) {    
+        
         // TODO: implement legacy credentials
         final Switchboard sb = Switchboard.getSwitchboard();
         String adminuser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");

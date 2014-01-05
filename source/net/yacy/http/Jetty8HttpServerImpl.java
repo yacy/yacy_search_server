@@ -33,6 +33,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.KeyStore;
 import java.util.Enumeration;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
@@ -44,6 +45,7 @@ import net.yacy.http.servlets.YaCyProxyServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.utils.PKCS12Tool;
 
+import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -133,10 +135,10 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         
         // wrap all handlers by security handler
         Jetty8YaCySecurityHandler securityHandler = new Jetty8YaCySecurityHandler();
-        securityHandler.setLoginService(new YaCyLoginService());
-        securityHandler.setRealmName("YaCy Admin Interface");
+        LoginService loginService = new YaCyLoginService();
+        securityHandler.setLoginService(loginService);
+        securityHandler.setRealmName(loginService.getName());
         securityHandler.setHandler(new CrashProtectionHandler(allrequesthandlers));
-                    
         server.setHandler(securityHandler);
     }
 

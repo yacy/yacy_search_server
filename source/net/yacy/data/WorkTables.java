@@ -211,11 +211,10 @@ public class WorkTables extends Tables {
 
     /**
      * execute an API call using a api table row which contains all essentials
-     * to access the server also the host, port and the authentication realm must be given
+     * to access the server also the host and port must be given
      * @param pks a collection of primary keys denoting the rows in the api table
      * @param host the host where the api shall be called
      * @param port the port on the host
-     * @param realm authentification realm
      * @return a map of the called urls and the http status code of the api call or -1 if any other IOException occurred
      */
     public Map<String, Integer> execAPICalls(String host, int port, Collection<String> pks) {
