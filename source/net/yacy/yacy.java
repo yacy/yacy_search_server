@@ -549,7 +549,7 @@ public final class yacy {
 
         // send 'wget' to web interface
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(RequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
+        requestHeader.put(RequestHeader.AUTHORIZATION, "Basic " + encodedPassword); // for http-authentify
 //        final Client con = new Client(10000, requestHeader);
         final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         con.setHeader(requestHeader.entrySet());

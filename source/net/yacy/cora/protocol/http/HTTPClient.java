@@ -49,12 +49,18 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -76,9 +82,11 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
@@ -358,9 +366,35 @@ public class HTTPClient {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        if (localhost) {
+            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(
+                    AuthScope.ANY, // thats ok since we tested for localhost!
+                    new UsernamePasswordCredentials("admin", Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "")));
+            CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+            byte[] content = null;
+            try {
+                this.httpResponse = httpclient.execute(httpGet);
+                try {
+                    HttpEntity httpEntity = this.httpResponse.getEntity();
+                    if (httpEntity != null) {
+                        if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
+                            content = getByteArray(httpEntity, maxBytes);
+                        }
+                        // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+                        EntityUtils.consume(httpEntity);
+                    }
+                } finally {
+                    this.httpResponse.close();
+                }
+            } finally {
+                httpclient.close();
+            }
+            return content;
+        }
         return getContentBytes(httpGet, maxBytes);
     }
-
+    
     /**
      * This method GETs a page from the server.
      * to be used for streaming out
@@ -584,6 +618,7 @@ public class HTTPClient {
     }
 
     private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes) throws IOException {
+        byte[] content = null;
     	try {
             execute(httpUriRequest);
             if (this.httpResponse == null) return null;
@@ -591,12 +626,11 @@ public class HTTPClient {
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
                 if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
-                    return getByteArray(httpEntity, maxBytes);
+                    content = getByteArray(httpEntity, maxBytes);
                 }
                 // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
             	EntityUtils.consume(httpEntity);
             }
-            return null;
         } catch (final IOException e) {
                 httpUriRequest.abort();
                 throw e;
@@ -604,6 +638,7 @@ public class HTTPClient {
         	if (this.httpResponse != null) this.httpResponse.close();
         	ConnectionInfo.removeConnection(httpUriRequest.hashCode());
         }
+    	return content;
     }
 
     private void execute(final HttpUriRequest httpUriRequest) throws IOException {
@@ -676,7 +711,7 @@ public class HTTPClient {
     	if (this.host != null)
     		httpUriRequest.setHeader(HTTP.TARGET_HOST, this.host);
         if (this.realm != null)
-            httpUriRequest.setHeader("Authorization", "realm=" + this.realm);
+            httpUriRequest.setHeader(RequestHeader.AUTHORIZATION, "Basic " + this.realm);
         httpUriRequest.setHeader("Connection", "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
 
