@@ -91,7 +91,6 @@ public final class QueryParams {
     }
     
     private static final int defaultmaxfacets = 30;
-    private static final String ampersand = "&amp;";
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     private static final Pattern matchnothing_pattern = Pattern.compile("");
@@ -591,8 +590,7 @@ public final class QueryParams {
 
         final StringBuilder sb = navurlBase(ext, theQuery, newQueryString);
 
-        sb.append(ampersand);
-        sb.append("startRecord=");
+        sb.append("&startRecord=");
         sb.append(page * theQuery.itemsPerPage());
 
         return sb;
@@ -606,35 +604,27 @@ public final class QueryParams {
         sb.append("?query=");
         sb.append(newQueryString == null ? theQuery.getQueryGoal().getOriginalQueryString(true) : newQueryString);
 
-        sb.append(ampersand);
-        sb.append("maximumRecords=");
+        sb.append("&maximumRecords=");
         sb.append(theQuery.itemsPerPage());
 
-        sb.append(ampersand);
-        sb.append("resource=");
+        sb.append("&resource=");
         sb.append((theQuery.isLocal()) ? "local" : "global");
 
-        sb.append(ampersand);
-        sb.append("verify=");
+        sb.append("&verify=");
         sb.append(theQuery.snippetCacheStrategy == null ? "false" : theQuery.snippetCacheStrategy.toName());
 
-        sb.append(ampersand);
-        sb.append("prefermaskfilter=");
+        sb.append("&prefermaskfilter=");
         sb.append(theQuery.prefer);
 
-        sb.append(ampersand);
-        sb.append("cat=href");
+        sb.append("&cat=href");
 
-        sb.append(ampersand);
-        sb.append("constraint=");
+        sb.append("&constraint=");
         sb.append((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64());
 
-        sb.append(ampersand);
-        sb.append("contentdom=");
+        sb.append("&contentdom=");
         sb.append(theQuery.contentdom.toString());
 
-        sb.append(ampersand);
-        sb.append("former=");
+        sb.append("&former=");
         sb.append(theQuery.getQueryGoal().getOriginalQueryString(true));
 
         return sb;
