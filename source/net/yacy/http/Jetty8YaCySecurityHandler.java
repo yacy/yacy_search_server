@@ -34,6 +34,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.serverAccessTracker;
 
 import org.eclipse.jetty.http.HttpSchemes;
 import org.eclipse.jetty.security.RoleInfo;
@@ -175,7 +176,7 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
         String refererHost;
         // update AccessTracker
         refererHost = request.getRemoteAddr();
-        sb.track(refererHost, pathInContext);
+        serverAccessTracker.track(refererHost, pathInContext);
         
         try {
             refererHost = new MultiProtocolURL(request.getHeader("Referer")).getHost();

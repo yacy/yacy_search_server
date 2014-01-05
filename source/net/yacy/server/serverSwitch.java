@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetAddress;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -51,7 +50,6 @@ import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
-import net.yacy.server.serverAccessTracker.Track;
 
 public class serverSwitch
 {
@@ -68,7 +66,6 @@ public class serverSwitch
     private final ConcurrentMap<String, String> configRemoved;
     private final ConcurrentMap<InetAddress, String> authorization;
     private final NavigableMap<String, BusyThread> workerThreads;
-    private final serverAccessTracker accessTracker;
     private YaCyHttpServer httpserver; // implemented HttpServer
     
     public serverSwitch(
@@ -137,8 +134,7 @@ public class serverSwitch
         this.serverJobs = 0;
 
         // init server tracking
-        this.accessTracker =
-            new serverAccessTracker(
+        serverAccessTracker.init(
                 getConfigLong("server.maxTrackingTime", 60 * 60 * 1000),
                 (int) getConfigLong("server.maxTrackingCount", 1000),
                 (int) getConfigLong("server.maxTrackingHostCount", 100));
@@ -518,22 +514,6 @@ public class serverSwitch
 
     public void handleBusyState(final int jobs) {
         this.serverJobs = jobs;
-    }
-
-    public void track(final String host, final String accessPath) {
-        this.accessTracker.track(host, accessPath);
-    }
-
-    public Collection<Track> accessTrack(final String host) {
-        return this.accessTracker.accessTrack(host);
-    }
-
-    public int latestAccessCount(final String host, final long timedelta) {
-        return this.accessTracker.latestAccessCount(host, timedelta);
-    }
-
-    public Iterator<String> accessHosts() {
-        return this.accessTracker.accessHosts();
     }
 
     /**

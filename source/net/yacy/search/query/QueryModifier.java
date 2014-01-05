@@ -27,7 +27,6 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 

@@ -28,15 +28,17 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.protocol.Domains;
+
 public class serverAccessTracker {
 
     private static final long cleanupCycle = 60000; // 1 minute
-
-    private final long  maxTrackingTime;
-    private final int   maxTrackingCount;
-    private final int   maxHostCount;
-    private final ConcurrentHashMap<String, Queue<Track>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
-    private long lastCleanup;
+    private static long  maxTrackingTime  = 3600000;
+    private static int   maxTrackingCount = 1000;
+    private static int   maxHostCount     = 100;
+    private static final ConcurrentHashMap<String, Queue<Track>> accessTracker = new ConcurrentHashMap<String, Queue<Track>>(); // mappings from requesting host to an ArrayList of serverTrack-entries
+    private static long  lastCleanup;
+    private static long  lastLocalhostAccess = 0;
 
     public static class Track {
         private final long time;
@@ -53,25 +55,22 @@ public class serverAccessTracker {
         }
     }
 
-    public serverAccessTracker(final long maxTrackingTime, final int maxTrackingCount, final int maxTrackingHostCount) {
-        this.maxTrackingTime = maxTrackingTime;
-        this.maxTrackingCount = maxTrackingCount;
-        this.maxHostCount = maxTrackingHostCount;
-        this.accessTracker = new ConcurrentHashMap<String, Queue<Track>>();
+    public static void init(final long mtt, final int mtc, final int mthc) {
+        maxTrackingTime = mtt;
+        maxTrackingCount = mtc;
+        maxHostCount = mthc;
     }
 
     /*
      * remove all entries from the access tracker where the age of the last access is greater than the given timeout
      */
-    private void cleanupAccessTracker() {
+    private static void cleanupAccessTracker() {
 
-        synchronized (this) {
-            if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return; // avoid too many scans of the queues
-            this.lastCleanup = System.currentTimeMillis();
-        }
+       if (System.currentTimeMillis() - lastCleanup < cleanupCycle) return; // avoid too many scans of the queues
+       lastCleanup = System.currentTimeMillis();
 
         // clear entries which had no entry for the maxTrackingTime time
-        final Iterator<Map.Entry<String, Queue<Track>>> i = this.accessTracker.entrySet().iterator();
+        final Iterator<Map.Entry<String, Queue<Track>>> i = accessTracker.entrySet().iterator();
         Queue<Track> track;
         while (i.hasNext()) {
             track = i.next().getValue();
@@ -81,7 +80,7 @@ public class serverAccessTracker {
                 i.remove();
             } else {
                 // check if the maxTrackingCount is exceeded
-                while (track.size() > this.maxTrackingCount) try {
+                while (track.size() > maxTrackingCount) try {
                     // delete the oldest entries
                     track.remove();
                 } catch (final NoSuchElementException e) { break; } // concurrency may cause that the track is already empty
@@ -89,11 +88,11 @@ public class serverAccessTracker {
         }
 
         // if there are more entries left than maxTrackingCount, delete some.
-        while (this.accessTracker.size() > this.maxHostCount) {
+        while (accessTracker.size() > maxHostCount) {
             // delete just any
-            final String key = this.accessTracker.keys().nextElement();
+            final String key = accessTracker.keys().nextElement();
             if (key == null) break; // may occur because of concurrency effects
-            this.accessTracker.remove(key);
+            accessTracker.remove(key);
         }
     }
 
@@ -103,7 +102,7 @@ public class serverAccessTracker {
      * @param delta the time delta from now to the past where the access times shall be computed
      * @return the number of accesses to the host in the given time span
      */
-    public int latestAccessCount(final String host, final long delta) {
+    public static int latestAccessCount(final String host, final long delta) {
         final Collection<Track> timeList = accessTrack(host);
         if (timeList == null) return 0;
         final long time = System.currentTimeMillis() - delta;
@@ -112,8 +111,8 @@ public class serverAccessTracker {
         return c;
     }
 
-    private void clearTooOldAccess(final Queue<Track> access) {
-        final long time = System.currentTimeMillis() - this.maxTrackingTime;
+    private static void clearTooOldAccess(final Queue<Track> access) {
+        final long time = System.currentTimeMillis() - maxTrackingTime;
         final Iterator<Track> e = access.iterator();
         Track l;
         int max = access.size(); // ensure termination
@@ -123,43 +122,48 @@ public class serverAccessTracker {
         }
     }
 
-    public void track(final String host, String accessPath) {
+    public static void track(final String host, String accessPath) {
         // check storage size
-        if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) {
+        if (System.currentTimeMillis() - lastCleanup > cleanupCycle) {
             cleanupAccessTracker();
         }
 
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
-        Queue<Track> track = this.accessTracker.get(host);
+        Queue<Track> track = accessTracker.get(host);
         if (track == null) {
             track = new LinkedBlockingQueue<Track>();
             track.add(new Track(System.currentTimeMillis(), accessPath));
             // add to tracker
-            this.accessTracker.put(host, track);
+            accessTracker.put(host, track);
         } else {
             track.add(new Track(System.currentTimeMillis(), accessPath));
             clearTooOldAccess(track);
         }
+        if (Domains.isLocalhost(host)) lastLocalhostAccess = System.currentTimeMillis();
     }
 
-    public Collection<Track> accessTrack(final String host) {
+    public static Collection<Track> accessTrack(final String host) {
         // returns mapping from Long(accesstime) to path
 
-        final Queue<Track> access = this.accessTracker.get(host);
+        final Queue<Track> access = accessTracker.get(host);
         if (access == null) return null;
         // clear too old entries
         clearTooOldAccess(access);
         if (access.isEmpty()) {
-            this.accessTracker.remove(host);
+            accessTracker.remove(host);
         }
         return access;
     }
 
-    public Iterator<String> accessHosts() {
+    public static Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
         final Map<String, Queue<Track>> accessTrackerClone = new ConcurrentHashMap<String, Queue<Track>>();
-        accessTrackerClone.putAll(this.accessTracker);
+        accessTrackerClone.putAll(accessTracker);
         return accessTrackerClone.keySet().iterator();
+    }
+    
+    public static long timeSinceAccessFromLocalhost() {
+        return System.currentTimeMillis() - lastLocalhostAccess;
     }
 }

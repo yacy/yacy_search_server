@@ -42,6 +42,7 @@ import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
+import net.yacy.server.serverAccessTracker;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.serverAccessTracker.Track;
@@ -71,17 +72,17 @@ public class AccessTracker_p {
         final int maxCount = 1000;
         boolean dark = true;
         if (page == 0) {
-            final Iterator<String> i = sb.accessHosts();
+            final Iterator<String> i = serverAccessTracker.accessHosts();
             String host;
             int entCount = 0;
             try {
                 while ((entCount < maxCount) && (i.hasNext())) {
                     host = i.next();
                     prop.putHTML("page_list_" + entCount + "_host", host);
-                    prop.putNum("page_list_" + entCount + "_countSecond", sb.latestAccessCount(host, 1000));
-                    prop.putNum("page_list_" + entCount + "_countMinute", sb.latestAccessCount(host, 1000 * 60));
-                    prop.putNum("page_list_" + entCount + "_count10Minutes", sb.latestAccessCount(host, 1000 * 60 * 10));
-                    prop.putNum("page_list_" + entCount + "_countHour", sb.latestAccessCount(host, 1000 * 60 * 60));
+                    prop.putNum("page_list_" + entCount + "_countSecond", serverAccessTracker.latestAccessCount(host, 1000));
+                    prop.putNum("page_list_" + entCount + "_countMinute", serverAccessTracker.latestAccessCount(host, 1000 * 60));
+                    prop.putNum("page_list_" + entCount + "_count10Minutes", serverAccessTracker.latestAccessCount(host, 1000 * 60 * 10));
+                    prop.putNum("page_list_" + entCount + "_countHour", serverAccessTracker.latestAccessCount(host, 1000 * 60 * 60));
                     entCount++;
                 }
             } catch (final ConcurrentModificationException e) {
@@ -99,7 +100,7 @@ public class AccessTracker_p {
             Collection<Track> access;
             Track entry;
             if (host.length() > 0) {
-                access = sb.accessTrack(host);
+                access = serverAccessTracker.accessTrack(host);
                 if (access != null) {
                     try {
                         final Iterator<Track> ii = listclone(access).iterator();
@@ -117,10 +118,10 @@ public class AccessTracker_p {
                 }
             } else {
                 try {
-                    final Iterator<String> i = sb.accessHosts();
+                    final Iterator<String> i = serverAccessTracker.accessHosts();
                     while ((entCount < maxCount) && (i.hasNext())) {
                         host = i.next();
-                        access = sb.accessTrack(host);
+                        access = serverAccessTracker.accessTrack(host);
                         final Iterator<Track> ii = listclone(access).iterator();
                         while (ii.hasNext()) {
                                 entry = ii.next();

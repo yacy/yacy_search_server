@@ -31,6 +31,7 @@ import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverAccessTracker;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.visualization.HexGridPlotter;
@@ -115,11 +116,11 @@ public class AccessPicture_p {
         String host;
         int c, h;
         for (final int time2 : times) {
-            final Iterator<String> i = sb.accessHosts();
+            final Iterator<String> i = serverAccessTracker.accessHosts();
             try {
                 while (i.hasNext()) {
                     host = i.next();
-                    c = sb.latestAccessCount(host, time2);
+                    c = serverAccessTracker.latestAccessCount(host, time2);
                     if (c > 0) {
                         h = (Math.abs(host.hashCode())) % hosts.length;
                         hosts[h] = host;
