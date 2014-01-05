@@ -218,10 +218,9 @@ public class WorkTables extends Tables {
      * @param realm authentification realm
      * @return a map of the called urls and the http status code of the api call or -1 if any other IOException occurred
      */
-    public Map<String, Integer> execAPICalls(String host, int port, String realm, Collection<String> pks) {
+    public Map<String, Integer> execAPICalls(String host, int port, Collection<String> pks) {
         // now call the api URLs and store the result status
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        client.setRealm(realm);
         client.setTimout(120000);
         Tables.Row row;
         String url;
@@ -250,10 +249,9 @@ public class WorkTables extends Tables {
         return l;
     }
 
-    public static int execAPICall(String host, int port, String realm, String path, byte[] pk) {
+    public static int execAPICall(String host, int port, String path, byte[] pk) {
         // now call the api URLs and store the result status
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        client.setRealm(realm);
         client.setTimout(120000);
         String url = "http://" + host + ":" + port + path;
         if (pk != null) url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(pk);
@@ -274,10 +272,10 @@ public class WorkTables extends Tables {
      * @param realm authentification realm
      * @return the http status code of the api call or -1 if any other IOException occurred
      */
-    public int execAPICall(String pk, String host, int port, String realm) {
+    public int execAPICall(String pk, String host, int port) {
         ArrayList<String> pks = new ArrayList<String>();
         pks.add(pk);
-        Map<String, Integer> m = execAPICalls(host, port, realm, pks);
+        Map<String, Integer> m = execAPICalls(host, port, pks);
         if (m.isEmpty()) return -1;
         return m.values().iterator().next().intValue();
     }

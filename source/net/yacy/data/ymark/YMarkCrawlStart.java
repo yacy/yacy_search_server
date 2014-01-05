@@ -110,8 +110,8 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		}
 	}
 
-	public int exec(final String host, final int port, final String realm) {
-		return this.worktables.execAPICall(this.apicall_pk, host, port, realm);
+	public int exec(final String host, final int port) {
+		return this.worktables.execAPICall(this.apicall_pk, host, port);
 	}
 
 	private void load() {

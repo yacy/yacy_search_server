@@ -2457,7 +2457,7 @@ public final class Switchboard extends serverSwitch {
         startupAction = false;
         
         // execute api calls
-        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), pks);
+        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), pks);
         for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
             this.log.info("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
         }

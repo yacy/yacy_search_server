@@ -49,7 +49,6 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
@@ -112,7 +111,6 @@ public class HTTPClient {
 	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
 	private String host = null;
-	private String realm = null;
 
 
     public HTTPClient(final ClientIdentification.Agent agent) {
@@ -302,15 +300,6 @@ public class HTTPClient {
     public void setRedirecting(final boolean redirecting) {
     	reqConfBuilder.setRedirectsEnabled(redirecting);
     	reqConfBuilder.setRelativeRedirectsAllowed(redirecting);
-    }
-
-    /**
-     * This method sets the authorization realm for the request
-     *
-     * @param realm
-     */
-    public void setRealm(final String realm) {
-        this.realm = realm;
     }
 
     /**
@@ -708,10 +697,7 @@ public class HTTPClient {
                     httpUriRequest.setHeader(entry.getKey(),entry.getValue());
             }
     	}
-    	if (this.host != null)
-    		httpUriRequest.setHeader(HTTP.TARGET_HOST, this.host);
-        if (this.realm != null)
-            httpUriRequest.setHeader(RequestHeader.AUTHORIZATION, "Basic " + this.realm);
+    	if (this.host != null) httpUriRequest.setHeader(HTTP.TARGET_HOST, this.host);
         httpUriRequest.setHeader("Connection", "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
 

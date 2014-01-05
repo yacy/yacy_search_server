@@ -215,7 +215,6 @@ public class CrawlStartScanner_p
                             WorkTables.execAPICall(
                                 Domains.LOCALHOST,
                                 (int) sb.getConfigLong("port", 8090),
-                                sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""),
                                 path,
                                 pk);
                         }
@@ -261,7 +260,6 @@ public class CrawlStartScanner_p
                                     WorkTables.execAPICall(
                                         Domains.LOCALHOST,
                                         (int) sb.getConfigLong("port", 8090),
-                                        sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""),
                                         path,
                                         u.hash());
                                 }
