@@ -208,6 +208,7 @@ import net.yacy.utils.UPnP;
 import net.yacy.utils.crypt;
 
 import com.google.common.io.Files;
+
 import net.yacy.http.YaCyHttpServer;
 
 
@@ -886,7 +887,7 @@ public final class Switchboard extends serverSwitch {
         // that an automatic authorization of localhost is done, because in this case crawls from local
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
         // addresses that can steer a YaCy peer
-        if ( !getConfigBool("adminAccountForLocalhost", false) ) {
+        if ( !getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) ) {
             if ( getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000") ) {
                 // the password was set automatically with a random value.
                 // We must remove that here to prevent that a user cannot log in any more
@@ -2056,11 +2057,11 @@ public final class Switchboard extends serverSwitch {
             }
 
             // set a random password if no password is configured
-            if ( getConfigBool("adminAccountForLocalhost", false)
+            if ( getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)
                 && getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() ) {
                 // make a 'random' password
                 setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
-                setConfig("adminAccount", "");
+                setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
             }
 
             // stop greedylearning if limit is reached
@@ -3242,7 +3243,7 @@ public final class Switchboard extends serverSwitch {
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final boolean accessFromLocalhost = requestHeader.accessFromLocalhost();
-        if ( getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost ) {
+        if ( getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) && accessFromLocalhost ) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }

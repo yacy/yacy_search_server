@@ -55,7 +55,7 @@ public class ConfigAccounts_p {
         UserDB.Entry entry = null;
 
         // admin password
-        boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
+        boolean localhostAccess = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
         if (post != null && post.containsKey("setAdmin")) {
             localhostAccess = Domains.isLocalhost(post.get("access", ""));
             final String user = (post == null) ? "" : post.get("adminuser", "");
@@ -66,22 +66,22 @@ public class ConfigAccounts_p {
             if (user.length() > 0 && pw1.length() > 3 && pw1.equals(pw2)) {
                 // check passed. set account:
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
-                env.setConfig("adminAccount", "");
-                env.setConfig("adminAccountUserName",user);
+                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
+                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
             }
 
             if (localhostAccess) {
 
-            	sb.setConfig("adminAccountForLocalhost", true);
+            	sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, true);
             	// if an localhost access is configured, check if a local password is given
             	// if not, set a random password
             	if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty()) {
             		// make a 'random' password
             		env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
-            		env.setConfig("adminAccount", "");
+            		env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
             	}
             } else {
-                sb.setConfig("adminAccountForLocalhost", false);
+                sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
                 if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
                     // make shure that the user can still use the interface after a random password was set
                     env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
@@ -89,14 +89,14 @@ public class ConfigAccounts_p {
             }
         }
 
-        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() && !env.getConfigBool("adminAccountForLocalhost", false)) {
+        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() && !env.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
             prop.put("passwordNotSetWarning", 1);
         }
 
         prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
         prop.put("account.checked", (localhostAccess) ? 0 : 1);
         prop.put("statusPassword", localhostAccess ? "0" : "1");
-        prop.put("defaultUser", env.getConfig("adminAccountUserName", "admin"));
+        prop.put("defaultUser", env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"));
 
         //default values
         prop.put("current_user", "newuser");

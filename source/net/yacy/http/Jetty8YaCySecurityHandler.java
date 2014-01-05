@@ -33,6 +33,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import org.eclipse.jetty.http.HttpSchemes;
 import org.eclipse.jetty.security.RoleInfo;
@@ -168,7 +169,7 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
     @Override
     protected RoleInfo prepareConstraintInfo(String pathInContext, Request request) {
         final Switchboard sb = Switchboard.getSwitchboard();
-        final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
+        final boolean adminAccountForLocalhost = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
         //final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
 
         String refererHost;

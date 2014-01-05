@@ -49,7 +49,7 @@ public class YaCyLoginService extends MappedLoginService {
 
         // TODO: implement legacy credentials
         final Switchboard sb = Switchboard.getSwitchboard();
-        String adminuser = sb.getConfig("adminAccountUserName", "admin");
+        String adminuser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
         if (username.equals(adminuser)) {
             final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
             // in YaCy the credential hash is composed of username:pwd so the username is needed to create valid credential 
@@ -66,23 +66,22 @@ public class YaCyLoginService extends MappedLoginService {
             subject.setReadOnly();
             IdentityService is = getIdentityService();
             return is.newUserIdentity(subject, userPrincipal, new String[]{AccessRight.ADMIN_RIGHT.toString()});
-        } else { // get user data from UserDB            
-            Entry user = sb.userDB.getEntry(username);
-            if (user != null) {
-                if (user.hasRight(AccessRight.ADMIN_RIGHT)) {
-                    String[] role = new String[]{AccessRight.ADMIN_RIGHT.toString()};
+        }
+        Entry user = sb.userDB.getEntry(username);
+        if (user != null) {
+            if (user.hasRight(AccessRight.ADMIN_RIGHT)) {
+                String[] role = new String[]{AccessRight.ADMIN_RIGHT.toString()};
 
-                    Credential credential = YaCyLegacyCredential.getCredentials(username, user.getMD5EncodedUserPwd());
-                    Principal userPrincipal = new MappedLoginService.KnownUser(username, credential);
-                    Subject subject = new Subject();
-                    subject.getPrincipals().add(userPrincipal);
-                    subject.getPrivateCredentials().add(credential);
-                    subject.setReadOnly();
-                    IdentityService is = getIdentityService();
+                Credential credential = YaCyLegacyCredential.getCredentials(username, user.getMD5EncodedUserPwd());
+                Principal userPrincipal = new MappedLoginService.KnownUser(username, credential);
+                Subject subject = new Subject();
+                subject.getPrincipals().add(userPrincipal);
+                subject.getPrivateCredentials().add(credential);
+                subject.setReadOnly();
+                IdentityService is = getIdentityService();
 
-                    return is.newUserIdentity(subject, userPrincipal, role);
-                } 
-            }
+                return is.newUserIdentity(subject, userPrincipal, role);
+            } 
         }
         return null;
     }

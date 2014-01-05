@@ -29,6 +29,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.ResultImages;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -95,7 +96,7 @@ public class Collage {
                 // check if this loads a page from localhost, which must be prevented to protect the server
                 // against attacks to the administration interface when localhost access is granted
                 if ((Domains.isLocal(baseURL.getHost(), null) || Domains.isLocal(imageURL.getHost(), null)) &&
-                    sb.getConfigBool("adminAccountForLocalhost", false)) continue;
+                    sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) continue;
 
                 final long z = imgZIndex[i];
                 prop.put("imgurl_list_" + c + "_url",

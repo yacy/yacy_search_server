@@ -41,8 +41,11 @@ public final class SwitchboardConstants {
      * <p>Name of the setting holding the authentication hash for the static <code>admin</code>-account. It is calculated
      * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
      */
-    public static final String ADMIN_ACCOUNT_B64MD5 = "adminAccountBase64MD5";
-
+    public static final String ADMIN_ACCOUNT                = "adminAccount";
+    public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5";
+    public static final String ADMIN_ACCOUNT_USER_NAME      = "adminAccountUserName"; // by default 'admin'
+    public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
+    
     public static final int   CRAWLJOB_SYNC = 0;
     public static final int   CRAWLJOB_STATUS = 1;
     // 20_dhtdistribution

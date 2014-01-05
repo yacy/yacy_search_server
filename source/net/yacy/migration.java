@@ -234,9 +234,9 @@ public class migration {
     public static void presetPasswords(final Switchboard sb) {
         // set preset accounts/passwords
         String acc;
-        if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
+        if ((acc = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT, "")).length() > 0) {
             sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
-            sb.setConfig("adminAccount", "");
+            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
         }
 
         // fix unsafe old passwords

@@ -131,14 +131,14 @@ public class Status
 
         // password protection
         if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty())
-            && (!sb.getConfigBool("adminAccountForLocalhost", false)) ) {
+            && (!sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) ) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
         } else {
             prop.put("protection", "1"); // protected
         }
 
-        if ( sb.getConfigBool("adminAccountForLocalhost", false) ) {
+        if ( sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) ) {
             prop.put("unrestrictedLocalAccess", 1);
         }
 

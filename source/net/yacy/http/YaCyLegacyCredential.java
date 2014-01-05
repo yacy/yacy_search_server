@@ -26,6 +26,7 @@ package net.yacy.http;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
+
 import org.eclipse.jetty.util.security.Credential;
 
 
@@ -39,7 +40,7 @@ public class YaCyLegacyCredential extends Credential {
     private String hash;
     private String foruser; // remember the user as YaCy credential is username:pwd (not just pwd)
     private boolean isBase64enc; // remember hash encoding  false = encodeMD5Hex(usr:pwd) ; true = encodeMD5Hex(Base64Order.standardCoder.encodeString(usr:pw))
-
+    
     /**
      * internal hash function
      *
@@ -54,11 +55,9 @@ public class YaCyLegacyCredential extends Credential {
     public boolean check(Object credentials) {
         if (credentials instanceof String) {
             final String pw = (String) credentials;
-            if (isBase64enc) { // for adminuser
-                return calcHash(foruser + ":" + pw).equals(this.hash);                
-            } else { // for user
-                return Digest.encodeMD5Hex(foruser + ":" + pw).equals(this.hash);
-            }
+            if (isBase64enc) return calcHash(foruser + ":" + pw).equals(this.hash); // for admin user
+            // normal users
+            return Digest.encodeMD5Hex(foruser + ":" + pw).equals(this.hash);
         }
         throw new UnsupportedOperationException();
     }
@@ -70,8 +69,8 @@ public class YaCyLegacyCredential extends Credential {
 	 */
 	public static Credential getCredentialsFromConfig(String username, String configHash) {
 		YaCyLegacyCredential c = new YaCyLegacyCredential();
-                c.foruser=username;
-                c.isBase64enc=true;
+        c.foruser = username;
+        c.isBase64enc = true;
 		c.hash = configHash;
 		return c;
 	}
@@ -84,9 +83,9 @@ public class YaCyLegacyCredential extends Credential {
 	 */
 	public static Credential getCredentials(String username, String configHash) {
 		YaCyLegacyCredential c = new YaCyLegacyCredential();
-                c.foruser=username;
-                c.isBase64enc = false;
-                c.hash = configHash;
+        c.foruser = username;
+        c.isBase64enc = false;
+        c.hash = configHash;
 		//c.hash = calcHash(user + ":" + password);
 		return c;
 	}
