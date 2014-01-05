@@ -73,7 +73,8 @@ public class Domains {
     private static Method InetAddressLocatorGetLocaleInetAddressMethod;
     private static final Set<String> ccSLD_TLD = new HashSet<String>();
     private static final String PRESENT = "";
-    private static final Pattern LOCAL_PATTERNS = Pattern.compile("(10\\..*)|(127\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)|(localhost)|(\\[?\\:\\:1/.*)|(\\[?fc.*)|(\\[?fd.*)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
+    private static final Pattern LOCALHOST_PATTERNS = Pattern.compile("(127\\..*)|(localhost)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
+    private static final Pattern INTRANET_PATTERNS = Pattern.compile("(10\\..*)|(127\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)|(localhost)|(\\[?\\:\\:1/.*)|(\\[?fc.*)|(\\[?fd.*)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
     
     private static final int MAX_NAME_CACHE_HIT_SIZE = 10000;
     private static final int MAX_NAME_CACHE_MISS_SIZE = 1000;
@@ -1030,6 +1031,15 @@ public class Domains {
     }
 
     /**
+     * check the host ip string against localhost names
+     * @param host
+     * @return true if the host from the string is the localhost
+     */
+    public static boolean isLocalhost(final String host) {
+        return (host != null && LOCALHOST_PATTERNS.matcher(host).matches());
+    }
+
+    /**
      * check if a given host is the name for a local host address
      * this method will return true if noLocalCheck is switched on. This means that
      * not only local and global addresses are then not distinguished but also that
@@ -1038,11 +1048,11 @@ public class Domains {
      * @param host
      * @return
      */
-    public static boolean isLocalhost(final String host) {
+    public static boolean isIntranet(final String host) {
         return (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
-                (host != null && LOCAL_PATTERNS.matcher(host).matches()));
+                (host != null && INTRANET_PATTERNS.matcher(host).matches()));
     }
-
+    
     /**
      * check if the given host is a local address.
      * the hostaddress is optional and shall be given if the address is already known
@@ -1061,9 +1071,9 @@ public class Domains {
             host.isEmpty()) return true;
 
         // check local ip addresses
-        if (isLocalhost(host)) return true;
+        if (isIntranet(host)) return true;
         if (hostaddress != null && (
-                isLocalhost(hostaddress.getHostAddress()) ||
+                isIntranet(hostaddress.getHostAddress()) ||
                 isLocal(hostaddress)
             )) return true;
 

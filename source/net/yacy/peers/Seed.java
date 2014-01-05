@@ -1087,8 +1087,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             try {
                 final URL url = new URL(seedURL);
                 final String host = url.getHost();
-                if (Domains.isLocalhost(host)) {
-                    return "seedURL in localhost rejected";
+                if (Domains.isIntranet(host)) {
+                    return "seedURL in local network rejected";
                 }
             } catch (final MalformedURLException e ) {
                 return "seedURL malformed";

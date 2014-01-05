@@ -183,7 +183,7 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
             refererHost = null;
         }                          
         final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
-        // ! note : accessFromLocalhost compares localhost ip pattern ( ! currently also any intranet host is a local host)
+        // ! note : accessFromLocalhost compares localhost ip pattern
         final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
         boolean protectedPage = (pathInContext.indexOf("_p.") > 0);
         // check "/gsa" and "/solr" if not publicSearchpage

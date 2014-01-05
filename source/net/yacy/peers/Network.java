@@ -765,8 +765,8 @@ public class Network
                 }
                 seedURL = new DigestURL(seedURLStr);
                 final String host = seedURL.getHost();
-                if (Domains.isLocalhost(host)) { // check seedlist reacheable
-                    final String errorMsg = "seedURL in localhost rejected (localhost can't be reached from outside)";
+                if (Domains.isIntranet(host)) { // check seedlist reacheable
+                    final String errorMsg = "seedURL in local network rejected (local hosts can't be reached from outside)";
                     log.warn("SaveSeedList: " + errorMsg);
                     return errorMsg;
                 }
