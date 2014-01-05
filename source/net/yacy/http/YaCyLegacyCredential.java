@@ -26,6 +26,7 @@ package net.yacy.http;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
+import net.yacy.server.serverAccessTracker;
 
 import org.eclipse.jetty.util.security.Credential;
 
@@ -55,7 +56,17 @@ public class YaCyLegacyCredential extends Credential {
     public boolean check(Object credentials) {
         if (credentials instanceof String) {
             final String pw = (String) credentials;
-            if (isBase64enc) return calcHash(foruser + ":" + pw).equals(this.hash); // for admin user
+            if (isBase64enc) {
+                if (serverAccessTracker.timeSinceAccessFromLocalhost() < 100) {
+                    // we allow localhost accesses also to submit the hash as password
+                    // this is very important since that method is used by the scripts in bin/ which are based on bin/apicall.sh
+                    // the cleartext password is not stored anywhere, but we must find a way to allow scripts to steer a peer.
+                    // this is the exception that makes that possible.
+                    // TODO: it should be better to check the actual access IP here, but that is not handed over to Credential classes :(
+                    if (pw.equals(this.hash)) return true;
+                }
+                return calcHash(foruser + ":" + pw).equals(this.hash); // for admin user
+            }
             // normal users
             return Digest.encodeMD5Hex(foruser + ":" + pw).equals(this.hash);
         }
