@@ -26,12 +26,12 @@ package net.yacy.http;
 
 import java.io.IOException;
 import java.util.Map.Entry;
-import javax.servlet.ServletException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.yacy.cora.document.id.DigestURL;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 
@@ -46,7 +46,7 @@ import net.yacy.crawler.retrieval.Response;
  */
 public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler {
 
-    private void handleRequestFromCache(HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
+    private void handleRequestFromCache(@SuppressWarnings("unused") HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
 
         // TODO: check if-modified
         for (Entry<String, String> entry : cachedResponseHeader.entrySet()) {

@@ -401,65 +401,6 @@ public final class HTTPDemon {
         }
     }
 
-    private static final void sendRespondHeader(
-            final HashMap<String, Object> conProp,
-            final OutputStream respond,
-            final String httpVersion,
-            final int httpStatusCode,
-            final String httpStatusText,
-            String contentType,
-            final long contentLength,
-            Date moddate,
-            final Date expires,
-            ResponseHeader headers,
-            final String contentEnc,
-            final String transferEnc,
-            final boolean nocache
-    ) throws IOException {
-
-        final String reqMethod = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
-
-        if ((transferEnc != null) && !httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1)) {
-            throw new IllegalArgumentException("Transfer encoding is only supported for http/1.1 connections. The current connection version is " + httpVersion);
-        }
-
-        if (!reqMethod.equals(HeaderFramework.METHOD_HEAD)){
-            if (!"close".equals(conProp.get(HeaderFramework.CONNECTION_PROP_PERSISTENT)) &&
-                    transferEnc == null && contentLength < 0) {
-                throw new IllegalArgumentException("Message MUST contain a Content-Length or a non-identity transfer-coding header field.");
-            }
-            if (transferEnc != null && contentLength >= 0) {
-                throw new IllegalArgumentException("Messages MUST NOT include both a Content-Length header field and a non-identity transfer-coding.");
-            }
-        }
-
-        if (headers == null) headers = new ResponseHeader(httpStatusCode);
-        final Date now = new Date(System.currentTimeMillis());
-
-        headers.put(HeaderFramework.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(HeaderFramework.DATE, HeaderFramework.formatRFC1123(now));
-        if (moddate.after(now)) {
-            moddate = now;
-        }
-        headers.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(moddate));
-
-        if (nocache) {
-            headers.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-            headers.put(HeaderFramework.CACHE_CONTROL, "no-store");
-            headers.put(HeaderFramework.PRAGMA, "no-cache");
-        }
-
-        if (contentType == null) contentType = "text/html; charset=UTF-8";
-        if (headers.get(HeaderFramework.CONTENT_TYPE) == null) headers.put(HeaderFramework.CONTENT_TYPE, contentType);
-        if (contentLength > 0)   headers.put(HeaderFramework.CONTENT_LENGTH, Long.toString(contentLength));
-        //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
-        if (expires != null)     headers.put(HeaderFramework.EXPIRES, HeaderFramework.formatRFC1123(expires));
-        if (contentEnc != null)  headers.put(HeaderFramework.CONTENT_ENCODING, contentEnc);
-        if (transferEnc != null) headers.put(HeaderFramework.TRANSFER_ENCODING, transferEnc);
-
-        sendRespondHeader(conProp, respond, httpVersion, httpStatusCode, httpStatusText, headers);
-    }
-
     static final void sendRespondHeader(
             final HashMap<String, Object> conProp,
             final OutputStream respond,
@@ -566,21 +507,6 @@ public final class HTTPDemon {
             // the windows during transmission. We simply pass it as IOException
             throw new IOException(e.getMessage());
         }
-    }
-
-    private static boolean isThisSeedIP(final String hostName) {
-        if ((hostName == null) || (hostName.isEmpty())) return false;
-
-        // getting ip address and port of this seed
-        if (getAlternativeResolver() == null) return false;
-
-        // resolve ip addresses
-        final InetAddress seedInetAddress = Domains.dnsResolve(getAlternativeResolver().myIP());
-        final InetAddress hostInetAddress = Domains.dnsResolve(hostName);
-        if (seedInetAddress == null || hostInetAddress == null) return false;
-
-        // if it's equal, the hostname points to this seed
-        return (seedInetAddress.equals(hostInetAddress));
     }
 
     /**

@@ -42,7 +42,6 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;

@@ -36,7 +36,7 @@ public class CrashProtectionHandler extends HandlerWrapper implements Handler, H
 		}
 	}
 	
-	private void writeResponse(HttpServletRequest request, HttpServletResponse response, Exception exc) throws IOException {
+	private void writeResponse(@SuppressWarnings("unused") HttpServletRequest request, HttpServletResponse response, Exception exc) throws IOException {
             PrintWriter out;
             try { // prevent exception after partial response (only getWriter not allowed if getOutputStream called before; Servlet API 3.0 )
                 out = response.getWriter();
