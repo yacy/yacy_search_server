@@ -29,7 +29,11 @@ REM Install YaCy as Windows Service
 %exepath%\prunsrv.exe //IS//YaCy --Jvm=auto --StartMode=jvm --StartClass=net.yacy.yacy --Classpath=htroot;lib/yacycore.jar --StartPath=%~dp0 --JvmOptions=%javaopts% --Startup=auto --JvmMx=%jmx% --JvmMs=%jms% --StopMode=jvm --StopClass=net.yacy.yacy --StopParams=-shutdown --Description=%servicedesc%
 
 if not errorlevel 1 goto installed
-echo Failed installing '%SERVICE_NAME%' service
+Echo Failed installing YaCy service
+Echo maybe it is already installed 
+Echo opening the service manager to edit the settings now.
+
+addon\windowsService\prunmgr.exe //ES//YaCy
 goto end
 
 :installed
