@@ -33,6 +33,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.KeyStore;
 import java.util.Enumeration;
+import java.util.StringTokenizer;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -53,6 +54,7 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.IPAccessHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -139,7 +141,30 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         securityHandler.setLoginService(loginService);
         securityHandler.setRealmName(loginService.getName());
         securityHandler.setHandler(new CrashProtectionHandler(allrequesthandlers));
-        server.setHandler(securityHandler);
+
+        // check server access restriction and add IPAccessHandler if restrictions are needed
+        // otherwise don't (to save performance)
+        String white = sb.getConfig("serverClient", "*");
+        if (!white.equals("*")) { // full ip (allowed ranges 0-255 or prefix  10.0-255,0,0-100  or 127.)
+            final StringTokenizer st = new StringTokenizer(white, ",");
+            IPAccessHandler iphandler = new IPAccessHandler();
+            int i=0;
+            while (st.hasMoreTokens()) {
+                String ip = st.nextToken();
+                iphandler.addWhite(ip);
+                i++;
+            }          
+            if (i > 0) {
+                iphandler.addWhite("127.0.0.1"); // allow localhost (loopback addr)
+                iphandler.setHandler(securityHandler); 
+                server.setHandler(iphandler);
+                ConcurrentLog.info("SERVER","activated IP access restriction to: [127.0.0.1," + white +"] (this works only correct with start parameter -Djava.net.preferIPv4Stack=true)");
+            } else {
+                server.setHandler(securityHandler); // iphandler not needed
+            }
+        } else {
+            server.setHandler(securityHandler); // iphandler not needed
+        }        
     }
 
     /**

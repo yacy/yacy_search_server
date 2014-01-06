@@ -184,35 +184,6 @@ public final class yacy {
 
             f = new File(dataHome, "DATA/yacy.running");
             final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
-            if (f.exists()) {                // another instance running? VM crash? User will have to care about this
-                ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
-                
-                // If YaCy is actually running, then we check if the server port is open.
-                // If yes, then we consider that a restart is a user mistake and then we just respond
-                // as the user expects and tell the browser to open the start page.
-                // That will especially happen if Windows Users double-Click the YaCy Icon on the desktop to simply
-                // open the web interface. (They don't think of 'servers' they just want to get to the search page).
-                // We need to parse the configuration file for that to get the host port
-                File dataFile = new File(dataHome, conf);
-                if (dataFile.exists()) {
-                    Properties p = new Properties();
-                    p.load(new FileInputStream(dataFile));
-                    int port = Integer.parseInt(p.getProperty("port", "8090"));
-                    try {
-                        if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
-                            Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
-                            // Thats it; YaCy was running, the user is happy, we can stop now.
-                            ConcurrentLog.severe("STARTUP", "WARNING: YaCy instance was still running; just opening the browser and exit.");
-                            System.exit(0);
-                        }
-                    } catch (final ExecutionException ex) {
-                        ConcurrentLog.info("STARTUP", "INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
-                    }
-                }
-                
-                // YaCy is not running; thus delete the file an go on as nothing was wrong.
-                delete(f);
-            }
             if (!f.createNewFile()) ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be created!");
             try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (final Exception e) { } // write PID
             f.deleteOnExit();
@@ -574,7 +545,71 @@ public final class yacy {
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
+    
+    /**
+     * read saved config file and perform action which need to be done before main task starts
+     * - like check on system alrady running etc.
+     * 
+     * @param dataHome data directory
+     */
+    static private void preReadSavedConfigandInit(File dataHome) {
+        File lockFile = new File(dataHome, "DATA/yacy.running");
+        final String conf = "DATA/SETTINGS/yacy.conf";
+        
+        // If YaCy is actually running, then we check if the server port is open.
+        // If yes, then we consider that a restart is a user mistake and then we just respond
+        // as the user expects and tell the browser to open the start page.
+        // That will especially happen if Windows Users double-Click the YaCy Icon on the desktop to simply
+        // open the web interface. (They don't think of 'servers' they just want to get to the search page).
+        // We need to parse the configuration file for that to get the host port
+        File configFile = new File(dataHome, conf);
+        
+        if (configFile.exists()) {
+            Properties p = new Properties();
+            try {
+                p.load(new FileInputStream(configFile));
 
+                // test for yacy already running
+                if (lockFile.exists()) {  // another instance running? VM crash? User will have to care about this
+                    //standard log system not up yet - use simply stdout
+                    // prevents also creation of a log file while just opening browser
+                    System.out.println("WARNING: the file " + lockFile + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
+
+                    if (configFile.exists()) {
+
+                        int port = Integer.parseInt(p.getProperty("port", "8090"));
+                        try {
+                            if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
+                                Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                                // Thats it; YaCy was running, the user is happy, we can stop now.
+                                System.out.println("WARNING: YaCy instance was still running; just opening the browser and exit.");
+                                System.exit(0);
+                            }
+                        } catch (final ExecutionException ex) {
+                            System.err.println( "INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
+                        }
+                    }
+
+                    // YaCy is not running; thus delete the file an go on as nothing was wrong.
+                    delete(lockFile);                   
+                } else {
+                // Test for server access restriction (is implemented using Jetty IPaccessHandler which does not support IPv6
+                // try to disavle IPv6 
+                String teststr = p.getProperty("serverClient", "*");
+                if (!teststr.equals("*")) {
+                    // testing on Win-8 showed this property has to be set befor Switchboard starts 
+                    // and seems to be sensitive (or time critical) if other code had been executed before this (don't know why ... ?)
+                    System.setProperty("java.net.preferIPv6Addresses", "false");
+                    System.setProperty("java.net.preferIPv4Stack", "true"); // DO NOT PREFER IPv6, i.e. freifunk uses ipv6 only and host resolving does not work
+                    teststr = System.getProperty("java.net.preferIPv4Stack");
+                    System.out.println("set system property java.net.preferIP4Stack="+teststr);
+                }
+                }
+            } catch (IOException ex) { }
+        }
+    }    
+
+    
     /**
      * Main-method which is started by java. Checks for special arguments or
      * starts up the application.
@@ -618,10 +653,12 @@ public final class yacy {
 	        if ((args.length >= 1) && (args[0].toLowerCase().equals("-startup") || args[0].equals("-start"))) {
 	            // normal start-up of yacy
 	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+                    preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
 	            // start-up of yacy with gui
 	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+                    preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
 	        } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
 	            // normal shutdown of yacy
@@ -636,6 +673,7 @@ public final class yacy {
 	            System.out.println(copyright);
 	        } else {
 	            if (args.length == 1) applicationRoot= new File(args[0]);
+                    preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        }
     	} finally {

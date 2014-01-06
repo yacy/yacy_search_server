@@ -2567,6 +2567,7 @@ The password==Das Passwort
 #---------------------------
 Server Access Settings==Serverzugangs Einstellungen
 IP-Number filter:==IP-Addressfilter:
+requires restart==erfordert Neustart
 Here you can restrict access to the server.==Hier können Sie den Zugang zum Server beschränken.
 By default, the access is not limited,==Standardmäßig ist der Zugang unbeschränkt,
 because this function is needed to spawn the p2p index-sharing function.==da dies notwendig ist um den P2P-Indextausch zu ermöglichen.

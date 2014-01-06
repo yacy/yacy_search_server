@@ -3,13 +3,17 @@
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td>IP-Number filter:</td>
-    <td><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#" /></td>
+    <td><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#" /><br />(requires restart)</td>
     <td><strong>Here you can restrict access to the server.</strong>  By default, the access is not limited,
            because this function is needed to spawn the p2p index-sharing function.
            If you block access to your server (setting anything else than '*'), then you will also be blocked
            from using other peers' indexes for search service.
            However, blocking access may be correct in enterprise environments where you only want to index your
-           company's own web pages.</td>
+           company's own web pages.<br />
+           Filter have to be entered as IP, IP range or first part of allowed IP's separated by comma (e.g. 10.100.0-100.0-100, 127. ) 
+           further details on format see Jetty 
+           <a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.
+    </td>
   </tr>
   <!--
   <tr valign="top">
