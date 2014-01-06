@@ -568,31 +568,7 @@ public final class yacy {
             Properties p = new Properties();
             try {
                 p.load(new FileInputStream(configFile));
-
-                // test for yacy already running
-                if (lockFile.exists()) {  // another instance running? VM crash? User will have to care about this
-                    //standard log system not up yet - use simply stdout
-                    // prevents also creation of a log file while just opening browser
-                    System.out.println("WARNING: the file " + lockFile + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
-
-                    if (configFile.exists()) {
-
-                        int port = Integer.parseInt(p.getProperty("port", "8090"));
-                        try {
-                            if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
-                                Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
-                                // Thats it; YaCy was running, the user is happy, we can stop now.
-                                System.out.println("WARNING: YaCy instance was still running; just opening the browser and exit.");
-                                System.exit(0);
-                            }
-                        } catch (final ExecutionException ex) {
-                            System.err.println( "INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
-                        }
-                    }
-
-                    // YaCy is not running; thus delete the file an go on as nothing was wrong.
-                    delete(lockFile);                   
-                } else {
+                
                 // Test for server access restriction (is implemented using Jetty IPaccessHandler which does not support IPv6
                 // try to disavle IPv6 
                 String teststr = p.getProperty("serverClient", "*");
@@ -602,12 +578,32 @@ public final class yacy {
                     System.setProperty("java.net.preferIPv6Addresses", "false");
                     System.setProperty("java.net.preferIPv4Stack", "true"); // DO NOT PREFER IPv6, i.e. freifunk uses ipv6 only and host resolving does not work
                     teststr = System.getProperty("java.net.preferIPv4Stack");
-                    System.out.println("set system property java.net.preferIP4Stack="+teststr);
-                }
+                    System.out.println("set system property java.net.preferIP4Stack=" + teststr);
+                }   
+                
+                // test for yacy already running
+                if (lockFile.exists()) {  // another instance running? VM crash? User will have to care about this
+                    //standard log system not up yet - use simply stdout
+                    // prevents also creation of a log file while just opening browser
+                    System.out.println("WARNING: the file " + lockFile + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
+
+                    int port = Integer.parseInt(p.getProperty("port", "8090"));
+                    try {
+                        if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
+                            Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                            // Thats it; YaCy was running, the user is happy, we can stop now.
+                            System.out.println("WARNING: YaCy instance was still running; just opening the browser and exit.");
+                            System.exit(0);
+                        } else {
+                            // YaCy is not running; thus delete the file an go on as nothing was wrong.
+                            System.err.println("INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
+                            delete(lockFile);
+                        }
+                    } catch (final ExecutionException ex) { }                                    
                 }
             } catch (IOException ex) { }
         }
-    }    
+    }     
 
     
     /**
