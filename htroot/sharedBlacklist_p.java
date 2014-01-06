@@ -51,6 +51,7 @@ import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -139,7 +140,7 @@ public class sharedBlacklist_p {
                         // get List
                         final DigestURL u = new DigestURL(downloadURLOld);
 
-                        otherBlacklist = FileUtils.strings(u.get(agent));
+                        otherBlacklist = FileUtils.strings(u.get(agent, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "")));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", hash);
@@ -156,7 +157,7 @@ public class sharedBlacklist_p {
 
                 try {
                     final DigestURL u = new DigestURL(downloadURL);
-                    otherBlacklist = FileUtils.strings(u.get(agent));
+                    otherBlacklist = FileUtils.strings(u.get(agent, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "")));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);

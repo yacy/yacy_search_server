@@ -294,7 +294,7 @@ public final class yacyRelease extends yacyVersion {
         // download signature first, if public key is available
         try {
             if (this.publicKey != null) {
-            	final byte[] signatureData = client.GETbytes(getUrl().toString() + ".sig");
+            	final byte[] signatureData = client.GETbytes(getUrl().toString() + ".sig", null);
                 if (signatureData == null) {
                     ConcurrentLog.warn("yacyVersion", "download of signature " + getUrl().toString() + " failed. ignoring signature file.");
                 }

@@ -102,7 +102,7 @@ public class ConfigAppearance_p {
                 final Iterator<String> it;
                 try {
                     final DigestURL u = new DigestURL(url);
-                    it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent));
+                    it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "")));
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);

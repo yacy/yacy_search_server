@@ -153,7 +153,7 @@ public class SMBLoader {
         }
 
         // load the resource
-        InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+        InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null);
         byte[] b = FileUtils.read(is);
         is.close();
 

@@ -48,7 +48,7 @@ public class YaCyLegacyCredential extends Credential {
      * @param clear password
      * @return hash string
      */
-    private static String calcHash(String pw) {
+    public static String calcHash(String pw) {
         return Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(pw));
     }
 

@@ -210,6 +210,7 @@ import net.yacy.utils.crypt;
 import com.google.common.io.Files;
 
 import net.yacy.http.YaCyHttpServer;
+import net.yacy.http.YaCyLegacyCredential;
 
 
 public final class Switchboard extends serverSwitch {
@@ -2457,7 +2458,7 @@ public final class Switchboard extends serverSwitch {
         startupAction = false;
         
         // execute api calls
-        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), pks);
+        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
         for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
             this.log.info("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
         }
@@ -3235,6 +3236,7 @@ public final class Switchboard extends serverSwitch {
     public int adminAuthenticated(final RequestHeader requestHeader) {
 
         // authorization in case that there is no account stored
+        final String adminAccountUserName = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
         final String adminAccountBase64MD5 = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
         if ( adminAccountBase64MD5.isEmpty() ) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
@@ -3258,7 +3260,8 @@ public final class Switchboard extends serverSwitch {
         }
 
         // authorization by encoded password, only for localhost access
-        if ( accessFromLocalhost && (adminAccountBase64MD5.equals(realmValue)) ) {
+        String pass = Base64Order.standardCoder.encodeString(adminAccountUserName + ":" + adminAccountBase64MD5);
+        if ( accessFromLocalhost && (pass.equals(realmValue)) ) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }
@@ -3734,7 +3737,7 @@ public final class Switchboard extends serverSwitch {
                         }
                     }
                     scc.incrementAndGet();
-                    final byte[] content = client.GETbytes(url);
+                    final byte[] content = client.GETbytes(url, null);
                     Iterator<String> enu = FileUtils.strings(content);
                     int lc = 0;
                     while ( enu.hasNext() ) {

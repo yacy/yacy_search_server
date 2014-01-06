@@ -549,38 +549,20 @@ public final class yacy {
 
         // send 'wget' to web interface
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(RequestHeader.AUTHORIZATION, "Basic " + encodedPassword); // for http-authentify
-//        final Client con = new Client(10000, requestHeader);
         final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         con.setHeader(requestHeader.entrySet());
-//        ResponseContainer res = null;
         try {
-//            res = con.GET("http://localhost:"+ port +"/" + path);
-            con.GETbytes("http://localhost:"+ port +"/" + path);
-
-            // read response
-//            if (res.getStatusLine().startsWith("2")) {
+            con.GETbytes("http://localhost:"+ port +"/" + path, encodedPassword);
             if (con.getStatusCode() > 199 && con.getStatusCode() < 300) {
                 ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
-//                final ByteArrayOutputStream bos = new ByteArrayOutputStream(); //This is stream is not used???
-//                try {
-//                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
-//                } finally {
-//                    res.closeStream();
-//                }
+
             } else {
-//                Log.logSevere("COMMAND-STEERING", "error response from YACY socket: " + res.getStatusLine());
             	ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
                 System.exit(-1);
             }
         } catch (final IOException e) {
             ConcurrentLog.severe("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
-//        } finally {
-//            // release connection
-//            if(res != null) {
-//                res.closeStream();
-//            }
         }
 
         try {

@@ -49,8 +49,6 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -309,8 +307,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final String uri) throws IOException {
-        return GETbytes(uri, Integer.MAX_VALUE);
+    public byte[] GETbytes(final String uri, final String pass) throws IOException {
+        return GETbytes(uri, pass, Integer.MAX_VALUE);
     }
 
     /**
@@ -320,8 +318,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURL url) throws IOException {
-        return GETbytes(url, Integer.MAX_VALUE);
+    public byte[] GETbytes(final MultiProtocolURL url, final String pass) throws IOException {
+        return GETbytes(url, pass, Integer.MAX_VALUE);
     }
 
     /**
@@ -332,8 +330,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final String uri, final int maxBytes) throws IOException {
-        return GETbytes(new MultiProtocolURL(uri), maxBytes);
+    public byte[] GETbytes(final String uri, final String pass, final int maxBytes) throws IOException {
+        return GETbytes(new MultiProtocolURL(uri), pass, maxBytes);
     }
 
 
@@ -345,7 +343,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURL url, final int maxBytes) throws IOException {
+    public byte[] GETbytes(final MultiProtocolURL url, final String pass, final int maxBytes) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
         HttpGet httpGet = null;
@@ -355,11 +353,11 @@ public class HTTPClient {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        if (localhost) {
+        if (localhost && pass != null) {
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(
                     AuthScope.ANY, // thats ok since we tested for localhost!
-                    new UsernamePasswordCredentials("admin", Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "")));
+                    new UsernamePasswordCredentials("admin", pass));
             CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
             byte[] content = null;
             try {
@@ -790,7 +788,7 @@ public class HTTPClient {
                     url = "http://" + url;
             }
             try {
-                System.out.println(UTF8.String(client.GETbytes(url)));
+                System.out.println(UTF8.String(client.GETbytes(url, null)));
             } catch (final IOException e) {
                 e.printStackTrace();
             }

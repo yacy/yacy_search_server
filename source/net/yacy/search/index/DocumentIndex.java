@@ -153,7 +153,7 @@ public class DocumentIndex extends Segment {
             length = -1;
         }
         try {
-            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent));
+            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null));
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }

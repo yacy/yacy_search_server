@@ -50,6 +50,7 @@ import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.search.SwitchboardConstants;
 
 public class serverSwitch
 {
@@ -536,7 +537,7 @@ public class serverSwitch
                     reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
                     final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
                     client.setHeader(reqHeader.entrySet());
-                    byte[] data = client.GETbytes(uri);
+                    byte[] data = client.GETbytes(uri, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
                     if ( data == null || data.length == 0 ) {
                         continue;
                     }

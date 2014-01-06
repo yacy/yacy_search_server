@@ -305,7 +305,7 @@ public class htmlParser extends AbstractParser implements Parser {
         AnchorURL url;
         try {
             url = new AnchorURL(args[0]);
-            final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent);
+            final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent, null);
             final Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();
             System.out.println(title);

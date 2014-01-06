@@ -42,6 +42,7 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
@@ -215,7 +216,8 @@ public class CrawlStartScanner_p
                                 Domains.LOCALHOST,
                                 (int) sb.getConfigLong("port", 8090),
                                 path,
-                                pk);
+                                pk,
+                                sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
                         }
                     }
                 }
@@ -260,7 +262,8 @@ public class CrawlStartScanner_p
                                         Domains.LOCALHOST,
                                         (int) sb.getConfigLong("port", 8090),
                                         path,
-                                        u.hash());
+                                        u.hash(),
+                                        sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
                                 }
                             } catch (final MalformedURLException e ) {
                                 ConcurrentLog.logException(e);
