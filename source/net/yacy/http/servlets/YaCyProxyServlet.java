@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,10 +81,14 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             return;
         }
         
-        String remoteHost = req.getRemoteHost();
-        if (!Domains.isThisHostIP(remoteHost)) {
+        final String remoteHost = req.getRemoteHost();
+        if (!Domains.isThisHostIP(remoteHost)) {            
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "proxy use not granted for IP " + req.getRemoteAddr());
+                    "proxy use not granted for IP " + remoteHost);
+            return;
+        } else if (!proxyippatternmatch(remoteHost)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "proxy use not granted for IP " + remoteHost);
             return;
         }
 
@@ -322,6 +327,26 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         return buf.toString("UTF-8");
     }
 
+    /**
+     * helper for proxy IP config pattern check
+     */
+    private boolean proxyippatternmatch(final String key) {
+        // the cfgippattern is a comma-separated list of patterns
+        // each pattern may contain one wildcard-character '*' which matches anything
+        final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyClient", "*");
+        if (cfgippattern.equals("*")) {
+            return true;
+        }
+        final StringTokenizer st = new StringTokenizer(cfgippattern, ",");
+        String pattern;
+        while (st.hasMoreTokens()) {
+            pattern = st.nextToken();
+            if (key.matches(pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }    
 
     /**
      * get destination url (from query parameter &url=http://....)

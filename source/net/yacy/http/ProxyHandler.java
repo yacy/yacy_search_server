@@ -45,6 +45,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.TextParser;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
@@ -61,7 +62,7 @@ import org.eclipse.jetty.util.IO;
  * proxies request, caches responses and adds urls to crawler
  */
 public class ProxyHandler extends AbstractRemoteHandler implements Handler {
-	
+	   
 	public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
 		RequestHeader result = new RequestHeader();
 		Enumeration<String> headerNames = request.getHeaderNames();
@@ -91,7 +92,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 	public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
 
-            if (request.getMethod().equals(HeaderFramework.METHOD_CONNECT)) {
+            if (request.getMethod().equalsIgnoreCase(HeaderFramework.METHOD_CONNECT)) {
                 handleConnect(request, response);
                 return;
             }
@@ -100,7 +101,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             setProxyHeaderForClient(request, proxyHeaders);
 
             final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
-            int timeout = 60000;
+            int timeout = 10000;
             client.setTimout(timeout);
             client.setHeader(proxyHeaders.entrySet());
             client.setRedirecting(false);
@@ -313,7 +314,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             host = uri.substring(0, c);
             if (host.indexOf('/') > 0) {
                 host = host.substring(host.indexOf('/') + 1);
-            }
+}
         }
 
         // TODO - make this async!
@@ -338,5 +339,5 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             IO.copyThread(socket.getInputStream(), out);
             IO.copy(in, socket.getOutputStream());
         }
-    }
+    } 
 }

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -111,11 +112,11 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
             return;
         }
         
-        String remoteHost = request.getRemoteHost();
-        if (!Domains.isThisHostIP(remoteHost)) { // isThisHostIP checks resolves & isAnyLocal & isLoopback IP
-            // TODO: handle proxy account  ~ ? use proxyClient config instead fix of localIP?
+        final String remoteHost = request.getRemoteHost();
+        if (!proxyippatternmatch(remoteHost)) {
+            // TODO: handle proxy account
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "proxy use not granted for IP " + request.getRemoteAddr() + " (see Server Proxy Access settings).");
+                    "proxy use not granted for IP " + remoteHost + " (see Server Proxy Access settings).");
             baseRequest.setHandled(true);
             return;
         }
@@ -124,4 +125,24 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
 
     }
     
+    /**
+     * helper for proxy IP config pattern check
+     */
+    private boolean proxyippatternmatch(final String key) {
+        // the cfgippattern is a comma-separated list of patterns
+        // each pattern may contain one wildcard-character '*' which matches anything
+        final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyClient", "*");
+        if (cfgippattern.equals("*")) {
+            return true;
+        }
+        final StringTokenizer st = new StringTokenizer(cfgippattern, ",");
+        String pattern;
+        while (st.hasMoreTokens()) {
+            pattern = st.nextToken();
+            if (key.matches(pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
