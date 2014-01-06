@@ -141,17 +141,17 @@ public class SolrServlet extends HttpServlet {
             }
             String q = mmsp.get(CommonParams.Q, "");
             if (querystring.length() == 0) querystring = q;
-            if (!mmsp.getMap().containsKey(CommonParams.START)) {
+            if (!mmsp.getMap().containsKey(CommonParams.START) && mmsp.getMap().containsKey("startRecord")) {
                 int startRecord = mmsp.getFieldInt("startRecord", "0");
                 mmsp.getMap().remove("startRecord");
                 mmsp.getMap().put(CommonParams.START, new String[]{Integer.toString(startRecord)}); // sru patch
             }
-            if (!mmsp.getMap().containsKey(CommonParams.ROWS)) {
+            if (!mmsp.getMap().containsKey(CommonParams.ROWS) && mmsp.getMap().containsKey("maximumRecords")) {
                 int maximumRecords = mmsp.getFieldInt("maximumRecords", "10");
                 mmsp.getMap().remove("maximumRecords");
                 mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(maximumRecords)}); // sru patch
-            }
-            mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(Math.min(mmsp.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100))});
+            } 
+            mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(Math.min(mmsp.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100))});            
             
             // set ranking according to profile number if ranking attributes are not given in the request
             if (!mmsp.getMap().containsKey("sort") && !mmsp.getMap().containsKey("bq") && !mmsp.getMap().containsKey("bf") && !mmsp.getMap().containsKey("boost")) {
