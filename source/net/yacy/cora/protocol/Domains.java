@@ -639,11 +639,11 @@ public class Domains {
         host = host.toLowerCase().trim();
 
         // try to simply parse the address
-        InetAddress ip = InetAddress.getByName(host);
-        if (ip != null) return ip;
+//        InetAddress ip = InetAddress.getByName(host);
+//        if (ip != null) return ip;
 
         // trying to resolve host by doing a name cache lookup
-        ip = NAME_CACHE_HIT.get(host);
+        InetAddress ip = NAME_CACHE_HIT.get(host);
         if (ip != null) {
             cacheHit_Hit++;
             return ip;
@@ -718,13 +718,13 @@ public class Domains {
         final String host = host0.toLowerCase().trim();
         // try to simply parse the address
         InetAddress ip;
-        try {
-            ip = InetAddress.getByName(host);
-            return ip;
-        } catch (UnknownHostException e1) {
-            // we expected that InetAddress.getByName may fail if this is not a raw address.
-            // We silently ignore this and go on.
-        }
+//        try {
+//            ip = InetAddress.getByName(host);
+//            return ip;
+//        } catch (UnknownHostException e1) {
+//            // we expected that InetAddress.getByName may fail if this is not a raw address.
+//            // We silently ignore this and go on.
+//        }
 
         /*
         if (MemoryControl.shortStatus()) {
