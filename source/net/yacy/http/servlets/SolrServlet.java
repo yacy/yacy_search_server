@@ -141,13 +141,13 @@ public class SolrServlet extends HttpServlet {
             }
             String q = mmsp.get(CommonParams.Q, "");
             if (querystring.length() == 0) querystring = q;
-            if (!mmsp.getMap().containsKey(CommonParams.START) && mmsp.getMap().containsKey("startRecord")) {
-                int startRecord = mmsp.getFieldInt("startRecord", "0");
+            if (!mmsp.getMap().containsKey(CommonParams.START)) {
+                int startRecord = mmsp.getFieldInt("startRecord", null, 0);
                 mmsp.getMap().remove("startRecord");
                 mmsp.getMap().put(CommonParams.START, new String[]{Integer.toString(startRecord)}); // sru patch
             }
-            if (!mmsp.getMap().containsKey(CommonParams.ROWS) && mmsp.getMap().containsKey("maximumRecords")) {
-                int maximumRecords = mmsp.getFieldInt("maximumRecords", "10");
+            if (!mmsp.getMap().containsKey(CommonParams.ROWS)) {
+                int maximumRecords = mmsp.getFieldInt("maximumRecords", null, 10);
                 mmsp.getMap().remove("maximumRecords");
                 mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(maximumRecords)}); // sru patch
             } 
