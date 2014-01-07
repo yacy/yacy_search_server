@@ -128,7 +128,7 @@ public final class HTTPLoader {
         client.setHeader(requestHeader.entrySet());
 
         // send request
-    	final byte[] responseBody = client.GETbytes(url, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), maxFileSize);
+    	final byte[] responseBody = client.GETbytes(url, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), maxFileSize);
         final int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
     	final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
         String requestURLString = request.url().toNormalform(true);
@@ -243,7 +243,7 @@ public final class HTTPLoader {
         final HTTPClient client = new HTTPClient(agent);
         client.setTimout(20000);
         client.setHeader(requestHeader.entrySet());
-        	final byte[] responseBody = client.GETbytes(request.url(), null);
+        	final byte[] responseBody = client.GETbytes(request.url(), null, null);
             final int code = client.getHttpResponse().getStatusLine().getStatusCode();
         	final ResponseHeader header = new ResponseHeader(code, client.getHttpResponse().getAllHeaders());
             // FIXME: 30*-handling (bottom) is never reached

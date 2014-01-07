@@ -88,7 +88,8 @@ public final class Fulltext {
     private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45"};
     
     // class objects
-	private final File                    segmentPath;
+    private final File                    segmentPath;
+    private final File                    archivePath;
     private       Index                   urlIndexFile;
     private       Export                  exportthread; // will have a export thread assigned if exporter is running
     private       String                  tablename;
@@ -98,8 +99,10 @@ public final class Fulltext {
     private final WebgraphConfiguration   webgraphConfiguration;
     private       boolean                 writeWebgraph;
 
-    protected Fulltext(final File segmentPath, final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
+    protected Fulltext(final File segmentPath, final File archivePath,
+            final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
         this.segmentPath = segmentPath;
+        this.archivePath = archivePath;
         this.tablename = null;
         this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
@@ -661,14 +664,13 @@ public final class Fulltext {
             ConcurrentLog.warn("Fulltext", "HOT DUMP selected solr0.getStoragePath() == NULL, no dump list!");
             return zips;
         }
-        File storagePath = esc.getContainerPath().getParentFile();
-        if (storagePath == null) {
+        if (this.archivePath == null) {
             ConcurrentLog.warn("Fulltext", "HOT DUMP selected esc.getStoragePath().getParentFile() == NULL, no dump list!");
             return zips;
         }
-        ConcurrentLog.info("Fulltext", "HOT DUMP dump path = " + storagePath.toString());
-        for (String p: storagePath.list()) {
-            if (p.endsWith("zip")) zips.add(new File(storagePath, p));
+        ConcurrentLog.info("Fulltext", "HOT DUMP dump path = " + this.archivePath.toString());
+        for (String p: this.archivePath.list()) {
+            if (p.endsWith("zip")) zips.add(new File(this.archivePath, p));
         }
         return zips;
     }
@@ -680,7 +682,7 @@ public final class Fulltext {
     public File dumpSolr() {
         EmbeddedInstance esc = this.solrInstances.getSolr0();
         File storagePath = esc.getContainerPath();
-        File zipOut = new File(storagePath.toString() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
+        File zipOut = new File(this.archivePath, storagePath.getName() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
             this.solrInstances.close();

@@ -406,8 +406,10 @@ public final class SwitchboardConstants {
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where the
      * whole database of known RWIs and URLs as well as dumps of the DHT-In and DHT-Out caches are stored</p>
      */
-    public static final String INDEX_PRIMARY_PATH       = "indexPrimaryPath"; // this is a relative path to the data root
+    public static final String INDEX_PRIMARY_PATH       = "indexPrimaryPath"; // this is a relative path to the application root or an absolute path
     public static final String INDEX_PATH_DEFAULT       = "DATA/INDEX";
+    public static final String INDEX_ARCHIVE_PATH       = "indexArchivePath"; // this is a relative path to the application root or an absolute path
+    public static final String INDEX_ARCHIVE_DEFAULT    = "DATA/ARCHIVE";
     /**
      * <p><code>public static final String <strong>LISTS_PATH</strong> = "listsPath"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all

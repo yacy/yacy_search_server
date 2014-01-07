@@ -307,8 +307,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final String uri, final String pass) throws IOException {
-        return GETbytes(uri, pass, Integer.MAX_VALUE);
+    public byte[] GETbytes(final String uri, final String username, final String pass) throws IOException {
+        return GETbytes(uri, username, pass, Integer.MAX_VALUE);
     }
 
     /**
@@ -318,8 +318,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURL url, final String pass) throws IOException {
-        return GETbytes(url, pass, Integer.MAX_VALUE);
+    public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass) throws IOException {
+        return GETbytes(url, username, pass, Integer.MAX_VALUE);
     }
 
     /**
@@ -330,8 +330,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final String uri, final String pass, final int maxBytes) throws IOException {
-        return GETbytes(new MultiProtocolURL(uri), pass, maxBytes);
+    public byte[] GETbytes(final String uri, final String username, final String pass, final int maxBytes) throws IOException {
+        return GETbytes(new MultiProtocolURL(uri), username, pass, maxBytes);
     }
 
 
@@ -343,7 +343,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURL url, final String pass, final int maxBytes) throws IOException {
+    public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass, final int maxBytes) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
         HttpGet httpGet = null;
@@ -357,7 +357,7 @@ public class HTTPClient {
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(
                     AuthScope.ANY, // thats ok since we tested for localhost!
-                    new UsernamePasswordCredentials("admin", pass));
+                    new UsernamePasswordCredentials(username, pass));
             CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
             byte[] content = null;
             try {
@@ -822,7 +822,7 @@ public class HTTPClient {
                     url = "http://" + url;
             }
             try {
-                System.out.println(UTF8.String(client.GETbytes(url, null)));
+                System.out.println(UTF8.String(client.GETbytes(url, null, null)));
             } catch (final IOException e) {
                 e.printStackTrace();
             }

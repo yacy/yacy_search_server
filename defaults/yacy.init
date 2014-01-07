@@ -287,6 +287,9 @@ promoteSearchPageGreeting.smallImage = /env/grafics/YaCyLogo_60ppi.png
 # when the secondary path should be equal to the primary, it must be declared empty
 indexPrimaryPath=DATA/INDEX
 
+# the path to index archive dumps
+indexArchivePath=DATA/ARCHIVE
+
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS
 
