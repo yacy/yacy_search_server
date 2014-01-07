@@ -638,10 +638,6 @@ public class Domains {
         if ((host == null) || host.isEmpty()) return null;
         host = host.toLowerCase().trim();
 
-        // try to simply parse the address
-//        InetAddress ip = InetAddress.getByName(host);
-//        if (ip != null) return ip;
-
         // trying to resolve host by doing a name cache lookup
         InetAddress ip = NAME_CACHE_HIT.get(host);
         if (ip != null) {
@@ -685,14 +681,6 @@ public class Domains {
         NAME_CACHE_HIT.insertIfAbsent(host, i);
         cacheHit_Insert++;
         return host;
-        /*
-        // call i.getHostName() using concurrency to interrupt execution in case of a time-out
-        try {
-            //TimeoutRequest.getHostName(i, 1000);
-        } catch (final ExecutionException e) {
-            return i.getHostAddress();
-        }
-        */
     }
 
     /**
@@ -716,15 +704,6 @@ public class Domains {
     public static InetAddress dnsResolve(final String host0) {
         if (host0 == null || host0.isEmpty()) return null;
         final String host = host0.toLowerCase().trim();
-        // try to simply parse the address
-        InetAddress ip;
-//        try {
-//            ip = InetAddress.getByName(host);
-//            return ip;
-//        } catch (UnknownHostException e1) {
-//            // we expected that InetAddress.getByName may fail if this is not a raw address.
-//            // We silently ignore this and go on.
-//        }
 
         /*
         if (MemoryControl.shortStatus()) {
@@ -734,7 +713,7 @@ public class Domains {
         */
 
         // try to resolve host by doing a name cache lookup
-        ip = NAME_CACHE_HIT.get(host);
+        InetAddress ip = NAME_CACHE_HIT.get(host);
         if (ip != null) {
             //System.out.println("DNSLOOKUP-CACHE-HIT(CONC) " + host);
             cacheHit_Hit++;
