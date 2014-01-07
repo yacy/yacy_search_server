@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.protocol.Domains;
 
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
 import org.eclipse.jetty.server.Handler;
@@ -47,7 +48,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  */
 abstract public class AbstractRemoteHandler extends AbstractHandler implements Handler {
 	
-    protected Switchboard sb = null;
+	protected Switchboard sb = null;
     private List<String> localVirtualHostNames; // list for quick check for req to local peer
     
     @Override
@@ -117,6 +118,14 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
             // TODO: handle proxy account
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
                     "proxy use not granted for IP " + remoteHost + " (see Server Proxy Access settings).");
+            baseRequest.setHandled(true);
+            return;
+        }
+        
+        // check the blacklist
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostOnly.toLowerCase(), request.getPathInfo())) {
+        	response.sendError(HttpServletResponse.SC_FORBIDDEN,
+        			"URL '" + hostOnly + "' blocked by yacy proxy (blacklisted)");
             baseRequest.setHandled(true);
             return;
         }
