@@ -2046,7 +2046,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return null;
     }
 
-    public InputStream getInputStream(final ClientIdentification.Agent agent, final String pass) throws IOException {
+    public InputStream getInputStream(final ClientIdentification.Agent agent, final String username, final String pass) throws IOException {
         if (isFile()) return new BufferedInputStream(new FileInputStream(getFSFile()));
         if (isSMB()) return new BufferedInputStream(new SmbFileInputStream(getSmbFile()));
         if (isFTP()) {
@@ -2059,13 +2059,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
-                return new ByteArrayInputStream(client.GETbytes(this, pass));
+                return new ByteArrayInputStream(client.GETbytes(this, username, pass));
         }
 
         return null;
     }
 
-    public byte[] get(final ClientIdentification.Agent agent, final String pass) throws IOException {
+    public byte[] get(final ClientIdentification.Agent agent, final String username, final String pass) throws IOException {
         if (isFile()) return read(new FileInputStream(getFSFile()));
         if (isSMB()) return read(new SmbFileInputStream(getSmbFile()));
         if (isFTP()) {
@@ -2078,7 +2078,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
-                return client.GETbytes(this, pass);
+                return client.GETbytes(this, username, pass);
         }
 
         return null;

@@ -122,7 +122,7 @@ public class loaderThreads {
         @Override
         public void run() {
             try {
-                this.page = this.url.get(this.agent, null);
+                this.page = this.url.get(this.agent, null, null);
                 this.loaded = true;
                 this.process.feed(this.page);
                 if (this.process.status() == loaderCore.STATUS_FAILED) {

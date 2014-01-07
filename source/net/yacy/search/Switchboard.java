@@ -2460,7 +2460,7 @@ public final class Switchboard extends serverSwitch {
         startupAction = false;
         
         // execute api calls
-        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
         for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
             this.log.info("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
         }
@@ -3739,7 +3739,7 @@ public final class Switchboard extends serverSwitch {
                         }
                     }
                     scc.incrementAndGet();
-                    final byte[] content = client.GETbytes(url, null);
+                    final byte[] content = client.GETbytes(url, null, null);
                     Iterator<String> enu = FileUtils.strings(content);
                     int lc = 0;
                     while ( enu.hasNext() ) {
