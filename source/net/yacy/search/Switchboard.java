@@ -210,7 +210,6 @@ import net.yacy.utils.crypt;
 import com.google.common.io.Files;
 
 import net.yacy.http.YaCyHttpServer;
-import net.yacy.http.YaCyLegacyCredential;
 
 
 public final class Switchboard extends serverSwitch {
@@ -339,9 +338,10 @@ public final class Switchboard extends serverSwitch {
         }
 
         // load values from configs
-        final File indexPath =
-            getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
+        final File indexPath = getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
         this.log.config("Index Primary Path: " + indexPath.toString());
+        final File archivePath = getDataPath(SwitchboardConstants.INDEX_ARCHIVE_PATH, SwitchboardConstants.INDEX_ARCHIVE_DEFAULT);
+        this.log.config("Index Archive Path: " + archivePath.toString());
         this.listsPath =
             getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
         this.log.config("Lists Path:     " + this.listsPath.toString());
@@ -498,7 +498,7 @@ public final class Switchboard extends serverSwitch {
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-        this.index = new Segment(this.log, segmentsPath, solrCollectionConfigurationWork, solrWebgraphConfigurationWork);
+        this.index = new Segment(this.log, segmentsPath, archivePath, solrCollectionConfigurationWork, solrWebgraphConfigurationWork);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) try {
             this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
         } catch (final IOException e) {ConcurrentLog.logException(e);}
@@ -1331,7 +1331,9 @@ public final class Switchboard extends serverSwitch {
                 partitionExponent,
                 this.useTailCache,
                 this.exceed134217727);
-            this.index = new Segment(this.log, new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), collectionConfiguration, webgraphConfiguration);
+            final File segmentsPath = new File(new File(indexPrimaryPath, networkName), "SEGMENTS");
+            final File archivePath = getDataPath(SwitchboardConstants.INDEX_ARCHIVE_PATH, SwitchboardConstants.INDEX_ARCHIVE_DEFAULT);
+            this.index = new Segment(this.log, segmentsPath, archivePath, collectionConfiguration, webgraphConfiguration);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {

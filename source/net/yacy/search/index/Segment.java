@@ -126,14 +126,15 @@ public class Segment {
      * @param segmentPath that should be the path ponting to the directory "SEGMENT"
      * @param collectionSchema
      */
-    public Segment(final ConcurrentLog log, final File segmentPath,
+    public Segment(final ConcurrentLog log, final File segmentPath, final File archivePath,
             final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
         log.info("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
-
+        archivePath.mkdirs();
+        
         // create LURL-db
-        this.fulltext = new Fulltext(segmentPath, collectionConfiguration, webgraphConfiguration);
+        this.fulltext = new Fulltext(segmentPath, archivePath, collectionConfiguration, webgraphConfiguration);
         this.termIndex = null;
         this.urlCitationIndex = null;
 

@@ -278,6 +278,8 @@ public class IndexControlURLs_p {
             final File dump = segment.fulltext().dumpSolr();
             prop.put("indexdump", 1);
             prop.put("indexdump_dumpfile", dump.getAbsolutePath());
+            dumpFiles =  segment.fulltext().dumpFiles();
+            prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
             sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
         }
 

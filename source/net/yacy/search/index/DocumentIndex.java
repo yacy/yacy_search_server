@@ -66,9 +66,9 @@ public class DocumentIndex extends Segment {
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-    public DocumentIndex(final File segmentPath, final File collectionConfigurationPath, final File webgraphConfigurationPath, final CallbackListener callback, final int cachesize)
+    public DocumentIndex(final File segmentPath, final File archivePath, final File collectionConfigurationPath, final File webgraphConfigurationPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new ConcurrentLog("DocumentIndex"), segmentPath,
+        super(new ConcurrentLog("DocumentIndex"), segmentPath, archivePath,
                 collectionConfigurationPath == null ? null : new CollectionConfiguration(collectionConfigurationPath, true),
                 webgraphConfigurationPath == null ? null : new WebgraphConfiguration(webgraphConfigurationPath, true)
         );
