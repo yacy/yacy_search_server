@@ -391,8 +391,19 @@ public class HTTPClient {
      * @throws IOException
      */
     public void GET(final String uri) throws IOException {
+    	GET(new MultiProtocolURL(uri));
+    }
+
+    /**
+     * This method GETs a page from the server.
+     * to be used for streaming out
+     * Please take care to call finish()!
+     *
+     * @param url the url to get
+     * @throws IOException
+     */
+    public void GET(final MultiProtocolURL url) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
-        final MultiProtocolURL url = new MultiProtocolURL(uri);
         final String urix = url.toNormalform(true);
         HttpGet httpGet = null;
         try {
@@ -413,7 +424,17 @@ public class HTTPClient {
      * @throws IOException
      */
     public HttpResponse HEADResponse(final String uri) throws IOException {
-        final MultiProtocolURL url = new MultiProtocolURL(uri);
+    	return HEADResponse(new MultiProtocolURL(uri));
+    }
+
+    /**
+     * This method gets HEAD response
+     *
+     * @param url the url to Response from
+     * @return the HttpResponse
+     * @throws IOException
+     */
+    public HttpResponse HEADResponse(final MultiProtocolURL url) throws IOException {
         final HttpHead httpHead = new HttpHead(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	execute(httpHead);
@@ -433,8 +454,21 @@ public class HTTPClient {
      * @throws IOException
      */
     public void POST(final String uri, final InputStream instream, final long length) throws IOException {
+    	POST(new MultiProtocolURL(uri), instream, length);
+    }
+
+    /**
+     * This method POSTs a page from the server.
+     * to be used for streaming out
+     * Please take care to call finish()!
+     *
+     * @param url the url to post
+     * @param instream the input to post
+     * @param length the contentlength
+     * @throws IOException
+     */
+    public void POST(final MultiProtocolURL url, final InputStream instream, final long length) throws IOException {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
-        final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;

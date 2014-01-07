@@ -108,13 +108,13 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             // send request
             try {
                 String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
-                String url = request.getRequestURL().toString() + queryString;
+                DigestURL digestURI = new DigestURL(request.getScheme(), request.getServerName(), request.getServerPort(), request.getPathInfo() + queryString);
                 if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
-                    client.GET(url);
+                    client.GET(digestURI);
                 } else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
-                    client.POST(url, request.getInputStream(), request.getContentLength());
+                    client.POST(digestURI, request.getInputStream(), request.getContentLength());
                 } else if (request.getMethod().equals(HeaderFramework.METHOD_HEAD)) {
-                    client.HEADResponse(url);
+                    client.HEADResponse(digestURI);
                 } else {
                     throw new ServletException("Unsupported Request Method");
                 }
@@ -128,7 +128,6 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                 cleanResponseHeader(clientresponse);
 
                 // TODO: is this fast, if not, use value from ProxyCacheHandler
-                DigestURL digestURI = new DigestURL(url);
                 ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI.hash());
 
             // the cache does either not exist or is (supposed to be) stale
@@ -137,7 +136,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                 // delete the cache
                 ResponseHeader rh = Cache.getResponseHeader(digestURI.hash());
                 if (rh != null && (sizeBeforeDelete = rh.getContentLength()) == 0) {
-                    byte[] b = Cache.getContent(new DigestURL(url).hash());
+                    byte[] b = Cache.getContent(digestURI.hash());
                     if (b != null) sizeBeforeDelete = b.length;
                 }
                 Cache.delete(digestURI.hash());
