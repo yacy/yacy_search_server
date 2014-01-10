@@ -223,7 +223,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String servletPath;
-        String pathInfo;
+        String pathInfo; 
         Enumeration<String> reqRanges = null;
         boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null; 
         if (included) {
@@ -644,6 +644,13 @@ public class YaCyDefaultServlet extends HttpServlet  {
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
 
+        // for userDB user legacyRequest expect login in Cookie (add one)
+        if (request.getUserPrincipal() != null) { 
+                String userpassEncoded = request.getHeader("Authorization"); // e.g. "Basic xxXXxxXXxxXX"
+                if (userpassEncoded != null) {
+                    legacyRequestHeader.setCookie("login", userpassEncoded);
+            }
+        }
         return legacyRequestHeader;
     }
 
