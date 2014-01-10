@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    
+    <display-name>YaCy</display-name>
+    <description>Decentralized Web Search</description>
+
+    <!-- Standard YaCy Servlets -->
+    
+    <!-- Default servlet for all YaCy output
+         -as this is mandatory the servlet activated automatically by the application
+         -no need to include this in this web.xml (provided only for completness)
+    <servlet>
+        <servlet-name>YaCyDefaultServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.YaCyDefaultServlet</servlet-class>
+    </servlet>
+    -->
+    
+    <!-- servlet to provide direct access to the embedded solr, also used for P2P searches -->
+    <servlet>
+        <servlet-name>SolrServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.SolrServlet</servlet-class>
+    </servlet>
+    
+    <!-- servlet to provide Google Search Appliance (GSA) formatted search results -->
+    <servlet>
+        <servlet-name>GSAServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.GSAsearchServlet</servlet-class>
+    </servlet>
+    
+    <!-- servlet to provide searchresults via proxy and needed for Augmented Browsing -->
+    <servlet>
+        <servlet-name>URLProxyServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.YaCyProxyServlet</servlet-class>
+    </servlet>
+
+    <!-- mapping activated by the application 
+    <servlet-mapping>
+        <servlet-name>SolrServlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    -->
+    <servlet-mapping>
+        <servlet-name>SolrServlet</servlet-name>
+        <url-pattern>/solr/select</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>GSAServlet</servlet-name>
+        <url-pattern>/gsa/search</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>URLProxyServlet</servlet-name>
+        <url-pattern>/proxy.html</url-pattern>
+    </servlet-mapping>
+    
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>Index.html</welcome-file>
+        <welcome-file>Welcome.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>

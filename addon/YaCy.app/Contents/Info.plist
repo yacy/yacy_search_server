@@ -74,6 +74,8 @@
 			<string>$JAVAROOT/lib/jetty-servlet-8.1.14.v20131031.jar</string>
 			<string>$JAVAROOT/lib/jetty-servlets-8.1.14.v20131031.jar</string>
 			<string>$JAVAROOT/lib/jetty-util-8.1.14.v20131031.jar</string>
+			<string>$JAVAROOT/lib/jetty-webapp-8.1.14.v20131031.jar</string>
+			<string>$JAVAROOT/lib/jetty-xml-8.1.14.v20131031.jar</string>                                                
 			<string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.1.jar</string>
 			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.2.jar</string>

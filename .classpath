@@ -84,6 +84,8 @@
 	<classpathentry kind="lib" path="lib/jetty-servlet-8.1.14.v20131031.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-servlets-8.1.14.v20131031.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-util-8.1.14.v20131031.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-webapp-8.1.14.v20131031.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-xml-8.1.14.v20131031.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-3.0.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
