@@ -273,7 +273,7 @@ images_height_val
 images_width_val
 
 ## size of images as number of pixels (easier for ranking than using with and height)
-images_pixel_val
+#images_pixel_val
 
 ## number of image links with alt tag
 #images_withalt_i
@@ -360,7 +360,7 @@ url_protocol_s
 url_file_name_s
 
 ## tokens generated from url_file_name_s which can be used for better matching and result boosting
-url_file_name_tokens_t
+#url_file_name_tokens_t
 
 ## the file name extension
 url_file_ext_s
@@ -446,7 +446,7 @@ host_extent_i
 #cr_host_norm_i
 
 ## custom rating; to be set with external rating information
-rating_i
+#rating_i
 
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt
