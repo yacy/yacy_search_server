@@ -26,6 +26,7 @@ package net.yacy.http;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -57,9 +58,10 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.IPAccessHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * class to embedded Jetty 8 http server into YaCy
@@ -102,8 +104,31 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         domainHandler.setAlternativeResolver(sb.peers);
 
         // configure root context
-        ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        htrootContext.setContextPath("/");  
+        // ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        WebAppContext htrootContext = new WebAppContext();
+        htrootContext.setContextPath("/");
+        try {
+            htrootContext.setBaseResource(Resource.newResource("htroot"));
+
+            // set web.xml to use
+            // make use of Jetty feature to define web.xml other as default WEB-INF/web.xml
+            // look in DATA/SETTINGS or use the one in DEFAULTS
+            Resource webxml = Resource.newResource(sb.dataPath + "/DATA/SETTINGS/web.xml");
+            if (webxml.exists()) {
+                htrootContext.setDescriptor(webxml.getName());
+            } else {
+                htrootContext.setDescriptor(sb.appPath + "/defaults/web.xml");
+            }
+
+        } catch (IOException ex) {
+            if (htrootContext.getBaseResource() == null) {
+                ConcurrentLog.severe("SERVER", "could not find directory: htroot ");
+            } else {
+                ConcurrentLog.warn("SERVER", "could not find: defaults/web.xml or DATA/SETTINGS/web.xml");
+            }
+        }
+
+        // as fundamental component leave this hardcoded, other servlets may be defined in web.xml only
         ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
         sholder.setInitParameter("resourceBase", "htroot");
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html

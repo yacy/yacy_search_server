@@ -95,7 +95,7 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_LOCAL_CRAWL                             = "50_localcrawl";
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_START                = "coreCrawlJob";
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT             = "coreCrawlJobSize";
-    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = null;
+    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = "freemem";
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
     // 60_remotecrawlloader

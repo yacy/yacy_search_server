@@ -523,7 +523,7 @@ public final class yacy {
         final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         con.setHeader(requestHeader.entrySet());
         try {
-            con.GETbytes("http://localhost:"+ port +"/" + path, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), encodedPassword);
+            con.GETbytes("http://localhost:"+ port +"/" + path, config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), encodedPassword);
             if (con.getStatusCode() > 199 && con.getStatusCode() < 300) {
                 ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
 

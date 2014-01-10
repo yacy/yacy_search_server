@@ -455,7 +455,7 @@ public class Segment {
      */
     public int getWordCountGuess(String word) {
         if (this.fulltext.getDefaultConnector() == null) return 0;
-        if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0) return 0;
+        if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0 || word.indexOf('\"') >= 0) return 0;
         if (this.termIndex != null) {
             int count = this.termIndex.count(Word.word2hash(word));
             if (count > 0) return count;

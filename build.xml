@@ -198,6 +198,8 @@
         <pathelement location="${lib}/jetty-servlet-8.1.14.v20131031.jar" />
         <pathelement location="${lib}/jetty-servlets-8.1.14.v20131031.jar" />
         <pathelement location="${lib}/jetty-util-8.1.14.v20131031.jar" />
+        <pathelement location="${lib}/jetty-webapp-8.1.14.v20131031.jar" />
+        <pathelement location="${lib}/jetty-xml-8.1.14.v20131031.jar" />
     	<pathelement location="${lib}/jsch-0.1.50.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
     	<pathelement location="${lib}/jsoup-1.6.3.jar" />
@@ -653,7 +655,7 @@
       <!--<arg value="-Xrunhprof"/>-->
       <arg line="-start"/>
       <jvmarg line="-Xms180m"/>
-      <jvmarg line="-Xmx600m"/>
+      <jvmarg line="-Xmx800m"/>
       <!-- <arg line="-migratewords"/>-->
       <!-- <arg line="-start ${user.dir}"/>-->
     </java>

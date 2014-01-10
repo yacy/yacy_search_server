@@ -82,7 +82,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         }
         
         final String remoteHost = req.getRemoteHost();
-        if (!Domains.isThisHostIP(remoteHost)) {            
+        if (!Domains.isThisHostIP(remoteHost)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
                     "proxy use not granted for IP " + remoteHost);
             return;
@@ -333,7 +333,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
     private boolean proxyippatternmatch(final String key) {
         // the cfgippattern is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
-        final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyClient", "*");
+        final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyURL.access", "*");
         if (cfgippattern.equals("*")) {
             return true;
         }
