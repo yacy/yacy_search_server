@@ -236,7 +236,7 @@ public final class TemplateEngine {
                         final byte[] text=keyStream.toByteArray(); //text between #{key}# an #{/key}#
                         int num=0;
                         final String patternKey = getPatternKey(prefix, multi_key);
-                        if(pattern.containsKey(patternKey) && pattern.get(patternKey) != null){
+                        if(pattern.containsKey(patternKey) && !pattern.get(patternKey).isEmpty()){
                             try{
                                 num=Integer.parseInt(pattern.get(patternKey)); // Key contains the iteration number as string
                             }catch(final NumberFormatException e){
