@@ -165,8 +165,10 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         LoginService loginService = new YaCyLoginService();
         securityHandler.setLoginService(loginService);
         securityHandler.setRealmName(loginService.getName());
-        securityHandler.setHandler(new CrashProtectionHandler(allrequesthandlers));
 
+        htrootContext.setSecurityHandler(securityHandler);
+        
+        Handler crashHandler = new CrashProtectionHandler(allrequesthandlers);
         // check server access restriction and add IPAccessHandler if restrictions are needed
         // otherwise don't (to save performance)
         String white = sb.getConfig("serverClient", "*");
@@ -181,14 +183,14 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
             }          
             if (i > 0) {
                 iphandler.addWhite("127.0.0.1"); // allow localhost (loopback addr)
-                iphandler.setHandler(securityHandler); 
+                iphandler.setHandler(crashHandler);
                 server.setHandler(iphandler);
                 ConcurrentLog.info("SERVER","activated IP access restriction to: [127.0.0.1," + white +"] (this works only correct with start parameter -Djava.net.preferIPv4Stack=true)");
             } else {
-                server.setHandler(securityHandler); // iphandler not needed
+                server.setHandler(crashHandler); // iphandler not needed
             }
         } else {
-            server.setHandler(securityHandler); // iphandler not needed
+            server.setHandler(crashHandler); // iphandler not needed
         }        
     }
 

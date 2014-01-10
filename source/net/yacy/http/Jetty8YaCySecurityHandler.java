@@ -26,6 +26,10 @@ package net.yacy.http;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,8 +41,8 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverAccessTracker;
 
 import org.eclipse.jetty.http.HttpSchemes;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.RoleInfo;
-import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.UserDataConstraint;
 import org.eclipse.jetty.server.AbstractHttpConnection;
 import org.eclipse.jetty.server.Connector;
@@ -51,7 +55,15 @@ import org.eclipse.jetty.server.UserIdentity;
  * demands authentication for pages with _p. inside
  * and updates AccessTracker
  */
-public class Jetty8YaCySecurityHandler extends SecurityHandler {
+public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
+   
+    public Jetty8YaCySecurityHandler() {
+        super();
+
+        for (AccessRight right : AccessRight.values()) {
+            addRole(right.toString()); // add default YaCy roles
+        }
+    }
 
     @Override
     protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException   
@@ -202,6 +214,8 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
             } // can omit else, as if grantedForLocalhost==true no constraint applies
               // TODO: is this correct or adminAccountBase64MD5 not empty check neccessary ?
         }
+        // DefaultServlet is not path security aware (at this time makes not sense to call super, yet -> would work on other servlets)
+        // return (RoleInfo)super.prepareConstraintInfo(pathInContext, request);
         return null;
     }
 

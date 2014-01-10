@@ -66,4 +66,20 @@
         <welcome-file>Welcome.html</welcome-file>
     </welcome-file-list>
 
+    <!-- security configuration -->
+    <!-- authentication method and default roles are preconfigured by the application (provided only for completness) -->    
+    <!--
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>YaCy Admin Interface</realm-name>
+    </login-config>
+    -->
+    
+    <!-- Roles -->
+    <!--
+    <security-role>
+        <role-name>adminRight</role-name>
+        <description>Administrator</description>
+    </security-role>
+    -->
 </web-app>
