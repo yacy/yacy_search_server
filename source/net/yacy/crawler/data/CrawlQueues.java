@@ -186,6 +186,15 @@ public class CrawlQueues {
         }
     }
 
+    public void freemem() {
+        if ((this.errorURL.stackSize() > 1)) {
+            log.warn("freemem: Cleaning Error-URLs report stack, "
+                    + this.errorURL.stackSize()
+                    + " entries on stack");
+            this.errorURL.clearStack();
+        }
+    }
+    
     public Request[] activeWorkerEntries() {
         synchronized (this.workers) {
             final Request[] e = new Request[this.workers.size()];
