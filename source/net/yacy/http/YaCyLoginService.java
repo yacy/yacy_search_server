@@ -53,7 +53,6 @@ public class YaCyLoginService extends MappedLoginService implements LoginService
     @Override
     protected UserIdentity loadUser(String username) {    
         
-        // TODO: implement legacy credentials
         final Switchboard sb = Switchboard.getSwitchboard();
         String adminuser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
         if (username.equals(adminuser)) {
@@ -75,19 +74,23 @@ public class YaCyLoginService extends MappedLoginService implements LoginService
         }
         Entry user = sb.userDB.getEntry(username);
         if (user != null) {
-            if (user.hasRight(AccessRight.ADMIN_RIGHT)) {
-                String[] role = new String[]{AccessRight.ADMIN_RIGHT.toString()};
-
-                Credential credential = YaCyLegacyCredential.getCredentials(username, user.getMD5EncodedUserPwd());
-                Principal userPrincipal = new MappedLoginService.KnownUser(username, credential);
-                Subject subject = new Subject();
-                subject.getPrincipals().add(userPrincipal);
-                subject.getPrivateCredentials().add(credential);
-                subject.setReadOnly();
-                IdentityService is = getIdentityService();
-
-                return is.newUserIdentity(subject, userPrincipal, role);
-            } 
+            // assigning roles from userDB
+            String[] role = new String[AccessRight.values().length];
+            int i = 0;
+            for (final AccessRight right : AccessRight.values()) {
+                if (user.hasRight(right)) {
+                    role[i] = right.toString();
+                    i++;
+                }
+            }
+            Credential credential = YaCyLegacyCredential.getCredentials(username, user.getMD5EncodedUserPwd());
+            Principal userPrincipal = new MappedLoginService.KnownUser(username, credential);
+            Subject subject = new Subject();
+            subject.getPrincipals().add(userPrincipal);
+            subject.getPrivateCredentials().add(credential);
+            subject.setReadOnly();
+            IdentityService is = getIdentityService();
+            return is.newUserIdentity(subject, userPrincipal, role);
         }
         return null;
     }
