@@ -65,8 +65,8 @@
 	<classpathentry kind="lib" path="lib/lucene-queryparser-4.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-spatial-4.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-suggest-4.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/solr-core-4.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-4.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/solr-core-4.6.0.jar" sourcepath="/Volumes/Tres/noBackup/Downloads/solr-4.6.0/solr/core/src/java"/>
+	<classpathentry kind="lib" path="lib/solr-solrj-4.5.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>

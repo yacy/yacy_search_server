@@ -104,7 +104,7 @@
 			<string>$JAVAROOT/lib/slf4j-api-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/solr-core-4.6.0.jar</string>
-			<string>$JAVAROOT/lib/solr-solrj-4.6.0.jar</string>
+			<string>$JAVAROOT/lib/solr-solrj-4.5.1.jar</string>
 			<string>$JAVAROOT/lib/spatial4j-0.3.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>
 			<string>$JAVAROOT/lib/wstx-asl-3.2.9.jar</string>
