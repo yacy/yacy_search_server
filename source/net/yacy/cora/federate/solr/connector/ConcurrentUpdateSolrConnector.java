@@ -31,13 +31,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.sorting.ReversibleScoreMap;
-import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.storage.ARH;
+import net.yacy.cora.storage.ConcurrentARH;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -71,7 +68,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                     try {
                         removeIdFromUpdateQueue(id);
                         ConcurrentUpdateSolrConnector.this.connector.deleteById(id);
-                        ConcurrentUpdateSolrConnector.this.idCache.remove(ASCII.getBytes(id));
+                        ConcurrentUpdateSolrConnector.this.idCache.delete(id);
                     } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
@@ -126,20 +123,18 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         }
     }
     
-    private HandleSet idCache;
+    private ARH<String> idCache;
     private BlockingQueue<SolrInputDocument> updateQueue;
     private BlockingQueue<String> deleteQueue;
     private Thread deletionHandler, updateHandler;
-    private int idCacheCapacity;
     
-    public ConcurrentUpdateSolrConnector(SolrConnector connector, int updateCapacity, int idCacheCapacity) {
+    public ConcurrentUpdateSolrConnector(SolrConnector connector, int updateCapacity, int idCacheCapacity, int concurrency) {
         this.connector = connector;
-        this.idCache = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.idCache = new ConcurrentARH<String>(idCacheCapacity, concurrency);
         this.updateQueue = new ArrayBlockingQueue<SolrInputDocument>(updateCapacity);
         this.deleteQueue = new LinkedBlockingQueue<String>();
         this.deletionHandler = null;
         this.updateHandler = null;
-        this.idCacheCapacity = idCacheCapacity;
         ensureAliveDeletionHandler();
         ensureAliveUpdateHandler();
     }
@@ -221,12 +216,8 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     
     private void updateIdCache(String id) {
         if (id == null) return;
-        if (this.idCache.size() >= this.idCacheCapacity || MemoryControl.shortStatus()) this.idCache.clear();
-        try {
-            this.idCache.put(ASCII.getBytes(id));
-        } catch (final SpaceExceededException e) {
-            this.idCache.clear();
-        }
+        if (MemoryControl.shortStatus()) this.idCache.clear();
+        this.idCache.add(id);
     }
     
     public void ensureAliveDeletionHandler() {
@@ -308,7 +299,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     @Override
     public void deleteById(String id) throws IOException {
         removeIdFromUpdateQueue(id);
-        this.idCache.remove(ASCII.getBytes(id));
+        this.idCache.delete(id);
         if (this.deletionHandler.isAlive()) {
             try {this.deleteQueue.put(id);} catch (final InterruptedException e) {}
         } else {
@@ -320,7 +311,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     public void deleteByIds(Collection<String> ids) throws IOException {
         for (String id: ids) {
             removeIdFromUpdateQueue(id);
-            this.idCache.remove(ASCII.getBytes(id));
+            this.idCache.delete(id);
         }
         if (this.deletionHandler.isAlive()) {
             for (String id: ids) try {this.deleteQueue.put(id);} catch (final InterruptedException e) {}
@@ -347,7 +338,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     @Override
     public boolean existsById(String id) throws IOException {
-        if (this.idCache.has(ASCII.getBytes(id))) {cacheSuccessSign(); return true;}
+        if (this.idCache.contains(id)) {cacheSuccessSign(); return true;}
         if (existIdFromDeleteQueue(id)) {cacheSuccessSign(); return false;}
         if (existIdFromUpdateQueue(id)) {cacheSuccessSign(); return true;}
         if (this.connector.existsById(id)) {
@@ -364,7 +355,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : e;
         Set<String> idsC = new HashSet<String>();
         for (String id: ids) {
-            if (this.idCache.has(ASCII.getBytes(id))) {cacheSuccessSign(); e.add(id); continue;}
+            if (this.idCache.contains(id)) {cacheSuccessSign(); e.add(id); continue;}
             if (existIdFromDeleteQueue(id)) {cacheSuccessSign(); continue;}
             if (existIdFromUpdateQueue(id)) {cacheSuccessSign(); e.add(id); continue;}
             idsC.add(id);
