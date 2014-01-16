@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
@@ -145,6 +146,9 @@ public class RemoteSearch extends Thread {
         int redundancy = event.peers.redundancy();
         if (indexingQueueSize > 10) redundancy = Math.max(1, redundancy - 1);
         if (indexingQueueSize > 50) redundancy = Math.max(1, redundancy - 1);
+        if (Memory.load() > 2.0) redundancy = Math.max(1, redundancy - 1);
+        if (Memory.cores() < 4) redundancy = Math.max(1, redundancy - 1);
+        if (Memory.cores() == 1) redundancy = 1;
         int minage = 3;
         int robinsoncount = event.peers.scheme.verticalPartitions() * redundancy / 2;
         if (indexingQueueSize > 10) robinsoncount = Math.max(1, robinsoncount / 2);

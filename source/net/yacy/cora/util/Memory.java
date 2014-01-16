@@ -66,6 +66,14 @@ public class Memory {
     public static final long used() {
         return total() - free();
     }
+
+    /**
+     * get number of CPU cores
+     * @return number of CPU cores
+     */
+    public static final long cores() {
+        return runtime.availableProcessors();
+    }
     
     /**
      * get the system load within the last minute
