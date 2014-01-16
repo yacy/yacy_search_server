@@ -400,7 +400,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     private final void addUnique(final byte[] a, final int astart, final int alength) throws SpaceExceededException {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(ConcurrentLog.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
+        assert (!(allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == this.rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + this.rowdef.objectsize;
@@ -424,7 +424,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     protected final void addSorted(final byte[] a, final int astart, final int alength) throws SpaceExceededException {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(ConcurrentLog.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
+        assert (!(allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == this.rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + this.rowdef.objectsize;
@@ -436,6 +436,11 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.lastTimeWrote = System.currentTimeMillis();
     }
 
+    private final static boolean allZero(final byte[] a, final int astart, final int alength) {
+        for (int i = 0; i < alength; i++) if (a[astart + i] != 0) return false;
+        return true;
+    }
+    
     public synchronized final void addAllUnique(final RowCollection c) throws SpaceExceededException {
         if (c == null) return;
         assert(this.rowdef.objectsize == c.rowdef.objectsize);
