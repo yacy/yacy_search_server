@@ -3233,6 +3233,8 @@ public final class Switchboard extends serverSwitch {
      * http-authentify: auth-level 4
      *
      * @param requestHeader
+     *  - requestHeader..AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
+     *  - adminAccountBase64MD5 = MD5(B64encode("adminname:password") or = "MD5:"+MD5("adminname:peername:password")
      * @return the auth-level as described above or 1 which means 'not authorized'. a 0 is returned in case of
      *         fraud attempts
      */
@@ -3254,8 +3256,13 @@ public final class Switchboard extends serverSwitch {
         }
 
         // get the authorization string from the header
-        final String realmProp = (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).trim();
-        final String realmValue = realmProp.substring(6);
+        final String realmProp = (requestHeader.get(RequestHeader.AUTHORIZATION, "")).trim();
+        String realmValue = realmProp.isEmpty() ? null : realmProp.substring(6); // take out "BASIC "
+
+        // authorization with admin keyword in configuration
+        if ( realmValue == null || realmValue.isEmpty() ) {
+            return 1;
+        }
 
         // security check against too long authorization strings
         if ( realmValue.length() > 256 ) {
@@ -3264,24 +3271,42 @@ public final class Switchboard extends serverSwitch {
 
         // authorization by encoded password, only for localhost access
         String pass = Base64Order.standardCoder.encodeString(adminAccountUserName + ":" + adminAccountBase64MD5);
-        if ( accessFromLocalhost && (pass.equals(realmValue)) ) {
+        if ( accessFromLocalhost && (pass.equals(realmValue)) ) { // assume realmValue as is in cfg
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }
 
-        // authorization by hit in userDB
-        if ( this.userDB.hasAdminRight(realmProp, requestHeader.getHeaderCookies()) ) {
+        // authorization by hit in userDB (realm username:encodedpassword - handed over by DefaultServlet)
+        if ( this.userDB.hasAdminRight(realmValue, requestHeader.getHeaderCookies()) ) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; //return, because 4=max
         }
 
-        // authorization with admin keyword in configuration
-        if ( realmValue == null || realmValue.isEmpty() ) {
-            return 1;
+        // athorization by BASIC auth (realmValue = "adminname:password")
+        if (adminAccountBase64MD5.startsWith("MD5:")) {
+            // handle new option   adminAccountBase64MD5="MD5:xxxxxxx" = encodeMD5Hex ("adminname:peername:password")
+            String realmtmp = Base64Order.standardCoder.decodeString(realmValue); //decode to clear text
+            int i = realmtmp.indexOf(':');
+            if (i > 4) { // put peer name in realmValue (>4 is correct to scipt "MD5:" and usernames are min 4 characters)
+                realmtmp = realmtmp.substring(0, i + 1) + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + realmtmp.substring(i + 1);
+
+            if (adminAccountBase64MD5.substring(4).equals(Digest.encodeMD5Hex(realmtmp))) {
+                adminAuthenticationLastAccess = System.currentTimeMillis();
+                return 4; // hard-authenticated, all ok
         }
-        if ( adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue)) ) {
+            } else {
+                // handle DIGEST auth (realmValue = adminAccountBase (set for lecacyHeader in DefaultServlet for authenticated requests)
+                if (adminAccountBase64MD5.equals(realmValue)) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; // hard-authenticated, all ok
+        }
+            }
+        } else {
+            // handle old option  adminAccountBase64MD5="xxxxxxx" = encodeMD55Hex(encodeB64("adminname:password")
+            if (adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue))) {
+                adminAuthenticationLastAccess = System.currentTimeMillis();
+                return 4; // hard-authenticated, all ok
+            }
         }
         return 1;
     }

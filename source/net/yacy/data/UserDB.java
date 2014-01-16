@@ -47,6 +47,8 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 
 public final class UserDB {
@@ -126,16 +128,19 @@ public final class UserDB {
     }    
 
     /**
-     * Use a ProxyAuth String to authenticate user.
+     * Use a ProxyAuth Value to authenticate user.
      * @param auth base64 Encoded String, which contains "username:pw".
      */
     public Entry proxyAuth(final String auth) {
         Entry entry = null;
-
+        
         if (auth != null) {
-            final String[] tmp = Base64Order.standardCoder.decodeString(auth.trim().substring(6)).split(":");
+            final String[] tmp = Base64Order.standardCoder.decodeString(auth.trim()).split(":");
             if (tmp.length == 2) {
                 entry = this.passwordAuth(tmp[0], tmp[1]);
+                if (entry == null) {
+                    entry = this.md5Auth(tmp[0], tmp[1]);
+                }
             }
         }
         return entry;
@@ -199,24 +204,26 @@ public final class UserDB {
         }
         return null;
     }
-	
+    
     public Entry passwordAuth(final String user, final String password) {
         final Entry entry = this.getEntry(user);
         final String md5pwd;
-        if (entry != null && (md5pwd = entry.getMD5EncodedUserPwd()) != null && md5pwd.equals(Digest.encodeMD5Hex(user+":"+password))) {
-            if (entry.isLoggedOut()){
-                try {
-                    entry.setProperty(Entry.LOGGED_OUT, "false");
-                } catch (final Exception e) {
-                    ConcurrentLog.logException(e);
-                }
+        if (entry != null && (md5pwd = entry.getMD5EncodedUserPwd()) != null) {
+
+            boolean authok;
+            if (md5pwd.startsWith("MD5:")) { // DIGEST style
+                authok = md5pwd.equals("MD5:" + Digest.encodeMD5Hex(user + ":"
+                        + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_REALM, "YaCy") + ":" + password));
+            } else {
+                authok = md5pwd.equals(Digest.encodeMD5Hex(user + ":" + password));
+            }
+            if (authok) {
                 return entry;
             }
-            return entry;
         }
         return null;
     }
-    
+
     public Entry passwordAuth(final String user, final String password, final String ip){
         final Entry entry = passwordAuth(user, password);
         if (entry != null) {
@@ -228,17 +235,9 @@ public final class UserDB {
     
     public Entry md5Auth(final String user, final String md5) {
         final Entry entry = this.getEntry(user);
-        if (entry != null && entry.getMD5EncodedUserPwd().equals(md5)) {
-            if (entry.isLoggedOut()){
-                try {
-                    entry.setProperty(Entry.LOGGED_OUT, "false");
-                } catch (final Exception e) {
-                    ConcurrentLog.logException(e);
-                }
-                return null;
-            }
+        if (entry != null && entry.getMD5EncodedUserPwd().endsWith(md5)) { // user pwd migth have prefix "MD5:"
             return entry;
-        }
+            }
         return null;
     }
 
@@ -328,8 +327,7 @@ public final class UserDB {
     
     public class Entry {
         public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";
-        public static final String AUTHENTICATION_METHOD = "auth_method";
-        public static final String LOGGED_OUT = "loggedOut";
+
         public static final String USER_FIRSTNAME = "firstName";
         public static final String USER_LASTNAME = "lastName";
         public static final String USER_ADDRESS = "address";
@@ -364,10 +362,6 @@ public final class UserDB {
 
             this.mem = (mem == null) ? new HashMap<String, String>() : mem;
           
-            
-            if (mem == null || !mem.containsKey(AUTHENTICATION_METHOD)) {
-                this.mem.put(AUTHENTICATION_METHOD,"yacy");
-            }
             this.oldDate=Calendar.getInstance();
             this.newDate=Calendar.getInstance();
         }
@@ -550,10 +544,6 @@ public final class UserDB {
             return (this.mem.containsKey(accessRight.toString())) ? this.mem.get(accessRight.toString()).equals("true") : false;
         }
         
-        public boolean isLoggedOut(){
-            return (this.mem.containsKey(LOGGED_OUT) ? this.mem.get(LOGGED_OUT).equals("true") : false);
-        }
-
         public void logout(final String ip, final String logintoken){
             logout(ip);
             if(cookieUsers.containsKey(logintoken)){
@@ -563,17 +553,12 @@ public final class UserDB {
 
         public void logout(final String ip) {
     	   try {
-               setProperty(LOGGED_OUT, "true");
                if (ipUsers.containsKey(ip)){
                        ipUsers.remove(ip);
                }
     	   } catch (final Exception e) {
                ConcurrentLog.logException(e);
            }
-        }
-
-        public void logout(){
-            logout("xxxxxx");
         }
 
         @Override

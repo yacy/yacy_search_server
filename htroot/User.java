@@ -125,28 +125,31 @@ public class User{
             }
         }
 
-        if(post!= null && entry != null){
-        		if(post.containsKey("changepass")){
-        			prop.put("status", "1"); //password
-        			if(entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("oldpass", "")))){
-        			if(post.get("newpass").equals(post.get("newpass2"))){
-        			if(!post.get("newpass", "").equals("")){
-        				try {
-							entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
-							prop.put("status_password", "0"); //changes
-						} catch (final Exception e) {
-						    ConcurrentLog.logException(e);
-						}
-        			}else{
-        				prop.put("status_password", "3"); //empty
-        			}
-        			}else{
-        				prop.put("status_password", "2"); //pws do not match
-        			}
-        			}else{
-        				prop.put("status_password", "1"); //old pw wrong
-        			}
-        		}
+        if (post != null && entry != null) {
+            if (post.containsKey("changepass")) {
+                prop.put("status", "1"); //password
+
+                if (entry.getMD5EncodedUserPwd().startsWith("MD5:") ?
+                        entry.getMD5EncodedUserPwd().equals("MD5:"+Digest.encodeMD5Hex(entry.getUserName() + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + post.get("oldpass", ""))) :
+                        entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(entry.getUserName() + ":" + post.get("oldpass", "")))) {
+                    if (post.get("newpass").equals(post.get("newpass2"))) {
+                        if (!post.get("newpass", "").equals("")) {
+                            try {
+                                entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, "MD5:" + Digest.encodeMD5Hex(entry.getUserName() + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + post.get("newpass", "")));
+                                prop.put("status_password", "0"); //changes
+                            } catch (final Exception e) {
+                                ConcurrentLog.logException(e);
+                            }
+                        } else {
+                            prop.put("status_password", "3"); //empty
+                        }
+                    } else {
+                        prop.put("status_password", "2"); //pws do not match
+                    }
+                } else {
+                    prop.put("status_password", "1"); //old pw wrong
+                }
+            }
         }
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");

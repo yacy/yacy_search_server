@@ -40,11 +40,14 @@ public final class SwitchboardConstants {
      * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
      * <p>Name of the setting holding the authentication hash for the static <code>admin</code>-account. It is calculated
      * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
+     * With introduction of DIGEST authentication all passwords are MD5 encoded and calculatd as <code>username:adminrealm:password</code>
+     * To differentiate old and new admin passwords, use the new calculated passwords a "MD5:" prefix.
      */
     public static final String ADMIN_ACCOUNT                = "adminAccount";
     public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5";
     public static final String ADMIN_ACCOUNT_USER_NAME      = "adminAccountUserName"; // by default 'admin'
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
+    public static final String ADMIN_REALM                  = "adminRealm";
     
     public static final int   CRAWLJOB_SYNC = 0;
     public static final int   CRAWLJOB_STATUS = 1;

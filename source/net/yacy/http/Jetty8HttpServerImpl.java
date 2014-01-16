@@ -45,9 +45,8 @@ import net.yacy.http.servlets.SolrServlet;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.http.servlets.YaCyProxyServlet;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
-
-import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -160,14 +159,17 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         allrequesthandlers.addHandler(htrootContext);    
         allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
         
-        // wrap all handlers by security handler
+        YaCyLoginService loginService = new YaCyLoginService();
+        // this is very important (as it is part of the user password hash)
+        // changes will ivalidate all current existing user-password-hashes (from userDB)
+        loginService.setName(sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy"));
+
         Jetty8YaCySecurityHandler securityHandler = new Jetty8YaCySecurityHandler();
-        LoginService loginService = new YaCyLoginService();
         securityHandler.setLoginService(loginService);
-        securityHandler.setRealmName(loginService.getName());
 
         htrootContext.setSecurityHandler(securityHandler);
-        
+
+        // wrap all handlers
         Handler crashHandler = new CrashProtectionHandler(allrequesthandlers);
         // check server access restriction and add IPAccessHandler if restrictions are needed
         // otherwise don't (to save performance)
