@@ -69,7 +69,7 @@ public class Transmission {
         this.timeout4Transfer = timeout4Transfer;
     }
 
-    public Chunk newChunk(final byte[] primaryTarget, final List<Seed> targets) {
+    public Chunk newChunk(final String primaryTarget, final List<Seed> targets) {
         return new Chunk(primaryTarget, targets);
     }
 
@@ -84,7 +84,7 @@ public class Transmission {
          * - a set of yacy seeds which will shrink as the containers are transmitted to them
          * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
-        private final byte[]                         primaryTarget;
+        private final String                         primaryTarget;
         private final ReferenceContainerCache<WordReference> containers;
         private final HandleSet                      references;
         private final HandleSet                      badReferences;
@@ -98,7 +98,7 @@ public class Transmission {
          * @param primaryTarget
          * @param targets
          */
-        public Chunk(final byte[] primaryTarget, final List<Seed> targets) {
+        public Chunk(final String primaryTarget, final List<Seed> targets) {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
@@ -204,7 +204,7 @@ public class Transmission {
             return this.containers.size();
         }
 
-        public byte[] primaryTarget() {
+        public String primaryTarget() {
             return this.primaryTarget;
         }
 
@@ -245,7 +245,7 @@ public class Transmission {
             	Transmission.this.log.info("Transfer of chunk to myself-target");
             	return true;
             }
-            Transmission.this.log.info("starting new index transmission request to " + ASCII.String(this.primaryTarget));
+            Transmission.this.log.info("starting new index transmission request to " + this.primaryTarget);
             final long start = System.currentTimeMillis();
             final String error = Protocol.transferIndex(target, this.containers, this.references, Transmission.this.segment, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
             if (error == null) {
@@ -254,7 +254,7 @@ public class Transmission {
                 final Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
                 final ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
                 Transmission.this.log.info("Index transfer of " + this.containers.size() +
-                                 " words [" + ((firstContainer == null) ? null : ASCII.String(firstContainer.getTermHash())) + " .. " + ASCII.String(this.primaryTarget) + "]" +
+                                 " words [" + ((firstContainer == null) ? null : ASCII.String(firstContainer.getTermHash())) + " .. " + this.primaryTarget + "]" +
                                  " and " + this.references.size() + " URLs" +
                                  " to peer " + target.getName() + ":" + target.hash +
                                  " in " + (transferTime / 1000) +

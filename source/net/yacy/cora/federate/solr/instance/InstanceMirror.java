@@ -159,11 +159,16 @@ public class InstanceMirror {
         this.connectorCache.put(corename, msc);
         return msc;
     }
+
+    public int bufferSize() {
+        int b = 0;
+        for (SolrConnector csc: this.connectorCache.values()) b += csc.bufferSize();
+        for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) b += ssc.bufferSize();
+        return b;
+    }
     
     public void clearCaches() {
-        for (SolrConnector csc: this.connectorCache.values()) {
-            csc.clearCaches();
-        }
+        for (SolrConnector csc: this.connectorCache.values()) csc.clearCaches();
         for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) ssc.commit(true);
     }
     

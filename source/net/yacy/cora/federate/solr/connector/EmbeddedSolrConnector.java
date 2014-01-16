@@ -102,7 +102,13 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         this.requestHandler.inform(this.core);
         super.init(this.instance.getServer(coreName));
     }
+    
+    @Override
+    public int bufferSize() {
+        return 0;
+    }
 
+    @Override
     public void clearCaches() {
         SolrConfig solrConfig = this.core.getSolrConfig();
         @SuppressWarnings("unchecked")

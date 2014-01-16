@@ -718,9 +718,7 @@ public class yacysearch {
                         sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 10)),
                     sb.getConfigLong(
                         SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
-                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)),
-                    (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0),
-                    (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)));
 
             if ( startRecord == 0 ) {
                 if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) && authenticated && !stealthmode) {

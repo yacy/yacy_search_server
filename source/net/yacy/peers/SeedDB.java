@@ -220,7 +220,7 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     public int redundancy() {
-        if (this.mySeed.isJunior()) return 1;
+        if (this.mySeed.isVirgin()) return 1;
         return this.netRedundancy;
     }
 

@@ -2034,6 +2034,7 @@ public final class Switchboard extends serverSwitch {
     
     public boolean cleanupJob() {
         
+        ConcurrentLog.ensureWorkerIsRunning();
         try {
             // flush caches in used libraries
             pdfParser.clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
@@ -3416,7 +3417,7 @@ public final class Switchboard extends serverSwitch {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
             while ( tries-- > 0 ) {
-                startHash = DHTSelection.selectTransferStart();
+                startHash = DHTSelection.selectRandomTransferStart();
                 assert startHash != null;
                 limitHash = DHTSelection.limitOver(this.peers, startHash);
                 if ( limitHash != null ) {

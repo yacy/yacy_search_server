@@ -194,8 +194,6 @@ public final class SearchEvent {
         final LoaderDispatcher loader,
         final int remote_maxcount,
         final long remote_maxtime,
-        final int burstRobinsonPercent,
-        final int burstMultiwordPercent,
         final boolean deleteIfSnippetFail) {
 
         long ab = MemoryControl.available();
@@ -321,9 +319,7 @@ public final class SearchEvent {
                             0, remote_maxcount,
                             remote_maxtime,
                             Switchboard.urlBlacklist,
-                            (SearchEvent.this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes,
-                            burstRobinsonPercent,
-                            burstMultiwordPercent);
+                            (SearchEvent.this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes);
                     }
                 }.start();
             }

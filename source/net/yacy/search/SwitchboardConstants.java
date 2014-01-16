@@ -303,8 +303,6 @@ public final class SwitchboardConstants {
 
     
     public static final String DHT_ENABLED                      = "network.unit.dht";
-    public static final String DHT_BURST_ROBINSON               = "network.unit.dht.burst.robinson";
-    public static final String DHT_BURST_MULTIWORD              = "network.unit.dht.burst.multiword";
 
     public static final String REMOTESEARCH_MAXCOUNT_DEFAULT    = "network.unit.remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";

@@ -25,7 +25,7 @@
 package net.yacy.peers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,11 +40,10 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
+import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.peers.operation.yacyVersion;
 
@@ -56,10 +55,10 @@ import net.yacy.peers.operation.yacyVersion;
  */
 
 public class DHTSelection {
-
-    public static List<Seed> selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
+    
+    public static Set<Seed> selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
         final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
-        final List<Seed> l = new ArrayList<Seed>();
+        final Set<Seed> l = new HashSet<Seed>();
         Map.Entry<byte[], String> entry;
         Seed s;
         while (i.hasNext()) {
@@ -72,149 +71,96 @@ public class DHTSelection {
         }
         return l;
     }
-    
-    public static List<Seed> selectNodeSearchTargets(final SeedDB seedDB, int maxCount, Set<Seed> omit) {
-        if (seedDB == null) { return null; }
 
-        final List<Seed> goodSeeds = new ArrayList<Seed>();
-        final List<Seed> optionalSeeds = new ArrayList<Seed>();
-        Seed seed;
-        Iterator<Seed> seedenum = seedDB.seedsConnected(true, true, Seed.randomHash(), 1.041f);
-        int c = seedDB.sizeConnected();
-        while (seedenum.hasNext() && c-- > 0 && goodSeeds.size() < maxCount) {
-            seed = seedenum.next();
-            if (seed == null || omit.contains(seed)) continue;
-            if (seed.getFlagRootNode()) {
-            	goodSeeds.add(seed);
-            } else {
-            	optionalSeeds.add(seed);
-            }
-        }
-        Random r = new Random(System.currentTimeMillis());
-        while (goodSeeds.size() < maxCount && optionalSeeds.size() > 0) {
-        	goodSeeds.add(optionalSeeds.remove(r.nextInt(optionalSeeds.size())));
-        }
-        
-        return goodSeeds;
-    }
-
-    public static List<Seed> selectSearchTargets(
+    public static Collection<Seed> selectExtraTargets(
             final SeedDB seedDB,
             final HandleSet wordhashes,
-            int redundancy,
-            int burstRobinsonPercent,
-            int burstMultiwordPercent) {
-        // find out a specific number of seeds, that would be relevant for the given word hash(es)
-        // the result is ordered by relevance: [0] is most relevant
-        // the seedcount is the maximum number of wanted results
-        if (seedDB == null) { return null; }
-
-        // put in seeds according to dht
-        final Map<String, Seed> regularSeeds = new HashMap<String, Seed>(); // dht position seeds
-        Seed seed;
-        Iterator<Seed> dhtEnum;
-        Iterator<byte[]> iter = wordhashes.iterator();
-        while (iter.hasNext()) {
-            selectDHTPositions(seedDB, iter.next(), redundancy, regularSeeds);
-        }
-        //int minimumseeds = Math.min(seedDB.scheme.verticalPartitions(), regularSeeds.size()); // that should be the minimum number of seeds that are returned
-        //int maximumseeds = seedDB.scheme.verticalPartitions() * redundancy; // this is the maximum number of seeds according to dht and heuristics. It can be more using burst mode.
-
-        // put in some seeds according to size of peer.
-        // But not all, that would produce too much load on the largest peers
-        dhtEnum = seedDB.seedsSortedConnected(false, Seed.ICOUNT);
-        int c = Math.max(Math.min(5, seedDB.sizeConnected()), wordhashes.size() > 1 ? seedDB.sizeConnected() * burstMultiwordPercent / 100 : 0);
-        while (dhtEnum.hasNext() && c-- > 0) {
-            seed = dhtEnum.next();
-            if (seed == null) continue;
-            if (seed.isLastSeenTimeout(3600000)) continue;
-            if (seed.getAge() < 1) { // the 'workshop feature'
-                ConcurrentLog.info("DHT", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
-                regularSeeds.put(seed.hash, seed);
-                continue;
-            }
-            if (Math.random() * 100 + (wordhashes.size() > 1 ? burstMultiwordPercent : 25) >= 50) {
-                if (ConcurrentLog.isFine("DHT")) ConcurrentLog.fine("DHT", "selectPeers/CountBurst: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getWordCount());
-                regularSeeds.put(seed.hash, seed);
-                continue;
-            }
-        }
-
-        // create a set that contains only robinson peers because these get a special handling
-        dhtEnum = seedDB.seedsConnected(true, false, null, 0.50f);
-        Set<Seed> robinson = new HashSet<Seed>();
-        while (dhtEnum.hasNext()) {
-            seed = dhtEnum.next();
-            if (seed == null) continue;
-            if (seed.getFlagAcceptRemoteIndex()) continue;
-            if (seed.isLastSeenTimeout(3600000)) continue;
-            robinson.add(seed);
-        }
-
-        // add robinson peers according to robinson burst rate
-        dhtEnum = robinson.iterator();
-        c = robinson.size() * burstRobinsonPercent / 100;
-        while (dhtEnum.hasNext() && c-- > 0) {
-            seed = dhtEnum.next();
-            if (seed == null) continue;
-            if (seed.isLastSeenTimeout(3600000)) continue;
-            if (Math.random() * 100 + burstRobinsonPercent >= 100) {
-                if (ConcurrentLog.isFine("DHT")) ConcurrentLog.fine("DHT", "selectPeers/RobinsonBurst: " + seed.hash + ":" + seed.getName());
-                regularSeeds.put(seed.hash, seed);
-                continue;
-            }
-        }
-
-        // put in seeds that are public robinson peers and where the peer tags match with query
-        // or seeds that are newbies to ensure that private demonstrations always work
-        dhtEnum = robinson.iterator();
-        while (dhtEnum.hasNext()) {
-            seed = dhtEnum.next();
-            if (seed == null) continue;
-            if (seed.isLastSeenTimeout(3600000)) continue;
-            if (seed.matchPeerTags(wordhashes)) {
-                // peer tags match
-                String specialized = seed.getPeerTags().toString();
-                if (specialized.equals("[*]")) {
-                    ConcurrentLog.info("DHT", "selectPeers/RobinsonTag: " + seed.hash + ":" + seed.getName() + " grants search for all");
-                } else {
-                    ConcurrentLog.info("DHT", "selectPeers/RobinsonTag " + seed.hash + ":" + seed.getName() + " is specialized peer for " + specialized);
+            final int minage,
+            final Set<Seed> omit,
+            final int maxcount) {
+        
+        Collection<Seed> extraSeeds = new HashSet<Seed>();
+        
+        if (seedDB != null) {
+            final OrderedScoreMap<Seed> seedSelection = new OrderedScoreMap<Seed>(null); 
+            Random r = new Random(); // we must use a random factor for the selection to prevent that all peers do the same and therefore overload the same peers
+            
+            // create sets that contains only robinson/node/large/young peers
+            Iterator<Seed> dhtEnum = seedDB.seedsConnected(true, false, null, 0.50f);
+            Seed seed;
+            while (dhtEnum.hasNext()) {
+                seed = dhtEnum.next();
+                if (seed == null) continue;
+                if (omit != null && omit.contains(seed)) continue; // sort out peers that are target for DHT
+                if (seed.isLastSeenTimeout(3600000)) continue; // do not ask peers that had not been seen more than one hour (happens during a startup situation)
+                if (!seed.getFlagAcceptRemoteIndex() && seed.matchPeerTags(wordhashes)) seedSelection.dec(seed, r.nextInt(10) + 10); // robinson peers with matching peer tags
+                if (seed.getFlagRootNode()) seedSelection.dec(seed, r.nextInt(15) + 15); // root nodes (fast peers)
+                if (seed.getAge() < minage) seedSelection.dec(seed, r.nextInt(25) + 25);// the 'workshop feature', fresh peers should be seen
+                if (seed.getLinkCount() > 1000000) {
+                    int pf = 1 + (int) (20000000 / seed.getLinkCount());
+                    seedSelection.dec(seed, r.nextInt(pf) + pf); // large peers
                 }
-                regularSeeds.put(seed.hash, seed);
+            }
+            
+            // select the maxount
+            Iterator<Seed> i = seedSelection.iterator();
+            int count = 0;
+            while (i.hasNext() && count++ < maxcount) {
+                seed = i.next();
+                if (RemoteSearch.log.isInfo()) {
+                    RemoteSearch.log.info("selectPeers/extra: " + seed.hash + ":" + seed.getName() + ", " + seed.getLinkCount() + " URLs" +
+                             (!seed.getFlagAcceptRemoteIndex() && seed.matchPeerTags(wordhashes) ? " ROBINSON" : "") +
+                             (seed.getFlagRootNode() ? " NODE" : "") +
+                             (seed.getAge() < 1 ? " FRESH" : "")
+                            );
+                }
+                extraSeeds.add(seed);
             }
         }
-
-        // produce return set
-        List<Seed> result = new ArrayList<Seed>(regularSeeds.size());
-        result.addAll(regularSeeds.values());
-        return result;
+        
+        return extraSeeds;
     }
     
-    private static void selectDHTPositions(
-            final SeedDB seedDB,
-            byte[] wordhash,
-            int redundancy,
-            Map<String, Seed> regularSeeds) {
+    public static Set<Seed> selectDHTSearchTargets(final SeedDB seedDB, final HandleSet wordhashes, final int minage, final int redundancy) {
+
+        // put in seeds according to dht
+        Set<Seed> seeds = new HashSet<Seed>(); // dht position seeds
+        if (seedDB != null) {
+            Iterator<byte[]> iter = wordhashes.iterator();
+            while (iter.hasNext()) {
+                seeds.addAll(selectDHTPositions(seedDB, iter.next(), minage, redundancy));
+            }
+            //int minimumseeds = Math.min(seedDB.scheme.verticalPartitions(), regularSeeds.size()); // that should be the minimum number of seeds that are returned
+            //int maximumseeds = seedDB.scheme.verticalPartitions() * redundancy; // this is the maximum number of seeds according to dht and heuristics. It can be more using burst mode.
+        }
+        
+        return seeds;
+    }
+    
+    private static List<Seed> selectDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy) {
         // this method is called from the search target computation
+        ArrayList<Seed> seeds = new ArrayList<Seed>(redundancy);
         Seed seed;
         for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
-            long dhtVerticalTarget = seedDB.scheme.verticalDHTPosition(wordhash, verticalPosition);
-            wordhash = Distribution.positionToHash(dhtVerticalTarget);
-            Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
+            final long dhtVerticalTarget = seedDB.scheme.verticalDHTPosition(wordhash, verticalPosition);
+            final byte[] verticalhash = Distribution.positionToHash(dhtVerticalTarget);
+            final Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, verticalhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);
-            int cc = 2; // select a maximum of 3, this is enough redundancy
+            int cc = 20; // in case that the network grows rapidly, we may jump to several additional peers but that must have a limit
             while (dhtEnum.hasNext() && c > 0 && cc-- > 0) {
                 seed = dhtEnum.next();
                 if (seed == null || seed.hash == null) continue;
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
-                if (ConcurrentLog.isFine("DHT")) ConcurrentLog.fine("DHT", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
-                regularSeeds.put(seed.hash, seed);
+                if (seed.getAge() < minage) continue; // prevent bad results because of too strong network growth
+                if (RemoteSearch.log.isInfo()) RemoteSearch.log.info("selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
+                seeds.add(seed);
                 c--;
             }
         }
+        return seeds;
     }
 
-    public static byte[] selectTransferStart() {
+    public static byte[] selectRandomTransferStart() {
         return ASCII.getBytes(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength));
     }
 
@@ -248,105 +194,59 @@ public class DHTSelection {
         return new acceptRemoteIndexSeedEnum(seedDB, starthash, Math.min(max, seedDB.sizeConnected()), alsoMyOwn);
     }
 
-    private static class acceptRemoteIndexSeedEnum implements Iterator<Seed> {
+    private static class acceptRemoteIndexSeedEnum extends LookAheadIterator<Seed> implements Iterator<Seed>, Iterable<Seed> {
 
         private final Iterator<Seed> se;
-        private Seed nextSeed;
         private final SeedDB seedDB;
-        private final HandleSet doublecheck;
         private int remaining;
         private final boolean alsoMyOwn;
 
         private acceptRemoteIndexSeedEnum(SeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
-            this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX, alsoMyOwn);
+            this.se = new seedDHTEnum(seedDB, starthash, alsoMyOwn);
             this.remaining = max;
-            this.doublecheck = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
-            this.nextSeed = nextInternal();
             this.alsoMyOwn = alsoMyOwn;
         }
 
         @Override
-        public boolean hasNext() {
-            return this.nextSeed != null;
-        }
-
-        private Seed nextInternal() {
+        protected Seed next0() {
             if (this.remaining <= 0) return null;
-            Seed s;
+            Seed s = null;
             try {
                 while (this.se.hasNext()) {
                     s = this.se.next();
                     if (s == null) return null;
-                    byte[] hashb = ASCII.getBytes(s.hash);
-                    if (this.doublecheck.has(hashb)) return null;
-                    try {
-                        this.doublecheck.put(hashb);
-                    } catch (final SpaceExceededException e) {
-                        ConcurrentLog.logException(e);
-                        break;
-                    }
                     if (s.getFlagAcceptRemoteIndex() ||
                         (this.alsoMyOwn && s.hash.equals(this.seedDB.mySeed().hash)) // Accept own peer regardless of FlagAcceptRemoteIndex
                        ) {
                         this.remaining--;
-                        return s;
+                        break;
                     }
                 }
+                return s;
             } catch (final kelondroException e) {
                 System.out.println("DEBUG acceptRemoteIndexSeedEnum:" + e.getMessage());
                 Network.log.severe("database inconsistency (" + e.getMessage() + "), re-set of db.");
                 this.seedDB.resetActiveTable();
                 return null;
             }
-            return null;
-        }
-
-        @Override
-        public Seed next() {
-            final Seed next = this.nextSeed;
-            this.nextSeed = nextInternal();
-            return next;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
         }
 
     }
-
-    /**
-     * enumerate seeds for DHT target positions
-     * @param seedDB
-     * @param firstHash
-     * @param minVersion
-     * @return
-     */
-    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final double minVersion) {
-        // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
-        return new seedDHTEnum(seedDB, firstHash, minVersion, false);
-    }
-
-    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final double minVersion, final boolean alsoMyOwn) {
-        // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
-        return new seedDHTEnum(seedDB, firstHash, minVersion, alsoMyOwn);
-    }
+    
     private static class seedDHTEnum implements Iterator<Seed> {
 
         private Iterator<Seed> e;
         private int steps;
-        private final double minVersion;
         private final SeedDB seedDB;
         private boolean alsoMyOwn;
         private int pass, insertOwnInPass;
         private Seed nextSeed;
 
-        private seedDHTEnum(final SeedDB seedDB, final byte[] firstHash, final double minVersion, final boolean alsoMyOwn) {
+        private seedDHTEnum(final SeedDB seedDB, final byte[] firstHash, final boolean alsoMyOwn) {
             this.seedDB = seedDB;
             this.steps = seedDB.sizeConnected() + ((alsoMyOwn) ? 1 : 0);
-            this.minVersion = minVersion;
-            this.e = seedDB.seedsConnected(true, false, firstHash, minVersion);
+            this.e = seedDB.seedsConnected(true, false, firstHash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
             this.pass = 1;
             this.alsoMyOwn = alsoMyOwn;
             if (alsoMyOwn) {
@@ -367,7 +267,8 @@ public class DHTSelection {
             this.steps--;
 
             if (!this.e.hasNext() && this.pass == 1) {
-                this.e = this.seedDB.seedsConnected(true, false, null, this.minVersion);
+                // rotate from the beginning; this closes the ordering of the DHT at the ends
+                this.e = this.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
                 this.pass = 2;
             }
             if (this.e.hasNext()) {
@@ -408,24 +309,17 @@ public class DHTSelection {
         return new providesRemoteCrawlURLsEnum(seedDB);
     }
 
-    private static class providesRemoteCrawlURLsEnum implements Iterator<Seed> {
+    private static class providesRemoteCrawlURLsEnum extends LookAheadIterator<Seed> implements Iterator<Seed>, Iterable<Seed> {
 
         private final Iterator<Seed> se;
-        private Seed nextSeed;
         private final SeedDB seedDB;
 
         private providesRemoteCrawlURLsEnum(final SeedDB seedDB) {
             this.seedDB = seedDB;
-            this.se = getDHTSeeds(seedDB, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
-            this.nextSeed = nextInternal();
+            this.se = seedDB.seedsConnected(true, false, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
         }
 
-        @Override
-        public boolean hasNext() {
-            return this.nextSeed != null;
-        }
-
-        private Seed nextInternal() {
+        protected Seed next0() {
             Seed s;
             try {
                 while (this.se.hasNext()) {
@@ -440,18 +334,6 @@ public class DHTSelection {
                 return null;
             }
             return null;
-        }
-
-        @Override
-        public Seed next() {
-            final Seed next = this.nextSeed;
-            this.nextSeed = nextInternal();
-            return next;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
         }
 
     }
@@ -484,7 +366,5 @@ public class DHTSelection {
             return null;
         }
     }
-
-
 
 }

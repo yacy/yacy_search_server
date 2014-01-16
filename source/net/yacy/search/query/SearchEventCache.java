@@ -139,9 +139,7 @@ public class SearchEventCache {
             final boolean generateAbstracts,
             final LoaderDispatcher loader,
             final int remote_maxcount,
-            final long remote_maxtime,
-            final int burstRobinsonPercent,
-            final int burstMultiwordPercent) {
+            final long remote_maxtime) {
 
         if (MemoryControl.shortStatus()) cleanupEvents(true);
         final String id = query.id(false);
@@ -173,7 +171,7 @@ public class SearchEventCache {
             // start a new event
             Switchboard sb = Switchboard.getSwitchboard();
             final boolean delete = sb == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true);
-            event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, burstRobinsonPercent, burstMultiwordPercent, delete);
+            event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, delete);
             MemoryControl.request(100 * 1024 * 1024, false); // this may trigger a short memory status which causes a reducing of cache space of other threads
         }
 

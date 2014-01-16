@@ -61,6 +61,12 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
         this.missCache = new ConcurrentARC<String, Object>(missCacheMax, partitions);
     }
 
+    @Override
+    public int bufferSize() {
+        return solr.bufferSize();
+    }
+
+    @Override
     public void clearCaches() {
         this.hitCache.clear();
         this.missCache.clear();

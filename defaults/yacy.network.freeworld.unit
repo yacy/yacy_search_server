@@ -45,22 +45,6 @@ network.unit.dht.partitionExponent = 4
 # to not-handshaking in a distributed way. It means to get data without using
 # a dht transmission logic.
 
-# robinson burst: percentage of the number of robinson peers that
-# shall be accessed for every search. This includes also robinson peers
-# that do not have a matching peer tag. If this is set to 100 then all robinson
-# peers are always asked
-network.unit.dht.burst.robinson = 50
-
-# multi-word burst: percentage of the number of all peers that
-# shall be accessed for multi-word searches. Multi-word search is
-# a hard problem when the distributed search network is divided by
-# term (as done with yacy, partly..).
-# Scientific solutions for this problem is to apply heuristics.
-# This heuristic enables to switch on a full network scan to get also
-# non-distributed multi-word positions. For a full scan set this value to 100.
-# Attention: this may out-number the maxcount of available httpc network connections.
-network.unit.dht.burst.multiword = 30
-
 # switch to enable verification of search results
 # must be set to true in untrusted networks and can be
 # set to false in completely trusted networks

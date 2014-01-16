@@ -140,6 +140,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
+    public int bufferSize() {
+        return this.updateQueue.size() + this.deleteQueue.size();
+    }
+
+    @Override
     public void clearCaches() {
         this.connector.clearCaches();
         this.idCache.clear();
