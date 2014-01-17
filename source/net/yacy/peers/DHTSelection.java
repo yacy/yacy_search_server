@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -72,18 +73,28 @@ public class DHTSelection {
         return l;
     }
 
+    /**
+     * 
+     * @param seedDB
+     * @param wordhashes
+     * @param minage
+     * @param omit
+     * @param maxcount
+     * @param r we must use a random factor for the selection to prevent that all peers do the same and therefore overload the same peers
+     * @return
+     */
     public static Collection<Seed> selectExtraTargets(
             final SeedDB seedDB,
             final HandleSet wordhashes,
             final int minage,
             final Set<Seed> omit,
-            final int maxcount) {
+            final int maxcount,
+            final Random r) {
         
         Collection<Seed> extraSeeds = new HashSet<Seed>();
         
         if (seedDB != null) {
-            final OrderedScoreMap<Seed> seedSelection = new OrderedScoreMap<Seed>(null); 
-            Random r = new Random(); // we must use a random factor for the selection to prevent that all peers do the same and therefore overload the same peers
+            final OrderedScoreMap<Seed> seedSelection = new OrderedScoreMap<Seed>(null);
             
             // create sets that contains only robinson/node/large/young peers
             Iterator<Seed> dhtEnum = seedDB.seedsConnected(true, false, null, 0.50f);
@@ -93,12 +104,16 @@ public class DHTSelection {
                 if (seed == null) continue;
                 if (omit != null && omit.contains(seed)) continue; // sort out peers that are target for DHT
                 if (seed.isLastSeenTimeout(3600000)) continue; // do not ask peers that had not been seen more than one hour (happens during a startup situation)
-                if (!seed.getFlagAcceptRemoteIndex() && seed.matchPeerTags(wordhashes)) seedSelection.dec(seed, r.nextInt(10) + 10); // robinson peers with matching peer tags
-                if (seed.getFlagRootNode()) seedSelection.dec(seed, r.nextInt(15) + 15); // root nodes (fast peers)
-                if (seed.getAge() < minage) seedSelection.dec(seed, r.nextInt(25) + 25);// the 'workshop feature', fresh peers should be seen
-                if (seed.getLinkCount() > 1000000) {
+                if (!seed.getFlagAcceptRemoteIndex() && seed.matchPeerTags(wordhashes)) seedSelection.dec(seed, r.nextInt(10) + 2); // robinson peers with matching peer tags
+                if (seed.getFlagRootNode()) seedSelection.dec(seed, r.nextInt(30) + 6); // root nodes (fast peers)
+                if (seed.getAge() < minage) seedSelection.dec(seed, r.nextInt(15) + 3); // young peers (with fresh info)
+                if (seed.getAge() < 1) seedSelection.dec(seed, r.nextInt(40) + 8); // the 'workshop feature', fresh peers should be seen
+                if (seed.getLinkCount() >= 100000 && seed.getLinkCount() < 1000000) { // peers above 100.000 links take part on a selection of medium-size peers
+                    seedSelection.dec(seed, r.nextInt(25) + 5);
+                }
+                if (seed.getLinkCount() >= 1000000) { // peers above 1 million links take part on a selection of large peers
                     int pf = 1 + (int) (20000000 / seed.getLinkCount());
-                    seedSelection.dec(seed, r.nextInt(pf) + pf); // large peers
+                    seedSelection.dec(seed, r.nextInt(pf) + pf / 5); // large peers; choose large one less frequent to reduce load on their peer
                 }
             }
             
@@ -109,9 +124,11 @@ public class DHTSelection {
                 seed = i.next();
                 if (RemoteSearch.log.isInfo()) {
                     RemoteSearch.log.info("selectPeers/extra: " + seed.hash + ":" + seed.getName() + ", " + seed.getLinkCount() + " URLs" +
-                             (!seed.getFlagAcceptRemoteIndex() && seed.matchPeerTags(wordhashes) ? " ROBINSON" : "") +
-                             (seed.getFlagRootNode() ? " NODE" : "") +
-                             (seed.getAge() < 1 ? " FRESH" : "")
+                            (seed.getLinkCount() >= 1000000 ? " LARGE-SIZE" : "") +
+                            (seed.getLinkCount() >= 100000 && seed.getLinkCount() < 1000000 ? " MEDIUM-SIZE" : "") +
+                            (!seed.getFlagAcceptRemoteIndex() && seed.matchPeerTags(wordhashes) ? " ROBINSON" : "") +
+                            (seed.getFlagRootNode() ? " NODE" : "") +
+                            (seed.getAge() < 1 ? " FRESH" : "")
                             );
                 }
                 extraSeeds.add(seed);
@@ -121,41 +138,64 @@ public class DHTSelection {
         return extraSeeds;
     }
     
-    public static Set<Seed> selectDHTSearchTargets(final SeedDB seedDB, final HandleSet wordhashes, final int minage, final int redundancy) {
+    public static Set<Seed> selectDHTSearchTargets(final SeedDB seedDB, final HandleSet wordhashes, final int minage, final int redundancy, final int maxredundancy, final Random random) {
 
         // put in seeds according to dht
-        Set<Seed> seeds = new HashSet<Seed>(); // dht position seeds
+        Set<Seed> seeds = new LinkedHashSet<Seed>(); // dht position seeds
         if (seedDB != null) {
             Iterator<byte[]> iter = wordhashes.iterator();
             while (iter.hasNext()) {
-                seeds.addAll(selectDHTPositions(seedDB, iter.next(), minage, redundancy));
+                seeds.addAll(collectHorizontalDHTPositions(seedDB, iter.next(), minage, redundancy, maxredundancy, random));
             }
-            //int minimumseeds = Math.min(seedDB.scheme.verticalPartitions(), regularSeeds.size()); // that should be the minimum number of seeds that are returned
-            //int maximumseeds = seedDB.scheme.verticalPartitions() * redundancy; // this is the maximum number of seeds according to dht and heuristics. It can be more using burst mode.
         }
         
         return seeds;
     }
+
+    private static ArrayList<Seed> collectHorizontalDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy, final int maxredundancy, Random random) {
+        // this method is called from the search target computation
+        ArrayList<Seed> collectedSeeds = new ArrayList<Seed>(redundancy * seedDB.scheme.verticalPartitions());
+        for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
+            ArrayList<Seed> seeds = selectVerticalDHTPositions(seedDB, wordhash, minage, maxredundancy, verticalPosition);
+            if (seeds.size() <= redundancy) {
+                collectedSeeds.addAll(seeds);
+            } else {
+                // we pick some random peers from the vertical position.
+                // All of them should be valid, but picking a random subset is a distributed load balancing on the whole YaCy network.
+                // without picking a random subset, always the same peers would be targeted for the same word resulting in (possible) DoS on the target.
+                for (int i = 0; i < redundancy; i++) {
+                    collectedSeeds.add(seeds.remove(random.nextInt(seeds.size())));
+                }
+            }
+        }
+        return collectedSeeds;
+    }
     
-    private static List<Seed> selectDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy) {
+    /**
+     * collecting vertical positions: that chooses for each of the DHT partition a collection of redundant storage positions
+     * @param seedDB the database of seeds
+     * @param wordhash the word we are searching for
+     * @param minage the minimum age of a seed (to prevent that too young seeds which cannot have results yet are asked)
+     * @param redundancy the number of redundant peer position for this parition, minimum is 1
+     * @param verticalPosition the verical position, thats the number of the partition 0 <= verticalPosition < seedDB.scheme.verticalPartitions()
+     * @return a list of seeds for the redundant positions
+     */
+    private static ArrayList<Seed> selectVerticalDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy, int verticalPosition) {
         // this method is called from the search target computation
         ArrayList<Seed> seeds = new ArrayList<Seed>(redundancy);
-        Seed seed;
-        for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
-            final long dhtVerticalTarget = seedDB.scheme.verticalDHTPosition(wordhash, verticalPosition);
-            final byte[] verticalhash = Distribution.positionToHash(dhtVerticalTarget);
-            final Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, verticalhash, redundancy, false);
-            int c = Math.min(seedDB.sizeConnected(), redundancy);
-            int cc = 20; // in case that the network grows rapidly, we may jump to several additional peers but that must have a limit
-            while (dhtEnum.hasNext() && c > 0 && cc-- > 0) {
-                seed = dhtEnum.next();
-                if (seed == null || seed.hash == null) continue;
-                if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
-                if (seed.getAge() < minage) continue; // prevent bad results because of too strong network growth
-                if (RemoteSearch.log.isInfo()) RemoteSearch.log.info("selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
-                seeds.add(seed);
-                c--;
-            }
+        final long dhtVerticalTarget = seedDB.scheme.verticalDHTPosition(wordhash, verticalPosition);
+        final byte[] verticalhash = Distribution.positionToHash(dhtVerticalTarget);
+        final Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, verticalhash, redundancy, false);
+        int c = Math.min(seedDB.sizeConnected(), redundancy);
+        int cc = 20; // in case that the network grows rapidly, we may jump to several additional peers but that must have a limit
+        while (dhtEnum.hasNext() && c > 0 && cc-- > 0) {
+            Seed seed = dhtEnum.next();
+            if (seed == null || seed.hash == null) continue;
+            if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
+            if (seed.getAge() < minage) continue; // prevent bad results because of too strong network growth
+            if (RemoteSearch.log.isInfo()) RemoteSearch.log.info("selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
+            seeds.add(seed);
+            c--;
         }
         return seeds;
     }

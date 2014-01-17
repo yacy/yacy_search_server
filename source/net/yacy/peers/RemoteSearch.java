@@ -24,8 +24,11 @@
 
 package net.yacy.peers;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -144,31 +147,48 @@ public class RemoteSearch extends Thread {
         final boolean shortmem = MemoryControl.shortStatus();
         final int indexingQueueSize = event.query.getSegment().fulltext().bufferSize();
         int redundancy = event.peers.redundancy();
-        if (indexingQueueSize > 10) redundancy = Math.max(1, redundancy - 1);
-        if (indexingQueueSize > 50) redundancy = Math.max(1, redundancy - 1);
-        if (Memory.load() > 2.0) redundancy = Math.max(1, redundancy - 1);
-        if (Memory.cores() < 4) redundancy = Math.max(1, redundancy - 1);
-        if (Memory.cores() == 1) redundancy = 1;
+        StringBuilder healthMessage = new StringBuilder(50);
+        if (indexingQueueSize > 0) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", indexingQueueSize > 0");}
+        if (indexingQueueSize > 10) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", indexingQueueSize > 10");}
+        if (indexingQueueSize > 50) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", indexingQueueSize > 50");}
+        if (Memory.load() > 2.0) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", load() > 2.0");}
+        if (Memory.cores() < 4) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", cores() < 4");}
+        if (Memory.cores() == 1) {redundancy = 1; healthMessage.append(", cores() == 1");}
         int minage = 3;
         int robinsoncount = event.peers.scheme.verticalPartitions() * redundancy / 2;
+        if (indexingQueueSize > 0) robinsoncount = Math.max(1, robinsoncount / 2);
         if (indexingQueueSize > 10) robinsoncount = Math.max(1, robinsoncount / 2);
         if (indexingQueueSize > 50) robinsoncount = Math.max(1, robinsoncount / 2);
-        if (shortmem) {redundancy = 1; robinsoncount = 1;}
+        if (shortmem) {redundancy = 1; robinsoncount = 1; healthMessage.append(", shortmem");}
         
         
         // prepare seed targets and threads
-        final Set<Seed> dhtPeers =
-            (clusterselection == null) ?
-                    DHTSelection.selectDHTSearchTargets(
+        Random random = new Random(System.currentTimeMillis());
+        Set<Seed> dhtPeers = null;
+        if (clusterselection != null) {
+            dhtPeers = DHTSelection.selectClusterPeers(event.peers, clusterselection);
+        } else {
+            dhtPeers = DHTSelection.selectDHTSearchTargets(
                             event.peers,
                             event.query.getQueryGoal().getIncludeHashes(),
                             minage,
-                            redundancy)
-                  : DHTSelection.selectClusterPeers(event.peers, clusterselection);
-        if (dhtPeers == null) return;
+                            redundancy, event.peers.redundancy(),
+                            random);
+            // this set of peers may be too large and consume too many threads if more than one word is searched.
+            // to prevent overloading, we do a subset collection based on random to prevent the death of the own peer
+            // and to do a distributed load-balancing on the target peers
+            long targetSize = 1 + redundancy * event.peers.scheme.verticalPartitions(); // this is the maximum for one word plus one
+            if (dhtPeers.size() > targetSize) {
+                ArrayList<Seed> pa = new ArrayList<Seed>(dhtPeers.size());
+                pa.addAll(dhtPeers);
+                dhtPeers.clear();
+                for (int i = 0; i < targetSize; i++) dhtPeers.add(pa.remove(random.nextInt(pa.size())));
+            }
+        }
+        if (dhtPeers == null) dhtPeers = new HashSet<Seed>();
         
         // select node targets
-        final Collection<Seed> robinsonPeers = DHTSelection.selectExtraTargets(event.peers, event.query.getQueryGoal().getIncludeHashes(), minage, dhtPeers, robinsoncount);
+        final Collection<Seed> robinsonPeers = DHTSelection.selectExtraTargets(event.peers, event.query.getQueryGoal().getIncludeHashes(), minage, dhtPeers, robinsoncount, random);
         
         if (event.peers != null) {
             if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
@@ -183,7 +203,7 @@ public class RemoteSearch extends Thread {
         }
         
         log.info("preparing remote search: shortmem=" + (shortmem ? "true" : "false") + ", indexingQueueSize=" + indexingQueueSize +
-                ", redundancy=" + redundancy + ", minage=" + minage + ", robinsoncount=" + robinsoncount + ", dhtPeers=" + dhtPeers.size() + ", robinsonpeers=" + robinsonPeers.size());
+                ", redundancy=" + redundancy + ", minage=" + minage + ", dhtPeers=" + dhtPeers.size() + ", robinsonpeers=" + robinsonPeers.size() + ", health: " + (healthMessage.length() > 0 ? healthMessage.substring(2) : "perfect"));
         
         
         // start solr searches
@@ -296,12 +316,13 @@ public class RemoteSearch extends Thread {
                     int urls = 0;
                     try {
                         event.oneFeederStarted();
+                        boolean localsearch = (targetPeer == null || targetPeer.equals(event.peers.mySeed())) && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false);
                         urls = Protocol.solrQuery(
                                         event,
                                         solrQuery,
                                         start,
                                         count,
-                                        targetPeer,
+                                        localsearch ? event.peers.mySeed() : targetPeer,
                                         partitions,
                                         blacklist);
                         if (urls >= 0) {
