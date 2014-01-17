@@ -140,7 +140,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     @Override
-    public long getSize() {
+    public synchronized long getSize() {
         RefCounted<SolrIndexSearcher> refCountedIndexSearcher = this.core.getSearcher();
         SolrIndexSearcher searcher = refCountedIndexSearcher.get();
         DirectoryReader reader = searcher.getIndexReader();
@@ -161,7 +161,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return req;
     }
     
-    public SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
+    public synchronized SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
         final long startTime = System.currentTimeMillis();
 
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
@@ -268,7 +268,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * Reason: Solr makes a very complex folding/unfolding including data compression for SolrQueryResponses.
      */
     @Override
-    public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
+    public synchronized QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = params.get("q");
@@ -297,7 +297,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @throws SolrException
      */
     @Override
-    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
+    public synchronized SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
         SolrQueryRequest req = this.request(params);
         SolrQueryResponse response = null;
         try {
@@ -310,7 +310,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         }
     }
 
-    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
+    public synchronized long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
         SolrQueryRequest req = this.request(params);
         SolrQueryResponse response = null;
         try {
@@ -357,7 +357,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     @Override
-    public long getCountByQuery(String querystring) {
+    public synchronized long getCountByQuery(String querystring) {
     	int numFound = 0;
     	DocListSearcher docListSearcher = null;
         try {
@@ -375,7 +375,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     @Override
-    public Set<String> existsByIds(Set<String> ids) {
+    public synchronized Set<String> existsByIds(Set<String> ids) {
         if (ids == null || ids.size() == 0) return new HashSet<String>();
         if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
         Set<String> idsr = new TreeSet<String>();
@@ -404,7 +404,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     @Override
-    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime) {
+    public synchronized BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime) {
         final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final Thread t = new Thread() {
