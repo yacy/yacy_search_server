@@ -33,8 +33,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
@@ -65,7 +63,8 @@ public class ConfigAccounts_p {
             // may be overwritten if new password is given
             if (user.length() > 0 && pw1.length() > 3 && pw1.equals(pw2)) {
                 // check passed. set account:
-                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
+                // old: // env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
+                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:"+Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":"+ pw1));
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);                
             } else {
@@ -193,7 +192,9 @@ public class ConfigAccounts_p {
             if( "newuser".equals(post.get("current_user"))){ //new user
 
                 if (!"".equals(pw1)) { //change only if set
-                    mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username + ":" + pw1));
+                    // MD5 according to HTTP Digest RFC 2617 (3.2.2) name:realm:pwd (use seed.hash as realm)
+                    // with prefix of encoding method (supported MD5: )
+                    mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, "MD5:"+Digest.encodeMD5Hex(username + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":"+pw1));
                 }
 
                 mem.put(UserDB.Entry.USER_FIRSTNAME, firstName);
@@ -222,7 +223,8 @@ public class ConfigAccounts_p {
                 if (entry != null) {
                     try{
                         if (!"".equals(pw1)) {
-                            entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
+                            // with prefix of encoding method (supported MD5: )
+                            entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, "MD5:"+Digest.encodeMD5Hex(username+ ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":"+pw1));
                         }
 
                         entry.setProperty(UserDB.Entry.USER_FIRSTNAME, firstName);

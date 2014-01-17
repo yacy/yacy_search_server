@@ -400,6 +400,16 @@ adminAccountUserName=admin
 # inaccessibility for installations on headless servers.
 adminAccountForLocalhost=true
 
+# adminRealm: a internal name (like a group name) for the login setting of the admin frontend
+# ATTENTION: changing this name will invalidate all currently password hashes
+# - With DIGEST authentication mode is this realm name of generated password hashes
+#   (RFC 2617 standard and recommendation). If you want to share password configuration 
+#   with additional machines they have to belong to the same realm
+# - authentication defaults to BASIC 
+# - and can be configured in defaults/web.xml , tag <auth-method>
+
+adminRealm=YaCy-AdminUI
+
 # if you are running a principal peer, you must update the following variables
 # The upload method that should be used to upload the seed-list file to
 # a public accessible webserver where it can be loaded by other peers.

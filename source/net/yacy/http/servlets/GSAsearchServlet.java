@@ -38,6 +38,7 @@ import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
@@ -100,7 +101,7 @@ public class GSAsearchServlet extends HttpServlet {
 
         // --- handled by Servlet securityHandler
         // check if user is allowed to search (can be switched in /ConfigPortal.html)
-        boolean authenticated = header.isUserInRole("admin"); //sb.adminAuthenticated(header) >= 2;
+        boolean authenticated = header.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString()); //sb.adminAuthenticated(header) >= 2;
         // final boolean searchAllowed = authenticated || sb.getConfigBool("publicSearchpage", true);
         // if (!searchAllowed) return null;
 

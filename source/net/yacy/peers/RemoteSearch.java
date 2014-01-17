@@ -24,9 +24,8 @@
 
 package net.yacy.peers;
 
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -35,6 +34,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -46,7 +47,8 @@ import net.yacy.search.query.SecondarySearchSuperviser;
 public class RemoteSearch extends Thread {
 
     private static final ThreadGroup ysThreadGroup = new ThreadGroup("yacySearchThreadGroup");
-
+    public static final ConcurrentLog log = new ConcurrentLog("DHT");
+    
     final private SearchEvent event;
     final private String wordhashes, excludehashes, contentdom;
     final private int partitions;
@@ -134,53 +136,61 @@ public class RemoteSearch extends Thread {
     		final int start, final int count, 
             final long time,
             final Blacklist blacklist,
-            final SortedMap<byte[], String> clusterselection,
-            final int burstRobinsonPercent,
-            final int burstMultiwordPercent) {
+            final SortedMap<byte[], String> clusterselection) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
+        
+        // check the peer memory and lifesign-situation to get a scaling for the number of remote search processes
+        final boolean shortmem = MemoryControl.shortStatus();
+        final int indexingQueueSize = event.query.getSegment().fulltext().bufferSize();
+        int redundancy = event.peers.redundancy();
+        if (indexingQueueSize > 10) redundancy = Math.max(1, redundancy - 1);
+        if (indexingQueueSize > 50) redundancy = Math.max(1, redundancy - 1);
+        if (Memory.load() > 2.0) redundancy = Math.max(1, redundancy - 1);
+        if (Memory.cores() < 4) redundancy = Math.max(1, redundancy - 1);
+        if (Memory.cores() == 1) redundancy = 1;
+        int minage = 3;
+        int robinsoncount = event.peers.scheme.verticalPartitions() * redundancy / 2;
+        if (indexingQueueSize > 10) robinsoncount = Math.max(1, robinsoncount / 2);
+        if (indexingQueueSize > 50) robinsoncount = Math.max(1, robinsoncount / 2);
+        if (shortmem) {redundancy = 1; robinsoncount = 1;}
+        
+        
         // prepare seed targets and threads
-        final List<Seed> dhtPeers =
+        final Set<Seed> dhtPeers =
             (clusterselection == null) ?
-                    DHTSelection.selectSearchTargets(
+                    DHTSelection.selectDHTSearchTargets(
                             event.peers,
                             event.query.getQueryGoal().getIncludeHashes(),
-                            event.peers.redundancy(),
-                            burstRobinsonPercent,
-                            burstMultiwordPercent)
+                            minage,
+                            redundancy)
                   : DHTSelection.selectClusterPeers(event.peers, clusterselection);
         if (dhtPeers == null) return;
-
-        // find nodes
-        Set<Seed> omit = new HashSet<Seed>();
-        for (Seed s: dhtPeers) omit.add(s);
-        List<Seed> nodePeers = DHTSelection.selectNodeSearchTargets(event.peers, 20, omit);
         
-        // remove all robinson peers from the dhtPeers and put them to the nodes
-        Iterator<Seed> si = dhtPeers.iterator();
-        while (si.hasNext()) {
-            Seed s = si.next();
-            if (!s.getFlagAcceptRemoteIndex()) {
-                si.remove();
-                nodePeers.add(s);
+        // select node targets
+        final Collection<Seed> robinsonPeers = DHTSelection.selectExtraTargets(event.peers, event.query.getQueryGoal().getIncludeHashes(), minage, dhtPeers, robinsoncount);
+        
+        if (event.peers != null) {
+            if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
+                dhtPeers.clear();
+                dhtPeers.add(event.peers.mySeed());
+            }
+            
+            if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
+                robinsonPeers.clear();
+                robinsonPeers.add(event.peers.mySeed());
             }
         }
         
-        if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
-            dhtPeers.clear();
-            dhtPeers.add(event.peers.mySeed());
-        }
+        log.info("preparing remote search: shortmem=" + (shortmem ? "true" : "false") + ", indexingQueueSize=" + indexingQueueSize +
+                ", redundancy=" + redundancy + ", minage=" + minage + ", robinsoncount=" + robinsoncount + ", dhtPeers=" + dhtPeers.size() + ", robinsonpeers=" + robinsonPeers.size());
         
-        if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
-            nodePeers.clear();
-            nodePeers.add(event.peers.mySeed());
-        }
-
+        
         // start solr searches
-        final int targets = dhtPeers.size() + nodePeers.size();
+        final int targets = dhtPeers.size() + robinsonPeers.size();
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
             final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
-            for (Seed s: nodePeers) {
+            for (Seed s: robinsonPeers) {
                 Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
                 event.nodeSearchThreads.add(t);
             }
@@ -188,8 +198,8 @@ public class RemoteSearch extends Thread {
         
         // start search to YaCy DHT peers
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
-            for (int i = 0; i < dhtPeers.size(); i++) {
-                if (dhtPeers.get(i) == null || dhtPeers.get(i).hash == null) continue;
+            for (Seed dhtPeer: dhtPeers) {
+                if (dhtPeer == null || dhtPeer.hash == null) continue;
                 try {
                     RemoteSearch rs = new RemoteSearch(
                         event,
@@ -201,7 +211,7 @@ public class RemoteSearch extends Thread {
                         time,
                         event.query.maxDistance,
                         targets,
-                        dhtPeers.get(i),
+                        dhtPeer,
                         event.secondarySearchSuperviser,
                         blacklist);
                     rs.start();

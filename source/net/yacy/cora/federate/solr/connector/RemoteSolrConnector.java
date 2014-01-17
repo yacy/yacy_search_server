@@ -74,6 +74,11 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     public synchronized void close() {
         super.close();
     }
+    
+    @Override
+    public int bufferSize() {
+        return 0;
+    }
 
     @Override
     public void clearCaches() {

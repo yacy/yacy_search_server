@@ -1162,7 +1162,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     @Override
     public int compareTo(final Seed arg0) {
-        // TODO Auto-generated method stub
         final int o1 = hashCode();
         final int o2 = arg0.hashCode();
         if ( o1 > o2 ) {

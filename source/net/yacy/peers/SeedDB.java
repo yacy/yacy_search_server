@@ -220,7 +220,7 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     public int redundancy() {
-        if (this.mySeed.isJunior()) return 1;
+        if (this.mySeed.isVirgin()) return 1;
         return this.netRedundancy;
     }
 
@@ -466,9 +466,9 @@ public final class SeedDB implements AlternativeDomainNames {
     public void addConnected(final Seed seed) {
         if (seed.isProper(false) != null) return;
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+        final ConcurrentMap<String, String> seedPropMap = seed.getMap();
         synchronized (this) {
             try {
-                final ConcurrentMap<String, String> seedPropMap = seed.getMap();
                 this.seedActiveDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
                 this.seedPassiveDB.delete(ASCII.getBytes(seed.hash));
                 this.seedPotentialDB.delete(ASCII.getBytes(seed.hash));
@@ -499,6 +499,7 @@ public final class SeedDB implements AlternativeDomainNames {
 
     protected void addPotential(final Seed seed) {
         if (seed.isProper(false) != null) return;
+        final ConcurrentMap<String, String> seedPropMap = seed.getMap();
         synchronized (this) {
             try {
                 this.seedActiveDB.delete(ASCII.getBytes(seed.hash));
@@ -506,7 +507,6 @@ public final class SeedDB implements AlternativeDomainNames {
             } catch (final Exception e) { ConcurrentLog.warn("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
             //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
             try {
-                final ConcurrentMap<String, String> seedPropMap = seed.getMap();
                 this.seedPotentialDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
             } catch (final Exception e) {
                 Network.log.severe("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -558,8 +558,30 @@ public final class SeedDB implements AlternativeDomainNames {
         }
         return new Seed(hash, entry);
     }
+    
+    private Seed get(final byte[] hash, final MapDataMining database) {
+        if (hash == null || hash.length == 0) return null;
+        if ((this.mySeed != null) && (hash.equals(this.mySeed.hash))) return this.mySeed;
+        final ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
+        try {
+            final Map<String, String> map = database.get(hash);
+            if (map == null) return null;
+            entry.putAll(map);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
+            return null;
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.logException(e);
+            return null;
+        }
+        return new Seed(ASCII.String(hash), entry);
+    }
 
     public Seed getConnected(final String hash) {
+        return get(hash, this.seedActiveDB);
+    }
+
+    public Seed getConnected(final byte[] hash) {
         return get(hash, this.seedActiveDB);
     }
 
@@ -567,7 +589,15 @@ public final class SeedDB implements AlternativeDomainNames {
         return get(hash, this.seedPassiveDB);
     }
 
+    public Seed getDisconnected(final byte[] hash) {
+        return get(hash, this.seedPassiveDB);
+    }
+
     public Seed getPotential(final String hash) {
+        return get(hash, this.seedPotentialDB);
+    }
+
+    public Seed getPotential(final byte[] hash) {
         return get(hash, this.seedPotentialDB);
     }
 
@@ -613,7 +643,7 @@ public final class SeedDB implements AlternativeDomainNames {
         synchronized (this) { try {
             Collection<byte[]> idx = this.seedActiveDB.select(Seed.NAME, name);
             for (byte[] pk: idx) {
-                seed = this.getConnected(ASCII.String(pk));
+                seed = this.getConnected(pk);
                 if (seed == null) continue;
                 //System.out.println("*** found lookupByName in seedActiveDB: " + peerName);
                 return seed;
@@ -623,7 +653,7 @@ public final class SeedDB implements AlternativeDomainNames {
         synchronized (this) { try {
             Collection<byte[]> idx = this.seedPassiveDB.select(Seed.NAME, name);
             for (byte[] pk: idx) {
-                seed = this.getDisconnected(ASCII.String(pk));
+                seed = this.getDisconnected(pk);
                 if (seed == null) continue;
                 //System.out.println("*** found lookupByName in seedPassiveDB: " + peerName);
                 return seed;
@@ -659,45 +689,48 @@ public final class SeedDB implements AlternativeDomainNames {
         Seed seed = null;
         String ipString = peerIP.getHostAddress();
 
-        if (lookupConnected) synchronized (this) {
+        if (lookupConnected) {
             try {
                 Collection<byte[]> idx = this.seedActiveDB.select(Seed.IP, ipString);
                 for (byte[] pk: idx) {
-                    seed = this.getConnected(ASCII.String(pk));
+                    seed = this.getConnected(pk);
                     if (seed == null) continue;
                     if ((port >= 0) && (seed.getPort() != port)) continue;
                     //System.out.println("*** found lookupByIP in connected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch (final  IOException e ) {
+            } catch (final IOException e ) {
+                ConcurrentLog.logException(e);
             }
         }
 
-        if (lookupDisconnected) synchronized (this) {
+        if (lookupDisconnected) {
             try {
                 Collection<byte[]> idx = this.seedPassiveDB.select(Seed.IP, ipString);
                 for (byte[] pk: idx) {
-                    seed = this.getDisconnected(ASCII.String(pk));
+                    seed = this.getDisconnected(pk);
                     if (seed == null) continue;
                     if ((port >= 0) && (seed.getPort() != port)) continue;
                     //System.out.println("*** found lookupByIP in disconnected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch (final  IOException e ) {
+            } catch (final IOException e ) {
+                ConcurrentLog.logException(e);
             }
         }
 
-        if (lookupPotential) synchronized (this) {
+        if (lookupPotential) {
             try {
                 Collection<byte[]> idx = this.seedPotentialDB.select(Seed.IP, ipString);
                 for (byte[] pk: idx) {
-                    seed = this.getPotential(ASCII.String(pk));
+                    seed = this.getPotential(pk);
                     if (seed == null) continue;
                     if ((port >= 0) && (seed.getPort() != port)) continue;
                     //System.out.println("*** found lookupByIP in potential: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch (final  IOException e ) {
+            } catch (final IOException e ) {
+                ConcurrentLog.logException(e);
             }
         }
 

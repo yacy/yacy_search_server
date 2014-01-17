@@ -46,15 +46,23 @@ import java.util.logging.Logger;
  */
 public final class ConcurrentLog {
 
-
+    private final static Logger ConcurrentLogLogger = Logger.getLogger("ConcurrentLog");
     private final static Message POISON_MESSAGE = new Message();
-    private final static BlockingQueue<Message> logQueue = new ArrayBlockingQueue<Message>(300);
-    private final static Worker logRunnerThread = new Worker();
+    private final static BlockingQueue<Message> logQueue = new ArrayBlockingQueue<Message>(500);
+    private static Worker logRunnerThread = null;
 
     static {
-        logRunnerThread.start();
+        ensureWorkerIsRunning();
     }
 
+    public static void ensureWorkerIsRunning() {
+        if (logRunnerThread == null || !logRunnerThread.isAlive()) {
+            logRunnerThread = new Worker();
+            logRunnerThread.start();
+            ConcurrentLogLogger.log(Level.INFO, "started ConcurrentLog.Worker.");
+        }
+    }
+    
     private final Logger theLogger;
 
     public ConcurrentLog(final String appName) {
@@ -165,12 +173,18 @@ public final class ConcurrentLog {
     public final boolean isLoggable(final Level level) {
         return this.theLogger.isLoggable(level);
     }
-
-
+    
+    /*
+    public final void logException(final Throwable thrown) {
+        if (thrown == null) return;
+        enQueueLog(this.theLogger, Level.WARNING, thrown.getMessage(), thrown);
+    }
+    */
+    
     // static log messages
     public final static void logException(final Throwable thrown) {
         if (thrown == null) return;
-        enQueueLog("StackTrace", Level.WARNING, thrown.getMessage(), thrown);
+        enQueueLog("ConcurrentLog", Level.WARNING, thrown.getMessage(), thrown);
     }
     public final static void severe(final String appName, final String message) {
         enQueueLog(appName, Level.SEVERE, message);
@@ -234,10 +248,11 @@ public final class ConcurrentLog {
         return Logger.getLogger(appName).isLoggable(Level.FINEST);
     }
 
+    // private
     private final static void enQueueLog(final Logger logger, final Level level, final String message, final Throwable thrown) {
         if (!logger.isLoggable(level)) return;
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
-            if (thrown == null) logger.log(level, message); else  logger.log(level, message, thrown);
+            if (thrown == null) logger.log(level, "* " + message); else logger.log(level, "* " + message, thrown); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
             	if (thrown == null) logQueue.put(new Message(logger, level, message)); else logQueue.put(new Message(logger, level, message, thrown));
@@ -250,7 +265,7 @@ public final class ConcurrentLog {
     private final static void enQueueLog(final Logger logger, final Level level, final String message) {
         if (!logger.isLoggable(level)) return;
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
-            logger.log(level, message);
+            logger.log(level, "* " + message); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
                 logQueue.put(new Message(logger, level, message));
@@ -262,7 +277,7 @@ public final class ConcurrentLog {
 
     private final static void enQueueLog(final String loggername, final Level level, final String message, final Throwable thrown) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
-        	if (thrown == null) Logger.getLogger(loggername).log(level, message); else Logger.getLogger(loggername).log(level, message, thrown);
+        	if (thrown == null) Logger.getLogger(loggername).log(level, "* " + message); else Logger.getLogger(loggername).log(level, "* " + message, thrown); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
             	if (thrown == null) logQueue.put(new Message(loggername, level, message)); else logQueue.put(new Message(loggername, level, message, thrown));
@@ -274,7 +289,7 @@ public final class ConcurrentLog {
 
     private final static void enQueueLog(final String loggername, final Level level, final String message) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
-            Logger.getLogger(loggername).log(level, message);
+            Logger.getLogger(loggername).log(level, "* " + message); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
                 logQueue.put(new Message(loggername, level, message));
@@ -336,14 +351,10 @@ public final class ConcurrentLog {
         public void run() {
             Message entry;
             Map<String, Logger> loggerCache = new HashMap<String, Logger>();
-            //Map<String, AtomicInteger> loggerCounter = new HashMap<String, AtomicInteger>();
             try {
                 while ((entry = logQueue.take()) != POISON_MESSAGE) {
                     if (entry.logger == null) {
                         assert entry.loggername != null;
-                        //AtomicInteger i = loggerCounter.get(entry.loggername);
-                        //if (i == null) {i = new AtomicInteger(0); loggerCounter.put(entry.loggername, i);}
-                        //i.incrementAndGet();
                         Logger l = loggerCache.get(entry.loggername);
                         if (l == null) {l = Logger.getLogger(entry.loggername); loggerCache.put(entry.loggername, l);}
                         if (entry.thrown == null) {
@@ -360,10 +371,10 @@ public final class ConcurrentLog {
                         }
                     }
                 }
-            } catch (final InterruptedException e) {
-                ConcurrentLog.logException(e);
+            } catch (final Throwable e) {
+                ConcurrentLogLogger.log(Level.SEVERE, "ConcurrentLog.Worker has terminated", e);
             }
-            //Logger.getLogger("Log").log(Level.INFO, "closing logRunner with cached loggers: " + loggerCounter.entrySet().toString());
+            ConcurrentLogLogger.log(Level.INFO, "terminating ConcurrentLog.Worker with " + logQueue.size() + " cached loglines.");
         }
     }
 
@@ -408,9 +419,11 @@ public final class ConcurrentLog {
                     e.printStackTrace(ps);
                     ps.close();
                     exceptionLog.severe(msg + "\n" + baos.toString(), e);
-                    ConcurrentLog.logException(e);
-                    ConcurrentLog.logException(e.getCause());
-                    if (e instanceof InvocationTargetException) ConcurrentLog.logException(((InvocationTargetException) e).getTargetException());
+                    ConcurrentLogLogger.log(Level.SEVERE, e.getMessage(), e);
+                    if (e instanceof InvocationTargetException) {
+                        Throwable target = ((InvocationTargetException) e).getTargetException();
+                        ConcurrentLogLogger.log(Level.SEVERE, target.getMessage(), target);
+                    }
                 }
             });
         } finally {
@@ -419,29 +432,17 @@ public final class ConcurrentLog {
     }
 
     public final static void shutdown() {
-        if (logRunnerThread == null || !logRunnerThread.isAlive()) return;
+        if (logRunnerThread == null || !logRunnerThread.isAlive()) {
+            ConcurrentLogLogger.log(Level.INFO, "shutdown of ConcurrentLog.Worker void because it was not running.");
+            return;
+        }
         try {
+            ConcurrentLogLogger.log(Level.INFO, "shutdown of ConcurrentLog.Worker: injection of poison message");
             logQueue.put(POISON_MESSAGE);
-            logRunnerThread.join(1000);
+            logRunnerThread.join(2000);
+            ConcurrentLogLogger.log(Level.INFO, "shutdown of ConcurrentLog.Worker: terminated");
         } catch (final InterruptedException e) {
         }
-    }
-
-    public final static String format(final String s, int n, final int fillChar) {
-        final int l = s.length();
-        if (l >= n) return s;
-        final StringBuilder sb = new StringBuilder(l + n);
-        for (final int i = l + n; i > n; n--) sb.insert(0, fillChar);
-        return sb.toString();
-    }
-
-    public final static boolean allZero(final byte[] a) {
-        return allZero(a, 0, a.length);
-    }
-
-    public final static boolean allZero(final byte[] a, final int astart, final int alength) {
-        for (int i = 0; i < alength; i++) if (a[astart + i] != 0) return false;
-        return true;
     }
 
     public static String stackTrace() {

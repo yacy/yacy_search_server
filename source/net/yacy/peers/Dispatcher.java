@@ -36,7 +36,6 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -83,7 +82,7 @@ public class Dispatcher {
 
     // a cloud is a cache for the objects that wait to be transmitted
     // the String-key is the primary target as contained in the Entry
-    private Map<ByteArray, Transmission.Chunk> transmissionCloud;
+    private Map<String, Transmission.Chunk> transmissionCloud;
 
     // the segment backend is used to store the remaining indexContainers in case that the object is closed
     private final Segment segment;
@@ -106,7 +105,7 @@ public class Dispatcher {
             final boolean gzipBody,
             final int timeout
             ) {
-        this.transmissionCloud = new ConcurrentHashMap<ByteArray, Transmission.Chunk>();
+        this.transmissionCloud = new ConcurrentHashMap<String, Transmission.Chunk>();
         this.segment = segment;
         this.seeds = seeds;
         this.log = new ConcurrentLog("INDEX-TRANSFER-DISPATCHER");
@@ -238,21 +237,9 @@ public class Dispatcher {
         for (int i = 0; i < partitions.length; i++) partitions[i] = new ArrayList<ReferenceContainer<WordReference>>();
 
         // check all entries and split them to the partitions
-        final ReferenceContainer<WordReference>[] partitionBuffer = new ReferenceContainer[partitionCount];
-        WordReference re;
         for (final ReferenceContainer<WordReference> container: containers) {
             // init the new partitions
-            for (int j = 0; j < partitionBuffer.length; j++) {
-                partitionBuffer[j] = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), container.size() / partitionCount);
-            }
-
-            // split the container
-            final Iterator<WordReference> i = container.entries();
-            while (i.hasNext()) {
-                re = i.next();
-                if (re == null) continue;
-                partitionBuffer[this.seeds.scheme.verticalDHTPosition(re.urlhash())].add(re);
-            }
+            final ReferenceContainer<WordReference>[] partitionBuffer = splitContainer(container);
 
             // add the containers to the result vector
             for (int j = 0; j < partitionBuffer.length; j++) {
@@ -260,6 +247,31 @@ public class Dispatcher {
             }
         }
         return partitions;
+    }
+    
+    private ReferenceContainer<WordReference>[] splitContainer(final ReferenceContainer<WordReference> container) throws SpaceExceededException {
+
+        // init the result vector
+        final int partitionCount = this.seeds.scheme.verticalPartitions();
+
+        // check all entries and split them to the partitions
+        @SuppressWarnings("unchecked")
+        final ReferenceContainer<WordReference>[] partitionBuffer = new ReferenceContainer[partitionCount];
+        
+        // init the new partitions
+        for (int j = 0; j < partitionBuffer.length; j++) {
+            partitionBuffer[j] = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), container.size() / partitionCount);
+        }
+
+        // split the container
+        final Iterator<WordReference> i = container.entries();
+        while (i.hasNext()) {
+            WordReference wordReference = i.next();
+            if (wordReference == null) continue;
+            partitionBuffer[this.seeds.scheme.verticalDHTPosition(wordReference.urlhash())].add(wordReference);
+        }
+
+        return partitionBuffer;
     }
 
     /**
@@ -275,39 +287,28 @@ public class Dispatcher {
     private void enqueueContainersToCloud(final List<ReferenceContainer<WordReference>>[] containers) {
         assert (containers.length == this.seeds.scheme.verticalPartitions());
         if (this.transmissionCloud == null) return;
-        ReferenceContainer<WordReference> lastContainer;
         byte[] primaryTarget;
-        ByteArray pTArray;
+        String primaryTargetString;
         Transmission.Chunk entry;
         for (int vertical = 0; vertical < containers.length; vertical++) {
-            // the 'new' primary target is the word hash of the last container in the array
-            lastContainer = containers[vertical].get(containers[vertical].size() - 1);
+            List<ReferenceContainer<WordReference>> verticalList = containers[vertical];
+            ReferenceContainer<WordReference> lastContainer = verticalList.get(verticalList.size() - 1);
             primaryTarget = Distribution.positionToHash(this.seeds.scheme.verticalDHTPosition(lastContainer.getTermHash(), vertical));
             assert primaryTarget[2] != '@';
-            pTArray = new ByteArray(primaryTarget);
+            primaryTargetString = ASCII.String(primaryTarget);
 
             // get or make a entry object
-            entry = this.transmissionCloud.get(pTArray); // if this is not null, the entry is extended here
+            entry = this.transmissionCloud.get(primaryTargetString); // if this is not null, the entry is extended here
             final List<Seed> targets = DHTSelection.getAcceptRemoteIndexSeedsList(
                     this.seeds,
                     primaryTarget,
                     this.seeds.redundancy() * 3,
                     true);
-            this.log.info("enqueueContainers: selected " + targets.size() + " targets for primary target key " + ASCII.String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
-            if (entry == null) entry = this.transmission.newChunk(primaryTarget, targets);
-
-            /*/ lookup targets
-            int sc = 1;
-            for (yacySeed seed : targets) {
-            	if(seed == null) continue;
-				if(seed == seeds.mySeed())	this.log.logInfo("enqueueContainers: myself-target at position " + sc);
-				this.log.logInfo("enqueueContainers: primaryTarget distance at position " + sc + ": " + FlatWordPartitionScheme.std.dhtDistance(primaryTarget, null, seed));
-				this.log.logInfo("enqueueContainers: distance to first container at position " + sc + ": " + FlatWordPartitionScheme.std.dhtDistance(FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(containers[vertical].get(0).getTermHash(), vertical)), null, seed));
-				sc++;
-			}*/
+            this.log.info("enqueueContainers: selected " + targets.size() + " targets for primary target key " + primaryTargetString + "/" + vertical + " with " + verticalList.size() + " index containers.");
+            if (entry == null) entry = this.transmission.newChunk(primaryTargetString, targets);
 
             // fill the entry with the containers
-            for (final ReferenceContainer<WordReference> c: containers[vertical]) {
+            for (final ReferenceContainer<WordReference> c: verticalList) {
                 try {
                     entry.add(c);
                 } catch (final SpaceExceededException e) {
@@ -317,7 +318,7 @@ public class Dispatcher {
             }
 
             // put the entry into the cloud
-            if (this.transmissionCloud != null && entry.containersSize() > 0) this.transmissionCloud.put(pTArray, entry);
+            if (this.transmissionCloud != null && entry.containersSize() > 0) this.transmissionCloud.put(primaryTargetString, entry);
         }
     }
 
@@ -343,7 +344,7 @@ public class Dispatcher {
         	return false;
         }
 
-        List<ReferenceContainer<WordReference>>[] splitContainerCache;
+        List<ReferenceContainer<WordReference>>[] splitContainerCache; // for each vertical partition a set of word references within a reference container
         try {
             splitContainerCache = splitContainers(selectedContainerCache);
         } catch (final SpaceExceededException e) {
@@ -375,9 +376,9 @@ public class Dispatcher {
     public boolean dequeueContainer() {
     	if (this.transmissionCloud == null) return false;
         if (this.indexingTransmissionProcessor.getQueueSize() > this.indexingTransmissionProcessor.getMaxConcurrency()) return false;
-        ByteArray maxtarget = null;
+        String maxtarget = null;
         int maxsize = -1;
-        for (final Map.Entry<ByteArray, Transmission.Chunk> chunk: this.transmissionCloud.entrySet()) {
+        for (final Map.Entry<String, Transmission.Chunk> chunk: this.transmissionCloud.entrySet()) {
             if (chunk.getValue().containersSize() > maxsize) {
                 maxsize = chunk.getValue().containersSize();
                 maxtarget = chunk.getKey();
@@ -403,17 +404,17 @@ public class Dispatcher {
 
         if (success && chunk.isFinished()) {
             // finished with this queue!
-            this.log.info("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
+            this.log.info("STORE: Chunk " + chunk.primaryTarget() + " has FINISHED all transmissions!");
             return chunk;
         }
 
-        if (!success) this.log.info("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
+        if (!success) this.log.info("STORE: Chunk " + chunk.primaryTarget() + " has failed to transmit index; marked peer as busy");
 
         if (chunk.canFinish()) {
             if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.enQueue(chunk);
             return chunk;
         }
-        this.log.info("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
+        this.log.info("STORE: Chunk " + chunk.primaryTarget() + " has not enough targets left. This transmission has failed, putting back index to backend");
         chunk.restore();
         return null;
     }
@@ -422,7 +423,7 @@ public class Dispatcher {
         // removes all entries from the dispatcher and puts them back to a RAMRI
         if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.shutdown();
         if (this.transmissionCloud != null) {
-        	outerLoop: for (final Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
+        	outerLoop: for (final Map.Entry<String, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
         		for (final ReferenceContainer<WordReference> i : e.getValue()) try {
         		    this.segment.storeRWI(i);
         		} catch (final Exception e1) {

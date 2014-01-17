@@ -151,7 +151,10 @@ public class Distribution {
      * @return a number from 0..verticalPartitions()
      */
     public final int verticalDHTPosition(final byte[] urlHash) {
-        return (int) (Distribution.horizontalDHTPosition(urlHash) >> this.shiftLength); // take only the top-<partitionExponent> bits
+        int vdp = (int) (Distribution.horizontalDHTPosition(urlHash) >> this.shiftLength); // take only the top-<partitionExponent> bits
+        assert vdp >= 0;
+        assert vdp < this.partitionCount;
+        return vdp;
     }
     
     public static void main(String[] args) {

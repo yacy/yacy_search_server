@@ -145,7 +145,7 @@ public class InstanceMirror {
         if (defaultCoreName == null) return null;
         EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, defaultCoreName);
         RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, true, defaultCoreName);
-        this.defaultConnector = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 1000000);
+        this.defaultConnector = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 100000, Runtime.getRuntime().availableProcessors());
         this.connectorCache.put(defaultCoreName, this.defaultConnector);
         return this.defaultConnector;
     }
@@ -155,15 +155,20 @@ public class InstanceMirror {
         if (msc != null) return msc;
         EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, corename);
         RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, true, corename);
-        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 1000000);
+        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 100000, Runtime.getRuntime().availableProcessors());
         this.connectorCache.put(corename, msc);
         return msc;
     }
+
+    public int bufferSize() {
+        int b = 0;
+        for (SolrConnector csc: this.connectorCache.values()) b += csc.bufferSize();
+        for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) b += ssc.bufferSize();
+        return b;
+    }
     
     public void clearCaches() {
-        for (SolrConnector csc: this.connectorCache.values()) {
-            csc.clearCaches();
-        }
+        for (SolrConnector csc: this.connectorCache.values()) csc.clearCaches();
         for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) ssc.commit(true);
     }
     

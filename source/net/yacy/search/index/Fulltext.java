@@ -227,7 +227,11 @@ public final class Fulltext {
             return this.solrInstances.getMirrorConnector(WebgraphSchema.CORE_NAME);
         }
     }
-
+    
+    public int bufferSize() {
+        return this.solrInstances.bufferSize();
+    }
+    
     public void clearCaches() {
         if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
         if (this.statsDump != null) this.statsDump.clear();
