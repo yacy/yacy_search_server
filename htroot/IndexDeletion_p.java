@@ -52,7 +52,7 @@ public class IndexDeletion_p {
 
         SolrConnector defaultConnector = sb.index.fulltext().getDefaultConnector();
         SolrConnector webgraphConnector = sb.index.fulltext().getWebgraphConnector();
-        defaultConnector.commit(false); // we must do a commit here because the user cannot see a proper count.
+        if (post != null && post.size() > 0) defaultConnector.commit(false); // we must do a commit here because the user cannot see a proper count.
         prop.put("doccount", defaultConnector.getSize());
 
         // Delete by URL Matching
