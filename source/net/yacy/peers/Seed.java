@@ -171,6 +171,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public static final String SEEDLISTURL = "seedURL";
     public static final String NEWS = "news"; // news attachment
     public static final String DCT = "dct"; // disconnect time
+    public static final String SOLRAVAILABLE ="SorlAvail"; // field to remember if remotePeer solr interface is avail.
     
     /** zero-value */
     private static final String ZERO = "0";
@@ -835,6 +836,31 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final boolean getFlagSSLAvailable() {
         if (getVersion() < 1.5) return false;
         return getFlag(FLAG_SSL_AVAILABLE);
+    }
+
+    /**
+     * remembers status of remote Solr interface dynamicly
+     * should not be used for the local peer
+     * @param value
+     */
+    public final void setFlagSolrAvailable(final boolean value) {
+         if (value) 
+             this.dna.put(Seed.SOLRAVAILABLE, "OK");
+         else
+             this.dna.put(Seed.SOLRAVAILABLE, "NA");
+    }
+
+    /**
+     * gets the last set result for remote solr status
+     *
+     * @return if status unknown it returns true
+     */
+    public final boolean getFlagSolrAvailable() {
+        // field is indented to deal with 3 states
+        // null = never checked,  "OK"  and "NA" for not available
+        String solravail = this.dna.get(Seed.SOLRAVAILABLE);
+        boolean my = (solravail != null) && ("NA".equals(solravail));
+        return !my;
     }
 
     public final void setUnusedFlags() {

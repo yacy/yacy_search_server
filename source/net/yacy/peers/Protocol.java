@@ -1048,6 +1048,10 @@ public final class Protocol {
             } else {
                 try {
                     final boolean myseed = target == event.peers.mySeed();
+                    if (!myseed && !target.getFlagSolrAvailable()) { // skip if peer.dna has flag that last try resulted in error
+                        Network.log.info("SEARCH skip (solr), remote Solr interface not accessible, peer=" + target.getName());
+                        return -1;
+                    }
                     final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress();
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
                     Thread remoteRequest = new Thread() {
@@ -1073,17 +1077,20 @@ public final class Protocol {
                     if (remoteRequest.isAlive()) {
                         try {remoteRequest.interrupt();} catch (Throwable e) {}
                         Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " does not answer (time-out)");
+                        target.setFlagSolrAvailable(false || myseed);
                         return -1; // give up, leave remoteRequest abandoned.
                     }
                     // no need to close this here because that sends a commit to remote solr which is not wanted here
                 } catch (final Throwable e) {
                     Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")");
+                    target.setFlagSolrAvailable(false || localsearch);
                     return -1;
                 }
             }
 
             if (rsp[0] == null || docList[0] == null) {
                 Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " returned null");
+                target.setFlagSolrAvailable(false || localsearch);
                 return -1;
             }
             
