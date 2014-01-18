@@ -133,7 +133,7 @@ then
 fi
 
 #turn on MMap for Solr if OS is a 64bit OS
-if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -d64 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
+if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
 
 if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
 then

@@ -25,7 +25,7 @@
 	<key>Java</key>
 	<dict>
 		<key>VMOptions</key>
-		<string>-server -d64 -Xmx600m -Xms90m -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8 -Dsolr.directoryFactory=solr.MMapDirectoryFactory</string>
+		<string>-server -Xmx600m -Xms90m -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8 -Dsolr.directoryFactory=solr.MMapDirectoryFactory</string>
 		<key>WorkingDirectory</key>
 		<string>$APP_PACKAGE/Contents/Resources/Java</string>
 		<key>MainClass</key>
