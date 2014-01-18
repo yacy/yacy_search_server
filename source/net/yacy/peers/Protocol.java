@@ -1311,6 +1311,8 @@ public final class Protocol {
         }
     }
 
+    public static boolean metadataRetrievalRunning = false;
+
     /**
      * transfer the index. If the transmission fails, return a string describing the cause. If everything is
      * ok, return null.
@@ -1386,22 +1388,19 @@ public final class Protocol {
             return null;
         } // all url's known
 
-        // extract the urlCache from the result
+        // extract the urlCache from the result; this is io-intensive;
+        // other transmissions should not be started as long as this is running
         final URIMetadataNode[] urls = new URIMetadataNode[uhs.length];
         byte[] key;
-        for ( int i = 0; i < uhs.length; i++ ) {
+        metadataRetrievalRunning = true;
+        for (int i = 0; i < uhs.length; i++) {
         	key = ASCII.getBytes(uhs[i]);
-        	if ( urlRefs.has(key) ) urls[i] = segment.fulltext().getMetadata(key);
-            if ( urls[i] == null ) {
-                if ( Network.log.isFine() ) {
-                    Network.log.fine("DEBUG transferIndex: requested url hash '"
-                        + uhs[i]
-                        + "', unknownURL='"
-                        + uhss
-                        + "'");
-                }
+        	if (urlRefs.has(key)) urls[i] = segment.fulltext().getMetadata(key);
+            if (urls[i] == null) {
+                if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
         }
+        metadataRetrievalRunning = false;
 
         in = transferURL(targetSeed, urls, gzipBody, timeout);
 
