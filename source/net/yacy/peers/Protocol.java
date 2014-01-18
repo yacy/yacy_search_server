@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
@@ -1327,7 +1328,7 @@ public final class Protocol {
         }
     }
 
-    public static boolean metadataRetrievalRunning = false;
+    public static AtomicInteger metadataRetrievalRunning = new AtomicInteger(0);
 
     /**
      * transfer the index. If the transmission fails, return a string describing the cause. If everything is
@@ -1408,7 +1409,7 @@ public final class Protocol {
         // other transmissions should not be started as long as this is running
         final URIMetadataNode[] urls = new URIMetadataNode[uhs.length];
         byte[] key;
-        metadataRetrievalRunning = true;
+        metadataRetrievalRunning.incrementAndGet();
         for (int i = 0; i < uhs.length; i++) {
         	key = ASCII.getBytes(uhs[i]);
         	if (urlRefs.has(key)) urls[i] = segment.fulltext().getMetadata(key);
@@ -1416,7 +1417,7 @@ public final class Protocol {
                 if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
         }
-        metadataRetrievalRunning = false;
+        metadataRetrievalRunning.decrementAndGet();
 
         in = transferURL(targetSeed, urls, gzipBody, timeout);
 

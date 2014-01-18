@@ -401,7 +401,7 @@ public class Dispatcher {
     public Transmission.Chunk transferDocumentIndex(final Transmission.Chunk chunk) {
 
         // try to keep the system healthy; sleep as long as System load is too high
-        while (Protocol.metadataRetrievalRunning) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}
+        while (Protocol.metadataRetrievalRunning.get() > 0) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}
         while (Memory.load() > 2.0) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
         
         // do the transmission
