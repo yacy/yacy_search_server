@@ -337,26 +337,20 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
     @Override
     public final int size() {
         int c = 0;
-        synchronized (this.cluster) {
-            for (final RAMIndex i: this.cluster) if (i != null) c += i.size();
-        }
+        for (final RAMIndex i: this.cluster) if (i != null) c += i.size();
         return c;
     }
 
     @Override
     public long mem() {
         long m = 0;
-        synchronized (this.cluster) {
-            for (final RAMIndex i: this.cluster) if (i != null)  m += i.mem();
-        }
+        for (final RAMIndex i: this.cluster) if (i != null)  m += i.mem();
         return m;
     }
 
     @Override
     public final boolean isEmpty() {
-        synchronized (this.cluster) {
-            for (final RAMIndex i: this.cluster) if (i != null && !i.isEmpty()) return false;
-        }
+        for (final RAMIndex i: this.cluster) if (i != null && !i.isEmpty()) return false;
         return true;
     }
 

@@ -325,7 +325,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public final synchronized int size() {
+    public final int size() {
         if (this.index0 != null && this.index1 == null) {
             return this.index0.size();
         }
@@ -337,7 +337,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public final synchronized boolean isEmpty() {
+    public final boolean isEmpty() {
         if (this.index0 != null && this.index1 == null) {
             return this.index0.isEmpty();
         }

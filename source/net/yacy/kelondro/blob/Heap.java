@@ -113,7 +113,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return the number of BLOBs in the heap
      */
     @Override
-    public synchronized int size() {
+    public int size() {
         return super.size() + ((this.buffer == null) ? 0 : this.buffer.size());
     }
 
