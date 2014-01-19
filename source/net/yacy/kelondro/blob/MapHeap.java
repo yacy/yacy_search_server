@@ -440,12 +440,12 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
      * @return the number of entries in the table
      */
     @Override
-    public synchronized int size() {
+    public int size() {
         return (this.blob == null) ? 0 : this.blob.size();
     }
 
     @Override
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
         return (this.blob == null) ? true : this.blob.isEmpty();
     }
 

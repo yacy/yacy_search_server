@@ -363,9 +363,7 @@ public class HeapReader {
             log.severe("this.index == null in size(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return 0;
         }
-        synchronized (this.index) {
-            return (this.index == null) ? 0 : this.index.size();
-        }
+        return (this.index == null) ? 0 : this.index.size();
     }
 
     public boolean isEmpty() {
@@ -374,9 +372,7 @@ public class HeapReader {
             log.severe("this.index == null in isEmpty(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return true;
         }
-        synchronized (this.index) {
-            return this.index.isEmpty();
-        }
+        return this.index.isEmpty();
     }
 
     /**

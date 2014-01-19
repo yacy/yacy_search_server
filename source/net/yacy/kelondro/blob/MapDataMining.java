@@ -389,12 +389,12 @@ public class MapDataMining extends MapHeap {
     }
 
     @Override
-    public synchronized int size() {
+    public int size() {
         return super.size();
     }
 
     @Override
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
         return super.isEmpty();
     }
 
