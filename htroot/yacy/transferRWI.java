@@ -46,6 +46,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
@@ -70,20 +71,40 @@ public final class transferRWI {
 
         final serverObjects prop = new serverObjects();
         final String contentType = header.getContentType();
+        prop.put("unknownURL", "");
+        prop.put("pause", 60000);
+        String result = "";
         if ((post == null) || (env == null)) {
-            logWarning(contentType, "post or env is null!");
+            result = "post or env is null!";
+            logWarning(contentType, result);
+            prop.put("result", result);
             return prop;
         }
         if (!Protocol.authentifyRequest(post, env)) {
-            logWarning(contentType, "not authentified");
+            result = "not authentified";
+            prop.put("result", result);
             return prop;
         }
         if (!post.containsKey("wordc")) {
-            logWarning(contentType, "missing wordc");
+            result = "missing wordc";
+            prop.put("result", result);
             return prop;
         }
         if (!post.containsKey("entryc")) {
-            logWarning(contentType, "missing entryc");
+            result = "missing entryc";
+            prop.put("result", result);
+            return prop;
+        }
+        if (!post.containsKey("indexes")) {
+            result = "missing indexes";
+            prop.put("result", result);
+            return prop;
+        }
+        // load tests
+        if (Memory.load() > 2.0 || MemoryControl.shortStatus()) {
+            // check also Protocol.metadataRetrievalRunning.get() > 0 ?
+            result = "too high load"; // don't tell too much details
+            prop.put("result", result);
             return prop;
         }
 
@@ -102,7 +123,7 @@ public final class transferRWI {
 
         // response values
         int pause = 0;
-        String result = "ok";
+        result = "ok";
         final StringBuilder unknownURLs = new StringBuilder(6000);
 
         double load = Memory.load();
