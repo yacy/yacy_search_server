@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
@@ -1047,6 +1048,10 @@ public final class Protocol {
             } else {
                 try {
                     final boolean myseed = target == event.peers.mySeed();
+                    if (!myseed && !target.getFlagSolrAvailable()) { // skip if peer.dna has flag that last try resulted in error
+                        Network.log.info("SEARCH skip (solr), remote Solr interface not accessible, peer=" + target.getName());
+                        return -1;
+                    }
                     final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress();
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
                     Thread remoteRequest = new Thread() {
@@ -1072,17 +1077,20 @@ public final class Protocol {
                     if (remoteRequest.isAlive()) {
                         try {remoteRequest.interrupt();} catch (Throwable e) {}
                         Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " does not answer (time-out)");
+                        target.setFlagSolrAvailable(false || myseed);
                         return -1; // give up, leave remoteRequest abandoned.
                     }
                     // no need to close this here because that sends a commit to remote solr which is not wanted here
                 } catch (final Throwable e) {
                     Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")");
+                    target.setFlagSolrAvailable(false || localsearch);
                     return -1;
                 }
             }
 
             if (rsp[0] == null || docList[0] == null) {
                 Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " returned null");
+                target.setFlagSolrAvailable(false || localsearch);
                 return -1;
             }
             
@@ -1327,6 +1335,8 @@ public final class Protocol {
         }
     }
 
+    public static AtomicInteger metadataRetrievalRunning = new AtomicInteger(0);
+
     /**
      * transfer the index. If the transmission fails, return a string describing the cause. If everything is
      * ok, return null.
@@ -1402,22 +1412,19 @@ public final class Protocol {
             return null;
         } // all url's known
 
-        // extract the urlCache from the result
+        // extract the urlCache from the result; this is io-intensive;
+        // other transmissions should not be started as long as this is running
         final URIMetadataNode[] urls = new URIMetadataNode[uhs.length];
         byte[] key;
-        for ( int i = 0; i < uhs.length; i++ ) {
+        metadataRetrievalRunning.incrementAndGet();
+        for (int i = 0; i < uhs.length; i++) {
         	key = ASCII.getBytes(uhs[i]);
-        	if ( urlRefs.has(key) ) urls[i] = segment.fulltext().getMetadata(key);
-            if ( urls[i] == null ) {
-                if ( Network.log.isFine() ) {
-                    Network.log.fine("DEBUG transferIndex: requested url hash '"
-                        + uhs[i]
-                        + "', unknownURL='"
-                        + uhss
-                        + "'");
-                }
+        	if (urlRefs.has(key)) urls[i] = segment.fulltext().getMetadata(key);
+            if (urls[i] == null) {
+                if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
         }
+        metadataRetrievalRunning.decrementAndGet();
 
         in = transferURL(targetSeed, urls, gzipBody, timeout);
 

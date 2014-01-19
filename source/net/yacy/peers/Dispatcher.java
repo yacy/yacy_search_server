@@ -37,6 +37,7 @@ import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -116,7 +117,7 @@ public class Dispatcher {
             gzipBody,
             timeout);
 
-        final int concurrentSender = Math.min(32, WorkflowProcessor.availableCPU * 2);
+        final int concurrentSender = Math.min(8, WorkflowProcessor.availableCPU);
         this.indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
                 "transferDocumentIndex",
                 "This is the RWI transmission process",
@@ -399,6 +400,10 @@ public class Dispatcher {
      */
     public Transmission.Chunk transferDocumentIndex(final Transmission.Chunk chunk) {
 
+        // try to keep the system healthy; sleep as long as System load is too high
+        while (Protocol.metadataRetrievalRunning.get() > 0) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}
+        while (Memory.load() > 2.0) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
+        
         // do the transmission
         final boolean success = chunk.transmit();
 

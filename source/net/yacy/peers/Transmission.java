@@ -268,6 +268,9 @@ public class Transmission {
                 this.hit++;
                 return true;
             }
+            Transmission.this.log.info(
+                    "Index transfer to peer " + target.getName() + ":" + target.hash +
+                    " failed: " + error);
             this.miss++;
             // write information that peer does not receive index transmissions
             Transmission.this.log.info("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);

@@ -57,7 +57,7 @@ SHUTDOWN_TIMEOUT=50
 # Default niceness if not set in config file
 NICE_VAL=0
 
-JAVA_ARGS="-server -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8 -d64 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"
+JAVA_ARGS="-server -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dsolr.directoryFactory=solr.MMapDirectoryFactory"
 
 ifdef(`openSUSE', `dnl
 . /etc/rc.status

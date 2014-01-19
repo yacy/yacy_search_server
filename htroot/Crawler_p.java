@@ -260,7 +260,7 @@ public class Crawler_p {
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
 
-                boolean crawlingQ = "on".equals(post.get("crawlingQ", "on"));
+                boolean crawlingQ = "on".equals(post.get("crawlingQ", "off")); // on unchecked checkbox "crawlingQ" not contained in post
                 env.setConfig("crawlingQ", crawlingQ);
                 
                 boolean followFrames = "on".equals(post.get("followFrames", "on"));

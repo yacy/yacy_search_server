@@ -97,7 +97,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         }
         
         InetAddress resolvedIP = Domains.dnsResolve(hostOnly); // during testing isLocal() failed to resolve domain against publicIP  
-        if (sb.myPublicIP().equals(resolvedIP.getHostAddress())) {
+        if (resolvedIP != null && sb.myPublicIP().equals(resolvedIP.getHostAddress())) {
             localVirtualHostNames.add(resolvedIP.getHostName()); // remember resolved hostname
             //localVirtualHostNames.add(resolved.getHostAddress()); // might change ?
             return;  
