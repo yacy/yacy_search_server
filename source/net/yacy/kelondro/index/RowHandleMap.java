@@ -333,12 +333,12 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         synchronized (this.index) {
             final boolean exist = this.index.has(key);
             if (!exist) return -1;
-            final int s = this.index.size();
-            final long m = this.index.mem();
+            //final int s = this.index.size();
+            //final long m = this.index.mem();
             indexentry = this.index.remove(key);
             assert (indexentry != null);
-            assert this.index.size() < s : "s = " + s + ", index.size() = " + this.index.size();
-            assert this.index.mem() <= m : "m = " + m + ", index.mem() = " + this.index.mem();
+            //assert this.index.size() < s : "s = " + s + ", index.size() = " + this.index.size();
+            //assert this.index.mem() <= m : "m = " + m + ", index.mem() = " + this.index.mem();
         }
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
