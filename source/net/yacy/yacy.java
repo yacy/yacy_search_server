@@ -227,9 +227,6 @@ public final class yacy {
             sb.setConfig("dataRoot", dataHome.toString());
             yacyVersion.latestRelease = version;
 
-            // read environment
-            final int timeout = Math.max(5000, Integer.parseInt(sb.getConfig("httpdTimeout", "5000")));
-
             // create some directories
             final File htRootPath = new File(appHome, sb.getConfig("htRootPath", "htroot"));
             final File htDocsPath = sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
@@ -523,7 +520,7 @@ public final class yacy {
         final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         con.setHeader(requestHeader.entrySet());
         try {
-            con.GETbytes("http://localhost:"+ port +"/" + path, config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), encodedPassword);
+            con.GETbytes("http://localhost:"+ port +"/" + path, config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), encodedPassword, false);
             if (con.getStatusCode() > 199 && con.getStatusCode() < 300) {
                 ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
 

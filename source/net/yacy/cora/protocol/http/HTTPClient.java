@@ -57,6 +57,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -98,7 +99,8 @@ import org.apache.http.util.EntityUtils;
  *
  */
 public class HTTPClient {
-
+    
+    private final static int default_timeout = 6000;
 	private final static int maxcon = 200;
 	private static IdleConnectionMonitorThread connectionMonitor = null;
 	private final static RequestConfig dfltReqConf = initRequestConfig();
@@ -109,10 +111,12 @@ public class HTTPClient {
 	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
 	private String host = null;
+	private final long timeout;
 
 
     public HTTPClient(final ClientIdentification.Agent agent) {
         super();
+        this.timeout = agent.clientTimeout;
         clientBuilder.setUserAgent(agent.userAgent);
         reqConfBuilder = RequestConfig.copy(dfltReqConf);
         reqConfBuilder.setSocketTimeout(agent.clientTimeout);
@@ -122,6 +126,7 @@ public class HTTPClient {
     
     public HTTPClient(final ClientIdentification.Agent agent, final int timeout) {
         super();
+        this.timeout = timeout;
         clientBuilder.setUserAgent(agent.userAgent);
         reqConfBuilder = RequestConfig.copy(dfltReqConf);
         reqConfBuilder.setSocketTimeout(timeout);
@@ -138,10 +143,10 @@ public class HTTPClient {
     	// IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
     	builder.setExpectContinueEnabled(false);
 		// timeout in milliseconds until a connection is established in milliseconds
-		builder.setConnectionRequestTimeout(6000);
-		builder.setConnectTimeout(8000);
+		builder.setConnectionRequestTimeout(default_timeout);
+		builder.setConnectTimeout(default_timeout);
 		// SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
-		builder.setSocketTimeout(3000);
+		builder.setSocketTimeout(default_timeout);
 		// getting an I/O error when executing a request over a connection that has been closed at the server side
 		builder.setStaleConnectionCheckEnabled(true);
 		// ignore cookies, cause this may cause segfaults in default cookiestore and is not needed
@@ -307,8 +312,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final String uri, final String username, final String pass) throws IOException {
-        return GETbytes(uri, username, pass, Integer.MAX_VALUE);
+    public byte[] GETbytes(final String uri, final String username, final String pass, final boolean concurrent) throws IOException {
+        return GETbytes(uri, username, pass, Integer.MAX_VALUE, concurrent);
     }
 
     /**
@@ -318,8 +323,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass) throws IOException {
-        return GETbytes(url, username, pass, Integer.MAX_VALUE);
+    public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass, final boolean concurrent) throws IOException {
+        return GETbytes(url, username, pass, Integer.MAX_VALUE, concurrent);
     }
 
     /**
@@ -330,8 +335,8 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final String uri, final String username, final String pass, final int maxBytes) throws IOException {
-        return GETbytes(new MultiProtocolURL(uri), username, pass, maxBytes);
+    public byte[] GETbytes(final String uri, final String username, final String pass, final int maxBytes, final boolean concurrent) throws IOException {
+        return GETbytes(new MultiProtocolURL(uri), username, pass, maxBytes, concurrent);
     }
 
 
@@ -343,7 +348,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass, final int maxBytes) throws IOException {
+    public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass, final int maxBytes, final boolean concurrent) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
         HttpGet httpGet = null;
@@ -379,7 +384,7 @@ public class HTTPClient {
             }
             return content;
         }
-        return getContentBytes(httpGet, maxBytes);
+        return getContentBytes(httpGet, maxBytes, concurrent);
     }
     
     /**
@@ -390,8 +395,8 @@ public class HTTPClient {
      * @param uri the url to get
      * @throws IOException
      */
-    public void GET(final String uri) throws IOException {
-    	GET(new MultiProtocolURL(uri));
+    public void GET(final String uri, final boolean concurrent) throws IOException {
+    	GET(new MultiProtocolURL(uri), concurrent);
     }
 
     /**
@@ -402,7 +407,7 @@ public class HTTPClient {
      * @param url the url to get
      * @throws IOException
      */
-    public void GET(final MultiProtocolURL url) throws IOException {
+    public void GET(final MultiProtocolURL url, final boolean concurrent) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
         final String urix = url.toNormalform(true);
         HttpGet httpGet = null;
@@ -413,7 +418,7 @@ public class HTTPClient {
         }
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         this.currentRequest = httpGet;
-        execute(httpGet);
+        execute(httpGet, concurrent);
     }
 
     /**
@@ -423,8 +428,8 @@ public class HTTPClient {
      * @return the HttpResponse
      * @throws IOException
      */
-    public HttpResponse HEADResponse(final String uri) throws IOException {
-    	return HEADResponse(new MultiProtocolURL(uri));
+    public HttpResponse HEADResponse(final String uri, final boolean concurrent) throws IOException {
+    	return HEADResponse(new MultiProtocolURL(uri), concurrent);
     }
 
     /**
@@ -434,10 +439,10 @@ public class HTTPClient {
      * @return the HttpResponse
      * @throws IOException
      */
-    public HttpResponse HEADResponse(final MultiProtocolURL url) throws IOException {
+    public HttpResponse HEADResponse(final MultiProtocolURL url, final boolean concurrent) throws IOException {
         final HttpHead httpHead = new HttpHead(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	execute(httpHead);
+    	execute(httpHead, concurrent);
     	finish();
     	ConnectionInfo.removeConnection(httpHead.hashCode());
     	return this.httpResponse;
@@ -453,8 +458,8 @@ public class HTTPClient {
      * @param length the contentlength
      * @throws IOException
      */
-    public void POST(final String uri, final InputStream instream, final long length) throws IOException {
-    	POST(new MultiProtocolURL(uri), instream, length);
+    public void POST(final String uri, final InputStream instream, final long length, final boolean concurrent) throws IOException {
+    	POST(new MultiProtocolURL(uri), instream, length, concurrent);
     }
 
     /**
@@ -467,7 +472,7 @@ public class HTTPClient {
      * @param length the contentlength
      * @throws IOException
      */
-    public void POST(final MultiProtocolURL url, final InputStream instream, final long length) throws IOException {
+    public void POST(final MultiProtocolURL url, final InputStream instream, final long length, final boolean concurrent) throws IOException {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
@@ -478,7 +483,7 @@ public class HTTPClient {
     	this.upbytes = length;
     	httpPost.setEntity(inputStreamEntity);
     	this.currentRequest = httpPost;
-    	execute(httpPost);
+    	execute(httpPost, concurrent);
     }
 
     /**
@@ -489,9 +494,9 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip) throws IOException {
+    public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip, final boolean concurrent) throws IOException {
         final MultiProtocolURL url = new MultiProtocolURL(uri);
-        return POSTbytes(url, url.getHost(), parts, usegzip);
+        return POSTbytes(url, url.getHost(), parts, usegzip, concurrent);
     }
 
     /**
@@ -504,7 +509,7 @@ public class HTTPClient {
      * @return response body
      * @throws IOException
      */
-    public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
+    public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip, final boolean concurrent) throws IOException {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
 
         setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -523,7 +528,7 @@ public class HTTPClient {
             httpPost.setEntity(multipartEntity);
         }
 
-        return getContentBytes(httpPost, Integer.MAX_VALUE);
+        return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
     }
 
     /**
@@ -535,7 +540,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] POSTbytes(final String uri, final InputStream instream, final long length) throws IOException {
+    public byte[] POSTbytes(final String uri, final InputStream instream, final long length, final boolean concurrent) throws IOException {
         final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
@@ -546,7 +551,7 @@ public class HTTPClient {
         // statistics
         this.upbytes = length;
         httpPost.setEntity(inputStreamEntity);
-        return getContentBytes(httpPost, Integer.MAX_VALUE);
+        return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
     }
 
 	/**
@@ -638,10 +643,10 @@ public class HTTPClient {
         }
     }
 
-    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes) throws IOException {
+    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes, final boolean concurrent) throws IOException {
         byte[] content = null;
     	try {
-            execute(httpUriRequest);
+            execute(httpUriRequest, concurrent);
             if (this.httpResponse == null) return null;
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
@@ -662,7 +667,7 @@ public class HTTPClient {
     	return content;
     }
 
-    private void execute(final HttpUriRequest httpUriRequest) throws IOException {
+    private void execute(final HttpUriRequest httpUriRequest, final boolean concurrent) throws IOException {
     	final HttpClientContext context = HttpClientContext.create();
     	context.setRequestConfig(reqConfBuilder.build());
     	if (this.host != null)
@@ -685,9 +690,28 @@ public class HTTPClient {
         final long time = System.currentTimeMillis();
 	    try {
 	        final CloseableHttpClient client = clientBuilder.build();
-            this.httpResponse = client.execute(httpUriRequest, context);
+	        if (concurrent) {
+	            final CloseableHttpResponse[] thr = new CloseableHttpResponse[]{null};
+	            final Throwable[] te = new Throwable[]{null};
+	            Thread t = new Thread() {
+	                public void run() {
+	                   try {
+	                       thr[0] = client.execute(httpUriRequest, context);
+	                   } catch (Throwable e) {
+	                       te[0] = e;
+	                   }
+	                }
+	            };
+	            t.start();
+	            try {t.join(this.timeout);} catch (InterruptedException e) {}
+	            if (te[0] != null) throw te[0];
+	            if (thr[0] == null) throw new IOException("timout to client after " + this.timeout + "ms");
+	            this.httpResponse = thr[0];
+	        } else {
+	            this.httpResponse = client.execute(httpUriRequest, context);
+	        }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
-        } catch (final IOException e) {
+        } catch (final Throwable e) {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
             if (this.httpResponse != null) this.httpResponse.close();
@@ -822,7 +846,7 @@ public class HTTPClient {
                     url = "http://" + url;
             }
             try {
-                System.out.println(UTF8.String(client.GETbytes(url, null, null)));
+                System.out.println(UTF8.String(client.GETbytes(url, null, null, true)));
             } catch (final IOException e) {
                 e.printStackTrace();
             }

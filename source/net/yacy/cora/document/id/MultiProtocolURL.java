@@ -2059,7 +2059,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
-                return new ByteArrayInputStream(client.GETbytes(this, username, pass));
+                return new ByteArrayInputStream(client.GETbytes(this, username, pass, false));
         }
 
         return null;
@@ -2078,7 +2078,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
-                return client.GETbytes(this, username, pass);
+                return client.GETbytes(this, username, pass, false);
         }
 
         return null;

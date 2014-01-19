@@ -45,7 +45,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.TextParser;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
@@ -110,11 +109,11 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                 String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
                 DigestURL digestURI = new DigestURL(request.getScheme(), request.getServerName(), request.getServerPort(), request.getPathInfo() + queryString);
                 if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
-                    client.GET(digestURI);
+                    client.GET(digestURI, false);
                 } else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
-                    client.POST(digestURI, request.getInputStream(), request.getContentLength());
+                    client.POST(digestURI, request.getInputStream(), request.getContentLength(), false);
                 } else if (request.getMethod().equals(HeaderFramework.METHOD_HEAD)) {
-                    client.HEADResponse(digestURI);
+                    client.HEADResponse(digestURI, false);
                 } else {
                     throw new ServletException("Unsupported Request Method");
                 }

@@ -3746,7 +3746,7 @@ public final class Switchboard extends serverSwitch {
                     final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                     client.setHeader(reqHeader.entrySet());
 
-                    client.HEADResponse(url.toString());
+                    client.HEADResponse(url.toString(), false);
                     int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                     ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
                     if (checkAge) {
@@ -3765,7 +3765,7 @@ public final class Switchboard extends serverSwitch {
                         }
                     }
                     scc.incrementAndGet();
-                    final byte[] content = client.GETbytes(url, null, null);
+                    final byte[] content = client.GETbytes(url, null, null, false);
                     Iterator<String> enu = FileUtils.strings(content);
                     int lc = 0;
                     while ( enu.hasNext() ) {

@@ -537,7 +537,7 @@ public class serverSwitch
                     reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
                     final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
                     client.setHeader(reqHeader.entrySet());
-                    byte[] data = client.GETbytes(uri, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+                    byte[] data = client.GETbytes(uri, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), false);
                     if ( data == null || data.length == 0 ) {
                         continue;
                     }

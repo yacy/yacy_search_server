@@ -149,7 +149,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         this.agent = agent;
         try {
             HTTPClient www = new HTTPClient(agent);
-            www.GET(path);
+            www.GET(path, false);
             final SAXParser saxParser = getParser();
             saxParser.parse(www.getContentstream(), this);
             www.finish();
@@ -167,7 +167,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         this.atomurl = null;
         try {
             HTTPClient www = new HTTPClient(this.agent);
-            www.GET(path);
+            www.GET(path, false);
             final SAXParser saxParser = getParser();
             try {
                 saxParser.parse(www.getContentstream(), this);

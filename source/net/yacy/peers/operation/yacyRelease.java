@@ -294,14 +294,14 @@ public final class yacyRelease extends yacyVersion {
         // download signature first, if public key is available
         try {
             if (this.publicKey != null) {
-            	final byte[] signatureData = client.GETbytes(getUrl().toString() + ".sig", null, null);
+            	final byte[] signatureData = client.GETbytes(getUrl().toString() + ".sig", null, null, false);
                 if (signatureData == null) {
                     ConcurrentLog.warn("yacyVersion", "download of signature " + getUrl().toString() + " failed. ignoring signature file.");
                 }
                 else signatureBytes = Base64Order.standardCoder.decode(UTF8.String(signatureData).trim());
             }
             client.setTimout(120000);
-            client.GET(getUrl().toString());
+            client.GET(getUrl().toString(), false);
             int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
             final ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
 

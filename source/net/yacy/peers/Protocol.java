@@ -158,7 +158,7 @@ public final class Protocol {
             new MultiProtocolURL("http://" + targetAddress + "/yacy/" + filename),
             Seed.b64Hash2hexHash(targetPeerHash) + ".yacyh",
             parts,
-            false);
+            false, true);
     }
 
     /**
@@ -201,7 +201,7 @@ public final class Protocol {
                     new MultiProtocolURL("http://" + address + "/yacy/hello.html"),
                     Seed.b64Hash2hexHash(otherHash) + ".yacyh",
                     parts,
-                    false);
+                    false, true);
             responseTime = System.currentTimeMillis() - start;
             result = FileUtils.table(content);
         } catch (final Exception e ) {
@@ -520,7 +520,7 @@ public final class Protocol {
             final byte[] result =
                 httpClient.POSTbytes(new MultiProtocolURL("http://"
                     + target.getClusterAddress()
-                    + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false);
+                    + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if ( reader == null ) {
                 Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '"
@@ -938,7 +938,7 @@ public final class Protocol {
             }
 
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
-            byte[] a = httpClient.POSTbytes(new MultiProtocolURL("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
+            byte[] a = httpClient.POSTbytes(new MultiProtocolURL("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false, true);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
                 a = null;
@@ -1326,7 +1326,7 @@ public final class Protocol {
                     new MultiProtocolURL("http://" + address + "/yacy/crawlReceipt.html"),
                     target.getHexHash() + ".yacyh",
                     parts,
-                    false);
+                    false, true);
             return FileUtils.table(content);
         } catch (final Exception e ) {
             // most probably a network time-out exception
@@ -1504,7 +1504,7 @@ public final class Protocol {
                     new MultiProtocolURL("http://" + address + "/yacy/transferRWI.html"),
                     targetSeed.getHexHash() + ".yacyh",
                     parts,
-                    gzipBody);
+                    gzipBody, true);
             final Iterator<String> v = FileUtils.strings(content);
             // this should return a list of urlhashes that are unknown
 
@@ -1562,7 +1562,7 @@ public final class Protocol {
                     new MultiProtocolURL("http://" + address + "/yacy/transferURL.html"),
                     targetSeed.getHexHash() + ".yacyh",
                     parts,
-                    gzipBody);
+                    gzipBody, true);
             final Iterator<String> v = FileUtils.strings(content);
 
             final Map<String, String> result = FileUtils.table(v);
@@ -1595,7 +1595,7 @@ public final class Protocol {
                     new MultiProtocolURL("http://" + address + "/yacy/profile.html"),
                     targetSeed.getHexHash() + ".yacyh",
                     parts,
-                    false);
+                    false, true);
             return FileUtils.table(content);
         } catch (final Exception e ) {
             Network.log.warn("yacyClient.getProfile error:" + e.getMessage());

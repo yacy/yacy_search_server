@@ -238,7 +238,7 @@ public class WorkTables extends Tables {
             url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
             ConcurrentLog.info("WorkTables", "executing url: " + url);
             try {
-                client.GETbytes(url, username, pass);
+                client.GETbytes(url, username, pass, false);
                 l.put(url, client.getStatusCode());
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
@@ -255,7 +255,7 @@ public class WorkTables extends Tables {
         String url = "http://" + host + ":" + port + path;
         if (pk != null) url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(pk);
         try {
-            client.GETbytes(url, username, pass);
+            client.GETbytes(url, username, pass, false);
             return client.getStatusCode();
         } catch (final IOException e) {
             ConcurrentLog.logException(e);

@@ -486,7 +486,7 @@ public final class HTTPDProxyHandler {
 
             // send request
             try {
-            	client.GET(getUrl);
+            	client.GET(getUrl, false);
                 if (log.isFinest()) log.finest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
                 conProp.put(HeaderFramework.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 

@@ -191,7 +191,7 @@ public static String Tableentry(String url, String type, String comment, String 
 						"http://"+host.getPublicAddress()+"/interaction/Contribution.json"
 								+ "?url=" + url + "&comment=" + comment
 								+ "&from=" + from + "&peer=" + peer,
-						new HashMap<String, ContentBody>(), false)));
+						new HashMap<String, ContentBody>(), false, false)));
 			} catch (final IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -79,7 +79,7 @@ public class SMWListSyncThread {
 											+ "/limit%3D200000"
 											+ "/format%3Dystat");
 
-							String reply = UTF8.String(new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent).GETbytes(urlCount.toString(), null, null));
+							String reply = UTF8.String(new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent).GETbytes(urlCount.toString(), null, null, false));
 							String overallcount = reply.split(",")[0];
 							String lastsyncstring = reply.split(",")[1];
 							this.currentmax = Integer.parseInt(overallcount);
