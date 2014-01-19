@@ -63,7 +63,11 @@ public class index {
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
 
         int searchoptions = (post == null) ? 0 : Math.min(1, post.getInt("searchoptions", 0));
-        if (!sb.getConfigBool("search.options", true)) searchoptions = 0;
+        if (!sb.getConfigBool("search.options", true)) {
+            searchoptions = 0;
+        } else { // show heuristic hint on search option screen
+            prop.put("searchoptions_heuristic", sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false));
+        }
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
         final int maximumRecords = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);

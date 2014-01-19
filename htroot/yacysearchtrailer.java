@@ -85,7 +85,7 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = "inurl%3A" + name;
-                queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+                queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -130,7 +130,7 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = "site%3A" + name;
-                queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+                queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -174,7 +174,7 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = (name.indexOf(' ', 0) < 0) ? "author%3A" + name : "author%3A%28" + name.replace(" ", "+") + "%29";
-                queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+                queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -211,7 +211,7 @@ public class yacysearchtrailer {
             prop.put("nav-topics", "1");
             navigatorIterator = topicNavigator.keys(false);
             int i = 0;
-            String queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+            String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
             // first sort the list to a form where the greatest element is in the middle
             LinkedList<Map.Entry<String, Integer>> cloud = new LinkedList<Map.Entry<String, Integer>>();
             while (i < MAX_TOPWORDS && navigatorIterator.hasNext()) {
@@ -257,7 +257,7 @@ public class yacysearchtrailer {
                 }
                 visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
-                queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+                queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -303,7 +303,7 @@ public class yacysearchtrailer {
                 }
                 visible = visible || Classification.isMediaExtension(name) || "pdf,doc,docx".indexOf(name) >= 0;
                 nav = "filetype%3A" + name;
-                queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+                queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -352,7 +352,7 @@ public class yacysearchtrailer {
                         break;
                     }
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
-                    queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+                    queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                     p = queryStringForUrl.indexOf(nav);
                     if (p < 0) {
                         queryStringForUrl += "+" + nav;
@@ -397,9 +397,9 @@ public class yacysearchtrailer {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);
-            final String query = theSearch.query.getQueryGoal().getOriginalQueryString(false);
+            final String query = theSearch.query.getQueryGoal().getQueryString(false);
             prop.put(fileType, "cat-location_query", query);
-            final String queryenc = theSearch.query.getQueryGoal().getOriginalQueryString(true).replace(' ', '+');
+            final String queryenc = theSearch.query.getQueryGoal().getQueryString(true).replace(' ', '+');
             prop.put(fileType, "cat-location_queryenc", queryenc);
         }
         prop.put("num-results_totalcount", theSearch.getResultCount());

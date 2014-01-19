@@ -1060,8 +1060,6 @@ donation.iframetarget=env/donate.html
 
 # search heuristics
 heuristic.site = false
-heuristic.blekko = false
-heuristic.twitter = false
 heuristic.searchresults = false
 heuristic.searchresults.crawlglobal = false
 heuristic.opensearch = false

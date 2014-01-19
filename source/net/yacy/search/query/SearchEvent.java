@@ -454,7 +454,7 @@ public final class SearchEvent {
                     new ProfilingGraph.EventSearch(
                             SearchEvent.this.query.id(true),
                         SearchEventType.JOIN,
-                        SearchEvent.this.query.getQueryGoal().getOriginalQueryString(false),
+                        SearchEvent.this.query.getQueryGoal().getQueryString(false),
                         index.size(),
                         System.currentTimeMillis() - timer),
                     false);

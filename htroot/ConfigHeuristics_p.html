@@ -14,16 +14,16 @@
     </p>
     
     <form action=""><fieldset>
-    The success of heuristics are marked with an image (<img width="16" height="9" src="/env/grafics/heuristic_redundant.gif" title="heuristic:&lt;name&gt; (redundant)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (redundant)"/>/<img width="16" height="9" src="/env/grafics/heuristic_new.gif" title="heuristic:&lt;name&gt; (new link)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (new link)"/>) below the favicon left from the search result entry:
+    The success of heuristics are marked with an image (<img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:&lt;name&gt; (redundant)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (redundant)"/>/<img width="16" height="9" src="env/grafics/heuristic_new.gif" title="heuristic:&lt;name&gt; (new link)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (new link)"/>) below the favicon left from the search result entry:
     <dl>
         <dt>
-          <img width="16" height="9" src="/env/grafics/heuristic_redundant.gif" title="heuristic:&lt;name&gt; (redundant)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (redundant)"/>
+          <img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:&lt;name&gt; (redundant)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (redundant)"/>
         </dt>
         <dd>
           The search result was discovered by a heuristic, but the link was already known by YaCy
         </dd>
         <dt>
-          <img width="16" height="9" src="/env/grafics/heuristic_new.gif" title="heuristic:&lt;name&gt; (new link)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (new link)"/>
+          <img width="16" height="9" src="env/grafics/heuristic_new.gif" title="heuristic:&lt;name&gt; (new link)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (new link)"/>
         </dt>
         <dd>
           The search result was discovered by a heuristic, not previously known by YaCy
@@ -70,33 +70,7 @@
       </p>
     </fieldset>
     </form>
-    
-    <form id="HeuristicFormTwitter" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
-    <fieldset>
-      <legend>
-        <input type="checkbox" name="twitter_check" id="twitter" onclick="window.location.href='ConfigHeuristics_p.html?#(twitter.checked)#twitter_on=::twitter_off=#(/twitter.checked)#'" value="twitter"#(twitter.checked)#:: checked="checked"#(/twitter.checked)# />
-        <label for="twitter">twitter: load external search result list from <a href="http://search.twitter.com" target="_blank">twitter</a></label>
-      </legend>
-      <p>
-      When using this heuristic, then every search request line is used for a call to twitter.
-      50 results are taken from twitter and loaded simultanously, parsed and indexed immediately.
-      </p>
-    </fieldset>
-    </form>
-    
-    <form id="HeuristicFormBlekko" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
-    <fieldset>
-      <legend>
-        <input type="checkbox" name="blekko_check" id="blekko" onclick="window.location.href='ConfigHeuristics_p.html?#(blekko.checked)#blekko_on=::blekko_off=#(/blekko.checked)#'" value="blekko"#(blekko.checked)#:: checked="checked"#(/blekko.checked)# />
-        <label for="blekko">blekko: load external search result list from <a href="http://blekko.com" target="_blank">blekko</a></label>
-      </legend>
-      <p>
-      When using this heuristic, then every search request line is used for a call to blekko.
-      20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.
-      </p>
-    </fieldset>
-    </form>
-
+       
     <fieldset>
       <form id="HeuristicFormOpenSearch" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
         <legend>
@@ -137,10 +111,13 @@
         <td><input type="text" name="ossys_newurl" size="70"/></td>
         <td><input type="submit" name="addnewosd" value="add"/></td>
       </tr>
+      <tr>
+        <td colspan="3" style="padding-top:10px "><input type="submit" name="setopensearch" value="Save" class="submitready"/></td>
+        <td colspan="2" align="center" style="padding-top:10px "><input type="submit" name="resettodefaultosdlist" value="reset to default list" class="submitready"/></td>
+      </tr>
       </table>
       </div>
       <div>
-        <input type="submit" name="setopensearch" value="Save" class="submitready"/>
         <span style="color:red">#[osderrmsg]#</span>
       </div>
       <br>

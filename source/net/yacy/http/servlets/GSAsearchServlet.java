@@ -128,7 +128,7 @@ public class GSAsearchServlet extends HttpServlet {
         post.put("originalQuery", originalQuery);
         
         // get a solr query string
-        QueryGoal qg = new QueryGoal(originalQuery, originalQuery);
+        QueryGoal qg = new QueryGoal(originalQuery);
         StringBuilder solrQ = qg.collectionTextQueryString(sb.index.fulltext().getDefaultConfiguration(), 0, false);
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());

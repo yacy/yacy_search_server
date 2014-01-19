@@ -97,11 +97,14 @@ public class QueryGoal {
         this.include_hashes = include_hashes;
         this.exclude_hashes = exclude_hashes;
     }
-    
-    public QueryGoal(String query_original, String query_words) {
-        assert query_original != null;
+
+    /**
+     * Creates a QueryGoal from a serach query string
+     * @param query_words search string (the actual search terms, excluding application specific modifier)
+     */
+    public QueryGoal(String query_words) {
         assert query_words != null;
-        this.query_original = query_original;
+        this.query_original = query_words;
         this.include_words = new NormalizedWords();
         this.exclude_words = new NormalizedWords();
         this.include_strings = new ArrayList<String>();
@@ -175,7 +178,14 @@ public class QueryGoal {
         }
     }
 
-    public String getOriginalQueryString(final boolean encodeHTML) {
+    /**
+     * Search query string (without YaCy specific modifier like site:xxx or /smb)
+     * the modifier are held separately in a search paramter modifier
+     *
+     * @param encodeHTML
+     * @return
+     */
+    public String getQueryString(final boolean encodeHTML) {
         if (this.query_original == null) return null;
         String ret;
         if (encodeHTML){
@@ -189,7 +199,7 @@ public class QueryGoal {
         }
         return ret;
     }
-    
+
     /**
      * @return a set of hashes of words to be included in the search result.
      * if possible, use getIncludeWords instead

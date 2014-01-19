@@ -96,7 +96,7 @@ public class AccessTracker {
 
     private static void add(final LinkedList<QueryParams> list, final QueryParams query, int resultCount) {
         // learn that this word can be a word completion for the DidYouMeanLibrary
-        String queryString = query.getQueryGoal().getOriginalQueryString(false);
+        String queryString = query.getQueryGoal().getQueryString(false);
         if (resultCount > 10 && queryString != null && queryString.length() > 0) {
             final StringBuilder sb = new StringBuilder(queryString);
             sb.append(queryString);
@@ -138,7 +138,7 @@ public class AccessTracker {
     }
 
     private static void addToDump(final QueryParams query, int resultCount) {
-        String queryString = query.getQueryGoal().getOriginalQueryString(false);
+        String queryString = query.getQueryGoal().getQueryString(false);
         if (queryString == null || queryString.isEmpty()) return;
         addToDump(queryString, Integer.toString(resultCount), new Date(query.starttime));
     }

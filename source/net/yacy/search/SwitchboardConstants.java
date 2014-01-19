@@ -522,8 +522,6 @@ public final class SwitchboardConstants {
     public static final String HEURISTIC_SITE                      = "heuristic.site";
     public static final String HEURISTIC_SEARCHRESULTS             = "heuristic.searchresults";
     public static final String HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL = "heuristic.searchresults.crawlglobal";
-    public static final String HEURISTIC_BLEKKO                    = "heuristic.blekko";
-    public static final String HEURISTIC_TWITTER                   = "heuristic.twitter";
     public static final String HEURISTIC_OPENSEARCH                = "heuristic.opensearch";
 	
 	/*

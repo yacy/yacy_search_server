@@ -67,7 +67,7 @@ public final class timeline {
             language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final QueryGoal qg = new QueryGoal(querystring, querystring);
+        final QueryGoal qg = new QueryGoal(querystring);
         HandleSet q = qg.getIncludeHashes();
 
         // tell all threads to do nothing for a specific time

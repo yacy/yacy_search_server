@@ -485,12 +485,6 @@ public class yacysearch {
                 modifier.add("/heuristic/blekko");
             }
             
-            final int heuristicTwitter = querystring.indexOf("/heuristic/twitter", 0);
-            if ( heuristicTwitter >= 0 ) {
-                querystring = querystring.replace("/heuristic/twitter", "");
-                modifier.add("/heuristic/twitter");
-            }
-
             final int tldp = querystring.indexOf("tld:", 0);
             if (tldp >= 0) {
                 int ftb = querystring.indexOf(' ', tldp);
@@ -524,7 +518,7 @@ public class yacysearch {
             }
 
             // the query
-            final QueryGoal qg = new QueryGoal(originalquerystring, querystring.trim());
+            final QueryGoal qg = new QueryGoal(querystring.trim());
             final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? qg.getIncludeHashes().size() - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
@@ -688,7 +682,7 @@ public class yacysearch {
             ConcurrentLog.info(
                 "LOCAL_SEARCH",
                 "INIT WORD SEARCH: "
-                    + theQuery.getQueryGoal().getOriginalQueryString(false)
+                    + theQuery.getQueryGoal().getQueryString(false)
                     + ":"
                     + QueryParams.hashSet2hashString(theQuery.getQueryGoal().getIncludeHashes())
                     + " - "
@@ -697,7 +691,7 @@ public class yacysearch {
                     + theQuery.itemsPerPage()
                     + " lines to be displayed");
             EventChannel.channels(EventChannel.LOCALSEARCH).addMessage(
-                new RSSMessage("Local Search Request", theQuery.getQueryGoal().getOriginalQueryString(false), ""));
+                new RSSMessage("Local Search Request", theQuery.getQueryGoal().getQueryString(false), ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
@@ -724,11 +718,8 @@ public class yacysearch {
                 if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) && authenticated && !stealthmode) {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
-                if ( (heuristicBlekko >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_BLEKKO, false)) && authenticated && !stealthmode ) {
+                if ( heuristicBlekko >= 0  && authenticated && !stealthmode ) {
                     sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
-                }
-                if ( (heuristicTwitter >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_TWITTER, false)) && authenticated && !stealthmode ) {
-                    sb.heuristicRSS("http://search.twitter.com/search.rss?rpp=50&q=$", theSearch, "twitter");
                 }
                 if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && authenticated && !stealthmode) {
                     OpenSearchConnector.query(sb, theSearch);
@@ -737,7 +728,7 @@ public class yacysearch {
 
             // log
             ConcurrentLog.info("LOCAL_SEARCH", "EXIT WORD SEARCH: "
-                + theQuery.getQueryGoal().getOriginalQueryString(false)
+                + theQuery.getQueryGoal().getQueryString(false)
                 + " - "
                 + "local_rwi_available(" + theSearch.local_rwi_available.get() + "), "
                 + "local_rwi_stored(" + theSearch.local_rwi_stored.get() + "), "

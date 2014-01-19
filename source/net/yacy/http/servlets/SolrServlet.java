@@ -135,7 +135,7 @@ public class SolrServlet extends HttpServlet {
                 QueryModifier modifier = new QueryModifier();
                 querystring = modifier.parse(querystring);
                 modifier.apply(mmsp);
-                QueryGoal qg = new QueryGoal(querystring, querystring);
+                QueryGoal qg = new QueryGoal(querystring);
                 StringBuilder solrQ = qg.collectionTextQueryString(sb.index.fulltext().getDefaultConfiguration(), profileNr, false);
                 mmsp.getMap().put(CommonParams.Q, new String[]{solrQ.toString()}); // sru patch
             }

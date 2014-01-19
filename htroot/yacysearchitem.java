@@ -129,7 +129,7 @@ public class yacysearchitem {
                 faviconURL = null;
             }
             final String resource = theSearch.query.domType.toString();
-            final String origQ = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+            final String origQ = theSearch.query.getQueryGoal().getQueryString(true);
             prop.put("content", 1); // switch on specific content
             prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) ? 1 : 0);
             prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);

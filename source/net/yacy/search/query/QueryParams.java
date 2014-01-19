@@ -602,7 +602,7 @@ public final class QueryParams {
         sb.append("/yacysearch.");
         sb.append(ext);
         sb.append("?query=");
-        sb.append(newQueryString == null ? theQuery.getQueryGoal().getOriginalQueryString(true) : newQueryString);
+        sb.append(newQueryString == null ? theQuery.getQueryGoal().getQueryString(true) : newQueryString);
 
         sb.append("&maximumRecords=");
         sb.append(theQuery.itemsPerPage());
@@ -625,7 +625,7 @@ public final class QueryParams {
         sb.append(theQuery.contentdom.toString());
 
         sb.append("&former=");
-        sb.append(theQuery.getQueryGoal().getOriginalQueryString(true));
+        sb.append(theQuery.getQueryGoal().getQueryString(true));
 
         return sb;
     }

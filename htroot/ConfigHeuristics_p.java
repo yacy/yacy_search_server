@@ -61,10 +61,6 @@ public class ConfigHeuristics_p {
             if (post.containsKey("searchresult_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false);
             if (post.containsKey("searchresultglobal_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL, true);
             if (post.containsKey("searchresultglobal_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL, false);
-            if (post.containsKey("blekko_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, true);
-            if (post.containsKey("blekko_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, false);
-            if (post.containsKey("twitter_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_TWITTER, true);
-            if (post.containsKey("twitter_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_TWITTER, false);
             if (post.containsKey("opensearch_on")) {
                 sb.setConfig(SwitchboardConstants.HEURISTIC_OPENSEARCH, true);
                 // re-read config (and create work table)
@@ -137,11 +133,11 @@ public class ConfigHeuristics_p {
             }
 
             // copy default opensearch heuristic config with sample entries
-            if (post.containsKey("copydefaultosdconfig")) {
+            if (post.containsKey("copydefaultosdconfig") || post.containsKey("resettodefaultosdlist")) {
                 // prepare a solr index profile switch list
                 final File osdDefaultConfig = new File(sb.getDataPath(), "defaults/heuristicopensearch.conf");
                 final File osdConfig = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
-                if (!osdConfig.exists() && osdDefaultConfig.exists()) {
+                if ((post.containsKey("resettodefaultosdlist") || !osdConfig.exists()) && osdDefaultConfig.exists()) {
                     try {
                         Files.copy(osdDefaultConfig, osdConfig);
                     } catch (final IOException ex) {
@@ -158,8 +154,6 @@ public class ConfigHeuristics_p {
         prop.put("site.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) ? 1 : 0);
         prop.put("searchresult.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ? 1 : 0);
         prop.put("searchresultglobal.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL, false) ? 1 : 0);
-        prop.put("blekko.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_BLEKKO, false) ? 1 : 0);
-        prop.put("twitter.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_TWITTER, false) ? 1 : 0);
         prop.put("opensearch.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) ? 1 : 0);
 
         // display config file content

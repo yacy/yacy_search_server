@@ -682,6 +682,16 @@ public final class Switchboard extends serverSwitch {
         this.log.info("surrogates.out Path = " + this.surrogatesOutPath.getAbsolutePath());
         this.surrogatesOutPath.mkdirs();
 
+        // copy opensearch heuristic config (if not exist)
+        final File osdConfig = new File(getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
+        if (!osdConfig.exists()) {
+            final File osdDefaultConfig = new File("defaults/heuristicopensearch.conf");
+            this.log.info("heuristic.opensearch list Path = " + osdDefaultConfig.getAbsolutePath());
+            try {
+                Files.copy(osdDefaultConfig, osdConfig);
+            } catch (final IOException ex) { }
+        }
+
         // create the release download directory
         this.releasePath =
             getDataPath(SwitchboardConstants.RELEASE_PATH, SwitchboardConstants.RELEASE_PATH_DEFAULT);
@@ -1321,8 +1331,7 @@ public final class Switchboard extends serverSwitch {
 
             // remove heuristics
             setConfig(SwitchboardConstants.HEURISTIC_SITE, false);
-            setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, false);
-            setConfig(SwitchboardConstants.HEURISTIC_TWITTER, false);
+            setConfig(SwitchboardConstants.HEURISTIC_OPENSEARCH, false);
 
             // relocate
             this.peers.relocate(
@@ -3582,7 +3591,7 @@ public final class Switchboard extends serverSwitch {
         new Thread() {
             @Override
             public void run() {
-                String queryString = searchEvent.query.getQueryGoal().getOriginalQueryString(false);
+                String queryString = searchEvent.query.getQueryGoal().getQueryString(false);
                 Thread.currentThread().setName("Switchboard.heuristicRSS:" + queryString);
                 final int meta = queryString.indexOf("heuristic:", 0);
                 if ( meta >= 0 ) {
