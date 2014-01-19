@@ -211,10 +211,10 @@ public class RemoteSearch extends Thread {
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
             final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
-                Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
-                event.nodeSearchThreads.add(t);
+                    Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
+                    event.nodeSearchThreads.add(t);
+                }
             }
-        }
         
         // start search to YaCy DHT peers
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
@@ -309,7 +309,10 @@ public class RemoteSearch extends Thread {
         // check own peer status
         if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
         // prepare seed targets and threads
-        if (targetPeer != null && targetPeer.hash != null && event.preselectedPeerHashes != null) targetPeer.setAlternativeAddress(event.preselectedPeerHashes.get(ASCII.getBytes(targetPeer.hash)));
+        if (targetPeer != null && targetPeer.hash != null && event.preselectedPeerHashes != null) {
+            if (!targetPeer.getFlagSolrAvailable()) return null; // solr interface not avail.
+            targetPeer.setAlternativeAddress(event.preselectedPeerHashes.get(ASCII.getBytes(targetPeer.hash)));
+        }
         Thread solr = new Thread() {
             @Override
             public void run() {
