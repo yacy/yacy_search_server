@@ -156,14 +156,13 @@ public class Latency {
         // find the minimum waiting time based on the network domain (local or global)
         int waiting = agent.minimumDelta;
 
-        // if we have accessed the domain many times, get slower (the flux factor)
-        waiting += host.flux(waiting);
-
-        // use the access latency as rule how fast we can access the server
-        // this applies also to localhost, but differently, because it is not necessary to
-        // consider so many external accesses
-        waiting = Math.max(waiting, host.average() * 3 / 2);
-
+        if (agent.minimumDelta > ClientIdentification.minimumLocalDeltaInit) {
+            // use the access latency as rule how fast we can access the server
+            // this applies also to localhost, but differently, because it is not necessary to
+            // consider so many external accesses
+            waiting = Math.max(waiting * 3 / 2, host.average() / 2);
+        }
+        
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
         
@@ -198,16 +197,17 @@ public class Latency {
         boolean local = url.isLocal();
         int waiting = agent.minimumDelta;
 
-        // for CGI accesses, we double the minimum time
-        // mostly there is a database access in the background
-        // which creates a lot of unwanted IO on target site
-        if (MultiProtocolURL.isCGI(url.getFileName())) waiting = waiting * 2;
-
-        // if we have accessed the domain many times, get slower (the flux factor)
-        if (!local) waiting += host.flux(waiting);
-
-        // use the access latency as rule how fast we can access the server
-        if (!local) waiting = Math.max(waiting, host.average() * 3 / 2);
+        if (!local && agent.minimumDelta > ClientIdentification.minimumLocalDeltaInit) {
+            // for CGI accesses, we double the minimum time
+            // mostly there is a database access in the background
+            // which creates a lot of unwanted IO on target site
+            if (MultiProtocolURL.isCGI(url.getFileName())) {
+                waiting = waiting * 3 / 2;
+            } else {
+                // use the access latency as rule how fast we can access the server
+                waiting = Math.max(waiting, host.average() / 2);
+            }
+        }
 
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -236,11 +236,6 @@ public class Latency {
         // mostly there is a database access in the background
         // which creates a lot of unwanted IO on target site
         if (MultiProtocolURL.isCGI(url.getFileName())) { waiting = waiting * 2; s.append(", isCGI = true -> double"); }
-
-        // if we have accessed the domain many times, get slower (the flux factor)
-        int flux = host.flux(waiting);
-        waiting += flux;
-        s.append(", flux = ").append(flux);
 
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
@@ -336,9 +331,6 @@ public class Latency {
         }
         public long robotsDelay() {
             return this.robotsMinDelay;
-        }
-        public int flux(final int range) {
-            return this.count.get() >= 10000 ? range * Math.min(5000, this.count.get()) / 10000 : range / (10000 - this.count.get());
         }
     }
 
