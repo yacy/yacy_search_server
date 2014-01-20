@@ -48,12 +48,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
 import net.yacy.http.ProxyHandler;
@@ -946,13 +943,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
             final int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {
                 final String path = in.toString(off + 22, q - off - 22);
-                try {
                     RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+                try {
                     dispatcher.include(request, response);
-                    //response.flushBuffer();
-                } catch (Exception e) {
-                    ConcurrentLog.logException(e);
-                    throw new ServletException();
+                } catch (IOException ex) {
+                    ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: file not found " + path);
                 }
             }
         }
