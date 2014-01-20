@@ -176,7 +176,7 @@ public class CrawlQueues {
         return null;
     }
 
-    private void cleanup() {
+    public void cleanup() {
         // wait for all workers to finish
         final int timeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
         for (final Loader w: this.workers.values()) {

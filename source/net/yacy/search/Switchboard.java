@@ -2084,6 +2084,9 @@ public final class Switchboard extends serverSwitch {
                 }
             }
             
+            // cleanup crawl loader jobs
+            this.crawlQueues.cleanup();
+            
             // refresh recrawl dates
             try {
                 CrawlProfile selentry;
