@@ -703,6 +703,7 @@ public class HTTPClient {
 	            };
 	            t.start();
 	            try {t.join(this.timeout);} catch (InterruptedException e) {}
+	            if (t.isAlive()) try {t.interrupt();} catch (Throwable e) {}
 	            if (te[0] != null) throw te[0];
 	            if (thr[0] == null) throw new IOException("timout to client after " + this.timeout + "ms");
 	            this.httpResponse = thr[0];
