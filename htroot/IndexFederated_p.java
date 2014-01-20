@@ -87,11 +87,9 @@ public class IndexFederated_p {
             if (previous_core_fulltext && !post_core_fulltext) {
                 // switch off
                 sb.index.fulltext().disconnectLocalSolr();
-                sb.index.fulltext().disconnectUrlDb();
             }
             if (!previous_core_fulltext && post_core_fulltext) {
                 // switch on
-                sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
                 try { sb.index.fulltext().connectLocalSolr(); } catch (final IOException e) { ConcurrentLog.logException(e); }
             }
             

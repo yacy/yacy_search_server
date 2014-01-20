@@ -43,11 +43,7 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.index.Index;
-import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.workflow.BusyThread;
-import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -281,83 +277,6 @@ public class migration {
             sb.setConfig("crawler.http.acceptLanguage", sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
             sb.setConfig("crawler.http.acceptCharset",  sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));
         }
-    }
-    /**
-     * converts old urldb to Solr.
-     * In chunks of 1000 entries.
-     * Creates a lock file in workdir to allow only one active migration thread
-     * @return current size of urldb index
-     */
-    @SuppressWarnings("deprecation")
-    public static int migrateUrldbtoSolr(final Switchboard sb) {
-        int ret = 0;
-        final File f;
-        final Fulltext ft = sb.index.fulltext();
-
-        if (ft.getURLDb() != null) {
-            ret = ft.getURLDb().size();
-            f = new File(sb.workPath, "migrateUrldbtoSolr.lck");
-            f.deleteOnExit();
-            if (f.exists()) {
-                return ret;
-            }
-            try {
-                f.createNewFile();                    
-            } catch (final IOException ex) {
-                ConcurrentLog.info("migrateUrldbtoSolr","could not create lock file");
-            }
-
-            final Thread t = new Thread() {
-                boolean go = true;
-                final Index urldb = ft.getURLDb();
-
-                public void run() {
-                    try {
-                        Thread.currentThread().setName("migration.migrateUrldbtoSolr");
-
-                        int i = urldb.size();
-                        while (go && i > 0) {
-
-                            List<Row.Entry> chunk = urldb.random(1000);
-                            if ((chunk == null) || (chunk.size() == 0)) {
-                                go = false;
-                                break;
-                            }
-                            Iterator<Row.Entry> chunkit = chunk.iterator();
-
-                            while (go && chunkit.hasNext()) {
-                                try { // to catch any data errors 
-                                    URIMetadataRow row = new URIMetadataRow(chunkit.next(), null);
-                                    ft.putMetadata(row); // this deletes old urldb-entry first and inserts into Solr
-                                    i--;
-                                    if (Switchboard.getSwitchboard().shallTerminate()) {
-                                        go = false;
-                                    }
-                                } catch (final Exception e) {
-                                    ConcurrentLog.info("migrateUrldbtoSolr", "some error while adding old data to new index, continue with next entry");
-                                }
-                            }
-                            ConcurrentLog.info("migrateUrldbtoSolr", Integer.toString(i) + " entries left (convert next chunk of 1000 entries)");
-                        }
-                        ft.commit(true);
-
-                    } catch (final IOException ex) {
-                        ConcurrentLog.info("migrateUrldbtoSolr", "error reading old urldb index");
-                    } finally {
-                        if (f.exists()) {
-                            f.delete(); // delete lock file
-                        }
-                    }
-                }
-
-                public void exit() {
-                    go = false;
-                }
-            };
-            t.setPriority(Thread.MIN_PRIORITY);
-            t.start();
-        }
-        return ret;
     }
     
     /**

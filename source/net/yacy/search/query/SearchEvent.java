@@ -70,7 +70,7 @@ import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -277,7 +277,7 @@ public final class SearchEvent {
         this.addRunning = true;
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
-        this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.urlhashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 100);
         this.taggingPredicates = new HashMap<String, String>();
         for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
             this.taggingPredicates.put(t.getName(), t.getPredicate());

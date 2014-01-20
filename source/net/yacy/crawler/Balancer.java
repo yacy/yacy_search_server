@@ -51,7 +51,7 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -96,7 +96,7 @@ public class Balancer {
         this.cacheStacksPath = cachePath;
         this.domainStacks = new ConcurrentHashMap<String, HostHandles>();
         this.domStackInitSize = Integer.MAX_VALUE;
-        this.double_push_check = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.double_push_check = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
         this.zeroWaitingCandidates = new ArrayList<Map.Entry<String, byte[]>>();
         this.random = new Random(System.currentTimeMillis());
         
@@ -564,7 +564,7 @@ public class Balancer {
     	if (!this.domainStacks.isEmpty() && System.currentTimeMillis() - this.lastDomainStackFill < 60000L) return;
     	this.domainStacks.clear();
     	this.lastDomainStackFill = System.currentTimeMillis();
-    	final HandleSet blackhandles = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
+    	final HandleSet blackhandles = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 10);
         String host;
         Request request;
         int count = 0;

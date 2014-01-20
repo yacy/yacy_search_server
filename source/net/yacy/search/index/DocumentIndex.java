@@ -74,10 +74,6 @@ public class DocumentIndex extends Segment {
         );
         super.connectRWI(cachesize, targetFileSize * 4 - 1);
         super.connectCitation(cachesize, targetFileSize * 4 - 1);
-        super.connectUrlDb(
-                false, // useTailCache
-                false  // exceed134217727
-                );
         super.fulltext().connectLocalSolr();
         super.fulltext().setUseWebgraph(true);
         this.callback = callback;

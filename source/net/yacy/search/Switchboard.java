@@ -506,7 +506,6 @@ public final class Switchboard extends serverSwitch {
             this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
         } catch (final IOException e) {ConcurrentLog.logException(e);}
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
-            this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             try {this.index.fulltext().connectLocalSolr();} catch (final IOException e) {ConcurrentLog.logException(e);}
         }
         this.index.fulltext().setUseWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
@@ -1347,7 +1346,6 @@ public final class Switchboard extends serverSwitch {
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
                 this.index.fulltext().connectLocalSolr();
-                this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             }
             this.index.fulltext().setUseWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 

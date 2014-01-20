@@ -11,16 +11,16 @@
 // LICENSE
 //
 // This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
+// it under the terms of the GNU General private License as published by
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU General private License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU General private License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
@@ -31,7 +31,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -43,7 +42,6 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -59,7 +57,7 @@ public class URIMetadataRow {
 
     // this object stores attributes for URL entries
 
-    public static final Row rowdef = new Row(
+    private static final Row rowdef = new Row(
         "String hash-12, " +            // the url's hash
         "String comp-360, " +           // components: the url, description, author, tags and publisher
         "Cardinal mod-4 {b256}, " +     // last-modified from the httpd
@@ -108,7 +106,7 @@ public class URIMetadataRow {
     private WordReference word; // this is only used if the url is transported via remote search requests
     private Components comp;
 
-    public URIMetadataRow(final Row.Entry entry, final WordReference searchedWord) {
+    private URIMetadataRow(final Row.Entry entry, final WordReference searchedWord) {
         this.entry = entry;
         this.snippet = "";
         this.word = searchedWord;
@@ -242,17 +240,6 @@ public class URIMetadataRow {
         return h;
     }
 
-    private String hostHash = null;
-    public String hosthash() {
-        if (this.hostHash != null) return this.hostHash;
-        this.hostHash = ASCII.String(this.entry.getPrimaryKeyBytes(), 6, 6);
-        return this.hostHash;
-    }
-
-    public boolean matches(final Pattern matcher) {
-        return this.metadata().matches(matcher);
-    }
-
     public DigestURL url() {
         return this.metadata().url();
     }
@@ -281,7 +268,7 @@ public class URIMetadataRow {
         return this.metadata().lon();
     }
 
-    private Components metadata() {
+    public Components metadata() {
         // avoid double computation of metadata elements
         if (this.comp != null) return this.comp;
         // parse elements from comp field;
@@ -434,20 +421,6 @@ public class URIMetadataRow {
         }
     }
 
-    public Request toBalancerEntry(final String initiatorHash) {
-        return new Request(
-                ASCII.getBytes(initiatorHash),
-                metadata().url(),
-                referrerHash(),
-                metadata().dc_title(),
-                moddate(),
-                null,
-                0,
-                0,
-                0,
-                0);
-    }
-
     /**
      * @return the object as String.<br>
      * This e.g. looks like this:
@@ -472,7 +445,7 @@ public class URIMetadataRow {
         private final String dc_title, dc_creator, dc_subject, dc_publisher;
         private String latlon; // a comma-separated tuple as "<latitude>,<longitude>" where the coordinates are given as WGS84 spatial coordinates in decimal degrees
 
-        public Components(
+        private Components(
                 final String urlRaw,
                 final byte[] urlhash,
                 final String title,
@@ -489,12 +462,7 @@ public class URIMetadataRow {
             this.dc_publisher = publisher;
             this.latlon = latlon;
         }
-        public boolean matches(final Pattern matcher) {
-            if (this.urlRaw != null) return matcher.matcher(this.urlRaw.toLowerCase()).matches();
-            if (this.url != null) return matcher.matcher(this.url.toNormalform(true).toLowerCase()).matches();
-            return false;
-        }
-        public DigestURL url() {
+        private DigestURL url() {
             if (this.url == null) {
                 try {
                     this.url = new DigestURL(this.urlRaw, this.urlHash);
@@ -506,11 +474,11 @@ public class URIMetadataRow {
             }
             return this.url;
         }
-        public String  dc_title()  { return this.dc_title; }
-        public String  dc_creator() { return this.dc_creator; }
-        public String  dc_publisher() { return this.dc_publisher; }
-        public String  dc_subject()   { return this.dc_subject; }
-        public double lat() {
+        private String  dc_title()  { return this.dc_title; }
+        private String  dc_creator() { return this.dc_creator; }
+        private String  dc_publisher() { return this.dc_publisher; }
+        private String  dc_subject()   { return this.dc_subject; }
+        private double lat() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
             if (p < 0) return 0.0d;
@@ -523,7 +491,7 @@ public class URIMetadataRow {
                 return 0.0d;
             }
         }
-        public double lon() {
+        private double lon() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
             if (p < 0) return 0.0d;

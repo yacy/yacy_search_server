@@ -32,7 +32,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -60,7 +60,7 @@ public class HostQueue {
             final boolean exceed134217727) {
         this.hostHash = hostHash;
         this.queuesPath = queuesPath;
-        this.urlHashDoubleCheck = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.urlHashDoubleCheck = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
         
         // create a stack for newly entered entries
         if (!(this.queuesPath.exists())) this.queuesPath.mkdir(); // make the path

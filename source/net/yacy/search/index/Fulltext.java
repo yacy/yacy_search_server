@@ -54,7 +54,6 @@ import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.InstanceMirror;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
-import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
@@ -66,10 +65,6 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.index.Cache;
-import net.yacy.kelondro.index.Index;
-import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionConfiguration;
@@ -90,9 +85,7 @@ public final class Fulltext {
     // class objects
     private final File                    segmentPath;
     private final File                    archivePath;
-    private       Index                   urlIndexFile;
     private       Export                  exportthread; // will have a export thread assigned if exporter is running
-    private       String                  tablename;
     private       ArrayList<HostStat>     statsDump;
     private       InstanceMirror          solrInstances;
     private final CollectionConfiguration collectionConfiguration;
@@ -103,8 +96,6 @@ public final class Fulltext {
             final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
         this.segmentPath = segmentPath;
         this.archivePath = archivePath;
-        this.tablename = null;
-        this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
         this.solrInstances = new InstanceMirror();
@@ -119,35 +110,6 @@ public final class Fulltext {
     
     public boolean useWebgraph() {
         return this.writeWebgraph;
-    }
-
-    /**
-     * @deprecated
-     * used only for migration
-     * @return the connected URLDb
-
-     */
-    @Deprecated
-    public Index getURLDb() {
-        return this.urlIndexFile;
-    }
-
-    protected void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
-    	if (this.urlIndexFile != null) return;
-        this.tablename = tablename;
-    	this.urlIndexFile = new SplitTable(new File(this.segmentPath, "default"), tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
-        // SplitTable always returns != null, even if no file exists.
-        // as old UrlDb should be null if not exist, check and close if empty
-        // TODO: check if a SplitTable.open() returning null or error status on not existing file is preferable
-        if (this.urlIndexFile.isEmpty()) {
-            disconnectUrlDb();
-        }
-    }
-
-    public void disconnectUrlDb() {
-    	if (this.urlIndexFile == null) return;
-    	this.urlIndexFile.close();
-    	this.urlIndexFile = null;
     }
 
     public CollectionConfiguration getDefaultConfiguration() {
@@ -233,19 +195,13 @@ public final class Fulltext {
     }
     
     public void clearCaches() {
-        if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
         if (this.statsDump != null) this.statsDump.clear();
         this.solrInstances.clearCaches();
         this.statsDump = null;
     }
 
-    public void clearURLIndex() throws IOException {
+    public void clearURLIndex() {
         if (this.exportthread != null) this.exportthread.interrupt();
-        if (this.urlIndexFile == null) {
-            SplitTable.delete(new File(this.segmentPath, "default"), this.tablename);
-        } else {
-            this.urlIndexFile.clear();
-        }
         this.statsDump = null;
         this.commit(true);
     }
@@ -280,8 +236,7 @@ public final class Fulltext {
     public long collectionSize() {
         long t = System.currentTimeMillis();
         if (t - this.collectionSizeLastAccess < 1000) return this.collectionSizeLastValue;
-        long size = this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
-        size += this.solrInstances.getDefaultMirrorConnector().getSize();
+        long size = this.solrInstances.getDefaultMirrorConnector().getSize();
         this.collectionSizeLastAccess = t;
         this.collectionSizeLastValue = size;
         return size;
@@ -297,10 +252,6 @@ public final class Fulltext {
 
     public void close() {
         this.statsDump = null;
-        if (this.urlIndexFile != null) {
-            this.urlIndexFile.close();
-            this.urlIndexFile = null;
-        }
         this.solrInstances.close();
     }
     
@@ -364,23 +315,8 @@ public final class Fulltext {
         try {
             SolrDocument doc = this.getDefaultConnector().getDocumentById(u);
             if (doc != null) {
-            	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash); // migration
             	return new URIMetadataNode(doc, wre, weight);
             }
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
-
-        // get the metadata from the old metadata index
-        if (this.urlIndexFile != null) try {
-    		// slow migration to solr
-    		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
-            if (entry == null) return null;
-			URIMetadataRow row = new URIMetadataRow(entry, wre);
-			SolrInputDocument solrInput = this.collectionConfiguration.metadata2solr(row);
-			this.putDocument(solrInput);
-			SolrDocument sd = this.collectionConfiguration.toSolrDocument(solrInput);
-			return new URIMetadataNode(sd, wre, weight);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
@@ -394,14 +330,8 @@ public final class Fulltext {
         String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
         String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
         ConcurrentLog.info("Fulltext", "indexing: " + id + " " + url);
-        byte[] idb = ASCII.getBytes(id);
         try {
-            if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-            //Date sdDate = (Date) connector.getFieldById(id, CollectionSchema.last_modified.getSolrFieldName());
-            //Date docDate = null;
-            //if (sdDate == null || (docDate = SchemaConfiguration.getDate(doc, CollectionSchema.last_modified)) == null || sdDate.before(docDate)) {
             connector.add(doc);
-            //}
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -428,7 +358,6 @@ public final class Fulltext {
         byte[] idb = entry.hash();
         String id = ASCII.String(idb);
         try {
-            if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
             // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
             SolrDocument sd = this.getDefaultConnector().getDocumentById(id);
             if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
@@ -458,24 +387,7 @@ public final class Fulltext {
                 (freshdate == null || freshdate.after(now)) ? null :
                 (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
 
-        // delete in old metadata structure
-        if (Fulltext.this.urlIndexFile != null) {
-            final ArrayList<String> l = new ArrayList<String>();
-            CloneableIterator<byte[]> i;
-            try {
-                i = Fulltext.this.urlIndexFile.keys(true, null);
-                String hash;
-                while (i != null && i.hasNext()) {
-                    hash = ASCII.String(i.next());
-                    if (hosthashes.contains(hash.substring(6))) l.add(hash);
-                }
-                
-                // then delete the urls using this list
-                for (final String h: l) Fulltext.this.urlIndexFile.delete(ASCII.getBytes(h));
-            } catch (final IOException e) {}
-        }
-
-        // finally remove the line with statistics
+        // remove the line with statistics
         if (Fulltext.this.statsDump != null) {
             final Iterator<HostStat> hsi = Fulltext.this.statsDump.iterator();
             HostStat hs;
@@ -578,12 +490,6 @@ public final class Fulltext {
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
-        if (Fulltext.this.urlIndexFile != null) try {
-            for (String id: deleteIDs) {
-                final Row.Entry r = Fulltext.this.urlIndexFile.remove(ASCII.getBytes(id));
-                if (r != null) Fulltext.this.statsDump = null;
-            }
-        } catch (final IOException e) {}
     }
     
     public boolean remove(final byte[] urlHash) {
@@ -595,20 +501,12 @@ public final class Fulltext {
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
-        if (this.urlIndexFile != null) try {
-            final Row.Entry r = this.urlIndexFile.remove(urlHash);
-            if (r != null) this.statsDump = null;
-            return r != null;
-        } catch (final IOException e) {
-            return false;
-        }
         return false;
     }
 
     @Deprecated
     public boolean exists(final String urlHash) {
         if (urlHash == null) return false;
-        if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(urlHash))) return true;
         try {
             if (this.getDefaultConnector().existsById(urlHash)) return true;
         } catch (final Throwable e) {
@@ -629,17 +527,6 @@ public final class Fulltext {
         if (ids.size() == 1) return exists(ids.iterator().next()) ? ids : e;
         Set<String> idsC = new HashSet<String>();
         idsC.addAll(ids);
-        if (this.urlIndexFile != null) {
-            Iterator<String> idsi = idsC.iterator();
-            String h;
-            while (idsi.hasNext()) {
-                h = idsi.next();
-                if (this.urlIndexFile.has(ASCII.getBytes(h))) {
-                    idsi.remove();
-                    e.add(h);
-                }
-            }
-        }
         try {
             Set<String> e1 = this.getDefaultConnector().existsByIds(idsC);
             e.addAll(e1);

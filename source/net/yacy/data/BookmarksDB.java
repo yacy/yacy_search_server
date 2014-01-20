@@ -43,7 +43,7 @@ import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 
 public class BookmarksDB {
@@ -212,7 +212,7 @@ public class BookmarksDB {
         final TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
         final String tagHash=BookmarkHelper.tagHash(tagName);
         final Tag tag=getTag(tagHash);
-        RowHandleSet hashes = tag == null ? new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10) : tag.getUrlHashes();
+        RowHandleSet hashes = tag == null ? new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 10) : tag.getUrlHashes();
         if (priv) {
             for (byte[] hash: hashes) set.add(ASCII.String(hash));
         } else {
@@ -389,7 +389,7 @@ public class BookmarksDB {
         private Tag(final String name) {
             this.tagHash = BookmarkHelper.tagHash(name);
             this.tagName = name;
-            this.urlHashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
+            this.urlHashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 10);
         }
 
         /**

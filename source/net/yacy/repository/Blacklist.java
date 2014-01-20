@@ -52,6 +52,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
@@ -462,7 +463,7 @@ public class Blacklist {
         }
         HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);
         if (urlHashCache == null) {
-            urlHashCache = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            urlHashCache = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
             if (isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
                 try {
                     urlHashCache.put(url.hash());
@@ -679,13 +680,13 @@ public class Blacklist {
             try {
                 ObjectInputStream in = new ObjectInputStream(new FileInputStream(cachefile));
                 RowHandleSet rhs = (RowHandleSet) in.readObject();
-                this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0) : rhs);
+                this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0) : rhs);
                 in.close();
                 return;
             } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }
         }
-        this.cachedUrlHashs.put(type, new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
+        this.cachedUrlHashs.put(type, new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0));
     }
 }

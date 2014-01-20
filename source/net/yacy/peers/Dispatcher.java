@@ -39,7 +39,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -194,7 +193,7 @@ public class Dispatcher {
         final ArrayList<ReferenceContainer<WordReference>> rc;
         if (ram) {
             // selection was only from ram, so we have to carefully remove only the selected entries
-            final HandleSet urlHashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            final HandleSet urlHashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
             Iterator<WordReference> it;
             for (final ReferenceContainer<WordReference> c: containers) {
                 urlHashes.clear();

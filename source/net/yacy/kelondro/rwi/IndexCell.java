@@ -40,7 +40,7 @@ import net.yacy.cora.storage.ComparableARC;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.MergeIterator;
@@ -102,7 +102,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.targetFileSize = targetFileSize;
         this.maxFileSize = maxFileSize;
         this.writeBufferSize = writeBufferSize;
-        this.removeDelayedURLs = new TreeMap<byte[], HandleSet>(URIMetadataRow.rowdef.objectOrder);
+        this.removeDelayedURLs = new TreeMap<byte[], HandleSet>(Word.commonHashOrder);
         this.flushShallRun = true;
         this.flushThread = new FlushThread();
         this.flushThread.start();
@@ -399,7 +399,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             r = this.removeDelayedURLs.get(termHash);
         }
         if (r == null) {
-            r = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            r = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
         }
         try {
             r.put(urlHashBytes);
@@ -414,7 +414,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     @Override
     public void removeDelayed() throws IOException {
-        final HandleSet words = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
+        final HandleSet words = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
         synchronized (this.removeDelayedURLs) {
             for (final byte[] b: this.removeDelayedURLs.keySet()) try {words.put(b);} catch (final SpaceExceededException e) {}
         }
@@ -476,7 +476,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
 
         public RemoveReducer(final byte[] urlHashBytes) {
-            this.urlHashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            this.urlHashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
             try {
                 this.urlHashes.put(urlHashBytes);
             } catch (final SpaceExceededException e) {

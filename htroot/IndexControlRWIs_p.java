@@ -45,7 +45,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -110,8 +109,8 @@ public class IndexControlRWIs_p {
             final String[] urls = post.getAll("urlhx.*");
             HandleSet urlb =
                 new RowHandleSet(
-                    URIMetadataRow.rowdef.primaryKeyLength,
-                    URIMetadataRow.rowdef.objectOrder,
+                    Word.commonHashLength,
+                    Word.commonHashOrder,
                     urls.length);
             if ( urls != null ) {
                 for ( final String s : urls ) {
@@ -165,8 +164,8 @@ public class IndexControlRWIs_p {
                         final Iterator<WordReference> en = index.entries();
                         urlb =
                             new RowHandleSet(
-                                URIMetadataRow.rowdef.primaryKeyLength,
-                                URIMetadataRow.rowdef.objectOrder,
+                                Word.commonHashLength,
+                                Word.commonHashOrder,
                                 index.size());
                         while ( en.hasNext() ) {
                             try {
@@ -208,8 +207,8 @@ public class IndexControlRWIs_p {
                     }
                     final HandleSet urlHashes =
                         new RowHandleSet(
-                            URIMetadataRow.rowdef.primaryKeyLength,
-                            URIMetadataRow.rowdef.objectOrder,
+                            Word.commonHashLength,
+                            Word.commonHashOrder,
                             0);
                     for ( final byte[] b : urlb ) {
                         try {
@@ -363,8 +362,8 @@ public class IndexControlRWIs_p {
                 final String blacklist = post.get("blacklist", "");
                 final HandleSet urlHashes =
                     new RowHandleSet(
-                        URIMetadataRow.rowdef.primaryKeyLength,
-                        URIMetadataRow.rowdef.objectOrder,
+                        Word.commonHashLength,
+                        Word.commonHashOrder,
                         urlb.size());
                 if ( post.containsKey("blacklisturls") ) {
                     final String[] supportedBlacklistTypes =

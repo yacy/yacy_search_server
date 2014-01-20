@@ -49,7 +49,6 @@ import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
@@ -588,7 +587,7 @@ public final class CrawlSwitchboard {
                     r = sei.next();
                     String handle = r.profileHandle();
                     RowHandleSet us = this.profilesActiveCrawlsCounter.get(handle);
-                    if (us == null) {us =  new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); this.profilesActiveCrawlsCounter.put(handle, us);}
+                    if (us == null) {us =  new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0); this.profilesActiveCrawlsCounter.put(handle, us);}
                     if (us.size() < 100) us.put(r.url().hash()); // store the hash, but not too many
                     deletionCandidate.remove(handle);
                     if (deletionCandidate.size() == 0) return new HashSet<String>(0);

@@ -66,7 +66,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -204,10 +203,6 @@ public class Segment {
     public long citationSegmentCount() {
         return this.urlCitationIndex == null ? 0 : this.urlCitationIndex.getSegmentCount();
     }
-    
-    public void connectUrlDb(final boolean useTailCache, final boolean exceed134217727) {
-        this.fulltext.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
-    }
 
     public Fulltext fulltext() {
         return this.fulltext;
@@ -280,7 +275,7 @@ public class Segment {
     }
     
     private static RowHandleSet getPossibleRootHashes(DigestURL url) {
-        RowHandleSet rootCandidates = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
+        RowHandleSet rootCandidates = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 10);
         String rootStub = url.getProtocol() + "://" + url.getHost();
         try {
             rootCandidates.put(new DigestURL(rootStub).hash());
