@@ -376,7 +376,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     @Override
-    public boolean existsById(String id) {
+    public synchronized boolean existsById(String id) {
         return getCountByQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id) > 0;
     }
     
