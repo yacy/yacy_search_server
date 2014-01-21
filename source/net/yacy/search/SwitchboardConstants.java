@@ -332,6 +332,7 @@ public final class SwitchboardConstants {
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
+    public static final String CRAWLER_SAME_HOST_IN_QUEUE       = "crawler.MaxSameHostInQueue";
     public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects"; // ignore the target url and follow to the redirect
     public static final String CRAWLER_RECORD_REDIRECTS         = "crawler.http.RecordRedirects"; // record the ignored redirected page to the index store
     

@@ -306,7 +306,7 @@ public class PerformanceQueues_p {
 
         // table thread pool settings
         prop.put("pool_0_name","Crawler Pool");
-        prop.put("pool_0_maxActive", sb.getConfigLong("crawler.MaxActiveThreads", 0));
+        prop.put("pool_0_maxActive", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 0));
         prop.put("pool_0_numActive",sb.crawlQueues.workerSize());
 
         final YaCyHttpServer httpd = sb.getHttpServer(); 

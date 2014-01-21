@@ -36,15 +36,22 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.Switchboard;
 
 
 public class Latency {
 
-    private final static int DEFAULT_AVERAGE = 300;
+    private final static int   DEFAULT_AVERAGE_LATENCY = 500;
+    private final static int   DEFAULT_MAX_SAME_HOST_IN_QUEUE = 20;
+    private final static float DEFAULT_LATENCY_FACTOR  = 0.5f;
 
     // the map is a mapping from host names to host configurations
     private static final int mapMaxSize = 1000;
     private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<String, Host>();
+    
+    public static int   defaultAverageLatency = DEFAULT_AVERAGE_LATENCY;
+    public static int   MaxSameHostInQueue    = DEFAULT_MAX_SAME_HOST_IN_QUEUE;
+    public static float latencyFactor         = DEFAULT_LATENCY_FACTOR;
 
     /**
      * update the latency entry after a host was selected for queueing into the loader
@@ -57,7 +64,7 @@ public class Latency {
         String hosthash = url.hosthash();
         Host h = map.get(hosthash);
         if (h == null) {
-            h = new Host(host, DEFAULT_AVERAGE, robotsCrawlDelay);
+            h = new Host(host, defaultAverageLatency, robotsCrawlDelay);
             if (map.size() > mapMaxSize || MemoryControl.shortStatus()) map.clear();
             map.put(hosthash, h);
         }
@@ -139,7 +146,6 @@ public class Latency {
     /**
      * guess a minimum waiting time
      * the time is not correct, because if the domain was not checked yet by the robots.txt delay value, it is too low
-     * also the 'isCGI' property is missing, because the full text of the domain is unknown here
      * @param hostname
      * @param hosthash
      * @param robots
@@ -156,12 +162,16 @@ public class Latency {
         // find the minimum waiting time based on the network domain (local or global)
         int waiting = agent.minimumDelta;
 
-        if (agent.minimumDelta > ClientIdentification.minimumLocalDeltaInit) {
-            // use the access latency as rule how fast we can access the server
-            // this applies also to localhost, but differently, because it is not necessary to
-            // consider so many external accesses
-            waiting = Math.max(waiting * 3 / 2, host.average() / 2);
-        }
+        // if we have accessed the domain many times, get slower (the flux factor)
+        waiting += host.flux(waiting);
+
+        // use the access latency as rule how fast we can access the server
+        // this applies also to localhost, but differently, because it is not necessary to
+        // consider so many external accesses
+        waiting = Math.max(waiting, (int) (host.average() * latencyFactor));
+
+        // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
+        if (Switchboard.getSwitchboard().crawlQueues.hostcount(hostname) > MaxSameHostInQueue) waiting += 5000;
         
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -197,17 +207,14 @@ public class Latency {
         boolean local = url.isLocal();
         int waiting = agent.minimumDelta;
 
-        if (!local && agent.minimumDelta > ClientIdentification.minimumLocalDeltaInit) {
-            // for CGI accesses, we double the minimum time
-            // mostly there is a database access in the background
-            // which creates a lot of unwanted IO on target site
-            if (MultiProtocolURL.isCGI(url.getFileName())) {
-                waiting = waiting * 3 / 2;
-            } else {
-                // use the access latency as rule how fast we can access the server
-                waiting = Math.max(waiting, host.average() / 2);
-            }
-        }
+        // if we have accessed the domain many times, get slower (the flux factor)
+        if (!local) waiting += host.flux(waiting);
+
+        // use the access latency as rule how fast we can access the server
+        waiting = Math.max(waiting, (int) (host.average() * latencyFactor));
+        
+        // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
+        if (Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost()) > MaxSameHostInQueue) waiting += 5000;
 
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -226,22 +233,33 @@ public class Latency {
         final Host host = host(url);
         if (host == null) return "host " + host + " never accessed before -> Integer.MIN_VALUE"; // no delay if host is new
 
+        // find the minimum waiting time based on the network domain (local or global)
+        boolean local = url.isLocal();
         final StringBuilder s = new StringBuilder(50);
 
         // find the minimum waiting time based on the network domain (local or global)
         int waiting = agent.minimumDelta;
         s.append("minimumDelta = ").append(waiting);
 
-        // for CGI accesses, we double the minimum time
-        // mostly there is a database access in the background
-        // which creates a lot of unwanted IO on target site
-        if (MultiProtocolURL.isCGI(url.getFileName())) { waiting = waiting * 2; s.append(", isCGI = true -> double"); }
-
+        // if we have accessed the domain many times, get slower (the flux factor)
+        if (!local) {
+            int flux = host.flux(waiting);
+            waiting += flux;
+            s.append(", flux = ").append(flux);
+        }
+        
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
         s.append(", host.average = ").append(host.average());
-        waiting = Math.max(waiting, host.average() * 3 / 2);
+        waiting = Math.max(waiting, (int) (host.average() * latencyFactor));
+        
+        // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
+        int hostcount = Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost());
+        if (hostcount > MaxSameHostInQueue) {
+            s.append(", hostcount = ").append(hostcount);
+            waiting += 5000;
+        }
 
         // find the delay as given by robots.txt on target site
         int robotsDelay = waitingRobots(url, robots, agent);
@@ -331,6 +349,9 @@ public class Latency {
         }
         public long robotsDelay() {
             return this.robotsMinDelay;
+        }
+        public int flux(final int range) {
+            return this.count.get() >= 10000 ? range * Math.min(5000, this.count.get()) / 10000 : range / (10000 - this.count.get());
         }
     }
 

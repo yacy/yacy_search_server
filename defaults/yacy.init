@@ -741,6 +741,16 @@ crawler.file.maxFileSize=100000000
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 200
 
+# maximum number of same hosts in crawler threads
+crawler.MaxSameHostInQueue = 20
+
+# default latency is the start value of the average of remote server response time
+crawler.defaultAverageLatency = 500
+
+# the latency factor is a factor that is applied to the average remote server latency.
+# The result is the minimum remote server access delay time
+crawler.latencyFactor = 0.5
+
 # maximum size of indexing queue
 indexer.slots = 100
 

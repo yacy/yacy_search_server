@@ -126,6 +126,7 @@ import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ResultImages;
 import net.yacy.crawler.data.ResultURLs;
@@ -824,6 +825,9 @@ public final class Switchboard extends serverSwitch {
                 getDataPath());
         OAIListFriendsLoader.init(this.loader, oaiFriends, ClientIdentification.yacyInternetCrawlerAgent);
         this.crawlQueues = new CrawlQueues(this, this.queuesRoot);
+        Latency.defaultAverageLatency = this.getConfigInt("crawler.defaultAverageLatency", 500);
+        Latency.latencyFactor = this.getConfigFloat("crawler.latencyFactor", 0.5f);
+        Latency.MaxSameHostInQueue = this.getConfigInt("crawler.MaxSameHostInQueue", 20);
 
         // on startup, resume all crawls
         setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused", "false");

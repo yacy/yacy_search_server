@@ -144,6 +144,27 @@ public class CrawlQueues {
         }
         return null;
     }
+    
+    /**
+     * count the number of same host names in the worker
+     * @param host
+     * @return
+     */
+    public int hostcount(final String host) {
+        if (host == null || host.length() == 0) return 0;
+        int c = 0;
+        final int timeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
+        for (final Loader worker: this.workers.values()) {
+            if (worker.isAlive()) {
+                if (worker.age() > timeout) {
+                    try {worker.interrupt();} catch (Throwable e) {}
+                } else if (host.equals(worker.request.url().getHost())) {
+                    c++;
+                }
+            }
+        }
+        return c;
+    }
 
     public void removeURL(final byte[] hash) {
         assert hash != null && hash.length == 12;
@@ -180,8 +201,8 @@ public class CrawlQueues {
         // wait for all workers to finish
         final int timeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
         for (final Loader w: this.workers.values()) {
-            if (w.age() > timeout) {
-                w.interrupt();
+            if (w.isAlive() && w.age() > timeout) {
+                try {w.interrupt();} catch (Throwable e) {}
             }
         }
     }
