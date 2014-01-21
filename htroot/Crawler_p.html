@@ -109,7 +109,7 @@
 </fieldset>
 <fieldset style="width:480px;height:190px;;float:left;">
 <legend>Progress</legend>
-      <form action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <form action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
@@ -119,9 +119,11 @@
           <tr class="TableCellLight"> 
             <td align="left">Speed / PPM<br/>(Pages Per Minute)</td>
             <td align="left" colspan="4">
-            <input #(crawlingSpeedMinChecked)#::class="TableCellDark"#(/crawlingSpeedMinChecked)# type="submit" name="crawlingPerformance" value="minimum" />
-            <input #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)# id="customPPM" name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" />
-            <input #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)# type="submit" name="crawlingPerformance" value="maximum" />
+            <input id="customPPM" name="customPPM" type="number" min="10" max="30000" style="width:46px" value="#[customPPMdefault]#" />PPM
+            <input id="latencyFactor" name="latencyFactor" type="number" min="0.1" max="3.0" step="0.1" style="width:32px" value="#[latencyFactorDefault]#" />LF
+            <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:32px" value="#[MaxSameHostInQueueDefault]#" />MH            
+            <input type="submit" name="crawlingPerformance" value="set" />
+            (<a href="/Crawler_p.html?crawlingPerformance=minimum">min</a>/<a href="/Crawler_p.html?crawlingPerformance=maximum">max</a>)
             </td>
           </tr>
           <tr class="TableCellLight"> 

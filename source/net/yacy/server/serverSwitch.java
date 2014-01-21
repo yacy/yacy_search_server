@@ -190,6 +190,10 @@ public class serverSwitch
         setConfig(key, Float.toString(value));
     }
 
+    public void setConfig(final String key, final double value) {
+        setConfig(key, Double.toString(value));
+    }
+
     public void setConfig(final String key, final String value) {
         // set the value
         final String oldValue = this.configProps.put(key, value);

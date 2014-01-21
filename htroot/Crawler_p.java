@@ -51,6 +51,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -515,17 +516,56 @@ public class Crawler_p {
             }
         }
 
+        /*
+         *  <input id="customPPM" name="customPPM" type="number" min="10" max="30000" style="width:46px" value="#[customPPMdefault]#" />PPM
+            <input id="latencyFactor" name="latencyFactor" type="number" min="0.1" max="3.0" step="0.1" style="width:32px" value="#[latencyFactorDefault]#" />LF
+            <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:32px" value="#[MaxSameHostInQueueDefault]#" />MH            
+            <input type="submit" name="crawlingPerformance" value="set" />
+            (<a href="/Crawler_p.html?crawlingPerformance=minimum">min</a>/<a href="/Crawler_p.html?crawlingPerformance=maximum">max</a>)
+            </td>
+         */
         if (post != null && post.containsKey("crawlingPerformance")) {
-            setPerformance(sb, post);
+            final String crawlingPerformance = post.get("crawlingPerformance", "custom");
+            final long LCbusySleep1 = sb.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
+            int wantedPPM = (LCbusySleep1 == 0) ? 30000 : (int) (60000L / LCbusySleep1);
+            try {
+                wantedPPM = post.getInt("customPPM", wantedPPM);
+            } catch (final NumberFormatException e) {}
+            if ("minimum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 10;
+            if ("maximum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 30000;
+            
+            int wPPM = wantedPPM;
+            if ( wPPM <= 0 ) {
+                wPPM = 1;
+            }
+            if ( wPPM >= 30000 ) {
+                wPPM = 30000;
+            }
+            final int newBusySleep = 60000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
+            final float loadprereq = wantedPPM <= 10 ? 1.0f : wantedPPM <= 100 ? 2.0f : wantedPPM >= 1000 ? 8.0f : 3.0f;
+            
+            BusyThread thread;
+            
+            thread = sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+            if ( thread != null ) {
+                sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, thread.setBusySleep(newBusySleep));
+                sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_LOADPREREQ, thread.setLoadPreReqisite(loadprereq));
+                thread.setLoadPreReqisite(loadprereq);
+                thread.setIdleSleep(2000);
+            }
+
+            float latencyFactor = post.getFloat("latencyFactor", 0.5f);
+            int MaxSameHostInQueue = post.getInt("MaxSameHostInQueue", 20);
+            env.setConfig(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, latencyFactor);
+            env.setConfig(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, MaxSameHostInQueue);
         }
 
         // performance settings
         final long LCbusySleep = env.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
         final int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
-        prop.put("crawlingSpeedMaxChecked", (LCppm >= 30000) ? "1" : "0");
-        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 30000)) ? "1" : "0");
-        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", Integer.toString(LCppm));
+        prop.put("latencyFactorDefault", env.getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f));
+        prop.put("MaxSameHostInQueueDefault", env.getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20));
 
         // generate crawl profile table
         int count = 0;
@@ -588,18 +628,6 @@ public class Crawler_p {
         if ("hour".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L;
         if ("minute".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L;
         return 0L;
-    }
-
-    private static void setPerformance(final Switchboard sb, final serverObjects post) {
-        final String crawlingPerformance = post.get("crawlingPerformance", "custom");
-        final long LCbusySleep = sb.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
-        int wantedPPM = (LCbusySleep == 0) ? 30000 : (int) (60000L / LCbusySleep);
-        try {
-            wantedPPM = post.getInt("customPPM", wantedPPM);
-        } catch (final NumberFormatException e) {}
-        if ("minimum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 10;
-        if ("maximum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 30000;
-        sb.setPerformance(wantedPPM);
     }
 
 }

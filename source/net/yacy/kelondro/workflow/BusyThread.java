@@ -69,7 +69,7 @@ public interface BusyThread extends WorkflowThread {
      * sets maximimum load for the job execution
      * @param load
      */
-    public void setLoadPreReqisite(final double load);
+    public double setLoadPreReqisite(final double load);
  
     /**
      * defines if the thread should obey the intermission command

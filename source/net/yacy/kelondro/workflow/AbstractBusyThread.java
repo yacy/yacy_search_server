@@ -85,9 +85,10 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         memprereq = freeBytes;
     }
     
-    public void setLoadPreReqisite(final double load) {
+    public double setLoadPreReqisite(final double load) {
         // sets minimum required amount of memory for the job execution
         loadprereq = load;
+        return load;
     }
     
     public void setObeyIntermission(final boolean obey) {

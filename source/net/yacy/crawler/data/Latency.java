@@ -37,6 +37,7 @@ import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 
 public class Latency {
@@ -160,10 +161,10 @@ public class Latency {
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
-        waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat("crawler.latencyFactor", 0.5f)));
+        waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f)));
 
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
-        if (Switchboard.getSwitchboard().crawlQueues.hostcount(hostname) > Switchboard.getSwitchboard().getConfigInt("crawler.MaxSameHostInQueue", 20)) waiting += 5000;
+        if (Switchboard.getSwitchboard().crawlQueues.hostcount(hostname) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 5000;
         
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -203,10 +204,10 @@ public class Latency {
         if (!local) waiting += host.flux(waiting);
 
         // use the access latency as rule how fast we can access the server
-        waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat("crawler.latencyFactor", 0.5f)));
+        waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f)));
         
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
-        if (Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost()) > Switchboard.getSwitchboard().getConfigInt("crawler.MaxSameHostInQueue", 20)) waiting += 5000;
+        if (Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost()) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 5000;
 
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -244,11 +245,11 @@ public class Latency {
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
         s.append(", host.average = ").append(host.average());
-        waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat("crawler.latencyFactor", 0.5f)));
+        waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f)));
         
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
         int hostcount = Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost());
-        if (hostcount > Switchboard.getSwitchboard().getConfigInt("crawler.MaxSameHostInQueue", 20)) {
+        if (hostcount > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) {
             s.append(", hostcount = ").append(hostcount);
             waiting += 5000;
         }

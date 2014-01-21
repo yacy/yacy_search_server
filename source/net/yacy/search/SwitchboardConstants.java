@@ -102,6 +102,7 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = "freemem";
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
+    public static final String CRAWLJOB_LOCAL_CRAWL_LOADPREREQ                  = "50_localcrawl_loadprereq";    
     // 60_remotecrawlloader
     /**
      * <p><code>public static final String <strong>CRAWLJOB_REMOTE_CRAWL_LOADER</strong> = "60_remotecrawlloader"</code></p>
@@ -334,9 +335,11 @@ public final class SwitchboardConstants {
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
-    public static final String CRAWLER_SAME_HOST_IN_QUEUE       = "crawler.MaxSameHostInQueue";
+    public static final String CRAWLER_LATENCY_FACTOR           = "crawler.latencyFactor";
+    public static final String CRAWLER_MAX_SAME_HOST_IN_QUEUE   = "crawler.MaxSameHostInQueue";
     public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects"; // ignore the target url and follow to the redirect
     public static final String CRAWLER_RECORD_REDIRECTS         = "crawler.http.RecordRedirects"; // record the ignored redirected page to the index store
+    
     
     /**
      * debug flags

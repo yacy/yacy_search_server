@@ -3341,37 +3341,6 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
-    public void setPerformance(final int wantedPPM) {
-        int wPPM = wantedPPM;
-        // we consider 3 cases here
-        //         wantedPPM <=   10: low performance
-        // 10   <  wantedPPM <  30000: custom performance
-        // 30000 <= wantedPPM        : maximum performance
-        if ( wPPM <= 0 ) {
-            wPPM = 1;
-        }
-        if ( wPPM >= 30000 ) {
-            wPPM = 30000;
-        }
-        final int newBusySleep = 60000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
-
-        BusyThread thread;
-
-        thread = getThread(SwitchboardConstants.INDEX_DIST);
-        if ( thread != null ) {
-            setConfig(
-                SwitchboardConstants.INDEX_DIST_BUSYSLEEP,
-                thread.setBusySleep(Math.max(2000, thread.setBusySleep(newBusySleep * 2))));
-            thread.setIdleSleep(30000);
-        }
-
-        thread = getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-        if ( thread != null ) {
-            setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, thread.setBusySleep(newBusySleep));
-            thread.setIdleSleep(2000);
-        }
-    }
-
     public String dhtShallTransfer() {
         final String cautionCause = onlineCaution();
         if ( cautionCause != null ) {
