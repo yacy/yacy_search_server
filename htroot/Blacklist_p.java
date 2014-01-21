@@ -373,33 +373,49 @@ public class Blacklist_p {
             prop.put(DISABLED + EDIT + "Itemlist", entryCount);
 
             // create selection of sublist
-            entryCount = 0;
-            int end = -1;
-            int start = -1;
-            if (sortedlist.length > 0) {
-                while (end < sortedlist.length) {
-                    if (size > 0) {
-                        start = entryCount * size;
-                        end = (entryCount + 1) * size;
+            int[] navbar = new int[7];
+            // generate array of start index for navbar ( -1 = early endmark)
+            // [0] [-2*size] [-1*size] [offset] [+1*size] [+2*size] [end]
+            if (size > 0 && sortedlist.length > 0) {
+                int start = offset - 3 * size; // start item (max 3 buttons to the left)
+                if (start < 0) {
+                    start = 0;
+                }
+                for (entryCount = 0; entryCount < 7; entryCount++) {
+                    if (start > sortedlist.length) {
+                        navbar[entryCount] = -1; // terminate display mark
                     } else {
-                        start = 0;
-                        end = sortedlist.length;
+                        navbar[entryCount] = start;
                     }
-                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_value", start);
-                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_fvalue", start + 1);
+                    start += size;
+                }
+                navbar[0] = 0; // first button: always go back to start
+                if (navbar[6] < sortedlist.length - size) { // last button: alway eof list
+                    navbar[6] = (sortedlist.length / size) * size;
+                }
+            } else {
+                navbar[0] = 0;
+                navbar[1] = -1; // display terminate mark
+            }
+            // output the navarray values
+            entryCount = 0;
+            if (sortedlist.length > size && size > 0) {
+                while (entryCount < 7 && navbar[entryCount] >= 0) {
+                    prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_fvalue", navbar[entryCount]);
+                    int end = navbar[entryCount] + size - 1;
                     if (end > sortedlist.length) {
                         end = sortedlist.length;
                     }
                     prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_tvalue", end);
-                    if (start == offset) {
+                    if (navbar[entryCount] == offset) {
                         prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_selected", 1);
-                    }
+                    }                    
                     entryCount++;
                 }
             } else {
-                prop.put(DISABLED + EDIT + "subListOffset_0_value", 0);
-                prop.put(DISABLED + EDIT + "subListOffset_0_fvalue", 0);
-                prop.put(DISABLED + EDIT + "subListOffset_0_tvalue", 0);
+                prop.put(DISABLED + EDIT + "subListOffset_0_fvalue", 1);
+                prop.put(DISABLED + EDIT + "subListOffset_0_tvalue", sortedlist.length);
+                prop.put(DISABLED + EDIT + "subListOffset_" + entryCount + "_selected", 1);
                 entryCount++;
             }
             prop.put(DISABLED + EDIT + "subListOffset", entryCount);

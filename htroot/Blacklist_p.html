@@ -127,11 +127,11 @@
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
           <input type="hidden" name="action" value="selectRange" />
           <p>Show entries:
-          <select name="offset" size="1" onchange="document.selectRange.submit();">
-                #{subListOffset}#
-                <option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[fvalue]# - #[tvalue]#</option>
-                #{/subListOffset}#
-          </select>
+            <table><tr>
+              #{subListOffset}#
+              <td  style="padding: 5px;"><button type="submit"  name="offset" style="padding:3px" value="#[fvalue]#" #(selected)#:: disabled="true"#(/selected)# />#[fvalue]# - #[tvalue]#</button></td>
+              #{/subListOffset}#
+            </tr></table>
           &nbsp;
           Entries per page:
           <select name="size" size="1" onchange="document.selectRange.submit();">
@@ -140,7 +140,7 @@
                 #{/subListSize}#
           </select>
           &nbsp;
-          <input type="submit" value="Go" />
+          <input type="submit" value="set" />
           </p>
       </fieldset></form>
 
