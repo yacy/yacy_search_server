@@ -825,9 +825,6 @@ public final class Switchboard extends serverSwitch {
                 getDataPath());
         OAIListFriendsLoader.init(this.loader, oaiFriends, ClientIdentification.yacyInternetCrawlerAgent);
         this.crawlQueues = new CrawlQueues(this, this.queuesRoot);
-        Latency.defaultAverageLatency = this.getConfigInt("crawler.defaultAverageLatency", 500);
-        Latency.latencyFactor = this.getConfigFloat("crawler.latencyFactor", 0.5f);
-        Latency.MaxSameHostInQueue = this.getConfigInt("crawler.MaxSameHostInQueue", 20);
 
         // on startup, resume all crawls
         setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused", "false");
