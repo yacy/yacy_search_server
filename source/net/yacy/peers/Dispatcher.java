@@ -44,6 +44,8 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 
 public class Dispatcher {
@@ -401,7 +403,9 @@ public class Dispatcher {
 
         // try to keep the system healthy; sleep as long as System load is too high
         while (Protocol.metadataRetrievalRunning.get() > 0) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}
-        while (Memory.load() > 2.0) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
+        
+        // we must test this here again
+        while (Memory.load() > Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f)) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
         
         // do the transmission
         final boolean success = chunk.transmit();

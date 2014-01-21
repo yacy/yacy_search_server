@@ -127,7 +127,7 @@ public final class transferRWI {
         final StringBuilder unknownURLs = new StringBuilder(6000);
 
         double load = Memory.load();
-        float maxload = sb.getConfigFloat(SwitchboardConstants.INDEX_TRANSFER_MAXLOAD, 1.5f);
+        float maxload = sb.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f);
         if (load > maxload) {
             // too high local load. this is bad but we must reject this to protect ourself!
             sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ", system has too high load = " + load + ", maxload = " + maxload);

@@ -266,7 +266,6 @@ public final class SwitchboardConstants {
     public static final String INDEX_DIST_ALLOW_WHILE_CRAWLING  = "allowDistributeIndexWhileCrawling";
     public static final String INDEX_DIST_ALLOW_WHILE_INDEXING  = "allowDistributeIndexWhileIndexing";
     public static final String INDEX_TRANSFER_TIMEOUT           = "indexTransfer.timeout";
-    public static final String INDEX_TRANSFER_MAXLOAD           = "indexTransfer.maxload";
     public static final String INDEX_TRANSFER_GZIP_BODY         = "indexTransfer.gzipBody";
     public static final String PARSER_MIME_DENY                 = "parser.mime.deny";
     public static final String PARSER_EXTENSIONS_DENY           = "parser.extensions.deny";
