@@ -126,7 +126,6 @@ import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
-import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ResultImages;
 import net.yacy.crawler.data.ResultURLs;

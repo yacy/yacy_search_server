@@ -91,12 +91,11 @@ public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
         if (protectedPage) {
             if (grantedForLocalhost) {
                 return null; // quick return for local admin
-            } else {
-                RoleInfo roleinfo = new RoleInfo();
-                roleinfo.setChecked(true); // RoleInfo.setChecked() : in Jetty this means - marked to have any security constraint
-                roleinfo.addRole(AccessRight.ADMIN_RIGHT.toString()); // use AccessRights as role
-                return roleinfo;
-            } 
+            }
+            RoleInfo roleinfo = new RoleInfo();
+            roleinfo.setChecked(true); // RoleInfo.setChecked() : in Jetty this means - marked to have any security constraint
+            roleinfo.addRole(AccessRight.ADMIN_RIGHT.toString()); // use AccessRights as role
+            return roleinfo; 
         }
         return (RoleInfo)super.prepareConstraintInfo(pathInContext, request);
     }

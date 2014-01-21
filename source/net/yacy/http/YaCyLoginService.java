@@ -76,9 +76,8 @@ public class YaCyLoginService extends MappedLoginService implements LoginService
         if (credential != null) {
             if (roles != null) {
                 return putUser(username, credential, roles);
-            } else {
-                return putUser(username, credential); // w/o role makes not much sense, but succeeds login....
             }
+            return putUser(username, credential); // w/o role makes not much sense, but succeeds login....
         }
         return null;
     }

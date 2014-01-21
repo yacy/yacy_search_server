@@ -86,9 +86,8 @@ public class YaCyLegacyCredential extends Credential {
             // normal users (and new admin pwd)
             if (hash.startsWith(MD5.__TYPE) && hash != null) {
                 return (Digest.encodeMD5Hex(foruser + ":" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":" + pw).equals(hash.substring(4)));
-            } else { // special check for old style password hash (prior v1.67/9501 15.1.2014)
-                return Digest.encodeMD5Hex(foruser + ":" + pw).equals(hash);
             }
+            return Digest.encodeMD5Hex(foruser + ":" + pw).equals(hash);
         }
         throw new UnsupportedOperationException();
     }
