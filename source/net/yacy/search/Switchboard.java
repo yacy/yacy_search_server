@@ -1094,7 +1094,8 @@ public final class Switchboard extends serverSwitch {
             60000,
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP, "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP, "0")),
-            Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ, "1000000")));
+            Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ, "1000000")),
+            Double.parseDouble(getConfig(SwitchboardConstants.INDEX_DIST_LOADPREREQ, "9.0")));
 
         // content control: initialize list sync thread
         deployThread(

@@ -344,7 +344,8 @@ public class serverSwitch
             startupDelay,
             Long.parseLong(getConfig(threadName + "_idlesleep", "100")),
             Long.parseLong(getConfig(threadName + "_busysleep", "1000")),
-            Long.parseLong(getConfig(threadName + "_memprereq", "1000000")));
+            Long.parseLong(getConfig(threadName + "_memprereq", "1000000")),
+            Double.parseDouble(getConfig(threadName + "_loadprereq", "9.0")));
     }
 
     public void deployThread(
@@ -356,7 +357,8 @@ public class serverSwitch
         final long startupDelay,
         final long initialIdleSleep,
         final long initialBusySleep,
-        final long initialMemoryPreRequisite) {
+        final long initialMemoryPreRequisite,
+        final double initialLoadPreRequisite) {
         if ( newThread.isAlive() ) {
             throw new RuntimeException(
                 "undeployed threads must not live; they are started as part of the deployment");
@@ -384,6 +386,13 @@ public class serverSwitch
             newThread.setMemPreReqisite(initialMemoryPreRequisite);
             setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
         }
+        try {
+            final double load = Double.parseDouble(getConfig(threadName + "_loadprereq", "novalue"));
+            newThread.setLoadPreReqisite(load);
+        } catch (final NumberFormatException e ) {
+            newThread.setLoadPreReqisite(initialLoadPreRequisite);
+            setConfig(threadName + "_loadprereq", (float)initialLoadPreRequisite);
+        }
         newThread.setDescription(threadShortDescription, threadLongDescription, threadMonitorURL);
         this.workerThreads.put(threadName, newThread);
         // start the thread
@@ -400,13 +409,16 @@ public class serverSwitch
         final String threadName,
         final long idleMillis,
         final long busyMillis,
-        final long memprereqBytes) {
+        final long memprereqBytes,
+        final double loadprereq) {
         final BusyThread thread = this.workerThreads.get(threadName);
         if ( thread != null ) {
             setConfig(threadName + "_idlesleep", thread.setIdleSleep(idleMillis));
             setConfig(threadName + "_busysleep", thread.setBusySleep(busyMillis));
             setConfig(threadName + "_memprereq", memprereqBytes);
             thread.setMemPreReqisite(memprereqBytes);
+            setConfig(threadName + "_loadprereq", (float)loadprereq);
+            thread.setLoadPreReqisite(loadprereq);
         }
     }
 

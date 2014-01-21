@@ -62,6 +62,7 @@ public final class SwitchboardConstants {
     public static final String INDEX_DIST_METHOD_JOBCOUNT   = null;
     public static final String INDEX_DIST_METHOD_FREEMEM    = null;
     public static final String INDEX_DIST_MEMPREREQ         = "20_dhtdistribution_memprereq";
+    public static final String INDEX_DIST_LOADPREREQ        = "20_dhtdistribution_loadprereq";
     public static final String INDEX_DIST_IDLESLEEP         = "20_dhtdistribution_idlesleep";
     public static final String INDEX_DIST_BUSYSLEEP         = "20_dhtdistribution_busysleep";
     // 30_peerping
@@ -132,6 +133,7 @@ public final class SwitchboardConstants {
      */
     public static final String SURROGATES                      = "70_surrogates";
     public static final String SURROGATES_MEMPREREQ            = "70_surrogates_memprereq";
+    public static final String SURROGATES_LOADPREREQ           = "70_surrogates_loadprereq";
     public static final String SURROGATES_IDLESLEEP            = "70_surrogates_idlesleep";
     public static final String SURROGATES_BUSYSLEEP            = "70_surrogates_busysleep";
     public static final String SURROGATES_METHOD_START         = "surrogateProcess";
@@ -144,6 +146,7 @@ public final class SwitchboardConstants {
      */
     public static final String SEARCHRESULT                      = "80_searchresult";
     public static final String SEARCHRESULT_MEMPREREQ            = "80_searchresult_memprereq";
+    public static final String SEARCHRESULT_LOADPREREQ           = "80_searchresult_loadprereq";
     public static final String SEARCHRESULT_IDLESLEEP            = "80_searchresult_idlesleep";
     public static final String SEARCHRESULT_BUSYSLEEP            = "80_searchresult_busysleep";
     public static final String SEARCHRESULT_METHOD_START         = "searchresultProcess";

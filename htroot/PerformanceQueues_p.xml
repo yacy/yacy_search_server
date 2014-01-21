@@ -20,6 +20,7 @@
 	        <delayIdleLoop>#[idlesleep]#</delayIdleLoop>
 	        <delayBusyLoop>#[busysleep]#</delayBusyLoop>
 	        <minMemory>#[memprereq]#</minMemory>
+	        <minMemory>#[loadprereq]#</minMemory>
 	        <description><![CDATA[#[longdescr]##(recommendation)#::<br/>recommended: #[value]##(/recommendation)#]]></description>
         </Task>
 	#{/table}#</Tasks>

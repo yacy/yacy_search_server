@@ -165,6 +165,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         thread.setIdleSleep(-1);
         thread.setBusySleep(-1);
         thread.setMemPreReqisite(0);
+        thread.setLoadPreReqisite(3);
         thread.start();
         return thread;
     }

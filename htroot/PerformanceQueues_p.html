@@ -29,6 +29,7 @@
 	        <td>Delay between<br />idle loops</td>
 	        <td>Delay between<br />busy loops</td>
 	        <td>Minimum of<br />Required Memory</td>
+	        <td>Maximum of<br />System-Load</td>
 	        <td>Full Description</td>
 	      </tr>
 	      #{table}#
@@ -51,6 +52,7 @@
 	        <td align="right"><input name="#[threadname]#_idlesleep" size="7" maxlength="7" value="#[idlesleep]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> milliseconds</td>
 	        <td align="right"><input name="#[threadname]#_busysleep" size="7" maxlength="7" value="#[busysleep]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> milliseconds</td>
 	        <td align="right"><input name="#[threadname]#_memprereq" size="7" maxlength="10" value="#[memprereq]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> kbytes</td>
+	        <td align="right"><input name="#[threadname]#_loadprereq" size="7" maxlength="7" value="#[loadprereq]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> load</td>
 	        <td align="left">#[longdescr]##(recommendation)#::<br/>recommended: #[value]# kbytes#(/recommendation)#</td>
 	      </tr>
 	      #{/table}#

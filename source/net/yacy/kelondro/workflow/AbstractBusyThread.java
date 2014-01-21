@@ -37,6 +37,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     private long startup = 0, intermission = 0, idlePause = 0, busyPause = 0;
     private long idletime = 0, memprereq = 0;
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
+    private double loadprereq = 9;
     private boolean intermissionObedient = true;
     private final Object syncObject = new Object();
     
@@ -82,6 +83,11 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     public void setMemPreReqisite(final long freeBytes) {
         // sets minimum required amount of memory for the job execution
         memprereq = freeBytes;
+    }
+    
+    public void setLoadPreReqisite(final double load) {
+        // sets minimum required amount of memory for the job execution
+        loadprereq = load;
     }
     
     public void setObeyIntermission(final boolean obey) {
@@ -158,6 +164,11 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
             //} else if ((memnow = serverMemory.available()) > memprereq) try {
+            } else if (MemoryControl.load() > loadprereq) {
+            	logSystem("Thread '" + this.getName() + "' runs high load cycle. current: " + MemoryControl.load() + " max.: " + loadprereq);
+                timestamp = System.currentTimeMillis();
+                ratz(this.idlePause);
+                idletime += System.currentTimeMillis() - timestamp;
             } else if (MemoryControl.request(memprereq, false)) try {
                 // do job
                 timestamp = System.currentTimeMillis();

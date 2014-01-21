@@ -25,6 +25,8 @@
 
 package net.yacy.kelondro.util;
 
+import java.lang.management.ManagementFactory;
+
 /**
  * Use this to get information about memory usage or try to free some memory
  */
@@ -173,6 +175,14 @@ public class MemoryControl {
      */
     public static void setProperMbyte(final long mbyte) {
     	getStrategy().setProperMbyte(mbyte);
+    }
+    
+    /**
+     * get the system load within the last minute
+     * @return the system load or a negative number if the load is not available
+     */
+    public static double load() {
+        return ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
     }
 
     /**

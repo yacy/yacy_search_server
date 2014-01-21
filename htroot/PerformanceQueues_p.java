@@ -119,6 +119,7 @@ public class PerformanceQueues_p {
         // set templates for latest news from the threads
         long blocktime, sleeptime, exectime;
         long idlesleep, busysleep, memuse, memprereq;
+        double loadprereq;
         int queuesize;
         threads = sb.threadNames();
         int c = 0;
@@ -177,18 +178,21 @@ public class PerformanceQueues_p {
             idlesleep = sb.getConfigLong(threadName + "_idlesleep" , 1000);
             busysleep = sb.getConfigLong(threadName + "_busysleep",   100);
             memprereq = sb.getConfigLong(threadName + "_memprereq",     0);
+            loadprereq = sb.getConfigFloat(threadName + "_loadprereq",  9);
             if (setDelay && post != null) {
                 // load with new values
                 idlesleep = post.getLong(threadName + "_idlesleep", idlesleep);
                 busysleep = post.getLong(threadName + "_busysleep", busysleep);
                 memprereq = post.getLong(threadName + "_memprereq", memprereq) * 1024l;
                 if (memprereq == 0) memprereq = sb.getConfigLong(threadName + "_memprereq", 0);
+                loadprereq = post.getDouble(threadName + "_loadprereq", loadprereq);
+                if (loadprereq == 0) loadprereq = sb.getConfigFloat(threadName + "_loadprereq",  9);
 
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
-                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
+                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; loadprereq = 9; }
 
-                sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
+                sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq, loadprereq);
                 idlesleep = sb.getConfigLong(threadName + "_idlesleep", idlesleep);
                 busysleep = sb.getConfigLong(threadName + "_busysleep", busysleep);
             }
@@ -205,14 +209,15 @@ public class PerformanceQueues_p {
 
                     // check values to prevent short-cut loops
                     if (idlesleep < 1000) idlesleep = 1000;
-                    if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
+                    if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; loadprereq = 9; }
                     //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
-                    sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
+                    sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq, loadprereq);
                 }
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
             prop.put("table_" + c + "_busysleep", busysleep);
             prop.put("table_" + c + "_memprereq", memprereq / 1024);
+            prop.put("table_" + c + "_loadprereq", loadprereq);
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
             // prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
             prop.put("table_" + c + "_disabled", threadName.equals("10_httpd") ? "1" : "0" ); // httpd hardcoded defaults
