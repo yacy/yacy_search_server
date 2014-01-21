@@ -49,6 +49,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.Memory;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -118,9 +119,7 @@ public class HTTPClient {
         this.timeout = agent.clientTimeout;
         clientBuilder.setUserAgent(agent.userAgent);
         reqConfBuilder = RequestConfig.copy(dfltReqConf);
-        reqConfBuilder.setSocketTimeout(agent.clientTimeout);
-        reqConfBuilder.setConnectTimeout(agent.clientTimeout);
-        reqConfBuilder.setConnectionRequestTimeout(agent.clientTimeout);
+        setTimout(agent.clientTimeout);
     }
     
     public HTTPClient(final ClientIdentification.Agent agent, final int timeout) {
@@ -128,9 +127,7 @@ public class HTTPClient {
         this.timeout = timeout;
         clientBuilder.setUserAgent(agent.userAgent);
         reqConfBuilder = RequestConfig.copy(dfltReqConf);
-        reqConfBuilder.setSocketTimeout(timeout);
-        reqConfBuilder.setConnectTimeout(timeout);
-        reqConfBuilder.setConnectionRequestTimeout(timeout);
+        setTimout(timeout);
     }
 
     public static void setDefaultUserAgent(final String defaultAgent) {
@@ -202,7 +199,7 @@ public class HTTPClient {
 		// for statistics same value should also be set here
 		ConnectionInfo.setMaxcount(maxcon);
 		// connections per host (2 default)
-		pooling.setDefaultMaxPerRoute(4);
+		pooling.setDefaultMaxPerRoute((int) (2 * Memory.cores()));
 		// Increase max connections for localhost
 		final HttpHost localhost = new HttpHost(Domains.LOCALHOST);
 		pooling.setMaxPerRoute(new HttpRoute(localhost), maxcon);
