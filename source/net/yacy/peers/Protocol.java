@@ -1412,21 +1412,7 @@ public final class Protocol {
             return null;
         } // all url's known
 
-        // extract the urlCache from the result; this is io-intensive;
-        // other transmissions should not be started as long as this is running
-        final URIMetadataNode[] urls = new URIMetadataNode[uhs.length];
-        byte[] key;
-        metadataRetrievalRunning.incrementAndGet();
-        for (int i = 0; i < uhs.length; i++) {
-        	key = ASCII.getBytes(uhs[i]);
-        	if (urlRefs.has(key)) urls[i] = segment.fulltext().getMetadata(key);
-            if (urls[i] == null) {
-                if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
-            }
-        }
-        metadataRetrievalRunning.decrementAndGet();
-
-        in = transferURL(targetSeed, urls, gzipBody, timeout);
+        in = transferURL(targetSeed, uhs, urlRefs, segment, gzipBody, timeout);
 
         if ( in == null ) {
             return "no connection from transferURL";
@@ -1520,7 +1506,9 @@ public final class Protocol {
 
     private static Map<String, String> transferURL(
         final Seed targetSeed,
-        final URIMetadataNode[] urls,
+        final String[] uhs,
+        final HandleSet urlRefs,
+        final Segment segment,
         boolean gzipBody,
         final int timeout) {
         // this post a message to the remote message board
@@ -1539,11 +1527,22 @@ public final class Protocol {
             gzipBody = false;
         }
 
+        // extract the urlCache from the result; this is io-intensive;
+        // other transmissions should not be started as long as this is running
+        byte[] key;
+        URIMetadataNode url;
         String resource;
         int urlc = 0;
         int urlPayloadSize = 0;
-        for ( final URIMetadataNode url : urls ) {
-            if ( url != null ) {
+        metadataRetrievalRunning.incrementAndGet();
+        for (int i = 0; i < uhs.length; i++) {
+        	key = ASCII.getBytes(uhs[i]);
+        	if (urlRefs.has(key)) {
+        		url = segment.fulltext().getMetadata(key);
+                if (url == null) {
+                    if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "'");
+                    continue;
+                }
                 resource = url.toString();
                 //System.out.println("*** DEBUG resource = " + resource);
                 if ( resource != null && resource.indexOf(0) == -1 ) {
@@ -1551,8 +1550,10 @@ public final class Protocol {
                     urlPayloadSize += resource.length();
                     urlc++;
                 }
-            }
+        	}
         }
+        metadataRetrievalRunning.decrementAndGet();
+        
         try {
             parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
