@@ -50,6 +50,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
@@ -911,47 +912,43 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 TemplateEngine.writeTemplate(fis, bas, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));                
                 fis.close();
                 // handle SSI
-                doContentMod (bas.toByteArray(),request,response);
+                parseSSI (bas.toByteArray(),request,response);
             }
         }
     }
 
-    protected void doContentMod(final byte[] in, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        net.yacy.cora.util.ByteBuffer buffer = new net.yacy.cora.util.ByteBuffer(in);
+    /**
+     * parse SSI line and include resource (<!--#include virtual="file.html" -->)
+     */
+    protected void parseSSI(final byte[] in, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        ByteBuffer buffer = new ByteBuffer(in);
         OutputStream out = response.getOutputStream();
-
-        // check and handle SSI (ServerSideIncludes)
-        int off = 0;
-        int p = buffer.indexOf("<!--#".getBytes(), off);
-        int q;
-        while (p >= 0) {
-            q = buffer.indexOf("-->".getBytes(), p + 10);
-
-            out.write(in, off, p - off);
+        final byte[] inctxt ="<!--#include virtual=\"".getBytes();
+        int offset = 0;
+        int p = buffer.indexOf(inctxt, offset);
+        int end;
+        while (p >= 0 && (end = buffer.indexOf("-->".getBytes(), p + 24)) > 0 ) { // min length 24; <!--#include virtual="a"
+            out.write(in, offset, p - offset);
             out.flush();
-            parseSSI(buffer, p, request, response);
-            off = q + 3;
-            p = buffer.indexOf("<!--#".getBytes(), off);
-        }
-        out.write(in, off, in.length - off);
-        //out.flush();
-    }
-	
-    // parse SSI line and include resource
-    protected void parseSSI(final net.yacy.cora.util.ByteBuffer in, final int off, HttpServletRequest request, HttpServletResponse response) throws ServletException {
-        if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
-            final int q = in.indexOf("\"".getBytes(), off + 22);
-            if (q > 0) {
-                final String path = in.toString(off + 22, q - off - 22);
-                    RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+            // find right end quote
+            final int rightquote = buffer.indexOf("\"".getBytes(), p + 23);
+            if (rightquote > 0 && rightquote < end) {
+                final String path = buffer.toString(p + 22, rightquote - p - 22);
+                RequestDispatcher dispatcher = request.getRequestDispatcher(path);
                 try {
                     dispatcher.include(request, response);
                 } catch (IOException ex) {
                     ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: file not found " + path);
                 }
+            } else {
+                ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: closing quote missing " + buffer.toString(p, end - p) + " in " + request.getPathInfo());
             }
+            offset = end + 3; // after "-->"
+            p = buffer.indexOf(inctxt, offset);
         }
+        out.write(in, offset, in.length - offset);
     }
+
     /**
      * TODO: add same functionality & checks as in HTTPDemon.parseMultipart
      *
