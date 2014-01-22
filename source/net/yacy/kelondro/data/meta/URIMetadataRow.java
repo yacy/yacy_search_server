@@ -494,7 +494,7 @@ public class URIMetadataRow {
         private double lon() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
-            if (p < 0) return 0.0d;
+            if (p < 0 || p == this.latlon.length() - 1) return 0.0d;
             try {
                 double lon = this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
                 if (lon >= -180.0d && lon <= 180.0d) return lon;
