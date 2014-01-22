@@ -211,15 +211,17 @@ public class RemoteSearch extends Thread {
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
             final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
-                    Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
-                    event.nodeSearchThreads.add(t);
-                }
+                if (MemoryControl.shortStatus() || Memory.load() > 4.0) continue;
+                Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
+                event.nodeSearchThreads.add(t);
             }
+        }
         
         // start search to YaCy DHT peers
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
             for (Seed dhtPeer: dhtPeers) {
                 if (dhtPeer == null || dhtPeer.hash == null) continue;
+                if (MemoryControl.shortStatus() || Memory.load() > 8.0) continue;
                 try {
                     RemoteSearch rs = new RemoteSearch(
                         event,
