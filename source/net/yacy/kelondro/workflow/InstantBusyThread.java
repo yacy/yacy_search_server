@@ -165,7 +165,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         thread.setIdleSleep(-1);
         thread.setBusySleep(-1);
         thread.setMemPreReqisite(0);
-        thread.setLoadPreReqisite(3);
+        thread.setLoadPreReqisite(99); // this is called during initialization phase and some code parts depend on it; therefore we cannot set a prerequisite that prevents the start of that thread
         thread.start();
         return thread;
     }
