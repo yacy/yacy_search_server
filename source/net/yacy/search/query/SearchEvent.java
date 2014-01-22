@@ -1216,7 +1216,7 @@ public final class SearchEvent {
                 }
             }
         }
-        if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
+        if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus()) {
             // too many concurrent processes
             node = pullOneFilteredFromRWI(true);
             if (node != null) {
