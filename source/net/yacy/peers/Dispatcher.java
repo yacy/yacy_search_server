@@ -123,7 +123,7 @@ public class Dispatcher {
                 "transferDocumentIndex",
                 "This is the RWI transmission process",
                 new String[]{"RWI/Cache/Collections"},
-                this, "transferDocumentIndex", concurrentSender * 2, null, concurrentSender);
+                this, "transferDocumentIndex", concurrentSender * 3, null, concurrentSender);
     }
 
     public int cloudSize() {
