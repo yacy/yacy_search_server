@@ -1030,9 +1030,6 @@ div#info:hover span {
   z-index: 100;
  }
  
-.info {
-  float:left;
-} 
 
 .info span {
   display: none;

@@ -304,7 +304,7 @@ public class Load_RSS_p {
                     ConcurrentLog.logException(e);
                 }
             }
-            sb.addToIndex(list, null, null, collections);
+            sb.addToIndex(list, null, null, collections, true);
         }
 
         if (rss != null && post.containsKey("indexAllItemContent")) {

@@ -75,8 +75,11 @@ function updatepage(str) {
     <fieldset class="yacys">
       Host/URL: 
       <input id="search" type="text" name="path" value="#[path]#" size="80" maxlength="250" />
-      <input type="submit" name="list" value="Browse Host" class="submitready" style="width:240px;"/>
-      #(delete)#::<input type="submit" name="delete" value="Delete Subpath" class="submitready" style="width:240px;" onclick="return confirm('Confirm Deletion')"/>#(/delete)#
+      <input type="submit" name="list" value="Browse Host" class="submitready" style="width:160px;"/>
+      #(delete)#::
+      <input type="submit" name="delete" value="Delete Subpath" class="submitready" style="width:160px;" onclick="return confirm('Confirm Deletion')"/>
+      <input type="submit" name="reload404" value="Re-Load 404" class="submitready" style="width:160px;"/>
+      #(/delete)#
       <br />
       <div id="searchresults"></div>
     </fieldset>
@@ -88,14 +91,15 @@ function updatepage(str) {
       #{list}#
       <div style="float:left; padding:1px 5px 1px 5px;">
         <div style="width:180px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><img src="/env/grafics/#(type)#invisible.png::burn-e.gif::construction.gif#(/type)#" align="left" width="12" height="8">&nbsp;<a href="/HostBrowser.html?path=#[host]#&facetcount=#[count]#">#[host]#</a></div></div>
-        <div style="width:120px; text-align:right; float: left; white-space:nowrap; overflow:hidden;"><span class="commit">#[count]#</span>#(crawler)#::/<span class="pending">#[pending]#</span>#(/crawler)##(errors)#::/<span class="error">#[exclcount]#/#[failcount]#</span>#(/errors)# URLs</div>
+        <div style="width:120px; text-align:right; float: left; white-space:nowrap; overflow:hidden;"><span class="commit">#[count]#</span>#(crawler)#::/<span class="pending">#[pending]#</span>#(/crawler)##(errors)#::/<span class="info">#[exclcount]#</span>/<span class="error">#[failcount]#</span>#(/errors)# URLs</div>
       </div>
       #{/list}#
       <div style="clear:both; float:left; padding:10px 5px 1px 5px;">
         <div style="float:left;clear:both;">Count Colors:</div>
         <div class="commit" style="float:left;">&nbsp;&nbsp;&nbsp;Documents without Errors</div>
         <div class="pending" style="float:left;">&nbsp;&nbsp;&nbsp;Pending in Crawler</div>
-        <div class="error" style="float:left;">&nbsp;&nbsp;&nbsp;Load Errors (exclusion/failure)</div>
+        <div class="info" style="float:left;">&nbsp;&nbsp;&nbsp;Crawler Excludes</div>
+        <div class="error" style="float:left;">&nbsp;&nbsp;&nbsp;Load Errors</div>
         </div>
     </fieldset>
     #(/hosts)#

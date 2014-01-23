@@ -114,7 +114,7 @@ public class RSSLoader extends Thread {
             indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
             loadCount++;
         }
-        sb.addToIndex(list, null, null, collections);
+        sb.addToIndex(list, null, null, collections, true);
         // update info for loading
 
         try {

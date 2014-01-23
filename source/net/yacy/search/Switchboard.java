@@ -2902,7 +2902,8 @@ public final class Switchboard extends serverSwitch {
         final Map<DigestURL, String> links,
         final SearchEvent searchEvent,
         final String heuristicName,
-        final Map<String, Pattern> collections) {
+        final Map<String, Pattern> collections,
+        final boolean doublecheck) {
 
         List<DigestURL> urls = new ArrayList<DigestURL>();
         // add the landing page to the index. should not load that again since it should be in the cache
@@ -2922,19 +2923,39 @@ public final class Switchboard extends serverSwitch {
         for (final Map.Entry<DigestURL, String> entry : links.entrySet()) {
             urls.add(new DigestURL(entry.getKey(), (byte[]) null));
         }
-        addToIndex(urls, searchEvent, heuristicName, collections);
+        addToIndex(urls, searchEvent, heuristicName, collections, doublecheck);
+    }
+    
+    public void reload(final Collection<String> reloadURLStrings, final Map<String, Pattern> collections, final boolean doublecheck) {
+        final Collection<DigestURL> reloadURLs = new ArrayList<DigestURL>(reloadURLStrings.size());
+        Collection<String> deleteIDs = new ArrayList<String>(reloadURLStrings.size());
+        for (String u: reloadURLStrings) {
+            DigestURL url;
+            try {
+                url = new DigestURL(u);
+                reloadURLs.add(url);
+                deleteIDs.add(ASCII.String(url.hash()));
+            } catch (MalformedURLException e) {
+            }
+        }
+        remove(deleteIDs);
+        if (doublecheck) this.index.fulltext().commit(false); // if not called here the double-cgeck in addToIndex will reject the indexing
+        addToIndex(reloadURLs, null, null, collections, doublecheck);
     }
 
     public void remove(final Collection<String> deleteIDs) {
         this.index.fulltext().remove(deleteIDs);
         for (String id: deleteIDs) {
-            this.crawlQueues.removeURL(ASCII.getBytes(id));
+            byte[] idh = ASCII.getBytes(id);
+            this.crawlQueues.removeURL(idh);
+            try {Cache.delete(idh);} catch (IOException e) {}
         }
     }
     
     public void remove(final byte[] urlhash) {
         this.index.fulltext().remove(urlhash);
         this.crawlQueues.removeURL(urlhash);
+        try {Cache.delete(urlhash);} catch (IOException e) {}
     }
 
     public void stackURLs(Set<DigestURL> rootURLs, final CrawlProfile profile, final Set<DigestURL> successurls, final Map<DigestURL,String> failurls) {
@@ -3083,17 +3104,17 @@ public final class Switchboard extends serverSwitch {
      * @throws IOException
      * @throws Parser.Failure
      */
-    public void addToIndex(final Collection<DigestURL> urls, final SearchEvent searchEvent, final String heuristicName, final Map<String, Pattern> collections) {
+    public void addToIndex(final Collection<DigestURL> urls, final SearchEvent searchEvent, final String heuristicName, final Map<String, Pattern> collections, boolean doublecheck) {
         Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (DigestURL url: urls) urlmap.put(ASCII.String(url.hash()), url);
         if (searchEvent != null) {
             for (String id: urlmap.keySet()) searchEvent.addHeuristic(ASCII.getBytes(id), heuristicName, true);
         }
-        final Set<String> existing = this.index.exists(urlmap.keySet());
+        final Set<String> existing = doublecheck ? this.index.exists(urlmap.keySet()) : null;
         final List<Request> requests = new ArrayList<Request>();
         for (Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
             final String urlName = e.getValue().toNormalform(true);
-            if (existing.contains(e.getKey())) {
+            if (doublecheck && existing.contains(e.getKey())) {
                 this.log.info("addToIndex: double " + urlName);
                 continue;
             }
@@ -3493,7 +3514,7 @@ public final class Switchboard extends serverSwitch {
                         }
 
                         // add all pages to the index
-                        addAllToIndex(url, links, searchEvent, "site", CrawlProfile.collectionParser("site"));
+                        addAllToIndex(url, links, searchEvent, "site", CrawlProfile.collectionParser("site"), true);
                     }
                 } catch (final Throwable e ) {
                     ConcurrentLog.logException(e);
@@ -3607,7 +3628,7 @@ public final class Switchboard extends serverSwitch {
                             + feedName
                             + "' rss feed");
                         // add all pages to the index
-                        addAllToIndex(null, links, searchEvent, feedName, CrawlProfile.collectionParser("rss"));
+                        addAllToIndex(null, links, searchEvent, feedName, CrawlProfile.collectionParser("rss"), true);
                     }
                 } catch (final Throwable e ) {
                     //Log.logException(e);

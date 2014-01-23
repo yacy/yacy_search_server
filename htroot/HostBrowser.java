@@ -21,15 +21,18 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
 
@@ -45,6 +48,7 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -53,6 +57,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
+import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -62,10 +67,10 @@ public class HostBrowser {
     final static long TIMEOUT = 10000L;
     
     public static enum StoreType {
-        LINK, INDEX, EXCLUDED, FAILED;
+        LINK, INDEX, EXCLUDED, FAILED, RELOAD;
     }
     
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "unchecked" })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -223,9 +228,14 @@ public class HostBrowser {
         
         if (path.length() > 0) {
             boolean delete = false;
+            boolean reload404 = false;
             if (admin && post.containsKey("delete")) {
                 // delete the complete path!! That includes everything that matches with this prefix.
                 delete = true;
+            }
+            if (admin && post.containsKey("reload404")) {
+                // try to re-load all urls that have load errors and matches with this prefix.
+                reload404 = true;
             }
             int facetcount=post.getInt("facetcount", 0);
             boolean complete = post.getBoolean("complete");
@@ -289,8 +299,10 @@ public class HostBrowser {
                 Map<String, InfoCacheEntry> infoCache = new HashMap<String, InfoCacheEntry>();
                 int hostsize = 0;
                 final List<String> deleteIDs = new ArrayList<String>();
+                final Collection<String> reloadURLs = new ArrayList<String>();
+                final Set<String> reloadURLCollection = new HashSet<String>();
                 long timeoutList = System.currentTimeMillis() + TIMEOUT;
-                long timeoutReferences = System.currentTimeMillis() + 3000;
+                long timeoutReferences = System.currentTimeMillis() + 6000;
                 ReferenceReportCache rrCache = sb.index.getReferenceReportCache();
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
@@ -302,10 +314,19 @@ public class HostBrowser {
                         if (delete) {
                             deleteIDs.add(ids);
                         } else {
-                            if (error == null) storedDocs.add(u); else if (admin) errorDocs.put(u, error);
+                            if (error == null) storedDocs.add(u); else {
+                                if (reload404 && error == FailType.fail) {
+                                    ArrayList<String> collections = (ArrayList<String>) doc.getFieldValue(CollectionSchema.collection_sxt.getSolrFieldName());
+                                    if (collections != null) reloadURLCollection.addAll(collections);
+                                    reloadURLs.add(u);
+                                }
+                                if (admin) errorDocs.put(u, error);
+                            }
                         }
                     } else if (complete) {
-                        if (error == null) storedDocs.add(u); else if (admin) errorDocs.put(u, error);
+                        if (error == null) storedDocs.add(u); else {
+                            if (admin) errorDocs.put(u, error);
+                        }
                     }
                     if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u); // add the current link
                     if (error == null) {
@@ -337,6 +358,11 @@ public class HostBrowser {
                     if (System.currentTimeMillis() > timeoutList) break;
                 }
                 if (deleteIDs.size() > 0) sb.remove(deleteIDs);
+                if (reloadURLs.size() > 0) {
+                    final Map<String, Pattern> cm = new LinkedHashMap<String, Pattern>();
+                    for (String collection: reloadURLCollection) cm.put(collection, QueryParams.catchall_pattern);
+                    sb.reload(reloadURLs, cm.size() > 0 ? cm : CrawlProfile.collectionParser("user"), false);
+                }
                 
                 // collect from crawler
                 List<Request> domainStackReferences = (admin) ? sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000) : new ArrayList<Request>(0);
@@ -373,17 +399,17 @@ public class HostBrowser {
                             String dir = path + remainingPath;
                             Object c = list.get(dir);
                             if (c == null) {
-                                int[] linkedStoredIncrawlerError = new int[]{0,0,0,0};
+                                int[] linkedStoredIncrawlerError = new int[]{0,0,0,0,0};
                                 if (type == StoreType.LINK) linkedStoredIncrawlerError[0]++;
                                 if (type == StoreType.INDEX) linkedStoredIncrawlerError[1]++;
                                 if (loadingLinks.contains(entry.getKey())) linkedStoredIncrawlerError[2]++;
-                                if (errorDocs.containsKey(entry.getKey())) linkedStoredIncrawlerError[3]++;
+                                if (errorDocs.containsKey(entry.getKey())) linkedStoredIncrawlerError[errorDocs.get(entry.getKey()) == FailType.excl ? 3 : 4]++;
                                 list.put(dir, linkedStoredIncrawlerError);
                             } else if (c instanceof int[]) {
                                 if (type == StoreType.LINK) ((int[]) c)[0]++;
                                 if (type == StoreType.INDEX) ((int[]) c)[1]++;
                                 if (loadingLinks.contains(entry.getKey())) ((int[]) c)[2]++;
-                                if (errorDocs.containsKey(entry.getKey())) ((int[]) c)[3]++;
+                                if (errorDocs.containsKey(entry.getKey())) ((int[]) c)[errorDocs.get(entry.getKey()) == FailType.excl ? 3 : 4]++;
                             }
                         }
                     }
@@ -403,13 +429,14 @@ public class HostBrowser {
                         int linked = ((int[]) entry.getValue())[0];
                         int stored = ((int[]) entry.getValue())[1];
                         int crawler = ((int[]) entry.getValue())[2];
-                        int error = ((int[]) entry.getValue())[3];
+                        int excl = ((int[]) entry.getValue())[3];
+                        int error = ((int[]) entry.getValue())[4];
                         prop.put("files_list_" + c + "_type_stored", stored);
                         prop.put("files_list_" + c + "_type_linked", linked);
                         prop.put("files_list_" + c + "_type_pendingVisible", crawler > 0 ? 1 : 0);
                         prop.put("files_list_" + c + "_type_pending", crawler);
-                        prop.put("files_list_" + c + "_type_excludedVisible", 0);
-                        prop.put("files_list_" + c + "_type_excluded", 0);
+                        prop.put("files_list_" + c + "_type_excludedVisible", excl > 0 ? 1 : 0);
+                        prop.put("files_list_" + c + "_type_excluded", excl);
                         prop.put("files_list_" + c + "_type_failedVisible", error > 0 ? 1 : 0);
                         prop.put("files_list_" + c + "_type_failed", error);
                         if (++c >= maxcount) break;
@@ -443,7 +470,7 @@ public class HostBrowser {
                                 } else {
                                     String ids = ASCII.String(uri.hash());
                                     InfoCacheEntry ice = infoCache.get(ids);
-                                    prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail; " + ice.toString());
+                                    prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail" + (ice == null ? "" : "; " + ice.toString()));
                                 }
                             }
                             if (loadRight) {
