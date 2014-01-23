@@ -192,7 +192,8 @@ public class SolrServlet extends HttpServlet {
             }
 
             // get the embedded connector
-            boolean defaultConnector = mmsp.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
+            String requestURI = hrequest.getRequestURI();
+            boolean defaultConnector = (requestURI.startsWith("/solr/" + WebgraphSchema.CORE_NAME)) ? false : requestURI.startsWith("/solr/" + CollectionSchema.CORE_NAME) || mmsp.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
             mmsp.getMap().remove("core");
             EmbeddedSolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
             if (connector == null) throw new ServletException("no core");

@@ -134,7 +134,9 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         htrootContext.addServlet(sholder,"/*");    
         
         //add SolrServlet
-        htrootContext.addServlet(SolrServlet.class,"/solr/select");        
+        htrootContext.addServlet(SolrServlet.class, "/solr/select"); // uses the default core, collection1
+        htrootContext.addServlet(SolrServlet.class, "/solr/collection1/select"); // the same servlet, identifies the collection1 core using the path
+        htrootContext.addServlet(SolrServlet.class, "/solr/webgraph/select"); // the same servlet, identifies the webgraph core using the path
 
         // add proxy?url= servlet
         htrootContext.addServlet(YaCyProxyServlet.class,"/proxy.html");
