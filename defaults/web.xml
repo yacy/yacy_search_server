@@ -17,8 +17,8 @@
     
     <!-- servlet to provide direct access to the embedded solr, also used for P2P searches -->
     <servlet>
-        <servlet-name>SolrServlet</servlet-name>
-        <servlet-class>net.yacy.http.servlets.SolrServlet</servlet-class>
+        <servlet-name>SolrSelectServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.SolrSelectServlet</servlet-class>
     </servlet>
     
     <!-- servlet to provide Google Search Appliance (GSA) formatted search results -->
@@ -33,14 +33,9 @@
         <servlet-class>net.yacy.http.servlets.YaCyProxyServlet</servlet-class>
     </servlet>
 
-    <!-- mapping activated by the application 
+    <!-- mapping activated by the application -->
     <servlet-mapping>
-        <servlet-name>SolrServlet</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
-    -->
-    <servlet-mapping>
-        <servlet-name>SolrServlet</servlet-name>
+        <servlet-name>SolrSelectServlet</servlet-name>
         <url-pattern>/solr/select</url-pattern>
     </servlet-mapping>
 
