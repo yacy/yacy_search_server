@@ -68,6 +68,9 @@
       <dt class="TableCellDark"></dt>
       <dd>Sharding Method<br/><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
 
+      <dt class="TableCellDark"></dt>
+      <dd><input type="checkbox" name="solr.indexing.solrremote.writeenabled" id="solr_indexing_solrremote_writeenabled" #(solr.indexing.solrremote.writeenabled.checked)#:: checked="checked"#(/solr.indexing.solrremote.writeenabled.checked)#/> write-enabled (if unchecked, the remote server(s) will only be used as search peers)</dd>
+
       <dt><input type="submit" name="setsolr" value="Set" /></dt><dd></dd>
 
       </dd>

@@ -125,14 +125,16 @@ public class IndexFederated_p {
                     ConcurrentLog.logException(e);
                 }
             }
+            
+            final boolean writeEnabled = post.getBoolean("solr.indexing.solrremote.writeenabled");
+            sb.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED, writeEnabled);
 
             if (solrRemoteIsOnAfterwards) try {
                 if (solrRemoteWasOn) sb.index.fulltext().disconnectRemoteSolr();
                 // switch on
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 final int solrtimeout = sb.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 10000);
-                final boolean writeEnabled = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED, true);
-
+                
                 try {
                     if (usesolr) {
                         ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, solrtimeout);
@@ -181,6 +183,7 @@ public class IndexFederated_p {
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
         prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
+        prop.put("solr.indexing.solrremote.writeenabled.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED, true));
         prop.put("solr.indexing.lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
         
         // return rewrite properties
