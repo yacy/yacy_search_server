@@ -11,8 +11,8 @@
       <li><a href="/yacyinteractive.html" class="MenuItemLink">File Search</a></li>
       <li><a href="/HostBrowser.html?hosts=" class="MenuItemLink">Host Browser</a></li>
       <!--<li><a href="/yacysearch_location.html" class="MenuItemLink">Location Search</a></li>-->
-      <li><a href="/solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1" class="MenuItemLink">Solr Default Core</a></li>
-      <li><a href="/solr/select?q=*:*&defType=edismax&start=0&rows=3&core=webgraph" class="MenuItemLink">Solr Webgraph Core</a></li>
+      <li><a href="/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" class="MenuItemLink">Solr Default Core</a></li>
+      <li><a href="/solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" class="MenuItemLink">Solr Webgraph Core</a></li>
       <li><a href="/gsa/search?q=www&num=3" class="MenuItemLink">Google Appliance API</a></li>
       <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
