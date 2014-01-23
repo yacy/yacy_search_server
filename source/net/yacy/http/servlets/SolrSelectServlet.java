@@ -1,5 +1,5 @@
 /**
- *  SolrServlet
+ *  SolrSelectServlet
  *  Copyright 2012 by Michael Peter Christen
  *  First released 23.08.2012 at http://yacy.net
  *

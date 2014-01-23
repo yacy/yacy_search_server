@@ -177,6 +177,13 @@ public final class Fulltext {
         }
     }
     
+    public EmbeddedInstance getEmbeddedInstance() {
+        synchronized (this.solrInstances) {
+            if (this.solrInstances.isConnected0()) return this.solrInstances.getSolr0();
+            return null;
+        }
+    }
+    
     public SolrConnector getDefaultConnector() {
         synchronized (this.solrInstances) {
             return this.solrInstances.getDefaultMirrorConnector();

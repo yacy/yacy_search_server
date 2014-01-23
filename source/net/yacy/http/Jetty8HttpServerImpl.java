@@ -42,11 +42,13 @@ import javax.net.ssl.SSLContext;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.http.servlets.GSAsearchServlet;
 import net.yacy.http.servlets.SolrSelectServlet;
+import net.yacy.http.servlets.SolrServlet;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.http.servlets.YaCyProxyServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
+
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -133,10 +135,13 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder,"/*");    
         
-        //add SolrServlet
+        //add SolrSelectServlet
         htrootContext.addServlet(SolrSelectServlet.class, "/solr/select"); // uses the default core, collection1
         htrootContext.addServlet(SolrSelectServlet.class, "/solr/collection1/select"); // the same servlet, identifies the collection1 core using the path
         htrootContext.addServlet(SolrSelectServlet.class, "/solr/webgraph/select"); // the same servlet, identifies the webgraph core using the path
+        
+        htrootContext.addServlet(SolrServlet.class, "/solr/collection1/admin/luke");
+        htrootContext.addServlet(SolrServlet.class, "/solr/webgraph/admin/luke");
 
         // add proxy?url= servlet
         htrootContext.addServlet(YaCyProxyServlet.class,"/proxy.html");
