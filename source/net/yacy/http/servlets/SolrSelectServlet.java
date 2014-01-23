@@ -80,7 +80,7 @@ import org.apache.solr.util.FastWriter;
  * this is now done in Solr 4.x.x with org.apache.solr.servlet.SolrDispatchFilter
  * implemented as servlet (we don't use multicore)
  */
-public class SolrServlet extends HttpServlet {
+public class SolrSelectServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     public final static Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
