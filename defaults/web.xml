@@ -1,24 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     
+    <!-- Default YaCy web.xml
+         Note: if DATA/SETTINGS/web.xml exists, it takes preference
+    -->
     <display-name>YaCy</display-name>
     <description>Decentralized Web Search</description>
 
     <!-- Standard YaCy Servlets -->
     
     <!-- Default servlet for all YaCy output
-         -as this is mandatory the servlet activated automatically by the application
+         -as this is mandatory the servlet is activated automatically by the application
          -no need to include this in this web.xml (provided only for completness)
     <servlet>
         <servlet-name>YaCyDefaultServlet</servlet-name>
         <servlet-class>net.yacy.http.servlets.YaCyDefaultServlet</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>YaCyDefaultServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>    
     -->
     
     <!-- servlet to provide direct access to the embedded solr, also used for P2P searches -->
     <servlet>
         <servlet-name>SolrSelectServlet</servlet-name>
         <servlet-class>net.yacy.http.servlets.SolrSelectServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>SolrServlet</servlet-name>
+        <servlet-class>net.yacy.http.servlets.SolrServlet</servlet-class>
     </servlet>
     
     <!-- servlet to provide Google Search Appliance (GSA) formatted search results -->
@@ -33,12 +45,14 @@
         <servlet-class>net.yacy.http.servlets.YaCyProxyServlet</servlet-class>
     </servlet>
 
-    <!-- mapping activated by the application -->
+    <!-- mappings activated by the application - hardcoded (added here for completness) -->
     <servlet-mapping>
         <servlet-name>SolrSelectServlet</servlet-name>
         <url-pattern>/solr/select</url-pattern>
+        <url-pattern>/solr/collection1/select</url-pattern>
+        <url-pattern>/solr/webgraph/select</url-pattern>
     </servlet-mapping>
-
+    
     <servlet-mapping>
         <servlet-name>GSAServlet</servlet-name>
         <url-pattern>/gsa/search</url-pattern>
@@ -47,8 +61,19 @@
     <servlet-mapping>
         <servlet-name>URLProxyServlet</servlet-name>
         <url-pattern>/proxy.html</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>    
     
+    <servlet-mapping>
+        <servlet-name>SolrServlet</servlet-name>
+        <url-pattern>/solr/collection1/admin/luke</url-pattern>
+        <url-pattern>/solr/webgraph/admin/luke</url-pattern>        
+    </servlet-mapping>       
+    <!-- eof hardcoded mappings --> 
+            
+    <!-- additional (optional) mappings --> 
+       <!-- you may add individual mappings of standard servlets here also -->     
+    <!-- eof additional (optional mappings -->    
+                                                                          
     <session-config>
         <session-timeout>
             30

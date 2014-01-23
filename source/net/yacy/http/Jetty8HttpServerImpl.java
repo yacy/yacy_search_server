@@ -135,6 +135,11 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder,"/*");    
         
+        // -----------------------------------------------------------------------------
+        // here we set and map the mandatory servlets, needed for typical YaCy operation
+        // to make sure they are available even if removed in individual web.xml
+        // additional, optional or individual servlets or servlet mappings can be set in web.xml
+
         //add SolrSelectServlet
         htrootContext.addServlet(SolrSelectServlet.class, "/solr/select"); // uses the default core, collection1
         htrootContext.addServlet(SolrSelectServlet.class, "/solr/collection1/select"); // the same servlet, identifies the collection1 core using the path
@@ -148,6 +153,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         
         // add GSA servlet
         htrootContext.addServlet(GSAsearchServlet.class,"/gsa/search");
+        // --- eof default servlet mappings --------------------------------------------
 
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
