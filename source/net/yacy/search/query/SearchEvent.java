@@ -78,6 +78,7 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
+import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
@@ -142,6 +143,7 @@ public final class SearchEvent {
     public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
+    public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
     private final LoaderDispatcher                        loader;
@@ -223,7 +225,7 @@ public final class SearchEvent {
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
         // prepare configured search navigation
-        final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
+        final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "")+",language";
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
         this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
         this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
@@ -231,6 +233,7 @@ public final class SearchEvent {
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
         this.filetypeNavigator = navcfg.contains("filetype") ? new ConcurrentScoreMap<String>() : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
+        this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
         this.snippets = new ConcurrentHashMap<String, String>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
@@ -782,6 +785,21 @@ public final class SearchEvent {
             }
         }
 
+        if (this.languageNavigator != null) {
+            fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
+            if (fcts != null) {
+                // remove unknown languages
+                Iterator<String> i = fcts.iterator();
+                while (i.hasNext()) {
+                    String lang = i.next();
+                    if (!ISO639.exists(lang)) {
+                        i.remove();
+                    }
+                }
+                this.languageNavigator.inc(fcts);
+            }
+        }
+
         if (this.authorNavigator != null) {
             fcts = facets.get(CollectionSchema.author_sxt.getSolrFieldName());
             if (fcts != null) this.authorNavigator.inc(fcts);
@@ -875,6 +893,12 @@ public final class SearchEvent {
                     }
                 }
 
+                if (this.query.modifier.language != null) {
+                    if (!this.query.modifier.language.equals(UTF8.String(iEntry.language()))) {
+                        if (log.isFine()) log.fine("dropped Node: language");
+                        continue pollloop;
+                    }
+                }
                 // finally extend the double-check and insert result to stack
                 this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {

@@ -84,6 +84,7 @@ public class ConfigSearchPage_p {
                 if (post.getBoolean("search.navigation.filetype")) nav += "filetype,";
                 if (post.getBoolean("search.navigation.protocol")) nav += "protocol,";
                 if (post.getBoolean("search.navigation.hosts")) nav += "hosts,";
+                if (post.getBoolean("search.navigation.language")) nav += "language,";
                 if (post.getBoolean("search.navigation.authors")) nav += "authors,";
                 if (post.getBoolean("search.navigation.namespace")) nav += "namespace,";
                 if (post.getBoolean("search.navigation.topics")) nav += "topics,";
@@ -162,6 +163,7 @@ public class ConfigSearchPage_p {
         prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.protocol", sb.getConfig("search.navigation", "").indexOf("protocol",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
+        prop.put("search.navigation.language", sb.getConfig("search.navigation", "").indexOf("language",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics",0) >= 0 ? 1 : 0);

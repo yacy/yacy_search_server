@@ -77,6 +77,23 @@ $(function() { $("#sidebarDomains").accordion('activate', false); });
 ::#(/activate)#
 #(/nav-domains)#
 
+#(nav-languages)#::
+<div id="sidebarLanguages" style="float:right; margin-top:5px; width:230px;">
+<h3 style="padding-left:25px;">Language Navigator</h3>
+<dl class="bplike" style="padding-left:5px;">#{element}#
+<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
+<dd>#[name]# (#[count]#)</dd>
+#{/element}#</dl>
+</div>
+#(activate)#
+<script type="text/javascript">
+//<![CDATA[
+$(function() { $("#sidebarLanguages").accordion('activate', false); });
+//]]>
+</script>
+::#(/activate)#
+#(/nav-languages)#
+
 #(nav-namespace)#::
 <div id="sidebarNameSpace" style="float:right; margin-top:5px; width:230px;">
 <h3 style="padding-left:25px;">Name Space Navigator</h3>

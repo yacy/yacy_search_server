@@ -35,6 +35,7 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.document.LibraryProvider;
+import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
@@ -152,6 +153,50 @@ public class yacysearchtrailer {
             if (pos == 1 && neg == 0)
              {
                 prop.put("nav-domains", 0); // this navigation is not useful
+            }
+        }
+
+        // host navigators
+        final ScoreMap<String> languageNavigator = theSearch.languageNavigator;
+        if (languageNavigator == null || languageNavigator.isEmpty()) {
+            prop.put("nav-languages", 0);
+        } else {
+            prop.put("nav-languages", 1);
+            navigatorIterator = languageNavigator.keys(false);
+            int i = 0, pos = 0, neg = 0;
+            String nav;
+            while (i < 20 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next();
+                count = languageNavigator.get(name);
+                if (count == 0) {
+                    break;
+                }
+                nav = "%2Flanguage%2F" + name;
+                String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
+                if (theSearch.query.modifier.language == null || !theSearch.query.modifier.language.contains(name)) {
+                    pos++;
+                    queryStringForUrl += "+" + nav;
+                    prop.put("nav-languages_element_" + i + "_on", 1);
+                    prop.put(fileType, "nav-languages_element_" + i + "_modifier", nav);
+                } else {
+                    neg++;
+                    prop.put("nav-languages_element_" + i + "_on", 0);
+                    prop.put(fileType, "nav-languages_element_" + i + "_modifier", "-" + nav);
+                }
+                String longname = ISO639.country(name);
+                prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
+                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                prop.put("nav-languages_element_" + i + "_count", count);
+                prop.put("nav-languages_element_" + i + "_nl", 1);
+                i++;
+            }
+            prop.put("nav-languages_element", i);
+            prop.put("nav-languages_activate", on(pos, neg, MAXLIMIT_NAV_HIGH) ? 1 : 0);
+            i--;
+            prop.put("nav-languages_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0)
+             {
+                prop.put("nav-languages", 0); // this navigation is not useful
             }
         }
 

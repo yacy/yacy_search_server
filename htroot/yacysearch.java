@@ -398,17 +398,6 @@ public class yacysearch {
                 modifier.add("/location");
             }
 
-            final int lrp = querystring.indexOf("/language/", 0);
-            String language = "";
-            if ( lrp >= 0 ) {
-                if ( querystring.length() >= (lrp + 12) ) {
-                    language = querystring.substring(lrp + 10, lrp + 12);
-                }
-                querystring = querystring.replace("/language/" + language, "");
-                language = language.toLowerCase();
-                modifier.add("/language/" + language);
-            }
-
             final int inurlp = querystring.indexOf("inurl:", 0);
             if ( inurlp >= 0 ) {
                 int ftb = querystring.indexOf(' ', inurlp);
@@ -501,11 +490,12 @@ public class yacysearch {
 
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
-            language = (post == null) ? language : post.get("lr", language);
-            if ( language.startsWith("lang_") ) {
+            String language = (post == null) ? null : post.get("lr");
+            if (language != null && language.startsWith("lang_") ) {
                 language = language.substring(5);
+                if (modifier.language == null) modifier.language = language;
             }
-            if ( !ISO639.exists(language) ) {
+            if (language == null || !ISO639.exists(language) ) {
                 // find out language of the user by reading of the user-agent string
                 String agent = header.get(HeaderFramework.ACCEPT_LANGUAGE);
                 if ( agent == null ) {

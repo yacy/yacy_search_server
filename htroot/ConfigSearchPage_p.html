@@ -3,17 +3,17 @@
 <head>
   <title>YaCy '#[clientname]#': Search Page</title>
   #%env/templates/metas.template%#
-  <link rel="stylesheet" type="text/css" media="screen" href="/env/highslide.css" />
-  <script type="text/javascript" src="/js/yacysearch.js"></script>
-  <script type="text/javascript" src="/js/highslide/highslide.js"></script>
+  <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
+  <script type="text/javascript" src="js/yacysearch.js"></script>
+  <script type="text/javascript" src="js/highslide/highslide.js"></script>
   <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
-  <script src="/yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"></script>
-  <script src="/yacy/ui/js/jquery-ui-1.7.2.min.js" type="text/javascript"></script>
-  <script src="/yacy/ui/js/jquery.tagcloud.js" type="text/javascript"></script>
-  <script src="/yacy/ui/js/jquery.tinysort.min.js" type="text/javascript"></script>
-  <link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="/yacy/ui/css/autocomplete.css" rel="stylesheet" />  
+  <script src="yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"></script>
+  <script src="yacy/ui/js/jquery-ui-1.7.2.min.js" type="text/javascript"></script>
+  <script src="yacy/ui/js/jquery.tagcloud.js" type="text/javascript"></script>
+  <script src="yacy/ui/js/jquery.tinysort.min.js" type="text/javascript"></script>
+  <link media="screen" type="text/css" href="yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" />
+  <link media="screen" type="text/css" href="yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
+  <link media="screen" type="text/css" href="yacy/ui/css/autocomplete.css" rel="stylesheet" />  
 </head>
 
 <body id="ConfigSearchPage" >
@@ -32,8 +32,8 @@ $(function() {
 	$("#sidebarDomains").accordion({});
 	$("#sidebarProtocols").accordion({});
 	$("#sidebarFiletypes").accordion({});
+        $("#sidebarLanguages").accordion({});        
 	$("#sidebarAuthors").accordion({});
-        $("#sidebarLanguages").accordion({});
 	$("#sidebarNameSpace").accordion({});
     $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
     $("#sidebarAbout").accordion({});
@@ -58,11 +58,11 @@ $(function() {
               <td valign="top"><input type="checkbox" name="publicTopmenu" value="true" #(publicTopmenu)#::checked="checked" #(/publicTopmenu)# /></td>
               <td><div class="SubMenu">
                   <ul class="SubMenu">
-                    <li style="width: 15%;"><a href="/Status.html" target="LayouTest" class="MenuItemLink">Administration</a></li>
-                    <li style="width: 15%;"><a href="/index.html" target="LayouTest" class="MenuItemLink">Web Search</a></li>
-                    <li style="width: 15%;"><a href="/yacyinteractive.html" target="LayouTest" class="MenuItemLink">File Search</a></li>
-                    <li style="width: 15%;"><a href="/HostBrowser.html?hosts=" target="LayouTest" class="MenuItemLink">HostBrowser</a></li>
-                    <li style="width: 15%;"><a href="/ViewProfile.html?hash=localhash" target="LayouTest" class="MenuItemLink">About Us</a></li>
+                    <li style="width: 15%;"><a href="Status.html" target="LayouTest" class="MenuItemLink">Administration</a></li>
+                    <li style="width: 15%;"><a href="index.html" target="LayouTest" class="MenuItemLink">Web Search</a></li>
+                    <li style="width: 15%;"><a href="yacyinteractive.html" target="LayouTest" class="MenuItemLink">File Search</a></li>
+                    <li style="width: 15%;"><a href="HostBrowser.html?hosts=" target="LayouTest" class="MenuItemLink">HostBrowser</a></li>
+                    <li style="width: 15%;"><a href="ViewProfile.html?hash=localhash" target="LayouTest" class="MenuItemLink">About Us</a></li>
                     <li style="width: 15%;"><a href="http://www.yacy-websearch.net/wiki/" target="LayouTest" class="MenuItemLink">Help / YaCy Wiki</a></li>
                   </ul>
                 </div></td>
@@ -144,6 +144,12 @@ $(function() {
                     </div></td>
                 </tr>
                 <tr>
+                  <td><input type="checkbox" name="search.navigation.language" value="true" #(search.navigation.language)#::checked="checked" #(/search.navigation.language)# /></td>
+                  <td><div id="sidebarLanguages" style="float: right; margin-top: 0px; width: 230px;">
+                      <h3 style="padding-left: 25px;">Language Navigator</h3>
+                    </div></td>
+                </tr>                  
+                <tr>
                   <td><input type="checkbox" name="search.navigation.authors" value="true" #(search.navigation.authors)#::checked="checked" #(/search.navigation.authors)# /></td>
                   <td><div id="sidebarAuthors" style="float: right; margin-top: 0px; width: 230px;">
                       <h3 style="padding-left: 25px;">Author Navigator</h3>
@@ -185,9 +191,9 @@ $(function() {
                       <td width="15px"></td>
                       <td>#[content_showDate_date]#</td>
                       <td>&nbsp;|&nbsp;42 kbyte</td>
-                      <td>&nbsp;|&nbsp;<a href="/solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a></td>
+                      <td>&nbsp;|&nbsp;<a href="solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a></td>
                       <td>&nbsp;|&nbsp;<a href="ViewFile.html" target="LayouTest">Parser</a></td>
-                      <td>&nbsp;|&nbsp;<a href="/api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
+                      <td>&nbsp;|&nbsp;<a href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
                       <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Pictures</a></td>
                       <td>&nbsp;|&nbsp;<a href="CacheResource_p.html" target="LayouTest">Cache</a></td>
                       <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">Augmented Browsing</a></td>
@@ -236,6 +242,7 @@ $(function() { $("#sidebarProtocols").accordion('activate', false); });
 $(function() { $("#sidebarFiletypes").accordion('activate', false); });
 $(function() { $("#sidebarDomains").accordion('activate', false); });
 $(function() { $("#sidebarNameSpace").accordion('activate', false); });
+$(function() { $("#sidebarLanguages").accordion('activate', false); });
 $(function() { $("#sidebarAuthors").accordion('activate', false); });
 $(function() { $("#vocabulary").accordion('activate', false); });
 $(function() { $("#sidebarAbout").accordion('activate', false); });

@@ -27,6 +27,7 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.kelondro.util.ISO639;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
@@ -34,13 +35,14 @@ import net.yacy.server.serverObjects;
 public class QueryModifier {
 
     private final StringBuilder modifier;
-    public String sitehost, sitehash, filetype, protocol, author, collection;
+    public String sitehost, sitehash, filetype, protocol, language, author, collection;
     
     public QueryModifier() {
         this.sitehash = null;
         this.sitehost = null;
         this.filetype = null;
         this.protocol = null;
+        this.language = null;
         this.author = null;
         this.collection = null;
         this.modifier = new StringBuilder(20);
@@ -118,6 +120,21 @@ public class QueryModifier {
                 author = querystring.substring(authori + 7, ftb);
                 querystring = querystring.replace("author:" + author, "");
                 add("author:" + author);
+            }
+        }
+
+        // parse language
+        final int langi = querystring.indexOf("/language/");
+        if (langi >= 0) {
+            if (querystring.length() >= (langi + 12)) {
+                language = querystring.substring(langi + 10, langi + 12);
+                querystring = querystring.replace("/language/" + language, "");
+                if (language.length() == 2 && ISO639.exists(language)) { // only 2-digit codes valid
+                    language = language.toLowerCase();
+                    add("/language/" + language);
+                } else {
+                    language = null;
+                }
             }
         }
         

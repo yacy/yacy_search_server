@@ -87,6 +87,7 @@ public final class QueryParams {
         defaultfacetfields.put("protocol", CollectionSchema.url_protocol_s);
         defaultfacetfields.put("filetype", CollectionSchema.url_file_ext_s);
         defaultfacetfields.put("authors", CollectionSchema.author_sxt);
+        defaultfacetfields.put("language", CollectionSchema.language_s);
         //missing: namespace
     }
     
@@ -446,6 +447,12 @@ public final class QueryParams {
                 fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
             }
         }
+
+        // add language facet
+        if (this.modifier.language != null && this.modifier.language.length() > 0 && this.solrSchema.contains((CollectionSchema.language_s))) {
+            fq.append(" AND ").append(CollectionSchema.language_s.getSolrFieldName()).append(":\"").append(this.modifier.language).append('\"');
+        }
+
         // add author facets
         if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author_sxt)) {
             fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
