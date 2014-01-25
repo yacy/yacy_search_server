@@ -1077,7 +1077,15 @@ public final class SearchEvent {
                 if (log.isFine()) log.fine("dropped RWI: file name domain does not match");
                 continue;
             }
-            
+
+            // check modifier constraint (language)
+            // TODO: : page.language() never null but defaults to "en" (may cause false drop of result)
+            if (this.query.modifier.language != null && !this.query.modifier.language.equals(ASCII.String(page.language()))) {
+                if (log.isFine()) log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                continue;
+            }
+
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page.url())) {
                 if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
@@ -1085,15 +1093,15 @@ public final class SearchEvent {
                 continue;
             }
 
-			// content control
-			if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
-				FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-				if (f != null && !f.isListed(page.url(), null)) {
-	                if (log.isFine()) log.fine("dropped RWI: url is blacklisted in contentcontrol");
-	                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
-				    continue;
-				}
-			}
+            // content control
+            if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
+		FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+		if (f != null && !f.isListed(page.url(), null)) {
+                    if (log.isFine()) log.fine("dropped RWI: url is blacklisted in contentcontrol");
+	            if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    continue;
+		}
+            }
 
             final String pageurl = page.url().toNormalform(true);
             final String pageauthor = page.dc_creator();

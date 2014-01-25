@@ -103,7 +103,6 @@ public class Segment {
     public static final int  lowcachedivisor =  900;
     public static final long targetFileSize  = 64 * 1024 * 1024; // 256 MB
     public static final int  writeBufferSize = 4 * 1024 * 1024;
-    public static final String UrlDbName = "text.urlmd";
     public static final String termIndexName = "text.index";
     public static final String citationIndexName = "citation.index";
 
