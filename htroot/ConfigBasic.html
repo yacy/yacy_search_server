@@ -13,7 +13,7 @@
       -->
     </script>
     <!-- redirecting browser if port was changed -->
-    #(reconnect)#::<meta http-equiv="refresh" content="10; url=#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html" />#(/reconnect)#
+    #(reconnect)#::<meta http-equiv="refresh" content="10; url=http://#[host]#:#[port]#/ConfigBasic.html" />#(/reconnect)#
     <!-- redirecting browser if language was changed -->
     #(changedLanguage)#::<meta http-equiv="refresh" content="0; url=ConfigBasic.html" />#(/changedLanguage)#
   </head>
@@ -31,7 +31,7 @@
     <form action="ConfigBasic.html" method="get" accept-charset="UTF-8">
       <ol>
         <li>
-          <img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
+          <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
           <fieldset>
             <input type="radio" name="language" value="de" id="lang_de" onchange="this.form.submit()" #(lang_de)#::checked="checked"#(/lang_de)# /><label for="lang_de">Deutsch</label>&nbsp;
             <input type="radio" name="language" value="fr" id="lang_fr" onchange="this.form.submit()" #(lang_fr)#::checked="checked"#(/lang_fr)# /><label for="lang_fr">Fran&ccedil;ais</label>&nbsp;
@@ -47,7 +47,7 @@
 
 	#(setUseCase)#::
 	<li>
-          <img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Use Case: what do you want to do with YaCy:<br />
+          <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Use Case: what do you want to do with YaCy:<br />
           <fieldset>
           <table border="0">
           <tr>
@@ -56,9 +56,9 @@
           	<td><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
           </tr>
           <tr>
-            <td><label for="usecaseFreeworld"><img src="/env/grafics/usecase_freeworld.png" alt="Usecase Freeworld" /></label></td>
-            <td><label for="usecasePortal"><img src="/env/grafics/usecase_webportal.png" alt="Usecase Portal" /></label></td>
-            <td><label for="usecaseIntranet"><img src="/env/grafics/usecase_intranet.png" alt="Usecase Intranet" /></label></td>
+            <td><label for="usecaseFreeworld"><img src="env/grafics/usecase_freeworld.png" alt="Usecase Freeworld" /></label></td>
+            <td><label for="usecasePortal"><img src="env/grafics/usecase_webportal.png" alt="Usecase Portal" /></label></td>
+            <td><label for="usecaseIntranet"><img src="env/grafics/usecase_intranet.png" alt="Usecase Intranet" /></label></td>
           </tr>
           <tr>
             <td valign="top"><label for="usecaseFreeworld">Join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label></td>
@@ -75,7 +75,7 @@
         #(/setUseCase)#
         
         <li>
-          #(statusName)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;You may change your peer name#(/statusName)#<br />
+          #(statusName)#<img src="env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;You may change your peer name#(/statusName)#<br />
           <fieldset>
             <dl>
               <dt><label for="peername">Peer Name: </label></dt>
@@ -87,7 +87,7 @@
         </li>
         
         <li>
-          #(statusPort)#<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer cannot be reached from outside (which is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
+          #(statusPort)#<img src="env/grafics/bad.png" height="16" width="16" alt="warning" />&nbsp;Your peer cannot be reached from outside (which is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
           <fieldset>
             <dl>
               <dt><label for="port">Peer Port: </label></dt>
@@ -100,7 +100,7 @@
               </dt>
               <dd>
                 <input type="checkbox" name="enableUpnp" id="enableUpnp" #(enabled)#::checked="checked"#(/enabled)# />
-                #(success)#::<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" /> Configuration was not successful. This may take a moment.::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />#(/success)#
+                #(success)#::<img src="env/grafics/bad.png" height="16" width="16" alt="warning" /> Configuration was not successful. This may take a moment.::<img src="env/grafics/ok.png" height="16" width="16" alt="ok" />#(/success)#
               </dd>#(/upnp)#
              </dl>
            </fieldset>
@@ -125,7 +125,7 @@
     <!-- [3]: port not proper -->
     <p>You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.</p>::
     <!-- [4]: reconnect to different port -->
-    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.</p>
+    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.</p>
     #(/nextStep)#
     #%env/templates/footer.template%#
   </body>
