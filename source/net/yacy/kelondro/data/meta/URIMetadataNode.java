@@ -349,7 +349,6 @@ public class URIMetadataNode {
             final Date tloaddate = loaddate();
             final Date oloaddate = other.loaddate();
             if (tloaddate.before(oloaddate)) return true;
-            if (tloaddate.equals(oloaddate)) return true;
         }
         return false;
     }
