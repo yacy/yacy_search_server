@@ -10,6 +10,9 @@
 # port number where the server should bind to
 port = 8090
 
+# optinal ssl port (https port) the server should bind to
+port.ssl = 8443
+
 # prefix for new default peer names
 peernameprefix=_anon
 
@@ -31,7 +34,7 @@ bindPort =
 #
 # English speaking user read below:
 #
-# With this you can access your peer using https://localhost:8090
+# With this you can access your peer using https://localhost:8443
 # 
 # There are two possibilities to specify which certificate should
 # be used by YaCy.
@@ -65,7 +68,7 @@ pkcs12ImportPwd =
 
 # the keyStore is only used, if server.https is set to true
 # if server.https=true, then the YaCy web interface is available at
-# https://localhost:<port>/ and not at http://localhost:<port>/
+# https://localhost:<port.ssl>/ and at http://localhost:<port>/
 server.https=false
 
 # property that collects the names of all servlets that had been used so far

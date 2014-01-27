@@ -70,7 +70,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
     private final Server server;
-    private final int sslport = 8443; // the port to use for https
 
     /**
      * @param port TCP Port to listen for http requests
@@ -90,6 +89,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
             final SslContextFactory sslContextFactory = new SslContextFactory();
             final SSLContext sslContext = initSslContext(sb);
             if (sslContext != null) {
+                int sslport = sb.getConfigInt("port.ssl", 8443);
                 sslContextFactory.setSslContext(sslContext);
 
                 SslSelectChannelConnector sslconnector = new SslSelectChannelConnector(sslContextFactory);
@@ -234,6 +234,9 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         // TODO:
     }
 
+    /**
+     * @return true if ssl/https connector is available
+     */
     @Override
     public boolean withSSL() {        
         Connector[] clist = server.getConnectors(); 
@@ -242,16 +245,24 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         }
         return false;
     }
-  
+
+    /**
+     * The port of actual running ssl connector
+     * @return the ssl/https port or -1 if not active
+     */
     @Override
     public int getSslPort() {
-        return sslport;
+        Connector[] clist = server.getConnectors();
+        for (Connector c:clist) {
+            if (c.getName().startsWith("ssl")) return c.getPort();
+        }
+        return -1;
     }
     
     /**
      * reconnect with new port settings (after waiting milsec) - routine returns
      * immediately
-     *
+     * checks http and ssl connector for new port settings
      * @param milsec wait time
      */
     @Override
@@ -271,7 +282,9 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
                 try { // reconnect with new settings (instead to stop/start server, just manipulate connectors
                     final Connector[] cons = server.getConnectors();
                     final int port = Switchboard.getSwitchboard().getConfigInt("port", 8090);
+                    final int sslport = Switchboard.getSwitchboard().getConfigInt("port.ssl", 8443);
                     for (Connector con : cons) {
+                        // check http connector
                         if (con.getName().startsWith("httpd") && con.getPort() != port) {
                             con.close();
                             con.stop();
@@ -280,7 +293,19 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
                             }
                             con.setPort(port);
                             con.start();
-                            ConcurrentLog.fine("SERVER", "set new port for Jetty connector " + con.getName());
+                            ConcurrentLog.info("SERVER", "set new port for Jetty connector " + con.getName());
+                            continue;
+                        }
+                        // check https connector
+                        if (con.getName().startsWith("ssl") && con.getPort() != sslport) {
+                            con.close();
+                            con.stop();
+                            if (!con.isStopped()) {
+                                ConcurrentLog.warn("SERVER", "Reconnect: Jetty Connector failed to stop");
+                            }
+                            con.setPort(sslport);
+                            con.start();
+                            ConcurrentLog.info("SERVER", "set new port for Jetty connector " + con.getName());
                         }
                     }
                 } catch (Exception ex) {
