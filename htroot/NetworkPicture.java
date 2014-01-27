@@ -39,6 +39,7 @@ import net.yacy.server.serverSwitch;
 public class NetworkPicture
 {
 
+    private static final ConcurrentLog log = new ConcurrentLog("NetworkPicture");
     private static final Semaphore sync = new Semaphore(1, true);
     private static EncodedImage buffer = null;
     private static long lastAccessSeconds = 0;
@@ -51,8 +52,8 @@ public class NetworkPicture
         final boolean authorized = sb.adminAuthenticated(header) >= 2;
 
         final long timeSeconds = System.currentTimeMillis() / 1000;
-        if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
-            ConcurrentLog.info("NetworkPicture", "cache hit (1); authorized = "
+        if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
+            if (log.isFine()) log.fine("cache hit (1); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));
@@ -64,8 +65,8 @@ public class NetworkPicture
         }
         sync.acquireUninterruptibly();
 
-        if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
-            ConcurrentLog.info("NetworkPicture", "cache hit (2); authorized = "
+        if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
+            if (log.isFine()) log.fine("cache hit (2); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));
