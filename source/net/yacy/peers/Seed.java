@@ -582,6 +582,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         String ip = getIP();
         if (ip == null) ip = Domains.LOCALHOST; // that should not happen
 
+        int p = ip.lastIndexOf(':');
+        if (p > 0 && (ip.indexOf(':') == p || "]:".equals(ip.substring(p - 1, p + 1)))) return ip; // includes already the port
+
         final String port = this.dna.get(Seed.PORT);
         if ( port == null || port.length() < 2 || port.length() > 5 ) {
             return null;
@@ -590,9 +593,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final StringBuilder sb = new StringBuilder(ip.length() + port.length() + 3);
         if (ip.indexOf(':') >= 0) {
             // IPv6 Address!, see: http://en.wikipedia.org/wiki/IPv6_address#Literal_IPv6_addresses_in_network_resource_identifiers
-            sb.append('[');
+            if (!ip.startsWith("[")) sb.append('[');
             sb.append(ip);
-            sb.append(']');
+            if (!ip.endsWith("]")) sb.append(']');
             sb.append(':');
             sb.append(port);
         } else {
@@ -1128,7 +1131,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( ipString == null ) {
             return ipString + " -> IP is null";
         }
-        if ( !ipString.isEmpty() && ipString.length() < 8 ) {
+        if ( ipString.length() < 8 ) {
             return ipString + " -> IP is too short: ";
         }
         if ( Switchboard.getSwitchboard().isAllIPMode() ) {

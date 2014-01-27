@@ -121,13 +121,18 @@ public final class hello {
             prop.put("message", "I am I");
             return prop;
         }
-        
+        if (remoteSeed.hash.equals(sb.peers.mySeed().hash)) {
+            // reject a ping with my own hash
+            prop.put("message", "You are using my peer hash");
+            return prop;
+        }
+        /*
         if (remoteSeed.getName().equals(sb.peers.mySeed().getName())) {
-        	// reject a ping with my name
+            // reject a ping with my name
             prop.put("message", "You are using my name");
             return prop;
         }
-        
+        */
         if (sb.isRobinsonMode() && !sb.isPublicRobinson()) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
             prop.put("message", "I am robinson, I do not answer");

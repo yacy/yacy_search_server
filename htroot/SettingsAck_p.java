@@ -208,14 +208,17 @@ public class SettingsAck_p {
             } else if (staticIP.startsWith("https://")) {
                 if (staticIP.length() > 8) { staticIP = staticIP.substring(8); } else { staticIP = ""; }
             }
-            if (staticIP.isEmpty()) {
-                serverCore.useStaticIP = false;
-            } else {
+            String error = Seed.isProperIP(staticIP);
+            if (error == null) {
                 serverCore.useStaticIP = true;
+                sb.peers.mySeed().setIP(staticIP);
+                env.setConfig("staticIP", staticIP);
+            } else {
+                serverCore.useStaticIP = false;
+                sb.peers.mySeed().setIP("");
+                env.setConfig("staticIP", "");
             }
-            if (Seed.isProperIP(staticIP) == null) sb.peers.mySeed().setIP(staticIP);
-            env.setConfig("staticIP", staticIP);
-
+            
             // server access data
             String filter = (post.get("serverfilter")).trim();
             /*String user   = (String) post.get("serveruser");

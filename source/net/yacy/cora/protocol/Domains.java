@@ -56,6 +56,7 @@ import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.util.MemoryControl;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
@@ -705,12 +706,15 @@ public class Domains {
         if (host0 == null || host0.isEmpty()) return null;
         final String host = host0.toLowerCase().trim();
 
-        /*
         if (MemoryControl.shortStatus()) {
             NAME_CACHE_HIT.clear();
             NAME_CACHE_MISS.clear();
         }
-        */
+        
+        if (host0.endsWith(".yacyh")) {
+            // that should not happen here
+            return null;
+        }
 
         // try to resolve host by doing a name cache lookup
         InetAddress ip = NAME_CACHE_HIT.get(host);

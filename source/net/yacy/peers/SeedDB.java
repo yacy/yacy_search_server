@@ -682,7 +682,7 @@ public final class SeedDB implements AlternativeDomainNames {
         // local peer?
         if (Domains.isThisHostIP(peerIP)) {
             if (this.mySeed == null) initMySeed();
-            return this.mySeed;
+            if (port > 0 && this.mySeed.getPort() == port) return this.mySeed;
         }
 
         // then try to use the cache
@@ -695,7 +695,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 for (byte[] pk: idx) {
                     seed = this.getConnected(pk);
                     if (seed == null) continue;
-                    if ((port >= 0) && (seed.getPort() != port)) continue;
+                    if (port > 0 && seed.getPort() != port) continue;
                     //System.out.println("*** found lookupByIP in connected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
@@ -710,7 +710,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 for (byte[] pk: idx) {
                     seed = this.getDisconnected(pk);
                     if (seed == null) continue;
-                    if ((port >= 0) && (seed.getPort() != port)) continue;
+                    if (port > 0 && seed.getPort() != port) continue;
                     //System.out.println("*** found lookupByIP in disconnected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
@@ -725,7 +725,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 for (byte[] pk: idx) {
                     seed = this.getPotential(pk);
                     if (seed == null) continue;
-                    if ((port >= 0) && (seed.getPort() != port)) continue;
+                    if (port > 0 && seed.getPort() != port) continue;
                     //System.out.println("*** found lookupByIP in potential: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
@@ -739,7 +739,7 @@ public final class SeedDB implements AlternativeDomainNames {
         String s = this.mySeed.getIP();
         if (s == null || !ipString.equals(s)) return null;
         int p = this.mySeed.getPort();
-        if ((port >= 0) && (p != port)) return null;
+        if (port > 0 && p != port) return null;
         //System.out.println("*** found lookupByIP as my seed: " + peerIP.toString() + " -> " + this.mySeed.getName());
         return this.mySeed;
     }

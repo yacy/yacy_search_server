@@ -148,7 +148,7 @@ public class serverSwitch
     public String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
         final String staticIP = getConfig("staticIP", "");
-        if ( !"".equals(staticIP) ) return staticIP;
+        if ( staticIP.length() > 0 ) return staticIP;
 
         // otherwise we return the real IP address of this host
         final InetAddress pLIP = Domains.myPublicLocalIP();
