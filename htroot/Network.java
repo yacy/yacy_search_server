@@ -198,8 +198,9 @@ public class Network {
             if (post.containsKey("addPeer")) {
 
                 // AUTHENTICATE
-                if (!requestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
-                	prop.authenticationRequired();
+                final int authentication = sb.adminAuthenticated(requestHeader);
+                if (authentication < 2) {
+                    prop.authenticationRequired(); // must authenticate
                     return prop;
                 }
 
