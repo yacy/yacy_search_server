@@ -83,13 +83,11 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         
         final String remoteHost = req.getRemoteHost();
         if (!Domains.isThisHostIP(remoteHost)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "proxy use not granted for IP " + remoteHost);
-            return;
-        } else if (!proxyippatternmatch(remoteHost)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "proxy use not granted for IP " + remoteHost);
-            return;
+            if (!proxyippatternmatch(remoteHost)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "proxy use not granted for IP " + remoteHost);
+                return;
+            }
         }
 
         if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
