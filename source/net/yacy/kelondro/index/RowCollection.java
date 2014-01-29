@@ -238,16 +238,16 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         return this.rowdef;
     }
 
-    private final long neededSpaceForEnsuredSize(final int elements, final boolean forcegc) {
+    private final long neededSpaceForEnsuredSize(final int elements) {
         assert elements > 0 : "elements = " + elements;
         final long needed = elements * this.rowdef.objectsize;
         if (this.chunkcache.length >= needed) return 0;
         assert needed > 0 : "needed = " + needed;
-        long allocram = needed * growfactorLarge100 / 100L;
+        long allocram = Math.max(1024, (needed * growfactorLarge100) / 100L);
         allocram -= allocram % this.rowdef.objectsize;
         assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
-        if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, forcegc)) return allocram;
-        allocram = needed * growfactorSmall100 / 100L;
+        if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, false)) return allocram;
+        allocram = (needed * growfactorSmall100) / 100L;
         allocram -= allocram % this.rowdef.objectsize;
         assert allocram >= 0 : "elements = " + elements + ", new = " + allocram;
         return allocram;
@@ -255,7 +255,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
 
     private final void ensureSize(final int elements) throws SpaceExceededException {
         if (elements == 0) return;
-        final long allocram = neededSpaceForEnsuredSize(elements, true);
+        final long allocram = neededSpaceForEnsuredSize(elements);
         if (allocram == 0) return;
         assert this.chunkcache.length < elements * this.rowdef.objectsize : "wrong alloc computation (1): elements * rowdef.objectsize = " + (elements * this.rowdef.objectsize) + ", chunkcache.length = " + this.chunkcache.length;
         assert allocram > this.chunkcache.length : "wrong alloc computation (2): allocram = " + allocram + ", chunkcache.length = " + this.chunkcache.length;
@@ -277,6 +277,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             }
         }
     }
+    
 
     /**
      * compute the needed memory in case of a cache extension. That is, if the cache is full and must
@@ -285,7 +286,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
      * @return
      */
     protected final long memoryNeededForGrow() {
-        return neededSpaceForEnsuredSize(this.chunkcount + 1, false);
+        return neededSpaceForEnsuredSize(this.chunkcount + 1);
     }
 
     @Override
@@ -307,6 +308,11 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         System.arraycopy(swapspace, 0, this.chunkcache, this.rowdef.objectsize * j, this.rowdef.objectsize);
     }
 
+    private final void checkShrink() {
+        final long allocram = this.rowdef.objectsize * this.chunkcount;
+        if (allocram < this.chunkcache.length / 2 && MemoryControl.request(allocram + 32, true)) trim();
+    }
+    
     protected synchronized void trim() {
         if (this.chunkcache.length == 0) return;
         final long needed = this.chunkcount * this.rowdef.objectsize;
@@ -318,9 +324,20 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             return; // if the swap buffer is not available, we must give up.
                     // This is not critical. Otherwise we provoke a serious
                     // problem with OOM
-        final byte[] newChunkcache = new byte[(int) needed];
-        System.arraycopy(this.chunkcache, 0, newChunkcache, 0, Math.min(this.chunkcache.length, newChunkcache.length));
-        this.chunkcache = newChunkcache;
+        try {
+            final byte[] newChunkcache = new byte[(int) needed];
+            System.arraycopy(this.chunkcache, 0, newChunkcache, 0, newChunkcache.length);
+            this.chunkcache = newChunkcache;
+        } catch (final OutOfMemoryError e) {
+            // lets try again after a forced gc()
+            System.gc();
+            try {
+                final byte[] newChunkcache = new byte[(int) needed];
+                System.arraycopy(this.chunkcache, 0, newChunkcache, 0, newChunkcache.length);
+                this.chunkcache = newChunkcache;
+            } catch (final OutOfMemoryError ee) {
+            }
+        }
     }
 
     public final long lastWrote() {
@@ -486,6 +503,9 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         }
         this.chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
+        
+        // check if the chunkcache can shrink
+        checkShrink();
     }
 
 
@@ -504,6 +524,9 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         if (this.chunkcount == this.sortBound) this.sortBound--;
         this.chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
+
+        // check if the chunkcache can shrink
+        checkShrink();
         return r;
     }
 
