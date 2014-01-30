@@ -349,6 +349,11 @@ public final class QueryParams {
         
         String bq = ranking.getBoostQuery();
         String bf = ranking.getBoostFunction();
+        if (this.queryGoal.getIncludeSize() > 1) {
+            // add boost on combined words
+            if (bq.length() > 0) bq += " ";
+            bq += CollectionSchema.text_t.getSolrFieldName() + ":\"" + this.queryGoal.getIncludeString() + "\"^10";
+        }
         if (bq.length() > 0) params.setParam("bq", bq);
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         
