@@ -615,7 +615,8 @@ public final class QueryParams {
      * @param theQuery search query
      * @param newModifier optional new modifier.
      *      - if null existing modifier of theQuery is appended
-     *      - if not null this new modifier is appended (overwriting existing modifier)
+     *      - if not null this new modifier is appended in addition to existing modifier
+     *      - if isEmpty overwrites (clears) existing modifier
      * @return url to new search result page
      */
     public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newModifier) {
@@ -629,7 +630,10 @@ public final class QueryParams {
         if (newModifier == null) {
             if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
         } else {
-            if(!newModifier.isEmpty()) sb.append("+" + newModifier);
+            if(!newModifier.isEmpty()) {
+                if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
+                sb.append("+" + newModifier);
+            }
         }
 
         sb.append("&maximumRecords=");
