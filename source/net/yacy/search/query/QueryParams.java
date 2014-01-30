@@ -608,13 +608,29 @@ public final class QueryParams {
         return sb;
     }
 
-    public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newQueryString) {
+     /**
+     * construct navigator url
+     *
+     * @param ext extension of servlet (e.g. html, rss)
+     * @param theQuery search query
+     * @param newModifier optional new modifier.
+     *      - if null existing modifier of theQuery is appended
+     *      - if not null this new modifier is appended (overwriting existing modifier)
+     * @return url to new search result page
+     */
+    public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newModifier) {
 
         final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
         sb.append(ext);
         sb.append("?query=");
-        sb.append(newQueryString == null ? theQuery.getQueryGoal().getQueryString(true) : newQueryString);
+        sb.append(theQuery.getQueryGoal().getQueryString(true));
+
+        if (newModifier == null) {
+            if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
+        } else {
+            if(!newModifier.isEmpty()) sb.append("+" + newModifier);
+        }
 
         sb.append("&maximumRecords=");
         sb.append(theQuery.itemsPerPage());
