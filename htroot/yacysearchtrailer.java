@@ -86,7 +86,7 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = "inurl%3A" + name;
-                if (!theSearch.query.modifier.toString().contains(nav)) {
+                if (!theSearch.query.modifier.toString().contains("inurl:"+name)) {
                     pos++;
                     prop.put("nav-namespace_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-namespace_element_" + i + "_modifier", nav);
@@ -380,7 +380,7 @@ public class yacysearchtrailer {
                         break;
                     }
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
-                    if (!theSearch.query.modifier.toString().contains("/vocabulary/")) {
+                    if (!theSearch.query.modifier.toString().contains("/vocabulary/"+navname+"/"+name)) {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", nav);
                     } else {
