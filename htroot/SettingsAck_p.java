@@ -177,9 +177,9 @@ public class SettingsAck_p {
         if (post.containsKey("httpNetworking")) {
 
             // set transparent proxy flag
-            HTTPDProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
-            env.setConfig("isTransparentProxy", HTTPDProxyHandler.isTransparentProxy);
-            prop.put("info_isTransparentProxy", HTTPDProxyHandler.isTransparentProxy ? "on" : "off");
+            boolean isTransparentProxy = post.containsKey("isTransparentProxy");
+            env.setConfig("isTransparentProxy", isTransparentProxy);
+            prop.put("info_isTransparentProxy", isTransparentProxy ? "on" : "off");
 
             // setting the keep alive property
             HTTPDemon.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
