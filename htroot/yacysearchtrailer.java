@@ -86,19 +86,18 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = "inurl%3A" + name;
-                String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
-                if (!theSearch.query.modifier.toString().contains(nav)) {
+                if (!theSearch.query.modifier.toString().contains("inurl:"+name)) {
                     pos++;
-                    queryStringForUrl += "+" + nav;
                     prop.put("nav-namespace_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-namespace_element_" + i + "_modifier", nav);
                 } else {
-                    neg++;
+                    neg++;                    
                     prop.put("nav-namespace_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-namespace_element_" + i + "_modifier", "-" + nav);
+                    nav="";
                 }
                 prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
-                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav).toString());
                 prop.put("nav-namespace_element_" + i + "_count", count);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
                 i++;
@@ -129,19 +128,18 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = "site%3A" + name;
-                String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 if (theSearch.query.modifier.sitehost == null || !theSearch.query.modifier.sitehost.contains(name)) {
-                    pos++;
-                    queryStringForUrl += "+" + nav;
+                    pos++;                    
                     prop.put("nav-domains_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-domains_element_" + i + "_modifier", nav);
                 } else {
-                    neg++;
+                    neg++;                    
                     prop.put("nav-domains_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-domains_element_" + i + "_modifier", "-" + nav);
+                    nav="";
                 }
                 prop.put(fileType, "nav-domains_element_" + i + "_name", name);
-                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav).toString());
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
                 i++;
@@ -156,7 +154,7 @@ public class yacysearchtrailer {
             }
         }
 
-        // host navigators
+        // language navigators
         final ScoreMap<String> languageNavigator = theSearch.languageNavigator;
         if (languageNavigator == null || languageNavigator.isEmpty()) {
             prop.put("nav-languages", 0);
@@ -172,20 +170,19 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = "%2Flanguage%2F" + name;
-                String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 if (theSearch.query.modifier.language == null || !theSearch.query.modifier.language.contains(name)) {
                     pos++;
-                    queryStringForUrl += "+" + nav;
                     prop.put("nav-languages_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-languages_element_" + i + "_modifier", nav);
                 } else {
-                    neg++;
+                    neg++;                    
                     prop.put("nav-languages_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-languages_element_" + i + "_modifier", "-" + nav);
+                    nav="";
                 }
                 String longname = ISO639.country(name);
                 prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
-                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav).toString());
                 prop.put("nav-languages_element_" + i + "_count", count);
                 prop.put("nav-languages_element_" + i + "_nl", 1);
                 i++;
@@ -215,19 +212,18 @@ public class yacysearchtrailer {
                     break;
                 }
                 nav = (name.indexOf(' ', 0) < 0) ? "author%3A" + name : "author%3A%28" + name.replace(" ", "+") + "%29";
-                String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 if (theSearch.query.modifier.author == null || !theSearch.query.modifier.author.contains(name)) {
                     pos++;
-                    queryStringForUrl += "+" + nav;
                     prop.put("nav-authors_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", nav);
                 } else {
-                    neg++;
+                    neg++;                    
                     prop.put("nav-authors_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
+                    nav="";
                 }
                 prop.put(fileType, "nav-authors_element_" + i + "_name", name);
-                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav).toString());
                 prop.put("nav-authors_element_" + i + "_count", count);
                 prop.put("nav-authors_element_" + i + "_nl", 1);
                 i++;
@@ -250,7 +246,6 @@ public class yacysearchtrailer {
             prop.put("nav-topics", "1");
             navigatorIterator = topicNavigator.keys(false);
             int i = 0;
-            String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
             // first sort the list to a form where the greatest element is in the middle
             LinkedList<Map.Entry<String, Integer>> cloud = new LinkedList<Map.Entry<String, Integer>>();
             while (i < MAX_TOPWORDS && navigatorIterator.hasNext()) {
@@ -269,7 +264,7 @@ public class yacysearchtrailer {
                 prop.put("nav-topics_element_" + i + "_on", 1);
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl + "+" + name).toString());
+                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, name).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
                 prop.put("nav-topics_element_" + i + "_nl", 1);
                 i++;
@@ -296,19 +291,18 @@ public class yacysearchtrailer {
                 }
                 visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
-                String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 if (theSearch.query.modifier.protocol == null || !theSearch.query.modifier.protocol.contains(name)) {
                     pos++;
-                    queryStringForUrl += "+" + nav;
                     prop.put("nav-protocols_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
                 } else {
-                    neg++;
+                    neg++;                    
                     prop.put("nav-protocols_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
+                    nav="";
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav).toString());
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
@@ -340,19 +334,18 @@ public class yacysearchtrailer {
                 }
                 visible = visible || Classification.isMediaExtension(name) || "pdf,doc,docx".indexOf(name) >= 0;
                 nav = "filetype%3A" + name;
-                String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
                 if (theSearch.query.modifier.filetype == null || !theSearch.query.modifier.filetype.contains(name) ) {
                     pos++;
-                    queryStringForUrl += "+" + nav;
                     prop.put("nav-filetypes_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", nav);
                 } else {
-                    neg++;
-                    prop.put("nav-filetypes_element_" + i + "_on", 0);
+                    neg++;                    
+                    prop.put("nav-filetypes_element_" + i + "_on", 0);                    
                     prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", "-" + nav);
+                    nav="";
                 }
                 prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
-                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav).toString());
                 prop.put("nav-filetypes_element_" + i + "_count", count);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
                 i++;
@@ -387,17 +380,16 @@ public class yacysearchtrailer {
                         break;
                     }
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
-                    String queryStringForUrl = theSearch.query.getQueryGoal().getQueryString(true);
-                    if (!theSearch.query.modifier.toString().contains("/vocabulary/")) {
-                        queryStringForUrl += "+" + nav;
+                    if (!theSearch.query.modifier.toString().contains("/vocabulary/"+navname+"/"+name)) {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", nav);
                     } else {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 0);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", "-" + nav);
+                        nav="";
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav).toString());
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
                     i++;

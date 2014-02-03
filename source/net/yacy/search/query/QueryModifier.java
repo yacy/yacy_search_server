@@ -170,11 +170,18 @@ public class QueryModifier {
         if (m != null) modifier.append(m);
     }
     
+    @Override
     public String toString() {
         return this.modifier.toString();
     }
 
-    
+    /**
+     * @return true if no modifier active
+     */
+    public boolean isEmpty() {
+        return this.modifier.length() == 0;
+    }
+
     private StringBuilder apply(String FQ) {
         
         final StringBuilder fq = new StringBuilder(FQ);

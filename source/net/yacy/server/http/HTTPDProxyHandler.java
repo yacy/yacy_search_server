@@ -100,7 +100,6 @@ public final class HTTPDProxyHandler {
     private static final HashSet<String> yellowList;
     private static int timeout = 60000;
     private static boolean yacyTrigger = true;
-    public static boolean isTransparentProxy = false;
     private static Process redirectorProcess = null;
     private static boolean redirectorEnabled = false;
     private static PrintWriter redirectorWriter = null;
@@ -113,7 +112,6 @@ public final class HTTPDProxyHandler {
     // creating a logger
     private static final ConcurrentLog log = new ConcurrentLog("PROXY");
 
-    private static boolean doAccessLogging = false;
 	/**
      * Do logging configuration for special proxy access log file
      */
@@ -123,13 +121,11 @@ public final class HTTPDProxyHandler {
         sb = Switchboard.getSwitchboard();
         if (sb != null) {
 
-        isTransparentProxy = Boolean.parseBoolean(sb.getConfig("isTransparentProxy","false"));
-
         // set timeout
         timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "60000"));
 
         // create a htRootPath: system pages
-        htRootPath = new File(sb.getAppPath(), sb.getConfig("htRootPath","htroot"));
+        htRootPath = new File(sb.getAppPath(), sb.getConfig(SwitchboardConstants.HTROOT_PATH,SwitchboardConstants.HTROOT_PATH_DEFAULT));
         if (!(htRootPath.exists())) {
             if(!htRootPath.mkdir())
                 ConcurrentLog.severe("PROXY", "could not create htRoot "+ htRootPath);
@@ -170,7 +166,6 @@ public final class HTTPDProxyHandler {
                 txtLog.setLevel(Level.FINEST);
                 proxyLogger.addHandler(txtLog);
 
-                doAccessLogging = true;
                 log.info("Proxy access logging configuration done." +
                                   "\n\tFilename: " + pattern +
                                   "\n\tLimit: " + limitStr +
@@ -1172,8 +1167,6 @@ public final class HTTPDProxyHandler {
      * <code>1117528623.857    178 192.168.1.201 TCP_MISS/200 1069 GET http://www.yacy.de/ - DIRECT/81.169.145.74 text/html</code>
      */
     private final static synchronized void logProxyAccess(final HashMap<String, Object> conProp) {
-
-        if (!doAccessLogging) return;
 
         logMessage.setLength(0);
 
