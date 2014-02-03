@@ -59,36 +59,33 @@ public class suggest {
         final String ext = header.get("EXT", "");
         final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
-        final boolean more = sb.index.connectedRWI() || (post != null && post.containsKey("more")); // with RWIs connected the guessing is super-fast
-
+        
         // get query
-        final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
+        final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", ""));
         final String querystring =  originalquerystring.replace('+', ' ');
         final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
         final int count = (post == null) ? 10 : Math.min(20, post.getInt("count", 10));
 
         int c = 0;
-        if (more || (sb.index.getWordCountGuess(querystring) == 0)) {
-            final DidYouMean didYouMean = new DidYouMean(sb.index, new StringBuilder(querystring));
-            final SortedSet<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
-            //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
-            synchronized (suggestions) {
-                for (StringBuilder suggestion: suggestions) {
-                    if (c >= meanMax) break;
-                    try {
-                        String s = suggestion.toString();
-                        if (json) {
-                            prop.putJSON("suggestions_" + c + "_text", s);
-                        } else if (xml) {
-                            prop.putXML("suggestions_" + c + "_text", s);
-                        } else {
-                            prop.putHTML("suggestions_" + c + "_text", s);
-                        }
-                        prop.put("suggestions_" + c + "_eol", 0);
-                        c++;
-                    } catch (final ConcurrentModificationException e) {
-                        ConcurrentLog.logException(e);
+        final DidYouMean didYouMean = new DidYouMean(sb.index, new StringBuilder(querystring));
+        final SortedSet<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
+        //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
+        synchronized (suggestions) {
+            for (StringBuilder suggestion: suggestions) {
+                if (c >= meanMax) break;
+                try {
+                    String s = suggestion.toString();
+                    if (json) {
+                        prop.putJSON("suggestions_" + c + "_text", s);
+                    } else if (xml) {
+                        prop.putXML("suggestions_" + c + "_text", s);
+                    } else {
+                        prop.putHTML("suggestions_" + c + "_text", s);
                     }
+                    prop.put("suggestions_" + c + "_eol", 0);
+                    c++;
+                } catch (final ConcurrentModificationException e) {
+                    ConcurrentLog.logException(e);
                 }
             }
         }

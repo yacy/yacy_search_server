@@ -443,7 +443,7 @@ public class Segment {
      * get a guess about the word count. This is only a guess because it uses the term index if present and this index may be
      * influenced by index transmission processes in its statistic word distribution. However, it can be a hint for heuristics
      * which use the word count. Please do NOT use this if the termIndex is not present because it otherwise uses the solr index
-     * which makes it painfull slow.
+     * which makes it painfully slow.
      * @param word
      * @return the number of references for this word.
      */

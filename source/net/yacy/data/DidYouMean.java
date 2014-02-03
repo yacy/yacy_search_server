@@ -1,19 +1,29 @@
 package net.yacy.data;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrException;
+
 import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionSchema;
 
 
 /**
@@ -29,7 +39,7 @@ import net.yacy.search.index.Segment;
  * the above mentioned four categories. Consumer threads check then the generated word variations against a term index.
  * Only words contained in the term index are return by the getSuggestion method.<p/>
  * @author apfelmaennchen
- * @author orbiter (extensions for multi-language support)
+ * @author orbiter (extensions for multi-language support + multi-word suggestions)
  */
 public class DidYouMean {
 
@@ -79,7 +89,7 @@ public class DidYouMean {
     private final SortedSet<StringBuilder> resultSet;
     private final indexSizeComparator INDEX_SIZE_COMPARATOR;
     private char[] alphabet;
-
+    private boolean more;
 
     /**
      * @param index a termIndex - most likely retrieved from a switchboard object.
@@ -94,6 +104,7 @@ public class DidYouMean {
         this.guessLib = new LinkedBlockingQueue<StringBuilder>();
         this.createGen = true;
         this.INDEX_SIZE_COMPARATOR = new indexSizeComparator();
+        this.more = segment.connectedRWI() && segment.RWICount() > 0; // with RWIs connected the guessing is super-fast
 
         // identify language
         if (this.word.length() > 0) {
@@ -154,8 +165,10 @@ public class DidYouMean {
         }
         final long startTime = System.currentTimeMillis();
         final long timelimit = startTime + timeout;
-        if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.indexOf(this.word, ' ') > 0) {
-            return getSuggestions(StringBuilderComparator.CASE_INSENSITIVE_ORDER.split(this.word, ' '), timeout, preSortSelection, this.segment);
+        int lastIndexOfSpace = this.word.lastIndexOf(" ");
+        if (lastIndexOfSpace > 0) {
+            // recursion over several words
+            return getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), timeout, preSortSelection, this.segment);
         }
         final SortedSet<StringBuilder> preSorted = getSuggestions(timeout);
         if (System.currentTimeMillis() > timelimit) {
@@ -204,35 +217,75 @@ public class DidYouMean {
 
     /**
      * return a string that is a suggestion list for the list of given words
-     * @param words
+     * @param head - the sequence of words before the last space in the sequence
+     * @param tail - the word after the last space, possibly empty
      * @param timeout
      * @param preSortSelection
      * @return
      */
-    @SuppressWarnings("unchecked")
-    private static SortedSet<StringBuilder> getSuggestions(final StringBuilder[] words, final long timeout, final int preSortSelection, final Segment segment) {
-        final SortedSet<StringBuilder>[] s = new SortedSet[words.length];
-        for (int i = 0; i < words.length; i++) {
-            s[i] = new DidYouMean(segment, words[i]).getSuggestions(timeout / words.length, preSortSelection);
-        }
-        // make all permutations
+    private static SortedSet<StringBuilder> getSuggestions(final String head, final String tail, final long timeout, final int preSortSelection, final Segment segment) {
         final SortedSet<StringBuilder> result = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-        StringBuilder sb;
-        for (int i = 0; i < words.length; i++) {
-            if (s[i].isEmpty()) {
-                continue;
-            }
-            sb = new StringBuilder(20);
-            for (int j = 0; j < words.length; j++) {
-                if (j > 0) {
-                    sb.append(' ');
+        int count = 20;
+        final SolrQuery solrQuery = new SolrQuery();
+        solrQuery.setParam("defType", "edismax");
+        solrQuery.setFacet(false);
+        solrQuery.setQuery(CollectionSchema.title.getSolrFieldName() + ":\"" + head + "\"^10 OR " + CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + "\"");
+        if (tail.length() > 0) solrQuery.setFilterQueries(CollectionSchema.text_t.getSolrFieldName() + ":/.*" + head + " " + tail + ".*/");
+        solrQuery.setStart(0);
+        solrQuery.setRows(count);
+        solrQuery.setHighlight(true);
+        solrQuery.setHighlightFragsize(head.length() + tail.length() + 80);
+        solrQuery.setHighlightSimplePre("<b>");
+        solrQuery.setHighlightSimplePost("</b>");
+        solrQuery.setHighlightSnippets(1);
+        solrQuery.addHighlightField(CollectionSchema.title.getSolrFieldName());
+        solrQuery.addHighlightField(CollectionSchema.text_t.getSolrFieldName());
+        solrQuery.setFields(); // no fields wanted! only snippets
+        //List<String> snippets = new ArrayList<String>();
+        OrderedScoreMap<String> snippets = new OrderedScoreMap<String>(null);
+        try {
+            QueryResponse response = segment.fulltext().getDefaultConnector().getResponseByParams(solrQuery);
+            Map<String, Map<String, List<String>>> rawsnippets = response.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
+            if (rawsnippets != null) {
+                for (Map<String, List<String>> re: rawsnippets.values()) {
+                    for (List<String> sl: re.values()) {
+                        for (String s: sl) {
+                            int sp = s.indexOf("</b>");
+                            if (sp >= 0) {
+                                s = s.substring(sp + 4);
+                                for (int i = 0; i < s.length(); i++) {
+                                    char c = s.charAt(i);
+                                    if (c < 'A') s = s.replace(c, ' ');
+                                }
+                                s = s.trim();
+                                sp = s.indexOf("  ");
+                                if (sp >= 0) s = s.substring(0, sp);
+                                sp = s.indexOf("<b>");
+                                if (sp >= 0) s = s.substring(0, sp).trim();
+                                String[] sx = s.split(" ");
+                                StringBuilder sb = new StringBuilder(s.length());
+                                for (String x: sx) if (x.length() > 1 && sb.length() < 28) sb.append(x).append(' '); else break;
+                                s = sb.toString().trim();
+                                int score = count;
+                                for (String a: snippets) {
+                                    if (a.startsWith(s)) snippets.inc(a, count);
+                                    if (s.startsWith(a)) score += count;
+                                }
+                                if (sb.length() > 2) snippets.inc(s, score);
+                                count--;
+                            }
+                        }
+                    }
                 }
-                if (i == j) {
-                    sb.append(s[j].first());
-                } else {
-                    sb.append(words[j]);
-                }
             }
+        } catch (SolrException e) {
+        } catch (IOException e) {
+        }
+        Iterator<String> si = snippets.keys(false);
+        while (si.hasNext() && result.size() < 10) {
+            String s = si.next();
+            StringBuilder sb = new StringBuilder(head.length() + s.length() + 1);
+            sb.append(head).append(' ').append(s);
             result.add(sb);
         }
         return result;
@@ -291,8 +344,9 @@ public class DidYouMean {
         // we take guessLib entries as long as there is any entry in it
         // to see if this is the case, we must wait for termination of the producer
         for (final Thread t: producers) {
-            if (this.timeLimit > System.currentTimeMillis()) try {
-                t.join(Math.max(0, this.timeLimit - System.currentTimeMillis()));
+            long wait = this.timeLimit - System.currentTimeMillis();
+            if (wait > 0) try {
+                t.join(wait);
             } catch (final InterruptedException e) {}
         }
 
@@ -315,8 +369,9 @@ public class DidYouMean {
 
         // wait for termination of consumer
         for (final Consumer c: consumers) {
-            if (this.timeLimit > System.currentTimeMillis()) try {
-                c.join(Math.max(0, this.timeLimit - System.currentTimeMillis()));
+            long wait = this.timeLimit - System.currentTimeMillis();
+            if (wait > 0) try {
+                c.join(wait);
             } catch (final InterruptedException e) {}
         }
 
