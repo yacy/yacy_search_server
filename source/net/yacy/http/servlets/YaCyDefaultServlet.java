@@ -947,6 +947,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             p = buffer.indexOf(inctxt, offset);
         }
         out.write(in, offset, in.length - offset);
+        buffer.close();
     }
 
     /**
