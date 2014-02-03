@@ -166,7 +166,7 @@ function putQueueState(queue, state) {
 	} else {
 		a.href = "Crawler_p.html?pause=" + queue;
 		a.title = "Pause this queue (" + state + ")";
-		img.src = "/env/grafics/stop.gif";
+		img.src = "/env/grafics/pause.gif";
 		img.alt = "Pause this queue";
 	}
 }
