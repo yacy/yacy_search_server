@@ -83,9 +83,8 @@ public class DidYouMean {
     private final Segment segment;
     private final StringBuilder word;
     private final int wordLen;
-    private final LinkedBlockingQueue<StringBuilder> guessGen, guessLib;
+    private final LinkedBlockingQueue<StringBuilder> guesses;
     private long timeLimit;
-    private boolean createGen; // keeps the value 'true' as long as no entry in guessLib is written
     private final SortedSet<StringBuilder> resultSet;
     private final indexSizeComparator INDEX_SIZE_COMPARATOR;
     private char[] alphabet;
@@ -100,9 +99,7 @@ public class DidYouMean {
         this.word = word0;
         this.wordLen = this.word.length();
         this.segment = segment;
-        this.guessGen = new LinkedBlockingQueue<StringBuilder>();
-        this.guessLib = new LinkedBlockingQueue<StringBuilder>();
-        this.createGen = true;
+        this.guesses = new LinkedBlockingQueue<StringBuilder>();
         this.INDEX_SIZE_COMPARATOR = new indexSizeComparator();
         this.more = segment.connectedRWI() && segment.RWICount() > 0; // with RWIs connected the guessing is super-fast
 
@@ -147,8 +144,7 @@ public class DidYouMean {
 
     public void reset() {
         this.resultSet.clear();
-        this.guessGen.clear();
-        this.guessLib.clear();
+        this.guesses.clear();
     }
 
     /**
@@ -171,12 +167,13 @@ public class DidYouMean {
             return getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), timeout, preSortSelection, this.segment);
         }
         final SortedSet<StringBuilder> preSorted = getSuggestions(timeout);
+        /*
         if (System.currentTimeMillis() > timelimit) {
             ConcurrentLog.info("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (1); execution time: "
                 + (System.currentTimeMillis() - startTime) + "ms");
             return preSorted;
         }
-
+*/
         final ReversibleScoreMap<StringBuilder> scored = new ClusteredScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
         try {
 	        for (final StringBuilder s: preSorted) {
@@ -204,11 +201,13 @@ public class DidYouMean {
         }
 
         // finished
+        /*
         if (countSorted.isEmpty()) {
             ConcurrentLog.info("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (2); execution time: "
                     + (System.currentTimeMillis() - startTime) + "ms");
                 return preSorted;
         }
+        */
         ConcurrentLog.info("DidYouMean", "found " + preSorted.size() + " unsorted terms, returned " + countSorted.size() + " sorted suggestions; execution time: "
                         + (System.currentTimeMillis() - startTime) + "ms");
 
@@ -225,12 +224,11 @@ public class DidYouMean {
      */
     private static SortedSet<StringBuilder> getSuggestions(final String head, final String tail, final long timeout, final int preSortSelection, final Segment segment) {
         final SortedSet<StringBuilder> result = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-        int count = 20;
+        int count = 30;
         final SolrQuery solrQuery = new SolrQuery();
         solrQuery.setParam("defType", "edismax");
         solrQuery.setFacet(false);
-        solrQuery.setQuery(CollectionSchema.title.getSolrFieldName() + ":\"" + head + "\"^10 OR " + CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + "\"");
-        if (tail.length() > 0) solrQuery.setFilterQueries(CollectionSchema.text_t.getSolrFieldName() + ":/.*" + head + " " + tail + ".*/");
+        solrQuery.setQuery(CollectionSchema.title.getSolrFieldName() + ":\"" + head + "\"^10 OR " + CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + "\"" + (tail.length() == 0 ? "" : CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + " " + tail + "\""));
         solrQuery.setStart(0);
         solrQuery.setRows(count);
         solrQuery.setHighlight(true);
@@ -250,9 +248,15 @@ public class DidYouMean {
                 for (Map<String, List<String>> re: rawsnippets.values()) {
                     for (List<String> sl: re.values()) {
                         for (String s: sl) {
+                            s = s.replaceAll("</b> <b>", " ");
                             int sp = s.indexOf("</b>");
                             if (sp >= 0) {
-                                s = s.substring(sp + 4);
+                                if (tail.length() > 0) {
+                                    if (sp - tail.length() < 0 || !s.substring(sp - tail.length(), sp).equals(tail)) continue;
+                                    s = tail + s.substring(sp + 4);
+                                } else {
+                                    s = s.substring(sp + 4);
+                                }
                                 for (int i = 0; i < s.length(); i++) {
                                     char c = s.charAt(i);
                                     if (c < 'A') s = s.replace(c, ' ');
@@ -267,11 +271,20 @@ public class DidYouMean {
                                 for (String x: sx) if (x.length() > 1 && sb.length() < 28) sb.append(x).append(' '); else break;
                                 s = sb.toString().trim();
                                 int score = count;
-                                for (String a: snippets) {
-                                    if (a.startsWith(s)) snippets.inc(a, count);
-                                    if (s.startsWith(a)) score += count;
+                                if (s.length() > 2)  {
+                                    boolean store = true;
+                                    for (String a: snippets) {
+                                        if (a.startsWith(s)) {
+                                            snippets.inc(a, count);
+                                            store = false; // s becomes superfluous
+                                        }
+                                        if (s.startsWith(a)) {
+                                            snippets.dec(a, count); // a becomes superfluous
+                                            score += count;
+                                        }
+                                    }
+                                    if (store) snippets.inc(s, score);
                                 }
-                                if (sb.length() > 2) snippets.inc(s, score);
                                 count--;
                             }
                         }
@@ -313,8 +326,7 @@ public class DidYouMean {
         for (final StringBuilder t: libr) {
             if (!t.equals(this.word)) {
                 try {
-                    this.createGen = false;
-                    this.guessLib.put(t);
+                    this.guesses.put(t);
                 } catch (final InterruptedException e) {}
             }
         }
@@ -350,21 +362,9 @@ public class DidYouMean {
             } catch (final InterruptedException e) {}
         }
 
-        // if there is not any entry in guessLib, then transfer all entries from the
-        // guessGen to guessLib
-        if (this.createGen) {
-            try {
-                this.guessGen.put(POISON_STRING);
-                StringBuilder s;
-                while (!(s = this.guessGen.take()).equals(POISON_STRING)) {
-                    this.guessLib.put(s);
-                }
-            } catch (final InterruptedException e) {}
-        }
-
         // put poison into guessLib to terminate consumers
         for (@SuppressWarnings("unused") final Consumer c: consumers) {
-            try { this.guessLib.put(POISON_STRING); } catch (final InterruptedException e) {}
+            try { this.guesses.put(POISON_STRING); } catch (final InterruptedException e) {}
         }
 
         // wait for termination of consumer
@@ -373,6 +373,7 @@ public class DidYouMean {
             if (wait > 0) try {
                 c.join(wait);
             } catch (final InterruptedException e) {}
+            if (c.isAlive()) c.interrupt();
         }
 
         // we don't want the given word in the result
@@ -385,15 +386,10 @@ public class DidYouMean {
     private void test(final StringBuilder s) throws InterruptedException {
         final Set<StringBuilder> libr = LibraryProvider.dymLib.recommend(s);
         libr.addAll(LibraryProvider.geoLoc.recommend(s));
-        if (!libr.isEmpty()) {
-            this.createGen = false;
-        }
         for (final StringBuilder t: libr) {
-            this.guessLib.put(t);
+            this.guesses.put(t);
         }
-        if (this.createGen) {
-            this.guessGen.put(s);
-        }
+        this.guesses.add(s);
     }
 
     /**
@@ -501,8 +497,8 @@ public class DidYouMean {
             public void run() {
                 StringBuilder s;
                 try {
-                    while ((s = DidYouMean.this.guessLib.take()) != POISON_STRING) {
-                        if (s.length() >= MinimumOutputWordLength && DidYouMean.this.segment.getWordCountGuess(s.toString()) > 2) {
+                    while ((s = DidYouMean.this.guesses.take()) != POISON_STRING) {
+                        if (s.length() >= MinimumOutputWordLength) {
                             DidYouMean.this.resultSet.add(s);
                         }
                         if (System.currentTimeMillis() > DidYouMean.this.timeLimit) {
