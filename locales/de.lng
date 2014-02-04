@@ -2709,10 +2709,13 @@ Please be fair, contribute your own index to the global index.==Bitte seien Sie 
 Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
 it as soon as possible and restart YaCy.==dieses Problem so schnell wie möglich und starten Sie YaCy neu.
 Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT wurde deaktiviert. Bitte beheben Sie 
+Crawling is paused! If the crawling was paused automatically, please check your disk space.=Crawling ist pausiert! Wenn das Crawling automatisch pausiert wurde, pr�fen Sie bitte Ihrer Festplattenspeicher.
 Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Installiere YaCy
+You can download the latest releases here:=Hier kann die neueste Version heruntergeladen werden:
+[versionResMain]# or #[versionResDev]#==[versionResMain]# oder #[versionResDev]#
 You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
 which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,

@@ -173,7 +173,7 @@ with SSL== avec SSL
 https enabled==https activé
 Configure your router for YaCy:==Configurez votre routeur pour YaCy:
 Set Configuration==Sauver la configuration
-Configuration was not successful. This may take a moment.== &Ecute;chec de la configuration. Cela peut prendre un moment.
+Configuration was not successful. This may take a moment.== &Eacute;chec de la configuration. Cela peut prendre un moment.
 What you should do next:==Que devez-vous faire ensuite:
 Your basic configuration is complete! You can now \(for example\)==Votre configuration de base est complète! Vous pouvez maintenant \(par exemple\)
 just <==juste <
@@ -1429,21 +1429,58 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 
 #File: Status.html
 #---------------------------
-System-, Index- and Noeud-Status==System-, Index- und Noeud-Status
-Welcome to YaCy!==Willkommen bei YaCy!
-"Restart"=="Neustarten"
-"Shutdown"=="Herunterfahren"
+Console Status==&Eacute;tat de la console
+Log-in as administrator to see full status==Connectez-vous en tant qu'administrateur pour voir toutes les informations
+Welcome to YaCy!==Bienvenue &agrave; YaCy!
+"bad"=="mauvais"
+"idea"=="id&eacute;e"
+"good"=="bien"
+Your settings are _not_ protected!==Vos param&egrave;tres ne sont _pas_ prot&eacute;g&eacute;s!
+Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Veuillez ouvrir <strong>imm&eacute;diatement</strong> la page de <a href="ConfigAccounts_p.html">configuration des comptes</a>
+and set an administration password.==et d&eacute;finir un mot de passe administrateur.
+You have not published your peer seed yet. This happens automatically, just wait.==Votre noeud n'est pas encore connu du r&eacute;seau. Attendez quelques instants, cela se d&eacute;roule automatiquement.
+Your network configuration is in private mode. Your peer seed will not be published.== La configuration de votre r&eacute;seau est en mode priv&eacute;. Votre noeud restera inconnu du r&eacute;seau.
+The peer must go online to get a peer address.==Le noeud doit aller en ligne afin de recevoir une adresse.
+You cannot be reached from outside.==Votre noeud ne peut pas &ecirc;tre atteint depuis l'ext&eacute;rieur.
+A possible reason is that you are behind a firewall, NAT or Router.==Il est possible que vous soyez derri&egrave;re un pare-feu, un NAT ou un routeur.
+But you can <a href="index.html">search the internet</a> using the other peers'==Vous pouvez cependant <a href="index.html">effectuer des recherches sur Internet</a> depuis votre page de recherche &agrave; l'aide de
+global index on your own search page==l'index global des autres noeuds
+We encourage you to open your firewall for the port you configured \(usually: 8090\),==Nous vous encourageons &agrave; ouvrir votre pare-feu pour le port que vous avez configur&eacute; (en g&eacute;n&eacute;ral: 8090),
+or to set up a 'virtual server' in your router settings \(often called DMZ\).==ou de mettre en place un 'serveur virtuel' (souvent appel&eacute; DMZ) au moyen des param&egrave;tres de votre routeur.
+Please be fair, contribute your own index to the global index.==Jouez le jeu: contribuez &agrave; l'index global &agrave; l'aide de votre index personnel.
+Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==L'espace disque disponible est inf&eacute;rieur &agrave; #[minSpace]#. Le balayage a &eacute;t&eacute; d&eacute;sactiv&eacute;. Veuillez r&eacute;soudre 
+it as soon as possible and restart YaCy.==ce probl&egrave;me aussi vite que possible et red&eacute;marrer YaCy.
+Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==La quantit&eacute; de m&eacute;moire disponible est inf&eacute;rieure &agrave; \#\[minSpace\]\#. La DHT a &eacute;t&eacute; d&eacute;sactiv&eacute;e. Veuillez r&eacute;soudre
+Crawling is paused! If the crawling was paused automatically, please check your disk space.==Le balayage est en pause! Si le balayage a &eacute;t&eacute; mis en pause automatiquement, veuillez v&eacute;rifier votre espace disque.
+Latest public version is==La version stable la plus r&eacute;cente est
+You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Vous pouvez t&eacute;l&eacute;charger une version de YaCy plus r&eacute;cente. Cliquer ici pour installer cette mise &agrave; jour et red&eacute;marrer YaCy.
+Install YaCy==Installer YaCy
+You can download the latest releases here:==Vous pouvez t&eacute;l&eacute;charger la version la plus r&eacute;cente ici:
+[versionResMain]# or #[versionResDev]#==[versionResMain]# ou #[versionResDev]#
+You are running a server in senior mode and you support the global internet index,==YaCy fonctionne actuellement en mode senior et vous contribuez &agrave; l'index global d'Internet,
+which you can also <a href="index.html">search yourself</a>.==o&ugrave; vous pouvez aussi vous-m&ecirc;me <a href="index.html">effectuer des recherches</a>.
+You have a principal peer because you publish your seed-list to a public accessible server==Votre pair est un serveur principal car vous publiez votre seed-list sur un serveur accessible publiquement
+where it can be retrieved using the URL==d'o&ugrave; elle peut &ecirc;tre r&eacute;cup&eacute;r&eacute;e via l'URL
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Votre indexeur de pages web est inactif. Vous pouvez d&eacute;marrer votre propre balayage du web <a href="CrawlStartSite_p.html">ici</a>
+Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Votre indexeur de pages web est actif. Vous pouvez surveiller votre balayage du web <a href="Crawler_p.html">ici</a>.
+If you need professional support, please write to==Si vous avez besoin d'une assistance professionnelle, vous pouvez &eacute;crire &agrave;
+For community support, please visit our <a href="http://forum.yacy.de" target="_blank">forum</a>==Si vous cherchez l'aide de la communaut&eacute;, vous pouvez visiter notre <a href="http://forum.yacy.de" target="_blank">forum</a>
+"Follow YaCy on Twitter"=="Suivez YaCy sur Twitter"
+
+
+
+"Restart"=="Red&ecute;marrer"
+"Shutdown"=="Arr&Ecirc;ter"
 Public System Properties==Allgemeine Systemangaben
-System version==Systemversion
-the latest public version is==Die neueste stabile Version ist
-Click here to==Klicken Sie
-download</a> it.==hier</a>, um sie herunterzuladen.
-This peer's address==Adresse dieses Noeuds
-#Not assigned==nicht zugewiesen
-Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Noeud muss online gehen, um eine Adresse zu bekommen.
+System version==Version du syst&egrave;me
+the latest public version is==La version stable la plus r&eacute;cente est
+Click here to==Cliquez
+download</a> it.==ici</a> pour la t&eacute;l&eacute;charger.
+This peer's address==Adresse de ce pair
+#Not assigned==non assign&eacute;
 #---
-The peer does not go online until you use the proxy to surf the internet,==Ihr Noeud geht nicht online, bis Sie den Proxy benutzen,
-thus proving that you <em>want</em> to go online.==wodurch Sie signalisieren, online gehen zu <em>wollen</em>.
+The peer does not go online until you use the proxy to surf the internet,==Le noeud ne va pas en ligne avant que vous utilisiez le proxy pour surfer sur Internet
+thus proving that you <em>want</em> to go online.==ce qui prouve que vous <em>voulez</em> aller en ligne.
 #---
 If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt,
 see the <a==lesen Sie die <a
