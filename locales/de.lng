@@ -412,6 +412,8 @@ which is not fatal, but would be good for the YaCy network==was nicht schlimm is
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Bitte öffnen Sie Ihre Firewall auf diesem Port und/oder stellen Sie einen virtuellen Server in Ihrem Router ein um Verbindungen auf diesem Port zu erlauben
 Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreicht werden
 Peer Port:==Peer-Port:
+with SSL== mit SSL
+https enabled==https aktiviert
 Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern

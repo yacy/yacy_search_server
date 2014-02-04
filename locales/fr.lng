@@ -137,37 +137,53 @@ For explanation please look into defaults/yacy.init==Pour des explications, rega
 
 #File: ConfigBasic.html
 #---------------------------
-Select a language for the interface==Choisissez une langue pour l'interface
+Access Configuration==Configuration d'acc&egrave;s
 Basic Configuration==Configuration de base
-Your YaCy Peer needs some basic information to operate properly==Votre noeud YaCy a besoin de quelques informations de base pour fonctionner correctement
-Your peer name has not been customized==Le nom de votre noeud YaCy n'a pas été personnalisé
-please set your own peer name==Choisissez s'il vous plaît votre propre nom de noeud YaCy
+Your port has changed. Please wait 10 seconds.== Votre port a été modifié. Veuillez patienter 10 secondes.
+Your YaCy Peer needs some basic information to operate properly==Votre noeud YaCy a besoin de quelques informations de base pour fonctionner correctement.
+Select a language for the interface==Sélectionnez une langue pour l'interface
+Use Case: what do you want to do with YaCy:==Utilisation: que voulez-vous faire avec YaCy:
+Community-based web search==Recherche communautaire sur le Web
+Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Rejoingnez et soutenez le réseau global \'freeworld\', effectuez des recherches sur le Web &agrave; l'aide d'un réseau de recherche non censuré appartenant aux utilisateurs.
+Search portal for your own web pages==Portail de recherche pour vos propres pages web
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Votre installation YaCy se comporte indépendemment des autres pairs et vous pouvez définir votre propre index lan&ccedil;ant votre propre balayage du Web. Cela peut servir &agrave; rechercher vos propres pages web ou &agrave; construire un portail de recherche thématique.
+Files may also be shared with the YaCy server, assign a path here:==Le serveur YaCy peut aussi être utilisé pour le partage de fichiers. Définissez un chemin ici:
+This path can be accessed at ==Ce chemin est accessible &agrave;
+Use that path as crawl start point.== Utilisez ce chemin comme point de démarrage du balayage.
+Intranet Indexing==Indexation d'intranet
+Create a search portal for your intranet or web pages or your \(shared\) file system.==Créer un portail de recherche pour votre intranet, vos pages web ou votre système de fichiers (partagés).
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==Les URL peuvent être utilisées avec les protocoles http/https/ftp et un nom de domaine local, ou avec une URL de la forme
+or smb:==ou smb:
+Your peer name has not been customized; please set your own peer name==Le nom de votre noeud YaCy n'a pas été personnalisé. Veuillez choisir votre propre nom de noeud YaCy.
 You have a nice peer name==Vous avez un joli nom de noeud
 Peer Name:==Nom de noeud:
-Please set a password for your peer to protect your settings==Choisissez s'il vous plaît un mot de passe pour protéger votre configuration
+Please set a password for your peer to protect your settings==Veuillez choisir un mot de passe pour protéger votre configuration
 > 3 characters==supérieur à 3 caractères
 if this is successful you will be asked to log in with these values immediately==Si le changement est opéré avec succès, il vous sera demandé de vous identifier immédiatement avec ces valeurs.
 Password is set==Le mot de passe est activé
 Peer User:==Utilisateur du noeud:
 Peer Password:==Mot de passe du noeud :
 repeat same password==Répéter le même mot de passe
-Your peer cannot be reached from outside==Votre noeud ne peut pas être accédé de l'extérieur
-what is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais ce serait mieux pour le réseau YaCy
-please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurez votre firewall pour ouvrir ce port et/ou mettez en place un serveur virtuel sur votre routeur pour autoriser les connexions à ce port
-Your peer can be reached by other peers==Votre noeud n'est pas joignable par les autres noeuds du réseau
+Your peer cannot be reached from outside==Votre noeud est inaccessible de l'extérieur
+which is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais ce serait mieux pour le réseau YaCy
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurer votre pare-feu pour ouvrir ce port et/ou mettre en place un serveur virtuel sur votre routeur pour autoriser les connexions à ce port
+Your peer can be reached by other peers==Votre noeud est joignable par les autres noeuds du réseau
 Peer Port:==Port logiciel du noeud:
+with SSL== avec SSL
+https enabled==https activé
 Configure your router for YaCy:==Configurez votre routeur pour YaCy:
-Set Configuration==Modifier la configuration
+Set Configuration==Sauver la configuration
+Configuration was not successful. This may take a moment.== &Ecute;chec de la configuration. Cela peut prendre un moment.
 What you should do next:==Que devez-vous faire ensuite:
 Your basic configuration is complete! You can now \(for example\)==Votre configuration de base est complète! Vous pouvez maintenant \(par exemple\)
 just <==juste <
 start an uncensored search==commencer une recherche non censurée
-start your own crawl</a> and contribute to the global index, or create your own private web index==démarrer votre propre crawl</a> et contribuer à l'index global, ou construire votre propre index du web
+start your own crawl</a> and contribute to the global index, or create your own private web index==démarrer votre propre balayge</a> et contribuer à l'index global, ou construire votre propre index du web
 set a personal peer profile</a> \(optional settings\)==remplir un profil de noeud personnel</a> (optionnel)
 monitor at the network page</a> what the other peers are doing==consulter la page réseau</a> et ce que font les autres pairs
-Your Peer name is a default name; please set another peer name.==Votre nom de pair est un nom par défaut; donnez en un autre s'il vous plait.
+Your Peer name is a default name; please set an individual peer name.== Votre nom de pair est un nom par défaut. veuillez lui donner un nom individuel.
 If this does not work, the name is probably taken by someone else.==Si cela ne fonctionne pas, le nom est surement déjà utilisé.
-Please try to choose another one.==S'il vous plait, choisissez en un autre.
+Please try to choose another one.==Veuillez en choisir un autre.
 You did not set a user name and/or a password.==Vous n'avez pas saisi de nom d'utilisateur et/ou de mot de passe.
 Some pages are protected by passwords.==Certaines pages sont protégées par mot de passe.
 You should set a password here to secure your YaCy peer.==Vous devez définir un mot de passe pour sécuriser votre pair.
