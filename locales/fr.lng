@@ -126,6 +126,43 @@ The current cache size is==La taille actuelle du cache est
 The maximum cache size is==La taille maximale du cache est
 #-----------------------------
 
+#File: ConfigAccounts_p.html
+#---------------------------
+User Accounts==Comptes des utilisateurs
+User Administration==Gestion des utilisateurs
+User created:==Utilisateur cr&eacute;&eacute;:
+User changed:==Utilisateur modifi&eacute;:
+Generic error.==Erreur g&eacute;n&eacute;rique.
+Passwords do not match.==Les mots de passe ne correspondent pas.
+Username too short. Username must be \>\= 4 Characters.==Nom d'utilisateur trop court. Un nom d'utilisateur doit comporter plus de 4 caract&egrave;res.
+No password is set for the administration account.==Aucun mot de passe n'est d&eacute;fini pour le compte administrateur.
+Please define a password for the admin account.==Veuillez d&eacute;finir un mot de passe pour le compte admin.
+Admin Account==Compte admin
+Access from localhost without account==Acc&egrave;s sans compte &agrave; partir de localhost
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre noeud depuis votre ordinateur (acc&egrave;s via localhost) est garanti. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+Access only with qualified account==Acc&egrave;s avec un compte autoris&eacute; uniquement
+You need this only if you want a remote access to your peer.==N&eacute;cessaire uniquement si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud.
+Peer User:==Utilisateur du noeud:
+New Peer Password:==Nouveau mot de passe du noeud:
+Repeat Peer Password:==Entrer &agrave; nouveau le mot de passe du noeud:
+"Define Administrator"=="D&eacute;finir un administrateur"
+Select user==Choisir un utilisateur
+New user==Nouvel utilisateur
+Edit User==Modifier l'utilisateur
+Delete User==Supprimer l'utilisateur
+Edit current user:==Modifier l'utilisateur courant:
+Username</label>==Nom d'utilisateur</label>
+Password</label>==Mot de passe</label>
+Repeat password==Entrer &agrave; nouveau le mot de passe
+First name==Pr&eacute;nom
+Last name==Nom
+Address==Adresse
+Rights==Droits
+Timelimit==Limite de temps
+Time used==Temps utilis&eacute;
+Save User==Sauvegarder l'utilisateur
+#-----------------------------
+
 #File: ConfigAdvanced_p.html
 #---------------------------
 Advanced Config==Configuration avancée
@@ -156,6 +193,7 @@ URLs may be used with http/https/ftp and a local domain name or IP, or with an U
 or smb:==ou smb:
 Your peer name has not been customized; please set your own peer name==Le nom de votre noeud YaCy n'a pas été personnalisé. Veuillez choisir votre propre nom de noeud YaCy.
 You have a nice peer name==Vous avez un joli nom de noeud
+You may change your peer name==Vous pouvez modifier le nom de votre noeud
 Peer Name:==Nom de noeud:
 Please set a password for your peer to protect your settings==Veuillez choisir un mot de passe pour protéger votre configuration
 > 3 characters==supérieur à 3 caractères
@@ -165,7 +203,7 @@ Peer User:==Utilisateur du noeud:
 Peer Password:==Mot de passe du noeud :
 repeat same password==Répéter le même mot de passe
 Your peer cannot be reached from outside==Votre noeud est inaccessible de l'extérieur
-which is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais ce serait mieux pour le réseau YaCy
+which is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais qu'il soit accessible serait mieux pour le réseau YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurer votre pare-feu pour ouvrir ce port et/ou mettre en place un serveur virtuel sur votre routeur pour autoriser les connexions à ce port
 Your peer can be reached by other peers==Votre noeud est joignable par les autres noeuds du réseau
 Peer Port:==Port logiciel du noeud:
@@ -755,9 +793,6 @@ The YaCy Lab==Le labo YaCy
 This is the place where we try new functions of the YaCy search engine.==C'est l'endroit ou nous testons les nouvelles fonctions du moteur de recherche YaCy.
 All these things here are to be considered as probably unstable, and/or experimental.==Toutes ces nouvelles fonctions sont encore instables et sont en phase d'expérimentation.
 You may try out these things but please do not care about bugs.==Vous pouvez essayer ces nouvelles fonctions, mais ne prettez pas attention aux erreurs.
-The <a==Le <a
-Advanced <a==avancé <a
-Configuration</a>==Paramétrage</a>
 #-----------------------------
 
 #File: Messages_p.html
@@ -1903,6 +1938,52 @@ with the target of implementing a P2P-based global search engine.==avec l'intent
 Architecture \(C\) by Michael Peter Christen==Architecture (C) de Michael Peter Christen
 #-----------------------------
 
+### Subdirectory env/templates ###
+#File: env/templates/header.template
+#---------------------------
+### SEARCH INTERFACES ###
+YaCy Administration==Administration de YaCy
+Search Interfaces==Interfaces de recherche
+Web Search==Recherche Web
+File Search==Recherche de fichier
+Host Browser==Navigateur d'h&ocirc;tes
+Solr Default Core==Solr Default Core
+Solr Webgraph Core==Solr Webgraph Core
+Google Appliance API==Google Appliance API
+Compare Search==Comparer des recherches
+URL Viewer==Afficher une URL
+Bookmarks==Marques-pages
+### DESIGN ###
+Search Integration into External Sites==Rercherche int&eacute;gr&eacute;e &agrave; un site externe
+Integrated Search Configuration==Configuration de la recherche int&eacute;gr&eacute;e
+### INDEX ###
+Index&nbsp;Production==G&eacute;n&eacute;ration de l'index
+Index Administration==Aministration de l'index
+Filter &amp; Blacklists==Filtre et listes noires
+Content Semantic==S&eacute;mantique du contenu
+Target Analysis==Analyse de la cible
+Process Scheduler==Planificateur de processus
+### MONITORING ###
+Monitoring==Surveillance
+YaCy Network==R&eacute;seau YaCy
+Web Visualization==Visualisation du Web
+Network Access==Acc&egrave;s au r&eacute;seau
+Computation==Server log
+### PEER CONTROL ###
+Peer Control==Contr�le du noeud
+Admin Console==Console d'administration
+Re-Start==Red&eacute;marrer
+Shutdown==Arr&ecirc;ter
+### YACY PROJECT ###
+The YaCy Project==Le projet YaCY
+Project Home==Page d'accueil du projet
+Tutorials==Tutoriels
+Project Wiki==Wiki du projet
+Git Repository==D&eacute;p&ocirc;t Git
+Bugtracker==Suivi des bogues
+Peer Statistics==Statistiques du noeud
+YaCy Statistics==Statistiques de YaCy
+#-----------------------------
 
 #File: env/templates/simpleheader.template
 #---------------------------
@@ -1912,61 +1993,20 @@ Noeud Owner Profile==Impressum dieses Noeuds
 Help / Wiki==Aide / Wiki
 Surftips</a>==Surftips</a>
 Project Home==Accueil projet
-
-#-----------------------------
-
-#File: env/templates/header.template
-#---------------------------
-YaCy - Distributed Web Indexing - Administration==YaCy - Indexation Web Partagée - Administration
-Global Index==Index global
-Crawler Control==Contrôle du Crawler
-Local Proxy==Proxy local
-Communication / Publication==Communication / Publication
-Noeud Control==Contrôle de Noeud
-The Project==Le projet
-Search Page==Page de recherche
-Detailed Search==Recherche détaillée
->Surftips==>Surftipps
->Bookmarks==>Marque-pages
->Help==>Aide
-Index Create==Création d'index
-Index Control==Contrôle d'Index
-Index Monitor==Moniteur d'index
-Filter &amp; Blacklists==Filtre &amp; Liste noire
-Proxy Indexing==Indexation de Proxy
-Cache Monitor==Moniteur de cache
-Cookie Monitor==Moniteur de cookies
-Home Page==Page d'accueil
-File Share==Partage de fichier
-#Wiki==Wiki
->Messages==>Messages
-Basic Configuration==Configuration de base
-Advanced Settings==Paramètres avancés
-#Status==Status
->Network==>Réseau
-#News==News
-#Log==Log
-#Performance==Performance
->Connections==>Connexions
-#Skins==Skins
-Project Home==Accueil projet
-Project News==Nouveautés
-English Forum==Forum anglais
-Newsletters==Newsletter
-Deutsches Forum==Forum Allemand
-Download YaCy==Télécharger YaCy 
-YaCy Wiki==Wiki YaCy
->Contact==>Contact
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Noeud Configuration Menu==Menu configuration du noeud
-Basic Configuraton==Configuration de base
->Language==>Langage
-Noeud Profile==Profil
-Interface Skins==Choix d'une Skin
->Advanced==>Avancé
+Peer Administration Console==Console d'administration du noeud
+Status==&Eacute;tat
+Basic Configuration==Configuration de base
+>Accounts==>Comptes
+Network Configuration==Configuration r&eacute;seau
+Download System Update==Mise &agrave; jour du syst&egrave;me
+>Performance==>Performance
+Advanced Settings==Param&egrave;tres avanc&eacute;s
+Local robots.txt==Robots locaux.txt
+Advanced Properties==Configuration avanc&eacute;e
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
