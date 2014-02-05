@@ -65,19 +65,26 @@ public class StringBuilderComparator implements Comparator<StringBuilder> {
         final int l0 = sb0.length();
         final int l1 = sb1.length();
         if (l0 != l1) return false;
-        return equals(sb0, sb1, l1);
+        return equals(sb0, sb1, 0, l1);
     }
 
     public boolean startsWith(final StringBuilder sb0, final StringBuilder sb1) {
         final int l0 = sb0.length();
         final int l1 = sb1.length();
         if (l0 < l1) return false;
-        return equals(sb0, sb1, l1);
+        return equals(sb0, sb1, 0, l1);
     }
 
-    private boolean equals(final StringBuilder sb0, final StringBuilder sb1, final int l) {
+    public boolean endsWith(final StringBuilder sb0, final StringBuilder sb1) {
+        final int l0 = sb0.length();
+        final int l1 = sb1.length();
+        if (l0 < l1) return false;
+        return equals(sb0, sb1, l0 - l1, l1);
+    }
+
+    private boolean equals(final StringBuilder sb0, final StringBuilder sb1, int start, final int l) {
         char c0, c1;
-        for (int i = 0; i < l; i++) {
+        for (int i = start; i < l; i++) {
             c0 = sb0.charAt(i);
             c1 = sb1.charAt(i);
             if (c0 == c1) continue;

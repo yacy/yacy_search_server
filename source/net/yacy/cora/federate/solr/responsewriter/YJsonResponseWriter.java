@@ -158,7 +158,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                         solitaireTag(writer, "link", u);
                         solitaireTag(writer, "file", filename);
                         // get image license
-                        if (MultiProtocolURL.isImage(filename)) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
+                        if (MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(filename))) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
                     } catch (final MalformedURLException e) {}
                     continue;
                 }

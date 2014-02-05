@@ -65,7 +65,7 @@ public class tarParser extends AbstractParser implements Parser {
 
         final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
-        final String ext = MultiProtocolURL.getFileExtension(url.getFileName()).toLowerCase();
+        final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
                 source = new GZIPInputStream(source);

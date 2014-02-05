@@ -22,8 +22,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.SortedSet;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -68,7 +68,7 @@ public class suggest {
 
         int c = 0;
         final DidYouMean didYouMean = new DidYouMean(sb.index, new StringBuilder(querystring));
-        final SortedSet<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
+        final Collection<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
         //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
         synchronized (suggestions) {
             for (StringBuilder suggestion: suggestions) {

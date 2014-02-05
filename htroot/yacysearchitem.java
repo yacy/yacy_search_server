@@ -244,7 +244,7 @@ public class yacysearchitem {
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
-            final String ext = MultiProtocolURL.getFileExtension(resultFileName).toLowerCase();
+            final String ext = MultiProtocolURL.getFileExtension(resultFileName);
             if (MultiProtocolURL.isImage(ext)) {
                 final String license = URLLicense.aquireLicense(resultURL);
                 prop.put("content_code", license);
