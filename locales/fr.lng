@@ -818,68 +818,111 @@ Send message==Envoyer un message
 
 #File: Network.html
 #---------------------------
-Network Overview==Aperçu du réseau
-Network Menu==Menu réseau
-Network Overview== Aperçu réseau
-Active Noeuds==Noeuds actifs
-Passive Noeuds==Noeuds passifs
-Potential Noeuds==Noeuds potentiels
-Network Overview==Aperçu réseau
-Active Noeuds==Noeuds actifs
-Passive Noeuds==Noeuds passifs
-Potential Noeuds==Noeuds potentiels
+YaCy Search Network==R&eacute;seau de recherche YaCy
+>YaCy Network<==>R&eacute;seau YaCy<
+The information that is presented on this page can also be retrieved as XML==Les informations pr&eacute;sent&eacute;es ici peuvent &ecirc;tre obtenues au format XML
+Click the API icon to see the XML.==Cliquez sur l'ic&ocirc;ne API pour afficher le XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Vous trouverez <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">ici</a> la liste compl&egrave;te des APIs.
+Network Overview==Aper&ccedil;u du r&eacute;seau
+Active&nbsp;Peers==Noeuds actifs
+Passive&nbsp;Peers==Noeuds passifs
+Potential&nbsp;Peers==Noeuds potentiels
+Active Peers in \'\#\[networkName\]\#\' Network==Noeuds actifs du r&eacute;seau '#[networkName]#'
+Passive Peers in \'\#\[networkName\]\#\' Network==Noeuds passifs du r&eacute;seau '#[networkName]#'
+Potential Peers in \'\#\[networkName\]\#\' Network==Noeuds potentiels du r&eacute;seau '#[networkName]#'
 Manually contacting Noeud==Contacter un noeud manuellement
+<strong>ERROR</strong>: Unable to execute query.==<strong>ERREUR</strong>: Impossible d'ex&eacute;cuter la requ&ecirc;te.
+is no valid regular expression, please enter a valid regular expression to search for a peername.==n'est pas une expression r&eacute;guli&egrave;re valide. Pour rechercher un nom de noeud, veuillez entrer une expression r&eacute;guli&egrave;re valide.
 no remote \#\[peertype\]\# peer for this list known==Aucun noeud distant #[peertype]# connu ou en ligne.
-Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==
-Voir #[num]# sur un total de #[total]# noeuds.
-send <strong>M</strong>essage/<br />show <strong>P</strong>rofile/<br />edit <strong>W</strong>iki==
-Envoyer un message (<strong>m</strong>)/<br />Montrer le profil (<strong>p</strong>)/<br />Modifier Wiki (<strong>w</strong>)
-Name==Nom
-Address==Adresse
-Hash==Hashage
-Type==Type
-Release/<br />SVN==Version YaCy/<br />SVN
-Contact==Contact
-Last<br />Seen==Dernier<br />en ligne
-Location==Lieu
-Offset==Offset
-Uptime==Uptime
-Links==Liens
-RWIs==RWIs
-Sent<br />Words==Envoyer<br /> des mots
-Sent<br />URLs==Envoyer<br /> des URLs
-Received<br />Words==Mots<br />reçus
-Received<br />URLs==URLs<br />reçues
-PPM==PPM
-Seeds==Seeds
-Connects<br />per hour==Connexions<br />par heure
-Send message to peer==Envoyer un message au noeud
-View profile of peer==Voir le profil du noeud
-Read and edit wiki on peer==Voir et éditer le wiki du noeud
-All Noeuds:==Tous les noeuds
-Branch==Type
-Noeuds==Noeuds
-All Links==Tous les liens
-All Words==Tous les mots
-Active \(connected Senior and Principal\)==Actifs (Seniors et principaux connectés)
-Passive \(disconnected Senior and Principal\)==Passifs (Seniors et principaux déconnectés) 
-Potential \(Junior\)==Potentiels (Junior)
-Network Total==Réseau complet
-YaCy Cluster Indexing Speed:==Vitese d'indexation du cluster YaCy
-Pages Per Minute \(Accumulated PPM over Active Noeuds\).==Pages par minute (PPM des noeuds actifs)
-Your Noeud:==Votre noeud:
-Version==Version
-Own/Other==Vous/Autres
-Accept Crawl==Accepter le crawl
-Network legend:==Légende réseau:
-dark font==Fonte noire
-senior/principal peers==Noeuds seniors/principaux
-lightred font==Fonte rouge claire
-passiv peers \( < 5 hour passiv time\)==Noeuds passifs (5 heures passives)
-turquoise font==Fonte turquoise
-junior peers==Noeuds juniors
+Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Voir #[num]# noeuds sur un total de #[total]#.
+Search for a peername \(RegExp allowed\)==Chercher le nom d'un noeud (expressions r&eacute;guli&egrave;res autoris&eacute;es)
+"Search"==Rechercher
+send&nbsp;<strong>M</strong>essage==envoyer&nbsp;<strong>M</strong>essage
+show&nbsp;<strong>P</strong>rofile==voir&nbsp;<strong>P</strong>rofil
+edit&nbsp;<strong>W</strong>iki==&eacute;diter&nbsp;<strong>W</strong>iki
+browse&nbsp;<strong>B</strong>log==consulter&nbsp;<strong>B</strong>log
+>Name<==>Nom<
+>Info<==>Info<
+>PPM<==>PPM<
+>QPH<==>QPH<
+>Release<==>Version<br/>de YaCy<
+Last<br/>Seen==Derni&egrave;re<br/>connexion
+<strong>UTC</strong><br/>Offset==D&eacute;calage<br/><strong>UTC</strong>
+>Location==>Lieu
+>Uptime==>Temps de fonctionnement
+>Links==>Liens
+>RWIs==>RWIs
+URLs for<br/>Remote<br/>Crawl==URLs pour balayage &agrave; distance
+Sent<br/>DHT Word Chunks==DHT Word Chunks<br/>envoy&eacute;s
+Sent<br/>URLs==URLs<br/>envoy&eacute;es
+Received<br/>DHT Word Chunks==DHT Word Chunks<br/>re&ccedil;us
+Received<br/>URLs==URLs re&ccedil;ues
+
+>Address==>Adresse
+>Hash==>Hachage
+>Age==>&Acirc;ge
+Peer<br/>Ping==Ping <br/> du noeud
+
+Send message to peer \#\[fullname\]\#==Envoyer un message au noeud #[fullname]#
+View profile of peer \#\[fullname\]\#==Voir le profil du noeud #[fullname]#
+Read and edit wiki on peer \#\[fullname\]\#==Lire et &eacute;diter le wiki du noeud #[fullname]#
+Browse blog of peer \#\[fullname\]\#==Consulter le blog du noeud #[fullname]#
+
+"Profile updated"=="Profil mis &agrave; jour"
+"Wiki updated"=="Wiki mis &agrave; jour"
+"Blog updated"=="Blog mis &agrave; jour"
+Contact: active==Contact: actif
+Contact: passive==Contact: passif 
+Contact: offline==Contact: hors-ligne
+Seed download:== T&eacute;l&eacute;chargement des seeds
+"Accept Crawl: no"=="Accepte le balayage: non"
+"Accept Crawl: yes"=="Accepte le balayage: oui"
+"DHT Receive: no"=="R&eacute;ception de la DHT: non"
+"DHT Receive: yes"=="R&eacute;ception de la DHT: oui"
+"Not a Node Candidate"=="Pas un noeud candidat"
+"Node Candidate"=="Noeud candidat"
+runtime:==Temps d'ex&eacute;cution:
+
+>Network<==>R&eacute;seau<
+>Online Peers<==>Noeuds en ligne<
+Number of<br/>Documents==Nombre de <br/>documents
+Indexing Speed:<br/>Pages Per Minute \(PPM\)==Vitesse d'indexation:<br/>pages par minute (PPM)
+Query Frequency:<br/>Queries Per Hour \(QPH\)==Fr&eacute;quence des requ&ecirc;tes:<br/>requ&ecirc;tes par heure (QPH)
+>Last Hour<==>Cette derni&egrave;re heure<
+>Today<==>Aujourd'hui<
+>Last&nbsp;Week<==>Cette&nbsp;derni&egrave;re&nbsp;semaine<
+>Last&nbsp;Month<==>Ce&nbsp;dernier&nbsp;mois<
+>Now<==>Maintenant<
+>Active<==>Actif<
+>Passive<==>Passif<
+>Potential<==>Potentiel<
+>This Peer<==>Votre noeud<
+"The YaCy Network"=="Le r&eacute;seau YaCy"
+
+URLs for<br/>Remote Crawl==URLs pour<br/>balayage &agrave; distance
+Known<br/>Seeds==Seeds<br/>connues
+Connects<br/>per hour==Connections<br/>par heure
+Indexing<br/>PPM</td>==Vitesse d'indexation (PPM)
+QPH<br/>(remote)==QPH<br/>(distant)
+"Type: Virgin"=="Type: Vierge"
+
+dark green font==police vert fonc&eacute;
+senior/principal peers==noeuds senior/principaux
+light green font==police vert clair
+passive peers==noeuds passifs
+pink font==police rose
+junior peers==noeuds junior
 red point==point rouge
-this peer==Votre noeud
+this peer==votre noeud
+grey waves==vagues grises
+crawling activity==activit&eacute; due au balayages en cours
+green radiation==radiation verte
+strong query activity==forte activit&eacute; due aux requ&ecirc;tes
+red lines==lignes rouges
+DHT-out==DHT sortante
+green lines==lignes vertes
+DHT-in==DHT entrante
+
 You are in online mode, but probably no internet resource is available. Please check your internet connection.==Vous êtes en mode connecté, mais aucune ressource internet n'est disponible. Vérifiez votre connexion internet.
 You are either not in online mode or you do not use the proxy option.==Vous n'êtes pas en mode En Ligne ni n'utilisez l'option Proxy.
 'on-demand - mode', see=='Mode - A la demande', voir
@@ -1951,7 +1994,7 @@ Solr Default Core==Solr Default Core
 Solr Webgraph Core==Solr Webgraph Core
 Google Appliance API==Google Appliance API
 Compare Search==Comparer des recherches
-URL Viewer==Afficher une URL
+URL Viewer==Afficher le contenu d'une URL
 Bookmarks==Marques-pages
 ### DESIGN ###
 Search Integration into External Sites==Rercherche int&eacute;gr&eacute;e &agrave; un site externe
@@ -1970,7 +2013,7 @@ Web Visualization==Visualisation du Web
 Network Access==Acc&egrave;s au r&eacute;seau
 Computation==Server log
 ### PEER CONTROL ###
-Peer Control==Contr�le du noeud
+Peer Control==Contr&ocirc;le du noeud
 Admin Console==Console d'administration
 Re-Start==Red&eacute;marrer
 Shutdown==Arr&ecirc;ter
@@ -1998,14 +2041,14 @@ Project Home==Accueil projet
 #File: env/templates/submenuConfig.template
 #---------------------------
 Peer Administration Console==Console d'administration du noeud
-Status==&Eacute;tat
+Status==Status
 Basic Configuration==Configuration de base
 >Accounts==>Comptes
 Network Configuration==Configuration r&eacute;seau
 Download System Update==Mise &agrave; jour du syst&egrave;me
 >Performance==>Performance
 Advanced Settings==Param&egrave;tres avanc&eacute;s
-Local robots.txt==Robots locaux.txt
+Local robots.txt==robots.txt local
 Advanced Properties==Configuration avanc&eacute;e
 #-----------------------------
 
