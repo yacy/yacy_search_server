@@ -368,7 +368,6 @@ public final class TextParser {
         String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         Set<Parser> idiom;
         if (ext != null && ext.length() > 0) {
-            ext = ext.toLowerCase();
             if (denyExtensionx.containsKey(ext)) throw new Parser.Failure("file extension '" + ext + "' is denied (1)", url);
             idiom = ext2parser.get(ext);
             if (idiom != null) idioms.addAll(idiom);
@@ -431,7 +430,7 @@ public final class TextParser {
      * @return an error if the extension is not supported, null otherwise
      */
     public static String supportsExtension(final MultiProtocolURL url) {
-        return supportsExtension(MultiProtocolURL.getFileExtension(url.getFileName()).toLowerCase());
+        return supportsExtension(MultiProtocolURL.getFileExtension(url.getFileName()));
     }
 
     public static String mimeOf(final MultiProtocolURL url) {
