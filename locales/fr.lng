@@ -126,6 +126,43 @@ The current cache size is==La taille actuelle du cache est
 The maximum cache size is==La taille maximale du cache est
 #-----------------------------
 
+#File: ConfigAccounts_p.html
+#---------------------------
+User Accounts==Comptes des utilisateurs
+User Administration==Gestion des utilisateurs
+User created:==Utilisateur cr&eacute;&eacute;:
+User changed:==Utilisateur modifi&eacute;:
+Generic error.==Erreur g&eacute;n&eacute;rique.
+Passwords do not match.==Les mots de passe ne correspondent pas.
+Username too short. Username must be \>\= 4 Characters.==Nom d'utilisateur trop court. Un nom d'utilisateur doit comporter plus de 4 caract&egrave;res.
+No password is set for the administration account.==Aucun mot de passe n'est d&eacute;fini pour le compte administrateur.
+Please define a password for the admin account.==Veuillez d&eacute;finir un mot de passe pour le compte admin.
+Admin Account==Compte admin
+Access from localhost without account==Acc&egrave;s sans compte &agrave; partir de localhost
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre noeud depuis votre ordinateur (acc&egrave;s via localhost) est garanti. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+Access only with qualified account==Acc&egrave;s avec un compte autoris&eacute; uniquement
+You need this only if you want a remote access to your peer.==N&eacute;cessaire uniquement si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud.
+Peer User:==Utilisateur du noeud:
+New Peer Password:==Nouveau mot de passe du noeud:
+Repeat Peer Password:==Entrer &agrave; nouveau le mot de passe du noeud:
+"Define Administrator"=="D&eacute;finir un administrateur"
+Select user==Choisir un utilisateur
+New user==Nouvel utilisateur
+Edit User==Modifier l'utilisateur
+Delete User==Supprimer l'utilisateur
+Edit current user:==Modifier l'utilisateur courant:
+Username</label>==Nom d'utilisateur</label>
+Password</label>==Mot de passe</label>
+Repeat password==Entrer &agrave; nouveau le mot de passe
+First name==Pr&eacute;nom
+Last name==Nom
+Address==Adresse
+Rights==Droits
+Timelimit==Limite de temps
+Time used==Temps utilis&eacute;
+Save User==Sauvegarder l'utilisateur
+#-----------------------------
+
 #File: ConfigAdvanced_p.html
 #---------------------------
 Advanced Config==Configuration avancée
@@ -156,6 +193,7 @@ URLs may be used with http/https/ftp and a local domain name or IP, or with an U
 or smb:==ou smb:
 Your peer name has not been customized; please set your own peer name==Le nom de votre noeud YaCy n'a pas été personnalisé. Veuillez choisir votre propre nom de noeud YaCy.
 You have a nice peer name==Vous avez un joli nom de noeud
+You may change your peer name==Vous pouvez modifier le nom de votre noeud
 Peer Name:==Nom de noeud:
 Please set a password for your peer to protect your settings==Veuillez choisir un mot de passe pour protéger votre configuration
 > 3 characters==supérieur à 3 caractères
@@ -165,18 +203,19 @@ Peer User:==Utilisateur du noeud:
 Peer Password:==Mot de passe du noeud :
 repeat same password==Répéter le même mot de passe
 Your peer cannot be reached from outside==Votre noeud est inaccessible de l'extérieur
-which is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais ce serait mieux pour le réseau YaCy
+which is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais qu'il soit accessible serait mieux pour le réseau YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurer votre pare-feu pour ouvrir ce port et/ou mettre en place un serveur virtuel sur votre routeur pour autoriser les connexions à ce port
 Your peer can be reached by other peers==Votre noeud est joignable par les autres noeuds du réseau
 Peer Port:==Port logiciel du noeud:
-with SSL== avec SSL
-https enabled==https activé
+>with SSL== >avec SSL
+\(https enabled\#==(https activé#
+: on port \#==: sur le port #
 Configure your router for YaCy:==Configurez votre routeur pour YaCy:
 Set Configuration==Sauver la configuration
 Configuration was not successful. This may take a moment.== &Eacute;chec de la configuration. Cela peut prendre un moment.
 What you should do next:==Que devez-vous faire ensuite:
 Your basic configuration is complete! You can now \(for example\)==Votre configuration de base est complète! Vous pouvez maintenant \(par exemple\)
-just <==juste <
+>just <==>juste <
 start an uncensored search==commencer une recherche non censurée
 start your own crawl</a> and contribute to the global index, or create your own private web index==démarrer votre propre balayge</a> et contribuer à l'index global, ou construire votre propre index du web
 set a personal peer profile</a> \(optional settings\)==remplir un profil de noeud personnel</a> (optionnel)
@@ -243,6 +282,61 @@ Use this skin==Utiliser ce thème
 Unable to get URL:==Impossible d'obtenir l'url:
 Error saving the skin.==Erreur en sauvegardant le thème.
 #-----------------------------
+
+#File: ConfigUpdate_p.html
+#---------------------------
+: System Update==: Mise &agrave; jour du syst&egrave;me
+>System Update<==>Mise &agrave; jour du syst&egrave;me<
+Release will be installed. Please wait.==La version va &ecirc;tre install&eacute;e. Veuillez patienter.
+This servlet can only be used on operation systems that are currently supported for deploy functions.==Cette servlet ne peut &ecirc;tre utilis&eacute;e que sur les syst&egrave;mes d'exploitation actuellement support&eacute;s pour les fonctions de d&eacute;ploiement.
+If you see this message this means that your operation system is not supported.==Si vous voyez ce message, &ccedil;a signifie que votre syst&egrave;me d'exploitation n'est pas support&eacute;.
+>Manual System Update==>Mise &agrave; jour manuelle du syst&egrave;me
+>Current installed Release==>Version actuellement install&eacute;e
+>Available Releases==>Versions disponibles
+>changelog<==>journal des changements<
+> and <==> et <
+> RSS feed<==> flux RSS<
+"Download Release"=="T&eacute;l&eacute;charger cette version"
+"Check for new Release"=="V&eacute;rifier si une nouvelle version est disponible"
+>Downloaded Releases==>Versions t&eacute;l&eacute;charg&eacute;es
+No downloaded releases available for deployment.==Aucune version t&eacute;l&eacute;charg&eacute;e disponible pour le d&eacute;ploiement.
+no&nbsp;automated installation on development environments==no&nbsp;automated installation on development environments
+"Install Release"=="Installer cette version"
+"Delete Release"=="Supprimer cette version"
+>Automatic Update==>Mise &agrave; jour automatique
+check for new releases, download if available and restart with downloaded release==V&eacute;rifier s'il existe une version plus r&eacute;cente, la t&eacute;l&eacute;charger et red&eacute;marrer avec la nouvelle version
+Check \+ Download \+ Install Release Now==V&eacute;rifier + T&eacute;l&eacute;charger + Installer Version Maintenant
+>Download of release==>T&eacute;l&eacute;chargement de la version
+finished. Restart Initiated.==termin&eacute;. Red&eacute;marrage amorc&eacute;.
+No more recent release found.==Aucune version plus r&eacute;cente n'a &eacute;t&eacute; trouv&eacute;e.
+Omitting update because==Le syst&egrave;me n'a pas &eacute;t&eacute; mis &agrave; jour car
+this is a development environment.==ceci est un environnement de d&eacute;veloppement.
+download of release \#\[downloadedRelease\]\# failed.==le t&eacute;l&eacute;chargement de la version #[downloadedRelease]# a &eacute;chou&eacute;.
+>Automated System Update==>Mise &agrave; jour automatis&eacute;e du syst&egrave;me
+manual update==Mise &agrave; jour manuelle
+no automatic look-up, updates can be made manually using this interface \(see options above\)==pas de v&eacute;rification automatique, les mises &agrave; jour peuvent &ecirc;tre effectu&eacute;es manuellement &agrave; l'aide de cette interface (voir les options ci-dessus)
+automatic update==Mise &agrave; jour automatique
+updates are made within fixed cycles:==updates are made within fixed cycles:
+Time between lookup==Temps entre les v&eacute;rifications
+>hours<==>heures<
+>Release blacklist==>Liste noire des versions
+>Release type==>Type de version
+\(regex on release number strings\)==(regex correspondant &agrave; la cha&icirc;ne de caract&egrave;re du num&eacute;ro de version)
+>only main releases==>uniquement les versions principales
+>any release including developer releases==>toutes les versions, y compris celles en d&eacute;veloppement
+Signed autoupdate:==Mise &agrave; jour automatique sign&eacute;e:
+only accept signed files==accepter uniquement les fichiers sign&eacute;s
+"Submit"=="Enregistrer"
+>Accepted Changes==>Modifications accept&eacute;es
+>System Update Statistics<==>Statistiques de mise &agrave; jour du syst&egrave;me<
+Last System Lookup==Derni&egrave;re v&eacute;rification
+Last Release Download==Dernier t&eacute;l&eacute;chargement de version
+Last Deploy==Dernier d&eacute;ploiement
+You installed YaCy with a package manager. To update YaCy, use the package manager:==Vous avez install&eacute; YaCy &agrave; l'aide d'un gestionnaire de paquets. Pour mettre YaCy &agrave; jour, utiliser le gestionnaire de paquets:
+add the following line to==ajouter la ligne suivante &agrave;
+YaCy has been installed to the Program Files directory. Automatic update is not possible.==YaCy a &eacute;t&eacute; install&eacute; dans le r&eacute;pertoire Program Files. La mise &agrave; jour automatique est impossible.
+Download and install the latest version from the web page==T&eacute;l&eacute;chargez et installez la derni&egrave;re version sur la page
+#---------------------------
 
 #File: Connections_p.html
 #---------------------------
@@ -755,9 +849,6 @@ The YaCy Lab==Le labo YaCy
 This is the place where we try new functions of the YaCy search engine.==C'est l'endroit ou nous testons les nouvelles fonctions du moteur de recherche YaCy.
 All these things here are to be considered as probably unstable, and/or experimental.==Toutes ces nouvelles fonctions sont encore instables et sont en phase d'expérimentation.
 You may try out these things but please do not care about bugs.==Vous pouvez essayer ces nouvelles fonctions, mais ne prettez pas attention aux erreurs.
-The <a==Le <a
-Advanced <a==avancé <a
-Configuration</a>==Paramétrage</a>
 #-----------------------------
 
 #File: Messages_p.html
@@ -783,68 +874,112 @@ Send message==Envoyer un message
 
 #File: Network.html
 #---------------------------
-Network Overview==Aperçu du réseau
-Network Menu==Menu réseau
-Network Overview== Aperçu réseau
-Active Noeuds==Noeuds actifs
-Passive Noeuds==Noeuds passifs
-Potential Noeuds==Noeuds potentiels
-Network Overview==Aperçu réseau
-Active Noeuds==Noeuds actifs
-Passive Noeuds==Noeuds passifs
-Potential Noeuds==Noeuds potentiels
+YaCy Search Network==R&eacute;seau de recherche YaCy
+>YaCy Network<==>R&eacute;seau YaCy<
+The information that is presented on this page can also be retrieved as XML==Les informations pr&eacute;sent&eacute;es ici peuvent &ecirc;tre obtenues au format XML
+Click the API icon to see the XML.==Cliquez sur l'ic&ocirc;ne API pour afficher le XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Vous trouverez <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">ici</a> la liste compl&egrave;te des APIs.
+Network Overview==Aper&ccedil;u du r&eacute;seau
+Active&nbsp;Peers==Noeuds actifs
+Passive&nbsp;Peers==Noeuds passifs
+Potential&nbsp;Peers==Noeuds potentiels
+Active Peers in \'\#\[networkName\]\#\' Network==Noeuds actifs du r&eacute;seau '#[networkName]#'
+Passive Peers in \'\#\[networkName\]\#\' Network==Noeuds passifs du r&eacute;seau '#[networkName]#'
+Potential Peers in \'\#\[networkName\]\#\' Network==Noeuds potentiels du r&eacute;seau '#[networkName]#'
 Manually contacting Noeud==Contacter un noeud manuellement
+<strong>ERROR</strong>: Unable to execute query.==<strong>ERREUR</strong>: Impossible d'ex&eacute;cuter la requ&ecirc;te.
+is no valid regular expression, please enter a valid regular expression to search for a peername.==n'est pas une expression r&eacute;guli&egrave;re valide. Pour rechercher un nom de noeud, veuillez entrer une expression r&eacute;guli&egrave;re valide.
 no remote \#\[peertype\]\# peer for this list known==Aucun noeud distant #[peertype]# connu ou en ligne.
-Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==
-Voir #[num]# sur un total de #[total]# noeuds.
-send <strong>M</strong>essage/<br />show <strong>P</strong>rofile/<br />edit <strong>W</strong>iki==
-Envoyer un message (<strong>m</strong>)/<br />Montrer le profil (<strong>p</strong>)/<br />Modifier Wiki (<strong>w</strong>)
-Name==Nom
-Address==Adresse
-Hash==Hashage
-Type==Type
-Release/<br />SVN==Version YaCy/<br />SVN
-Contact==Contact
-Last<br />Seen==Dernier<br />en ligne
-Location==Lieu
-Offset==Offset
-Uptime==Uptime
-Links==Liens
-RWIs==RWIs
-Sent<br />Words==Envoyer<br /> des mots
-Sent<br />URLs==Envoyer<br /> des URLs
-Received<br />Words==Mots<br />reçus
-Received<br />URLs==URLs<br />reçues
-PPM==PPM
-Seeds==Seeds
-Connects<br />per hour==Connexions<br />par heure
-Send message to peer==Envoyer un message au noeud
-View profile of peer==Voir le profil du noeud
-Read and edit wiki on peer==Voir et éditer le wiki du noeud
-All Noeuds:==Tous les noeuds
-Branch==Type
-Noeuds==Noeuds
-All Links==Tous les liens
-All Words==Tous les mots
-Active \(connected Senior and Principal\)==Actifs (Seniors et principaux connectés)
-Passive \(disconnected Senior and Principal\)==Passifs (Seniors et principaux déconnectés) 
-Potential \(Junior\)==Potentiels (Junior)
-Network Total==Réseau complet
-YaCy Cluster Indexing Speed:==Vitese d'indexation du cluster YaCy
-Pages Per Minute \(Accumulated PPM over Active Noeuds\).==Pages par minute (PPM des noeuds actifs)
-Your Noeud:==Votre noeud:
-Version==Version
-Own/Other==Vous/Autres
-Accept Crawl==Accepter le crawl
-Network legend:==Légende réseau:
-dark font==Fonte noire
-senior/principal peers==Noeuds seniors/principaux
-lightred font==Fonte rouge claire
-passiv peers \( < 5 hour passiv time\)==Noeuds passifs (5 heures passives)
-turquoise font==Fonte turquoise
-junior peers==Noeuds juniors
+Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Voir #[num]# noeuds sur un total de #[total]#.
+Search for a peername \(RegExp allowed\)==Chercher le nom d'un noeud (expressions r&eacute;guli&egrave;res autoris&eacute;es)
+"Search"==Rechercher
+send&nbsp;<strong>M</strong>essage==envoyer&nbsp;<strong>M</strong>essage
+show&nbsp;<strong>P</strong>rofile==voir&nbsp;<strong>P</strong>rofil
+edit&nbsp;<strong>W</strong>iki==&eacute;diter&nbsp;<strong>W</strong>iki
+browse&nbsp;<strong>B</strong>log==consulter&nbsp;<strong>B</strong>log
+https supported==https support&eacute;
+>Name<==>Nom<
+>Info<==>Info<
+>PPM<==>PPM<
+>QPH<==>QPH<
+>Release<==>Version<br/>de YaCy<
+Last<br/>Seen==Derni&egrave;re<br/>connexion
+<strong>UTC</strong><br/>Offset==D&eacute;calage<br/><strong>UTC</strong>
+>Location==>Lieu
+>Uptime==>Temps de fonctionnement
+>Links==>Liens
+>RWIs==>RWIs
+URLs for<br/>Remote<br/>Crawl==URLs pour balayage &agrave; distance
+Sent<br/>DHT Word Chunks==DHT Word Chunks<br/>envoy&eacute;s
+Sent<br/>URLs==URLs<br/>envoy&eacute;es
+Received<br/>DHT Word Chunks==DHT Word Chunks<br/>re&ccedil;us
+Received<br/>URLs==URLs re&ccedil;ues
+
+>Address==>Adresse
+>Hash==>Hachage
+>Age==>&Acirc;ge
+Peer<br/>Ping==Ping <br/> du noeud
+
+Send message to peer \#\[fullname\]\#==Envoyer un message au noeud #[fullname]#
+View profile of peer \#\[fullname\]\#==Voir le profil du noeud #[fullname]#
+Read and edit wiki on peer \#\[fullname\]\#==Lire et &eacute;diter le wiki du noeud #[fullname]#
+Browse blog of peer \#\[fullname\]\#==Consulter le blog du noeud #[fullname]#
+
+"Profile updated"=="Profil mis &agrave; jour"
+"Wiki updated"=="Wiki mis &agrave; jour"
+"Blog updated"=="Blog mis &agrave; jour"
+Contact: active==Contact: actif
+Contact: passive==Contact: passif 
+Contact: offline==Contact: hors-ligne
+Seed download:== T&eacute;l&eacute;chargement des seeds
+"Accept Crawl: no"=="Accepte le balayage: non"
+"Accept Crawl: yes"=="Accepte le balayage: oui"
+"DHT Receive: no"=="R&eacute;ception de la DHT: non"
+"DHT Receive: yes"=="R&eacute;ception de la DHT: oui"
+"Not a Node Candidate"=="Pas un noeud candidat"
+"Node Candidate"=="Noeud candidat"
+runtime:==Temps d'ex&eacute;cution:
+
+>Network<==>R&eacute;seau<
+>Online Peers<==>Noeuds en ligne<
+Number of<br/>Documents==Nombre de <br/>documents
+Indexing Speed:<br/>Pages Per Minute \(PPM\)==Vitesse d'indexation:<br/>pages par minute (PPM)
+Query Frequency:<br/>Queries Per Hour \(QPH\)==Fr&eacute;quence des requ&ecirc;tes:<br/>requ&ecirc;tes par heure (QPH)
+>Last Hour<==>Cette derni&egrave;re heure<
+>Today<==>Aujourd'hui<
+>Last&nbsp;Week<==>Cette&nbsp;derni&egrave;re&nbsp;semaine<
+>Last&nbsp;Month<==>Ce&nbsp;dernier&nbsp;mois<
+>Now<==>Maintenant<
+>Active<==>Actif<
+>Passive<==>Passif<
+>Potential<==>Potentiel<
+>This Peer<==>Votre noeud<
+"The YaCy Network"=="Le r&eacute;seau YaCy"
+
+URLs for<br/>Remote Crawl==URLs pour<br/>balayage &agrave; distance
+Known<br/>Seeds==Seeds<br/>connues
+Connects<br/>per hour==Connections<br/>par heure
+Indexing<br/>PPM</td>==Vitesse d'indexation (PPM)
+QPH<br/>\(remote\)==QPH<br/>(distant)
+"Type: Virgin"=="Type: Vierge"
+
+dark green font==police vert fonc&eacute;
+senior/principal peers==noeuds senior/principaux
+light green font==police vert clair
+passive peers==noeuds passifs
+pink font==police rose
+junior peers==noeuds junior
 red point==point rouge
-this peer==Votre noeud
+this peer==votre noeud
+grey waves==vagues grises
+crawling activity==activit&eacute; due au balayages en cours
+green radiation==radiation verte
+strong query activity==forte activit&eacute; due aux requ&ecirc;tes
+red lines==lignes rouges
+DHT-out==DHT sortante
+green lines==lignes vertes
+DHT-in==DHT entrante
+
 You are in online mode, but probably no internet resource is available. Please check your internet connection.==Vous êtes en mode connecté, mais aucune ressource internet n'est disponible. Vérifiez votre connexion internet.
 You are either not in online mode or you do not use the proxy option.==Vous n'êtes pas en mode En Ligne ni n'utilisez l'option Proxy.
 'on-demand - mode', see=='Mode - A la demande', voir
@@ -1573,22 +1708,41 @@ Settings page</a>.==Page de paramètres</a>.
 Enabled: Updating periodically to server==Actif: Mise à jour périodique de
 Enabled: Updating periodically to file==Actif: Mise à jour périodique du fichier
 Last upload:==Dernier chargement:
+Steering==SALUT
 #-----------------------------
 
 #File: Steering.html
 #---------------------------
-Steering==Orientation
-Steering Receipt:==Reçu d'orientation:
-No information has been submitted==Aucune information n'a été soumise
-Nothing changed==Rien n'a changé
-Your system is not protected by a password==Votre système n'est pas protégé par mot de passe
-Please go to the <a href="/Settings_p.html">Settings</a> page and set an administration password==S'il vous plait, allez à la<a href="/Settings_p.html">page des Paramètres</a> et saisissez un mot de passe administrateur
-You don't have the correct access right to perform this task.==Vous n'avez l'autorisation d'effectuer cette tâche.
-Please log in.==S'il vous plait, connectez vous.
-Shutting down.==Arreter
-Application will terminate after working off all scheduled tasks.==Le proxy Yacy sera arreté après que les tâches en suspens aient été traitées.
-Then YaCy will restart.==Alors YaCy redémarrera.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Vous pouvez maintenant retourner à la page de <a href="Settings_p.html">Paramètres</a>, si vous voulez poursuivre vos changements.
+Steering</title>==Orientation</title>
+Checking peer status...==Contr&ocirc; de l'&eacute;tat du noeud...
+Peer is online again, forwarding to status page...==Le noeud est &agrave; nouveau en ligne, redirection vers la page d'&eacute;tat du syst&egrave;me...
+Peer is not online yet, will check again in a few seconds...==Le noeud n'est pas encore en ligne, nouvelle v&eacute;rification dans quelques secondes...
+No action submitted==Aucune action n'a &eacute;t&eacute; soumise
+Go back to the <a href="Settings_p.html">Settings</a> page.==Retourner sur la page des <a href="Settings_p.html">param&egrave;tres</a>.
+Your system is not protected by a password==Votre syst&egrave;me n'est pas prot&eacute;g&eacute; par mot de passe.
+Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Veuillez vous rendre sur la page de <a href="/ConfigAccounts_p.html">gestion des utilisateurs</a> et d&eacute;finir un mot de passe administrateur.
+You don't have the correct access right to perform this task.==Vous n'avez pas les droits d'acc&egrave;s n&eacute;cessaires pour effectuer cette action.
+Please log in.==Veuillez vous connecter.
+You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Vous pouvez maintenant retourner sur la page des <a href="Settings_p.html">param&egrave;tres</a> si vous voulez effectuer d'autres modifications.
+See you soon!==&Agrave; bient&ocirc;t!
+Application will terminate after working off all scheduled tasks.=L'application se terminera apr&egrave;s avoir achev&eacute; toutes les taches programm&eacute;es.
+Please send us feed-back!==Envoyez-nous vos commentaires!
+We don't track YaCy users, YaCy does not send 'home-pings', we do not even know how many people use YaCy as their private search engine.==Nous ne tra&ccedil;ons pas les utilisateurs de YaCy, YaCy n'envoie pas de "home-pings", nous ne savons m&ecirc;me pas combien de gens utilisent YaCy comme moteur de recherche.
+Therefore we like to ask you: do you like YaCy? Will you use it again... if not, why? Is is possible that we change a bit to suit your needs?==C'est pourquoi nous appr&eacute;cierions beaucoup que vous nous disiez ce que vous pensez de YaCy. Appr&eacute;ciez-vous YaCy? Allez-vous l'utiliser &agrave; nouveau... si non, pourquoi? Nous pouvons peut-&ecirc;tre modifier YaCy pour qu'il r&eacute;ponde &agrave; vos besoins.
+Please send us feed-back about your experience with an==Vous pouvez nous faire parvenir vos commentaires avec un
+<a href="http://sayat.me/YaCy" target="_blank">anonymous message</a>==<a href="http://sayat.me/YaCy" target="_blank">message anonynme</a>
+or a</br>==ou un<br/>
+posting to our <a href="http://forum.yacy.de" target="_blank">web forums</a><br/>==message sur nos <a href="http://forum.yacy.de" target="_blank">forums</a><br/>
+<a href="http://bugs.yacy.net" target="_blank">bug report</a>!==<a href="http://bugs.yacy.net" target="_blank">rapport de bogue</a>!
+<h2>Professional Support</h2>==<h2>Support professionnel</h2>
+If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see==Si vous souhaitez utiliser YaCy dans votre entreprise en association avec un service de consultations d'expertise par des sp&eacute;cialistes de YaCy, veuillez consulter
+Just a moment, please!==Juste un instant, s'il vous pla&icirc;t!
+Then YaCy will restart.==YaCy red&eacute;marrera ensuite.
+If you can't reach YaCy's interface after 5 minutes restart failed.==Si apr&egrave;s 5 minutes vous ne pouvez pas atteindre l'interface de YaCy, le red&eacute;marrage a &eacute;chou&eacute;.
+>Installing release==>Installation de la version
+YaCy will be restarted after installation.==YaCy red&eacute;marrera apr&egrave;s l'installation.
+The file you are trying to install is not located in the release directory.==Le fichier que vous essayez d'installer n'est pas situ&eacute; dans le r&eacute;pertoire de la version.
+Go back to the <a href="ConfigUpdate_p.html">System Update</a> page.==Veuillez retourner sur la page de <a href="ConfigUpdate_p.html">mise &agrave; jour du syst&egrave;me</a>.
 #-----------------------------
 
 #File: Surftips.html
@@ -1903,6 +2057,52 @@ with the target of implementing a P2P-based global search engine.==avec l'intent
 Architecture \(C\) by Michael Peter Christen==Architecture (C) de Michael Peter Christen
 #-----------------------------
 
+### Subdirectory env/templates ###
+#File: env/templates/header.template
+#---------------------------
+### SEARCH INTERFACES ###
+YaCy Administration==Administration de YaCy
+Search Interfaces==Interfaces de recherche
+Web Search==Recherche Web
+File Search==Recherche de fichier
+Host Browser==Navigateur d'h&ocirc;tes
+Solr Default Core==Solr Default Core
+Solr Webgraph Core==Solr Webgraph Core
+Google Appliance API==Google Appliance API
+Compare Search==Comparer des recherches
+URL Viewer==Afficher le contenu d'une URL
+Bookmarks==Marques-pages
+### DESIGN ###
+Search Integration into External Sites==Rercherche int&eacute;gr&eacute;e &agrave; un site externe
+Integrated Search Configuration==Configuration de la recherche int&eacute;gr&eacute;e
+### INDEX ###
+Index&nbsp;Production==G&eacute;n&eacute;ration de l'index
+Index Administration==Aministration de l'index
+Filter &amp; Blacklists==Filtre et listes noires
+Content Semantic==S&eacute;mantique du contenu
+Target Analysis==Analyse de la cible
+Process Scheduler==Planificateur de processus
+### MONITORING ###
+Monitoring==Surveillance
+YaCy Network==R&eacute;seau YaCy
+Web Visualization==Visualisation du Web
+Network Access==Acc&egrave;s au r&eacute;seau
+Computation==Server log
+### PEER CONTROL ###
+Peer Control==Contr&ocirc;le du noeud
+Admin Console==Console d'administration
+Re-Start==Red&eacute;marrer
+Shutdown==Arr&ecirc;ter
+### YACY PROJECT ###
+The YaCy Project==Le projet YaCY
+Project Home==Page d'accueil du projet
+Tutorials==Tutoriels
+Project Wiki==Wiki du projet
+Git Repository==D&eacute;p&ocirc;t Git
+Bugtracker==Suivi des bogues
+Peer Statistics==Statistiques du noeud
+YaCy Statistics==Statistiques de YaCy
+#-----------------------------
 
 #File: env/templates/simpleheader.template
 #---------------------------
@@ -1912,61 +2112,20 @@ Noeud Owner Profile==Impressum dieses Noeuds
 Help / Wiki==Aide / Wiki
 Surftips</a>==Surftips</a>
 Project Home==Accueil projet
-
-#-----------------------------
-
-#File: env/templates/header.template
-#---------------------------
-YaCy - Distributed Web Indexing - Administration==YaCy - Indexation Web Partagée - Administration
-Global Index==Index global
-Crawler Control==Contrôle du Crawler
-Local Proxy==Proxy local
-Communication / Publication==Communication / Publication
-Noeud Control==Contrôle de Noeud
-The Project==Le projet
-Search Page==Page de recherche
-Detailed Search==Recherche détaillée
->Surftips==>Surftipps
->Bookmarks==>Marque-pages
->Help==>Aide
-Index Create==Création d'index
-Index Control==Contrôle d'Index
-Index Monitor==Moniteur d'index
-Filter &amp; Blacklists==Filtre &amp; Liste noire
-Proxy Indexing==Indexation de Proxy
-Cache Monitor==Moniteur de cache
-Cookie Monitor==Moniteur de cookies
-Home Page==Page d'accueil
-File Share==Partage de fichier
-#Wiki==Wiki
->Messages==>Messages
-Basic Configuration==Configuration de base
-Advanced Settings==Paramètres avancés
-#Status==Status
->Network==>Réseau
-#News==News
-#Log==Log
-#Performance==Performance
->Connections==>Connexions
-#Skins==Skins
-Project Home==Accueil projet
-Project News==Nouveautés
-English Forum==Forum anglais
-Newsletters==Newsletter
-Deutsches Forum==Forum Allemand
-Download YaCy==Télécharger YaCy 
-YaCy Wiki==Wiki YaCy
->Contact==>Contact
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Noeud Configuration Menu==Menu configuration du noeud
-Basic Configuraton==Configuration de base
->Language==>Langage
-Noeud Profile==Profil
-Interface Skins==Choix d'une Skin
->Advanced==>Avancé
+Peer Administration Console==Console d'administration du noeud
+Status==Status
+Basic Configuration==Configuration de base
+>Accounts==>Comptes
+Network Configuration==Configuration r&eacute;seau
+Download System Update==Mise &agrave; jour du syst&egrave;me
+>Performance==>Performance
+Advanced Settings==Param&egrave;tres avanc&eacute;s
+Local robots.txt==robots.txt local
+Advanced Properties==Configuration avanc&eacute;e
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
