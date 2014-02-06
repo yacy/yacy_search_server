@@ -125,7 +125,6 @@ public class PerformanceQueues_p {
         int c = 0;
         long idleCycles, busyCycles, memshortageCycles;
         // set profile?
-        final double multiplier = (post != null) && post.containsKey("profileSpeed") ? 100.0 / post.getFloat("profileSpeed", 100.0f) : 1.0;
         final boolean setProfile = (post != null && post.containsKey("submitdefault"));
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
         // save used settings file to config
@@ -197,22 +196,16 @@ public class PerformanceQueues_p {
                 busysleep = sb.getConfigLong(threadName + "_busysleep", busysleep);
             }
             if (setProfile) {
-                if (threadName.equals(SwitchboardConstants.PEER_PING) ||
-                    threadName.equals(SwitchboardConstants.SEED_UPLOAD) ||
-                    threadName.equals(SwitchboardConstants.CLEANUP)) {
-                    /* do not change any values */
-                } else {
-                    // load with new values
-                    idlesleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep))) * multiplier);
-                    busysleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep))) * multiplier);
-                    //memprereq = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"), String.valueOf(memprereq))) * multiplier);
-
-                    // check values to prevent short-cut loops
-                    if (idlesleep < 1000) idlesleep = 1000;
-                    if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; loadprereq = 9; }
-                    //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
-                    sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq, loadprereq);
-                }
+                // load with new values
+                idlesleep = Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep)));
+                busysleep = Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep)));
+                memprereq = Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"), String.valueOf(memprereq)));
+                loadprereq = Double.parseDouble(d(defaultSettings.get(threadName + "_loadprereq"), String.valueOf(memprereq)));
+                // check values to prevent short-cut loops
+                if (idlesleep < 1000) idlesleep = 1000;
+                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; loadprereq = 9; }
+                //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
+                sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq, loadprereq);
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
             prop.put("table_" + c + "_busysleep", busysleep);

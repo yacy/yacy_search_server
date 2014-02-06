@@ -1095,36 +1095,36 @@ public final class Switchboard extends serverSwitch {
 
         // content control: initialize list sync thread
         deployThread(
-                "720_ccimport",
-                "Content Control Import",
-                "this is the content control import thread",
-                null,
-                new InstantBusyThread(
-                    new SMWListSyncThread(this, sb.getConfig("contentcontrol.bookmarklist", "contentcontrol"), "Category:Content Source", "/?Url/?Filter/?Category/?Modification date", sb.getConfigBool(
-            				"contentcontrol.smwimport.purgelistoninit", false)),
-                    "run",
-                    SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
-                    SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
-                    3000,
-                    10000,
-                    3000,
-                    10000),
-                2000);
+            "720_ccimport",
+            "Content Control Import",
+            "this is the content control import thread",
+            null,
+            new InstantBusyThread(
+                new SMWListSyncThread(this, sb.getConfig("contentcontrol.bookmarklist", "contentcontrol"), "Category:Content Source", "/?Url/?Filter/?Category/?Modification date", sb.getConfigBool(
+        				"contentcontrol.smwimport.purgelistoninit", false)),
+                "run",
+                SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
+                SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
+                3000,
+                10000,
+                3000,
+                10000),
+            2000);
         deployThread(
-                "730_ccfilter",
-                "Content Control Filter",
-                "this is the content control filter update thread",
-                null,
-                new InstantBusyThread(
-                    new ContentControlFilterUpdateThread(this),
-                    "run",
-                    SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
-                    SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
-                    3000,
-                    10000,
-                    3000,
-                    10000),
-                2000);
+            "730_ccfilter",
+            "Content Control Filter",
+            "this is the content control filter update thread",
+            null,
+            new InstantBusyThread(
+                new ContentControlFilterUpdateThread(this),
+                "run",
+                SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
+                SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
+                3000,
+                10000,
+                3000,
+                10000),
+            2000);
 
         // set network-specific performance attributes
         if ( this.firstInit ) {
