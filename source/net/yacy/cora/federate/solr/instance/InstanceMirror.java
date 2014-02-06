@@ -32,144 +32,140 @@ import net.yacy.cora.federate.solr.connector.SolrConnector;
 
 public class InstanceMirror {
 
-    private EmbeddedInstance solr0;
-    private ShardInstance solr1;
-    private SolrConnector defaultConnector;
-    private Map<String, SolrConnector> connectorCache;
-    private EmbeddedSolrConnector defaultEmbeddedConnector;
-    private Map<String, EmbeddedSolrConnector> embeddedCache;
+    private EmbeddedInstance embeddedSolrInstance;
+    private ShardInstance remoteSolrInstance;
+    private Map<String, SolrConnector> mirrorConnectorCache;
+    private Map<String, EmbeddedSolrConnector> embeddedConnectorCache;
+    private Map<String, RemoteSolrConnector> remoteConnectorCache;
 
     public InstanceMirror() {
-        this.solr0 = null;
-        this.solr1 = null;
-        this.defaultConnector = null;
-        this.connectorCache = new ConcurrentHashMap<String, SolrConnector>();
-        this.defaultEmbeddedConnector = null;
-        this.embeddedCache = new ConcurrentHashMap<String, EmbeddedSolrConnector>();
+        this.embeddedSolrInstance = null;
+        this.remoteSolrInstance = null;
+        this.mirrorConnectorCache = new ConcurrentHashMap<String, SolrConnector>();
+        this.embeddedConnectorCache = new ConcurrentHashMap<String, EmbeddedSolrConnector>();
+        this.remoteConnectorCache = new ConcurrentHashMap<String, RemoteSolrConnector>();
     }
     
-    public boolean isConnected0() {
-        return this.solr0 != null;
+    public boolean isConnectedEmbedded() {
+        return this.embeddedSolrInstance != null;
     }
 
-    public void connect0(EmbeddedInstance c) {
-        for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.defaultConnector = null;
-        this.connectorCache.clear();
-        this.defaultEmbeddedConnector = null;
-        this.embeddedCache.clear();
-        this.solr0 = c;
+    public void connectEmbedded(EmbeddedInstance c) {
+        disconnectEmbedded();
+        this.embeddedSolrInstance = c;
     }
 
-    public EmbeddedInstance getSolr0() {
-        return this.solr0;
+    public EmbeddedInstance getEmbedded() {
+        return this.embeddedSolrInstance;
     }
 
-    public void disconnect0() {
-        if (this.solr0 == null) return;
-        for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.defaultConnector = null;
-        this.connectorCache.clear();
-        this.defaultEmbeddedConnector = null;
-        this.embeddedCache.clear();
-        this.solr0.close();
-        this.solr0 = null;
+    public void disconnectEmbedded() {
+        if (this.embeddedSolrInstance == null) return;
+        for (SolrConnector connector: this.mirrorConnectorCache.values()) connector.close();
+        this.mirrorConnectorCache.clear();
+        for (EmbeddedSolrConnector connector: this.embeddedConnectorCache.values()) connector.close();
+        this.embeddedConnectorCache.clear();
+        this.embeddedSolrInstance.close();
+        this.embeddedSolrInstance = null;
     }
 
-    public boolean isConnected1() {
-        return this.solr1 != null;
+    public boolean isConnectedRemote() {
+        return this.remoteSolrInstance != null;
     }
 
-    public void connect1(ShardInstance c) {
-        for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.defaultConnector = null;
-        this.connectorCache.clear();
-        this.defaultEmbeddedConnector = null;
-        this.embeddedCache.clear();
-        this.solr1 = c;
+    public void connectRemote(ShardInstance c) {
+        disconnectRemote();
+        this.remoteSolrInstance = c;
     }
 
-    public ShardInstance getSolr1() {
-        return this.solr1;
+    public ShardInstance getRemote() {
+        return this.remoteSolrInstance;
     }
 
-    public void disconnect1() {
-        if (this.solr1 == null) return;
-        for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.defaultConnector = null;
-        this.connectorCache.clear();
-        this.defaultEmbeddedConnector = null;
-        this.embeddedCache.clear();
-        this.solr1.close();
-        this.solr1 = null;
+    public void disconnectRemote() {
+        if (this.remoteSolrInstance == null) return;
+        for (SolrConnector connector: this.mirrorConnectorCache.values()) connector.close();
+        this.mirrorConnectorCache.clear();
+        for (RemoteSolrConnector connector: this.remoteConnectorCache.values()) connector.close();
+        this.remoteConnectorCache.clear();
+        this.remoteSolrInstance.close();
+        this.remoteSolrInstance = null;
     }
 
     public synchronized void close() {
-        this.disconnect0();
-        this.disconnect1();
+        this.disconnectEmbedded();
+        this.disconnectRemote();
     }
 
     public String getDefaultCoreName() {
-        if (this.solr0 != null) return this.solr0.getDefaultCoreName();
-        if (this.solr1 != null) return this.solr1.getDefaultCoreName();
+        if (this.embeddedSolrInstance != null) return this.embeddedSolrInstance.getDefaultCoreName();
+        if (this.remoteSolrInstance != null) return this.remoteSolrInstance.getDefaultCoreName();
         return null;
     }
 
     public Collection<String> getCoreNames() {
-        if (this.solr0 != null) return this.solr0.getCoreNames();
-        if (this.solr1 != null) return this.solr1.getCoreNames();
+        if (this.embeddedSolrInstance != null) return this.embeddedSolrInstance.getCoreNames();
+        if (this.remoteSolrInstance != null) return this.remoteSolrInstance.getCoreNames();
         return null;
     }
 
     public EmbeddedSolrConnector getDefaultEmbeddedConnector() {
-        if (this.defaultEmbeddedConnector != null) return this.defaultEmbeddedConnector;
-        if (this.solr0 == null) return null;
-        this.defaultEmbeddedConnector = new EmbeddedSolrConnector(this.solr0);
+        if (this.embeddedSolrInstance == null) return null;
         String coreName = this.getDefaultCoreName();
         if (coreName == null) return null;
-        this.embeddedCache.put(coreName, this.defaultEmbeddedConnector);
-        return this.defaultEmbeddedConnector;
+        EmbeddedSolrConnector esc = this.embeddedConnectorCache.get(coreName);
+        if (esc != null) return esc;
+        esc = new EmbeddedSolrConnector(this.embeddedSolrInstance);
+        this.embeddedConnectorCache.put(coreName, esc);
+        return esc;
     }
 
     public EmbeddedSolrConnector getEmbeddedConnector(String corename) {
-        EmbeddedSolrConnector ec = this.embeddedCache.get(corename);
-        if (ec != null) return ec;
-        ec = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, corename);
-        this.embeddedCache.put(corename, ec);
-        return ec;
+        if (this.embeddedSolrInstance == null) return null;
+        EmbeddedSolrConnector esc = this.embeddedConnectorCache.get(corename);
+        if (esc != null) return esc;
+        esc = new EmbeddedSolrConnector(this.embeddedSolrInstance, corename);
+        this.embeddedConnectorCache.put(corename, esc);
+        return esc;
+    }
+
+    public RemoteSolrConnector getRemoteConnector(String corename) {
+        if (this.remoteSolrInstance == null) return null;
+        RemoteSolrConnector rsc = this.remoteConnectorCache.get(corename);
+        if (rsc != null) return rsc;
+        rsc = new RemoteSolrConnector(this.remoteSolrInstance, true, corename);
+        this.remoteConnectorCache.put(corename, rsc);
+        return rsc;
     }
     
     public SolrConnector getDefaultMirrorConnector() {
-        if (this.defaultConnector != null) return this.defaultConnector;
-        String defaultCoreName = this.getDefaultCoreName();
-        if (defaultCoreName == null) return null;
-        EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, defaultCoreName);
-        RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, true, defaultCoreName);
-        this.defaultConnector = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 100000, Runtime.getRuntime().availableProcessors());
-        this.connectorCache.put(defaultCoreName, this.defaultConnector);
-        return this.defaultConnector;
+        String coreName = this.getDefaultCoreName();
+        if (coreName == null) return null;
+        return getGenericMirrorConnector(coreName);
     }
 
-    public SolrConnector getMirrorConnector(String corename) {
-        SolrConnector msc = this.connectorCache.get(corename);
+    public SolrConnector getGenericMirrorConnector(String corename) {
+        SolrConnector msc = this.mirrorConnectorCache.get(corename);
         if (msc != null) return msc;
-        EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, corename);
-        RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, true, corename);
+        EmbeddedSolrConnector esc = getEmbeddedConnector(corename);
+        RemoteSolrConnector rsc = getRemoteConnector(corename);
         msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 100000, Runtime.getRuntime().availableProcessors());
-        this.connectorCache.put(corename, msc);
+        this.mirrorConnectorCache.put(corename, msc);
         return msc;
     }
 
     public int bufferSize() {
         int b = 0;
-        for (SolrConnector csc: this.connectorCache.values()) b += csc.bufferSize();
-        for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) b += ssc.bufferSize();
+        for (SolrConnector sc: this.mirrorConnectorCache.values()) b += sc.bufferSize();
+        for (EmbeddedSolrConnector esc: this.embeddedConnectorCache.values()) b += esc.bufferSize();
+        for (RemoteSolrConnector rsc: this.remoteConnectorCache.values()) b += rsc.bufferSize();
         return b;
     }
     
     public void clearCaches() {
-        for (SolrConnector csc: this.connectorCache.values()) csc.clearCaches();
-        for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) ssc.commit(true);
+        for (SolrConnector csc: this.mirrorConnectorCache.values()) csc.clearCaches();
+        for (EmbeddedSolrConnector esc: this.embeddedConnectorCache.values()) esc.clearCaches();
+        for (RemoteSolrConnector rsc: this.remoteConnectorCache.values()) rsc.clearCaches();
     }
     
 }

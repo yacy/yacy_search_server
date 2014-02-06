@@ -121,7 +121,7 @@ public final class Fulltext {
     }
 
     public boolean connectedLocalSolr() {
-        return this.solrInstances.isConnected0();
+        return this.solrInstances.isConnectedEmbedded();
     }
 
     public void connectLocalSolr() throws IOException {
@@ -141,23 +141,23 @@ public final class Fulltext {
         int p = lvn.indexOf('_');
         assert SOLR_PATH.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", p = " + p + ", check defaults/solr/solrconfig.xml";
         ConcurrentLog.info("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn + ", default core size: " + localCollectionConnector.getSize());
-        this.solrInstances.connect0(localCollectionInstance);
+        this.solrInstances.connectEmbedded(localCollectionInstance);
     }
 
     public void disconnectLocalSolr() {
-        this.solrInstances.disconnect0();
+        this.solrInstances.disconnectEmbedded();
     }
 
     public boolean connectedRemoteSolr() {
-        return this.solrInstances.isConnected1();
+        return this.solrInstances.isConnectedRemote();
     }
 
     public void connectRemoteSolr(final ArrayList<RemoteInstance> instances, final boolean writeEnabled) {
-        this.solrInstances.connect1(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5, writeEnabled));
+        this.solrInstances.connectRemote(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5, writeEnabled));
     }
 
     public void disconnectRemoteSolr() {
-        this.solrInstances.disconnect1();
+        this.solrInstances.disconnectRemote();
     }
 
     public EmbeddedSolrConnector getDefaultEmbeddedConnector() {
@@ -169,9 +169,9 @@ public final class Fulltext {
     }
 
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
-        if (this.solrInstances.getSolr1() == null) return null;
+        if (this.solrInstances.getRemote() == null) return null;
         try {
-            return new RemoteSolrConnector(this.solrInstances.getSolr1(), true);
+            return new RemoteSolrConnector(this.solrInstances.getRemote(), true);
         } catch (final IOException e) {
             return null;
         }
@@ -179,7 +179,7 @@ public final class Fulltext {
     
     public EmbeddedInstance getEmbeddedInstance() {
         synchronized (this.solrInstances) {
-            if (this.solrInstances.isConnected0()) return this.solrInstances.getSolr0();
+            if (this.solrInstances.isConnectedEmbedded()) return this.solrInstances.getEmbedded();
             return null;
         }
     }
@@ -193,7 +193,7 @@ public final class Fulltext {
     public SolrConnector getWebgraphConnector() {
         if (!this.writeWebgraph) return null;
         synchronized (this.solrInstances) {
-            return this.solrInstances.getMirrorConnector(WebgraphSchema.CORE_NAME);
+            return this.solrInstances.getGenericMirrorConnector(WebgraphSchema.CORE_NAME);
         }
     }
     
@@ -215,7 +215,7 @@ public final class Fulltext {
 
     public void clearLocalSolr() throws IOException {
         synchronized (this.solrInstances) {
-            EmbeddedInstance instance = this.solrInstances.getSolr0();
+            EmbeddedInstance instance = this.solrInstances.getEmbedded();
             if (instance != null) {
                 for (String name: instance.getCoreNames()) new EmbeddedSolrConnector(instance, name).clear();
             }
@@ -226,7 +226,7 @@ public final class Fulltext {
 
     public void clearRemoteSolr() throws IOException {
         synchronized (this.solrInstances) {
-            ShardInstance instance = this.solrInstances.getSolr1();
+            ShardInstance instance = this.solrInstances.getRemote();
             if (instance != null) {
                 for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, true, name).clear();
             }
@@ -552,7 +552,7 @@ public final class Fulltext {
     }
     
     public List<File> dumpFiles() {
-        EmbeddedInstance esc = this.solrInstances.getSolr0();
+        EmbeddedInstance esc = this.solrInstances.getEmbedded();
         ArrayList<File> zips = new ArrayList<File>();
         if (esc == null) {
             ConcurrentLog.warn("Fulltext", "HOT DUMP selected solr0 == NULL, no dump list!");
@@ -578,7 +578,7 @@ public final class Fulltext {
      * @return
      */
     public File dumpSolr() {
-        EmbeddedInstance esc = this.solrInstances.getSolr0();
+        EmbeddedInstance esc = this.solrInstances.getEmbedded();
         File storagePath = esc.getContainerPath();
         File zipOut = new File(this.archivePath, storagePath.getName() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
         synchronized (this.solrInstances) {
@@ -605,7 +605,7 @@ public final class Fulltext {
      * @param solrDumpZipFile
      */
     public void restoreSolr(File solrDumpZipFile) {
-        EmbeddedInstance esc = this.solrInstances.getSolr0();
+        EmbeddedInstance esc = this.solrInstances.getEmbedded();
         File storagePath = esc.getContainerPath();
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();

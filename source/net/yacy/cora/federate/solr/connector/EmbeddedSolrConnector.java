@@ -51,6 +51,7 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.core.SolrInfoMBean;
 import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
@@ -123,7 +124,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         @SuppressWarnings("unchecked")
         SolrCache<Integer, Document> documentCache = solrConfig.documentCacheConfig == null ? null : solrConfig.documentCacheConfig.newInstance();
         if (documentCache != null) documentCache.clear();
-        this.core.getInfoRegistry().clear(); // don't know what this is for - but this is getting huge!
+        for (SolrInfoMBean ib: this.core.getInfoRegistry().values()) {
+            // clear 'lost' caches
+            if (ib instanceof SolrCache) ((SolrCache<?,?>) ib).clear();
+        }
+        // this.core.getInfoRegistry().clear();
     }
     
     public SolrInstance getInstance() {
@@ -205,24 +210,21 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      */
     public SolrDocumentList SolrQueryResponse2SolrDocumentList(final SolrQueryRequest req, final SolrQueryResponse rsp) {
         SolrDocumentList sdl = new SolrDocumentList();
-        @SuppressWarnings("rawtypes")
-        NamedList nl = rsp.getValues();
+        NamedList<?> nl = rsp.getValues();
         ResultContext resultContext = (ResultContext) nl.get("response");
         DocList response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
-
         sdl.setNumFound(response == null ? 0 : response.matches());
         sdl.setStart(response == null ? 0 : response.offset());
-
         if (response != null) {
-            final int responseCount = response.size();
-            SolrIndexSearcher searcher = req.getSearcher();
-            DocIterator iterator = response.iterator();
-            for (int i = 0; i < responseCount; i++) {
-                try {
+            try {
+                SolrIndexSearcher searcher = req.getSearcher();
+                final int responseCount = response.size();
+                DocIterator iterator = response.iterator();
+                for (int i = 0; i < responseCount; i++) {
                     sdl.add(doc2SolrDoc(searcher.doc(iterator.nextDoc(), (Set<String>) null)));
-                } catch (IOException e) {
-                    ConcurrentLog.logException(e);
                 }
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
             }
         }
         return sdl;
@@ -332,8 +334,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     private class DocListSearcher {
-        public SolrQueryRequest request;
-        public DocList response;
+        private SolrQueryRequest request;
+        private DocList response;
 
         public DocListSearcher(final String querystring, final int offset, final int count, final String ... fields) {
             // construct query
@@ -347,10 +349,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             params.setIncludeScore(false);
             
             // query the server
-            this.request = request(params);
+            this.request = EmbeddedSolrConnector.this.request(params);
             SolrQueryResponse rsp = query(request);
-            @SuppressWarnings("rawtypes")
-            NamedList nl = rsp.getValues();
+            NamedList<?> nl = rsp.getValues();
             ResultContext resultContext = (ResultContext) nl.get("response");
             if (resultContext == null) log.warn("DocListSearcher: no response for query '" + querystring + "'");
             this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
@@ -359,6 +360,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             if (this.request != null) this.request.close();
             this.request = null;
             this.response = null;
+        }
+        protected void finalize() throws Throwable {
+            try {close();} finally {super.finalize();}
         }
     }
     
@@ -418,12 +422,13 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             public void run() {
                 int o = offset, responseCount = 0;
                 DocListSearcher docListSearcher = null;
+                SolrIndexSearcher searcher = null;
                 while (System.currentTimeMillis() < endtime) {
                     try {
                     	responseCount = 0;
                         docListSearcher = new DocListSearcher(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
                         responseCount = docListSearcher.response.size();
-                        SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
+                        searcher = docListSearcher.request.getSearcher();
                         DocIterator iterator = docListSearcher.response.iterator();
                         for (int i = 0; i < responseCount; i++) {
                             Document doc = searcher.doc(iterator.nextDoc(), SOLR_ID_FIELDS);
@@ -433,6 +438,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                         break;
                     } catch (IOException e) {
                     } finally {
+                        if (searcher != null) try {searcher.close();} catch (IOException e) {}
                         if (docListSearcher != null) docListSearcher.close();
                     }
                     if (responseCount < pagesize) break;
