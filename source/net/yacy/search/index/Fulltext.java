@@ -75,6 +75,7 @@ import net.yacy.search.schema.WebgraphSchema;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.core.SolrInfoMBean;
 import org.apache.lucene.util.Version;
 
 public final class Fulltext {
@@ -133,14 +134,12 @@ public final class Fulltext {
         }
         
         EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
-        EmbeddedSolrConnector localCollectionConnector = new EmbeddedSolrConnector(localCollectionInstance);
-
-        Version luceneVersion = localCollectionConnector.getConfig().getLuceneVersion("luceneMatchVersion");
+        Version luceneVersion = localCollectionInstance.getDefaultCore().getSolrConfig().getLuceneVersion("luceneMatchVersion");
         String lvn = luceneVersion.name();
         ConcurrentLog.info("Fulltext", "using lucene version " + lvn);
         int p = lvn.indexOf('_');
         assert SOLR_PATH.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", p = " + p + ", check defaults/solr/solrconfig.xml";
-        ConcurrentLog.info("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn + ", default core size: " + localCollectionConnector.getSize());
+        ConcurrentLog.info("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);
         this.solrInstances.connectEmbedded(localCollectionInstance);
     }
 
@@ -195,6 +194,12 @@ public final class Fulltext {
         synchronized (this.solrInstances) {
             return this.solrInstances.getGenericMirrorConnector(WebgraphSchema.CORE_NAME);
         }
+    }
+    
+    public Collection<SolrInfoMBean> getSolrInfoBeans() {
+        EmbeddedSolrConnector esc = this.solrInstances.getDefaultEmbeddedConnector();
+        if (esc == null) return new ArrayList<SolrInfoMBean>(0);
+        return esc.getSolrInfoBeans();
     }
     
     public int bufferSize() {

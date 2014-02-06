@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -82,7 +83,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     
     private final SearchHandler requestHandler;
     private final EmbeddedInstance instance;
-    private SolrCore core;
+    private final SolrCore core;
 
     public EmbeddedSolrConnector(EmbeddedInstance instance) {
         super();
@@ -109,6 +110,10 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return 0;
     }
 
+    public Collection<SolrInfoMBean> getSolrInfoBeans() {
+        return this.core.getInfoRegistry().values();
+    }
+    
     @Override
     public void clearCaches() {
         SolrConfig solrConfig = this.core.getSolrConfig();

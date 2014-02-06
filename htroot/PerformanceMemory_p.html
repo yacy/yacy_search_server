@@ -74,6 +74,29 @@
       </tr>
     </table>
     
+    <p><strong>Solr Resources:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Class</td>
+        <td>Type</td>
+        <td>Description</td>
+        <td>Statistics</td>
+        <td>Size</td>
+      </tr>
+      #{SolrList}#
+      <tr class="TableCellLight">
+        <td align="left" class="TableCellDark">#[class]#</td>
+        <td align="left" class="TableCellDark">#[type]#</td>
+        <td align="left">#[description]#</td>
+        <td align="left">#[statistics]#</td>
+        <td align="right">#[size]#</td>
+      </tr>
+      #{/SolrList}#
+      <tr class="TableCellDark">
+        <td colspan="5">Total Cache Count = #[SolrCacheCount]#</td>
+      </tr>
+    </table>
+    
     <p><strong>Table RAM Index:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">

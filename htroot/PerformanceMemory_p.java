@@ -26,9 +26,13 @@
 
 //import java.util.Iterator;
 import java.io.File;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
+
+import org.apache.solr.core.SolrInfoMBean;
+import org.apache.solr.search.SolrCache;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
@@ -52,6 +56,8 @@ public class PerformanceMemory_p {
     
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
+        Switchboard sb = (Switchboard) env;
+        
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
             defaultSettings = FileUtils.loadMap(new File(env.getAppPath(), "defaults/yacy.init"));
@@ -103,11 +109,28 @@ public class PerformanceMemory_p {
         prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
         prop.putNum("memoryUsedNow", MemoryControl.used() / MB);
 
+        
+        Collection<SolrInfoMBean> solrCaches = sb.index.fulltext().getSolrInfoBeans();
+        int c = 0;
+        int scc = 0;
+        for (SolrInfoMBean sc: solrCaches) {
+            prop.put("SolrList_" + c + "_class", sc.getName());
+            prop.put("SolrList_" + c + "_type", sc instanceof SolrCache ? ((SolrCache<?,?>)sc).name() : "");
+            prop.put("SolrList_" + c + "_description", sc.getDescription());
+            prop.put("SolrList_" + c + "_statistics", sc.getStatistics() == null ? "" : sc.getStatistics().toString().replaceAll(",", ", "));
+            prop.put("SolrList_" + c + "_size", sc instanceof SolrCache ? Integer.toString(((SolrCache<?,?>)sc).size()) : "");
+            if (sc instanceof SolrCache) scc++;
+            c++;
+        }
+        prop.put("SolrList", c);
+        prop.put("SolrCacheCount", scc);
+        
         // write table for Table index sizes
         Iterator<String> i = Table.filenames();
         String filename;
         Map<Table.StatKeys, String> mapx;
-        int p, c = 0;
+        int p;
+        c = 0;
         long mem, totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
