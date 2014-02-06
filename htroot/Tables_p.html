@@ -23,14 +23,14 @@
     }
     -->
     </script>
-    <script type="text/javascript" src="/js/sorttable.js"></script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
   </head>
   <body id="Tables">
   
 <script type="text/javascript">
 //<![CDATA[
 if (window.location.search.length > 1) {
-document.write("<div id=\"api\">\<a href=\"/api/table_p.xml" + window.location.search + "\"\><img src=\"env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\"/></a></div>");
+document.write("<div id=\"api\">\<a href=\"api/table_p.xml" + window.location.search + "\"\><img src=\"env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\"/></a></div>");
 }
 //]]>
 </script>
@@ -71,7 +71,7 @@ document.write("<div id=\"api\">\<a href=\"/api/table_p.xml" + window.location.s
     </form>
     #(/showselection)#
     #(showtable)#::
-    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="tablelisting">
+    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="tablelisting" name="tablelisting">
       <fieldset>
       <legend><label for="tablelisting">Table Editor: showing table '#[table]#'</label></legend>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
