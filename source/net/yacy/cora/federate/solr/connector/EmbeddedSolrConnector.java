@@ -23,8 +23,8 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
@@ -110,8 +110,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return 0;
     }
 
-    public Collection<SolrInfoMBean> getSolrInfoBeans() {
-        return this.core.getInfoRegistry().values();
+    public Map<String, SolrInfoMBean> getSolrInfoBeans() {
+        return this.core.getInfoRegistry();
     }
     
     @Override

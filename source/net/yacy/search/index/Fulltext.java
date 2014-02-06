@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -196,9 +197,9 @@ public final class Fulltext {
         }
     }
     
-    public Collection<SolrInfoMBean> getSolrInfoBeans() {
+    public Map<String, SolrInfoMBean> getSolrInfoBeans() {
         EmbeddedSolrConnector esc = this.solrInstances.getDefaultEmbeddedConnector();
-        if (esc == null) return new ArrayList<SolrInfoMBean>(0);
+        if (esc == null) return new HashMap<String, SolrInfoMBean>();
         return esc.getSolrInfoBeans();
     }
     

@@ -26,10 +26,10 @@
 
 //import java.util.Iterator;
 import java.io.File;
-import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.solr.core.SolrInfoMBean;
 import org.apache.solr.search.SolrCache;
@@ -110,16 +110,19 @@ public class PerformanceMemory_p {
         prop.putNum("memoryUsedNow", MemoryControl.used() / MB);
 
         
-        Collection<SolrInfoMBean> solrCaches = sb.index.fulltext().getSolrInfoBeans();
+        final Map<String, SolrInfoMBean> solrInfoMBeans = sb.index.fulltext().getSolrInfoBeans();
+        final TreeMap<String, Map.Entry<String, SolrInfoMBean>> solrBeanOM = new TreeMap<String, Map.Entry<String, SolrInfoMBean>>();
         int c = 0;
+        for (Map.Entry<String, SolrInfoMBean> sc: solrInfoMBeans.entrySet()) solrBeanOM.put(sc.getValue().getName() + "$" + sc.getKey() + "$" + c++, sc);
+        c = 0;
         int scc = 0;
-        for (SolrInfoMBean sc: solrCaches) {
-            prop.put("SolrList_" + c + "_class", sc.getName());
-            prop.put("SolrList_" + c + "_type", sc instanceof SolrCache ? ((SolrCache<?,?>)sc).name() : "");
-            prop.put("SolrList_" + c + "_description", sc.getDescription());
-            prop.put("SolrList_" + c + "_statistics", sc.getStatistics() == null ? "" : sc.getStatistics().toString().replaceAll(",", ", "));
-            prop.put("SolrList_" + c + "_size", sc instanceof SolrCache ? Integer.toString(((SolrCache<?,?>)sc).size()) : "");
-            if (sc instanceof SolrCache) scc++;
+        for (Map.Entry<String, SolrInfoMBean> sc: solrBeanOM.values()) {
+            prop.put("SolrList_" + c + "_class", sc.getValue().getName());
+            prop.put("SolrList_" + c + "_type", sc.getKey());
+            prop.put("SolrList_" + c + "_description", sc.getValue().getDescription());
+            prop.put("SolrList_" + c + "_statistics", sc.getValue().getStatistics() == null ? "" : sc.getValue().getStatistics().toString().replaceAll(",", ", "));
+            prop.put("SolrList_" + c + "_size", sc.getValue() instanceof SolrCache ? Integer.toString(((SolrCache<?,?>)sc.getValue()).size()) : "");
+            if (sc.getValue() instanceof SolrCache) scc++;
             c++;
         }
         prop.put("SolrList", c);
