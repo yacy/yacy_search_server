@@ -207,14 +207,15 @@ which is not fatal, but would be good for the YaCy network==ce qui n'est pas tro
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurer votre pare-feu pour ouvrir ce port et/ou mettre en place un serveur virtuel sur votre routeur pour autoriser les connexions à ce port
 Your peer can be reached by other peers==Votre noeud est joignable par les autres noeuds du réseau
 Peer Port:==Port logiciel du noeud:
-with SSL== avec SSL
-https enabled==https activé
+>with SSL== >avec SSL
+\(https enabled\#==(https activé#
+: on port \#==: sur le port #
 Configure your router for YaCy:==Configurez votre routeur pour YaCy:
 Set Configuration==Sauver la configuration
 Configuration was not successful. This may take a moment.== &Eacute;chec de la configuration. Cela peut prendre un moment.
 What you should do next:==Que devez-vous faire ensuite:
 Your basic configuration is complete! You can now \(for example\)==Votre configuration de base est complète! Vous pouvez maintenant \(par exemple\)
-just <==juste <
+>just <==>juste <
 start an uncensored search==commencer une recherche non censurée
 start your own crawl</a> and contribute to the global index, or create your own private web index==démarrer votre propre balayge</a> et contribuer à l'index global, ou construire votre propre index du web
 set a personal peer profile</a> \(optional settings\)==remplir un profil de noeud personnel</a> (optionnel)
@@ -281,6 +282,61 @@ Use this skin==Utiliser ce thème
 Unable to get URL:==Impossible d'obtenir l'url:
 Error saving the skin.==Erreur en sauvegardant le thème.
 #-----------------------------
+
+#File: ConfigUpdate_p.html
+#---------------------------
+: System Update==: Mise &agrave; jour du syst&egrave;me
+>System Update<==>Mise &agrave; jour du syst&egrave;me<
+Release will be installed. Please wait.==La version va &ecirc;tre install&eacute;e. Veuillez patienter.
+This servlet can only be used on operation systems that are currently supported for deploy functions.==Cette servlet ne peut &ecirc;tre utilis&eacute;e que sur les syst&egrave;mes d'exploitation actuellement support&eacute;s pour les fonctions de d&eacute;ploiement.
+If you see this message this means that your operation system is not supported.==Si vous voyez ce message, &ccedil;a signifie que votre syst&egrave;me d'exploitation n'est pas support&eacute;.
+>Manual System Update==>Mise &agrave; jour manuelle du syst&egrave;me
+>Current installed Release==>Version actuellement install&eacute;e
+>Available Releases==>Versions disponibles
+>changelog<==>journal des changements<
+> and <==> et <
+> RSS feed<==> flux RSS<
+"Download Release"=="T&eacute;l&eacute;charger cette version"
+"Check for new Release"=="V&eacute;rifier si une nouvelle version est disponible"
+>Downloaded Releases==>Versions t&eacute;l&eacute;charg&eacute;es
+No downloaded releases available for deployment.==Aucune version t&eacute;l&eacute;charg&eacute;e disponible pour le d&eacute;ploiement.
+no&nbsp;automated installation on development environments==no&nbsp;automated installation on development environments
+"Install Release"=="Installer cette version"
+"Delete Release"=="Supprimer cette version"
+>Automatic Update==>Mise &agrave; jour automatique
+check for new releases, download if available and restart with downloaded release==V&eacute;rifier s'il existe une version plus r&eacute;cente, la t&eacute;l&eacute;charger et red&eacute;marrer avec la nouvelle version
+Check \+ Download \+ Install Release Now==V&eacute;rifier + T&eacute;l&eacute;charger + Installer Version Maintenant
+>Download of release==>T&eacute;l&eacute;chargement de la version
+finished. Restart Initiated.==termin&eacute;. Red&eacute;marrage amorc&eacute;.
+No more recent release found.==Aucune version plus r&eacute;cente n'a &eacute;t&eacute; trouv&eacute;e.
+Omitting update because==Le syst&egrave;me n'a pas &eacute;t&eacute; mis &agrave; jour car
+this is a development environment.==ceci est un environnement de d&eacute;veloppement.
+download of release \#\[downloadedRelease\]\# failed.==le t&eacute;l&eacute;chargement de la version #[downloadedRelease]# a &eacute;chou&eacute;.
+>Automated System Update==>Mise &agrave; jour automatis&eacute;e du syst&egrave;me
+manual update==Mise &agrave; jour manuelle
+no automatic look-up, updates can be made manually using this interface \(see options above\)==pas de v&eacute;rification automatique, les mises &agrave; jour peuvent &ecirc;tre effectu&eacute;es manuellement &agrave; l'aide de cette interface (voir les options ci-dessus)
+automatic update==Mise &agrave; jour automatique
+updates are made within fixed cycles:==updates are made within fixed cycles:
+Time between lookup==Temps entre les v&eacute;rifications
+>hours<==>heures<
+>Release blacklist==>Liste noire des versions
+>Release type==>Type de version
+\(regex on release number strings\)==(regex correspondant &agrave; la cha&icirc;ne de caract&egrave;re du num&eacute;ro de version)
+>only main releases==>uniquement les versions principales
+>any release including developer releases==>toutes les versions, y compris celles en d&eacute;veloppement
+Signed autoupdate:==Mise &agrave; jour automatique sign&eacute;e:
+only accept signed files==accepter uniquement les fichiers sign&eacute;s
+"Submit"=="Enregistrer"
+>Accepted Changes==>Modifications accept&eacute;es
+>System Update Statistics<==>Statistiques de mise &agrave; jour du syst&egrave;me<
+Last System Lookup==Derni&egrave;re v&eacute;rification
+Last Release Download==Dernier t&eacute;l&eacute;chargement de version
+Last Deploy==Dernier d&eacute;ploiement
+You installed YaCy with a package manager. To update YaCy, use the package manager:==Vous avez install&eacute; YaCy &agrave; l'aide d'un gestionnaire de paquets. Pour mettre YaCy &agrave; jour, utiliser le gestionnaire de paquets:
+add the following line to==ajouter la ligne suivante &agrave;
+YaCy has been installed to the Program Files directory. Automatic update is not possible.==YaCy a &eacute;t&eacute; install&eacute; dans le r&eacute;pertoire Program Files. La mise &agrave; jour automatique est impossible.
+Download and install the latest version from the web page==T&eacute;l&eacute;chargez et installez la derni&egrave;re version sur la page
+#---------------------------
 
 #File: Connections_p.html
 #---------------------------
@@ -841,6 +897,7 @@ send&nbsp;<strong>M</strong>essage==envoyer&nbsp;<strong>M</strong>essage
 show&nbsp;<strong>P</strong>rofile==voir&nbsp;<strong>P</strong>rofil
 edit&nbsp;<strong>W</strong>iki==&eacute;diter&nbsp;<strong>W</strong>iki
 browse&nbsp;<strong>B</strong>log==consulter&nbsp;<strong>B</strong>log
+https supported==https support&eacute;
 >Name<==>Nom<
 >Info<==>Info<
 >PPM<==>PPM<
@@ -903,7 +960,7 @@ URLs for<br/>Remote Crawl==URLs pour<br/>balayage &agrave; distance
 Known<br/>Seeds==Seeds<br/>connues
 Connects<br/>per hour==Connections<br/>par heure
 Indexing<br/>PPM</td>==Vitesse d'indexation (PPM)
-QPH<br/>(remote)==QPH<br/>(distant)
+QPH<br/>\(remote\)==QPH<br/>(distant)
 "Type: Virgin"=="Type: Vierge"
 
 dark green font==police vert fonc&eacute;
@@ -1651,22 +1708,41 @@ Settings page</a>.==Page de paramètres</a>.
 Enabled: Updating periodically to server==Actif: Mise à jour périodique de
 Enabled: Updating periodically to file==Actif: Mise à jour périodique du fichier
 Last upload:==Dernier chargement:
+Steering==SALUT
 #-----------------------------
 
 #File: Steering.html
 #---------------------------
-Steering==Orientation
-Steering Receipt:==Reçu d'orientation:
-No information has been submitted==Aucune information n'a été soumise
-Nothing changed==Rien n'a changé
-Your system is not protected by a password==Votre système n'est pas protégé par mot de passe
-Please go to the <a href="/Settings_p.html">Settings</a> page and set an administration password==S'il vous plait, allez à la<a href="/Settings_p.html">page des Paramètres</a> et saisissez un mot de passe administrateur
-You don't have the correct access right to perform this task.==Vous n'avez l'autorisation d'effectuer cette tâche.
-Please log in.==S'il vous plait, connectez vous.
-Shutting down.==Arreter
-Application will terminate after working off all scheduled tasks.==Le proxy Yacy sera arreté après que les tâches en suspens aient été traitées.
-Then YaCy will restart.==Alors YaCy redémarrera.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Vous pouvez maintenant retourner à la page de <a href="Settings_p.html">Paramètres</a>, si vous voulez poursuivre vos changements.
+Steering</title>==Orientation</title>
+Checking peer status...==Contr&ocirc; de l'&eacute;tat du noeud...
+Peer is online again, forwarding to status page...==Le noeud est &agrave; nouveau en ligne, redirection vers la page d'&eacute;tat du syst&egrave;me...
+Peer is not online yet, will check again in a few seconds...==Le noeud n'est pas encore en ligne, nouvelle v&eacute;rification dans quelques secondes...
+No action submitted==Aucune action n'a &eacute;t&eacute; soumise
+Go back to the <a href="Settings_p.html">Settings</a> page.==Retourner sur la page des <a href="Settings_p.html">param&egrave;tres</a>.
+Your system is not protected by a password==Votre syst&egrave;me n'est pas prot&eacute;g&eacute; par mot de passe.
+Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Veuillez vous rendre sur la page de <a href="/ConfigAccounts_p.html">gestion des utilisateurs</a> et d&eacute;finir un mot de passe administrateur.
+You don't have the correct access right to perform this task.==Vous n'avez pas les droits d'acc&egrave;s n&eacute;cessaires pour effectuer cette action.
+Please log in.==Veuillez vous connecter.
+You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Vous pouvez maintenant retourner sur la page des <a href="Settings_p.html">param&egrave;tres</a> si vous voulez effectuer d'autres modifications.
+See you soon!==&Agrave; bient&ocirc;t!
+Application will terminate after working off all scheduled tasks.=L'application se terminera apr&egrave;s avoir achev&eacute; toutes les taches programm&eacute;es.
+Please send us feed-back!==Envoyez-nous vos commentaires!
+We don't track YaCy users, YaCy does not send 'home-pings', we do not even know how many people use YaCy as their private search engine.==Nous ne tra&ccedil;ons pas les utilisateurs de YaCy, YaCy n'envoie pas de "home-pings", nous ne savons m&ecirc;me pas combien de gens utilisent YaCy comme moteur de recherche.
+Therefore we like to ask you: do you like YaCy? Will you use it again... if not, why? Is is possible that we change a bit to suit your needs?==C'est pourquoi nous appr&eacute;cierions beaucoup que vous nous disiez ce que vous pensez de YaCy. Appr&eacute;ciez-vous YaCy? Allez-vous l'utiliser &agrave; nouveau... si non, pourquoi? Nous pouvons peut-&ecirc;tre modifier YaCy pour qu'il r&eacute;ponde &agrave; vos besoins.
+Please send us feed-back about your experience with an==Vous pouvez nous faire parvenir vos commentaires avec un
+<a href="http://sayat.me/YaCy" target="_blank">anonymous message</a>==<a href="http://sayat.me/YaCy" target="_blank">message anonynme</a>
+or a</br>==ou un<br/>
+posting to our <a href="http://forum.yacy.de" target="_blank">web forums</a><br/>==message sur nos <a href="http://forum.yacy.de" target="_blank">forums</a><br/>
+<a href="http://bugs.yacy.net" target="_blank">bug report</a>!==<a href="http://bugs.yacy.net" target="_blank">rapport de bogue</a>!
+<h2>Professional Support</h2>==<h2>Support professionnel</h2>
+If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see==Si vous souhaitez utiliser YaCy dans votre entreprise en association avec un service de consultations d'expertise par des sp&eacute;cialistes de YaCy, veuillez consulter
+Just a moment, please!==Juste un instant, s'il vous pla&icirc;t!
+Then YaCy will restart.==YaCy red&eacute;marrera ensuite.
+If you can't reach YaCy's interface after 5 minutes restart failed.==Si apr&egrave;s 5 minutes vous ne pouvez pas atteindre l'interface de YaCy, le red&eacute;marrage a &eacute;chou&eacute;.
+>Installing release==>Installation de la version
+YaCy will be restarted after installation.==YaCy red&eacute;marrera apr&egrave;s l'installation.
+The file you are trying to install is not located in the release directory.==Le fichier que vous essayez d'installer n'est pas situ&eacute; dans le r&eacute;pertoire de la version.
+Go back to the <a href="ConfigUpdate_p.html">System Update</a> page.==Veuillez retourner sur la page de <a href="ConfigUpdate_p.html">mise &agrave; jour du syst&egrave;me</a>.
 #-----------------------------
 
 #File: Surftips.html
