@@ -163,7 +163,6 @@
         <pathelement location="${htroot}" />
     	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
-        <pathelement location="${lib}/arq-2.8.7.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
     	<pathelement location="${lib}/commons-codec-1.7.jar" />
@@ -181,7 +180,6 @@
         <pathelement location="${lib}/httpcore-4.3.1.jar" />
         <pathelement location="${lib}/httpmime-4.3.2.jar" />
         <pathelement location="${lib}/icu4j-core.jar" />
-        <pathelement location="${lib}/iri-0.8.jar" />
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
     	<pathelement location="${lib}/jaudiotagger-2.0.4-20111207.115108-15.jar" />
@@ -223,7 +221,6 @@
         <pathelement location="${lib}/pdfbox-1.8.3.jar" />
     	<pathelement location="${lib}/poi-3.9-20121203.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.9-20121203.jar" />
-    	<pathelement location="${lib}/sax-2.0.1.jar" />
         <pathelement location="${lib}/servlet-api-3.0.jar" />
         <pathelement location="${lib}/slf4j-api-1.7.2.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.7.2.jar" />

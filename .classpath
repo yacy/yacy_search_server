@@ -70,9 +70,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
-	<classpathentry kind="lib" path="lib/sax-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/arq-2.8.7.jar"/>
-	<classpathentry kind="lib" path="lib/iri-0.8.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.6.3.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-client-8.1.14.v20131031.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-continuation-8.1.14.v20131031.jar"/>

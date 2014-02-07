@@ -39,7 +39,6 @@
 			<string>$JAVAROOT/htroot</string>
 			<string>$JAVAROOT/lib/activation.jar</string>
 			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
-			<string>$JAVAROOT/lib/arq-2.8.7.jar</string>
 			<string>$JAVAROOT/lib/bcmail-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bcprov-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/commons-codec-1.7.jar</string>
@@ -57,7 +56,6 @@
 			<string>$JAVAROOT/lib/httpcore-4.3.1.jar</string>
 			<string>$JAVAROOT/lib/httpmime-4.3.2.jar</string>
 			<string>$JAVAROOT/lib/icu4j-core.jar</string>
-			<string>$JAVAROOT/lib/iri-0.8.jar</string>
 			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
 			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
 			<string>$JAVAROOT/lib/jaudiotagger-2.0.4-20111207.115108-15.jar</string>
@@ -98,8 +96,7 @@
 			<string>$JAVAROOT/lib/pdfbox-1.8.3.jar</string>
 			<string>$JAVAROOT/lib/poi-3.9-20121203.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.9-20121203.jar</string>
-			<string>$JAVAROOT/lib/sax-2.0.1.jar</string>
-                        <string>$JAVAROOT/lib/servlet-api-3.0.jar</string>
+			<string>$JAVAROOT/lib/servlet-api-3.0.jar</string>
 			<string>$JAVAROOT/lib/slf4j-api-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/solr-core-4.6.0.jar</string>
