@@ -40,7 +40,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -165,9 +164,6 @@ public class IndexControlURLs_p {
                 sb.crawlQueues.clear();
                 sb.crawlStacker.clear();
                 ResultURLs.clearStacks();
-            }
-            if ( post.get("deleteTriplestore", "").equals("on") ) {
-                JenaTripleStore.clear();
             }
             if ( post.get("deleteCache", "").equals("on") ) {
                 Cache.clear();

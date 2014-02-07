@@ -42,7 +42,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ExecutionException;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
@@ -286,29 +285,6 @@ public final class yacy {
             // set user-agent
             HTTPClient.setDefaultUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
-            // initial fill of the triplestore
-            File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
-            mkdirIfNeseccary(triplestore);
-            for (String s: triplestore.list()) {
-            	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf") && !s.startsWith("private_store_")) {
-                    try {
-                        JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
-                    } catch (final IOException e) {
-                        ConcurrentLog.logException(e);
-                    }
-            	}
-            }
-            if (sb.getConfigBool("triplestore.persistent", false)) {
-                File local = new File(triplestore, "local.rdf");
-                if (local.exists()) {
-                    try {
-                        JenaTripleStore.load(local.getAbsolutePath());
-                    } catch (final IOException e) {
-                        ConcurrentLog.logException(e);
-                    }
-                }
-            }
-
             // start main threads
             final int port = sb.getConfigInt("port", 8090);
             try {
@@ -398,11 +374,6 @@ public final class yacy {
         } catch (final Exception ee) {
             ConcurrentLog.severe("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
-        }
-
-        // save the triple store
-        if (sb.getConfigBool("triplestore.persistent", false)) {
-            JenaTripleStore.saveAll();
         }
 
         ConcurrentLog.config("SHUTDOWN", "goodbye. (this is the last line)");

@@ -73,11 +73,6 @@ public class IndexFederated_p {
             sb.index.fulltext().setUseWebgraph(webgraph);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
         }
-
-        if (post != null && post.containsKey("setjena")) {
-            boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA);
-            env.setConfig(SwitchboardConstants.CORE_SERVICE_JENA, jena);
-        }
         
         if (post != null && post.containsKey("setsolr")) {
             boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
@@ -179,7 +174,6 @@ public class IndexFederated_p {
         prop.put(SwitchboardConstants.CORE_SERVICE_RWI + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_WEBGRAPH + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false) ? 1 : 0);
-        prop.put(SwitchboardConstants.CORE_SERVICE_JENA + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_JENA, false) ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
         prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));

@@ -1143,10 +1143,6 @@ core.service.fulltext = true
 core.service.rwi.tmp = true
 core.service.citation.tmp = true
 core.service.webgraph.tmp = false
-core.service.jena.tmp = false
-
-# RDF triplestore settings
-triplestore.persistent = true
 
 # Augmentation settings
 parserAugmentation = false

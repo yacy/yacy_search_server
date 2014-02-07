@@ -322,13 +322,10 @@ public final class SwitchboardConstants {
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT      = "federated.service.solr.indexing.timeout";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED = "federated.service.solr.indexing.writeEnabled";
 
-    //public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
-    //public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";
     public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
     public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";
     public static final String CORE_SERVICE_CITATION            = "core.service.citation.tmp";
     public static final String CORE_SERVICE_WEBGRAPH            = "core.service.webgraph.tmp";
-    public static final String CORE_SERVICE_JENA                = "core.service.jena.tmp";
 
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>

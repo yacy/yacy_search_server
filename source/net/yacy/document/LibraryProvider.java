@@ -32,11 +32,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.ZipException;
@@ -49,15 +46,9 @@ import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.geo.OverarchingLocation;
 import net.yacy.cora.language.synonyms.AutotaggingLibrary;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
-import net.yacy.cora.lod.JenaTripleStore;
-import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
-import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.URLRewriterLibrary;
 import net.yacy.kelondro.util.FileUtils;
-
-import com.hp.hpl.jena.rdf.model.Resource;
 
 public class LibraryProvider {
 
@@ -132,7 +123,6 @@ public class LibraryProvider {
         integrateGeonames0(-1);
         integrateGeonames1(-1);
         integrateGeonames2(100000);
-        activatePND();
         Set<String> allTags = new HashSet<String>() ;
         allTags.addAll(autotagging.allTags()); // we must copy this into a clone to prevent circularity
         autotagging.addPlaces(geoLoc);
@@ -230,60 +220,6 @@ public class LibraryProvider {
         final File derewoInput = LibraryProvider.Dictionary.DRW0.file();
         final File derewoOutput = new File(dymDict, derewoInput.getName() + ".words");
         FileUtils.deletedelete(derewoOutput);
-    }
-
-    public static void activatePND() {
-        // translate input files (once..)
-        final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
-        if ( !dymDict.exists() ) {
-            dymDict.mkdirs();
-        }
-        // read the pnd file and store it into the triplestore
-        final File dictInput = LibraryProvider.Dictionary.PND0.file();
-        if ( dictInput.exists() ) {
-            try {
-            	JenaTripleStore.LoadNTriples(Files.read(dictInput));
-            } catch (final IOException e ) {
-                ConcurrentLog.logException(e);
-            }
-        }
-        // read the triplestore and generate a vocabulary
-        Map<String, SOTuple> map = new HashMap<String, SOTuple>();
-        ConcurrentLog.info("LibraryProvider", "retrieving PND data from triplestore");
-        Iterator<Resource> i = JenaTripleStore.getSubjects("http://dbpedia.org/ontology/individualisedPnd");
-        ConcurrentLog.info("LibraryProvider", "creating vocabulary map from PND triplestore");
-        String objectspace = "";
-        while (i.hasNext()) {
-        	Resource resource = i.next();
-        	String subject = resource.toString();
-
-        	// prepare a proper term from the subject uri
-        	int p = subject.lastIndexOf('/');
-        	if (p < 0) continue;
-        	String term = subject.substring(p + 1);
-        	objectspace = subject.substring(0, p + 1);
-        	p = term.indexOf('(');
-        	if (p >= 0) term = term.substring(0, p);
-        	term = term.replaceAll("_", " ").trim();
-        	if (term.isEmpty()) continue;
-        	if (term.indexOf(' ') < 0) continue; // accept only names that have at least two parts
-
-        	// store the term into the vocabulary map
-        	map.put(term, new SOTuple(Tagging.normalizeTerm(term), subject));
-        }
-        if (!map.isEmpty()) try {
-            ConcurrentLog.info("LibraryProvider", "adding vocabulary to autotagging");
-			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
-			autotagging.addVocabulary(pndVoc);
-            ConcurrentLog.info("LibraryProvider", "added pnd vocabulary to autotagging");
-		} catch (final IOException e) {
-		}
-    }
-
-    public static void deactivatePND() {
-        // remove the PND Triples from the triplestore
-    	JenaTripleStore.deleteObjects(null, "http://dbpedia.org/ontology/individualisedPnd");
-    	autotagging.deleteVocabulary("Persons");
     }
 
     /*

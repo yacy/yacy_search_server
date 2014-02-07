@@ -27,15 +27,11 @@
 
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.lod.JenaTripleStore;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
@@ -44,12 +40,9 @@ import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-
 public class yacydoc {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
 
@@ -129,25 +122,6 @@ public class yacydoc {
         prop.put("yacy_citations", sb.index.connectedCitation() ? sb.index.urlCitation().count(entry.hash()) : 0);
         prop.put("yacy_inbound", entry.llocal());
         prop.put("yacy_outbound", entry.lother());
-
-        // extract the submodel from the triplestore
-        Model model = JenaTripleStore.getSubmodelBySubject(YaCyMetadata.hashURI(entry.hash()));
-        String rdf = JenaTripleStore.getRDFByModel(model);
-        prop.putXML("triples", rdf);
-        prop.put("rdf", header.fileType() == FileType.XML ? rdf : "");
-
-
-        String references = "";
-        Iterator<RDFNode> t = JenaTripleStore.getObjects("http://yacy.net/url#"+urlhash, "http://purl.org/dc/terms/references");
-
-        while (t.hasNext()) {
-            RDFNode r = t.next();
-            references += r.toString()+",";
-        }
-
-        ConcurrentLog.info("yacydoc", references);
-
-        prop.put("taglinks", references);
 
         // return rewrite properties
         return prop;

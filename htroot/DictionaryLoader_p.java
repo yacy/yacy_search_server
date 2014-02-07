@@ -275,46 +275,6 @@ public class DictionaryLoader_p {
             prop.put("drw0ActionActivated", 1);
         }
 
-        // PND0
-        if (post.containsKey("pnd0Load")) {
-            // load from the net
-            try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURL(LibraryProvider.Dictionary.PND0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
-                final byte[] b = response.getContent();
-                FileUtils.copy(b, LibraryProvider.Dictionary.PND0.file());
-                LibraryProvider.activatePND();
-                prop.put("pnd0Status", LibraryProvider.Dictionary.PND0.file().exists() ? 1 : 0);
-                prop.put("pnd0ActionLoaded", 1);
-            } catch (final MalformedURLException e) {
-                ConcurrentLog.logException(e);
-                prop.put("pnd0ActionLoaded", 2);
-                prop.put("pnd0ActionLoaded_error", e.getMessage());
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-                prop.put("pnd0ActionLoaded", 2);
-                prop.put("pnd0ActionLoaded_error", e.getMessage());
-            }
-        }
-
-        if (post.containsKey("pnd0Remove")) {
-            LibraryProvider.deactivatePND();
-            FileUtils.deletedelete(LibraryProvider.Dictionary.PND0.file());
-            FileUtils.deletedelete(LibraryProvider.Dictionary.PND0.fileDisabled());
-            prop.put("pnd0ActionRemoved", 1);
-        }
-
-        if (post.containsKey("pnd0Deactivate")) {
-            LibraryProvider.deactivatePND();
-            LibraryProvider.Dictionary.PND0.file().renameTo(LibraryProvider.Dictionary.PND0.fileDisabled());
-            prop.put("pnd0ActionDeactivated", 1);
-        }
-
-        if (post.containsKey("pnd0Activate")) {
-            LibraryProvider.Dictionary.PND0.fileDisabled().renameTo(LibraryProvider.Dictionary.PND0.file());
-            LibraryProvider.activatePND();
-            prop.put("pnd0ActionActivated", 1);
-        }
-
         // check status again
         boolean keepPlacesTagging = false;
         for (final LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {

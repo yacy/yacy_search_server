@@ -104,7 +104,6 @@ import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
@@ -733,9 +732,6 @@ public final class Switchboard extends serverSwitch {
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
-
-        // init user triplestores
-        JenaTripleStore.initPrivateStores();
 
         // init html parser evaluation scheme
         File parserPropertiesPath = new File("defaults/");
@@ -2298,11 +2294,6 @@ public final class Switchboard extends serverSwitch {
             if ( getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
                 && this.peers.mySeed().getFlagAcceptRemoteIndex() ) {
                 this.tables.cleanFailURLS(getConfigLong("cleanup.failedSearchURLtimeout", -1));
-            }
-
-            // periodically store the triple store
-            if (getConfigBool("triplestore.persistent", false)) {
-                JenaTripleStore.saveAll();
             }
             
             // clean up profiles

@@ -39,8 +39,6 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.lod.JenaTripleStore;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.Cache;
@@ -58,9 +56,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-
-import com.hp.hpl.jena.rdf.model.Model;
-
 
 public class ViewFile {
 
@@ -352,8 +347,6 @@ public class ViewFile {
         prop.putNum("error_size", size);
         prop.put("error_mimeTypeAvailable", (response.getMimeType() == null) ? "0" : "1");
         prop.put("error_mimeTypeAvailable_mimeType", response.getMimeType());
-        Model model = JenaTripleStore.getSubmodelBySubject(YaCyMetadata.hashURI(url.hash()));
-        prop.putXML("error_triples", JenaTripleStore.getRDFByModel(model));
 
         if (urlEntry == null) {
             prop.put("error_referrerHash", "");

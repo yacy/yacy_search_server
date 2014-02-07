@@ -18,12 +18,4 @@
       <li><a href="/AugmentedParsing_p.html" class="MenuItemLink lock">Augmented Parsing</a></li>
     </ul>
   </div>
-  
-  <div class="SubMenugroup">
-    <h3>Linked Data</h3>
-    <ul class="SubMenu">
-      <li><a href="/Triplestore_p.html" class="MenuItemLink lock">Triplestore</a></li>
-	  <li><a href="/Triple_p.html" class="MenuItemLink lock">Query</a></li>
-    </ul>
-  </div>
 </div>

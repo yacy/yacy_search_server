@@ -64,8 +64,7 @@
 			<string>$JAVAROOT/lib/jcifs-1.3.17.jar</string>
 			<string>$JAVAROOT/lib/jcl-over-slf4j-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/jempbox-1.8.3.jar</string>
-			<string>$JAVAROOT/lib/jena-2.6.4.jar</string>
-                        <string>$JAVAROOT/lib/jetty-client-8.1.14.v20131031.jar</string>
+			<string>$JAVAROOT/lib/jetty-client-8.1.14.v20131031.jar</string>
 			<string>$JAVAROOT/lib/jetty-continuation-8.1.14.v20131031.jar</string>
 			<string>$JAVAROOT/lib/jetty-http-8.1.14.v20131031.jar</string>
 			<string>$JAVAROOT/lib/jetty-io-8.1.14.v20131031.jar</string>
