@@ -44,6 +44,10 @@ public class ByteArray {
     public ByteArray(final byte[] bb) {
         this.buffer = bb;
     }
+    
+    public long usedMemory() {
+        return this.buffer.length;
+    }
 
     public byte[] asBytes() {
         return this.buffer;

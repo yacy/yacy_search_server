@@ -289,7 +289,7 @@ public class PerformanceQueues_p {
 
         // table cache settings
         prop.putNum("wordCacheSize", indexSegment.RWIBufferCount());
-        prop.putNum("wordCacheSizeKBytes", rwi == null ? 0 : rwi.getBufferSizeBytes()/1024);
+        prop.putNum("wordCacheSizeKBytes", rwi == null ? 0 : rwi.getBufferSizeBytes() / 1024L);
         prop.putNum("maxURLinCache", rwi == null ? 0 : rwi.getBufferMaxReferences());
         prop.putNum("maxAgeOfCache", rwi == null ? 0 : rwi.getBufferMaxAge() / 1000 / 60); // minutes
         prop.putNum("minAgeOfCache", rwi == null ? 0 : rwi.getBufferMinAge() / 1000 / 60); // minutes

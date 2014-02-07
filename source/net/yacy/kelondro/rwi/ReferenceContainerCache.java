@@ -201,6 +201,16 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public int size() {
         return (this.cache == null) ? 0 : this.cache.size();
     }
+    
+    public long usedMemory() {
+        if (this.cache == null) return 0;
+        long b = 0L;
+        for (Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> e: this.cache.entrySet()) {
+            b += e.getKey().usedMemory();
+            b += e.getValue().mem();
+        }
+        return b;
+    }
 
     public boolean isEmpty() {
         if (this.cache == null) return true;

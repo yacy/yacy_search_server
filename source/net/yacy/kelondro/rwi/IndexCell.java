@@ -631,7 +631,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     @Override
     public long getBufferSizeBytes() {
-        return 10000 * this.ram.size(); // guessed; we don't know that exactly because there is no statistics here (expensive, not necessary)
+        return this.ram.usedMemory();
     }
 
     @Override
