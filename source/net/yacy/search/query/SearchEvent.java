@@ -1409,6 +1409,7 @@ public final class SearchEvent {
         }
         
         // now pull results as long as needed and as long as possible
+        if (this.remote && item < 10 && this.resultList.sizeAvailable() <= item) try {Thread.sleep(100);} catch (final InterruptedException e) {ConcurrentLog.logException(e);}
         while ( this.resultList.sizeAvailable() <= item &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
                 (!this.feedingIsFinished() && System.currentTimeMillis() < finishTime))) {
