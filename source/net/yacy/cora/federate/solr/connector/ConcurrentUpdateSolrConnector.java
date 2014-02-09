@@ -109,9 +109,17 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                     } else {
                         // if there is only a single document, send this directly to solr
                         //ConcurrentLog.info("ConcurrentUpdateSolrConnector", "sending one document to solr");
+                        updateIdCache((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                         try {
-                            updateIdCache((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                             ConcurrentUpdateSolrConnector.this.connector.add(doc);
+                        } catch (final OutOfMemoryError e) {
+                            // clear and try again...
+                            clearCaches();
+                            try {
+                                ConcurrentUpdateSolrConnector.this.connector.add(doc);
+                            } catch (final IOException ee) {
+                                ConcurrentLog.logException(e);
+                            }
                         } catch (final IOException e) {
                             ConcurrentLog.logException(e);
                         }

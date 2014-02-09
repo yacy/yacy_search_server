@@ -38,6 +38,7 @@ import net.yacy.search.schema.CollectionSchema;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -133,7 +134,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             // clear 'lost' caches
             if (ib instanceof SolrCache) ((SolrCache<?,?>) ib).clear();
         }
-        // this.core.getInfoRegistry().clear();
+        FieldCache.DEFAULT.purgeAllCaches(); // purge the lucene field cache
     }
     
     public SolrInstance getInstance() {

@@ -71,6 +71,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     
     @Override
     public void commit(final boolean softCommit) {
+        if (this.server == null) return;
         synchronized (this.server) {
             try {
                 this.server.commit(true, true, softCommit);
