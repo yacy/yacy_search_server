@@ -2015,6 +2015,25 @@ public final class Switchboard extends serverSwitch {
         // do nothing
     }
     
+    public static void clearCaches() {
+        // flush caches in used libraries
+        pdfParser.clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
+        
+        // clear caches
+        if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();
+        Word.clearCache();
+        // Domains.clear();            
+        FieldCache.DEFAULT.purgeAllCaches();
+        
+        // clean up image stack
+        ResultImages.clearQueues();
+        
+        // flush the document compressor cache
+        Cache.commit();
+        Digest.cleanup(); // don't let caches become permanent memory leaks
+
+    }
+    
     public int cleanupJobSize() {
         int c = 1; // "es gibt immer was zu tun"
         if ( (this.crawlQueues.delegatedURL.size() > 1000) ) {
@@ -2040,21 +2059,7 @@ public final class Switchboard extends serverSwitch {
         
         ConcurrentLog.ensureWorkerIsRunning();
         try {
-            // flush caches in used libraries
-            pdfParser.clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
-            
-            // clear caches
-            if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();
-            Word.clearCache();
-            // Domains.clear();            
-            FieldCache.DEFAULT.purgeAllCaches();
-            
-            // clean up image stack
-            ResultImages.clearQueues();
-            
-        	// flush the document compressor cache
-        	Cache.commit();
-        	Digest.cleanup(); // don't let caches become permanent memory leaks
+            clearCaches();
 
             // clear caches if necessary
             if ( !MemoryControl.request(128000000L, false) ) {
@@ -2304,7 +2309,7 @@ public final class Switchboard extends serverSwitch {
             Fulltext fulltext = index.fulltext();
             CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
             WebgraphConfiguration webgraphConfiguration = fulltext.getWebgraphConfiguration();
-            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && MemoryControl.request(256000000L, false) && Memory.load() < 1.0f) {
                 
                 // we optimize first because that is useful for postprocessing
                 int proccount = 0;

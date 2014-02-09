@@ -1059,6 +1059,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Set<String> uniqueURLs = new HashSet<String>();
         try {
             long count = collectionConnector.getCountByQuery(query);
+            long start = System.currentTimeMillis();
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
             BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
             int countcheck = 0;
@@ -1117,6 +1118,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     collectionConnector.add(sid);
                     
                     proccount++;
+                    if (proccount % 100 == 0) ConcurrentLog.info("CollectionConfiguration", "postprocessed " + proccount + " from " + count + " documents; " + (proccount * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " + ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining");
                 } catch (final Throwable e1) {
                     ConcurrentLog.logException(e1);
                 }

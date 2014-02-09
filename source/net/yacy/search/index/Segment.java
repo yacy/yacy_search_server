@@ -76,6 +76,7 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.StorageQueueEntry;
@@ -304,6 +305,7 @@ public class Segment {
         }
         public ReferenceReport getReferenceReport(final byte[] id, final boolean acceptSelfReference) throws IOException {
             ReferenceReport rr = cache.get(id);
+            if (MemoryControl.shortStatus()) cache.clear();
             if (rr != null) return rr;
             try {
                 rr = new ReferenceReport(id, acceptSelfReference);
@@ -329,6 +331,7 @@ public class Segment {
         }
         public int getClickdepth(final DigestURL url, int maxtime) throws IOException {
             Integer clickdepth = cache.get(url.hash());
+            if (MemoryControl.shortStatus()) cache.clear();
             if (clickdepth != null) {
                 //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth + " CACHE HIT");
                 return clickdepth.intValue();
@@ -386,6 +389,7 @@ public class Segment {
                 SolrDocument doc;
                 try {
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                        if (MemoryControl.shortStatus()) break;
                         String refid = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
                         if (refid == null) continue;
                         byte[] refidh = ASCII.getBytes(refid);
