@@ -265,7 +265,9 @@ public final class Fulltext {
 
     public void close() {
         this.statsDump = null;
-        this.solrInstances.close();
+        try {
+            this.solrInstances.close();
+        } catch (Throwable e) {}
     }
     
     private long lastCommit = 0;
