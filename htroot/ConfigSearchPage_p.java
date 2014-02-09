@@ -77,7 +77,6 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
                 sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
                 sb.setConfig("search.result.show.hostbrowser", post.getBoolean("search.result.show.hostbrowser"));
-                sb.setConfig("search.result.show.tags", post.getBoolean("search.result.show.tags"));
 
                 // construct navigation String
                 String nav = "";
@@ -131,7 +130,6 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.cache", config.getProperty("search.result.show.cache","true"));
                 sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
                 sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
-                sb.setConfig("search.result.show.tags", config.getProperty("search.result.show.tags","false"));
             }
         }
 
@@ -158,7 +156,6 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.cache", sb.getConfigBool("search.result.show.cache", false) ? 1 : 0);
         prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);
         prop.put("search.result.show.hostbrowser", sb.getConfigBool("search.result.show.hostbrowser", false) ? 1 : 0);
-        prop.put("search.result.show.tags", sb.getConfigBool("search.result.show.tags", false) ? 1 : 0);
 
         prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.protocol", sb.getConfig("search.navigation", "").indexOf("protocol",0) >= 0 ? 1 : 0);

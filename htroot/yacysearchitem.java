@@ -140,7 +140,6 @@ public class yacysearchitem {
             prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
             prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
             prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
-            prop.put("content_showTags", sb.getConfigBool("search.result.show.tags", false) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
@@ -203,7 +202,6 @@ public class yacysearchitem {
             prop.put("content_showHostBrowser_link", resultUrlstring);
             prop.put("content_showParser_urlhash", resulthashString);
             prop.put("content_showCitation_urlhash", resulthashString);
-            prop.put("content_showTags_urlhash", resulthashString);
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(resulthashString));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
             prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
