@@ -1639,7 +1639,7 @@ public final class SearchEvent {
         float q, min = Float.MAX_VALUE, max = Float.MIN_VALUE;
         int ic = maxcount;
         long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
-        while ( ic-- > 0 && i.hasNext() ) {
+        while ( ic-- > 0 && i.hasNext() && System.currentTimeMillis() < timeout) {
             word = i.next();
             if ( word == null ) {
                 continue;
@@ -1651,7 +1651,6 @@ public final class SearchEvent {
                 max = Math.max(max, q);
                 counts.put(word, q);
             }
-            if (System.currentTimeMillis() > timeout) break;
         }
         if ( max > min ) {
             for ( final Map.Entry<String, Float> ce : counts.entrySet() ) {

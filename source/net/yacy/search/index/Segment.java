@@ -452,12 +452,12 @@ public class Segment {
      * @return the number of references for this word.
      */
     public int getWordCountGuess(String word) {
-        if (this.fulltext.getDefaultConnector() == null) return 0;
         if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0 || word.indexOf('\"') >= 0) return 0;
         if (this.termIndex != null) {
             int count = this.termIndex.count(Word.word2hash(word));
-            if (count > 0) return count;
+            return count;
         }
+        if (this.fulltext.getDefaultConnector() == null) return 0;
         try {
             return (int) this.fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
         } catch (final Throwable e) {
