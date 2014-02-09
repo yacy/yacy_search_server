@@ -59,7 +59,7 @@ public final class ConcurrentLog {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             logRunnerThread = new Worker();
             logRunnerThread.start();
-            ConcurrentLogLogger.log(Level.INFO, "started ConcurrentLog.Worker.");
+            //ConcurrentLogLogger.log(Level.INFO, "started ConcurrentLog.Worker.");
         }
     }
     

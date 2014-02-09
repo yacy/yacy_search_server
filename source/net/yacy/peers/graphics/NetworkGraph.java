@@ -283,7 +283,8 @@ public class NetworkGraph {
         if (communicationTimeout >= 0) {
             final Date horizon = new Date(System.currentTimeMillis() - communicationTimeout);
             for (final Hit event: EventChannel.channels(EventChannel.DHTRECEIVE)) {
-                if (event == null || event.getPubDate() == null) continue;
+                if (event == null) break;
+                if (event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTRECEIVE: " + event.getLink());
                     drawNetworkPictureDHT(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN, coronaangle, false, cyc);

@@ -49,7 +49,6 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-import net.yacy.server.http.HTTPDProxyHandler;
 import net.yacy.server.http.HTTPDemon;
 
 public class SettingsAck_p {

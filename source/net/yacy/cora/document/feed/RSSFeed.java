@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.util.ConcurrentLog;
 
 public class RSSFeed implements Iterable<RSSMessage> {
 
@@ -149,8 +148,8 @@ public class RSSFeed implements Iterable<RSSMessage> {
             try {
                 this.lastGUID = this.GUIDiterator.next();
             } catch (final ConcurrentModificationException e) {
-                ConcurrentLog.logException(e);
-                return null;
+                //ConcurrentLog.logException(e);
+                this.lastGUID = null;
             }
             if (this.lastGUID == null) return null;
             return RSSFeed.this.messages.get(this.lastGUID);
