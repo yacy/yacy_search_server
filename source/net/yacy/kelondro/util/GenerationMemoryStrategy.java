@@ -29,6 +29,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GenerationMemoryStrategy extends MemoryStrategy {
 	
@@ -102,11 +103,11 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @param force specifies whether ignoring preferred size
      * @return whether enough memory could be freed (or is free) or not
      */
-    protected final boolean request(final long size, final boolean force, boolean shortStatus) {
+    protected final boolean request(final long size, final boolean force, AtomicBoolean shortStatus) {
     	if (size == 0l) return true; // does not make sense to check - returning true without setting shortStatus (which also doesn't make sense to me)
     	final boolean unknown = size < 0l; // size < 0 indicate an unknown size - maybe from gziped streams
-    	final boolean r = unknown? properState(force) : size < available(force);
-        shortStatus = !r;
+    	final boolean r = unknown ? properState(force) : size < available(force);
+        shortStatus.set(!r);
         return r;
     }
     

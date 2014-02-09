@@ -25,6 +25,8 @@
 
 package net.yacy.kelondro.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import net.yacy.cora.util.ConcurrentLog;
 
 public abstract class MemoryStrategy {
@@ -115,7 +117,7 @@ public abstract class MemoryStrategy {
      * @param force specifies whether a GC should be run even in case former GCs didn't provide enough memory
      * @return whether enough memory could be freed (or is free) or not
      */
-	protected abstract boolean request(final long size, final boolean force, boolean shortStatus);
+	protected abstract boolean request(final long size, final boolean force, AtomicBoolean shortStatus);
 
 	/**
      * @return if Memory seams to be in a proper state

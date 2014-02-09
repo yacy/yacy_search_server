@@ -25,6 +25,8 @@
 
 package net.yacy.kelondro.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import net.yacy.cora.util.Memory;
 
 /**
@@ -146,10 +148,10 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      * @return whether enough memory could be freed (or is free) or not
      */
     @Override
-    protected boolean request(final long size, final boolean force, boolean shortStatus) {
+    protected boolean request(final long size, final boolean force, AtomicBoolean shortStatus) {
         if (size <= 0) return true;
         final boolean r = request0(size, force);
-        shortStatus = !r;
+        shortStatus.set(!r);
         return r;
     }
     private boolean request0(final long size, final boolean force) {

@@ -26,13 +26,15 @@
 package net.yacy.kelondro.util;
 
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Use this to get information about memory usage or try to free some memory
  */
 public class MemoryControl {
 
-    private static boolean shortStatus = false, simulatedShortStatus = false, usingStandardStrategy = true;
+    private static AtomicBoolean shortStatus = new AtomicBoolean(false);
+    private static boolean simulatedShortStatus = false, usingStandardStrategy = true;
     private static MemoryStrategy strategy;
 
     private static MemoryStrategy getStrategy() {
@@ -145,7 +147,7 @@ public class MemoryControl {
      */
     public static boolean shortStatus() {
         //if (shortStatus) System.out.println("**** SHORT MEMORY ****");
-        return simulatedShortStatus || shortStatus;
+        return simulatedShortStatus || shortStatus.get();
     }
 
     /**
