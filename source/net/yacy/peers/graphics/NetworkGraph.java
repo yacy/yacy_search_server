@@ -58,15 +58,15 @@ public class NetworkGraph {
     private static int longestName = 30;
 
     public  static final String COL_BACKGROUND     = "FFFFFF";
-    public  static final String COL_DHTCIRCLE      = "006020";
+    public  static final String COL_DHTCIRCLE      = "004018";
     private static final String COL_HEADLINE       = "FFFFFF";
-    private static final String COL_ACTIVE_DOT     = "000044";
+    private static final String COL_ACTIVE_DOT     = "000040";
     private static final String COL_ACTIVE_LINE    = "113322";
     private static final String COL_ACTIVE_TEXT    = "226644";
-    private static final String COL_PASSIVE_DOT    = "221111";
+    private static final String COL_PASSIVE_DOT    = "201010";
     private static final String COL_PASSIVE_LINE   = "443333";
     private static final String COL_PASSIVE_TEXT   = "663333";
-    private static final String COL_POTENTIAL_DOT  = "002200";
+    private static final String COL_POTENTIAL_DOT  = "002000";
     private static final String COL_POTENTIAL_LINE = "224422";
     private static final String COL_POTENTIAL_TEXT = "336633";
     private static final String COL_MYPEER_DOT     = "FF0000";
@@ -373,25 +373,24 @@ public class NetworkGraph {
             PrintTool.arcPrint(this.img, this.centerX, this.centerY, this.innerradius + linelength, angle, name);
 
             // draw corona around dot for crawling activity
-            final int ppmx = Math.min(this.seed.getPPM() / 10, 20);
+            final int ppmx = Math.min(this.seed.getPPM() / 20, 10);
             if (this.coronaangle >= 0 && ppmx > 0) {
-                drawCorona(this.img, this.centerX, this.centerY, this.innerradius, angle, dotsize, ppmx, this.coronaangle, true, false, 2, 2, 2); // color = 0..63
+                drawCorona(this.img, this.centerX, this.centerY, this.innerradius, this.innerradius * 2 / 5, angle, dotsize, ppmx, this.coronaangle, true, false, 2, 2, 2); // color = 0..63
             }
 
             // draw corona around dot for query activity
-            int qphx = Math.min((int) (this.seed.getQPM() * 2.0f), 8);
+            int qphx = Math.min((int) (this.seed.getQPM() * 30.0f), 8);
             if (this.coronaangle >= 0 && qphx > 0) {
-                drawCorona(this.img, this.centerX, this.centerY, this.innerradius, angle, dotsize, qphx, this.coronaangle, false, true, 10, 40, 10); // color = 0..63
+                drawCorona(this.img, this.centerX, this.centerY, this.innerradius, this.innerradius / 2, angle, dotsize, qphx, this.coronaangle, false, true, 10, 60, 10); // color = 0..63
             }
         }
     }
 
-    private static void drawCorona(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final double angle, final int dotsize, int strength, final int coronaangle, final boolean inside, final boolean split, final int r, final int g, final int b) {
+    private static void drawCorona(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final int waveradius, final double angle, final int dotsize, int strength, final int coronaangle, final boolean inside, final boolean split, final int r, final int g, final int b) {
         final double ca = Math.PI * 2.0d * coronaangle / 360.0d;
         if (strength > 20) strength = 20;
         // draw a wave around crawling peers
         double wave;
-        final int waveradius = innerradius / 2;
         final int segments = 72;
         for (int radius = 0; radius < waveradius; radius++) {
             wave = ((double) (waveradius - radius) * strength) * (1.0 + Math.sin(Math.PI * 16 * radius / waveradius + ((inside) ? ca : -ca))) / 2.0 / waveradius;
