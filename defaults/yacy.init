@@ -632,11 +632,11 @@ collection=user
 720_ccimport_idlesleep=100
 720_ccimport_busysleep=1000
 720_ccimport_memprereq=1048576
-720_ccimport_loadprereq=9.0
+720_ccimport_loadprereq=8.0
 730_ccfilter_idlesleep=100
 730_ccfilter_busysleep=1000
 730_ccfilter_memprereq=1048576
-730_ccfilter_loadprereq=9.0
+730_ccfilter_loadprereq=8.0
 80_searchresult_idlesleep=10000
 80_searchresult_busysleep=200
 80_searchresult_memprereq=0
@@ -644,7 +644,7 @@ collection=user
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
 90_cleanup_memprereq=0
-90_cleanup_loadprereq=3.0
+90_cleanup_loadprereq=16.0
 
 # additional attributes:
 # performanceIO is a percent-value. a value of 10 means, that 10% of the busysleep time
