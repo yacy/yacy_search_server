@@ -15,7 +15,7 @@
 			</head>
 			<body>
 				<div align="center">
-					<img src="/env/grafics/kaskelix.png"/><br/>
+					<img src="env/grafics/kaskelix.png"/><br/>
 					<h1><xsl:value-of select='channel/title' /></h1>				
 				</div>	
 				<p>

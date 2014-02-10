@@ -5,35 +5,35 @@
   <div class="SubMenugroup">
     <h3>Crawler/Spider</h3>
     <ul class="SubMenu">
-      <li><a href="/CrawlStartSite_p.html" class="MenuItemLink lock">Full Site Crawl/<br/>Sitemap Loader</a></li>
-      <li><a href="/CrawlStartExpert_p.html" class="MenuItemLink lock">Crawl Start<br/>(Expert)</a></li>
-      <li><a href="/CrawlStartScanner_p.html" class="MenuItemLink lock">Network<br/>Scanner</a></li>
-      <li><a href="/Load_MediawikiWiki.html" class="MenuItemLink">Crawling of<br/>MediaWikis</a></li>
-      <li><a href="/Load_PHPBB3.html" class="MenuItemLink">Crawling of<br/>phpBB3 Forums</a></li>
+      <li><a href="CrawlStartSite_p.html" class="MenuItemLink lock">Full Site Crawl/<br/>Sitemap Loader</a></li>
+      <li><a href="CrawlStartExpert_p.html" class="MenuItemLink lock">Crawl Start<br/>(Expert)</a></li>
+      <li><a href="CrawlStartScanner_p.html" class="MenuItemLink lock">Network<br/>Scanner</a></li>
+      <li><a href="Load_MediawikiWiki.html" class="MenuItemLink">Crawling of<br/>MediaWikis</a></li>
+      <li><a href="Load_PHPBB3.html" class="MenuItemLink">Crawling of<br/>phpBB3 Forums</a></li>
     </ul>
   </div>
   
   <div class="SubMenugroup">
     <h3>Content Import</h3>
     <ul class="SubMenu">
-      <li><a href="/Load_RSS_p.html" class="MenuItemLink lock">RSS Feed<br/>Importer</a></li>
-      <li><a href="/IndexImportOAIPMH_p.html" class="MenuItemLink lock">OAI-PMH<br/>Importer</a></li>
+      <li><a href="Load_RSS_p.html" class="MenuItemLink lock">RSS Feed<br/>Importer</a></li>
+      <li><a href="IndexImportOAIPMH_p.html" class="MenuItemLink lock">OAI-PMH<br/>Importer</a></li>
     </ul>
   </div>
   
   <div class="SubMenugroup">
     <h3>Network Harvesting</h3>
     <ul class="SubMenu">
-      <li><a href="/RemoteCrawl_p.html" class="MenuItemLink lock">Remote<br/>Crawling</a></li>
-      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Scraping<br/>Proxy</a></li>
+      <li><a href="RemoteCrawl_p.html" class="MenuItemLink lock">Remote<br/>Crawling</a></li>
+      <li><a href="ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Scraping<br/>Proxy</a></li>
     </ul>
   </div>
   
   <div class="SubMenugroup">
     <h3>Database Reader</h3>
     <ul class="SubMenu">
-      <li><a href="/ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">Database Reader<br/>for phpBB3 Forums</a></li>
-      <li><a href="/IndexImportMediawiki_p.html" class="MenuItemLink lock">Dump Reader for <br/>MediaWiki dumps</a></li>
+      <li><a href="ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">Database Reader<br/>for phpBB3 Forums</a></li>
+      <li><a href="IndexImportMediawiki_p.html" class="MenuItemLink lock">Dump Reader for <br/>MediaWiki dumps</a></li>
     </ul>
   </div>
 </div>

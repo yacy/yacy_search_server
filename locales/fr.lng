@@ -1720,7 +1720,7 @@ Peer is not online yet, will check again in a few seconds...==Le noeud n'est pas
 No action submitted==Aucune action n'a &eacute;t&eacute; soumise
 Go back to the <a href="Settings_p.html">Settings</a> page.==Retourner sur la page des <a href="Settings_p.html">param&egrave;tres</a>.
 Your system is not protected by a password==Votre syst&egrave;me n'est pas prot&eacute;g&eacute; par mot de passe.
-Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Veuillez vous rendre sur la page de <a href="/ConfigAccounts_p.html">gestion des utilisateurs</a> et d&eacute;finir un mot de passe administrateur.
+Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Veuillez vous rendre sur la page de <a href="ConfigAccounts_p.html">gestion des utilisateurs</a> et d&eacute;finir un mot de passe administrateur.
 You don't have the correct access right to perform this task.==Vous n'avez pas les droits d'acc&egrave;s n&eacute;cessaires pour effectuer cette action.
 Please log in.==Veuillez vous connecter.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Vous pouvez maintenant retourner sur la page des <a href="Settings_p.html">param&egrave;tres</a> si vous voulez effectuer d'autres modifications.

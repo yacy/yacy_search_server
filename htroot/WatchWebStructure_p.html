@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>YaCy '#[clientname]#': Web Structure</title>
-<link rel="stylesheet" media="screen" type="text/css" href="/yacy/ui/css/colorpicker.css" />
+<link rel="stylesheet" media="screen" type="text/css" href="yacy/ui/css/colorpicker.css" />
 #%env/templates/metas.template%# 
-<script type="text/javascript" src="/js/WatchWebStructure.js"></script>
+<script type="text/javascript" src="js/WatchWebStructure.js"></script>
 <style type="text/css">
   #left {
     float: left;
@@ -23,7 +23,7 @@
 #%env/templates/header.template%# 
 #%env/templates/submenuWebStructure.template%#
 
-    <script type="text/javascript" src="/yacy/ui/js/jquery.colorpicker.js"></script>
+    <script type="text/javascript" src="yacy/ui/js/jquery.colorpicker.js"></script>
 	<script type="text/javascript">
       $(document).ready(function(){
         $('#colorback, #colortext, #colorline, #colordot0, #colordota, #colorlineend').ColorPicker({
@@ -41,7 +41,7 @@
       });
     </script>
 
-<div id="api"><a href="/api/webstructure.xml?about=#[besthost]#"><img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
+<div id="api"><a href="api/webstructure.xml?about=#[besthost]#"><img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
 <span>
 The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.
@@ -55,7 +55,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
      <fieldset><legend>Host List</legend>
       #{list}#
       <div style="float:left; padding:1px 5px 1px 5px;">
-        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><a href="/WatchWebStructure_p.html?host=#[host]#&depth=3&time=1000">#[host]#</a></div>
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><a href="WatchWebStructure_p.html?host=#[host]#&depth=3&time=1000">#[host]#</a></div>
         <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# outlinks</div>
       </div>
       #{/list}#

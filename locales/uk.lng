@@ -741,7 +741,7 @@ You can create a personal profile here, which can be seen by other YaCy-members=
 or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==<a href="ViewProfile.html?hash=localhash">переглянути</a> інші користувачі YaCy, а також всі інші через <a href="ViewProfile.rdf?hash=localhash">файл FOAF RDF</a>.
 >Name==>Ім’я
 Nick Name==Псевдонім
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Домашня сторінка<br>(доступна <a href="/Supporter.html">звідси</a>)
+Homepage \(appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online\)==Домашня сторінка<br>(доступна <a href="Supporter.html">звідси</a>)
 eMail==ел.Пошта
 #ICQ==ICQ
 #Jabber==Jabber
@@ -913,7 +913,7 @@ Crawl Profile Editor==Редактор профілю сканування
 Crawl profiles hold information about a crawl process that is currently ongoing.==Профілі сканування включають інформацію про поточний процес сканування.
 
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Профілі сканування містять інформацію про конкретні URL, які використовуються всередині, щоб зрозуміти, що таке сканування.
-#The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Профілі віддаленого сканування, <a href="/ProxyIndexingMonitor_p.html">індексування через проксі</a> та фрагменти витягнення
+#The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Профілі віддаленого сканування, <a href="ProxyIndexingMonitor_p.html">індексування через проксі</a> та фрагменти витягнення
 #cannot be altered here as they are hard-coded.==не може бути змінений, тому що прописаний "намертво".
 Crawl Profile List==Профіль списку сканування
 Crawl Thread==Потік сканування
@@ -1013,7 +1013,7 @@ Statistics about \#\[domains\]\# domains in this stack:==Статистика щ
 \(7\) Results from surrogates import==\(7\) Результати з імпорту "заміщень"
 These records had been imported from surrogate files in DATA/SURROGATES/in==Ці записи було імпортовано з сурогатних файлів з DATA/SURROGATES/in
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Використання:</em> Розмістіть файли з вмістом dublin core metadata в DATA/SURROGATES/in або використайте в функцію імпорту індексу
-\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(Наприклад, <a href="/IndexImportMediawiki_p.html">Імпорт Dump'у MediaWiki</a>, <a href="/IndexImportOAIPMH_p.html">Імпорт OAI-PMH</a>\)
+\(i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(Наприклад, <a href="IndexImportMediawiki_p.html">Імпорт Dump'у MediaWiki</a>, <a href="IndexImportOAIPMH_p.html">Імпорт OAI-PMH</a>\)
 Domain==Домен
 URLs=URL
 "delete all"=="Видалити всі"
@@ -1787,7 +1787,7 @@ Remaining Time:==Залишилось часу:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 OAI-PMH Import==Імпорт OAI-PMH
-Results from the import can be monitored in the <a href=\"\/CrawlResults.html\?process=7\">indexing results for surrogates==Наслідки імпортування знаходяться на сторінці <a href="/CrawlResults.html?process=7">наслідків імпорту "заміщень"
+Results from the import can be monitored in the <a href=\"CrawlResults.html\?process=7\">indexing results for surrogates==Наслідки імпортування знаходяться на сторінці <a href="CrawlResults.html?process=7">наслідків імпорту "заміщень"
 Single request import==Імпортування одиночним запитом
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==При цьому способі тільки один запит відправляється до OAI-PMH сервера і отримані записи додаються в індекс
 "Import OAI-PMH source"=="Імпортувати джерело OAI-PMH"
@@ -2435,8 +2435,8 @@ Cachesize is now set to \#\[return\]\#MB.==Розмір кешу зараз ви
 Changes will take effect after restart only.==Зміни набируть чинності після перезапуску YaCy.
 An error has occurred:==Виникла помилка:
 You can see a snapshot of recently indexed pages==Ви можете перегянути останні проіндексовані сторінки
-on the <a href="/CrawlResults\.html\?process=4">Proxy Index Monitor</a> Page.==на сторінці <a href="/CrawlResults.html?process=4">спостереження за індексуванням проксі</a>.
-You have to <a href="/Settings_p\.html\?page=ProxyAccess">setup the proxy</a> before use.==Вам потрібно <a href="/Settings_p.html?page=ProxyAccess">налаштувати проксі-сервер</a> перед його використанням.
+on the <a href="CrawlResults\.html\?process=4">Proxy Index Monitor</a> Page.==на сторінці <a href="CrawlResults.html?process=4">спостереження за індексуванням проксі</a>.
+You have to <a href="Settings_p\.html\?page=ProxyAccess">setup the proxy</a> before use.==Вам потрібно <a href="Settings_p.html?page=ProxyAccess">налаштувати проксі-сервер</a> перед його використанням.
 #-----------------------------
 
 #File: QuickCrawlLink_p.html
@@ -2932,7 +2932,7 @@ Peer is not online yet, will check again in a few seconds...==Вузол ще н
 No action submitted==Ніяких дій не відправлено
 Go back to the <a href="Settings_p.html">Settings</a> page==Назад до сторінки <a href="Settings_p.html">налаштувань</a>
 Your system is not protected by a password==Ваша система не захищена паролем
-Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Будь-ласка, перейдіть на сторінку <a href="/ConfigAccounts_p.html">керування користувачами</a> і виставте основний пароль.
+Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Будь-ласка, перейдіть на сторінку <a href="ConfigAccounts_p.html">керування користувачами</a> і виставте основний пароль.
 You don't have the correct access right to perform this task.==У вас немає дозволу на запуск цього додатка.
 Please log in.==Bitte melden Sie sich an.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Якщо хочете зробити інші зміни, можна перейти назад на сторінку <a href="Settings_p.html">налаштувань</a>.
@@ -3242,7 +3242,7 @@ Anchor Name==Текст посилання
 Delete==Видалити
 Next update in==Наступне оновлення через
 /> seconds.==/> секунд.
-See a access timing <a href="/api/latency_p.xml">here</a>==Таблиця затримок і часу доступу знаходиться <a href="/api/latency_p.xml">тут</a>.
+See a access timing <a href="api/latency_p.xml">here</a>==Таблиця затримок і часу доступу знаходиться <a href="api/latency_p.xml">тут</a>.
 Queue</th>==Черга</th>
 >Size==>Розмір
 >Max<==>Макс.<

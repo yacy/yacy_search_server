@@ -1,10 +1,10 @@
 <div class="SubMenu">
 <ul class="SubMenu">
-<li style="width:15%;"><a href="/Status.html" class="MenuItemLink">Administration</a></li>
-<li style="width:15%;"><a href="/index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value" class="MenuItemLink">Web Search</a></li>
-<li style="width:15%;"><a href="/yacyinteractive.html" onclick="this.href='/yacyinteractive.html?handover='+document.searchform.search.value" class="MenuItemLink">File Search</a></li>
-<li style="width:15%;"><a href="/HostBrowser.html?hosts=" class="MenuItemLink">HostBrowser</a></li>
-<li style="width:15%;"><a href="/ViewProfile.html?hash=localhash" class="MenuItemLink">About Us</a></li>
+<li style="width:15%;"><a href="Status.html" class="MenuItemLink">Administration</a></li>
+<li style="width:15%;"><a href="index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value" class="MenuItemLink">Web Search</a></li>
+<li style="width:15%;"><a href="yacyinteractive.html" onclick="this.href='/yacyinteractive.html?handover='+document.searchform.search.value" class="MenuItemLink">File Search</a></li>
+<li style="width:15%;"><a href="HostBrowser.html?hosts=" class="MenuItemLink">HostBrowser</a></li>
+<li style="width:15%;"><a href="ViewProfile.html?hash=localhash" class="MenuItemLink">About Us</a></li>
 <li style="width:9%;"><a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink" target="_blank">Help / YaCy Wiki</a></li>
 </ul>
 </div>

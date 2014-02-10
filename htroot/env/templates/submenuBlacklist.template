@@ -1,10 +1,10 @@
 <div class="SubMenu">
   <h3>Filter &amp; Blacklists</h3>
   <ul class="SubMenu">
-    <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Blacklist Administration</a></li>
-    <li><a href="/BlacklistCleaner_p.html" class="MenuItemLink lock">Blacklist Cleaner</a></li>
-    <li><a href="/BlacklistTest_p.html" class="MenuItemLink lock">Blacklist Test</a></li>
-    <li><a href="/BlacklistImpExp_p.html" class="MenuItemLink lock">Import/Export</a></li>
-    <li><a href="/ContentControl_p.html" class="MenuItemLink lock">Content Control</a></li>
+    <li><a href="Blacklist_p.html" class="MenuItemLink lock">Blacklist Administration</a></li>
+    <li><a href="BlacklistCleaner_p.html" class="MenuItemLink lock">Blacklist Cleaner</a></li>
+    <li><a href="BlacklistTest_p.html" class="MenuItemLink lock">Blacklist Test</a></li>
+    <li><a href="BlacklistImpExp_p.html" class="MenuItemLink lock">Import/Export</a></li>
+    <li><a href="ContentControl_p.html" class="MenuItemLink lock">Content Control</a></li>
   </ul>
 </div>

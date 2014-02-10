@@ -3,8 +3,8 @@
   <head>
     <title>YaCy '#[clientname]#': Crawl Start</title>
     #%env/templates/metas.template%#
-    <script type="text/javascript" src="/js/ajax.js"></script>
-    <script type="text/javascript" src="/js/IndexCreate.js"></script>
+    <script type="text/javascript" src="js/ajax.js"></script>
+    <script type="text/javascript" src="js/IndexCreate.js"></script>
     <script type="text/javascript">
         //<![CDATA[
         /**
@@ -201,7 +201,7 @@
   <body id="IndexCreate">
   
 <div id="api">
-<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API#Managing_crawl_jobs" id="apilink" target="_blank"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API#Managing_crawl_jobs" id="apilink" target="_blank"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
 <span>Click on this API button to see a documentation of the POST request parameter for crawl starts.</span>
 </div>
   
@@ -228,7 +228,7 @@
           <dl>
             <dt>One Start URL or a list of URLs:<br/>(must start with http:// https:// ftp:// smb:// file://)</dt>
             <dd>
-          <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">Define the start-url(s) here. You can submit more than one URL, each line one URL please.
+          <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">Define the start-url(s) here. You can submit more than one URL, each line one URL please.
             Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </span></span>
@@ -237,7 +237,7 @@
                 &nbsp;
                 <span id="robotsOK"></span>
 	            <span id="title"><br/></span>
-	           	<img id="ajax" src="/env/grafics/empty.gif" alt="empty" />
+	           	<img id="ajax" src="env/grafics/empty.gif" alt="empty" />
 	        </dd>
 	        <dt></dt>
 	        <dd>
@@ -264,7 +264,7 @@
           <dl>
           <dt>Crawling Depth</dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             This defines how often the Crawler will follow links (of links..) embedded in websites.
             0 means that only the page you enter under "Starting Point" will be added
             to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will
@@ -280,7 +280,7 @@
 
           <dt>Maximum Pages per Domain</dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.
             You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
             the given depth. Domains outside the given depth are then sorted-out anyway.
@@ -293,7 +293,7 @@
           
           <dt><label for="Constraints">misc. Constraints</label></dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled.
             However, there are sometimes web pages with static content that
             is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
@@ -304,30 +304,30 @@
             Follow Frames: <input type="checkbox" name="followFrames" id="followFrames" #(followFramesChecked)#::checked="checked"#(/followFramesChecked)# />&nbsp;&nbsp;-->
           </dd>
 	        <dt>Load Filter on URLs</dt>
-	        <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+	        <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>.
             Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'. 
             You can also use an automatic domain-restriction to fully crawl a single domain.
             </span></span>
             <table border="0">
-            <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td></td></tr>
+            <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td></td></tr>
 			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)#/><div id="rangeDomainDescription" style="display:inline">Restrict to start domain(s)</div></td></tr>
 			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)#/><div id="rangeSubpathDescription" style="display:inline">Restrict to sub-path(s)</div></td></tr>
 			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" #(range_wide)#::checked="checked"#(/range_wide)#/>Use filter</td>
 			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-            <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
+            <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	        <dt>Load Filter on IPs</dt>
 	        <dd>
             <table border="0">
-            <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
+            <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
+		    <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
           <dt><label for="crawlingCountryMustMatch">Must-Match List for Country Codes</label>
           </dt>
-          <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+          <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             Crawls can be restricted to specific countries. This uses the country code that can be computed from
             the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
             </span></span>
@@ -343,20 +343,20 @@
           <dl>
 	        <dt>Filter on URLs</dt>
 	        <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>
             that <b>must not match</b> with the URLs to allow that the content of the url is indexed.
             </span></span>
             <table border="0">
-		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
+		    <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
+		    <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	        <dt>Filter on Content of Document<br/>(all visible text, including camel-case-tokenized url and title)</dt>
 	        <dd>
             <table border="0">
-		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
+		    <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
+		    <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	      </dl>
@@ -365,7 +365,7 @@
           <legend><label>Clean-Up before Crawl Start</label></legend>
           <dl>
             <dt>No Deletion</dt>
-            <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             After a crawl was done in the past, document may become stale and eventually they are also deleted on the target host.
             To remove old files from the search index it is not sufficient to just consider them for re-load but it may be necessary
             to delete them because they simply do not exist any more. Use this in combination with re-crawl while this time should be longer.
@@ -391,7 +391,7 @@
           <legend><label>Double-Check Rules</label></legend>
           <dl>
             <dt>No&nbsp;Doubles</dt>
-            <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
             then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
             to use that check the 're-load' option.
@@ -415,7 +415,7 @@
           <legend><label>Document Cache</label></legend>
           <dl><dt><label for="storeHTCache">Store to Web Cache</label></dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             This option is used by default for proxy prefetch, but is not needed for explicit crawling.
             </span></span>
             <input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# />
@@ -423,7 +423,7 @@
 
           <dt><label for="mustmatch">Policy for usage of Web Cache</label></dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The caching policy states when to use the cache during crawling:
               <b>no&nbsp;cache</b>: never use the cache, all content from fresh internet source;
               <b>if&nbsp;fresh</b>: use the cache if the cache exists and is fresh using the proxy-fresh rules;
@@ -443,7 +443,7 @@
           <dl>
           <dt><label for="collection">Use Special User Agent and robot identification</label></dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             You are running YaCy in non-p2p mode and because YaCy can be used as replacement for commercial search appliances
             (like the GSA) the user must be able to crawl all web pages that are granted to such commercial plattforms.
             Not having this option would be a strong handicap for professional usage of this software. Therefore you are able to select
@@ -463,7 +463,7 @@
           <dl>
           <dt>Do Local Indexing</dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
             Document Cache without indexing.
             </span></span>
@@ -475,7 +475,7 @@
 
           <dt><label for="crawlOrder">Do Remote Indexing</label></dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
             If you need your crawling results locally, you should switch this off.
             Only senior and principal peers can initiate or receive remote crawls.
@@ -498,10 +498,10 @@
 
           <dt><label for="collection">Add Crawl result to collection(s)</label></dt>
           <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             A crawl result can be tagged with names which are candidates for a collection request.
-            These tags can be selected with the <a href="/gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator.
-            To use this option, the 'collection_sxt'-field must be switched on in the <a href="/IndexFederated_p.html">Solr Schema</a>
+            These tags can be selected with the <a href="gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator.
+            To use this option, the 'collection_sxt'-field must be switched on in the <a href="IndexFederated_p.html">Solr Schema</a>
             </span></span>
 			<input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
 	      </dd>

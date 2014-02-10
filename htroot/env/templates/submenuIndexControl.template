@@ -1,15 +1,15 @@
 <div class="SubMenu">
   <h3>Index Administration</h3>
   <ul class="SubMenu">
-    <li><a href="/IndexControlURLs_p.html" class="MenuItemLink lock">URL Database Administration</a></li>
-    <li><a href="/IndexDeletion_p.html" class="MenuItemLink lock">Index Deletion</a></li>
-    <li><a href="/IndexFederated_p.html" class="MenuItemLink lock">Index Sources &amp; Targets</a></li>
-    <li><a href="/IndexSchema_p.html" class="MenuItemLink lock">Solr Schema Editor</a></li>
-    <li><a href="/IndexReIndexMonitor_p.html" class="MenuItemLink lock">Field Re-Indexing</a></li>
-    #(p2p)#::<li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Reverse Word Index</a></li>#(/p2p)#
-    <!--<li><a href="/IndexControlCleaner_p.html" class="MenuItemLink lock">Index Cleaner</a></li>-->
-    <!--<li><a href="/ContentAnalysis_p.html" class="MenuItemLink lock">Content Analysis</a></li>-->
-    <li><a href="/ConfigHTCache_p.html" class="MenuItemLink lock">Web Cache</a></li>
-    <li><a href="/ConfigParser.html" class="MenuItemLink lock">Parser Configuration</a></li>
+    <li><a href="IndexControlURLs_p.html" class="MenuItemLink lock">URL Database Administration</a></li>
+    <li><a href="IndexDeletion_p.html" class="MenuItemLink lock">Index Deletion</a></li>
+    <li><a href="IndexFederated_p.html" class="MenuItemLink lock">Index Sources &amp; Targets</a></li>
+    <li><a href="IndexSchema_p.html" class="MenuItemLink lock">Solr Schema Editor</a></li>
+    <li><a href="IndexReIndexMonitor_p.html" class="MenuItemLink lock">Field Re-Indexing</a></li>
+    #(p2p)#::<li><a href="IndexControlRWIs_p.html" class="MenuItemLink lock">Reverse Word Index</a></li>#(/p2p)#
+    <!--<li><a href="IndexControlCleaner_p.html" class="MenuItemLink lock">Index Cleaner</a></li>-->
+    <!--<li><a href="ContentAnalysis_p.html" class="MenuItemLink lock">Content Analysis</a></li>-->
+    <li><a href="ConfigHTCache_p.html" class="MenuItemLink lock">Web Cache</a></li>
+    <li><a href="ConfigParser.html" class="MenuItemLink lock">Parser Configuration</a></li>
   </ul>
 </div>

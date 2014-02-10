@@ -681,7 +681,7 @@ You can create a personal profile here, which can be seen by other YaCy-members=
 or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==或者<a href="ViewProfile.html?hash=localhash">在公共场所时</a>使用<a href="ViewProfile.rdf?hash=localhash">FOAF RDF 文件</a>.
 #Name==Name
 #Nick Name==Nick Name
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==首页(显示在每个<a href="/Supporter.html">支持者</a> 页面中, 前提是您的peer在线).
+Homepage \(appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online\)==首页(显示在每个<a href="Supporter.html">支持者</a> 页面中, 前提是您的peer在线).
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
@@ -839,7 +839,7 @@ Sending Client==发送主机
 Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl文件里保存有正在运行的crawl进程信息.
 
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
-#The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
+#The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
 #cannot be altered here as they are hard-coded.==können nicht verändert werden, weil sie "hard-coded" sind.
 Crawl Profile List==Crawl文件列表
 Crawl Thread==Crawl线程
@@ -929,7 +929,7 @@ Statistics about \#\[domains\]\# domains in this stack:==此栈显示有关 #[do
 \(7\) Results from surrogates import==\(7\) 备份导入结果
 These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的备份文件中导入
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>用法:</em>将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
-\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(例如 <a href="/IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH 导入</a>\)
+\(i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(例如 <a href="IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH 导入</a>\)
 #Domain==Domain
 #URLs=URLs
 "delete all"=="全部删除"
@@ -1662,7 +1662,7 @@ Remaining Time:==剩余时间:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 #OAI-PMH Import==OAI-PMH Import
-Results from the import can be monitored in the <a href=\"\/CrawlResults.html\?process=7\">indexing results for surrogates==导入结果<a href="/CrawlResults.html?process=7">监视
+Results from the import can be monitored in the <a href=\"CrawlResults.html\?process=7\">indexing results for surrogates==导入结果<a href="CrawlResults.html?process=7">监视
 Single request import==单个导入请求
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==向OAI-PMH服务器提交如下导入请求, 并将返回记录导入索引
 "Import OAI-PMH source"=="导入OAI-PMH源"
@@ -2741,7 +2741,7 @@ Peer is not online yet, will check again in a few seconds...==peer尚未上线, 
 No action submitted==未提交动作
 Go back to the <a href="Settings_p.html">Settings</a> page==将返回<a href="Settings_p.html">设置</a>页面
 Your system is not protected by a password==您的系统未受密码保护
-Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==请在<a href="/ConfigAccounts_p.html">用户管理</a>页面设置管理密码.
+Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.==请在<a href="ConfigAccounts_p.html">用户管理</a>页面设置管理密码.
 You don't have the correct access right to perform this task.==无执行此任务权限.
 Please log in.==请登录.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==您现在可以返回<a href="Settings_p.html">设置</a>页面进行详细设置.
@@ -3037,7 +3037,7 @@ Anchor Name==祖先名
 Delete==删除
 Next update in==下次更新将在
 /> seconds.==/> 秒后.
-See a access timing <a href="/api/latency_p.xml">here</a>==<a href="/api/latency_p.xml">点这</a> 查看访问时间
+See a access timing <a href="api/latency_p.xml">here</a>==<a href="api/latency_p.xml">点这</a> 查看访问时间
 Queue</th>==队列</th>
 >Size==>大小
 #Max==Max

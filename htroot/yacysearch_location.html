@@ -15,8 +15,8 @@
     var searchLayer_co1 = null;
     var path_mdsearch = 'yacysearch_location.rss?dom=alltext&query=';
     var path_losearch = 'yacysearch_location.rss?dom=location&query=';
-    var marker_md = new OpenLayers.Icon("/env/grafics/marker_red.png", new OpenLayers.Size(11,16));
-    var marker_co = new OpenLayers.Icon("/env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
+    var marker_md = new OpenLayers.Icon("env/grafics/marker_red.png", new OpenLayers.Size(11,16));
+    var marker_co = new OpenLayers.Icon("env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
     var shallZoom   = true;  // flag if the map shall be zoomed to the search result
     var shallReload = false; // flag if the search shall be repeated upon next resize of the window
     var poisfound = 0;
@@ -155,7 +155,7 @@
     #%env/templates/embeddedheader.template%#
     ::
 <div id="api">
-<a href="yacysearch_location.rss" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<a href="yacysearch_location.rss" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
 <script type="text/javascript">
 //<![CDATA[
 document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?dom=metatag|alltext&' + window.location.search.substring(1));

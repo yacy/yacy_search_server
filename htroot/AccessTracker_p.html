@@ -7,7 +7,7 @@
   <body id="AccessTracker">
     #%env/templates/header.template%#
     #%env/templates/submenuAccessTracker.template%#
-    <script type="text/javascript" src="/js/sorttable.js"></script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
     #(page)#
     <h2>Server Access Overview</h2>
     <p>This is a list of #[num]# requests to the local http server within the last hour.</p>
@@ -110,7 +110,7 @@
         <td>#[resulttime]#</td>
         <td>#[urltime]#</td>
         <td>#[snippettime]#</td>
-        <td><a href="/yacysearch.html?query=#[querystring]#&amp;resource=local">#[querystring]#</a></td>
+        <td><a href="yacysearch.html?query=#[querystring]#&amp;resource=local">#[querystring]#</a></td>
         <td>#[userAgent]#</td>
       </tr>
       #{/list}#

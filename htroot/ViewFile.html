@@ -57,13 +57,13 @@ function updatepage(str) {
   <head>
     <title>YaCy '#[clientname]#': View URL Content</title>
     #%env/templates/metas.template%#
-  <script type="text/javascript" src="/js/highslide/highslide.js"></script>
+  <script type="text/javascript" src="js/highslide/highslide.js"></script>
   </head>
   <body>
   
 <div id="api">
 <a href="http://localhost:8090/api/getpageinfo_p.xml?actions=title,robots&url=#[url]#" id="apilink">
-<img src="/env/grafics/api.png" width="60" height="40" alt="API"/>
+<img src="env/grafics/api.png" width="60" height="40" alt="API"/>
 </a>
 <span>See the page info about the url.</span>
 </div>
@@ -95,7 +95,7 @@ function updatepage(str) {
       <fieldset><legend>URL Metadata</legend>
         <dl>
           <dt>URL:</dt><dd><a href="#[url]#">#[url]#</a></dd>
-          <dt>Hash:</dt><dd><a href="/solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)</dd>
+          <dt>Hash:</dt><dd><a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)</dd>
           <dt>In Metadata:</dt><dd>#(inurldb)#no::yes#(/inurldb)#</dd>
           <dt>In Cache:</dt><dd>#(incache)#no::yes#(/incache)#</dd>
           <dt>Word Count:</dt><dd>#[wordCount]#</dd>
@@ -174,8 +174,8 @@ function updatepage(str) {
 	</fieldset>
 :: <!-- 5 -->
 	<fieldset><legend>Original from Cache</legend>
-	  #(html)#::<iframe src="/CacheResource_p.html?url=#[url]#" width="800" height="400" />#(/html)#
-	  #(png)#::<iframe src="/CacheResource_p.png?url=#[url]#" width="800" height="400" />#(/png)#
+	  #(html)#::<iframe src="CacheResource_p.html?url=#[url]#" width="800" height="400" />#(/html)#
+	  #(png)#::<iframe src="CacheResource_p.png?url=#[url]#" width="800" height="400" />#(/png)#
 	</fieldset>
 :: <!-- 6 -->
 	<fieldset><legend>Link List</legend>
@@ -207,7 +207,7 @@ function updatepage(str) {
 	</fieldset>
 :: <!-- 8 -->
 	<fieldset><legend>CitationReport</legend>
-	  <iframe src="/api/citation.html?url=#[url]#" width="800" height="400" />
+	  <iframe src="api/citation.html?url=#[url]#" width="800" height="400" />
 	</fieldset>
 #(/viewMode)#
 </td></tr></table>

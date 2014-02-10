@@ -682,7 +682,7 @@ You can create a personal profile here, which can be seen by other YaCy-members=
 or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==или <a href="ViewProfile.html?hash=localhash">в публичном доступе</a> используя <a href="ViewProfile.rdf?hash=localhash">файл FOAF RDF</a>.
 >Name<==>Ваше имя<
 Nick Name==Ваш ник
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Домашная страница (отображается на каждой <a href="/Supporter.html">поддерживаемой странице,</a> столько сколько Ваш пир в онлайне).
+Homepage \(appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online\)==Домашная страница (отображается на каждой <a href="Supporter.html">поддерживаемой странице,</a> столько сколько Ваш пир в онлайне).
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
@@ -833,7 +833,7 @@ Sending Client==Client (Sender)
 >Scheduled Crawls can be modified in this table<==>Geplante Crawls können in dieser Tabelle geändert werden<
 Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl Profile beinhalten Informationen über einen Crawl Prozess der gerade ausgeführt wird.
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
-#The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
+#The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
 #cannot be altered here as they are hard-coded.==können nicht verändert werden, weil sie "hard-coded" sind.
 Crawl Profile List==Crawl Profil Liste
 Crawl Thread==Crawl Art
@@ -922,7 +922,7 @@ Statistics about \#\[domains\]\# domains in this stack:==Statistiken über #[dom
 \(7\) Results from surrogates import==\(7\) Ergebnisse aus dem Surrogat Import
 These records had been imported from surrogate files in DATA/SURROGATES/in==Diese Datensätze wurden aus Surrogat Dateien in DATA/SURROGATES/in importiert
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/SURROGATES/in kopieren oder eine der Index Import Funktionen nutzen
-\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
+\(i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
 #Domain==Domain
 #URLs=URLs
 "delete all"=="удалить все"
@@ -1643,7 +1643,7 @@ Remaining Time:==Verbleibende Zeit:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 #OAI-PMH Import==OAI-PMH Import
-Results from the import can be monitored in the <a href=\"\/CrawlResults.html\?process=7\">indexing results for surrogates==Ergebnisse aus dem Import finden Sie auf der Seite <a href="/CrawlResults.html?process=7">Ergebnisse aus dem Surrogat Import
+Results from the import can be monitored in the <a href=\"CrawlResults.html\?process=7\">indexing results for surrogates==Ergebnisse aus dem Import finden Sie auf der Seite <a href="CrawlResults.html?process=7">Ergebnisse aus dem Surrogat Import
 Single request import==Einfacher Anfrage Import
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==Mit dieser Methode wird nur eine einzelne Abfrage an einen OAI-PMH Server geschickt und die Datensätze in den Index aufgenommen
 "Import OAI-PMH source"=="Importiere OAI-PMH Quelle"
@@ -2680,7 +2680,7 @@ Peer is not online yet, will check again in a few seconds...==Узел пока 
 #No action submitted==Keine Aktion übermittelt
 #Go back to the <a href="Settings_p.html">Settings</a> page==Zurück zur Seite mit den <a href="Settings_p.html">Erweiterten Einstellungen</a>
 #Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
-#Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="/ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
+#Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
 You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuführen.
 Please log in.== Пожалкйста авторизуйтесь.
 #You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
@@ -2925,7 +2925,7 @@ Comment==Комментарий
 View this profile as==Просмотр этого профиля как 
 > or==> или
 #vCard==vCard
-You can edit your profile <a href="/ConfigProfile_p.html">here</a>==Вы можете изменить свой профиль <a href="/ConfigProfile_p.html">по этой ссылке</a>
+You can edit your profile <a href="ConfigProfile_p.html">here</a>==Вы можете изменить свой профиль <a href="ConfigProfile_p.html">по этой ссылке</a>
 #-----------------------------
 #File: Crawler_p.html
 #---------------------------
@@ -2961,7 +2961,7 @@ Anchor Name==Имя якоря
 Delete==Удалить
 Next update in==Следующее обновление через
 /> seconds.==/> секунд.
-See a access timing <a href="/api/latency_p.xml">here</a>==Смотрите сроки доступа <a href="/api/latency_p.xml">по этой ссылке</a>
+See a access timing <a href="api/latency_p.xml">here</a>==Смотрите сроки доступа <a href="api/latency_p.xml">по этой ссылке</a>
 Queue</th>==Очередь</th>
 >Size==>Размер
 Max<==Максимально<

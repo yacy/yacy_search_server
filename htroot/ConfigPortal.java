@@ -126,8 +126,8 @@ public class ConfigPortal {
                 }
                 sb.setConfig(SwitchboardConstants.GREETING, config.getProperty(SwitchboardConstants.GREETING,"P2P Web Search"));
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"http://yacy.net"));
-                sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, config.getProperty(SwitchboardConstants.GREETING_LARGE_IMAGE,"/env/grafics/YaCyLogo_120ppi.png"));
-                sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, config.getProperty(SwitchboardConstants.GREETING_SMALL_IMAGE,"/env/grafics/YaCyLogo_60ppi.png"));
+                sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, config.getProperty(SwitchboardConstants.GREETING_LARGE_IMAGE,"env/grafics/YaCyLogo_120ppi.png"));
+                sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, config.getProperty(SwitchboardConstants.GREETING_SMALL_IMAGE,"env/grafics/YaCyLogo_60ppi.png"));
                 sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, config.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE,"Status.html"));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, config.getProperty(SwitchboardConstants.INDEX_FORWARD,""));
                 HTTPDFileHandler.indexForward = "";

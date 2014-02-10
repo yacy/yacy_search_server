@@ -18,7 +18,7 @@
       <legend>
         <label for="p2p">Solr Search Index</label>
       </legend>
-      Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="/IndexSchema_p.html">Schema Editor</a>.
+      Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="IndexSchema_p.html">Schema Editor</a>.
       <dl>
       
       <dt class="TableCellDark">Lazy Value Initialization&nbsp;<input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /></dt>
@@ -29,9 +29,9 @@
       <dd>
       This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.<br/>
       The Solr native search interface is accessible at<br/>
-      <a href="/solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=collection1</a>
+      <a href="solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=collection1</a>
       for the default search index (core: collection1) and at<br/>
-      <a href="/solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a> for the webgraph core.<br/>
+      <a href="solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a> for the webgraph core.<br/>
       If you switch off this index, a remote Solr must be activated.</dd>
       
       <dt>Use remote Solr server(s)&nbsp;<input type="checkbox" name="solr.indexing.solrremote" id="solr_indexing_solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# onclick="if(!document.getElementById('config').solr_indexing_solrremote.checked) {document.getElementById('config').core_service_fulltext.checked = true;}"/></dt>

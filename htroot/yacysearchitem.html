@@ -5,19 +5,19 @@
   <a href="#[link]#" target="#[target]#">#[title]#</a></h4>
   <div class="urlactions">
     #(heuristic)#::
-    <img width="16" height="9" src="/env/grafics/heuristic_redundant.gif" title="heuristic:#[name]# (redundant)" style="width:16px; height:9px;" alt="heuristic:#[name]# (redundant)"/>::
-    <img width="16" height="9" src="/env/grafics/heuristic_new.gif" title="heuristic:#[name]# (new link)" style="width:16px; height:9px;" alt="heuristic:#[name]# (new link)"/>
+    <img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:#[name]# (redundant)" style="width:16px; height:9px;" alt="heuristic:#[name]# (redundant)"/>::
+    <img width="16" height="9" src="env/grafics/heuristic_new.gif" title="heuristic:#[name]# (new link)" style="width:16px; height:9px;" alt="heuristic:#[name]# (new link)"/>
     #(/heuristic)#
     #(authorized)#::
     #(bookmark)#::
-      <a href="#[bookmarklink]#" class="bookmarklink" title="recommend"><img width="11" height="11" src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="recommendIcon" /></a>
+      <a href="#[bookmarklink]#" class="bookmarklink" title="recommend"><img width="11" height="11" src="env/grafics/empty.gif" title="bookmark" alt="bookmark" class="recommendIcon" /></a>
     #(/bookmark)#
     #(recommend)#
-      <img width="11" height="11" src="/env/grafics/empty.gif" title="" alt="recommend" class="recommendIcon" />
-      <img width="11" height="11" src="/env/grafics/empty.gif" title="" alt="delete" class="deleteIcon" />
+      <img width="11" height="11" src="env/grafics/empty.gif" title="" alt="recommend" class="recommendIcon" />
+      <img width="11" height="11" src="env/grafics/empty.gif" title="" alt="delete" class="deleteIcon" />
       ::
-      <a href="#[recommendlink]#" class="recommendlink" title="recommend"><img width="11" height="11" src="/env/grafics/empty.gif" title="recommend" alt="recommend" class="recommendIcon" /></a>
-      <a href="#[deletelink]#" title="delete" class="deletelink" ><img width="11" height="11" src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
+      <a href="#[recommendlink]#" class="recommendlink" title="recommend"><img width="11" height="11" src="env/grafics/empty.gif" title="recommend" alt="recommend" class="recommendIcon" /></a>
+      <a href="#[deletelink]#" title="delete" class="deletelink" ><img width="11" height="11" src="env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
     #(/recommend)#
     #(/authorized)#
   </div>
@@ -26,19 +26,19 @@
   <p class="urlinfo">
   #(showDate)#::#[date]##(/showDate)#
   #(showSize)#::&nbsp;|&nbsp;#[sizename]##(/showSize)#
-  #(showMetadata)#::&nbsp;|&nbsp;<a href="/solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
+  #(showMetadata)#::&nbsp;|&nbsp;<a href="solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
   #(showParser)#::&nbsp;|&nbsp;<a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#" target="_blank">Parser</a>#(/showParser)#
-  #(showCitation)#::&nbsp;|&nbsp;<a href="/api/citation.html?hash=#[urlhash]#" target="_blank">Citations</a>#(/showCitation)#
+  #(showCitation)#::&nbsp;|&nbsp;<a href="api/citation.html?hash=#[urlhash]#" target="_blank">Citations</a>#(/showCitation)#
   #(showPictures)#::&nbsp;|&nbsp;<a href="yacysearch.html?cat=image&amp;url=#[link]#&amp;query=#[former]#">Pictures</a>#(/showPictures)#
   #(showCache)#::&nbsp;|&nbsp;<a href="CacheResource_p.html?url=#[link]#" target="_blank">Cache</a>#(/showCache)#
   #(showProxy)#::&nbsp;|&nbsp;<a href="proxy.html?url=#[link]#" target="_blank">Augmented Browsing</a>#(/showProxy)#
-  #(showHostBrowser)#::&nbsp;|&nbsp;<a href="/HostBrowser.html?path=#[link]#"><img src="/env/grafics/minitree.png" width="15" height="8"/></a>#(/showHostBrowser)#
+  #(showHostBrowser)#::&nbsp;|&nbsp;<a href="HostBrowser.html?path=#[link]#"><img src="env/grafics/minitree.png" width="15" height="8"/></a>#(/showHostBrowser)#
   </p>
   </div>
   ::
   #(item)#::<div class="thumbcontainer">
     <a href="#[hrefCache]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
-      <!-- <img src="/ViewImage.png?maxwidth=128&amp;maxheight=128&amp;code=#[code]#" alt="#[name]#" /> -->
+      <!-- <img src="ViewImage.png?maxwidth=128&amp;maxheight=128&amp;code=#[code]#" alt="#[name]#" /> -->
       <img src="#[href]#" width="128" height="128" alt="#[name]#" />
     </a>
     <div class="highslide-caption"><a href="#[href]#" target="#[target]#">#[name]#</a><br /><a href="#[source]#" target="#[target]#">#[sourcedom]#</a></div>

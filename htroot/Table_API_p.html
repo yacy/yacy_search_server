@@ -26,12 +26,12 @@
     	document.getElementById("apilist").submit();
     }
     </script>
-    <script type="text/javascript" src="/js/sorttable.js"></script>
+    <script type="text/javascript" src="js/sorttable.js"></script>
   </head>
   <body id="Tables">
   
 <div id="api">
-<a href="/api/table_p.xml?table=api&count=100&search=" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<a href="api/table_p.xml?table=api&count=100&search=" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
 <span>The information that is presented on this page can also be retrieved as XML
 Click the API icon to see the XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
@@ -85,7 +85,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" id="#[pk]#">
           <td valign="top" align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
-          <td valign="top">#[type]##(isCrawlerStart)#::<br/><br/><a href="#[url]#" title="clone"><img src="/env/grafics/doc.gif"><img src="/env/grafics/right.gif"><img src="/env/grafics/doc.gif"></a>#(/isCrawlerStart)#</td>
+          <td valign="top">#[type]##(isCrawlerStart)#::<br/><br/><a href="#[url]#" title="clone"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>#(/isCrawlerStart)#</td>
           <td valign="top">#[comment]#</td>
           <td valign="top">#[callcount]#</td>
           <td valign="top">#[dateRecording]#</td>

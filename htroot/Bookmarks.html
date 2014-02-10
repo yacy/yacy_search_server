@@ -3,8 +3,8 @@
 	<head>
 		<title>YaCy '#[clientname]#': Bookmarks</title>
 		#%env/templates/metas.template%#		
-		<script src="/js/ajax.js" type="text/javascript"></script>
-		<script src="/js/Bookmarks.js" type="text/javascript"></script>
+		<script src="js/ajax.js" type="text/javascript"></script>
+		<script src="js/Bookmarks.js" type="text/javascript"></script>
 		#(display)#				
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="Bookmarks.rss" />
 		::
@@ -112,7 +112,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 				::
 				<p><input type="submit" name="add" value="edit" /></p>
 				#(/edit)#
-				<img src="/env/grafics/empty.gif" name="ajax" />
+				<img src="env/grafics/empty.gif" name="ajax" />
 			</fieldset>
 		</form>
 		:: <!-- import XML Bookmarks (mode=3) -->		
@@ -229,7 +229,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					/
 					<a href="Bookmarks.html?delete=#[hash]#" class="bookmarkAction" onclick="return confirm('Confirm deletion')">Delete</a>
 					/
-					<a href="/api/getpageinfo_p.xml?url=#[link]#" class="bookmarkAction">Info</a>
+					<a href="api/getpageinfo_p.xml?url=#[link]#" class="bookmarkAction">Info</a>
 				</p>
 			</div>
 			#{/bookmarks}#

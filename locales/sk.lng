@@ -1839,7 +1839,7 @@ Steering Receipt:==Navod na ovladanie
 No information has been submitted==Udaje neboli odoslane
 Nothing changed==Udaje neboli zmenene
 Your system is not protected by a password==Vas system nie je chraneny heslom
-Please go to the <a href="/Settings_p.html">Settings</a> page and set an administration password==Chodte prosim do <a href="/Settings_p.html">nastaveni</a> a zvolte administratorske heslo.
+Please go to the <a href="Settings_p.html">Settings</a> page and set an administration password==Chodte prosim do <a href="Settings_p.html">nastaveni</a> a zvolte administratorske heslo.
 You don't have the correct access right to perform this task.==Nemate prava na spustenie tejto aplikacie.
 Please log in.==Prosim prihlaste sa.
 Shutting down.==Vypinanie.

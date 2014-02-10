@@ -667,7 +667,7 @@ You can create a personal profile here, which can be seen by other YaCy-members=
 or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
 #Name==नाम
 #Nick Name==उपनाम 
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
+Homepage \(appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
 #eMail==ईमेल
 #ICQ==आईसीक्यू
 #Jabber==गपशप
@@ -838,7 +838,7 @@ Sending Client==क्लाइंट भेजा जा रहा है
 >Scheduled Crawls can be modified in this table<==>इस तालिका में संशोधित किया जा सकता क्रॉल अनुसूचित<
 Crawl profiles hold information about a crawl process that is currently ongoing.==क्रॉल प्रोफाइल में वर्तमान में चल रही है कि एक क्रॉल करने की प्रक्रिया के बारे में जानकारी पकड़.
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==क्रॉल प्रोफाइल को आंतरिक रूप से यह के अंतर्गत आता है क्रॉल प्रदर्शन करने के लिए प्रयोग किया जाता है जो एक विशिष्ट यूआरएल के बारे में जानकारी रखना है.
-#The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==दूरदराज के लिए प्रोफाइल प्रॉक्सी के माध्यम से, <a href="/ProxyIndexingMonitor_p.html"> अनुक्रमण क्रॉल </ a> और टुकड़ा fetches
+#The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==दूरदराज के लिए प्रोफाइल प्रॉक्सी के माध्यम से, <a href="ProxyIndexingMonitor_p.html"> अनुक्रमण क्रॉल </ a> और टुकड़ा fetches
 #cannot be altered here as they are hard-coded.==वे हार्ड कोडित रहे हैं यहाँ के रूप में परिवर्तित नहीं किया जा सकता है.
 Crawl Profile List==प्रोफ़ाइल सूची क्रॉल
 Crawl Thread==धागा क्रॉल
@@ -929,7 +929,7 @@ Statistics about \#\[domains\]\# domains in this stack:==इस ढेर मे
 \(7\) Results from surrogates import==\(7\) Surrogates के आयात से का परिणाम
 These records had been imported from surrogate files in DATA/SURROGATES/in==ये रिकॉर्ड आंकड़े / surrogates में / में सरोगेट फ़ाइलों से आयात किया गया था
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em> प्रयोग करें प्रकरण: </ em> डबलिन कोर मेटाडेटा सामग्री के साथ जगह फाइलें आंकड़े / surrogates में / में या एक सूचकांक आयात विधि का उपयोग
-\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==\ (यानी <a href="/IndexImportMediawiki_p.html"> साँचा आयात </ a> <a href="/IndexImportOAIPMH_p.html"> OAI-PMH पुनर्प्राप्ति </ a> \)
+\(i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==\ (यानी <a href="IndexImportMediawiki_p.html"> साँचा आयात </ a> <a href="IndexImportOAIPMH_p.html"> OAI-PMH पुनर्प्राप्ति </ a> \)
 #Domain==डोमेन
 #URLs=यूआरएल
 "delete all"=="सब नष्ट"

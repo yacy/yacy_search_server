@@ -14,7 +14,7 @@
 	}
   //]]>
 	</script>
-  <script type="text/javascript" src="/js/yacysearch.js"></script>
+  <script type="text/javascript" src="js/yacysearch.js"></script>
   </head>
   <body id="Surftips">
     #%env/templates/header.template%#
@@ -29,13 +29,13 @@
      <div class="searchresults">
        #(authorized)#::
        <div class="urlactions">
-         <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="Add to bookmarks" class="bookmarkIcon" /></a>
+         <a href="Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="env/grafics/empty.gif" title="bookmark" alt="Add to bookmarks" class="bookmarkIcon" /></a>
          #(recommend)#
-         <img src="/env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
-         <img src="/env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
+         <img src="env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
+         <img src="env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
          ::
-         <a href="/Surftips.html?votePositive=#[urlhash]#&amp;refid=#[refid]#&amp;url=#[url]#&amp;title=#[title]#&amp;description=#[description]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="positive vote" class="recommendlink" onclick="pcomment(this.href);void(0);"><img src="/env/grafics/empty.gif" title="positive vote" alt="Give positive vote" class="recommendIcon" /></a>
-         <a href="/Surftips.html?voteNegative=#[urlhash]#&amp;refid=#[refid]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="negative vote" class="deletelink" ><img src="/env/grafics/empty.gif" title="negative vote" alt="Give negative vote" class="deleteIcon" /></a>
+         <a href="Surftips.html?votePositive=#[urlhash]#&amp;refid=#[refid]#&amp;url=#[url]#&amp;title=#[title]#&amp;description=#[description]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="positive vote" class="recommendlink" onclick="pcomment(this.href);void(0);"><img src="env/grafics/empty.gif" title="positive vote" alt="Give positive vote" class="recommendIcon" /></a>
+         <a href="Surftips.html?voteNegative=#[urlhash]#&amp;refid=#[refid]#&amp;display=#[display]##(showScore)#::&amp;score=true#(/showScore)#" title="negative vote" class="deletelink" ><img src="env/grafics/empty.gif" title="negative vote" alt="Give negative vote" class="deleteIcon" /></a>
          #(/recommend)#
        </div>
        #(/authorized)#
@@ -46,7 +46,7 @@
     #{/results}#
     <!-- supporter page (appears like surf tip) -->
      <div class="searchresults">
-       <h4 class="linktitle"><a href="/Supporter.html">YaCy Supporters</a></h4>
+       <h4 class="linktitle"><a href="Supporter.html">YaCy Supporters</a></h4>
        <p class="snippet">a list of home pages of yacy users</p>
      </div>
     <!-- supporter page -->
@@ -56,11 +56,11 @@
     
     <form action="Surftips.html" method="get" class="PeerControl" accept-charset="UTF-8"><div>
       <button type="submit" name="publicPage" value="0">
-        <img src="/env/grafics/lock.gif" alt="authentication required" />
+        <img src="env/grafics/lock.gif" alt="authentication required" />
           Hide surftips for users without autorization
       </button>
       <button type="submit" name="publicPage" value="1">
-        <img src="/env/grafics/lock.gif" alt="authentication required" />
+        <img src="env/grafics/lock.gif" alt="authentication required" />
           Show surftips to everyone
       </button>
     </div></form>

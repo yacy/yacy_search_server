@@ -6,7 +6,7 @@
   </head>
   <body id="IndexSchema_p">
 <div id="api">
-<a href="/api/schema.xml?core=#[core]#">
+<a href="api/schema.xml?core=#[core]#">
 <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
 <span>The solr schema can also be retrieved as xml here. Click the API icon to see the xml. Just copy this xml to solr/conf/schema.xml to configure solr.</span>
 </div>	
@@ -22,7 +22,7 @@
             <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
           #{/cores}#
       </select>
-    &nbsp;&nbsp;&nbsp;... the core can be searched at <a href="/solr/select?core=#[core]#&amp;q=*:*&start=0&rows=3">/solr/select?core=#[core]#&amp;q=*:*&amp;start=0&amp;rows=3</a>
+    &nbsp;&nbsp;&nbsp;... the core can be searched at <a href="solr/select?core=#[core]#&amp;q=*:*&start=0&rows=3">/solr/select?core=#[core]#&amp;q=*:*&amp;start=0&amp;rows=3</a>
     </form>
     
     <form action="IndexSchema_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
