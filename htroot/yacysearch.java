@@ -113,6 +113,12 @@ public class yacysearch {
                 "") : env.getConfig(SwitchboardConstants.GREETING, "");
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
+        // in case that the crawler is running and the search user is the peer admin, we expect that the user wants to check recently crawled document
+        // to ensure that recent crawl results are inside the search results, we do a soft commit here. This is also important for live demos!
+        if (authenticated && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 0) {
+            sb.index.fulltext().commit(true);
+        }
+        
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring = originalquerystring.replace('+', ' ').trim();
