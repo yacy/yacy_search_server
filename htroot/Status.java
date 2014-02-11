@@ -123,7 +123,7 @@ public class Status
         final boolean adminaccess = sb.adminAuthenticated(header) >= 2;
         if ( adminaccess ) {
             prop.put("showPrivateTable", "1");
-            prop.put("privateStatusTable", "Status_p.inc");
+            prop.put("privateStatusTable", "status_p.inc");
         } else {
             prop.put("showPrivateTable", "0");
             prop.put("privateStatusTable", "");
@@ -318,9 +318,10 @@ public class Status
         }
 
         // memory usage and system attributes
-        prop.put("freeMemory", Formatter.bytesToString(MemoryControl.free()));
-        prop.put("totalMemory", Formatter.bytesToString(MemoryControl.total()));
+        prop.put("usedMemory", Formatter.bytesToString(MemoryControl.total()));
         prop.put("maxMemory", Formatter.bytesToString(MemoryControl.maxMemory()));
+        prop.put("usedDisk", Formatter.bytesToString(sb.observer.getSizeOfDataPath()));
+        prop.put("freeDisk", Formatter.bytesToString(sb.observer.getUsableSpace()));
         prop.put("processors", WorkflowProcessor.availableCPU);
         prop.put("load", Memory.load());
 

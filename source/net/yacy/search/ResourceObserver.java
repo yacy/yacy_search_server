@@ -26,6 +26,8 @@ package net.yacy.search;
 
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
+
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
@@ -70,7 +72,7 @@ public class ResourceObserver {
 
     	if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0 || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
     	    String reason = "";
-            if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0) reason += " not enough disk space, " + this.path.getUsableSpace();
+            if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0) reason += " not enough disk space, " + getUsableSpace();
             if (this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) reason += " not enough memory space";
 			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
 				log.info("pausing local crawls");
@@ -100,6 +102,19 @@ public class ResourceObserver {
     	}
     }
 
+    private long sizeOfDirectory_lastCountTime = 0;
+    private long sizeOfDirectory_lastCountValue = 0;
+    public long getSizeOfDataPath() {
+        if (System.currentTimeMillis() - this.sizeOfDirectory_lastCountTime < 60000) return this.sizeOfDirectory_lastCountValue;
+        this.sizeOfDirectory_lastCountTime = System.currentTimeMillis();
+        this.sizeOfDirectory_lastCountValue = FileUtils.sizeOfDirectory(this.path);
+        return this.sizeOfDirectory_lastCountValue;
+    }
+    
+    public long getUsableSpace() {
+        return this.path.getUsableSpace();
+    }
+
     /**
      * returns the amount of disk space available
      * @return <ul>
@@ -109,7 +124,7 @@ public class ResourceObserver {
      * </ul>
      */
     private Space getNormalizedDiskFree() {
-        final long currentSpace = this.path.getUsableSpace();
+        final long currentSpace = getUsableSpace();
     	//final long currentSpace = getUsableSpace(this.path);
     	if (currentSpace < 1L) return Space.HIGH;
     	Space ret = Space.HIGH;
