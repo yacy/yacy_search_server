@@ -213,13 +213,8 @@ public final class Fulltext {
         this.statsDump = null;
     }
 
-    public void clearURLIndex() {
-        if (this.exportthread != null) this.exportthread.interrupt();
-        this.statsDump = null;
-        this.commit(true);
-    }
-
     public void clearLocalSolr() throws IOException {
+        if (this.exportthread != null) this.exportthread.interrupt();
         synchronized (this.solrInstances) {
             EmbeddedInstance instance = this.solrInstances.getEmbedded();
             if (instance != null) {

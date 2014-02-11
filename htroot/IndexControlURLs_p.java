@@ -148,7 +148,6 @@ public class IndexControlURLs_p {
         // delete everything
         if ( post.containsKey("deletecomplete") ) {
             if ( post.get("deleteIndex", "").equals("on") ) {
-                segment.fulltext().clearURLIndex();
                 try {segment.fulltext().clearLocalSolr();} catch (final IOException e) {}
             }
             if ( post.get("deleteRemoteSolr", "").equals("on")) {
