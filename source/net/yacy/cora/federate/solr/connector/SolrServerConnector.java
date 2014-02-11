@@ -77,6 +77,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 this.server.commit(true, true, softCommit);
                 //if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).shutdown();
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 //Log.logException(e);
             }
         }
@@ -93,6 +94,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 this.server.optimize(true, true, maxSegments);
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
             }
         }
@@ -112,6 +114,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             if (segmentCount == null) return 1;
             return segmentCount.intValue();
         } catch (final Throwable e) {
+            clearCaches(); // prevent further OOM if this was caused by OOM
             log.warn(e);
             return 0;
         }
@@ -139,6 +142,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             if (numDocs == null) return 0;
             return numDocs.longValue();
         } catch (final Throwable e) {
+            clearCaches(); // prevent further OOM if this was caused by OOM
             log.warn(e);
             return 0;
         }
@@ -156,6 +160,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 this.server.deleteByQuery(AbstractSolrConnector.CATCHALL_TERM);
                 this.server.commit(true, true, false);
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 throw new IOException(e);
             }
         }
@@ -168,6 +173,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 this.server.deleteById(id, -1);
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 throw new IOException(e);
             }
         }
@@ -182,6 +188,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 this.server.deleteById(l, -1);
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 throw new IOException(e);
             }
         }
@@ -199,6 +206,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 this.server.deleteByQuery(querystring, -1);
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 throw new IOException(e);
             }
         }
@@ -215,6 +223,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         try {
             this.server.request(up);
         } catch (final Throwable e) {
+            clearCaches(); // prevent further OOM if this was caused by OOM
             throw new IOException(e);
         }
     }
@@ -227,6 +236,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
                 this.server.add(solrdoc, -1);
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
                 try {
@@ -265,6 +275,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 }
                 this.server.add(solrdocs, -1);
             } catch (final Throwable e) {
+                clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
                 List<String> ids = new ArrayList<String>();
@@ -314,8 +325,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
             return rsp.getResults();
         } catch (final SolrServerException e) {
+            clearCaches(); // prevent further OOM if this was caused by OOM
             throw new SolrException(ErrorCode.UNKNOWN, e);
         } catch (final Throwable e) {
+            clearCaches(); // prevent further OOM if this was caused by OOM
             throw new IOException("Error executing query", e);
         }
     }
