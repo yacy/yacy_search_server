@@ -331,6 +331,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             if (docs == null || docs.isEmpty()) return null;
             return docs.get(0);
         } catch (final Throwable e) {
+            clearCaches(); // we clear the in case that this is caused by OOM
             throw new IOException(e.getMessage(), e);
         }
     }
