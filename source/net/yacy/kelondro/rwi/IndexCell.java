@@ -505,7 +505,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     @Override
     public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startTermHash, final boolean rot, final boolean excludePrivate) {
-        return referenceContainerIterator(startTermHash, rot, excludePrivate);
+        return referenceContainerIterator(startTermHash, rot, excludePrivate, false);
     }
 
     @Override
