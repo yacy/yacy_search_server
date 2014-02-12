@@ -83,10 +83,10 @@ public class PerformanceQueues_p {
 	            prop.put("setStartupCommit", "1");
             }
             if(post.containsKey("diskFree")) {
-            	sb.setConfig(SwitchboardConstants.DISK_FREE, post.getInt("diskFree", 3000));
+            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getInt("diskFree", 3000));
             }
             if(post.containsKey("diskFreeHardlimit")) {
-            	sb.setConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, post.getInt("diskFreeHardlimit", 1000));
+            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getInt("diskFreeHardlimit", 1000));
             }
             if(post.containsKey("memoryAcceptDHT")) {
             	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
@@ -325,8 +325,8 @@ public class PerformanceQueues_p {
         final String Xms = sb.getConfig("javastart_Xms", "Xms600m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
 
-        final long diskFree = sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000L);
-        final long diskFreeHardlimit = sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 1000L);
+        final long diskFree = sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, 3000L);
+        final long diskFreeHardlimit = sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, 1000L);
         final long memoryAcceptDHT = sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 50000L);
         final boolean observerTrigger = !MemoryControl.properState();
         prop.put("diskFree", diskFree);

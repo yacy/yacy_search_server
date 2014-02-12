@@ -210,6 +210,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         	}
         	sort();
     	}
+    	trim();
     	return oldsize - size();
     }
 

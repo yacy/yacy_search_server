@@ -28,6 +28,8 @@ package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,6 +40,7 @@ import net.yacy.cora.order.Order;
 import net.yacy.cora.sorting.Rating;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
@@ -210,6 +213,40 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return donesomething;
     }
 
+    public int deleteOld(int minsize, long maxtime) throws IOException {
+        long timeout = System.currentTimeMillis() + maxtime;
+        Collection<byte[]> keys = keys4LargeReferences(minsize, maxtime / 3);
+        int c = 0;
+        int oldShrinkMaxsize = ReferenceContainer.maxReferences;
+        ReferenceContainer.maxReferences = minsize;
+        for (byte[] key: keys) {
+            ReferenceContainer<ReferenceType> container = this.get(key, null);
+            container.shrinkReferences();
+            try {this.add(container); c++;} catch (SpaceExceededException e) {}
+            if (System.currentTimeMillis() > timeout) break;
+        }
+        ReferenceContainer.maxReferences = oldShrinkMaxsize;
+        return c;
+    }
+    
+    private Collection<byte[]> keys4LargeReferences(int minsize, long maxtime) throws IOException {
+        long timeout = System.currentTimeMillis() + maxtime;
+        ArrayList<byte[]> keys = new ArrayList<byte[]>();
+        Iterator<ByteArray> ci = this.ram.keys();
+        while (ci.hasNext()) {
+            byte[] k = ci.next().asBytes();
+            if (this.ram.count(k) >= minsize) keys.add(k);
+        }
+        CloneableIterator<byte[]> ki = this.array.keys(true, false);
+        while (ki.hasNext()) {
+            byte[] k = ki.next();
+            if (this.array.count(k) >= minsize) keys.add(k);
+            if (System.currentTimeMillis() > timeout) break;
+        }
+        return keys;
+    }
+    
+    
     /*
      * methods to implement Index
      */

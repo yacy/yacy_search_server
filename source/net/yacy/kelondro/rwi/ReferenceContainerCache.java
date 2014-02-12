@@ -106,6 +106,10 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public synchronized void close() {
     	this.cache = null;
     }
+    
+    public Iterator<ByteArray> keys() {
+        return this.cache.keySet().iterator();
+    }
 
     /**
      * dump the cache to a file. This method can be used in a destructive way

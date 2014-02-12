@@ -1056,6 +1056,28 @@ disk.free = 3000
 # minimum for DHT
 disk.free.hardlimit = 1000
 
+# ResourceObserver settings
+# We apply the naming of control circuit states to resources observer limit values (steady-state value, over/undershot)
+# under/overshot states in the system are supposed to be regulated to match the steady-state value
+
+# autoregulation of resource states
+# ATTENTION: be aware that using the autoregulate-option causes that the search index data is DELETED as soon as threshold-values are reached!
+# the autoregulate function starts workin if resources reach over/undershot values and the auto-regulation tries to regulate to the steadystate value
+resource.disk.free.autoregulate=true
+resource.disk.used.autoregulate=false
+
+# the target steady-state of minimum disk space left (MB)
+resource.disk.free.min.steadystate=4096 
+
+# the undershot below the steady-state of minimum disk free as absolute size (MB)
+resource.disk.free.min.undershot=2048
+
+# the target steady-state of maximum disk space for YaCy (MB)
+resource.disk.used.max.steadystate=524288
+
+# the overshot above the steady-state of disk space for YaCy (absolute) (MB)
+resource.disk.used.max.overshot=1048576
+
 # minimum memory to accept dht-in (MiB)
 memory.acceptDHTabove = 50
 memory.disabledDHT = false

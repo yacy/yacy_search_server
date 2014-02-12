@@ -123,7 +123,7 @@ public class Status
         final boolean adminaccess = sb.adminAuthenticated(header) >= 2;
         if ( adminaccess ) {
             prop.put("showPrivateTable", "1");
-            prop.put("privateStatusTable", "status_p.inc");
+            prop.put("privateStatusTable", "Status_p.inc");
         } else {
             prop.put("showPrivateTable", "0");
             prop.put("privateStatusTable", "");
@@ -145,7 +145,7 @@ public class Status
         // resource observer status
         if ( adminaccess ) {
             if ( !sb.observer.getDiskAvailable() ) {
-                final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
+                final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSteadystate());
                 prop.put("warningDiskSpaceLow", "1");
                 prop.put("warningDiskSpaceLow_minSpace", minFree);
             }
@@ -320,7 +320,7 @@ public class Status
         // memory usage and system attributes
         prop.put("usedMemory", Formatter.bytesToString(MemoryControl.total()));
         prop.put("maxMemory", Formatter.bytesToString(MemoryControl.maxMemory()));
-        prop.put("usedDisk", Formatter.bytesToString(sb.observer.getSizeOfDataPath()));
+        prop.put("usedDisk", Formatter.bytesToString(sb.observer.getSizeOfDataPath(true)));
         prop.put("freeDisk", Formatter.bytesToString(sb.observer.getUsableSpace()));
         prop.put("processors", WorkflowProcessor.availableCPU);
         prop.put("load", Memory.load());

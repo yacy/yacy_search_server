@@ -459,6 +459,18 @@ public final class Fulltext {
         }
     }
 
+    public void deleteOldDocuments(final long deltaToNow, final boolean loaddate) {
+        Date deleteageDate = new Date(System.currentTimeMillis() - deltaToNow);
+        final String collection1Query = (loaddate ? CollectionSchema.load_date_dt : CollectionSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
+        final String webgraphQuery = (loaddate ? WebgraphSchema.load_date_dt : WebgraphSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
+        try {
+            this.getDefaultConnector().deleteByQuery(collection1Query);
+            if (this.getWebgraphConnector() != null) this.getWebgraphConnector().deleteByQuery(webgraphQuery);
+        } catch (final IOException e) {
+        }
+    }
+    
+    
     /**
      * remove a full subpath from the index
      * @param subpath the left path of the url; at least until the end of the host

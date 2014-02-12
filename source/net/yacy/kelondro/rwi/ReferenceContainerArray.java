@@ -390,6 +390,10 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         public ReferenceContainer<ReferenceType> reduce(ReferenceContainer<ReferenceType> container);
 
     }
+    
+    public CloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
+        return this.array.keys(up, rotating);
+    }
 
     public int entries() {
         return this.array.entries();
