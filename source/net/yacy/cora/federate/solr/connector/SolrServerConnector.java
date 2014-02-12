@@ -42,6 +42,7 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 import org.apache.solr.client.solrj.response.LukeResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -75,7 +76,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         synchronized (this.server) {
             try {
                 this.server.commit(true, true, softCommit);
-                //if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).shutdown();
             } catch (final Throwable e) {
                 clearCaches(); // prevent further OOM if this was caused by OOM
                 //Log.logException(e);
@@ -92,7 +92,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         if (getSegmentCount() <= maxSegments) return;
         synchronized (this.server) {
             try {
-                this.server.optimize(true, true, maxSegments);
+                //this.server.optimize(true, true, maxSegments);
+                new UpdateRequest().setAction(UpdateRequest.ACTION.OPTIMIZE, true, true, maxSegments, true).process(this.server); // this includes a 'true' for expungeDelete
             } catch (final Throwable e) {
                 clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
