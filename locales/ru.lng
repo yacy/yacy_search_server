@@ -53,7 +53,7 @@ Remote Search Log==Лог внешнего поиска
 Success:==Успешно:
 Remote Search Host Tracker==Удаленный поиск на узле
 This is a list of searches that had been requested from this\' peer search interface==Это список запросов полученный от других поисковых пиров
-Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Показаны \ # \ [num \] \ # из \ # \ [total \] \ # запросов .
+Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Показаны \#\[num\]\# из \#\[total\]\# запросов .
 Requesting Host==Запрашиваемый Хост
 Offset==Смещение
 Expected Results==Ожидаемые результат
@@ -125,7 +125,7 @@ Allow regular expressions in host part of blacklist entries.==Разрешить
 The blacklist-cleaner only works for the following blacklist-engines up to now:==The blacklist-cleaner only works for the following blacklist-engines up to now
 Illegal Entries in \#\[blList\]\# for==Неправильный ввод \#\[blList\]\# для
 Deleted \#\[delCount\]\# entries==Удалено \#\[delCount\]\# значений
-Altered \#\[alterCount\]\# entries!==Изменённые \#\[alterCount\]\# записи!
+Altered \#\[alterCount\]\# entries!==Изменено \#\[alterCount\]\# записи!
 Two wildcards in host-part==Две маски в хост-часть
 Either subdomain <u>or</u> wildcard==Либо поддомен <u> или </u> шаблону
 Path is invalid Regex==Неверный путь Регулярное выражение
@@ -138,7 +138,7 @@ No Blacklist selected==Не выбран черный список
 #-----------------------------
 #File: BlacklistImpExp_p.html
 #---------------------------
-#Blacklist Import==Blacklist Import
+#Blacklist Import==Импорт черного списка
 Used Blacklist engine:==Используется черный список:
 Import blacklist items from...==Импортировать значения черного списка из...
 other YaCy peers:==другой YaCy пир:
@@ -181,7 +181,7 @@ Edit<==Редактировать<
 previous entries==предыдущая запись
 next entries==следующая запись
 new entry==новая запись
-import XML-File==импорт XML-фаил
+import XML-File==импорт XML-файла
 export as XML==экспорт в XML
 Comments</a>==Комментарии</a>
 Blog-Home==Блог
@@ -295,12 +295,12 @@ Search Result==Результат поиска
 #File: ConfigAccounts_p.html
 #---------------------------
 User Accounts==Аккаунт Пользователя
-User Administration==Администратор
+User Administration==Пользователь Администратор
 User created:==Пользователь создан:
 User changed:==Пользователь изменен:
 Generic error.==Общая ошибка.
 Passwords do not match.==Пароли не совпадают.
-Username too short. Username must be \>\= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше \>\= 4 символов.
+Username too short. Username must be \>\= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше 4 символов.
 No password is set for the administration account.==Пароль не установлен для административной учетной записи.
 Please define a password for the admin account.==Пожалуйста, определите пароль для учетной записи администратора .
 Admin Account==Admin, учетная запись
@@ -332,7 +332,7 @@ Save User==Сохранить пользователя
 #---------------------------
 Appearance and Integration==Внешний вид и интеграция
 You can change the appearance of the YaCy interface with skins.==Вы можете изменить внешний вид YaCy, интерфейс со скинами .==
-#You can change the appearance of YaCy with skins==# Вы можете изменить внешний вид YaCy со скинами
+#You can change the appearance of YaCy with skins==#Вы можете изменить внешний вид YaCy со скинами
 The selected skin and language also affects the appearance of the search page.==Выбранный скин и язык также влияет на внешний вид страницы поиска.
 If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Вы можете <a href="ConfigPortal.html">создать свой поисковый портал с  YaCy</a>
 change the appearance of the search page here.==изменить внешний вид страницы поиска.
@@ -344,7 +344,7 @@ Available Skins==Доступные скины
 "Use"=="Использовать"
 "Delete"=="Удалить"
 >Skin Color Definition<==>Цвет скина<==
-The generic skin \'generic_pd\' can be configured here with custom colors:==Основной скин \ 'generic_pd \' может быть настроен с пользовательскими настройками цвета:
+The generic skin \'generic_pd\' can be configured here with custom colors:==Основной скин \'generic_pd\' может быть настроен с пользовательскими настройками цвета:
 >Background<==>Фон<
 #>Text<==>Текст<
 >Legend<==>Легенда<
@@ -353,19 +353,19 @@ The generic skin \'generic_pd\' can be configured here with custom colors:==Ос
 >Table&nbsp;Item&nbsp;2<==>Таблица&nbsp;Значение&nbsp;2<
 >Table&nbsp;Bottom<==>Таблица&nbsp;В низу<
 >Border&nbsp;Line<==>Граница&nbsp;Линия<
->Sign&nbsp;\'bad\'<==>Вход&nbsp;'плохо'<
->Sign&nbsp;\'good\'<==>Вход&nbsp;'хорошо'<
->Sign&nbsp;\'other\'<==>Вход&nbsp;'другое'<
+>Sign&nbsp;\'bad\'<==>Вход&nbsp;\'плохо\'<
+>Sign&nbsp;\'good\'<==>Вход&nbsp;\'хорошо\'<
+>Sign&nbsp;\'other\'<==>Вход&nbsp;\'другое\'<
 >Search&nbsp;Headline<==>Поиск&nbsp;Заголовок<
 >Search&nbsp;URL==>Поиск&nbsp;URL
-"Set Colors"=="Настройка Цвета"
+"Set Colors"=="Установить Цвета"
 #>Skin Download<==>Скачать Скин<
 Skins can be installed from download locations==Скин может быть установлен из источника на локальной машине
 Install new skin from URL==Установка нового скина по ссылке
 Use this skin==Использовать этот скин
 "Install"=="Установить"
-Make sure that you only download data from trustworthy sources. The new Skin file==Убедитесь, что вы загружаете данные из достоверного источника. Новый файл кожи
-might overwrite existing data if a file of the same name exists already.==может перезаписать существующий фаил, если с таким именем уже существует.
+Make sure that you only download data from trustworthy sources. The new Skin file==Убедитесь, что вы загружаете данные из достоверного источника. Новый файл скина
+might overwrite existing data if a file of the same name exists already.==может перезаписать существующий файл, если с файл таким именем уже существует.
 >Unable to get URL:==>Неудалось получить по URL:
 Error saving the skin.==Ошибка сохранения файла скина.
 #-----------------------------
@@ -377,7 +377,7 @@ Your YaCy Peer needs some basic information to operate properly==Ваш узел
 Select a language for the interface==Выберите язык интерфейса
 Use Case: what do you want to do with YaCy:==Вариант использования: что вы хотите сделать с YaCy:
 Community-based web search==Групповой веб-поиск
-Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Регистрация и поддержка глобальной сети \ 'FreeWorld \', поиск в интернете без цензуры пользовательской поисковой сети
+Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Регистрация и поддержка глобальной сети \'FreeWorld \', поиск в интернете без цензуры пользовательской поисковой сети
 Search portal for your own web pages==Поиск в интернете и для собственных веб-страниц
 Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ваш YaCy ведет себя независимо от других участников сети, и вы имеете свой собственный веб-индекс, начав самостоятельно сканировать веб. Это может быть использовано для поиска на собственном сайте или для создания тематического поискового портала.
 Files may also be shared with the YaCy server, assign a path here:==Файлы могут также доступны YaCy серверу, назначьте путь здесь:
@@ -485,9 +485,9 @@ Defaults<==По умолчанию<
 url<==URL<
 #is a mandatory property - no default<==является обязательным свойством<
 YaCy P2P Web Search==YaCy P2P Веб поиск
-Size and position \(width \| height \| position\)==Размер и положение (ширина | высота | положение )
-Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
-Animation effects \(show | hide\)== Анимационные эффекты (показать | скрыть)
+Size and position \(width \| height \| position\)==Размер и положение \(ширина \| высота \| положение \)
+Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Специально где диалог должен быть показан. Возможные значения для позиционирования: \'центр\', \'слева\', \'справа\', \'сверху\', \'снизу\', или массив содержащий необходимую пару координат \(в пикселях от верхнего левого угла области просмотра\) или возможные строковые значения \(напр. \[\'right\',\'top\'\] для верхнего правого просмотра\)
+Animation effects \(show | hide\)== Анимационные эффекты \(показать | скрыть\)
 #The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==
 #Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
 #Interaction \(modal \| resizable\)==Взаимодействие (модальное | изменяемый размер)
@@ -508,7 +508,7 @@ Animation effects \(show | hide\)== Анимационные эффекты (п�
 #---------------------------
 Network Configuration==Конфигурация сети
 No changes were made!==Изменений не произведено!
-Accepted Changes==Приняты изменения!
+Accepted Changes==Изменения приняты!
 Inapplicable Setting Combination==Некорректное сочетанией настроек
 #P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
 For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Для P2P-режима должно быть разрешено или отсылка через DHT или прием \(или и то и другое\). Вы указали автономную (Robinson) конфигурацию
@@ -561,12 +561,12 @@ this network definition must be equal to all members of the same YaCy network.==
 #Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
 #List of ip:port - addresses of the cluster: \(comma-separated\)
 >Public Cluster==>Публичный кластер
-Your peer is part of a public cluster within the YaCy network==Ihr Peer ist Teil eines öffentlichen Clusters innerhalb des YaCy-Netzwerkes
-Index data is not distributed, but remote crawl requests are distributed and accepted==Indexdaten werden nicht verteilt, aber Remotecrawl-Anfragen werden verteilt und akzeptiert
-Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Suchanfragen werden über alle Peers des Clusters verteilt und von allen Peers des Clusters beantwortet
-List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Liste von .yacy oder .yacyh Domains der Peers des Clusters: (kommagetrennt)
->Public Peer==>Öffentlicher Peer
-You are visible to other peers and contact them to distribute your presence==Sie sind für andere Peers sichtbar und kontaktieren sie um ihnen Ihre Anwesenheit mitzuteilen
+Your peer is part of a public cluster within the YaCy network==Ваш пир является частью публичного кластера в рамках YaCy-сети
+Index data is not distributed, but remote crawl requests are distributed and accepted==Индексные данные не распространяются, но удаленные запросы сканирования распространяются и принимаются
+Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Нас находят по запросам распределенным по всем пирам кластера, и отвечают все пиры кластера
+List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Список .yacy или .yacyh - домены кластера: (через запятую)
+>Public Peer==>Публичные пиры
+You are visible to other peers and contact them to distribute your presence==Вы видны другим участникам и связываетесь с ними для распространения своего присутствия
 Your peer does not accept any outside index data, but responds on all remote search requests==Ihr Peer akzeptiert keinerlei Indexdaten von außen, aber antwortet auf alle Remote-Suchanfragen
 #>Peer Tags==>Peer Tags
 When you allow access from the YaCy network, your data is recognized using keywords==Falls Sie Zugriff vom YaCy-Netzwerk aus erlauben, so werden Ihre Daten anhand von Schlüsselwörtern erkannt
