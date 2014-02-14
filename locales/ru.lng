@@ -561,7 +561,7 @@ this network definition must be equal to all members of the same YaCy network.==
 #Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
 #List of ip:port - addresses of the cluster: \(comma-separated\)
 >Public Cluster==>Публичный кластер
-Your peer is part of a public cluster within the YaCy network==Ваш пир является частью публичного кластера в рамках YaCy-сети
+You peer is part of a public cluster within the YaCy network==Ваш пир является частью публичного кластера в рамках YaCy-сети
 Index data is not distributed, but remote crawl requests are distributed and accepted==Индексные данные не распространяются, но удаленные запросы сканирования распространяются и принимаются
 Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Нас находят по запросам распределенным по всем пирам кластера, и отвечают все пиры кластера
 List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Список .yacy или .yacyh - домены кластера: (через запятую)
