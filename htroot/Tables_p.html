@@ -85,7 +85,7 @@ document.write("<div id=\"api\">\<a href=\"api/table_p.xml" + window.location.se
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="left"><input type="checkbox" name="item_#[count]#" value="pk_#[pk]#" /></td>
-          <td>#[pk]#</td>
+          <td><a href="Tables_p.html?editrow=pk_#[pk]#&table=#[table]#">#[pk]#</a></td>
           #{columns}#
           <td align="left">#[cell]#</td>
           #{/columns}#
