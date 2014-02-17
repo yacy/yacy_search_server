@@ -172,6 +172,7 @@ public class Tables_p {
                         prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                         prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
                         prop.put("showtable_list_" + count + "_count", count);
+                        prop.put("showtable_list_" + count + "_table", table); // tablename for edit link
                         for (int i = 0; i < columns.size(); i++) {
                             cell = row.get(columns.get(i));
                             prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : UTF8.String(cell));
