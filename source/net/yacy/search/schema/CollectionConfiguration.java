@@ -1063,12 +1063,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
             BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
             int countcheck = 0;
+            Collection<String> failids = new ArrayList<String>();
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
                 Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
-                
+                final String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                final String i = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
                 try {
-                    DigestURL url = new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                    DigestURL url = new DigestURL(u, ASCII.getBytes(i));
                     byte[] id = url.hash();
                     SolrInputDocument sid = this.toSolrInputDocument(doc);
                     
@@ -1121,8 +1123,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     if (proccount % 100 == 0) ConcurrentLog.info("CollectionConfiguration", "postprocessed " + proccount + " from " + count + " documents; " + (proccount * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " + ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining");
                 } catch (final Throwable e1) {
                     ConcurrentLog.logException(e1);
+                    failids.add(i);
                 }
                 countcheck++;
+            }
+            if (failids.size() > 0) {
+                ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: deleting " + failids.size() + " documents which have permanent execution fails");
+                collectionConnector.deleteByIds(failids);
             }
             if (count != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck); // big gap for harvestkey = null
             ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
