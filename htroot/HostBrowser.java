@@ -70,7 +70,7 @@ public class HostBrowser {
         LINK, INDEX, EXCLUDED, FAILED, RELOAD;
     }
     
-    @SuppressWarnings({ "deprecation", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -125,7 +125,7 @@ public class HostBrowser {
 
         String load = post.get("load", "");
         boolean wait = false;
-        if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && !sb.index.exists(ASCII.String(pathURI.hash()))) {
+        if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && sb.index.getLoadTime(ASCII.String(pathURI.hash())) < 0) {
             // in case that the url does not exist and loading is wanted turn this request into a loading request
             load = path;
             wait = true;
@@ -144,7 +144,7 @@ public class HostBrowser {
                     ));
                 prop.putHTML("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
                 if (wait) for (int i = 0; i < 30; i++) {
-                    if (sb.index.exists(ASCII.String(url.hash()))) break;
+                    if (sb.index.getLoadTime(ASCII.String(url.hash())) >= 0) break;
                     try {Thread.sleep(100);} catch (final InterruptedException e) {}
                 }
             } catch (final MalformedURLException e) {

@@ -21,6 +21,7 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,11 +46,20 @@ import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class AbstractSolrConnector implements SolrConnector {
 
+    protected static Set<String> SOLR_ID_FIELDS = new HashSet<String>();
+    protected static Set<String> SOLR_ID_and_LOAD_DATE_FIELDS = new HashSet<String>();
+    static {
+        SOLR_ID_FIELDS.add(CollectionSchema.id.getSolrFieldName());
+        SOLR_ID_and_LOAD_DATE_FIELDS.add(CollectionSchema.id.getSolrFieldName());
+        SOLR_ID_and_LOAD_DATE_FIELDS.add(CollectionSchema.load_date_dt.getSolrFieldName());
+    }
+    
     public final static SolrDocument POISON_DOCUMENT = new SolrDocument();
     public final static String POISON_ID = "POISON_ID";
     public final static String CATCHALL_TERM = "*:*";
@@ -71,6 +81,42 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setStart(0);
     }
     protected final static int pagesize = 100;
+    
+    protected static long getLoadDate(final Object doc) {
+        Object d = null;
+        if (doc != null) {
+            if (doc instanceof SolrInputDocument) d = ((SolrInputDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+            if (doc instanceof SolrDocument) d = ((SolrDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+            if (doc instanceof org.apache.lucene.document.Document) {
+                String ds = ((org.apache.lucene.document.Document) doc).get(CollectionSchema.load_date_dt.getSolrFieldName());
+                try {
+                    d = Long.parseLong(ds);
+                } catch (NumberFormatException e) {
+                    d = -1l;
+                }
+            }
+        }
+        if (d == null) return -1l;
+        if (d instanceof Long) return ((Long) d).longValue();
+        if (d instanceof Date) return ((Date) d).getTime();
+        return -1l;
+    }
+
+    /**
+     * check if fields contain id and load_date_dt date
+     * @param fields
+     * @return fields with added id and load_date_dt if necessary
+     */
+    protected static String[] ensureEssentialFieldsIncluded(String[] fields) {
+        if (fields != null && fields.length > 0) {
+            Set<String> f = new HashSet<String>();
+            for (String s: fields) f.add(s);
+            f.add(CollectionSchema.id.getSolrFieldName());
+            f.add(CollectionSchema.load_date_dt.getSolrFieldName());
+            fields = f.toArray(new String[f.size()]);
+        }
+        return fields;
+    }
     
     /**
      * Get a query result from solr as a stream of documents.
@@ -191,62 +237,31 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     
     /**
-     * check if a given document, identified by url hash as ducument id exists
+     * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return true if any entry in solr exists
+     * @return the load date if any entry in solr exists, -1 otherwise
      * @throws IOException
      */
     @Override
-    public boolean existsById(String id) throws IOException {
+    public long getLoadTime(String id) throws IOException {
         // construct raw query
         final SolrQuery params = new SolrQuery();
         //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
         params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
         //params.set("defType", "raw");
-        params.setRows(0);
+        params.setRows(1);
         params.setStart(0);
         params.setFacet(false);
         params.clearSorts();
-        params.setFields(CollectionSchema.id.getSolrFieldName());
+        params.setFields(CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
         params.setIncludeScore(false);
 
         // query the server
-        return getDocumentCountByParams(params) > 0;
-    }
-
-    /**
-     * check a set of ids for existence.
-     * @param ids a collection of document ids
-     * @return a collection of a subset of the ids which exist in the index
-     * @throws IOException
-     */
-    public Set<String> existsByIds(Set<String> ids) throws IOException {
-        if (ids == null || ids.size() == 0) return new HashSet<String>();
-        // construct raw query
-        final SolrQuery params = new SolrQuery();
-        //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
-        StringBuilder sb = new StringBuilder(); // construct something like "({!raw f=id}Ij7B63g-gSHA) OR ({!raw f=id}PBcGI3g-gSHA)"
-        for (String id: ids) {
-            sb.append("({!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id).append(") OR ");
-        }
-        if (sb.length() > 0) sb.setLength(sb.length() - 4); // cut off the last 'or'
-        params.setQuery(sb.toString());
-        //params.set("defType", "raw");
-        params.setRows(ids.size()); // we want all lines
-        params.setStart(0);
-        params.setFacet(false);
-        params.clearSorts();
-        params.setFields(CollectionSchema.id.getSolrFieldName());
-        params.setIncludeScore(false);
-
-        // query the server
-        final SolrDocumentList docs = getDocumentListByParams(params);
-        // construct a new id list from that
-        HashSet<String> idsr = new HashSet<String>();
-        for (SolrDocument doc : docs) {
-            idsr.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-        }
-        return idsr;
+        final SolrDocumentList sdl = getDocumentListByParams(params);
+        if (sdl == null || sdl.getNumFound() <= 0) return -1;
+        SolrDocument doc = sdl.iterator().next();
+        long d = getLoadDate(doc);
+        return d;
     }
     
     /**

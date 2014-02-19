@@ -23,7 +23,6 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -105,18 +104,10 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return true if any entry in solr exists
+     * @return the load time if any entry in solr exists, -1 otherwise
      * @throws IOException
      */
-    public boolean existsById(final String id) throws IOException;
-    
-    /**
-     * check a set of ids for existence.
-     * @param ids a collection of document ids
-     * @return a collection of a subset of the ids which exist in the index
-     * @throws IOException
-     */
-    public Set<String> existsByIds(Set<String> ids) throws IOException;
+    public long getLoadTime(final String id) throws IOException;
 
     /**
      * add a solr input document

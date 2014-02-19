@@ -73,7 +73,6 @@ public class IndexControlRWIs_p {
 
     private final static String errmsg = "not possible to compute word from hash";
 
-    @SuppressWarnings("deprecation")
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -281,7 +280,7 @@ public class IndexControlRWIs_p {
                         Reference iEntry;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            if (!segment.fulltext().exists(ASCII.String(iEntry.urlhash()))) {
+                            if (segment.fulltext().getLoadTime(ASCII.String(iEntry.urlhash())) >= 0) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
                                 } catch (final SpaceExceededException e) {

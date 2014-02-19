@@ -1596,24 +1596,9 @@ public final class Switchboard extends serverSwitch {
      * @param hash
      * @return if it exists, the name of the database is returned, if it not exists, null is returned
      */
-    @Deprecated
     public HarvestProcess urlExists(final String hash) {
-        if (this.index.exists(hash)) return HarvestProcess.LOADED;
+        if (this.index.getLoadTime(hash) >= 0) return HarvestProcess.LOADED;
         return this.crawlQueues.exists(ASCII.getBytes(hash));
-    }
-
-    /**
-     * tests if hashes occur in any database.
-     * @param ids a collection of url hashes
-     * @return a map from the hash id to: if it exists, the name of the database, otherwise null
-     */
-    public Map<String, HarvestProcess> urlExists(final Set<String> ids) {
-        Set<String> e = this.index.exists(ids);
-        Map<String, HarvestProcess> m = new HashMap<String, HarvestProcess>();
-        for (String id: ids) {
-            m.put(id, e.contains(id) ? HarvestProcess.LOADED : this.crawlQueues.exists(ASCII.getBytes(id)));
-        }
-        return m;
     }
 
     public void urlRemove(final Segment segment, final byte[] hash) {
@@ -2990,8 +2975,7 @@ public final class Switchboard extends serverSwitch {
         // stacking may fail because of double occurrences of that url. Therefore
         // we must wait here until the url has actually disappeared
         int t = 100;
-        Set<String> ids = new HashSet<String>(1); ids.add(ASCII.String(urlhash));
-        while (t-- > 0 && this.index.exists(ids).size() > 0) {
+        while (t-- > 0 && this.index.getLoadTime(ASCII.String(urlhash)) >= 0) {
             try {Thread.sleep(100);} catch (final InterruptedException e) {}
             ConcurrentLog.fine("Switchboard", "STACKURL: waiting for deletion, t=" + t);
             //if (t == 20) this.index.fulltext().commit(true);
@@ -3106,11 +3090,10 @@ public final class Switchboard extends serverSwitch {
         if (searchEvent != null) {
             for (String id: urlmap.keySet()) searchEvent.addHeuristic(ASCII.getBytes(id), heuristicName, true);
         }
-        final Set<String> existing = doublecheck ? this.index.exists(urlmap.keySet()) : null;
         final List<Request> requests = new ArrayList<Request>();
         for (Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
             final String urlName = e.getValue().toNormalform(true);
-            if (doublecheck && existing.contains(e.getKey())) {
+            if (doublecheck && this.index.getLoadTime(e.getKey()) >= 0) {
                 this.log.info("addToIndex: double " + urlName);
                 continue;
             }
@@ -3183,9 +3166,8 @@ public final class Switchboard extends serverSwitch {
     public void addToCrawler(final Collection<DigestURL> urls, final boolean asglobal) {
         Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (DigestURL url: urls) urlmap.put(ASCII.String(url.hash()), url);
-        Set<String> existingids = this.index.exists(urlmap.keySet());
         for (Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
-            if (existingids.contains(e.getKey())) continue; // double
+            if (this.index.getLoadTime(e.getKey()) >= 0) continue; // double
             DigestURL url = e.getValue();
             final Request request = this.loader.request(url, true, true);
             final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));

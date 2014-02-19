@@ -467,19 +467,13 @@ public class Segment {
         }
     }
 
-    @Deprecated
-    public boolean exists(final String urlhash) {
-        return this.fulltext.exists(urlhash);
-    }
-
     /**
-     * Multiple-test for existing url hashes in the search index.
-     * All given ids are tested and a subset of the given ids are returned.
-     * @param ids
-     * @return a set of ids which exist in the database
+     * get the load time of a resource.
+     * @param urlHash
+     * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
      */
-    public Set<String> exists(final Set<String> ids) {
-        return this.fulltext.exists(ids);
+    public long getLoadTime(final String urlhash) {
+        return this.fulltext.getLoadTime(urlhash);
     }
 
     /**

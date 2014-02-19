@@ -399,8 +399,8 @@ public final class CrawlStacker {
         // check if the url is double registered
         String urlhash = ASCII.String(url.hash());
         final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
-        final Date oldDate = this.indexSegment.fulltext().getLoadDate(urlhash); // TODO: combine the exists-query with this one
-        if (oldDate == null) {
+        final long oldTime = this.indexSegment.fulltext().getLoadTime(urlhash);
+        if (oldTime < 0) {
             if (dbocc != null) {
                 // do double-check
                 if (dbocc == HarvestProcess.ERRORS) {
@@ -410,12 +410,13 @@ public final class CrawlStacker {
                 return "double in: " + dbocc.toString();
             }
         } else {
-            final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
+            final boolean recrawl = profile.recrawlIfOlder() > oldTime;
             if (recrawl) {
                 if (CrawlStacker.log.isInfo())
                     CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                        ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
+                        ((System.currentTimeMillis() - oldTime) / 60000 / 60 / 24) + " days ago.");
             } else {
+                Date oldDate = new Date(oldTime);
                 if (dbocc == null) {
                     return "double in: LURL-DB, oldDate = " + oldDate.toString();
                 }

@@ -232,10 +232,9 @@ public final class transferRWI {
                 testids.add(ASCII.String(urlHash));
                 received++;
             }
-            Set<String> existing = sb.index.fulltext().exists(testids);
             for (String id: testids) {
                 try {
-                    if (existing.contains(id)) {
+                    if (sb.index.fulltext().getLoadTime(id) >= 0) {
                         knownURL.put(ASCII.getBytes(id));
                     } else {
                         unknownURL.put(ASCII.getBytes(id));

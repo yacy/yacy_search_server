@@ -174,11 +174,10 @@ public class Transmission {
                 }
                 testids.add(ASCII.String(e.urlhash()));
             }
-            Set<String> existingids = Transmission.this.segment.fulltext().exists(testids);
             i = c.entries();
             while (i.hasNext()) {
                 final WordReference e = i.next();
-                if (existingids.contains(ASCII.String(e.urlhash()))) {
+                if (Transmission.this.segment.fulltext().getLoadTime(ASCII.String(e.urlhash())) >= 0) {
                     this.references.put(e.urlhash());
                 } else {
                     notFoundx.add(e.urlhash());

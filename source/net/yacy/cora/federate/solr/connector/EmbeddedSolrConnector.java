@@ -23,10 +23,8 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -73,11 +71,6 @@ import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.RefCounted;
 
 public class EmbeddedSolrConnector extends SolrServerConnector implements SolrConnector {
-
-    private static Set<String> SOLR_ID_FIELDS = new HashSet<String>();
-    static {
-        SOLR_ID_FIELDS.add(CollectionSchema.id.getSolrFieldName());
-    }
     
     public static final String SELECT = "/select";
     public static final String CONTEXT = "/solr";
@@ -385,38 +378,33 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return numFound;
     }
 
+    /**
+     * check if a given document, identified by url hash as document id exists
+     * @param id the url hash and document id
+     * @return the load date if any entry in solr exists, -1 otherwise
+     * @throws IOException
+     */
     @Override
-    public synchronized boolean existsById(String id) {
-        return getCountByQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id) > 0;
-    }
-    
-    @Override
-    public synchronized Set<String> existsByIds(Set<String> ids) {
-        if (ids == null || ids.size() == 0) return new HashSet<String>();
-        if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
-        Set<String> idsr = new TreeSet<String>();
-        final SolrQuery params = new SolrQuery();
-        params.setRows(0);
-        params.setStart(0);
-        params.setFacet(false);
-        params.clearSorts();
-        params.setFields(CollectionSchema.id.getSolrFieldName());
-        params.setIncludeScore(false);
-        SolrQueryRequest req = new SolrQueryRequestBase(this.core, params){};
-        req.getContext().put("path", SELECT);
-        req.getContext().put("webapp", CONTEXT);
+    public synchronized long getLoadTime(String id) {
+        int responseCount = 0;
+        SolrIndexSearcher searcher = null;
+        DocListSearcher docListSearcher = null;
         try {
-	        for (String id: ids) {
-	            params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
-	            SolrQueryResponse rsp = new SolrQueryResponse();
-	            this.requestHandler.handleRequest(req, rsp);
-	            DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
-	            if (response.matches() > 0) idsr.add(id);
-	        }
-        } finally {
-        	req.close();
+            docListSearcher = new DocListSearcher("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, 0, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
+            responseCount = docListSearcher.response.size();
+            if (responseCount == 0) return -1;
+            searcher = docListSearcher.request.getSearcher();
+            DocIterator iterator = docListSearcher.response.iterator();
+            //for (int i = 0; i < responseCount; i++) {
+            Document doc = searcher.doc(iterator.nextDoc(), AbstractSolrConnector.SOLR_ID_and_LOAD_DATE_FIELDS);
+            if (doc == null) return -1;
+            return AbstractSolrConnector.getLoadDate(doc);
+            //}
+        } catch (Throwable e) {} finally { 
+            if (searcher != null) try {searcher.close();} catch (IOException e) {}
+            if (docListSearcher != null) docListSearcher.close();
         }
-        return idsr;
+        return -1;
     }
     
     @Override

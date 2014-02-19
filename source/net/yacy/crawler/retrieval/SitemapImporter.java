@@ -82,7 +82,6 @@ public class SitemapImporter extends Thread {
         // check if the url is known and needs to be recrawled
         Date lastMod = entry.lastmod(null);
         if (lastMod != null) {
-            @SuppressWarnings("deprecation")
             final HarvestProcess dbocc = this.sb.urlExists(ASCII.String(nexturlhash));
             if (dbocc != null && dbocc == HarvestProcess.LOADED) {
                 // the url was already loaded. we need to check the date

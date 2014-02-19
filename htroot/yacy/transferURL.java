@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -144,10 +143,9 @@ public final class transferURL {
                 lEm.put(ASCII.String(lEntry.hash()), lEntry);
             }
             
-            Set<String> doubles = sb.index.exists(lEm.keySet());
-            doublecheck = doubles.size();
+            doublecheck = 0;
             for (String id : lEm.keySet()) {
-                if (!doubles.contains(id)) {
+                if (sb.index.getLoadTime(id) < 0) {
                     lEntry = lEm.get(id);
 
                     // write entry to database
@@ -160,6 +158,8 @@ public final class transferURL {
                     } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
+                } else {
+                    doublecheck++;
                 }
             }
 

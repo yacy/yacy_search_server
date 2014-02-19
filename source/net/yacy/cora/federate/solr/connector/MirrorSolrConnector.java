@@ -23,9 +23,7 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -391,20 +389,11 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public boolean existsById(String id) throws IOException {
-        return (this.solr0 != null && this.solr0.existsById(id)) || (this.solr1 != null && this.solr1.existsById(id));
-    }
-
-    @Override
-    public Set<String> existsByIds(Set<String> ids) throws IOException {
-        if (ids == null || ids.size() == 0) return new HashSet<String>();
-        if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.existsByIds(ids);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.existsByIds(ids);
-        Set<String> s = new HashSet<String>();
-        s.addAll(this.solr0.existsByIds(ids));
-        s.addAll(this.solr1.existsByIds(ids));
-        return s;
+    public long getLoadTime(String id) throws IOException {
+        if (this.solr0 != null && this.solr1 == null) return this.solr0.getLoadTime(id);
+        if (this.solr0 == null && this.solr1 != null) return this.solr1.getLoadTime(id);
+        if (this.solr0 == null && this.solr1 == null) return -1;
+        return Math.max(this.solr0.getLoadTime(id), this.solr1.getLoadTime(id));
     }
 
     /*

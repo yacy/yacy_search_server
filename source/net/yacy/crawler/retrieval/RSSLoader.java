@@ -107,9 +107,9 @@ public class RSSLoader extends Thread {
                 ConcurrentLog.logException(e);
             }
         }
-        Map<String, HarvestProcess> existingids = sb.urlExists(urlmap.keySet());
         for (final Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
-            if (existingids.get(e.getKey()) != null) continue;
+            HarvestProcess harvestProcess = sb.urlExists(e.getKey());
+            if (harvestProcess != null) continue;
             list.add(e.getValue());
             indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
             loadCount++;

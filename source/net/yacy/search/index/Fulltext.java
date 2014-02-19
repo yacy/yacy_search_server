@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -273,7 +272,7 @@ public final class Fulltext {
         getDefaultConnector().commit(softCommit);
         if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
-
+/*
     public Date getLoadDate(final String urlHash) {
         if (urlHash == null) return null;
         try {
@@ -288,7 +287,7 @@ public final class Fulltext {
             return null;
         }
     }
-
+*/
     public DigestURL getURL(final byte[] urlHash) {
         if (urlHash == null || this.getDefaultConnector() == null) return null;
         
@@ -526,36 +525,19 @@ public final class Fulltext {
         return false;
     }
 
-    @Deprecated
-    public boolean exists(final String urlHash) {
-        if (urlHash == null) return false;
+    /**
+     * get the load time of a resource.
+     * @param urlHash
+     * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
+     */
+    public long getLoadTime(final String urlHash) {
+        if (urlHash == null) return -1l;
         try {
-            if (this.getDefaultConnector().existsById(urlHash)) return true;
+            return this.getDefaultConnector().getLoadTime(urlHash);
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
-        return false;
-    }
-    
-    /**
-     * Multiple-test for existing url hashes in the search index.
-     * All given ids are tested and a subset of the given ids are returned.
-     * @param ids
-     * @return a set of ids which exist in the database
-     */
-    public Set<String> exists(Set<String> ids) {
-        HashSet<String> e = new HashSet<String>();
-        if (ids == null || ids.size() == 0) return e;
-        if (ids.size() == 1) return exists(ids.iterator().next()) ? ids : e;
-        Set<String> idsC = new HashSet<String>();
-        idsC.addAll(ids);
-        try {
-            Set<String> e1 = this.getDefaultConnector().existsByIds(idsC);
-            e.addAll(e1);
-        } catch (final Throwable ee) {
-            ConcurrentLog.logException(ee);
-        }
-        return e;
+        return -1l;
     }
 
     public String failReason(final String urlHash) throws IOException {

@@ -292,12 +292,12 @@ public class Load_RSS_p {
                     ConcurrentLog.logException(e);
                 }
             }
-            Map<String, HarvestProcess> existingurls = sb.urlExists(messages.keySet());
             loop: for (final Map.Entry<String, RSSMessage> entry: messages.entrySet()) {
                 try {
                     final RSSMessage message = entry.getValue();
                     final DigestURL messageurl = new DigestURL(message.getLink());
-                    if (existingurls.get(ASCII.String(messageurl.hash())) != null) continue loop;
+                    HarvestProcess harvestProcess = sb.urlExists(ASCII.String(messageurl.hash()));
+                    if (harvestProcess != null) continue loop;
                     list.add(messageurl);
                     RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 } catch (final IOException e) {
@@ -344,7 +344,6 @@ public class Load_RSS_p {
                     continue;
                 }
             }
-            Map<String, HarvestProcess> ids = sb.urlExists(urls.keySet());
             
             int i = 0;
             for (final Hit item: feed) {
@@ -353,7 +352,8 @@ public class Load_RSS_p {
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();
-                    prop.put("showitems_item_" + i + "_state", ids.get(ASCII.String(messageurl.hash())) != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
+                    HarvestProcess harvestProcess = sb.urlExists(ASCII.String(messageurl.hash()));
+                    prop.put("showitems_item_" + i + "_state", harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
                     prop.put("showitems_item_" + i + "_state_count", i);
                     prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
                     prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
