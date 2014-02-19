@@ -34,7 +34,7 @@
         <dd><input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOff" value="off" #(maxReferencesRadioChecked)#checked="checked"::#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=off&maxReferencesLimit='"/>
             No reference size limitation (this may cause strong CPU load when words are searched that appear very often)<br/>
             <input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOn" value="on" #(maxReferencesRadioChecked)#::checked="checked"#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=on&maxReferencesLimit=&maxReferences=#[maxReferences]#'"/>
-            Limitation of number of references per word: <input type="text" name="maxReferences" value="#[maxReferences]#" size="9" maxlength="12" onfocus="document.getElementById('maxReferencesRadioOff').checked = false;document.getElementById('maxReferencesRadioOn').checked = true"/> (this causes that old references als deleted if that limit is reached)<br/><br/>
+            Limitation of number of references per word: <input type="text" name="maxReferences" value="#[maxReferences]#" size="9" maxlength="12" onfocus="document.getElementById('maxReferencesRadioOff').checked = false;document.getElementById('maxReferencesRadioOn').checked = true"/> (this causes that old references are deleted if that limit is reached)<br/><br/>
             <input type="submit" name="maxReferencesLimit" id="maxReferencesLimit" value="Set References Limit" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
