@@ -205,10 +205,17 @@ public class EmbeddedInstance implements SolrInstance {
         this.cores.put(name, c);
         return c;
     }
+    
+    protected void finalize() throws Throwable {
+        this.close();
+    }
 
     @Override
     public synchronized void close() {
-        try {this.coreContainer.shutdown();} catch (final Throwable e) {ConcurrentLog.logException(e);}
+        if (this.coreContainer != null) try {
+            this.coreContainer.shutdown();
+            this.coreContainer = null;
+        } catch (final Throwable e) {ConcurrentLog.logException(e);}
     }
     
 }

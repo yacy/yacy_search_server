@@ -141,12 +141,18 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public SolrConfig getConfig() {
         return this.core.getSolrConfig();
     }
+    
+    protected void finalize() throws Throwable {
+        this.close();
+    }
 
     @Override
     public synchronized void close() {
-        try {this.commit(false);} catch (final Throwable e) {ConcurrentLog.logException(e);}
+        if (this.core != null && !this.core.isClosed()) try {this.commit(false);} catch (final Throwable e) {ConcurrentLog.logException(e);}
         try {super.close();} catch (final Throwable e) {ConcurrentLog.logException(e);}
-        try {this.core.close();} catch (final Throwable e) {ConcurrentLog.logException(e);}
+        // we do NOT close the core here because that is closed if the enclosing instance is closed
+        // do NOT uncomment the following line, which caused a "org.apache.solr.core.SolrCore Too many close [count:-1] on org.apache.solr.core.SolrCore@51af7c57" error
+        // try {this.core.close();} catch (final Throwable e) {ConcurrentLog.logException(e);}
     }
 
     @Override

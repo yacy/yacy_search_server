@@ -73,6 +73,10 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
         this.documentCache.clear();
         if (this.solr != null) this.solr.commit(true);
     }
+    
+    protected void finalize() throws Throwable {
+        this.close();
+    }
 
     @Override
     public synchronized void close() {
