@@ -43,8 +43,8 @@
     #(/portForwarding)#
     
     <dt>Proxy</dt>
-    <dd>Transparent <a href="Settings_p.html?page=http">#[info_isTransparentProxy]#</a>&nbsp;&nbsp;
-        URL <a href="AugmentedBrowsing_p.html">#[info_proxyURL]#</a></dd>
+    <dd>Transparent <a href="Settings_p.html?page=http">#(info_isTransparentProxy)#on::off#(/info_isTransparentProxy)#</a>&nbsp;&nbsp;
+        URL <a href="AugmentedBrowsing_p.html">#(info_proxyURL)#on::off#(/info_proxyURL)#</a></dd>
     <dd>Remote: <a href="Settings_p.html?page=proxy">#(remoteProxy)#not used::#[host]#:#[port]# | Used for YaCy -> YaCy communication: #(4Yacy)#Yes::No #(/4Yacy)# #(/remoteProxy)#</a></dd>
     <dt>Auto-popup on start-up</dt>
     <dd>

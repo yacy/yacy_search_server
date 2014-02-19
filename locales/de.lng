@@ -892,14 +892,6 @@ Edit Profile==Bearbeite Profil
 #File: CrawlResults.html
 #---------------------------
 Crawl Results<==Crawl Ergebnisse<
-Overview</a>==Überblick</a>
-Receipts</a>==Rückmeldungen</a>
-Queries</a>==Suchanfragen</a>
-DHT Transfer==DHT-Verteilung
-Proxy Use==Proxy Benutzung
-Local Crawling</a>==Lokales Crawlen</a>
-Global Crawling</a>==Globales Crawlen</a>
-Surrogate Import</a>==Surrogat Import</a>
 >Crawl Results Overview<==>Crawl Ergebnisse Überblick<
 These are monitoring pages for the different indexing queues.==Das sind die Seiten zur Überwachung der verschiedenen Indexier Warteschlangen.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermenüs oben beschrieben.
@@ -1236,27 +1228,27 @@ Images==Bilder
 Video==Videos
 Applications==Anwendungen
 more options...==mehr Optionen...
-advanced parameters==erweiterte Parameter
-Max. number of results==Max. Anzahl der Ergebnisse
+#advanced parameters==erweiterte Parameter
+#Max. number of results==Max. Anzahl der Ergebnisse
 Results per page==Ergebnisse pro Seite
 Resource==Quelle
 global==global
->local==>lokal
-Global search is disabled because==Die globale Suche ist deaktiviert, denn
-DHT Distribution</a> is==die DHT-Verteilung</a> ist
-Index Receive</a> is==der Index-Empfang</a> ist 
-DHT Distribution and Index Receive</a> are==DHT-Verteilung und Index-Empfang</a> sind
-disabled.\#\(==deaktiviert.#(
-URL mask==URL-Filter
+#>local==>lokal
+#Global search is disabled because==Die globale Suche ist deaktiviert, denn
+#DHT Distribution</a> is==die DHT-Verteilung</a> ist
+#Index Receive</a> is==der Index-Empfang</a> ist 
+#DHT Distribution and Index Receive</a> are==DHT-Verteilung und Index-Empfang</a> sind
+#disabled.\#\(==deaktiviert.#(
+#URL mask==URL-Filter
 restrict on==beschränken auf
 show all==alle zeigen
 #überarbeiten!!!
 Prefer mask==Vorzugsmaske
 Constraints==Einschränkungen
 only index pages==Nur Index-Seiten
-"authentication required"=="Autorisierung erforderlich"
-Disable search function for users without authorization==Suchfunktion für Benutzer ohne Autorisierung sperren
-Enable web search to everyone==Suchfunktion für alle Nutzer erlauben
+#"authentication required"=="Autorisierung erforderlich"
+#Disable search function for users without authorization==Suchfunktion für Benutzer ohne Autorisierung sperren
+#Enable web search to everyone==Suchfunktion für alle Nutzer erlauben
 the peer-to-peer network==Peer-to-Peer-Netzwerk
 only the local index==Nur lokaler Index
 Query Operators==Such-Operatoren
@@ -1281,7 +1273,7 @@ doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
 an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
 heuristics==Heuristiken
-add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
+#add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
 add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
 Search Navigation==Such-Navigation
 keyboard shotcuts==Tastatur-Kürzel
@@ -1293,7 +1285,7 @@ automatic result retrieval==Automatische Ergebnis-Abfrage
 browser integration==Browserintegration
 after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==Nach der Suche clicken Sie auf das Suchfeld Ihres Browsers und wählen Sie '"YaCy" hinzufügen'
 search as rss feed==Suche als RSS-Feed
-click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
+#click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
 >example==>Beispiel
 json search results==JSON-Suchergebnisse
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
@@ -1328,20 +1320,26 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 Reverse Word Index Administration==Reverse Wort Indexverwaltung
 The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enthält im Moment #[wcount]# inverse Wort Indexe
 RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
-Select Segment:==Segment Auswahl:
+#Select Segment:==Segment Auswahl:
 Retrieve by Word:<==Abfrage nach Wort:<
 "Show URL Entries for Word"=="URL Einträge für Wort zeigen"
 Retrieve by Word-Hash==Abfrage nach Wort-Hash
 "Show URL Entries for Word-Hash"=="URL Einträge für Wort-Hash zeigen"
 "Generate List"=="Liste erstellen"
-Cleanup==Aufräumen
->Index Deletion<==>Index Löschung<
->Delete Search Index<==>Lösche Suchindex<
-Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
-Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Holen Fehler während der Suche
-"Delete"=="Löschen"
+Limitations==Einschränkungen
+Index Reference Size==Index Referenzgröße
+No reference size limitation \(this may cause strong CPU load when words are searched that appear very often\)==Kein Referenzgrößen Limit (Dies kann sehr hohe CPU Auslastung erzeigen wenn Wörter gesucht werden die sehr häufig vorkommen)
+Limitation of number of references per word:==Limitierung der Anzahl der Referenzen pro Wort:
+\(this causes that old references are deleted if that limit is reached\)==(sorgt dafür dass alte References gelöscht werden wenn das Limit erreicht ist)
+"Set References Limit"=="Setze das Referenz Limit"
+#Cleanup==Aufräumen
+#>Index Deletion<==>Index Löschung<
+#>Delete Search Index<==>Lösche Suchindex<
+#Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
+#Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
+#Delete robots.txt Cache==Lösche robots.txt Cache
+#Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Holen Fehler während der Suche
+#"Delete"=="Löschen"
 No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
 No entry for word hash==Keinen Eintrag zu Wort-Hash
 Search result==Suchergebnis
@@ -1380,7 +1378,7 @@ Positive Ranking Factors==Positive Ranking Faktoren
 Reverse Normalized Weighted Ranking Sum==Inverse normalisierte gewichtete Ranking Summe
 hash</td>==Hash</td>
 dom length</td>==Domain Länge</td>
-ybr</td>==YBR</td>
+#ybr</td>==YBR</td>
 #url comps</td>
 url length</td>==URL Länge</td>
 pos in text</td>==Pos. im Text</td>
@@ -1411,24 +1409,44 @@ Blacklist Extension==Blacklist Erweiterung
 
 #File: IndexControlURLs_p.html
 #---------------------------
-URL References Administration==URL Referenzen Administration
+#URL References Administration==URL Referenzen Administration
 The local index currently contains \#\[ucount\]\# URL references==Der lokale Index enthält im Moment #[ucount]# URL-Referenzen
 URL Retrieval==URL Abfrage
-Select Segment:==Segment Auswahl:
+#Select Segment:==Segment Auswahl:
 Retrieve by URL:<==Abfrage nach URL:<
 "Show Details for URL"=="Details für URL zeigen"
 Retrieve by URL-Hash==Abfrage nach URL-Hash
 "Show Details for URL-Hash"=="Details für URL-Hash zeigen"
-"Generate List"=="Liste erstellen"
+#"Generate List"=="Liste erstellen"
+Cleanup=Aufräumen
+Index Deletion=Löschen des Index
+Delete local search index \(embedded Solr and old Metadata\)==Lösche den lokalen Suchindex (Embedded Solr und alte Metadaten)
+Delete remote solr index==Lösche entfernten Solr Index
+Delete RWI Index \(DHT transmission words\)==Lösche RWI Index (DHT übertragene Worte)
+Delete Citation Index \(linking between URLs\)==Lösche Citation Index (Verlinkung zwischen URLs)
+Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
+Stop Crawler and delete Crawl Queues==Stoppe Crawler und lösche Crawl Queues
+Delete robots.txt Cache==Lösche robots.txt Cache
+Delete cached snippet-fetching failures during search==Lösche gecachte snippet-fetching Fehler während der Suche
+"Delete"=="Löschen"
 Statistics about top-domains in URL Database==Statistik über die Top-Domains in der URL Datenbank
 Show top==Zeige die
 domains from all URLs.==Top-Domains aus allen URLs.
 "Generate Statistics"=="Statistik erstellen"
+Dump and Restore of Solr Index==Dump und Wiederherstellen des Solr Index
+Dump File=Dump Datei
+"Create Dump"=="Erstelle Dump"
+"Restore Dump"=="Stelle Dump wieder her"
+Optimize Solr==Optimiere Solr
+merge to max. <==merge mit max. <
+> segments==> Segmenten
+Reboot Solr Core==Starte Solr Core neu
+"Shut Down and Re-Start Solr"=="Fahre Solr herunter und Neustart"
 Statistics about the top-\#\[domains\]\# domains in the database:==Statistik über die Top-#[domains]# Domains in der Datenbank:
 "delete all"=="Alle Löschen"
 #Domain==Domain
 #URLs==URLs
-Sequential List of URL-Hashes==Sequentielle Liste der URL-Hashes
+#Sequential List of URL-Hashes==Sequentielle Liste der URL-Hashes
 Loaded URL Export==Export geladener URLs
 Export File==Export-Datei
 #URL Filter==URL Filter
@@ -1484,7 +1502,7 @@ Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Einträge ang
 "clear list"=="Liste löschen"
 There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Einträge in der zurückgewiesenen URL Liste:
 #Initiator==Initiator
-Executor==Ausführender
+#Executor==Ausführender
 #URL==URL
 Fail-Reason==Fehlermeldung
 #-----------------------------
@@ -1690,7 +1708,7 @@ Various stack files that belong to the crawling queue==Verschiedene Stack-Dateie
 #MediaWiki Dump Import==MediaWiki Dump Import
 No import thread is running, you can start a new thread here==Sie können hier einen neuen Thread starten, da aktuell kein Import Thread läuft
 Bad input data:==Ungültige Eingabedaten:
-MediaWiki Dump File Selection: select a \'bz2\' file==MediaWiki Dump Datei Auswahl: Wähle eine 'bz2' Datei aus
+MediaWiki Dump File Selection: select an XML file \(which may be bz2- or gz-encoded\)==MediaWiki Dump Datei Auswahl: Wähle eine XML Datei (die auch bz2 oder gzip komprimiert sein darf)
 You can import MediaWiki dumps here. An example is the file==Hier können Sie MediaWiki Dumps importieren. Als Beispiel dient die Datei
 Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Legen Sie die Datei im YaCy-Verzeichnis oder einem Unterordner ab.
 "Import MediaWiki Dump"=="Importiere MediaWiki Dump"
@@ -1919,7 +1937,7 @@ YaCy Search Network==YaCy Suche Netzwerk
 YaCy Network<==YaCy Netzwerk<
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
 Network Overview==Netzwerkübersicht
 Active&nbsp;Peers==Aktive Peers
 Passive&nbsp;Peers==Passive Peers
@@ -1979,6 +1997,7 @@ Queries Per Hour \(QPH\)==Abfragen pro Stunde (QPH)
 >Today<==>Heute<
 >Last&nbsp;Week<==>Letzte&nbsp;Woche<
 >Last&nbsp;Month<==>Letzter&nbsp;Monat<
+Last Hour==Letzte Stunde
 >Now<==>Jetzt<
 >Active<==>Aktiv<
 >Passive<==>Passiv<
@@ -1998,10 +2017,10 @@ Your Peer:==Ihr Peer:
 >Uptime<==>Laufzeit<
 #>Links<==>Links<
 #>RWIs<==>RWIs<
-Sent<br/>Words==Gesendete<br/>Wörter
 Sent<br/>URLs==Gesendete<br/>URLs
-Received<br/>Words==Empfangene<br/>Wörter
+Sent<br/>DHT Word Chunks==Gesendete<br/>DHT Wortstücke
 Received<br/>URLs==Empfangene<br/>URLs
+Received<br/>DHT Word Chunks==Empfangene<br/>DHT Wortstücke
 Known<br/>Seeds==Bekannte<br/>Seeds
 Connects<br/>per hour==Verbindungen<br/>pro Stunde
 #Version==Version
@@ -2191,8 +2210,10 @@ Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
 >idle loops==>untät. Durchl.
 >busy loops==>beschäft. Durchl.
 Minimum of<br />Required Memory==Mindestens<br />benötigter Speicher
+Maximum of<br />System-Load==Maximum der<br />Systemlast
 Full Description==Vollständige Beschreibung
 Submit New Delay Values==Neue Verzögerungswerte speichern
+Re-set to default==Auf Defaultwerte zurücksetzen
 Changes take effect immediately==Änderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
 #RAM Cache==RAM Cache
@@ -2215,20 +2236,13 @@ flushed to disc; this may last some minutes.==auf die Festplatte gesichert werde
 #Initial space of words in cache:==Anfangs Freiraum im Word Cache:
 #This is is the init size of space for words in cache.==Dies ist die Anfangsgröße von Wörtern im Cache.
 Enter New Cache Size==Neue Cachegröße eintragen
-Balancer Settings==Balancer Einstellungen
-This is the time delta between accessing of the same domain during a crawl.==Das ist die Zeitdifferenz zwischen zwei Zugriffen auf dieselbe Domäne während eines Crawls.
-The crawl balancer tries to avoid that domains are==Der Crawl Balancer versucht zu vermeiden, dass Domains
-accessed too often, but if the balancer fails \(i.e. if there are only links left from the same domain\), then these minimum==zu oft abgefragt werden. Aber wenn der Balancer nicht mehr greift \(z.B. wenn nur noch Links von derselben Domain übrig sind), werden diese Minimum
-delta times are ensured.==Zeitdifferenzen eingehalten.
-#>Crawler Domain<==>Crawler Domain<
->Minimum Access Time Delta<==>Minimum Zeitdifferenz zwischen Zugriffen<
->local \(intranet\) crawls<==>Lokale (Intranet) Crawls<
->global \(internet\) crawls<==>Globale (Internet) Crawls<
-"Enter New Parameters"=="Neue Parameter Setzen"
 Thread Pool Settings:==Threadpool-Einstellungen:
 maximum Active==max. aktiv
 current Active==derzeit aktiv
 Enter new Threadpool Configuration==Neue Threadpool-Konfiguration eintragen
+milliseconds<==Millisekunden<
+kbytes<==KBytes<
+load<==Last<
 #-----------------------------
 
 #File: PerformanceConcurrency_p.html
@@ -2237,8 +2251,9 @@ Performance of Concurrent Processes==Performance gleichzeitig laufender Prozesse
 serverProcessor Objects==serverProcessor Objekte
 #Thread==Thread
 Queue Size<br />Current==Größe der Warteschlange<br />Aktuell
-Queue Size<br />Current==Größe der Warteschlange<br />Maximum
-Concurrency:<br />Number of Threads==Gleichzeitigkeit:<br />Anzahl der Threads
+Queue Size<br />Maximum==Größe der Warteschlange<br />Maximum
+Executors:<br />Current Number of Threads==Executors:<br />Aktuelle Anzahl der Threads
+Concurrency:<br />Maximum Number of Threads==Concurrency:<br />Maximale Anzahl der Threads
 Childs==Kindprozesse
 Average<br />Block Time<br />Reading==Durchschnittlich<br />reservierte Zeit<br />lesend
 Average<br />Exec Time==Durchschnittliche Ausführungszeit
@@ -2259,9 +2274,9 @@ Time<==Zeit<
 Duration \(ms\)==Dauer (Millisekunden)
 Result-Count==Anzahl Ergebnisse
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zuständigen Peers im DHT gelöst wurde.
-red -> request list alive==rot -> Request Liste aktiv
-green -> request has terminated==grün -> Request wurde beendet
-grey -> the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -> Das Suchergebnis hash order position(s) (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
+red -&gt; request list alive==rot -&gt; Request Liste aktiv
+green -&gt; request has terminated==grün -&gt; Request wurde beendet
+grey -&gt; the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -&gt; Das Suchergebnis hash order position(s) (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
 "Search event picture"=="Such Ereignis Bild"
 #-----------------------------
 
@@ -2441,7 +2456,7 @@ Hint: On linux you can configure your firewall to transparently redirect all htt
 Connection Keep-Alive==Verbindung halten
 With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit können Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalität unterstützen soll.
 Send "Via" Header==Sende "Via" Header
-Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via-HTTP-Header</a>
+Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
 http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
 Send "X-Forwarded-For" Header== Sende "X-Forward-For" Header
 Specifies if the proxy should send the X-Forwarded-For http header.==Gibt an, ob der Proxy den X-forwarded-For HTTP-Header setzen soll.
@@ -2715,7 +2730,6 @@ You can download a more recent version of YaCy. Click here to install this updat
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Installiere YaCy
 You can download the latest releases here:=Hier kann die neueste Version heruntergeladen werden:
-[versionResMain]# or #[versionResDev]#==[versionResMain]# oder #[versionResDev]#
 You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
 which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
@@ -2730,10 +2744,8 @@ For community support, please visit our==Für Unterstützung aus der Community, 
 #File: Status_p.inc
 #---------------------------
 #System Status==System Status
-Process</dt>==Prozess</dt>
 Unknown==unbekannt
 Uptime==Online seit
-System Resources==Systemressourcen
 Processors:==Prozessoren:
 Protection==Sicherheit
 Password is missing==Kein Passwort
@@ -2765,8 +2777,8 @@ Enabled <a==Aktiviert <a
 Disable\]==Deaktivieren]
 Memory Usage==Speicherverbrauch
 free:==Frei:
-total:==Total:
 max:==Maximal:
+on::off==an::aus
 
 Configure==Einstellen
 Reset</a>==Zurücksetzen</a>
@@ -2838,7 +2850,7 @@ YaCy Supporters<==YaCy Unterstützer<
 >a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
-"authentication required"=="Autorisierung erforderlich"
+#"authentication required"=="Autorisierung erforderlich"
 Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
 Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
@@ -2848,7 +2860,8 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 : Peer Steering==: Peer Steuerung
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
 >Process Scheduler<==>Prozess Planer<
 This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
 to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
@@ -2919,7 +2932,8 @@ Scheduled actions are executed after the next execution date has arrived within 
 Table Viewer==Tabellenanzeige
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
 >robots.txt table<==>robots.txt Tabelle<
 #-----------------------------
 
@@ -3157,8 +3171,8 @@ The data that is visualized here can also be retrieved in a XML file, which list
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
-To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Web Structure==Netz Struktur
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im WikiWeb Structure==Netz Struktur
 >Host List<==>Host Liste<
 \#\[count\]\# outlinks==#[count]# ausgehende Links
 host<==Host<
@@ -3263,10 +3277,12 @@ alt text==alt Beschreibung
 #File: yacyinteractive.html
 #---------------------------
 YaCy Interactive Search==YaCy interaktive Suche
-This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
-The query format is similar to <a href=\"http://www.loc.gov/standards/sru/\">SRU</a>.==Das Abfrageformat ist ähnlich dem <a href="http://www.loc.gov/standards/sru/">SRU</a>.
+This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\" target=\"_blank\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
+The query format is similar to==Das Abfrageformat ist ähnlich dem von
+SRU==SRU
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf das API Symbol, um einen Beispielaufruf der RSS Such API zu sehen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
 loading from local index...==lädt aus lokalem Index...
 e="Search"==e="Suchen"
 #-----------------------------
@@ -3274,10 +3290,12 @@ e="Search"==e="Suchen"
 #File: yacysearch.html
 #---------------------------
 Search Page==Suchseite
-This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==Diese Suchergebnisse können auch als RSS/<a href="http://www.opensearch.org">opensearch</a> abgerufen werden.
-The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Das Abfrageformat ist so ähnlich wie <a href="http://www.loc.gov/standards/sru/">SRU</a>.
+This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\" target=\"_blank\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
+The query format is similar to==Das Abfrageformat ist ähnlich dem von
+SRU==SRU
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf den API Button, um ein Beispiel zu sehen, wie das Such-RSS-API aufgerufen werden kann.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
 "Search"=="Suchen"
 'Search'=='Suchen'
 "search again"=="Erneut suchen" 
@@ -3476,6 +3494,14 @@ Outgoing&nbsp;Cookies==Ausgehende Cookies
 
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
+Overview</a>==Überblick</a>
+Receipts</a>==Rückmeldungen</a>
+Queries</a>==Suchanfragen</a>
+DHT Transfer==DHT-Verteilung
+Proxy Use==Proxy Benutzung
+Local Crawling</a>==Lokales Crawlen</a>
+Global Crawling</a>==Globales Crawlen</a>
+Surrogate Import</a>==Surrogat Import</a>
 Processing Monitor==Prozess Monitor
 Crawler Queues==Crawler Puffer
 Loader<==Lade Puffer<
