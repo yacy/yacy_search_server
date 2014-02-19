@@ -292,6 +292,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
+    public boolean isClosed() {
+        return this.connector == null || this.connector.isClosed(); 
+    }
+    
+    @Override
     public void close() {
         ensureAliveDeletionHandler();
         try {this.deleteQueue.put(POISON_ID);} catch (final InterruptedException e) {}
@@ -301,6 +306,8 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         try {this.updateHandler.join();} catch (final InterruptedException e) {}
         this.connector.close();
         this.idCache.clear();
+        this.connector = null;
+        this.idCache = null;
     }
 
     @Override

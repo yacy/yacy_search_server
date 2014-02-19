@@ -70,6 +70,12 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public int getSegmentCount();
     
     /**
+     * test if the connector is already closed
+     * @return true if the connector is closed
+     */
+    public boolean isClosed();
+    
+    /**
      * close the server connection
      */
     public void close();

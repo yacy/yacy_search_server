@@ -141,6 +141,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public SolrConfig getConfig() {
         return this.core.getSolrConfig();
     }
+
+    @Override
+    public boolean isClosed() {
+        return this.core == null || this.core.isClosed();
+    }
     
     protected void finalize() throws Throwable {
         this.close();

@@ -1040,8 +1040,11 @@ public final class Protocol {
             if (localsearch && !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
                 // search the local index
                 try {
-                    rsp[0] = event.getQuery().getSegment().fulltext().getDefaultConnector().getResponseByParams(solrQuery);
-                    docList[0] = rsp[0].getResults();
+                    SolrConnector sc = event.getQuery().getSegment().fulltext().getDefaultConnector();
+                    if (!sc.isClosed()) {
+                        rsp[0] = sc.getResponseByParams(solrQuery);
+                        docList[0] = rsp[0].getResults();
+                    }
                 } catch (final Throwable e) {
                     Network.log.info("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
                     return -1;
@@ -1061,7 +1064,7 @@ public final class Protocol {
                                 RemoteInstance instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
                                 try {
                                     SolrConnector solrConnector = new RemoteSolrConnector(instance, myseed ? true : target.getVersion() >= 1.63, "solr");
-                                    try {
+                                    if (!solrConnector.isClosed()) try {
                                         rsp[0] = solrConnector.getResponseByParams(solrQuery);
                                         docList[0] = rsp[0].getResults();
                                     } catch (Throwable e) {} finally {

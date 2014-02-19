@@ -120,13 +120,24 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             return 0;
         }
     }
-    
+
+    @Override
+    public boolean isClosed() {
+        return this.server == null; // we cannot now this exactly when server != null, because SolrServer does not provide a method to test the close status
+    }
 
     @Override
     public void close() {
         if (this.server == null) return;
         try {
-            if (this.server instanceof EmbeddedSolrServer) synchronized (this.server) {this.server.commit(true, true, false);}
+            if (this.server instanceof EmbeddedSolrServer) {
+                synchronized (this.server) {
+                    this.server.commit(true, true, false);
+                }
+            }
+            synchronized (this.server) {
+                this.server.shutdown(); // if the server is embedded, resources are freed, if it is a HttpSolrServer, only the httpclient is shut down, not the remote server
+            }
             this.server = null;
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
