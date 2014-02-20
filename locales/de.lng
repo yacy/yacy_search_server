@@ -1095,6 +1095,11 @@ Scan Range==Scan Bereich
 Scan sub-range with given host==Scanne Unterbereich von angegebenen Host aus
 Full Intranet Scan:==Voller Intranet Scan:
 Do not use intranet scan results, you are not in an intranet environment!==Verwenden Sie nicht die Intranet Scan Resultate, da sie sich nicht in einer Intranet Umgebung befinden!
+All known hosts in the search index \(/31 subnet recommended!\)==Alle bekannten Hosts im Suchindex (/31 Subnetz empfohlen!)
+only the given host\(s\)==Nur den/die angegebenen Host(s)
+addresses\)==Addressen)
+Subnet<==Subnetz<
+Time-Out<==Timeout<
 >Scan Cache<==>Scan Cache<
 accumulate scan results with access type \"granted\" into scan cache \(do not delete old scan result\)==Sammle Scan Ergebnisse mit dem Zugriffstyp "granted" im Scan Cache (Lösche keine alten Scan Ergebnisse)
 >Service Type<==>Service Typ<
@@ -1112,20 +1117,20 @@ Look every==Überprüfe alle
 again and add new sites automatically to indexer.==wieder und füge neue Seiten automatisch zum Indexer hinzu.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==Seiten die nicht im Laufe eines geplanten Scans auftauchen werden von den Suchergebnissen ausgeschlossen.
 "Scan"=="Scannen"
-The following servers had been detected:==Die folgenden Server wurden entdeckt:
-Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
->Protocol<==>Protokoll<
+#The following servers had been detected:==Die folgenden Server wurden entdeckt:
+#Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
+#>Protocol<==>Protokoll<
 #>IP<==>IP<
 #>URL<==>URL<
->Access<==>Zugriff<
->Process<==>Prozess<
->unknown<==>unbekannt<
->empty<==>leer<
->granted<==>erlaubt<
->denied<==>verweigert<
->not in index<==>nicht im Index<
->indexed<==>indexiert<
-"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawlen hinzu"
+#>Access<==>Zugriff<
+#>Process<==>Prozess<
+#>unknown<==>unbekannt<
+#>empty<==>leer<
+#>granted<==>erlaubt<
+#>denied<==>verweigert<
+#>not in index<==>nicht im Index<
+#>indexed<==>indexiert<
+#"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawlen hinzu"
 #-----------------------------
 
 #File: CrawlStartSite_p.html
@@ -1135,23 +1140,25 @@ Site Crawler:==Seiten Crawler:
 Download all web pages from a given domain or base URL.==Downloaden aller Webseiten von einer gegebenen Domain oder Basis URL.
 >Site Crawl Start<==>Seiten Crawl Start<
 >Site<==>Seite<
+Start URL&nbsp;\(must start with==Start URL&nbsp;(muss mit ... beginnen
 Link-List of URL==Link Liste der URL
->Scheduler<==>Zeitplanung<
-run this crawl once==führe diesen Crawl nur einmalig aus
-scheduled, look every==geplant, überprüfe alle
->minutes<==>Minuten<
->hours<==>Stunden<
->days<==>Tage<
-for new documents automatically.==automatisch auf neue Dokument.
+#>Scheduler<==>Zeitplanung<
+#run this crawl once==führe diesen Crawl nur einmalig aus
+#scheduled, look every==geplant, überprüfe alle
+#>minutes<==>Minuten<
+#>hours<==>Stunden<
+#>days<==>Tage<
+#for new documents automatically.==automatisch auf neue Dokument.
 >Path<==>Pfad<
 load all files in domain==Lade alle Dateien in der Domäne
 load only files in a sub-path of given url==Lade nur Dateien in einem Unterpfad der angegebenen URL
 >Limitation<==>Einschränkungen<
 not more than <==nicht mehr als <
 >documents<==>Dokumente<
->Dynamic URLs<==>Dynamische URLs<
-allow <==erlaube <
-urls with a \'\?\' in the path==URLs mit einem '?' im Pfad
+#>Dynamic URLs<==>Dynamische URLs<
+#allow <==erlaube <
+#urls with a \'\?\' in the path==URLs mit einem '?' im Pfad
+Collection<==Kollektion<
 #>Start<==>Start<
 "Start New Crawl"=="Starte neuen Crawl"
 Hints<==Hinweise<
@@ -1169,12 +1176,15 @@ The scheduler on crawls can be changed or removed using the <a href=\"Table_API_
 
 #File: Help.html
 #---------------------------
-YaCy: Help==YaCy: Hilfe
-Tutorial==Anleitung
+#YaCy: Help==YaCy: Hilfe
+YaCy: Tutorial==YaCy: Anleitung
 You are using the administration interface of your own search engine==Sie benutzen gerade das Administrationsinterface ihrer eigenen Suchmaschine
 You can create your own search index with YaCy==Sie können mit YaCy Ihren eigenen Suchindex erstellen
 To learn how to do that, watch one of the demonstration videos below==Bitte sehen Sie als Anleitung eine Demonstration (2. Video unten in deutscher Sprache)
-
+twitter this video==Video twittern
+Download from Vimeo==Von Vimeo herunterladen
+More Tutorials==Mehr Tutorials
+Please see the tutorials on==Bitte besuchen Sie auch die Anleitungen auf
 #-----------------------------
 
 #File: HostBrowser.html
@@ -1194,8 +1204,8 @@ Confirm Deletion==Löschen Bestätigen
 Count Colors:==Legende der farbigen Zahlen:
 Documents without Errors==Dokumente mit Fehlern
 Pending in Crawler==Warten im Crawler
-Load Errors \(exclusion/failure\)==Ladefehler (Ausschluss/Fehler)
-Browser for \#\[path\]\#==Browser für #[path]#
+#Load Errors \(exclusion/failure\)==Ladefehler (Ausschluss/Fehler)
+#Browser for \#\[path\]\#==Browser für #[path]#
 documents stored for host: \#\[hostsize\]\#==Gespeicherte Dokumente für Host: #[hostsize]#
 documents stored for subpath: \#\[subpathloadsize\]\#==Gespeicherte Dokumente für Teilpfad: #[subpathloadsize]#
 unloaded documents detected in subpath: \#\[subpathdetectedsize\]\#==Entladene Dokumente erkannt im Teilpfad: #[subpathdetectedsize]#
@@ -1212,9 +1222,9 @@ load &amp; index==Laden &amp; Indexieren
 >loading<==>ladend<
 Outbound Links, outgoing from \#\[host\]\# - Host List==Ausgehende Links, ausgehend von #[host]# - Host Liste
 Inbound Links, incoming to \#\[host\]\# - Host List==Eingehende Links, eingehend auf #[host]# - Host Liste
-browse \#\[host\]\#==Durchsuche #[host]#
-\#\[count\]\# URLs==#[count]# URL(s)
-Administration Options==Administration Optionen
+#browse \#\[host\]\#==Durchsuche #[host]#
+#\#\[count\]\# URLs==#[count]# URL(s)
+#Administration Options==Administration Optionen
 #-----------------------------
 
 #File: index.html
@@ -1555,14 +1565,18 @@ Import failed:==Import fehlgeschlagen:
 
 #File: DictionaryLoader_p.html
 #---------------------------
-Dictionary Loader==Wörterbuch Download
+Knowledge Loader==Wissens Datenbanken Laden
 YaCy can use external libraries to enable or enhance some functions. These libraries are not==YaCy kann externe Bibliotheken zum Erweitern oder Aktivieren bestimmter Funktionen verwenden. Diese Bibliotheken sind nicht
 included in the main release of YaCy because they would increase the application file too much.==im Standard Release von YaCy enthalten weil diese die Anwendungsdatei zu stark vergrößern würden.
 You can download additional files here.==Sie können zusätzliche Dateien hier herunterladen.
 >Geolocalization<==>Geolokalisierung<
 Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.==Geolokalisierung erlaubt es YaCy bestimmte Orte auf OpenStreetMap zu bestimmten Suchbegriffen zu präsentieren.
 >GeoNames<==>Geografische Namen<
-With this file it is possible to find cities with a population > 1000 all over the world.==Mit dieser Datei ist es möglich Städte überall auf der Erde zu finden die mehr als 1000 Einwohner haben.
+With this file it is possible to find cities all over the world.==Mit dieser Datei ist es möglich Städte überall auf der Erde zu finden.
+Content<==Inhalt<
+cities with a population &gt; 1000 all over the world==Städte überall auf der Erde mit mehr als 1000 Einwohnern
+cities with a population &gt; 5000 all over the world==Städte überall auf der Erde mit mehr als 5000 Einwohnern
+cities with a population &gt; 100000 all over the world \(the set is is reduced to cities &gt; 100000\)==Städte überall auf der Erde mit mehr als 100000 Einwohnern (Der Datensatz wurde auf Städte mit &gt; 100000 Einwohnern reduziert)
 >Download from<==>Download von<
 >Storage location<==>Speicherort<
 #>Status<==>Status<
@@ -1585,6 +1599,9 @@ With this file it is possible to find cities with a population > 1000 all over t
 >cannot activate dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht aktiviert werden: #[error]#<
 #>OpenGeoDB<==>OpenGeoDB<
 >With this file it is possible to find locations in Germany using the location \(city\) name, a zip code, a car sign or a telephone pre-dial number.<==>Mit dieser Datei ist es möglich, Orte in Deutschland anhand des (Stadt)Namens, der Postleitzahl, eines Autokennzeichens oder einer Telefonvorwahl zu finden.<
+Suggestions<==Eingabevorschläge<
+Suggestion dictionaries will help YaCy to provide better suggestions during the input of search words==Wörterbücher mit Vorschlägen helfen YaCy bessere Suchtips bei der Eingabe von Suchworten anzuzeigen
+This file provides 100000 most common german words for suggestions==Diese Datei stell die 100000 häufigsten deutschen Wörter für Suchvorschläge bereit
 #-----------------------------
 
 #File: IndexCreateWWWGlobalQueue_p.html
@@ -2724,7 +2741,7 @@ Please be fair, contribute your own index to the global index.==Bitte seien Sie 
 Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
 it as soon as possible and restart YaCy.==dieses Problem so schnell wie möglich und starten Sie YaCy neu.
 Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT wurde deaktiviert. Bitte beheben Sie 
-Crawling is paused! If the crawling was paused automatically, please check your disk space.=Crawling ist pausiert! Wenn das Crawling automatisch pausiert wurde, pr&uuml;fen Sie bitte Ihrer Festplattenspeicher.
+Crawling is paused! If the crawling was paused automatically, please check your disk space.==Crawling wurde pausiert! Wenn das Crawling automatisch pausiert wurde, prüfen Sie bitte Ihrer Festplattenspeicher.
 Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
@@ -2776,8 +2793,11 @@ Enable\]==Aktivieren]
 Enabled <a==Aktiviert <a
 Disable\]==Deaktivieren]
 Memory Usage==Speicherverbrauch
-free:==Frei:
-max:==Maximal:
+RAM used:==RAM benutzt:
+RAM max:==RAM maximal:
+DISK used:==DISK benutzt:
+\(approx.\)==(etwa)
+DISK free:==DISK frei:
 on::off==an::aus
 
 Configure==Einstellen
