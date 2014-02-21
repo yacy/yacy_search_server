@@ -398,21 +398,19 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     @Override
     public synchronized long getLoadTime(String id) {
         int responseCount = 0;
-        SolrIndexSearcher searcher = null;
         DocListSearcher docListSearcher = null;
         try {
             docListSearcher = new DocListSearcher("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, 0, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
             responseCount = docListSearcher.response.size();
             if (responseCount == 0) return -1;
-            searcher = docListSearcher.request.getSearcher();
+            SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
             DocIterator iterator = docListSearcher.response.iterator();
             //for (int i = 0; i < responseCount; i++) {
             Document doc = searcher.doc(iterator.nextDoc(), AbstractSolrConnector.SOLR_ID_and_LOAD_DATE_FIELDS);
             if (doc == null) return -1;
             return AbstractSolrConnector.getLoadDate(doc);
             //}
-        } catch (Throwable e) {} finally { 
-            if (searcher != null) try {searcher.close();} catch (IOException e) {}
+        } catch (Throwable e) {} finally {
             if (docListSearcher != null) docListSearcher.close();
         }
         return -1;
