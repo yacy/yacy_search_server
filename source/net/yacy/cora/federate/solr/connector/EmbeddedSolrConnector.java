@@ -425,13 +425,12 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             public void run() {
                 int o = offset, responseCount = 0;
                 DocListSearcher docListSearcher = null;
-                SolrIndexSearcher searcher = null;
                 while (System.currentTimeMillis() < endtime) {
                     try {
                     	responseCount = 0;
                         docListSearcher = new DocListSearcher(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
                         responseCount = docListSearcher.response.size();
-                        searcher = docListSearcher.request.getSearcher();
+                        SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
                         DocIterator iterator = docListSearcher.response.iterator();
                         for (int i = 0; i < responseCount; i++) {
                             Document doc = searcher.doc(iterator.nextDoc(), SOLR_ID_FIELDS);
@@ -441,7 +440,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                         break;
                     } catch (IOException e) {
                     } finally {
-                        if (searcher != null) try {searcher.close();} catch (IOException e) {}
                         if (docListSearcher != null) docListSearcher.close();
                     }
                     if (responseCount < pagesize) break;
