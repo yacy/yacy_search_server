@@ -20,8 +20,8 @@
 
 package net.yacy.cora.order;
 
-import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Random;
 
@@ -600,33 +600,45 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         if ("-test".equals(s[0])) {
             // do some checks
             Random r = new Random(System.currentTimeMillis());
-            
-            // encode with enhancedCoder, decode with standard RFC 1521 base64
-            sun.misc.BASE64Decoder rfc1521Decoder = new sun.misc.BASE64Decoder();
-            for (int i = 0; i < 100000; i++) {
-                String challenge = Long.toString(r.nextLong());
-                String eb64 = enhancedCoder.encode(UTF8.getBytes(challenge));
-                String rfc1521 = new String(eb64);
-                while (rfc1521.length() % 4 != 0) rfc1521 += "=";
-                rfc1521 = rfc1521.replace('-', '+').replace('_', '/');
-                System.out.println("Encode enhancedB64 + Decode RFC1521: Challenge=" + challenge + ", eb64=" + eb64 + ", rfc1521=" + rfc1521);
-                try {
-                    if (!UTF8.String(rfc1521Decoder.decodeBuffer(rfc1521)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
-                } catch (IOException e) {}
-            }
-            
-            // encode with enhancedCoder, decode with standard RFC 1521 base64
-            sun.misc.BASE64Encoder rfc1521Encoder = new sun.misc.BASE64Encoder();
-            for (int i = 0; i < 100000; i++) {
+
+            try {                
+                // use the class loader to call sun.misc.BASE64Encoder, the sun base64 encoder
+                // we do not instantiate that class here directly since that provokes a
+                // "warning: sun.misc.BASE64Encoder is internal proprietary API and may be removed in a future release"
+
                 // encode with enhancedCoder, decode with standard RFC 1521 base64
-                String challenge = Long.toString(r.nextLong());
-                String rfc1521 = rfc1521Encoder.encode(UTF8.getBytes(challenge));
-                String eb64 = new String(rfc1521);
-                while (eb64.endsWith("=")) eb64 = eb64.substring(0, eb64.length() - 1);
-                eb64 = eb64.replace('+', '-').replace('/', '_');
-                System.out.println("Encode RFC1521 + Decode enhancedB64: Challenge=" + challenge + ", rfc1521=" + rfc1521 + ", eb64=" + eb64);
-                if (!UTF8.String(enhancedCoder.decode(eb64)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
+                Class<?> rfc1521Decoder_class = Class.forName("sun.misc.BASE64Decoder");
+                Object rfc1521Decoder = rfc1521Decoder_class.newInstance();
+                Method rfc1521Decoder_decodeBuffer = rfc1521Decoder_class.getMethod("decodeBuffer", String.class);
+                for (int i = 0; i < 100000; i++) {
+                    String challenge = Long.toString(r.nextLong());
+                    String eb64 = enhancedCoder.encode(UTF8.getBytes(challenge));
+                    String rfc1521 = new String(eb64);
+                    while (rfc1521.length() % 4 != 0) rfc1521 += "=";
+                    rfc1521 = rfc1521.replace('-', '+').replace('_', '/');
+                    System.out.println("Encode enhancedB64 + Decode RFC1521: Challenge=" + challenge + ", eb64=" + eb64 + ", rfc1521=" + rfc1521);
+                    if (!UTF8.String((byte[]) rfc1521Decoder_decodeBuffer.invoke(rfc1521Decoder, rfc1521)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
+                }
+                
+                // encode with enhancedCoder, decode with standard RFC 1521 base64
+                Class<?> rfc1521Encoder_class = Class.forName("sun.misc.BASE64Encoder");
+                Object rfc1521Encoder = rfc1521Encoder_class.newInstance();
+                Method rfc1521Encoder_encode = rfc1521Encoder_class.getMethod("encode", byte[].class);
+                // sun.misc.BASE64Encoder rfc1521Encoder = new sun.misc.BASE64Encoder();
+                for (int i = 0; i < 100000; i++) {
+                    // encode with enhancedCoder, decode with standard RFC 1521 base64
+                    String challenge = Long.toString(r.nextLong());
+                    String rfc1521 = (String) rfc1521Encoder_encode.invoke(rfc1521Encoder, UTF8.getBytes(challenge));
+                    String eb64 = new String(rfc1521);
+                    while (eb64.endsWith("=")) eb64 = eb64.substring(0, eb64.length() - 1);
+                    eb64 = eb64.replace('+', '-').replace('/', '_');
+                    System.out.println("Encode RFC1521 + Decode enhancedB64: Challenge=" + challenge + ", rfc1521=" + rfc1521 + ", eb64=" + eb64);
+                    if (!UTF8.String(enhancedCoder.decode(eb64)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
+            
         }
     }
 }
