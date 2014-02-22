@@ -470,11 +470,11 @@ Hypertext Cache Configuration==Настройка кэша гипертекст�
 The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Кэш хранит данные полученные по HTTP и FTP протоколу. Документы из smb:// и file:// не кэшируются.
 The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Если кэш заполнен, то старые записи будут удалены и заменены на новые.
 HTCache Configuration==Настройка кэша
-The path where the cache is stored==Путь, где сохраняется кэш
+The path where the cache is stored==Место хранения кэша
 The current size of the cache==Текущий размер кэша
 The maximum size of the cache==Максимальный размер кэша
 "Set"=="Установить"
-Cleanup==Очистить
+Cleanup==Удаление кэша
 Cache Deletion==Очистить кэш
 Delete HTTP &amp; FTP Cache==Очистить HTTP &amp; FTP кэш
 Delete robots.txt Cache==Очистить кэш robots.txt
@@ -564,22 +564,24 @@ You can configure if you want to participate at the global YaCy network or if yo
 own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
 a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
 peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
-Peer-to-Peer Mode==Peer-to-Peer Modus
->Index Distribution==>Index-Verteilung
-This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
->enabled==>aktiviert
-disabled during crawling==während des Crawlings deaktiviert
-disabled during indexing==während des Indexierens deaktiviert
->Index Receive==>Index-Empfang
-Accept remote Index Transmissions==Remote Index-Übertragungen akzeptieren
-This works only if you have a senior peer. The DHT-rules do not work without this function==Dies funktioniert nur, wenn Sie einen Senior-Peer haben. Die DHT-Regeln arbeiten nicht ohne diese Funktion
->reject==>verwerfe
-accept transmitted URLs that match your blacklist==akzeptiere übertragene URLs, die zu Ihrer Blacklist passen
-#>Accept Remote Crawl Requests==>Remotecrawl-Anfragen akzeptieren
-#Perform web indexing upon request of another peer==Führe Indexierung bei Anfrage eines anderen Peers aus
-#This works only if you are a senior peer==Dies funktioniert nur, wenn Sie ein Senior-Peer sind
-#Load with a maximum of==Lade mit maximal
-#pages per minute==Seiten pro Minute (PPM)
+Peer-to-Peer Mode==Peer-to-Peer режим
+>Index Distribution==>Распределение индекса
+This enables automated, DHT-ruled Index Transmission to other peers==Автоматическая передача индекса в виде DHT на другие узлы
+>enabled==>включить
+disabled during crawling==отключить во время сканирования
+disabled during indexing==отключить во время индексации
+>Index Receive==>Приём индекса
+Accept remote Index Transmissions==Приём удалённых передач индекса
+This works only if you have a senior peer. The DHT-rules do not work without this function==Работает только, если ваш узел находится в senior-режиме. Правила DHT не работают без этой функции.
+>reject==>запретить
+accept transmitted URLs that match your blacklist==приём URL-ссылок, совпадающих с вашим чёрным списком
+>allow==>разрешить
+deny remote search==запретить удалённый поиск
+#>Accept Remote Crawl Requests==>Приём запросов удалённого индексатора
+#Perform web indexing upon request of another peer==Выполнять вэб-индексирование при запросе от другого узла
+#This works only if you are a senior peer==Работает только, если ваш узел находится в senior-режиме.
+#Load with a maximum of==Загрузить максимум
+#pages per minute==страниц в минуту (PPM)
 >Robinson Mode==>Robinson режим
 If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Falls Ihr Peer im 'Robinson Modus' läuft, so verwenden Sie YaCy als Suchmaschine für Ihr eigenes Suchportal, ohne Datenaustausch mit anderen Peers
 There is no index receive and no index distribution between your peer and any other peer==Es gibt keinen Index-Empfang von und keine Index-Verteilung zu anderen Peers
@@ -774,7 +776,7 @@ check for new releases, download if available and restart with downloaded releas
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Загрузка версии #[downloadedRelease]# завершена. Начинается перезагрузка.
 No more recent release found.==Более новой версии не обнаружено.
 Release will be installed. Please wait.==Идет установка новой версии. Пожалуйста, подождите.
-You installed YaCy with a package manager.==Вы установили YaCy с помощью менеджера пакетов
+You installed YaCy with a package manager.==Вы установили YaCy с помощью менеджера пакетов.
 To update YaCy, use the package manager:==Для обновления YaCy используйте менеджер пакетов.
 Omitting update because this is a development environment.==Пропускаю обновление, потому что это режим разработки.
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==Пропускаю обновление, потому что загрузка версии #[downloadedRelease]# не была успешной.
@@ -782,6 +784,7 @@ Automated System Update==Автоматическое обновление
 manual update==Ручное обновление
 no automatic look-up, updates can be made manually using this interface \(see options above\)==Обновление можно сделать вручную на этой странице.
 automatic update==Автоматическое обновление
+add the following line to==добавьте строку в файл
 updates are made within fixed cycles:==обновления выполняются в установленные циклы:
 Time between lookup==Время между проверками
 hours==часов
@@ -893,14 +896,6 @@ Edit Profile==Изменить профиль
 #File: CrawlResults.html
 #---------------------------
 Crawl Results<==Результаты индексирования<
-Overview</a>==Обзор</a>
-Receipts</a>==Поступления</a>
-Queries</a>==Запросы</a>
-DHT Transfer==DHT-передача
-Proxy Use==Использование прокси
-Local Crawling</a>==Локальное индексирование</a>
-Global Crawling</a>==Глобальное индексирование</a>
-Surrogate Import</a>==Surrogate Import</a>
 >Crawl Results Overview<==>Обзор результатов индексирования<
 These are monitoring pages for the different indexing queues.==Das sind die Seiten zur Überwachung der verschiedenen Indexier Warteschlangen.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermenüs oben beschrieben.
@@ -918,28 +913,28 @@ This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu
 <em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Einträge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
 'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
 is reported back and can be monitored here.==wird nun zurück gemeldet und hier angezeigt.
-\(2\) Results for Result of Search Queries==(2) Ergebnisse der Resultate bei Suchanfragen
+\(2\) Results for Result of Search Queries==(2) Результаты поисковых запросов
 This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
 The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
 <em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>Anwendungsfall:</em> Diese Liste füllt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
-\(3\) Results for Index Transfer==(3) Ergebnisse der DHT-Verteilung
+\(3\) Results for Index Transfer==(3) Результаты передачи индекса
 The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgeführt.
 These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer übermittelt, da er am angemessensten zur Speicherung
 the logic of the Global Distributed Hash Table.==übereinstimmend mit der Logic der verteilten Hash Tabelle ist.
 <em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Anwendung:</em> Dies Liste füllt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
-\(4\) Results for Proxy Indexing==(4) Ergebnisse der Proxy Indexierung
-These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
-No personal or protected page is indexed==Weder persönliche noch geschützte Seiten werden indexiert
-such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
-and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
+\(4\) Results for Proxy Indexing==(4) Результаты  индексирования через прокси
+These web pages had been indexed as result of your proxy usage.==Эти вэб-страницы были проиндексированы в результате использования вами прокси.
+No personal or protected page is indexed==Личные или защищённые страницы не индексируются.
+such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Такие страницы определяются по свойствам HTTP-заголовка (использование куки или HTTP-авторизации) или по параметрам POST (в адресе или передающиеся через HTTP-протокол)
+and automatically excluded from indexing.==и автоматически исключаются из индексирования.
 <em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Anwendung:</em> Sie müssen YaCy als Proxy benutzen, um diese Tabelle zu füllen.
 Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
 \(5\) Results for Local Crawling==(5) Результаты локального индексирования
-These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen Crawl auf der 'Index erzeugen' Seite gestartet haben.
+These web pages had been crawled by your own crawl task.==Эти вэб-страницы были проиндексированы вашим узлом по вашему указанию.
 <em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
-\(6\) Results for Global Crawling==(6) Ergebnisse des globalen Crawlens
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
+\(6\) Results for Global Crawling==(6) Результаты глобального индексирования
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Эти страницы проиндексированы вашим узлом, но индексатор был инициирован удалённым узлом..
 This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
 <em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
@@ -1104,6 +1099,11 @@ Scan Range==Уровень сканирования
 Scan sub-range with given host==Scanne Unterbereich von angegebenen Host aus
 Full Intranet Scan:==Полное сканирование интранета:
 Do not use intranet scan results, you are not in an intranet environment!==Verwenden Sie nicht die Intranet Scan Resultate, da sie sich nicht in einer Intranet Umgebung befinden!
+All known hosts in the search index \(/31 subnet recommended!\)==Alle bekannten Hosts im Suchindex (/31 Subnetz empfohlen!)
+only the given host\(s\)==Nur den/die angegebenen Host(s)
+addresses\)==Addressen)
+Subnet<==Subnetz<
+Time-Out<==Timeout<
 >Scan Cache<==>Scan Cache<
 accumulate scan results with access type \"granted\" into scan cache \(do not delete old scan result\)==Sammle Scan Ergebnisse mit dem Zugriffstyp "granted" im Scan Cache (Lösche keine alten Scan Ergebnisse)
 >Service Type<==>Тип сервиса<
@@ -1121,20 +1121,20 @@ Look every==Проверять каждые
 again and add new sites automatically to indexer.=и добавлять новые сайты в индексатор автоматически.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==Seiten die nicht im Laufe eines geplanten Scans auftauchen werden von den Suchergebnissen ausgeschlossen.
 "Scan"=="Сканировать"
-The following servers had been detected:==Die folgenden Server wurden entdeckt:
-Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
->Protocol<==>Протокол<
+#The following servers had been detected:==Die folgenden Server wurden entdeckt:
+#Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
+#>Protocol<==>Протокол<
 #>IP<==>IP-адрес<
 #>URL<==>URL-адрес<
->Access<==>Доступ<
->Process<==>Состояние<
->unknown<==>неизвестно<
->empty<==>пусто<
->granted<==>разрешено<
->denied<==>запрещено<
->not in index<==>нет в индексе<
->indexed<==>проиндексировано<
-"Add Selected Servers to Crawler"=="Добавить выбранные серверы в индексатор"
+#>Access<==>Доступ<
+#>Process<==>Состояние<
+#>unknown<==>неизвестно<
+#>empty<==>пусто<
+#>granted<==>разрешено<
+#>denied<==>запрещено<
+#>not in index<==>нет в индексе<
+#>indexed<==>проиндексировано<
+#"Add Selected Servers to Crawler"=="Добавить выбранные серверы в индексатор"
 #-----------------------------
 
 #File: CrawlStartSite_p.html
@@ -1143,24 +1143,26 @@ Available server within the given IP range==Verfügbare Server innerhalb des ang
 Site Crawler:==Индексирование сайта:
 Download all web pages from a given domain or base URL.==Загрузить все веб-страницы из указанного домена или основного URL.
 >Site Crawl Start<==>Запуск индексирования сайта<
->Site<==>Сайт<	
+>Site<==>Сайт<
+Start URL&nbsp;\(must start with==Начальная URL-ссылка&nbsp;(должна начинаться с	
 Link-List of URL==Список URL-адресов
->Scheduler<==>Планировщик<
-run this crawl once==запустить индексирование один раз
-scheduled, look every==по расписанию, каждые
->minutes<==>минут<
->hours<==>часов<
->days<==>дней<
-for new documents automatically.==автоматически, на наличие новых документов.
+#>Scheduler<==>Планировщик<
+#run this crawl once==запустить индексирование один раз
+#scheduled, look every==по расписанию, каждые
+#>minutes<==>минут<
+#>hours<==>часов<
+#>days<==>дней<
+#for new documents automatically.==автоматически, на наличие новых документов.
 >Path<==>Путь<
 load all files in domain==загрузить все файлы в этом домене
 load only files in a sub-path of given url==загрузить файлы только по ссылкам указанным в URL-адресе
 >Limitation<==>Ограничения<
 not more than <==не больше чем <
 >documents<==>документов<
->Dynamic URLs<==>Динамические URL-адреса<
-allow <==разрешить <
-urls with a \'\?\' in the path==URL адреса '?' в адресе
+#>Dynamic URLs<==>Динамические URL-адреса<
+#allow <==разрешить <
+#urls with a \'\?\' in the path==URL адреса '?' в адресе
+Collection<==Коллекция<
 #>Start<==>Запуск<
 "Start New Crawl"=="Запустить новое индексирование"
 Hints<==Подсказки<
@@ -1178,10 +1180,15 @@ The scheduler on crawls can be changed or removed using the <a href=\"Table_API_
 
 #File: Help.html
 #---------------------------
-YaCy: Help==YaCy: Помощь
-Tutorial==Руководство
+#YaCy: Help==YaCy: Помощь
+YaCy: Tutorial==YaCy: Инструкции
 You are using the administration interface of your own search engine==YaCy можно использовать для организации собственного поиска. Ниже видео-демонстрация работы YaCy (на немецком языке).
-
+You can create your own search index with YaCy==С YaCy вы можете организовать свой собственный поиск
+To learn how to do that, watch one of the demonstration videos below==Bitte sehen Sie als Anleitung eine Demonstration (2. Video unten in deutscher Sprache)
+twitter this video==Отправить это видео в твиттер
+Download from Vimeo==Загрузить из Vimeo
+More Tutorials==Больше инструкций
+Please see the tutorials on==Пожалуйста, смотрите больше инструкций на
 #-----------------------------
 
 #File: HostBrowser.html
@@ -1206,8 +1213,8 @@ Load Errors==Ошибки загрузки
 >Administration Options<==>Расширенные опции<
 Delete all Load Errors from index==Удалить все ошибки загрузки из индекса
 "Delete Load Errors"=="Удалить"
-Load Errors \(exclusion/failure\)==Ошибки загрузки
-Browser for \#\[path\]\#==Браузер для #[path]#
+#Load Errors \(exclusion/failure\)==Ошибки загрузки
+#Browser for \#\[path\]\#==Браузер для #[path]#
 documents stored for host: \#\[hostsize\]\#==Gespeicherte Dokumente für Host: #[hostsize]#
 documents stored for subpath: \#\[subpathloadsize\]\#==Gespeicherte Dokumente für Teilpfad: #[subpathloadsize]#
 unloaded documents detected in subpath: \#\[subpathdetectedsize\]\#==Entladene Dokumente erkannt im Teilpfad: #[subpathdetectedsize]#
@@ -1224,9 +1231,9 @@ load &amp; index==Загрузить &amp; индекс
 >loading<==>загружается<
 Outbound Links, outgoing from \#\[host\]\# - Host List==Ausgehende Links, ausgehend von #[host]# - Host Liste
 Inbound Links, incoming to \#\[host\]\# - Host List==Eingehende Links, eingehend auf #[host]# - Host Liste
-browse \#\[host\]\#==просмотр #[host]#
-\#\[count\]\# URLs==#[count]# URL-адресов
-Administration Options==Расширенные опции
+#browse \#\[host\]\#==просмотр #[host]#
+#\#\[count\]\# URLs==#[count]# URL-адресов
+#Administration Options==Расширенные опции
 #-----------------------------
 
 #File: index.html
@@ -1240,27 +1247,27 @@ Audio==Аудио
 Video==Видео
 Applications==Приложения
 more options...==Расширенный поиск...
-advanced parameters==дополнительные параметры
-Max. number of results==максимальное число результатов
+#advanced parameters==дополнительные параметры
+#Max. number of results==максимальное число результатов
 Results per page==Результатов на страницу
 Resource==Ресурс
 global==глобальный
->local==>локальный
-Global search is disabled because==Глобальный поиск отключен потому что
-DHT Distribution</a> is==Приём DHT-данных</a> ist
-Index Receive</a> is==Приём индекса</a> ist 
-DHT Distribution and Index Receive</a> are==Приём DHT-данных и индекса</a>
-отключен.\#\(==deaktiviert.#(
-URL mask==Фильтр URL-адресов
+#>local==>локальный
+#Global search is disabled because==Глобальный поиск отключен потому что
+#DHT Distribution</a> is==Приём DHT-данных</a> ist
+#Index Receive</a> is==Приём индекса</a> ist 
+#DHT Distribution and Index Receive</a> are==Приём DHT-данных и индекса</a>
+#отключен.\#\(==deaktiviert.#(
+#URL mask==Фильтр URL-адресов
 restrict on==ограничение
 show all==показать все
 #überarbeiten!!!
 Prefer mask==Фильтр
 Constraints==Ограничения
 only index pages==только проиндексированные страницы
-"authentication required"=="требуется авторизация"
-Disable search function for users without authorization==Отключить веб-поиск для пользователей без авторизации
-Enable web search to everyone==Разрешить веб-поиск всем
+#"authentication required"=="требуется авторизация"
+#Disable search function for users without authorization==Отключить веб-поиск для пользователей без авторизации
+#Enable web search to everyone==Разрешить веб-поиск всем
 the peer-to-peer network==P2P-сеть
 only the local index==Только локальный индекс
 Query Operators==Операторы запроса
@@ -1285,7 +1292,7 @@ doublequotes==двойные кавычки
 prefer given language==предпочитать указанный язык
 an ISO639 2-letter code==двухбуквенный языковой код ISO639
 heuristics==эвристики
-add search results from scroogle==добавить результаты из Scroogle
+#add search results from scroogle==добавить результаты из Scroogle
 add search results from blekko==добавить результаты из Blekko
 Search Navigation==Навигация по поиску
 keyboard shotcuts==Назначения клавиш
@@ -1297,7 +1304,7 @@ automatic result retrieval==Вывод результатов
 browser integration==интеграция в браузер
 after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==после поиска, кликните на поиске по умолчанию в правом верхнем углу браузера и выберите 'добавить Поиск YaCy'
 search as rss feed==представить как RSS-ленту
-click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==после поиска кликните на красной иконке в правом верхнему углу. Также хорошо работает с модификатором ранжирования /date. Смотрите
+#click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==после поиска кликните на красной иконке в правом верхнему углу. Также хорошо работает с модификатором ранжирования /date. Смотрите
 >example==>пример
 json search results==результаты в формате JSON
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==для AJAX-разработчиков: получите rss-ленту и замените расширение .rss на .json
@@ -1331,21 +1338,27 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 #---------------------------
 Reverse Word Index Administration==Администрирование индекса ссылок по слову
 The local index currently contains \#\[wcount\]\# reverse word indexes==Локальный индекс в настоящее время содержит #[wcount]# слов обратного индекса
-RWI Retrieval \(= search for a single word\)==RWI‐запрос (= поиск одного слова)
-Select Segment:==Выбрать сегмент:
-Retrieve by Word:<==Запрос по слову:<
-"Show URL Entries for Word"=="Показать URL-адреса для слова"
-Retrieve by Word-Hash==Запросы слова по хэш 
-"Show URL Entries for Word-Hash"=="Показать URL-адреса для хэш слова"
-"Generate List"=="Генерировать список"
-Cleanup==Очистка
->Index Deletion<==>Удаление индекса<
->Delete Search Index<==>Удалить поисковый индекс<
-Stop Crawler and delete Crawl Queues==Остановить индексатор и удалить очередь запросов
-Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
-Delete robots.txt Cache==Удалить кеш robots.txt
-Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты, полученные ошибочно во время поиска
-"Delete"=="Удалить"
+RWI Retrieval \(= search for a single word\)==Поиск слов
+#Select Segment:==Выбрать сегмент:
+Retrieve by Word:<==Поиск по слову:<
+"Show URL Entries for Word"=="Показать ссылки"
+Retrieve by Word-Hash==Поиск слова по хэш 
+"Show URL Entries for Word-Hash"=="Показать ссылки"
+"Generate List"=="Создать список"
+Limitations==Ограничения
+Index Reference Size==Размер индекса ссылок
+No reference size limitation \(this may cause strong CPU load when words are searched that appear very often\)==Без ограничений (это может сильно нагружать процессор, если искомые слова ищутся слишком часто)
+Limitation of number of references per word:==Ограничение числа ссылок на слово:
+\(this causes that old references are deleted if that limit is reached\)==(старые ссылки будут удалены, если достигнут предела)
+"Set References Limit"=="Установить"
+#Cleanup==Очистка
+#>Index Deletion<==>Удаление индекса<
+#>Delete Search Index<==>Удалить поисковый индекс<
+#Stop Crawler and delete Crawl Queues==Остановить индексатор и удалить очередь запросов
+#Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
+#Delete robots.txt Cache==Удалить кеш robots.txt
+#Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты, полученные ошибочно во время поиска
+#"Delete"=="Удалить"
 No entry for word \'\#\[word\]\#\'==Не найдено для слова \'\#\[word\]\#\'
 No entry for word hash==Не найдено для хэш слова
 Search result==Результат поиска
@@ -1384,7 +1397,7 @@ Positive Ranking Factors==Positive Ranking Faktoren
 Reverse Normalized Weighted Ranking Sum==Inverse normalisierte gewichtete Ranking Summe
 hash</td>==хэш</td>
 dom length</td>==длина домена</td>
-ybr</td>==YBR</td>
+#ybr</td>==YBR</td>
 #url comps</td>
 url length</td>==длина URL-адреса</td>
 pos in text</td>==Pos. im Text</td>
@@ -1415,38 +1428,59 @@ Blacklist Extension==Расширения черного списка
 
 #File: IndexControlURLs_p.html
 #---------------------------
-URL References Administration==URL Referenzen Administration
-The local index currently contains \#\[ucount\]\# URL references==Der lokale Index enthält im Moment #[ucount]# URL-Referenzen
-URL Retrieval==URL Abfrage
-Select Segment:==Segment Auswahl:
-Retrieve by URL:<==Abfrage nach URL:<
-"Show Details for URL"=="Details für URL zeigen"
-Retrieve by URL-Hash==Abfrage nach URL-Hash
-"Show Details for URL-Hash"=="Details für URL-Hash zeigen"
-"Generate List"=="Liste erstellen"
-Statistics about top-domains in URL Database==Statistik über die Top-Domains in der URL Datenbank
+#URL References Administration==Управление URL-ссылками
+The local index currently contains \#\[ucount\]\# URL references==Локальный индекс содержит на данный момент #[ucount]# URL-ссылок
+URL Retrieval==Поиск URL-ссылок
+#Select Segment:==Выбрать сегмент:
+Retrieve by URL:<==Поиск ссылки:<
+"Show Details for URL"=="Показать сведения"
+Retrieve by URL-Hash==Поиск хэша URL-ссылки
+"Show Details for URL-Hash"=="Показать сведения"
+#"Generate List"=="Создать список"
+Cleanup==Очистка
+Index Deletion==Удаление индекса
+Delete local search index \(embedded Solr and old Metadata\)==Удалить локальный индекс поиска (включая Solr и старые метаданные)
+Delete remote solr index==Удалить удалённый индекс базы solr
+Delete RWI Index \(DHT transmission words\)==Удалить индекс RWI (передача слов в виде DHT)
+Delete Citation Index \(linking between URLs\)==Удалить индекс цитат (перекрестные ссылки)
+Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
+Stop Crawler and delete Crawl Queues==Остановить индексатор и удалить очередь запросов
+Delete robots.txt Cache==Удалить кеш robots.txt
+Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты, полученные ошибочно во время поиска
+"Delete"=="Удалить"
+Statistics about top-domains in URL Database==Список наиболее распространённых доменов в базе данных ссылок
 Show top==Показать
 domains from all URLs.==наиболее часто встречающихся доменов среди всех URL.
-"Generate Statistics"=="Statistik erstellen"
-Statistics about the top-\#\[domains\]\# domains in the database:==Statistik über die Top-#[domains]# Domains in der Datenbank:
+"Generate Statistics"=="Показать"
+Statistics about the top-\#\[domains\]\# domains in the database:==Статистика #[domains]# наиболее распространённых доменов в базе данных:
 "delete all"=="удалить всё"
-#Domain==Domain
-#URLs==URLs
-Sequential List of URL-Hashes==Sequentielle Liste der URL-Hashes
-Loaded URL Export==Export geladener URLs
-Export File==Export-Datei
-#URL Filter==URL Filter
-#Export Format==Export Format
-#Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
+Domain==Домен
+#URLs==Ссылки
+Dump and Restore of Solr Index==Создание дампа и восстановление индекса базы Solr
+"Create Dump"=="Создать дамп"
+Dump File==Файл дампа
+"Restore Dump"=="Восстановить дамп"
+Optimize Solr==Оптимизация базы Solr
+merge to max. <==Объединить максимум <
+> segments==>сегментов
+"Optimize Solr"=="Оптимизировать"
+Reboot Solr Core==Перезапустить ядро Solr
+"Shut Down and Re-Start Solr"=="Перезапустить"
+#Sequential List of URL-Hashes==Sequentielle Liste der URL-Hashes
+Loaded URL Export==Экспорт URL-ссылок
+Export File==Экспортировать файл
+URL Filter==Фильтр ссылок
+Export Format==Формат экспорта
+Only Domain <i>\(superfast\)==Только домен <i>(sehr schnell)
 Only Domain:==Только домен:
-Full URL List:==Liste mit vollständiger URL:
+Full URL List:==Полный список ссылок:
 Plain Text List \(domains only\)==Простой текстовый список (только домены)
 HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
 #Full URL List <i>\(high IO\)==Vollständige URL Liste <i>(hoher IO)
 Plain Text List \(URLs only\)==Простой текстовый список (только URL-адреса)
 HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
-"Export URLs"=="Экспортировать URL-адреса"
+"Export URLs"=="Экспортировать"
 Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# URLs bisher
 Finished export of \#\[urlcount\]\# URLs to file==Завершен экспорт #[urlcount]# URL-адресов в файл
 Export to file \#\[exportfile\]\# failed:==Экспорт в файл #[exportfile]# произошел с ошибкой:
@@ -1488,7 +1522,7 @@ Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Einträge ang
 "clear list"=="Liste löschen"
 There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Einträge in der zurückgewiesenen URL Liste:
 #Initiator==Initiator
-Executor==Ausführender
+#Executor==Ausführender
 #URL==URL
 Fail-Reason==Fehlermeldung
 #-----------------------------
@@ -1541,14 +1575,19 @@ Import failed:==Import fehlgeschlagen:
 
 #File: DictionaryLoader_p.html
 #---------------------------
-Dictionary Loader==Загрузка словаря
+Knowledge Loader==Загрузка словаря
 YaCy can use external libraries to enable or enhance some functions. These libraries are not==YaCy kann externe Bibliotheken zum Erweitern oder Aktivieren bestimmter Funktionen verwenden. Diese Bibliotheken sind nicht
 included in the main release of YaCy because they would increase the application file too much.==im Standard Release von YaCy enthalten weil diese die Anwendungsdatei zu stark vergrößern würden.
 You can download additional files here.==Sie können zusätzliche Dateien hier herunterladen.
 >Geolocalization<==>Geolokalisierung<
 Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.==Geolokalisierung erlaubt es YaCy bestimmte Orte auf OpenStreetMap zu bestimmten Suchbegriffen zu präsentieren.
 >GeoNames<==>Geografische Namen<
-With this file it is possible to find cities with a population > 1000 all over the world.==Mit dieser Datei ist es möglich Städte überall auf der Erde zu finden die mehr als 1000 Einwohner haben.
+With this file it is possible to find cities all over the world.==Mit dieser Datei ist es möglich Städte überall auf der Erde zu finden.
+Content<==Inhalt<
+cities with a population &gt; 1000 all over the world==Städte überall auf der Erde mit mehr als 1000 Einwohnern
+cities with a population &gt; 5000 all over the world==Städte überall auf der Erde mit mehr als 5000 Einwohnern
+cities with a population &gt; 100000 all over the world \(the set is is reduced to cities &gt; 100000\)==Städte 
+überall auf der Erde mit mehr als 100000 Einwohnern (Der Datensatz wurde auf Städte mit &gt; 100000 Einwohnern reduziert)
 >Download from<==>Download von<
 >Storage location<==>Speicherort<
 #>Status<==>Status<
@@ -1571,6 +1610,9 @@ With this file it is possible to find cities with a population > 1000 all over t
 >cannot activate dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht aktiviert werden: #[error]#<
 #>OpenGeoDB<==>OpenGeoDB<
 >With this file it is possible to find locations in Germany using the location \(city\) name, a zip code, a car sign or a telephone pre-dial number.<==>Mit dieser Datei ist es möglich, Orte in Deutschland anhand des (Stadt)Namens, der Postleitzahl, eines Autokennzeichens oder einer Telefonvorwahl zu finden.<
+Suggestions<==Eingabevorschläge<
+Suggestion dictionaries will help YaCy to provide better suggestions during the input of search words==Wörterbücher mit Vorschlägen helfen YaCy bessere Suchtips bei der Eingabe von Suchworten anzuzeigen
+This file provides 100000 most common german words for suggestions==Diese Datei stell die 100000 häufigsten deutschen Wörter für Suchvorschläge bereit
 #-----------------------------
 
 #File: IndexCreateWWWGlobalQueue_p.html
@@ -1694,7 +1736,7 @@ Various stack files that belong to the crawling queue==Verschiedene Stack-Dateie
 #MediaWiki Dump Import==MediaWiki Dump Import
 No import thread is running, you can start a new thread here==Sie können hier einen neuen Thread starten, da aktuell kein Import Thread läuft
 Bad input data:==Ungültige Eingabedaten:
-MediaWiki Dump File Selection: select a \'bz2\' file==MediaWiki Dump Datei Auswahl: Wähle eine 'bz2' Datei aus
+MediaWiki Dump File Selection: select an XML file \(which may be bz2- or gz-encoded\)==MediaWiki Dump Datei Auswahl: Wähle eine XML Datei (die auch bz2 oder gzip komprimiert sein darf)
 You can import MediaWiki dumps here. An example is the file==Hier können Sie MediaWiki Dumps importieren. Als Beispiel dient die Datei
 Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Legen Sie die Datei im YaCy-Verzeichnis oder einem Unterordner ab.
 "Import MediaWiki Dump"=="Importiere MediaWiki Dump"
@@ -1923,7 +1965,7 @@ YaCy Search Network==Поиск сети YaCy
 YaCy Network<==Сеть YaCy<
 The information that is presented on this page can also be retrieved as XML==Информация, указанная на этой странице, также может быть получена как XML
 Click the API icon to see the XML.==Нажмите на иконку API, чтобы увидеть XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
 Network Overview==Обзор сети
 Active&nbsp;Peers==Активные узлы
 Passive&nbsp;Peers==Пассивные узлы
@@ -1983,6 +2025,7 @@ Queries Per Hour \(QPH\)==Запросов в час (QPH)
 >Today<==>Сегодня<
 >Last&nbsp;Week<==>Последняя&nbsp;неделя<
 >Last&nbsp;Month<==>Последний&nbsp;месяц<
+Last Hour==Последний час
 >Now<==>Сейчас<
 >Active<==>Активные<
 >Passive<==>Пассивные<
@@ -2002,10 +2045,10 @@ Your Peer:==Ваш узел:
 >Uptime<==>Продолжительность работы<
 #>Links<==>Ссылки<
 #>RWIs<==>RWIs<
-Sent<br/>Words==Отправлено<br/>слов
 Sent<br/>URLs==Отправлено<br/>URL-ссылок
-Received<br/>Words==Получено<br/>слов
+Sent<br/>DHT Word Chunks==Отправлено<br/>по DHT частей слов
 Received<br/>URLs==Получено<br/>URL-ссылок
+Received<br/>DHT Word Chunks==Получено<br/>по DHT частей слов
 Known<br/>Seeds==Известные<br/>сиды
 Connects<br/>per hour==Соединений<br/>в час
 #Version==Версия
@@ -2072,17 +2115,17 @@ Attributes==Attribute
 Performance Settings==Настройки производительности
 Memory Settings==Настройки памяти
 Memory reserved for JVM==Выделение памяти для JVM
-"Set"=="Установить"
-Resource Observer==Обзор ресурса
-DHT-Trigger==DHT-Umschalter
-not triggered:==nicht ausgelöst:
+"Set"=="Сохранить"
+Resource Observer==Обзор ресурсов
+DHT-Trigger==DHT-триггер
+not triggered:==не срабатывает:
 >triggered==>ausgelöst
 reset state==сбросить статус
 HDD==Жесткий диск
-disable crawls below==Deaktivere Crawls unter
-free space==свободное место
-disable DHT-in below==Deaktivere eingehende DHT Transfers unter
-RAM==Arbeitsspeicher
+disable crawls below==Остановить индексаторы при достижении
+free space==свободного места
+disable DHT-in below==Остановить DHT-приём при достижении
+RAM==RAM
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Изменения будут применены после <strong>перезапуска</strong> YaCy
 restart now</a>==перезапустить сейчас</a>
 Confirm Restart==Подтвердить перезапуск
@@ -2090,12 +2133,12 @@ refresh graph==Oбновить диаграмму
 #show memory tables==показать таблицы памяти
 Use Default Profile:==Использовать профиль по-умолчанию:
 and use==и использовать
-of the defined performance.==der vorgegebenen Geschwindigkeit.
+of the defined performance.==от заданной производительности.
 Save==Сохранить
-Changes take effect immediately==Применить изменения немедленно
+Changes take effect immediately==Изменения будут применены немедленно
 YaCy Priority Settings==Настройки приоритета YaCy
 YaCy Process Priority==Приоритет процесса YaCy
-#Normal==Нормальный
+Normal==Нормальный
 Below normal==Ниже нормального
 Idle</option>==Ожидание</option>
 "Set new Priority"=="Установить новый приоритет"
@@ -2108,7 +2151,7 @@ This shall improve performance of the affected process \(proxy or search\).==Die
 seconds since last proxy/local-search/remote-search access.\)==Sekunden vergangen.)
 Online Caution Case==Onlinezugriff Typ
 indexer delay \(milliseconds\) after case occurency==Indexierer Verzögerung (Millisekunden) nach Onlinezugriff
-#Proxy:==Прокси:
+Proxy:==Прокси:
 Local Search:==Локальный поиск:
 Remote Search:==Удалённый поиск:
 "Enter New Parameters"=="Введите новые параметры"
@@ -2121,25 +2164,25 @@ refresh graph==обновить диаграмму
 Memory Usage:==Использование памяти:
 After Startup==После запуска
 After Initializations==После инициализации
-before GC==перед GC
+before GC==до GC
 after GC==после GC
 >Now==>Сейчас
-before <==перед <
+before <==до <
 Description==Описание
-maximum memory that the JVM will attempt to use==maximaler Speicher den die JVM nutzen wird
->Available<==>Verfügbar<
+maximum memory that the JVM will attempt to use==максимум доступно памяти для JVM
+>Available<==>Доступно<
 total available memory including free for the JVM within maximum==gesamter verfügbarer Speicher für die JVM innerhalb des Maximums.
->Total<==>Gesamt<
+>Total<==>Всего<
 total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speicher
->Free<==>Frei<
+>Free<==>Свободно<
 free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
 #EcoTable RAM Index:==EcoTabelle RAM Index:
-Table RAM Index:==Tabelle RAM Speicher Index:
->Size==>Größe
->Key==>Schlüssel
->Value==>Wert
+Table RAM Index:==Таблица индекса RAM:
+>Size==>Размер
+>Key==>Ключ
+>Value==>Значение
 #FlexTable RAM Index:==FlexTabelle RAM Index:
 Table</td>==Tabelle</td>
 Chunk Size<==Chunk Größe<
@@ -2195,8 +2238,10 @@ Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
 >idle loops==>untät. Durchl.
 >busy loops==>beschäft. Durchl.
 Minimum of<br />Required Memory==Mindestens<br />benötigter Speicher
+Maximum of<br />System-Load==Maximum der<br />Systemlast
 Full Description==Vollständige Beschreibung
 Submit New Delay Values==Neue Verzögerungswerte speichern
+Re-set to default==Auf Defaultwerte zurücksetzen
 Changes take effect immediately==Änderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
 #RAM Cache==RAM Cache
@@ -2219,20 +2264,13 @@ flushed to disc; this may last some minutes.==auf die Festplatte gesichert werde
 #Initial space of words in cache:==Anfangs Freiraum im Word Cache:
 #This is is the init size of space for words in cache.==Dies ist die Anfangsgröße von Wörtern im Cache.
 Enter New Cache Size==Neue Cachegröße eintragen
-Balancer Settings==Balancer Einstellungen
-This is the time delta between accessing of the same domain during a crawl.==Das ist die Zeitdifferenz zwischen zwei Zugriffen auf dieselbe Domäne während eines Crawls.
-The crawl balancer tries to avoid that domains are==Der Crawl Balancer versucht zu vermeiden, dass Domains
-accessed too often, but if the balancer fails \(i.e. if there are only links left from the same domain\), then these minimum==zu oft abgefragt werden. Aber wenn der Balancer nicht mehr greift \(z.B. wenn nur noch Links von derselben Domain übrig sind), werden diese Minimum
-delta times are ensured.==Zeitdifferenzen eingehalten.
-#>Crawler Domain<==>Crawler Domain<
->Minimum Access Time Delta<==>Minimum Zeitdifferenz zwischen Zugriffen<
->local \(intranet\) crawls<==>Lokale (Intranet) Crawls<
->global \(internet\) crawls<==>Globale (Internet) Crawls<
-"Enter New Parameters"=="Neue Parameter Setzen"
 Thread Pool Settings:==Threadpool-Einstellungen:
 maximum Active==max. aktiv
 current Active==derzeit aktiv
 Enter new Threadpool Configuration==Neue Threadpool-Konfiguration eintragen
+milliseconds<==Millisekunden<
+kbytes<==KBytes<
+load<==Last<
 #-----------------------------
 
 #File: PerformanceConcurrency_p.html
@@ -2241,7 +2279,9 @@ Performance of Concurrent Processes==Performance gleichzeitig laufender Prozesse
 serverProcessor Objects==serverProcessor Objekte
 #Thread==Thread
 Queue Size<br />Current==Größe der Warteschlange<br />Aktuell
-Queue Size<br />Current==Größe der Warteschlange<br />Maximum
+Queue Size<br />Maximum==Größe der Warteschlange<br />Maximum
+Executors:<br />Current Number of Threads==Executors:<br />Aktuelle Anzahl der Threads
+Concurrency:<br />Maximum Number of Threads==Concurrency:<br />Maximale Anzahl der Threads
 Concurrency:<br />Number of Threads==Gleichzeitigkeit:<br />Anzahl der Threads
 Childs==Kindprozesse
 Average<br />Block Time<br />Reading==Durchschnittlich<br />reservierte Zeit<br />lesend
@@ -2263,66 +2303,66 @@ Time<==Zeit<
 Duration \(ms\)==Dauer (Millisekunden)
 Result-Count==Anzahl Ergebnisse
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zuständigen Peers im DHT gelöst wurde.
-red -> request list alive==rot -> Request Liste aktiv
-green -> request has terminated==grün -> Request wurde beendet
-grey -> the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -> Das Suchergebnis hash order position(s) (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
+red -&gt; request list alive==rot -&gt; Request Liste aktiv
+green -&gt; request has terminated==grün -&gt; Request wurde beendet
+grey -&gt; the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -&gt; Das Suchergebnis hash order position(s) (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
 "Search event picture"=="Such Ereignis Bild"
 #-----------------------------
 
 #File: ProxyIndexingMonitor_p.html
 #---------------------------
-Indexing with Proxy==Indexierung per Proxy
-YaCy can be used to 'scrape' content from pages that pass the integrated caching HTTP proxy.==YaCy kann dazu verwendet werden den Inhalt aller Webseiten zu 'crawlen', die den eingebauten HTTP Proxy Server passieren.
-When scraping proxy pages then <strong>no personal or protected page is indexed</strong>;==Beim Indexieren von Seiten aus der Proxy Nutzung werden <strong>keine persönlichen oder geschützten Seiten indexiert</strong>!
+Indexing with Proxy==Индексация через прокси-сервер
+YaCy can be used to 'scrape' content from pages that pass the integrated caching HTTP proxy.==YaCy может индексировать кэшированные страницы с помощью прокси.
+When scraping proxy pages then <strong>no personal or protected page is indexed</strong>;==<strong>Личные и защищённые страницы не индексируются</strong>!
 # This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite für Internetseiten, die Ihr Peer während der aktuellen Sitzung
 # as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
-# No personal or protected page is indexed==Persönliche Seiten und geschütze Seiten werden nicht indexiert
-those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==Solche Seiten werden entweder durch Merkmale im HTTP Header (Kopf der Seite) (z.B.: Cookies oder HTTP Authorisierung)
-or by POST-Parameters \(either in URL or as HTTP protocol\)==oder durch POST-Parameter (z.B. in einer URL oder im HTTP Protokoll) erkannt
-and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
+# No personal or protected page is indexed==Личные или защищённые страницы не индексируются.
+those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==Такие страницы определяются по свойствам HTTP-заголовка (использование куки или HTTP-авторизации)
+or by POST-Parameters \(either in URL or as HTTP protocol\)==или по параметрам POST (в адресе или передающиеся через HTTP-протокол)
+and automatically excluded from indexing.==и автоматически исключаются из индексирования.
 
-Proxy Auto Config:==Automatische Proxy Konfiguration:
-this controls the proxy auto configuration script for browsers at http://localhost:8090/autoconfig.pac==Diese Einstellung regelt das Automatische Proxy Konfigurationsskript unter http://localhost:8090/autoconfig.pac
-.yacy-domains only==nur .yacy Domains
-whether the proxy should only be used for .yacy-Domains==Soll der Proxy nur für .yacy Domains verwendet werden diese Checkbox aktivieren.
-Proxy pre-fetch setting:==Proxy Indexier Einstellung:
-this is an automated html page loading procedure that takes actual proxy-requested==Dies ist eine automatische Web Seiten Lade Funktion, die aktuell besuchte
+Proxy Auto Config:==Автоматическая конфигурация прокси:
+this controls the proxy auto configuration script for browsers at http://localhost:8090/autoconfig.pac==Используйте скрипт автоматической конфигурации прокси для браузеров http://localhost:8090/autoconfig.pac
+.yacy-domains only==Только домены .yacy
+whether the proxy should only be used for .yacy-Domains==Использование прокси-сервера только для доменов .yacy
+Proxy pre-fetch setting:==Настройка кэширующего прокси:
+this is an automated html page loading procedure that takes actual proxy-requested==Настройка индексации кэшируемых страниц через прокси-сервер
 URLs as crawling start points for crawling.==URLs als Startpunkt zum Indexieren benutzt.
-Prefetch Depth==Indexier Tiefe
-A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Bei einer Tiefe von 0 wird nur die besuchte Seite indexiert; eine Tiefe von 1 bedeutet, dass alle Seiten
-embedded URLs, but since embedded image links are loaded by the browser==die auf dieser Seite verlinkt sind, geladen und indexiert werden; Da Links auf Bilder sowieso schon vom Browser geladen werden,
-this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
-Store to Cache==Speicher im Cache
-It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und YaCy soll im "Proxy-zu-Proxy"-Modus laufen.
-Do Local Text-Indexing==Lokales Text-Indexieren
-If this is on, all pages \(except private content\) that passes the proxy is indexed.==Wenn dieses aktiviert ist, werden alle Seiten (ausser private), die den Proxy passieren, indexiert. 
-Do Local Media-Indexing==Lokales Medien-Indexieren
-This is the same as for Local Text-Indexing, but switches only the indexing of media content on.==Dies ist fast das Gleiche wie beim lokalen Text-Indexieren, nur, dass medialer Inhalt indexiert wird.
-Do Remote Indexing==Remote Indexierung
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler andere Peers anfragen und als remote Indexierer für Ihren Crawl nutzen.
-If you need your crawling results locally, you should switch this off.==Sollten Sie Ihre Crawling Ergebnisse lokal benötigen, dann deaktivieren Sie diese Funktion.
-Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers können einen remote Crawl starten oder empfangen.
-Please note that this setting only take effect for a prefetch depth greater than 0.==Bitte berücksichtigen Sie, dass diese Einstellung nur wirkt, wenn Ihre Indexier Tiefe größer als 0 ist.
-Proxy generally==Proxy Allgemein
-Path==Verzeichnis
-The path where the pages are stored \(max. length 300\)==Verzeichnis in dem der Cache sein soll (max. 300 Zeichen)
-Size</label>==Größe</label>
-The size in MB of the cache.==Die Größe des Cache in MB.
-"Set proxy profile"=="Proxy Profil speichern"
-The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
-Please delete that file and restart.==Bitte löschen Sie diese Datei und starten Sie YaCy neu.
-Pre-fetch is now set to depth==Proxy Indexierung erfolgt nun bis zu einer Tiefe von
-Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
-Local Text Indexing is now \#\(indexingLocalText\)\#off::on==Lokales Text Indexieren ist nun #(indexingLocalText)#aus::an
-Local Media Indexing is now \#\(indexingLocalMedia\)\#off::on==Lokales Medien Indexieren ist nun #(indexingLocalMedia)#aus::an
-Remote Indexing is now \#\(indexingRemote\)\#off::on==Remote-Indexieren ist nun #(indexingRemote)#aus::an
-Cachepath is now set to \'\#\[return\]\#\'.</strong> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</strong> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
-Cachesize is now set to \#\[return\]\#MB.==Die Cache Größe ist nun auf #[return]#MB gesetzt.
-Changes will take effect after restart only.==Änderungen werden erst nach einem Neustart von YaCy wirksam.
-An error has occurred:==Es trat ein Fehler auf:
-You can see a snapshot of recently indexed pages==Sie können sich Voransichten von frisch indexierten Seiten
-on the==auf der
-Page.==Seite ansehen.
+Prefetch Depth==Уровень предварительной выборки
+A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==0 - отключение предварительной выборки, 1 - включение предварительной выборки. 
+embedded URLs, but since embedded image links are loaded by the browser==Предварительная выборка   
+this means that only embedded href-anchors are prefetched additionally.==будет действовать только в отношении href-якорей, так включенные ссылки загружаются браузером.
+Store to Cache==Сохранять в кэш
+It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Рекомендуется отключать только в том случае, если вы используете второй кэширующий прокси-сервер и YaCy настроен на использование в режиме прокси-прокси.
+Do Local Text-Indexing==Индексировать локальный текст
+If this is on, all pages \(except private content\) that passes the proxy is indexed.==Если включено, то все страницы, включая личные, будут проиндексированы.
+Do Local Media-Indexing==Индексировать локальные медиа-файлы
+This is the same as for Local Text-Indexing, but switches only the indexing of media content on.==Если включено, то все медиа-файлы будут индексироваться.
+Do Remote Indexing==Удалённое индексирование
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Если включено, то для индексирования также будут использоваться удалённые узлы.
+If you need your crawling results locally, you should switch this off.==Если вам необходимы данные о локальной индексации, то снимите этот флажок.
+Only senior and principal peers can initiate or receive remote crawls.==Только узлы работающие в режимах senior и principal, могут участвовать в удалённой индексации.
+Please note that this setting only take effect for a prefetch depth greater than 0.==Обратите внимение, что это действует только отключена предварительная выборка.
+Proxy generally==Кэш прокси
+Path==Путь
+The path where the pages are stored \(max. length 300\)==Место хранения кэша
+Size</label>==Размер</label>
+The size in MB of the cache.==Размер кэша в MB.
+"Set proxy profile"=="Сохранить настройки"
+The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Файл DATA/PLASMADB/crawlProfiles0.db отсутствует или повреждён.
+Please delete that file and restart.==Пожалуйста, удалите этот файл и перезапустите YaCy.
+Pre-fetch is now set to depth==Уровень предварительный выборки установлен
+Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Кэширование #(caching)#выкл::вкл#(/caching)#.
+Local Text Indexing is now \#\(indexingLocalText\)\#off::on==Индексация локальных текстовых файлов #(indexingLocalText)#выкл::вкл
+Local Media Indexing is now \#\(indexingLocalMedia\)\#off::on==Индексация локальных медиа-файлов #(indexingLocalMedia)#выкл::вкл
+Remote Indexing is now \#\(indexingRemote\)\#off::on==Удалённая индексация #(indexingRemote)#выкл::вкл
+Cachepath is now set to \'\#\[return\]\#\'.</strong> Please move the old data in the new directory.==Путь хранения кэша установлен как '#[return]#'.</strong>.
+Cachesize is now set to \#\[return\]\#MB.==Размер кэша установлен в #[return]#MB .
+Changes will take effect after restart only.==Изменения будут применены только после перезапуска.
+An error has occurred:==Произошла ошибка:
+You can see a snapshot of recently indexed pages==Вы можете увидеть недавно проиндексированные данные
+on the==на этой
+Page.==странице.
 #-----------------------------
 
 #File: QuickCrawlLink_p.html
@@ -2404,19 +2444,19 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 #File: Settings_p.html
 #---------------------------
 Advanced Settings==Расширенные настройки
-If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die ursprünglichen Werte zurücksetzen wollen,
-but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, müssen Sie YaCy stoppen,
-delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/yacy.conf' im YaCy Hauptordner löschen und YaCy neu starten.
+If you want to restore all settings to the default values,==Если вы хотите восстановить все значения настроек по-умолчанию,
+but <strong>forgot your administration password</strong>, you must stop the proxy,==но <strong>забыли свой пароль администратора</strong>, то вы должны остановить YaCy,
+delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==удалить файл 'DATA/SETTINGS/yacy.conf' в корневой папке YaCy и перезапустить YaCy.
 Performance Settings of Busy Queues==Настройки производительности очередей и процессов
-Viewer and administration for database tables==Administration der Datenbank Tabellen
-Viewer for Cookies in Proxy==Einstellung Cookie Überwachung
-Server Access Settings==Server Zugangs-Einstellungen
-Proxy Access Settings==Proxy Zugangs-Einstellungen
+Viewer and administration for database tables==Просмотр и управление таблицами базы данных
+Viewer for Cookies in Proxy==Просмотр сведений о куки (при использовании прокси-сервера)
+Server Access Settings==Настройки доступности сервера
+Proxy Access Settings==Настройки доступности прокси-сервера
 Crawler Settings==Настройки индексатора
 HTTP Networking==HTTP сеть
-#Remote Proxy \(optional\)==Удалённый прокси (опционально)
-Seed Upload Settings==Seed Upload Einstellungen
-Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
+Remote Proxy \(optional\)==Удалённый прокси (опционально)
+Seed Upload Settings==Настройки загрузки сида
+Message Forwarding \(optional\)==Отправка уведомления (опционально)
 #-----------------------------
 
 #File: Settings_Crawler.inc
@@ -2445,7 +2485,7 @@ Hint: On linux you can configure your firewall to transparently redirect all htt
 Connection Keep-Alive==Verbindung halten
 With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit können Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalität unterstützen soll.
 Send "Via" Header==Sende "Via" Header
-Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via-HTTP-Header</a>
+Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
 http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
 Send "X-Forwarded-For" Header== Sende "X-Forward-For" Header
 Specifies if the proxy should send the X-Forwarded-For http header.==Gibt an, ob der Proxy den X-forwarded-For HTTP-Header setzen soll.
@@ -2719,7 +2759,6 @@ You can download a more recent version of YaCy. Click here to install this updat
 #"Update YaCy"=="Обновить YaCy"
 Install YaCy==Установка YaCy
 You can download the latest releases here:=Hier kann die neueste Version heruntergeladen werden:
-[versionResMain]# or #[versionResDev]#==[versionResMain]# oder #[versionResDev]#
 You are running a server in senior mode and you support the global internet index,==Ваш узел в senior-режиме и Вы поддерживаете глобальный индекс Интернет,
 which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
@@ -2734,10 +2773,8 @@ For community support, please visit our==Für Unterstützung aus der Community, 
 #File: Status_p.inc
 #---------------------------
 System Status==Статус системы
-Process</dt>==Состояние</dt>
 Unknown==Неизвестный
 Uptime==Время работы
-System Resources==Системные ресурсы
 Processors:==Процессоры:
 Load:==Загрузка процессора:
 Protection==Защита
@@ -2769,8 +2806,14 @@ Enable\]==Включить]
 Enabled <a==Включено <a
 Disable\]==Отключить]
 Memory Usage==Использование памяти
-free:==Свободно:
-total:==Всего:
+RAM used:==RAM используется:
+RAM max:==RAM максимум:
+DISK used:==На диске используется:
+\(approx.\)==(примерно)
+DISK free:==На диске свободно:
+on::off==вкл::выкл
+
+Configure==Настройка
 max:==Максимально:
 
 Configure==Настройка
@@ -2846,7 +2889,7 @@ YaCy Supporters<==YaCy Unterstützer<
 >a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
-"authentication required"=="Autorisierung erforderlich"
+#"authentication required"=="Autorisierung erforderlich"
 Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
 Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
@@ -2856,8 +2899,9 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 : Peer Steering==: Управление узлом
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
->Process Scheduler<==>Prozess Planer<
+To see a list of all APIs, please visit the ==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
+>Process Scheduler<==>Планировщик<
 This table shows actions that had been issued on the YaCy interface==Эта таблица показывает какие действия были выполнены на YaCy интерфейсе,
 to change the configuration or to request crawl actions.==для изменения настроек или подачи запроса на выполнение сканирования.
 These recorded actions can be used to repeat specific actions and to send them==Эти сохраненые действия могут быть использованы, чтобы повторить некоторые и направить их
@@ -2927,7 +2971,8 @@ Scheduled actions are executed after the next execution date has arrived within 
 Table Viewer==Просмотр таблицы
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
 >robots.txt table<==>Значения robots.txt<
 #-----------------------------
 
@@ -3010,8 +3055,8 @@ Network Monitor==Монитор сети
 YaCy Debugging: Thread Dump==Oтладка YaCy: Дамп потока
 Threaddump<==Дамп потока<
 "Single Threaddump"=="Простой дамп потока"
-"Multiple Dump Statistic"=="Mehrfache Dump Statistiken"
-#"create Threaddump"=="Threaddump erstellen"
+"Multiple Dump Statistic"=="Мульти-дамп потока"
+#"create Threaddump"=="Создать дамп потока"
 #-----------------------------
 
 #File: User.html
@@ -3058,7 +3103,7 @@ Parsed Text==Geparster Text
 Parsed Sentences==Geparste Sätze
 Parsed Tokens/Words==Geparste Zeichen/Wörter
 Link List==Список ссылок
-"Show"=="Anzeigen"
+"Show"=="Показать"
 Unable to find URL Entry in DB==Es war nicht möglich den URL Eintrag in der DB zu finden.
 Invalid URL==Неправильный URL-адрес
 Unable to download resource content.==Es war nicht möglich den Inhalt der Quelle runterzuladen.
@@ -3073,9 +3118,9 @@ Parsed Content==Geparster Quellen Inhalt
 
 #File: ViewLog_p.html
 #---------------------------
-Lines==Zeilen
-reversed order==umgekehrte Reihenfolge
-"refresh"=="Aktualisieren"
+Lines==строк
+reversed order==в обратном порядке
+"refresh"=="Обновить"
 #-----------------------------
 
 #File: ViewProfile.html
@@ -3169,9 +3214,9 @@ The data that is visualized here can also be retrieved in a XML file, which list
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
-To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Web Structure==Веб структура
->Host List<==>Хост<
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im WikiWeb Structure==Netz Struktur
+>Host List<==>Список хостов<
 \#\[count\]\# outlinks==#[count]# внешних ссылок
 host<==Хост<
 depth<==Глубина<
@@ -3275,10 +3320,12 @@ alt text==alt Beschreibung
 #File: yacyinteractive.html
 #---------------------------
 YaCy Interactive Search==YaCy interaktive Suche
-This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
-The query format is similar to <a href=\"http://www.loc.gov/standards/sru/\">SRU</a>.==Das Abfrageformat ist ähnlich dem <a href="http://www.loc.gov/standards/sru/">SRU</a>.
+This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\" target=\"_blank\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
+The query format is similar to==Das Abfrageformat ist ähnlich dem von
+SRU==SRU
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf das API Symbol, um einen Beispielaufruf der RSS Such API zu sehen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
 loading from local index...==lädt aus lokalem Index...
 e="Search"==e="Suchen"
 #-----------------------------
@@ -3286,10 +3333,12 @@ e="Search"==e="Suchen"
 #File: yacysearch.html
 #---------------------------
 Search Page==Страница поиска
-This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==Diese Suchergebnisse können auch als RSS/<a href="http://www.opensearch.org">opensearch</a> abgerufen werden.
-The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Das Abfrageformat ist so ähnlich wie <a href="http://www.loc.gov/standards/sru/">SRU</a>.
+This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\" target=\"_blank\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
+The query format is similar to==Das Abfrageformat ist ähnlich dem von
+SRU==SRU
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf den API Button, um ein Beispiel zu sehen, wie das Such-RSS-API aufgerufen werden kann.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
+API wiki page==API Seite im Wiki
 "Search"=="Поиск"
 'Search'=='Поиск'
 "search again"=="Искать ещё"
@@ -3492,6 +3541,14 @@ Outgoing&nbsp;Cookies==Исходящие куки
 
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
+Overview</a>==Обзор</a>
+Receipts</a>==Поступления</a>
+Queries</a>==Запросы</a>
+DHT Transfer==DHT-передача
+Proxy Use==Использование прокси
+Local Crawling</a>==Локальное индексирование</a>
+Global Crawling</a>==Глобальное индексирование</a>
+Surrogate Import</a>==Surrogat Import</a>
 Processing Monitor==Монитор процессов
 Crawler Queues==Очереди индексирования
 Loader<==Загрузчик<
@@ -3580,7 +3637,7 @@ File Hosting==Хостинг файлов
 #File: env/templates/submenuViewLog.template
 #---------------------------
 Server Log Menu==Меню логов сервера
-#Server Log==Лог сервера
+Server Log==Лог сервера
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template
@@ -3671,7 +3728,7 @@ About YaCy-UI==О YaCy
 Admin Console==Консоль администратора
 "Bookmarks"=="Закладки"
 >Bookmarks==>Закладки
-#Server Log==Лог сервера
+Server Log==Лог сервера
 #-----------------------------
 
 #File: yacy/ui/yacyui-admin.html
