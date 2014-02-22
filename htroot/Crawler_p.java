@@ -264,16 +264,16 @@ public class Crawler_p {
                 boolean crawlingQ = "on".equals(post.get("crawlingQ", "off")); // on unchecked checkbox "crawlingQ" not contained in post
                 env.setConfig("crawlingQ", crawlingQ);
                 
-                boolean followFrames = "on".equals(post.get("followFrames", "on"));
+                boolean followFrames = "on".equals(post.get("followFrames", "false"));
                 env.setConfig("followFrames", followFrames);
                 
-                boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "on"));
+                boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "false"));
                 env.setConfig("obeyHtmlRobotsNoindex", obeyHtmlRobotsNoindex);
 
-                final boolean indexText = "on".equals(post.get("indexText", "on"));
+                final boolean indexText = "on".equals(post.get("indexText", "false"));
                 env.setConfig("indexText", indexText);
 
-                final boolean indexMedia = "on".equals(post.get("indexMedia", "on"));
+                final boolean indexMedia = "on".equals(post.get("indexMedia", "false"));
                 env.setConfig("indexMedia", indexMedia);
 
                 env.setConfig("storeHTCache", storeHTCache);
