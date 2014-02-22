@@ -20,6 +20,7 @@
 
 package net.yacy.cora.federate.solr.instance;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -117,6 +118,17 @@ public class InstanceMirror {
         if (esc != null) return esc;
         esc = new EmbeddedSolrConnector(this.embeddedSolrInstance);
         this.embeddedConnectorCache.put(coreName, esc);
+        return esc;
+    }
+
+    public RemoteSolrConnector getDefaultRemoteConnector(boolean useBinaryResponseWriter) throws IOException {
+        if (this.remoteSolrInstance == null) return null;
+        String coreName = this.getDefaultCoreName();
+        if (coreName == null) return null;
+        RemoteSolrConnector esc = this.remoteConnectorCache.get(coreName);
+        if (esc != null) return esc;
+        esc = new RemoteSolrConnector(this.remoteSolrInstance, useBinaryResponseWriter);
+        this.remoteConnectorCache.put(coreName, esc);
         return esc;
     }
 

@@ -2580,8 +2580,7 @@ public final class Switchboard extends serverSwitch {
                 } else {
                     // we consider this as fail urls to have a tracking of the problem
                     if (rejectReason != null && !rejectReason.startsWith("double in")) {
-                        final CrawlProfile profile = this.crawler.get(UTF8.getBytes(response.profile().handle()));
-                        this.crawlStacker.nextQueue.errorURL.push(response.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
+                        this.crawlStacker.nextQueue.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
                     }
                 }
             }
@@ -2600,8 +2599,10 @@ public final class Switchboard extends serverSwitch {
            ) {
             // get the hyperlinks
             final Map<DigestURL, String> hl = Document.getHyperlinks(documents);
-            for (Map.Entry<DigestURL, String> entry: Document.getImagelinks(documents).entrySet()) {
-                if (TextParser.supportsExtension(entry.getKey()) == null) hl.put(entry.getKey(), entry.getValue());
+            if (response.profile().indexMedia()) {
+                for (Map.Entry<DigestURL, String> entry: Document.getImagelinks(documents).entrySet()) {
+                    if (TextParser.supportsExtension(entry.getKey()) == null) hl.put(entry.getKey(), entry.getValue());
+                }
             }
             
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links

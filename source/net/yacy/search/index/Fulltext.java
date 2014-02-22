@@ -168,10 +168,9 @@ public final class Fulltext {
     }
 
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
-        if (this.solrInstances.getRemote() == null) return null;
         try {
-            return new RemoteSolrConnector(this.solrInstances.getRemote(), true);
-        } catch (final IOException e) {
+            return this.solrInstances.getDefaultRemoteConnector(true);
+        } catch (IOException e) {
             return null;
         }
     }
@@ -217,7 +216,9 @@ public final class Fulltext {
         synchronized (this.solrInstances) {
             EmbeddedInstance instance = this.solrInstances.getEmbedded();
             if (instance != null) {
-                for (String name: instance.getCoreNames()) new EmbeddedSolrConnector(instance, name).clear();
+                for (String name: instance.getCoreNames()) {
+                    this.solrInstances.getEmbeddedConnector(name).clear();
+                }
             }
             this.commit(false);
             this.solrInstances.clearCaches();
@@ -228,7 +229,9 @@ public final class Fulltext {
         synchronized (this.solrInstances) {
             ShardInstance instance = this.solrInstances.getRemote();
             if (instance != null) {
-                for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, true, name).clear();
+                for (String name: instance.getCoreNames()) {
+                    this.solrInstances.getRemoteConnector(name).clear();
+                }
             }
             this.solrInstances.clearCaches();
         }
