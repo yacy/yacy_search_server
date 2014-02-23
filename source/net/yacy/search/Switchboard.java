@@ -3261,7 +3261,7 @@ public final class Switchboard extends serverSwitch {
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final boolean accessFromLocalhost = requestHeader.accessFromLocalhost();
-        if ( getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) && accessFromLocalhost ) {
+        if (accessFromLocalhost && getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }
@@ -3298,13 +3298,13 @@ public final class Switchboard extends serverSwitch {
             // handle new option   adminAccountBase64MD5="MD5:xxxxxxx" = encodeMD5Hex ("adminname:peername:password")
             String realmtmp = Base64Order.standardCoder.decodeString(realmValue); //decode to clear text
             int i = realmtmp.indexOf(':');
-            if (i > 4) { // put peer name in realmValue (>4 is correct to scipt "MD5:" and usernames are min 4 characters)
+            if (i >= 3) { // put peer name in realmValue (>3 is ok to skip "MD5:" and usernames are min 4 characters, in basic auth realm "user:pwd")
                 realmtmp = realmtmp.substring(0, i + 1) + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + realmtmp.substring(i + 1);
 
-            if (adminAccountBase64MD5.substring(4).equals(Digest.encodeMD5Hex(realmtmp))) {
-                adminAuthenticationLastAccess = System.currentTimeMillis();
-                return 4; // hard-authenticated, all ok
-        }
+                if (adminAccountBase64MD5.substring(4).equals(Digest.encodeMD5Hex(realmtmp))) {
+                    adminAuthenticationLastAccess = System.currentTimeMillis();
+                    return 4; // hard-authenticated, all ok
+                }
             } else {
                 // handle DIGEST auth (realmValue = adminAccountBase (set for lecacyHeader in DefaultServlet for authenticated requests)
                 if (adminAccountBase64MD5.equals(realmValue)) {
