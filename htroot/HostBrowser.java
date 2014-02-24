@@ -182,9 +182,6 @@ public class HostBrowser {
                 
                 // collect hosts from crawler
                 final Map<String, Integer[]> crawler = (admin) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
-                for (Map.Entry<String, Integer[]> host: crawler.entrySet()) {
-                    hostscore.inc(host.getKey(), host.getValue()[0]);
-                }
                 
                 // collect the errorurls
                 Map<String, ReversibleScoreMap<String>> exclfacets = admin ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
