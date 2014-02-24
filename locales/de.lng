@@ -957,59 +957,46 @@ Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt d
 #File: CrawlStartExpert_p.html
 #---------------------------
 Expert Crawl Start==Experten Crawl Start
-Start Crawling Job:==Starte Crawling Aufgabe:
-You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie können hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterlädt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterlädt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
-Attribute<==Attribut<
-Value<==Wert<
-Description<==Beschreibung<
->Starting Point:==>Startpunkt:
->From URL==>Von URL
-From Sitemap==Von Sitemap
-From File==Von Datei
-Existing start URLs are always re-crawled.==Existierende Start-URLs werden immer wieder gecrawled.
+Start Crawling Job:==Starte Crawling Job:
+You can define URLs as start points for Web page crawling and start crawling here.==Sie können hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
+\"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links.=="Crawling" bedeutet, dass YaCy die angegebene Webseite runterlädt, alle Links extrahiert und dann den Inhalt hinter diesen Links lädt.
+This is repeated as long as specified under \"Crawling Depth\".== Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
+A crawl can also be started using wget and the==Ein Crawl kann auch mit wget gestartet werden unter Verwendung der
+>post arguments<==>POST Argumente<
+> for this web page.==> für diese Webseite.
+
+#>Crawl Job<==>Crawl Job<
+A Crawl Job consist of one or more start point, crawl limitations and document freshness rules.==Ein Crawl Job besteht aus einem oder mehreren Startpunkten, Crawl Limitierungen und einer Dokumenten Frischheits-Regel.
+
+>Start Point<==>Startpunkt<
+One Start URL or a list of URLs:<br/>\(must start with http:// https:// ftp:// smb:// file://\)==Eine Start URL oder eine Liste von URLs:<br/>(muss mit http:// https:// ftp:// smb:// file:// beginnen)
+Define the start-url\(s\) here. You can submit more than one URL, each line one URL please.==Definiere die Start-URL(s) hier. Die können mehr als eine URL angeben und diese bitte mit einer URL pro Zeile.
+Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.==Jede dieser URLs ist die Wurzel für einen Crawl Start. Existierende Start URLs werden immer neu geladen.
 Other already visited URLs are sorted out as \"double\", if they are not allowed using the re-crawl option.==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert, wenn diese nicht ausdrücklich per Re-crawl Option zugelassen wurden.
-Create Bookmark==Lesezeichen erstellen
-\(works with "Starting Point: From URL" only\)==(funktioniert nur mit "Startpunkt von URL")
-Title<==Titel<
-Folder<==Ordner<
-This option lets you create a bookmark from your crawl start URL.==Diese Option gibt Ihnen die Möglichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen.
-Crawling Depth</label>==Crawling-Tiefe</label>
-This defines how often the Crawler will follow links \(of links..\) embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links (von Links ...) in Webseiten folgen wird.
-0 means that only the page you enter under \"Starting Point\" will be added==0 bedeutet, dass nur die Seite unter "Startpunkt"
-to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==dem Index zugefügt wird. 2-4 ist gut für normales Indexieren. Werte über 8 sind nicht nützlich, denn eine Suche mit Suchtiefe 8 würde
-index approximately 25.600.000.000 pages, maybe this is the whole WWW.==ungefähr 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
-Scheduled re-crawl<==Geplanter Re-Crawl<
->no&nbsp;doubles<==>Keine&nbsp;Dubletten<
-run this crawl once and never load any page that is already known, only the start-url may be loaded again.==Führe diesen Crawl einmalig aus und lade niemals eine schon bekannte Seite nach. Nur die URL unter Startpunkt darf noch einmal geladen werden.
->re-load<==>Nachladen<
-run this crawl once, but treat urls that are known since==führe diesen Crawl einmalig aus aber behandle URLs die bereits seit
->years<==>Jahre<
->months<==>Monate<
->days<==>Tage<
->hours<==>Stunden<
-not as double and load them again. No scheduled re-crawl.==bekannt sind nicht als Dubletten und lade sie erneut.
->scheduled<==>Geplant<
-after starting this crawl, repeat the crawl every==Nach dem Start dieses Crawls, führe ihn jede
-> automatically.==> automatisch aus.
+
+
+>From Link-List of URL<==>Von Linkliste der URL<
+From Sitemap<==Von Sitemap<
+From File \(enter a path<br/>within your local file system\)==Von Datei (Verwende Pfad einer Datei<br/>auf dem lokalen Dateisystem)
+
 A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl führt eine Dubletten Prüfung anhand einer internen Datenbank gegen alle im Internet gefunden Links durch. Wenn dieselbe URL wieder gefunden wird,
 then the url is treated as double when you check the \'no doubles\' option. A url may be loaded again when it has reached a specific age,==wird die URL als Dublette behandelt wenn die 'Keine Doubletten' Option ausgewählt wurde. Eine URL kann noch einmal geladen werden wenn sie ein bestimmtes Alter erreicht hat.
-to use that check the \'re-load\' option. When you want that this web crawl is repeated automatically, then check the \'scheduled\' option.==Dafür kann die 'Nachladen' Option verwendet werden. Wenn der Web Crawl automatisch wiederholt werden soll, kann die 'Geplant' Option ausgewählt werden.
-In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==In diesem Fall wird der Crawl erneut nach der eingestellten Zeit ausgeführt und keine URL aus einem vorhergegangenem Crawl wird als Dublette ausgelassen.
-Must-Match Filter==Muss-entsprechen Filter
+#to use that check the \'re-load\' option. When you want that this web crawl is repeated automatically, then check the \'scheduled\' option.==Dafür kann die 'Nachladen' Option verwendet werden. Wenn der Web Crawl automatisch wiederholt werden soll, kann die 'Geplant' Option ausgewählt werden.
+#In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==In diesem Fall wird der Crawl erneut nach der eingestellten Zeit ausgeführt und keine URL aus einem vorhergegangenem Crawl wird als Dublette ausgelassen.
+#Must-Match Filter==Muss-entsprechen Filter
 Use filter==Filter nutzen
 Restrict to start domain==Auf Startdomain beschränken
 Restrict to sub-path==Auf Sub-Pfad beschränken
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-ähnlicher regulärer Ausdruck, der mit den zu crawlenden URLs übereinstimmen muss;
-The filter is a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regular expression</a>==Dieser Filter ist ein <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a>
-that must match with the URLs which are used to be crawled; default is \'catch all\'.==der auf die zum Crawlen verwendeten URLs zutreffen muss. Die Standard Einstellung ist 'alle zulassen'.
-Example: to allow only urls that contain the word \'science\', set the filter to \'.*science.*\'.==Beispiel: Um nur URLs zuzulassen, die das Wort 'Wissenschaft' beeinhalten, setzen Sie den Filter auf '.*Wissenschaft.*'.
+#The filter is a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regular expression</a>==Dieser Filter ist ein <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a>
+#that must match with the URLs which are used to be crawled; default is \'catch all\'.==der auf die zum Crawlen verwendeten URLs zutreffen muss. Die Standard Einstellung ist 'alle zulassen'.
+#Example: to allow only urls that contain the word \'science\', set the filter to \'.*science.*\'.==Beispiel: Um nur URLs zuzulassen, die das Wort 'Wissenschaft' beeinhalten, setzen Sie den Filter auf '.*Wissenschaft.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Sie können aber auch eine automatische Domain-Beschränkung benutzen, um eine einzelne Domain komplett zu crawlen.
-Must-Not-Match Filter==Muss-nicht-entsprechen Filter
-This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
-The empty string is a never-match filter which should do well for most cases.==Ein leeres Feld ist ein niemals-passend Filter, der in den meisten Fällen gute Dienste leisten sollte.
-If you don't know what this means, please leave this field empty.==Wenn Sie nicht wissen, was dies bedeutet, lassen Sie das Feld einfach leer.
+#Must-Not-Match Filter==Muss-nicht-entsprechen Filter
+#This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
+#The empty string is a never-match filter which should do well for most cases.==Ein leeres Feld ist ein niemals-passend Filter, der in den meisten Fällen gute Dienste leisten sollte.
 #Re-crawl known URLs:==Re-crawl bekannter URLs:
-Use</label>:==Benutzen</label>:
+
 #It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es hängt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl älter als das angegebene
 #Auto-Dom-Filter:==Auto-Dom-Filter:
 #This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschränkt ,
@@ -1017,37 +1004,98 @@ Use</label>:==Benutzen</label>:
 #restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschränken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe für
 #for this example would be 1.==dieses Beispiel wäre 1.
 #The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschränkt wird.
-Maximum Pages per Domain:==Maximale Seiten pro Domain:
-Page-Count==Seitenanzahl
+#Maximum Pages per Domain:==Maximale Seiten pro Domain:
+#Page-Count==Seitenanzahl
 You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.==Sie können die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
 You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie können diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit für alle Domains mit der
 the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
-Accept URLs with==Akzeptiere URLs mit
-dynamic URLs==dynamische URLs
-A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
-is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
+#dynamic URLs==dynamische URLs
+
+
+
+Document Cache<==Dokumenten Cache<
 Store to Web Cache==Speichern im Web-Cache
 This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardmäßig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
+A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled.==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden.
+However, there are sometimes web pages with static content that== Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
+is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
+Following frames is NOT done by Gxxg1e, but we do by default to have a richer content. \'nofollow\' in robots metadata can be overridden; this does not affect obeying of the robots.txt which is never ignored.==Gxxg1e folgt Frames NICHT aber wir machen das in den Standardeinstellungen, um reicheren Kontant zu bekommen. 'nofollow' in den robots Metadaten kann ausser Kraft gesetzt werden. Das wirkt sich jedoch nicht auf die Einhaltung der robots.txt aus welche nie ignoriert wird.
+Accept URLs with query-part \(\'\?\'\):==Akzeptiere URLs mit Fragezeichen ('?') im Abfrage Part:
+Obey html-robots-noindex:==Beachte noindex in der HTML robots Datei:
 
 Policy for usage of Web Cache==Regeln für die Nutzung des Web Caches
 The caching policy states when to use the cache during crawling:==Die Caching Regeln legen fest wann der Cache während des Crawlen verwendet wird:
-#no&nbsp;cache==no&nbsp;cache
 no&nbsp;cache==kein&nbsp;Cache
-#if&nbsp;fresh==if&nbsp;fresh
 if&nbsp;fresh==bei&nbsp;frischem&nbsp;Cache&nbsp;Hit
-#if&nbsp;exist==if&nbsp;exist
 if&nbsp;exist==bei&nbsp;Cache&nbsp;Hit
-#cache&nbsp;only==cache&nbsp;only
 cache&nbsp;only==nur&nbsp;Cache
 never use the cache, all content from fresh internet source;==Den Cache nie verwenden, allen Inhalt frisch von der Online Quelle
 use the cache if the cache exists and is fresh using the proxy-fresh rules;==Verwende den Cache, wenn ein Treffer im Cache existiert und dieser aktuell ist.
 use the cache if the cache exist. Do no check freshness. Otherwise use online source;==Verwende den Cache, wenn ein Treffer existiert ohne die Aktualität zu prüfen. Andernfalls verwende die Quelle online;
 never go online, use all content from cache. If no cache exist, treat content as unavailable==Gehe niemals online, verwende nur den Cache Inhalt. Wenn kein Cache existiert, behandle den Inhalt als nicht verfügbar
 
-Do Local Indexing:==Lokales Indexieren:
+#>Crawler Filter<==>Crawler Filter<
+These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.==Das sind Limitierungen auf den Crawl-Stacker. Die Filter werden angewandt bevor eine Webseite geladen wurde.
+Crawling Depth<==Crawling Tiefe<
+This defines how often the Crawler will follow links \(of links..\) embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links (von Links ...) in Webseiten folgen wird.
+0 means that only the page you enter under \"Starting Point\" will be added==0 bedeutet, dass nur die Seite unter "Startpunkt"
+to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==dem Index zugefügt wird. 2-4 ist gut für normales Indexieren. Werte über 8 sind nicht nützlich, denn eine Suche mit Suchtiefe 8 würde
+index approximately 25.600.000.000 pages, maybe this is the whole WWW.==ungefähr 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
+also all linked non-parsable documents==auch alle verlinkten und nicht-parsbaren Dokumente
+Unlimited crawl depth for URLs matching with==Unlimitierte Crawl Tiefe für URLs auf die folgendes zutrifft
+Maximum Pages per Domain==Maximale Seiten per Domain
+>Use<==>Benutzen<
+>Page-Count<==>Seitenanzahl<
+misc. Constraints==Verschiedene Einschränkungen
+>Load Filter on URLs<==>Lade Filter auf URLs<
+>Load Filter on IPs<==>Lade Filter auf IPs<
+Must-Match List for Country Codes==Liste aller Ländercodes die zutreffen müssen
+Crawls can be restricted to specific countries. This uses the country code that can be computed from==Crawls können auf bestimmte Länder beschränkt werden. Dafür wird der Ländercode verwendet, der
+the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.==aus der IP des Servers berechnet wird welcher die Seite hostet. Der Filter ist kein regulärer Ausdruck aber eine Liste mit Ländercodes und Komma als Trennzeichen.
+no country code restriction==keine Einschränkung anhand von Ländercodes
+
+Document Filter==Dokument-Filter
+These are limitations on index feeder. The filters will be applied after a web page was loaded.==Das sind Limitierungen auf den Index-Feeder. Die Filter werden angewandt wenn eine Webseite geladen wurde.
+>Filter on URLs<==Filter auf URLs<
+The filter is a==Der Filter ist ein
+>regular expression<==>Regülärer Ausdruck<
+that <b>must not match</b> with the URLs to allow that the content of the url is indexed.==der auf die URLs <b>zutreffen muss</b>, damit der Inhalt der URL indexiert werden darf.
+> must-match<==> muss zutreffen<
+> must-not-match<==> muss nicht zutreffen<
+\(must not be empty\)==(darf nicht leer sein)
+
+Clean-Up before Crawl Start==Aufräumen vor dem Crawl Start
+>No Deletion<==>Kein Löschen<
+>Re-load<==>Neu Laden<
+For each host in the start url list, delete all documents \(in the given subpath\) from that host.==Lösche alle Dokumente (im angegebenen Unterpfad) für jeden Host in der URL Startliste von diesem Host.
+Do not delete any document before the crawl is started.==Lösche keine Dokumente bevor der Crawl gestartet wird.
+Treat documents that are loaded==Behandle Dokumente die
+> ago as stale and delete them before the crawl is started.==> zuvor geladen wurden als abgelaufen und lösche sie bevor der Crawl gestartet wird.
+After a crawl was done in the past, document may become stale and eventually they are also deleted on the target host.==Nachdem ein Crawl abgeschlossen wurde, werden Dokumenten ebenfalls überfällig und eventuell werden diese auch auf dem Ziel-Host gelöscht.
+To remove old files from the search index it is not sufficient to just consider them for re-load but it may be necessary==Um diese alten Dateien aus dem Suchindex zu entfernen ist es nicht ausreichend sie für einen erneutes Laden vorzusehen - aber es kann notwending sein
+to delete them because they simply do not exist any more. Use this in combination with re-crawl while this time should be longer.==diese ebenfalls zu Löschen weil sie ganz einfach nicht mehr existieren. Verwendung in Kombination mit Re-Crawl während diese Zeit länger sein sollte.
+
+Double-Check Rules==Dubletten Check Regeln
+No&nbsp;Doubles==Keine&nbsp;Dubletten
+A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl macht einen Dubletten Check auf alle im Internet gefundenen Links gegen die interne Datenbank. Wenn dieselbe URL wieder gefunden wird,
+then the url is treated as double when you check the \'no doubles\' option. A url may be loaded again when it has reached a specific age,==dann wird die URL als Dublette behandelt wenn Sie die 'Keine Dubletten' Option ausgewählt haben. Eine URL wird wieder geladen, wenn sie ein bestimmtes Alter erreicht hat.
+to use that check the \'re-load\' option.==Um diese Option zu verwenden bitte die Option "Neu Laden" markieren.
+>Re-load<==>Neu Laden<
+Treat documents that are loaded==Behandle Dokumente die
+> ago as stale and load them again. If they are younger, they are ignored.==> zuvor geladen wurden als abgelaufen und lade sie erneut. Wenn sie jünger sind werden sie ignoriert.
+Never load any page that is already known. Only the start-url may be loaded again.==Lade nie eine Seite die schon bekannt ist. Nur die Start-URL kann erneut geladen werden.
+
+Robot Behaviour==Robot Verhalten
+Use Special User Agent and robot identification==Verwende speziellen User-Agent und Robot Verifizierung
+You are running YaCy in non-p2p mode and because YaCy can be used as replacement for commercial search appliances==Sie verwenden YaCy im Nicht-P2P Modus und weil YaCy sich als Ersatz für kommerzielle Suchanwendungen benutzen lässt.
+\(like the GSA\) the user must be able to crawl all web pages that are granted to such commercial plattforms.==(wie z.B. die GSA) der Benutzer muss alle Webseiten die solchen kommerziellen Platformen verfügbar sind crawlen können.
+Not having this option would be a strong handicap for professional usage of this software. Therefore you are able to select==Diese Option nicht zu haben könnte ein starkes Handicap für die professionelle Nutzung dieser Software darstellen. Darum können Sie hier
+alternative user agents here which have different crawl timings and also identify itself with another user agent and obey the corresponding robots rule.==alternative User-Agents auswählen, die verschiedene Craw Timings haben und sich selbst auch mit einem anderen User-Agent ausweisen und die jeweiligen robots Regeln anwenden.
+
+Do Local Indexing==Lokales Indexieren
 index text==Indexiere Text
 index media==Indexiere Medien
-This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterlädt. Dies sollte standardmässig aktiviert sein, ausser Sie wollen den
+This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterlädt. Dies sollte standardmässig aktiviert sein, ausser Sie wollen den
 Document Cache without indexing.==Dokumenten Cache ohne Indexierung füllen.
 Do Remote Indexing==Nutze Remote Indexierung
 Describe your intention to start this global crawl \(optional\)==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional)
@@ -1057,10 +1105,17 @@ If you need your crawling results locally, you should switch this off.==Wenn Sie
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers können einen remote Crawl initiieren oder erhalten.
 A YaCyNews message will be created to inform all peers about a global crawl==Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren 
 so they can omit starting a crawl with the same start point.==damit sie es vermeiden können, einen Crawl vom selben Startpunkt zu starten.
-Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschließen
-This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem häufig vorkommende Wörter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle Wörter von der Indexierung auszuschließen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
-check this box.==aktivieren Sie diese Box.
-"Start New Crawl"=="Neuen Crawl starten"
+#Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschließen
+#This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem häufig vorkommende Wörter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle Wörter von der Indexierung auszuschließen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
+
+Add Crawl result to collection\(s\)==Crawl Ergebnis zu Kollektion(en) hinzufügen
+A crawl result can be tagged with names which are candidates for a collection request.==Ein Crawl Ergebnis kann mit Namen getagged werden die Kandidaten für eine Kollektion Anfrage sind.
+These tags can be selected with the==Diese Tags können ausgewählt werden mit dem
+GSA interface==GSA Interface
+using the \'site\' operator.==durch Verwendung des 'site' Befehls.
+To use this option, the 'collection_sxt'-field must be switched on in the==Um diese Option zu verwenden, muss das 'collection_sxt'-Feld eingeschalten werden auf der Seite für das
+#Solr Schema==Solr Schema
+"Start New Crawl Job"=="Neuen Crawl Job starten"
 #-----------------------------
 
 #File: CrawlStartIntranet_p.html
@@ -1092,7 +1147,7 @@ Please enter a different IP range for another scan.==Bitte geben Sie einen ander
 Please wait...==Bitte warten...
 >Scan the network<==>Das Netzwerk Scannen<
 Scan Range==Scan Bereich
-Scan sub-range with given host==Scanne Unterbereich von angegebenen Host aus
+Scan sub-range with given host==Scanne Unterbereich vom angegebenen Host aus
 Full Intranet Scan:==Voller Intranet Scan:
 Do not use intranet scan results, you are not in an intranet environment!==Verwenden Sie nicht die Intranet Scan Resultate, da sie sich nicht in einer Intranet Umgebung befinden!
 All known hosts in the search index \(/31 subnet recommended!\)==Alle bekannten Hosts im Suchindex (/31 Subnetz empfohlen!)
@@ -3393,7 +3448,7 @@ Table Viewer==Tabellen Betrachter
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
-YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
+#YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
 ### SEARCH INTERFACES ###
 Search Interfaces==Suchschnittstellen
 Web Search==Web-Suche
@@ -3458,15 +3513,16 @@ Help / YaCy Wiki==Hilfe / YaCy Wiki
 
 #File: env/templates/submenuAccessTracker.template
 #---------------------------
-Access Tracker==Zugriffe
-Server Access==Server-Zugriff
-Overview==Überblick
-#Details==Details
-Connections</a>==Verbindungen</a>
-Local Search==Lokale Suche
+Access Tracker==Zugriffs-Tracker
+Server Access==Server-Zugang
+Access Grid==Zugriffs-Grid
+Incoming Requests Overview==Eingehende Anfragen Überblick
+Incoming Requests Details==Eingehende Anfragen Details
+All Connections<==Alle Verbindungen<
+Local Search<==Lokale Suche<
 #Log==Log
-#Host Tracker==Host Tracker
-Remote&nbsp;Search==Remote Suche
+Host Tracker==Host-Tracker
+Remote Search<==Remote-Suche
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
