@@ -268,31 +268,16 @@ public final class Fulltext {
         getDefaultConnector().commit(softCommit);
         if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
-/*
-    public Date getLoadDate(final String urlHash) {
-        if (urlHash == null) return null;
-        try {
-            SolrDocument doc = this.getDefaultConnector().getDocumentById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
-            Object d = doc == null ? null : doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-            if (d == null) return null;
-            assert d instanceof Date : "d = " + d.toString();
-            if (d instanceof Date) return (Date) d;
-            if (d instanceof Long) return new Date(((Long) d).longValue());
-            return null;
-        } catch (final IOException e) {
-            return null;
-        }
-    }
-*/
-    public DigestURL getURL(final byte[] urlHash) {
-        if (urlHash == null || this.getDefaultConnector() == null) return null;
+    
+    public DigestURL getURL(final String urlHashS) {
+        if (urlHashS == null || this.getDefaultConnector() == null) return null;
         
         try {
-            SolrDocument doc = this.getDefaultConnector().getDocumentById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
+            SolrDocument doc = this.getDefaultConnector().getDocumentById(urlHashS, CollectionSchema.sku.getSolrFieldName());
             Object u = doc == null ? null : doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
             if (u == null) return null;
             assert u instanceof String : "u = " + u.toString();
-            if (u instanceof String) return new DigestURL((String) u, urlHash);
+            if (u instanceof String) return new DigestURL((String) u, ASCII.getBytes(urlHashS));
             return null;
         } catch (final IOException e) {
             return null;

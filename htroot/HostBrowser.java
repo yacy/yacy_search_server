@@ -567,12 +567,12 @@ public class HostBrowser {
                     // get all urls from the index and store them here
                     for (String id: internalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURL u = fulltext.getURL(ASCII.getBytes(id));
+                        DigestURL u = fulltext.getURL(id);
                         if (u != null) references_internal_urls.add(u.toNormalform(true));
                     }
                     for (String id: externalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURL u = fulltext.getURL(ASCII.getBytes(id));
+                        DigestURL u = fulltext.getURL(id);
                         if (u != null) references_external_urls.add(u.toNormalform(true));
                     }
                 } catch (final IOException e) {

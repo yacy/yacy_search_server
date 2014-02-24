@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.util.EnumMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -82,7 +83,7 @@ public class YMarkMetadata {
 	public YMarkMetadata(final byte[] urlHash, final Segment indexSegment) {
 		this.document = null;
 		this.indexSegment = indexSegment;
-		this.uri = this.indexSegment.fulltext().getURL(urlHash);
+		this.uri = this.indexSegment.fulltext().getURL(ASCII.String(urlHash));
 	}
 
 	public YMarkMetadata(final Document document) {

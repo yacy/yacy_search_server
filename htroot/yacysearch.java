@@ -595,7 +595,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final DigestURL url = indexSegment.fulltext().getURL(UTF8.getBytes(bookmarkHash));
+                final DigestURL url = indexSegment.fulltext().getURL(bookmarkHash);
                 if ( url != null ) {
                     try {
                         sb.tables.bookmarks.createBookmark(

@@ -1610,7 +1610,7 @@ public final class Switchboard extends serverSwitch {
     public DigestURL getURL(final byte[] urlhash) {
         if (urlhash == null) return null;
         if (urlhash.length == 0) return null;
-        final DigestURL url = this.index.fulltext().getURL(urlhash);
+        final DigestURL url = this.index.fulltext().getURL(ASCII.String(urlhash));
         if (url != null) return url;
         return this.crawlQueues.getURL(urlhash);
     }
