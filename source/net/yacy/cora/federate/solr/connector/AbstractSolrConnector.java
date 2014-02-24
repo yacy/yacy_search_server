@@ -82,24 +82,32 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     protected final static int pagesize = 100;
     
-    protected static long getLoadDate(final Object doc) {
+    protected static Metadata getMetadata(final Object doc) {
+        if (doc == null) return null;
         Object d = null;
-        if (doc != null) {
-            if (doc instanceof SolrInputDocument) d = ((SolrInputDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-            if (doc instanceof SolrDocument) d = ((SolrDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-            if (doc instanceof org.apache.lucene.document.Document) {
-                String ds = ((org.apache.lucene.document.Document) doc).get(CollectionSchema.load_date_dt.getSolrFieldName());
-                try {
-                    d = Long.parseLong(ds);
-                } catch (NumberFormatException e) {
-                    d = -1l;
-                }
-            }
+        String url = null;
+        if (doc instanceof SolrInputDocument) {
+            d = ((SolrInputDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+            url = (String) ((SolrInputDocument) doc).getFieldValue(CollectionSchema.sku.getSolrFieldName());
         }
-        if (d == null) return -1l;
-        if (d instanceof Long) return ((Long) d).longValue();
-        if (d instanceof Date) return ((Date) d).getTime();
-        return -1l;
+        if (doc instanceof SolrDocument) {
+            d = ((SolrDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+            url = (String) ((SolrDocument) doc).getFieldValue(CollectionSchema.sku.getSolrFieldName());
+        }
+        if (doc instanceof org.apache.lucene.document.Document) {
+            String ds = ((org.apache.lucene.document.Document) doc).get(CollectionSchema.load_date_dt.getSolrFieldName());
+            try {
+                d = Long.parseLong(ds);
+            } catch (NumberFormatException e) {
+                d = -1l;
+            }
+            url = ((org.apache.lucene.document.Document) doc).get(CollectionSchema.sku.getSolrFieldName());
+        }
+        if (d == null) return null;
+        long date = -1;
+        if (d instanceof Long) date = ((Long) d).longValue();
+        if (d instanceof Date) date = ((Date) d).getTime();
+        return new Metadata(url, date);
     }
 
     /**
@@ -239,11 +247,11 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return the load date if any entry in solr exists, -1 otherwise
+     * @return metadata if any entry in solr exists, null otherwise
      * @throws IOException
      */
     @Override
-    public long getLoadTime(String id) throws IOException {
+    public Metadata getMetadata(String id) throws IOException {
         // construct raw query
         final SolrQuery params = new SolrQuery();
         //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
@@ -253,15 +261,15 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setStart(0);
         params.setFacet(false);
         params.clearSorts();
-        params.setFields(CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
+        params.setFields(CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
         params.setIncludeScore(false);
 
         // query the server
         final SolrDocumentList sdl = getDocumentListByParams(params);
-        if (sdl == null || sdl.getNumFound() <= 0) return -1;
+        if (sdl == null || sdl.getNumFound() <= 0) return null;
         SolrDocument doc = sdl.iterator().next();
-        long d = getLoadDate(doc);
-        return d;
+        Metadata md = getMetadata(doc);
+        return md;
     }
     
     /**

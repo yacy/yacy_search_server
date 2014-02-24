@@ -29,13 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.sorting.OrderedScoreMap;
-import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.BinSearch;
@@ -47,9 +42,7 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
-import net.yacy.search.index.Fulltext.HostStat;
 import net.yacy.search.index.Segment;
-
 
 public class BlockRank {
 
@@ -147,64 +140,6 @@ public class BlockRank {
 
         ConcurrentLog.info("BlockRank", "read " + index.size() + " host indexes from file " + file.toString());
         return index;
-    }
-
-    public static BinSearch[] evaluate(final ReferenceContainerCache<HostReference> index, final Map<String, HostStat> hostHashResolver, final BinSearch[] referenceTable, int recusions) {
-
-        // first find out the maximum count of the hostHashResolver
-        int maxHostCount = 1;
-        for (final HostStat stat: hostHashResolver.values()) {
-            if (stat.count > maxHostCount) maxHostCount = stat.count;
-        }
-
-        // then just count the number of references. all other information from the index is not used because they cannot be trusted
-        final ScoreMap<byte[]> hostScore = new OrderedScoreMap<byte[]>(index.termKeyOrdering());
-        HostStat hostStat;
-        int hostCount;
-        for (final ReferenceContainer<HostReference> container: index) {
-            if (container.isEmpty()) continue;
-            if (referenceTable == null) {
-                hostStat = hostHashResolver.get(ASCII.String(container.getTermHash()));
-                hostCount = hostStat == null ? 6 /* high = a penalty for 'i do not know this', this may not be fair*/ : Math.max(1, hostStat.count);
-                hostScore.set(container.getTermHash(), container.size() * maxHostCount / hostCount);
-            } else {
-                int score = 0;
-                final Iterator<HostReference> hri = container.entries();
-                HostReference hr;
-                while (hri.hasNext()) {
-                    hr = hri.next();
-                    hostStat =  hostHashResolver.get(ASCII.String(hr.urlhash()));
-                    hostCount = hostStat == null ? 6 /* high = a penalty for 'i do not know this', this may not be fair*/ : Math.max(1, hostStat.count);
-                    score += (17 - ranking(hr.urlhash(), referenceTable)) * maxHostCount / hostCount;
-                }
-                hostScore.set(container.getTermHash(), score);
-            }
-        }
-
-        // now divide the scores into two halves until the score map is empty
-        final List<BinSearch> table = new ArrayList<BinSearch>();
-        while (hostScore.size() > 10) {
-            final List<byte[]> smallest = hostScore.lowerHalf();
-            if (smallest.isEmpty()) break; // should never happen but this ensures termination of the loop
-            ConcurrentLog.info("BlockRank", "index evaluation: computed partition of size " + smallest.size());
-            table.add(new BinSearch(smallest, 6));
-            for (final byte[] host: smallest) hostScore.delete(host);
-        }
-        if (!hostScore.isEmpty()) {
-            final ArrayList<byte[]> list = new ArrayList<byte[]>();
-            for (final byte[] entry: hostScore) list.add(entry);
-            ConcurrentLog.info("BlockRank", "index evaluation: computed last partition of size " + list.size());
-            table.add(new BinSearch(list, 6));
-        }
-
-        // the last table entry has now a list of host hashes that has the most references
-        final int binTables = Math.min(16, table.size());
-        final BinSearch[] newTables = new BinSearch[binTables];
-        for (int i = 0; i < binTables; i++) newTables[i] = table.get(table.size() - i - 1);
-
-        // re-use the new table for a recursion
-        if (recusions == 0) return newTables;
-        return evaluate(index, hostHashResolver, newTables, --recusions); // one recursion step
     }
 
     public static int ranking(final byte[] hash, final BinSearch[] rankingTable) {

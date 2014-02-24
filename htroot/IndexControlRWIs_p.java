@@ -374,7 +374,7 @@ public class IndexControlRWIs_p {
 					    } catch (final SpaceExceededException e ) {
 					        ConcurrentLog.logException(e);
 					    }
-					    url = segment.fulltext().getURL(b);
+					    url = segment.fulltext().getURL(ASCII.String(b));
 					    segment.fulltext().remove(b);
 					    if ( url != null ) {
 					        for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
@@ -401,7 +401,7 @@ public class IndexControlRWIs_p {
 					    } catch (final SpaceExceededException e ) {
 					        ConcurrentLog.logException(e);
 					    }
-					    url = segment.fulltext().getURL(b);
+					    url = segment.fulltext().getURL(ASCII.String(b));
 					    segment.fulltext().remove(b);
 					    if ( url != null ) {
 					        for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
