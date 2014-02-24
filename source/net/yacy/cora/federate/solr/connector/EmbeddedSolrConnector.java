@@ -396,24 +396,24 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public synchronized long getLoadTime(String id) {
+    public synchronized Metadata getMetadata(String id) {
         int responseCount = 0;
         DocListSearcher docListSearcher = null;
         try {
             docListSearcher = new DocListSearcher("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, 0, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
             responseCount = docListSearcher.response.size();
-            if (responseCount == 0) return -1;
+            if (responseCount == 0) return null;
             SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
             DocIterator iterator = docListSearcher.response.iterator();
             //for (int i = 0; i < responseCount; i++) {
             Document doc = searcher.doc(iterator.nextDoc(), AbstractSolrConnector.SOLR_ID_and_LOAD_DATE_FIELDS);
-            if (doc == null) return -1;
-            return AbstractSolrConnector.getLoadDate(doc);
+            if (doc == null) return null;
+            return AbstractSolrConnector.getMetadata(doc);
             //}
         } catch (Throwable e) {} finally {
             if (docListSearcher != null) docListSearcher.close();
         }
-        return -1;
+        return null;
     }
     
     @Override

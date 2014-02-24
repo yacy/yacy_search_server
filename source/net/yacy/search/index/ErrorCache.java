@@ -176,8 +176,13 @@ public class ErrorCache {
     }
 
     public boolean exists(final byte[] urlHash) {
+        String urlHashString = ASCII.String(urlHash);
         try {
-            final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(ASCII.String(urlHash), CollectionSchema.failreason_s.getSolrFieldName());
+            // first try to check if the document exists at all.
+            long loaddate = this.fulltext.getLoadTime(urlHashString);
+            if (loaddate < 0) return false;
+            // then load the fail reason, if exists
+            final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlHashString, CollectionSchema.failreason_s.getSolrFieldName());
             if (doc == null) return false;
             // check if the document contains a value in the field CollectionSchema.failreason_s
             Object failreason = doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());

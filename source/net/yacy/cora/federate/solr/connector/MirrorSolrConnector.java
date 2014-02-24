@@ -394,19 +394,19 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public long getLoadTime(String id) throws IOException {
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.getLoadTime(id);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.getLoadTime(id);
-        if (this.solr0 == null && this.solr1 == null) return -1;
-        return Math.max(this.solr0.getLoadTime(id), this.solr1.getLoadTime(id));
+    public Metadata getMetadata(String id) throws IOException {
+        if (this.solr0 != null && this.solr1 == null) return this.solr0.getMetadata(id);
+        if (this.solr0 == null && this.solr1 != null) return this.solr1.getMetadata(id);
+        if (this.solr0 == null && this.solr1 == null) return null;
+        Metadata md0 = this.solr0.getMetadata(id);
+        Metadata md1 = this.solr1.getMetadata(id);
+        if (md0 == null) return md1;
+        if (md1 == null) return md0;
+        long date = Math.max(md0.date, md1.date);
+        assert md0.url.equals(md1.url);
+        return new Metadata(md0.url, date);
     }
 
-    /*
-    @Override
-    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(String querystring, int offset, int maxcount, long maxtime, int buffersize, String... fields) {
-        return null;
-    }
-    */
     @Override
     public BlockingQueue<String> concurrentIDsByQuery(String querystring, int offset, int maxcount, long maxtime) {
         if (this.solr0 != null && this.solr1 == null) return this.solr0.concurrentIDsByQuery(querystring, offset, maxcount, maxtime);

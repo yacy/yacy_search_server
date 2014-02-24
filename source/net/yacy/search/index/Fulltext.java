@@ -269,21 +269,6 @@ public final class Fulltext {
         if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
     
-    public DigestURL getURL(final String urlHashS) {
-        if (urlHashS == null || this.getDefaultConnector() == null) return null;
-        
-        try {
-            SolrDocument doc = this.getDefaultConnector().getDocumentById(urlHashS, CollectionSchema.sku.getSolrFieldName());
-            Object u = doc == null ? null : doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-            if (u == null) return null;
-            assert u instanceof String : "u = " + u.toString();
-            if (u instanceof String) return new DigestURL((String) u, ASCII.getBytes(urlHashS));
-            return null;
-        } catch (final IOException e) {
-            return null;
-        }
-    }
-    
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
         WordReferenceVars wre = element.getElement();        
@@ -483,6 +468,18 @@ public final class Fulltext {
         return false;
     }
 
+    public DigestURL getURL(final String urlHash) {
+        if (urlHash == null || this.getDefaultConnector() == null) return null;
+        
+        try {
+            SolrConnector.Metadata md = this.getDefaultConnector().getMetadata(urlHash);
+            if (md == null) return null;
+            return new DigestURL(md.url, ASCII.getBytes(urlHash));
+        } catch (final IOException e) {
+            return null;
+        }
+    }
+    
     /**
      * get the load time of a resource.
      * @param urlHash
@@ -491,7 +488,9 @@ public final class Fulltext {
     public long getLoadTime(final String urlHash) {
         if (urlHash == null) return -1l;
         try {
-            return this.getDefaultConnector().getLoadTime(urlHash);
+            SolrConnector.Metadata md = this.getDefaultConnector().getMetadata(urlHash);
+            if (md == null) return -1;
+            return md.date;
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }

@@ -36,6 +36,15 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
 
+    public static class Metadata {
+        public long date;
+        public String url;
+        public Metadata(final String url, final long date) {
+            this.url = url;
+            this.date = date;
+        }
+    }
+    
     /**
      * clear all caches: inside solr and ouside solr within the implementations of this interface
      */
@@ -110,11 +119,11 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return the load time if any entry in solr exists, -1 otherwise
+     * @return the metadata (url and load data) if any entry in solr exists, null otherwise
      * @throws IOException
      */
-    public long getLoadTime(final String id) throws IOException;
-
+    public Metadata getMetadata(final String id) throws IOException;
+    
     /**
      * add a solr input document
      * @param solrdoc
