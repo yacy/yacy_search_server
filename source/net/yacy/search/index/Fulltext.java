@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +55,6 @@ import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.sorting.ReversibleScoreMap;
-import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
@@ -87,7 +85,6 @@ public final class Fulltext {
     private final File                    segmentPath;
     private final File                    archivePath;
     private       Export                  exportthread; // will have a export thread assigned if exporter is running
-    private       ArrayList<HostStat>     statsDump;
     private       InstanceMirror          solrInstances;
     private final CollectionConfiguration collectionConfiguration;
     private final WebgraphConfiguration   webgraphConfiguration;
@@ -98,7 +95,6 @@ public final class Fulltext {
         this.segmentPath = segmentPath;
         this.archivePath = archivePath;
         this.exportthread = null; // will have a export thread assigned if exporter is running
-        this.statsDump = null;
         this.solrInstances = new InstanceMirror();
         this.collectionConfiguration = collectionConfiguration;
         this.webgraphConfiguration = webgraphConfiguration;
@@ -206,9 +202,7 @@ public final class Fulltext {
     }
     
     public void clearCaches() {
-        if (this.statsDump != null) this.statsDump.clear();
         this.solrInstances.clearCaches();
-        this.statsDump = null;
     }
 
     public void clearLocalSolr() throws IOException {
@@ -261,7 +255,6 @@ public final class Fulltext {
     }
 
     public void close() {
-        this.statsDump = null;
         try {
             this.solrInstances.close();
         } catch (Throwable e) {}
@@ -347,7 +340,6 @@ public final class Fulltext {
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
-        this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCaches();
     }
 
@@ -359,7 +351,6 @@ public final class Fulltext {
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
-        this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCaches();
     }
 
@@ -378,7 +369,6 @@ public final class Fulltext {
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
-        this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCaches();
     }
 
@@ -398,16 +388,6 @@ public final class Fulltext {
         if (this.writeWebgraph) deleteDomainWithConstraint(this.getWebgraphConnector(), WebgraphSchema.source_host_id_s.getSolrFieldName(), hosthashes,
                 (freshdate == null || freshdate.after(now)) ? null :
                 (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
-
-        // remove the line with statistics
-        if (Fulltext.this.statsDump != null) {
-            final Iterator<HostStat> hsi = Fulltext.this.statsDump.iterator();
-            HostStat hs;
-            while (hsi.hasNext()) {
-                hs = hsi.next();
-                if (hosthashes.contains(hs.hosthash)) hsi.remove();
-            }
-        }
     }
 
     public void deleteStaleDomainNames(final Set<String> hostnames, Date freshdate) {
@@ -419,16 +399,6 @@ public final class Fulltext {
         if (this.writeWebgraph) deleteDomainWithConstraint(this.getWebgraphConnector(), WebgraphSchema.source_host_s.getSolrFieldName(), hostnames,
                 (freshdate == null || freshdate.after(now)) ? null :
                 (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
-        
-        // finally remove the line with statistics
-        if (Fulltext.this.statsDump != null) {
-            final Iterator<HostStat> hsi = Fulltext.this.statsDump.iterator();
-            HostStat hs;
-            while (hsi.hasNext()) {
-                hs = hsi.next();
-                if (hostnames.contains(hs.hostname)) hsi.remove();
-            }
-        }
     }
     
     /**
@@ -790,42 +760,5 @@ public final class Fulltext {
         }
 
     }
-    
-    public Iterator<HostStat> statistics(int count, final ScoreMap<String> domainScore) {
-        // prevent too heavy IO.
-        if (this.statsDump != null && count <= this.statsDump.size()) return this.statsDump.iterator();
 
-        // fetch urls from the database to determine the host in clear text
-        final Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
-        String urlhash;
-        count += 10; // make some more to prevent that we have to do this again after deletions too soon.
-        if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();
-        this.statsDump = new ArrayList<HostStat>();
-        DigestURL url;
-        while (j.hasNext()) {
-            urlhash = j.next();
-            if (urlhash == null) continue;
-            url = this.getURL(ASCII.getBytes(urlhash));
-            if (url == null || url.getHost() == null) continue;
-            if (this.statsDump == null) return new ArrayList<HostStat>().iterator(); // some other operation has destroyed the object
-            this.statsDump.add(new HostStat(url.getHost(), url.getPort(), urlhash.substring(6), domainScore.get(urlhash)));
-            count--;
-            if (count == 0) break;
-        }
-        // finally return an iterator for the result array
-        return (this.statsDump == null) ? new ArrayList<HostStat>().iterator() : this.statsDump.iterator();
-    }
-
-    public static class HostStat {
-        public String hostname, hosthash;
-        public int port;
-        public int count;
-        private HostStat(final String host, final int port, final String urlhashfragment, final int count) {
-            assert urlhashfragment.length() == 6;
-            this.hostname = host;
-            this.port = port;
-            this.hosthash = urlhashfragment;
-            this.count = count;
-        }
-    }
 }
