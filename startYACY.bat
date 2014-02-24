@@ -30,7 +30,12 @@ Echo.
 Echo You can download Java at http://java.com/
 Echo.
 Echo ***************************************************************************
-start %priority% javaw %javacmd% -classpath %CLASSPATH% net.yacy.yacy
+Rem commandline parameter added for -config option, like -config "port=8090" "adminAccount=admin:password" 
+Rem special parameter "adminAccount=admin:password" calculates and sets new admin-pwd
+Rem any parameter in yacy.conf can me modified this way (make sure to use correct upper/lower case)
+
+start %priority% javaw %javacmd% -classpath %CLASSPATH% net.yacy.yacy %1 %2 %3 %4 %5 %6 %7 %8 %9
+
 Echo You can close the console safely now.
 
 GoTo :END

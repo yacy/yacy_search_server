@@ -63,9 +63,14 @@ import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import com.google.common.io.Files;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.server.serverSwitch;
 
 
 /**
@@ -635,7 +640,53 @@ public final class yacy {
 	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
 	            // show yacy version
 	            System.out.println(copyright);
-	        } else {
+                } else if ((args.length > 1) && (args[0].toLowerCase().equals("-config"))) {
+                    // set config parameter. Special handling of adminAccount=user:pwd (generates md5 encoded password)
+                    // on Windows parameter should be enclosed in doublequotes to accept = sign (e.g. -config "port=8090" "port.ssl=8043")
+                    File f = new File (dataRoot,"DATA/SETTINGS/");
+                    if (!f.exists()) {
+                        mkdirsIfNeseccary(f);
+                    } else {
+                        if (new File(dataRoot, "DATA/yacy.running").exists()) {
+                            System.out.println("please restart YaCy");
+                        }
+                    }
+                    // use serverSwitch to read config properties (including init values from yacy.init
+                    serverSwitch ss = new serverSwitch(dataRoot,applicationRoot,"defaults/yacy.init","DATA/SETTINGS/yacy.conf");
+
+                    for (int icnt=1; icnt < args.length ; icnt++) {
+                        String cfg = args[icnt];
+                        int pos = cfg.indexOf('=');
+                        if (pos > 0) {
+                            String cmd = cfg.substring(0, pos);
+                            String val = cfg.substring(pos + 1);
+
+                            if (!val.isEmpty()) {
+                                if (cmd.equalsIgnoreCase(SwitchboardConstants.ADMIN_ACCOUNT)) { // special command to set adminusername and md5-pwd
+                                    int cpos = val.indexOf(':');  //format adminAccount=adminname:adminpwd
+                                    if (cpos >= 0) {
+                                        String username = val.substring(0, cpos);
+                                        String pwdtxt = val.substring(cpos + 1);
+                                        if (!username.isEmpty()) {
+                                            ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, username);
+                                            System.out.println("Set property " + SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME + " = " + username);
+                                        } else {
+                                            username = ss.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+                                        }
+                                        ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:" + Digest.encodeMD5Hex(username + ":" + ss.getConfig(SwitchboardConstants.ADMIN_REALM, "YaCy") + ":" + pwdtxt));
+                                        System.out.println("Set property " + SwitchboardConstants.ADMIN_ACCOUNT_B64MD5 + " = " + ss.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+                                    }
+                                } else {
+                                    ss.setConfig(cmd, val);
+                                    System.out.println("Set property " + cmd + " = " + val);
+                                }
+                            }
+                        } else {
+                            System.out.println("skip parameter " + cfg + " (equal sign missing, put parameter in doublequotes)");
+                        }
+                        System.out.println();
+                    }
+                } else {
 	            if (args.length == 1) applicationRoot= new File(args[0]);
                     preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);

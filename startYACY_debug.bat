@@ -3,11 +3,8 @@ title YaCy
 
 if exist DATA\yacy.noconsole del DATA\yacy.noconsole
 
-If %1.==CPGEN. GoTo :CPGEN
-
 Rem Generating the proper classpath unsing loops and labels
-Set CLASSPATH=htroot
-For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
+Set CLASSPATH=lib/yacycore.jar;htroot
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
@@ -37,7 +34,11 @@ Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%p
 
 title YaCy - http://localhost:%port%
 
-start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% net.yacy.yacy
+Rem commandline parameter added for -config option, like -config "port=8090" "adminAccount=admin:password" 
+Rem special parameter "adminAccount=admin:password" calculates and sets new admin-pwd
+Rem any parameter in yacy.conf can me modified this way (make sure to use correct upper/lower case)
+
+start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% net.yacy.yacy %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 if not exist DATA\yacy.restart GoTo :END
 del DATA\yacy.restart
@@ -70,10 +71,6 @@ if defined priolvl (
 )
 
 GoTo :STARTJAVA
-
-Rem This target is used to concatenate the classpath parts 
-:CPGEN
-Set CLASSPATH=%CLASSPATH%;%2
 
 Rem Target needed to jump to the end of the file
 :END
