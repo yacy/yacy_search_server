@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 
@@ -157,8 +158,9 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                         continue uniquecheck;
                     }
                     try {
-                        final SolrDocument doc = segment.fulltext().getDefaultConnector().getDocumentById(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"");
-                        if (doc != null) {
+                        final SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"", 0, 1);
+                        if (docs != null && !docs.isEmpty()) {
+                            SolrDocument doc = docs.get(0);
                             // switch unique attribute in new document
                             sid.setField(uniquefield.getSolrFieldName(), false);
                             // switch attribute in existing document

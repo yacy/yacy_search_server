@@ -332,8 +332,8 @@ public final class Fulltext {
         String id = ASCII.String(idb);
         try {
             // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
-            SolrDocument sd = this.getDefaultConnector().getDocumentById(id);
-            if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
+            long date = this.getLoadTime(id);
+            if (date < entry.loaddate().getTime()) {
                 putDocument(getDefaultConfiguration().metadata2solr(entry));
             }
         } catch (final SolrException e) {
@@ -495,14 +495,6 @@ public final class Fulltext {
             ConcurrentLog.logException(e);
         }
         return -1l;
-    }
-
-    public String failReason(final String urlHash) throws IOException {
-        if (urlHash == null) return null;
-        SolrDocument doc = this.getDefaultConnector().getDocumentById(urlHash, CollectionSchema.failreason_s.getSolrFieldName());
-        Object reason = doc == null ? null : doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
-        if (reason == null) return null;
-        return reason instanceof String && ((String) reason).length() == 0 ? null : (String) reason;
     }
     
     public List<File> dumpFiles() {
