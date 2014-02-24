@@ -31,6 +31,7 @@ import java.util.Map;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
@@ -49,7 +50,7 @@ import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
 
 @SuppressWarnings("deprecation")
 public class RemoteInstance implements SolrInstance {
@@ -57,9 +58,9 @@ public class RemoteInstance implements SolrInstance {
     private String solrurl;
     private final Object client; // not declared as org.apache.http.impl.client.DefaultHttpClient to avoid warnings during compilation. TODO: switch to org.apache.http.impl.client.HttpClientBuilder
     private final String defaultCoreName;
-    private final HttpSolrServer defaultServer;
+    private final ConcurrentUpdateSolrServer defaultServer;
     private final Collection<String> coreNames;
-    private final Map<String, HttpSolrServer> server;
+    private final Map<String, ConcurrentUpdateSolrServer> server;
     private final int timeout;
     
     public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName, final int timeout) throws IOException {
@@ -75,7 +76,7 @@ public class RemoteInstance implements SolrInstance {
     
     public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName, final int timeout) throws IOException {
         this.timeout = timeout;
-        this.server= new HashMap<String, HttpSolrServer>();
+        this.server= new HashMap<String, ConcurrentUpdateSolrServer>();
         this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
         this.coreNames = coreNames == null ? new ArrayList<String>() : coreNames;
         if (this.coreNames.size() == 0) {
@@ -178,7 +179,7 @@ public class RemoteInstance implements SolrInstance {
             this.client = null;
         }
         
-        this.defaultServer = (HttpSolrServer) getServer(this.defaultCoreName);
+        this.defaultServer = (ConcurrentUpdateSolrServer) getServer(this.defaultCoreName);
         if (this.defaultServer == null) throw new IOException("cannot connect to url " + url + " and connect core " + defaultCoreName);
     }
 
@@ -211,7 +212,7 @@ public class RemoteInstance implements SolrInstance {
     @Override
     public SolrServer getServer(String name) {
         // try to get the server from the cache
-        HttpSolrServer s = this.server.get(name);
+        ConcurrentUpdateSolrServer s = this.server.get(name);
         if (s != null) return s;
         // create new http server
         if (this.client != null) {
@@ -226,14 +227,14 @@ public class RemoteInstance implements SolrInstance {
             String solrpath = u.getPath();
             String p = "http://" + host + ":" + port + solrpath;
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
-            s = new HttpSolrServer(p, ((org.apache.http.impl.client.DefaultHttpClient) this.client));
+            s = new ConcurrentUpdateSolrServer(p, ((org.apache.http.impl.client.DefaultHttpClient) this.client), 10, Runtime.getRuntime().availableProcessors());
         } else {
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
-            s = new HttpSolrServer(this.solrurl + name);
+            s = new ConcurrentUpdateSolrServer(this.solrurl + name, queueSizeByMemory(), Runtime.getRuntime().availableProcessors());
         }
-        s.setAllowCompression(true);
-        s.setConnectionTimeout(this.timeout);
-        s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
+        //s.setAllowCompression(true);
+        s.setSoTimeout(this.timeout);
+        //s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
         s.setSoTimeout(this.timeout);
         this.server.put(name, s);
         return s;
@@ -244,4 +245,7 @@ public class RemoteInstance implements SolrInstance {
     	if (this.client != null) ((org.apache.http.impl.client.DefaultHttpClient) this.client).getConnectionManager().shutdown();
     }
 
+    public static int queueSizeByMemory() {
+        return (int) Math.max(1, MemoryControl.maxMemory() / 1024 / 1024 / 12);
+    }
 }

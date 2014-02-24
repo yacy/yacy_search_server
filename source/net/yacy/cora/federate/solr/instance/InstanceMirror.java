@@ -161,7 +161,7 @@ public class InstanceMirror {
         if (msc != null) return msc;
         EmbeddedSolrConnector esc = getEmbeddedConnector(corename);
         RemoteSolrConnector rsc = getRemoteConnector(corename);
-        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 100000, Runtime.getRuntime().availableProcessors());
+        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), RemoteInstance.queueSizeByMemory(), 100000, Runtime.getRuntime().availableProcessors());
         this.mirrorConnectorCache.put(corename, msc);
         return msc;
     }
