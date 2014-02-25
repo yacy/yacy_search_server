@@ -77,7 +77,7 @@ This is a list of searches that had been requested from remote peer search inter
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Administration==Blacklist Verwaltung
-Used Blacklist engine:==Benutzte Blacklist Verwaltung:
+#Used Blacklist engine:==Benutzte Blacklist Verwaltung:
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
 from being loaded. You can define several blacklists and activate them separately.==Sie können mehrere Blacklists anlegen und getrennt aktivieren.
 You may also provide your blacklist to other peers by sharing them; in return you may==Sie können ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
@@ -86,9 +86,9 @@ Active list:==Aktive Liste(n):
 No blacklist selected==Keine Blacklist gewählt
 Select list to edit:==Liste auswählen:
 not shared::shared==nicht freigegeben::freigegeben
-"select"=="wählen"
+"select"=="Wählen"
 Create new list:==Neue Liste anlegen:
-"create"=="anlegen"
+"create"=="Anlegen"
 Settings for this list==Einstellungen dieser Liste
 "Save"=="Speichern"
 Share/don't share this list==Liste freigeben/nicht freigeben
@@ -102,20 +102,22 @@ Move selected pattern\(s\) to==Verschiebe gewählten Eintrag zu
 #You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
 Add new pattern:==Neuen Eintrag hinzufügen:
 "Add URL pattern"=="URL hinzufügen"
-The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Der rechte Asterisk '*', nach dem '/', kann durch einen <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regulären Ausdruck</a> ersetzt werden.
+The right \'\*\', after the \'\/\', can be replaced by a==Der rechte Asterisk '*', nach dem '/', kann ersetzt werden durch einen
+>regular expression<==>regulären Ausdruck<
 domain.net\/fullpath<==domain.de/vollerpfad<
 >domain.net\/\*<==>domain.de/*<
 \*.domain.net\/\*<==*.domain.de/*<
 \*.sub.domain.net\/\*<==*.sub.domain.de/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
 #domain.\*\/\*<==domain.*/*<
-a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==ein ganzer <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a> (langsam)
+a complete <==ein ganzer <
+\(slow\)==(langsam)
 #was removed from blacklist==wurde aus Blacklist entfernt
 #was added to the blacklist==wurde zur Blacklist hinzugefügt
 Activate this list for==Diese Liste ist gültig für
 Show entries:==Zeige Einträge:
 Entries per page:==Einträge pro Seite:
-"Go"=="Los"
+"set"=="Setzen"
 Edit existing pattern\(s\):==Bearbeite existierende Einträge:
 "Save URL pattern\(s\)"=="URL Einträge speichern"
 #-----------------------------
@@ -245,7 +247,7 @@ YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Die Liste der Lesezeichen kann auch als RSS Feed abgerufen werden. Dies ist auch beim Auswählen eines bestimmten Tags möglich.
 Click the API icon to load the RSS from the current selection.==Klicken Sie auf die API Sprechblase, um einen RSS Feed der aktuellen Auswahl zu laden.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
 <h3>Bookmarks==<h3>Lesezeichen
 Bookmarks \(==Lesezeichen \(
 #Login==Login
@@ -302,7 +304,6 @@ Public Queue==Öffentlicher Puffer
 Websearch Comparison==Vergleichs-Suche
 Left Search Engine==linke Suchmaschine
 Right Search Engine==rechte Suchmaschine
-Query==Suchwort
 "Compare"=="Vergleiche"
 Search Result==Suchergebnis
 #-----------------------------
@@ -315,7 +316,7 @@ User created:==Benutzer erstellt:
 User changed:==Benutzer geändert:
 Generic error.==Genereller Fehler.
 Passwords do not match.==Passwörter stimmen nicht überein.
-Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als vier Zeichen sein.
+Username too short. Username must be &gt;= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als vier Zeichen sein.
 No password is set for the administration account.==Für den Administrator Zugang ist kein Passwort gesetzt.
 Please define a password for the admin account.==Bitte setzen Sie ein Passwort für das admin Konto.
 Admin Account==Admin Konto
@@ -436,7 +437,7 @@ You can also use your peer without opening it, but this is not recomended.==Sie 
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==Heuristik Konfiguration
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\" target="_blank">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik" target="_blank">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
 Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Wenn eine Such Heuristik verwendet wird, werden die gefunden Links nicht direkt als Suchergebnisse angezeigt aber dafür die geladenen Seiten indexiert und mit dem anderen Inhalt abgespeichert.
@@ -458,9 +459,32 @@ This means: right after the search request every page is loaded and every page t
 If you check \'add as global crawl job\' the pages to be crawled are added to the global crawl queue \(remote peers can pickup pages to be crawled\).==Wenn 'als globaler Crawl hinzufügen' gewählt ist werden die zu indexierenden Seiten dem globalen Crawler hinzugefügt (entfernte Peers können beim Crawlen unterstützen).
 Default is to add the links to the local crawl queue \(your peer crawls the linked pages\).==Vorgabe ist die Links der lokalen Crawl Queue hinzuzufügen.
 add as global crawl job==als globaler Crawl hinzufügen
-blekko: load external search result list from==blekko: lade externe Suchergebnisse von
-When using this heuristic, then every search request line is used for a call to blekko.==Wenn diese Heuristik aktiv ist werden alle lokalen Suchanfragen an blekko weitergeleitet.
-20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.==Die ersten 20 Ergebnisse von blekko werden geladen und sofort indexiert.
+
+opensearch load external search result list from active systems below==opensearch lade externe Suchergebnisse von aktiven System die unten gelistet sind
+When using this heuristic, then every search request line is used for a call to listed opensearch systems until enough results to fill the current search page are available.==Wenn diese Heuristik genutzt wird, dann wird jede Suchanfragezeile für einen Aufruf der aufgelisteten OpenSearch Systeme bis genügend Resultate verfügbar sind, um die aktuelle Suchseite zu füllen.
+20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 Resultate werden vom remote System genommen und simultan geladen, geparsed und sofort indexiert.
+To find out more about OpenSearch see==Um mehr über OpenSearch zu erfahren besuche
+#>OpenSearch.org<==>OpenSearch.org<
+Available/Active Opensearch System==Verfügbare/Aktive OpenSearch Systeme
+>Active<==>Aktiv<
+>Title<==>Titel<
+>Comment<==>Kommentar<
+Url <small>\(format opensearch==URL <small>(format OpenSearch
+Url template syntax==URL Template Syntax
+>delete<==>Lösche<
+>new<==>neu<
+"add"=="Hinzufügen"
+"Save"=="Speichern"
+"reset to default list"=="Reset zur Standardliste"
+"discover from index" class=="Discover vom Index" class
+With the button "discover from index" you can search within the metadata of your local index \(Web Structure Index\) to find systems which support the Opensearch specification.==Mit dem Knopf "Discover vom Index" können Sie in den Metadaten Ihres lokalen Suchindexes (Web Struktur Index) suchen, um Systeme zu finden, die die OpenSearch Spezifikation unterstützen.
+The task is started in the background. It may take some minutes before new entries appear \(after refreshing the page\).==Der Task wird im Hintergrund gestartet. Es kann einige Minuten dauern bevor neue Einträge erscheinen (nachdem die Seite erneut geladen wurde).
+Alternatively you may==Alternativ können Sie
+>copy &amp; paste a example config file<==>eine existierende Beispiel Konfiguration mit Copy &amp; Paste kopieren<
+located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==von <i>defaults/heuristicopensearch.conf</i> ins Verzeichnis DATA/SETTINGS.
+For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html\?core=webgraph">webgraph Solr schema</a>.==Für die Discover Funktion der <i>Web Graph</i> Option aus dem Web Struktur Index und den Feldern <i>target_rel_s, target_protocol_s, target_urlstub_s</i> müssen im <a href="IndexSchema_p.html?core=webgraph">Web Graph Solr Schema</a> angeschalten werden.
+"switch Solr fields on"=="Schalte Solr Felder an"
+\(\'modify Solr Schema\'\)==('Modifiziere Solr Schema')
 #-----------------------------
 
 #File: ConfigHTCache_p.html
@@ -471,12 +495,14 @@ The cache is a rotating cache: if it is full, then the oldest entries are delete
 HTCache Configuration==HTCache Konfiguration
 The path where the cache is stored==Der Pfad an dem der Cache gespeichert wird
 The current size of the cache==Die aktuelle Größe des Caches
+\#\[actualCacheSize\]\# MB for \#\[actualCacheDocCount\]\# files, \#\[docSizeAverage\]\# KB / file in average==#[actualCacheSize]# MB für  #[actualCacheDocCount]# Dateien, #[docSizeAverage]# KB / Datei im Durchschnitt
 The maximum size of the cache==Die maximale Größe des Caches
 "Set"=="Setzen"
 Cleanup==Aufräumen
 Cache Deletion==Cache Löschen
 Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
 Delete robots.txt Cache==Lösche robots.txt Cache
+Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Hol-Fehler während der Suche
 "Delete"=="Löschen"
 #-----------------------------
 
@@ -503,18 +529,40 @@ might overwrite existing data if a file of the same name exists already.==Achtun
 #File: ConfigLiveSearch.html
 #---------------------------
 Integration of a Search Field for Live Search==Integration eines Suchfeldes für die Live Suche
+Integration of Live Search with YaCy Search Widget==Integration der Livesuche mit dem YaCy Such-Widget
+There are basically two methods for integrating the YaCy Search Widget with your web site.==Es gibt zwei Methoden, um das YaCy Such-Widget mit Ihrer Webseite zu integrieren.
+Static hosting of widget on own HTTP server==Statisches Hosten des Widgets auf Ihrem eigenen HTTP Server
+Remote access through selected YaCy Peer==Remote Access durch ausgewähltes YaCy Peer
+Advantages:==Vorteile:
+faster connection speed==Schnellere Verbindungsgeschwindigkeit
+possibility for local adaptions==Möglichkeit von lokalen Anpassungen
+Disadvantages:==Nachteile:
+No automatic update to future releases of YaCy Search Widget==Kein automatisches Update auf zukünftige YaCy Suchwidgets
+Ajax/JSONP cross domain requests needed to query remote YaCy Peer==AJAX/JSON Cross Domain Anfragen müssen den remote YaCy Peer abfragen
+Installing:==Installieren:
+download yacy-portalsearch.tar.gz from==Downloaden von yacy-portalsearch.tar.gz von
+unpack within your HTTP servers path==Entpacken in das HTTP Server Verzeichnis
+use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==Verwenden von ./yacy/portalsearch/yacy-portalsearch.html als Referenz für eine Integration mit Ihrem bestehenen Portal
+#Remote access through selected YaCy Peer==Remote Access durch ausgewähltes YaCy Peer
+#Advantages:==Vorteile:
+Always latest version of YaCy Search Widget==Immer die aktuellste Version des YaCy Suchwidgets
+No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Keine AJAX/JSON cross Domainanfragen, da Suchwidget und YaCy auf derselben Domäne gehostet werden.
+Under certain cirumstances slower than static hosting==Unter bestimmten Umständen langsamer als statisches Hosting
+Just use the code snippet below and paste it any place in your own portal page==Vewenden Sie einfach das Codesnippet unten und kopieren Sie es in Ihr eigenes Suchportal
+Please check if '\#\[ip\]\#:\#\[port\]\#' is appropriate or replace it with address of the YaCy Peer holding your index==Bitte prüfen Sie, ob '#[ip]#:#[port]#' korrekt ist und ersetzen Sie es mit der Adresse des YaCy Peers dass die Konfiguration hat.
 A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
 This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
-Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
-Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
-Code Snippet:==Code Ausschnitt:
-YaCy Portal Search==YaCy Portal Suche
+#Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
+Just use the code snippet below and paste it any place in your own portal page==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld auf Ihrem eigenen Webportal zu verwenden.
+#Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
+#Code Snippet:==Code Ausschnitt:
+#YaCy Portal Search==YaCy Portal Suche
 "Search"=="Suche"
 Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
 Defaults<==Standardeinstellungen<
 url<==URL<
-is a mandatory property - no default<==muss angegeben werden<
-YaCy P2P Web Search==YaCy P2P Web Suche
+#is a mandatory property - no default<==muss angegeben werden<
+#YaCy P2P Web Search==YaCy P2P Web Suche
 Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
 Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
 Animation effects \(show | hide\)==Animationseffekte (show | hide)
@@ -525,14 +573,12 @@ If modal is set to true, the dialog will have modal behavior; other items on the
 Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
 If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
 Load JavaScript load_js==JavaScript laden load_js
-If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Wenn load_js auf false gesetzt wird, müssen Sie manuell das benötigte Javascript auf Ihrer Portalseite laden.
-This can help to avoid timing problems or double loading.==Das kann helfen Timing Probleme oder das doppelte Laden zu verhindern.
 Load Stylesheets load_css==Stylesheets laden load_css
-If load_css is set to false, you have to manually load the needed CSS on your portal page.==Wenn load_css auf false gesetzt wird, müssen Sie manuell das benötigte CSS auf Ihrer Portalseite laden. 
-#Themes==Themes
-You can <==Sie können <
-download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==fertige Themes herunterladen</a> oder <a href="http://jqueryui.com/themeroller/" target="_blank">erstellen</a>
-your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==Ihr ganz eigenes Theme. <br/>Themes werden im folgenden Verzeichnis installiert: DATA/HTDOCS/yacy/ui/css/themes/
+This parameter is used for static hosting only.==Dieser Parameter wird nur für das statische Hosting verwendet.
+>Themes<==>Themen<
+You can download standard jquery-ui themes or create your own custom themes on==Sie können Standard jQuery UI Themen herunterladen oder generieren Sie Ihr eigenes Thema auf
+Themes are installed in ./yacy/jquery/themes/ \(static hosting\) or in DATA/HTDOCS/jquery/themes/ on remote YaCy Peer.==Themen sind installiert in ./yacy/jquery/themes/ (statisches Hosting) oder in DATA/HTDOCS/jquery/themes/ beim remote YaCy Peer.
+YaCy ships with 'start' and 'smoothness' themes pre-installed.==YaCy kommt vorinstalliert mit 'start' und 'smoothness' Themen.
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -613,32 +659,12 @@ Content Parser Settings==Inhalt Parser Einstellungen
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Dateitypen basierend auf ihren MIME-Typen ermöglichen.
 For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
-enable/disable Parser==Parser aktiv / inaktiv
-# --- Parser Names are hard-coded BEGIN ---
-##Mime-Type==MIME Typ
-##Microsoft Powerpoint Parser==Microsoft Powerpoint Parser
-#Torrent Metadata Parser==Torrent Metadaten Parser
-##HTML Parser==HTML Parser
-#GNU Zip Compressed Archive Parser==GNU Zip Komprimiertes Archiv Parser
-##Adobe Flash Parser==Adobe Flash Parser
-#Word Document Parser==Word Dokument Parser
-##vCard Parser==vCard Parser
-#Bzip 2 UNIX Compressed File Parser==bzip2 UNIX Komprimierte Datei Parser
-#OASIS OpenDocument V2 Text Document Parser==OASIS OpenDocument V2 Text Dokument Parser
-##Microsoft Excel Parser==Microsoft Excel Parser
-#ZIP File Parser==ZIP Datei Parser
-##Rich Site Summary/Atom Feed Parser==Rich Site Summary / Atom Feed Parser
-#Comma Separated Value Parser==Comma Separated Value (CSV) Parser
-##Microsoft Visio Parser==Microsoft Visio Parser
-#Tape Archive File Parser==Bandlaufwerk Archiv Datei Parser
-#7zip Archive Parser==7zip Archiv Parser
-##Acrobat Portable Document Parser==Adobe Acrobat Portables Dokument Format Parser
-##Rich Text Format Parser==Rich Text Format Parser
-#Generic Image Parser==Generischer Bild Parser
-#PostScript Document Parser==PostScript Dokument Parser
-#Open Office XML Document Parser==Open Office XML Dokument Parser
-#BMP Image Parser==BMP Bild Parser
-# --- Parser Names are hard-coded END ---
+If you want to test a specific parser you can do so using the==
+Wenn Sie einen bestimmten Parser testen wollen, verwenden Sie dafür den
+>File Viewer<==>Datei Betrachter<
+> enable/disable<==> aktiv / inaktiv<
+>Extension<==>Erweiterung<
+>Mime-Type<==>MIME-Typ<
 "Submit"=="Speichern"
 #-----------------------------
 
@@ -655,23 +681,33 @@ Greeting Line<==Grußzeile<
 URL of Home Page<==URL der Homepage<
 URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<
 URL of a Large Corporate Image<==URL des großen Corporate Identity Bildes<
+Enable Search for Everyone\?==Suche für Jedermann aktivieren?
+Search is available for everyone==Suche steht für Jedermann zur Verfügung
+Only the administator is allowed to search==Nur der Administrator darf suchen
+Show additional interaction features in footer==Zeige zusätzliche Features zur Interaktion in der Fußzeile
+User-Logon==Benutzer-Logon
+Snippet Fetch Strategy &amp; Link Verification==Snippet Fetch Strategie &amp; Link Verifikation
+Speed up search results with this option! \(use CACHEONLY or FALSE to switch off verification\)==Beschleunige die Suchergebnisse mit dieser Option! (Verwende CACHEONLY oder FALSE, um die Verifikation abzuschalten)
+NOCACHE: no use of web cache, load all snippets online==NOCACHE: Keine Verwendung des Webcache, alle Snippets online laden
+IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFRESH: Verwende den Cache wenn er existiert und frisch ist und lade ansonsten online nach
+IFEXIST: use the cache if the cache exist or load online==IFEXIST: Verwende den Cache wenn er existiert ansonsten lade online
+If verification fails, delete index reference==Wenn die Überprüfung fehlschlägt lösche die Index Referenz
+CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet==CACHEONLY: Gehe niemals online und verwende den ganzen Content aus dem Cache. Wenn kein Eintrag im Cache existiert betrachte den Kontent trotzdem als existent und zeige Resultate ohne Snippets.
+FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE: Keine Linkprüfung und keine Snippet Generierung: Alle Suchergebnisse sind ohne Prüfung valide
+Greedy Learning Mode==Gieriger Lernmodus
+load documents linked in search results, will be deactivated automatically when index size==Lade Dokumente die in Suchergebnissen verlinkt sind. Wird automatisch deaktiviert wenn die Indexgröße
 Show Navigation Bar on Search Page?==Navigationsleiste auf Suchseite anzeigen?
 Show Navigation Top-Menu&nbsp;==Zeige Top-Menu Navigation&nbsp;
 no link to YaCy Menu \(admin must navigate to /Status.html manually\)==kein Verweis auf YaCy Menu (Der Admin muss manuell auf /Status.html wechseln)
 Show Advanced Search Options on Search Page?==Erweiterte Suchoptionen auf Suchseite anzeigen?
 Show Advanced Search Options on index.html&nbsp;==Erweiterte Suchoptionen auf index.html anzeigen?
 do not show Advanced Search==Erweiterte Suche nicht anzeigen
-Show Information Links for each Search Result Entry==Informationslinks für jeden Suchergebnis Eintrag anzeigen
->Date&==>Datum&
->Size&==>Größe&
->Metadata&==>Metadaten&
->Parser&==>Parser&
->Pictures==>Bilder
 Default Pop-Up Page<==Standard Pop-up<
 >Status Page==>Status Seite
 >Search Front Page==>Frontseite Suche
 >Search Page \(small header\)==>Suchseite (kleine Kopfzeile)
 >Interactive Search Page==>Interaktive Suchseite
+Default maximum number of results per page==Standard Maximum der Suchergebnisse pro Seite
 Default index.html Page \(by forwarder\)==Standard index.html Seite (durch Weiterleitung)
 Target for Click on Search Results==Zielfenster beim Klicken auf ein Suchergebnis
 
@@ -679,10 +715,20 @@ Target for Click on Search Results==Zielfenster beim Klicken auf ein Suchergebni
 \"_self\" \(same window\)=="_self" (Im gleichen Fenster)
 \"_parent\" \(the parent frame of a frameset\)=="_parent" (Der Parent Frame eines Framesets)
 \"_top\" \(top of all frames\)=="_top" (Oberster Frame)
-\"searchresult\" \(a default custom page name for search results\)=="Suchergebnis" (Eine standardmäßig konfigurierbare Setie für Suchergebnisse)
+\"searchresult\" \(a default custom page name for search results\)=="Suchergebnis" (Eine standardmäßig konfigurierbare Seite für Suchergebnisse)
 
+Special Target as Exception for an URL-Pattern==Spezial Ziel als Ausnahme für ein URL-Muster
+Pattern:<==Muster:<
+>Exclude Hosts<==>Hosts ausnehmen<
+List of hosts that shall be excluded from search results by default but can be included using the site:&lt;host&gt; operator:==Liste aller Hosts die von standardmäßig von den Suchergebnissen ausgeschlossen werden sollen aber mit dem Seitenoperator: &lt;host&gt; wieder aufgenommen werden können.
+\'About\' Column<br/>\(shown in a column alongside<br/>with the search result page\)=='Über' Spalte<br/>(wird in einer Spalte<br/>mit der Suchergebnisseite angezeigt)
+\(Headline\)==(Kopfzeile)
+\(Content\)==(Inhalt)
 "Change Search Page"=="Ändere die Suchseite"
 "Set to Default Values"=="Standardwerte setzen"
+You have ==Sie müssen 
+set a remote user/password==einen Remote Benutzer mit Passwort anlegen
+to change this options.==, um diese Option zu ändern.
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigenen Webseiten eingebaut werden. Verwenden Sie dazu den folgenden Code:
 This would look like:==Das würde so aussehen:
 For a search page with a small header, use this code:==Für eine Suchseite mit kleiner Kopfzeile verwenden Sie folgenden Code:
@@ -716,6 +762,7 @@ Here are all configuration options from YaCy.==Hier sind alle Konfigurationseins
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie können alles ändern, bedenken Sie aber, dass einige Änderungen einen Neustart von YaCy erfordern und andere Änderungen YaCy ganz zum Absturz bringen können.
 For explanation please look into defaults/yacy.init==Eine Erklärung finden Sie in der Datei defaults/yacy.init
 "Save"=="Speichern"
+"Clear"=="Leeren"
 #-----------------------------
 
 #File: ConfigRobotsTxt_p.html
@@ -758,6 +805,9 @@ Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Mein
 Manual System Update==Manuelle Systemaktualisierung
 Current installed Release==Aktuell installierte Version
 Available Releases==Verfügbare Versionen
+>changelog<==>Changelog<
+> and <==> und <
+> RSS feed<==> RSS Feed<
 \(unsigned\)==(unsigniert)
 \(signed\)==(signiert)
 "Download Release"=="Version Herunterladen"
@@ -1259,6 +1309,8 @@ Confirm Deletion==Löschen Bestätigen
 Count Colors:==Legende der farbigen Zahlen:
 Documents without Errors==Dokumente mit Fehlern
 Pending in Crawler==Warten im Crawler
+Crawler Excludes<==Crawler Ausnahmen<
+Load Errors<==Ladefehler<
 #Load Errors \(exclusion/failure\)==Ladefehler (Ausschluss/Fehler)
 #Browser for \#\[path\]\#==Browser für #[path]#
 documents stored for host: \#\[hostsize\]\#==Gespeicherte Dokumente für Host: #[hostsize]#
@@ -1280,6 +1332,15 @@ Inbound Links, incoming to \#\[host\]\# - Host List==Eingehende Links, eingehend
 #browse \#\[host\]\#==Durchsuche #[host]#
 #\#\[count\]\# URLs==#[count]# URL(s)
 #Administration Options==Administration Optionen
+#-----------------------------
+
+#File: HostBrowserAdmin_p.html
+#---------------------------
+Administration Options==Administrator Optionen
+Delete all==Lösche alle
+>Load Errors<==>Ladefehler<
+from index==vom Index
+"Delete Load Errors"=="Lösche alle Ladefehler"
 #-----------------------------
 
 #File: index.html
@@ -2890,6 +2951,17 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 See you soon!==Bis bald!
 Just a moment, please!==Einen Moment bitte!
 Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+Please send us feed-back!==Bitte senden Sie uns Feedback!
+We don't track YaCy users, YaCy does not send \'home-pings\', we do not even know how many people use YaCy as their private search engine.==Wir tracken YaCy Benutzer nicht. YaCy sendet keine 'Pings nach Hause'. Wir wissen noch nicht einmal wie viele Menschen YaCy als ihre private Suchmaschine verwenden.
+Therefore we like to ask you: do you like YaCy\? Will you use it again... if not, why\? Is is possible that we change a bit to suit your needs\?==Darum wollen wir Sie fragen: Mögen Sie YaCy? Werden sie es wieder verwenden ... wenn nicht ... Warum? Ist es möglich dass wir uns verändern, um uns Ihren Anforderungen anzupassen?
+Please send us feed-back about your experience with an==Bitte senden Sie uns Ihr Feedback mit einer
+>anonymous message<==>anonymen Nachricht<
+or a<==oder einem<
+posting to our==Posting auf unserem
+web forums==Web Forum
+>bug report<==>Bug Report<
+>Professional Support<==>Professioneller Support<
+If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see==Wenn Sie ein professioneller Anwender sind und YaCy in Ihrer Firma in Kombination mit Beratungsservices eines YaCy Spezialisten einsetzen wollen, besuchen Sie  
 Then YaCy will restart.==Dann wird YaCy neu gestartet.
 If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
 Installing release==Installiere Release
@@ -3187,10 +3259,7 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Sie können I
 
 #File: Crawler_p.html
 #---------------------------
-Crawler Queues==Crawler Puffer
-PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
-#Traffic \(Crawler\)==Traffic (Crawler)
-RWI RAM \(Word Cache\)==RWI RAM (Wörter Zwischenspeicher)
+#Crawler==Crawler
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, löschen Sie die Datei DATA/PLASMADB/crawlProfiles0.db
 and restart.==und starten Sie YaCy neu.
 Error:==Fehler:
@@ -3207,37 +3276,31 @@ Error with file input==Fehler mit Datei Eingabe
 started.==gestartet.
 Please wait some seconds,==Bitte warten Sie einige Sekunden, 
 it may take some seconds until the first result appears there.==es kann einige Sekunden dauern, bis hier die ersten Ergebnisse zu sehen sind.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, können Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> löschen.
-Crawl Queue:==Crawler Puffer:
-Queue</th>==Puffer</th>
-Profile</th>==Profil</th>
-Initiator==Auftraggeber
-Depth</th>==Tiefe</th>
-Modified Date==Änderungsdatum
-Anchor Name==Linktitel
-#URL==URL
-Delete==Löschen
-Next update in==Nächste Aktualisierung in
-/> seconds.==/> Sekunden.
-See a access timing <a href="api/latency_p.xml">here</a>==<a href="api/latency_p.xml">Hier</a> gibt es eine Tabelle mit Latenz- und Zugriffszeiten
-Queue</th>==Puffer</th>
 >Size==>Größe
+>Progress<==>Fortschritt<
 #Max==Max
+"set"=="Setzen"
 #Indexing</td>==Indexieren</td>
 Loader==Lader
+>Index Size<==>Index Größe<
+Seg-<br/>ments==Seg-<br/>mente
+>Documents<==>Documente<
+>solr search api<==>Solr Such-API<
+>Webgraph Edges<==>Webgraph Kanten<
+Citations<br/>\(reverse link index\)==Citations<br/>(Rückwärts Such Index)
+RWIs<br/>\(P2P Chunks\)==RWIs<br/>(P2P Anteile)<
 Local Crawler==Lokaler Crawler
-unlimited==uneingeschränkt
-#Remote Crawler==Remote Crawler
-Speed==Geschwindigkeit
-"minimum"=="Minimum"
-"custom"=="benutzerdefiniert"
-"maximum"=="Maximum"
+Limit Crawler==Limitierter Crawler
+Remote Crawler==Entfernter Crawler
+No-Load Crawler==Keine-Ladung Crawler
+Speed / PPM<br/>\(Pages Per Minute\)==Geschwindigkeit / PPM<br/>\(PPM = Seiten pro Minute)
 Database==Datenbank
 Entries==Einträge
-Pages \(URLs\)==Seiten (URLs)
-RWIs \(Words\)==RWIs (Wörter)
 Indicator==Indikator
 Level==Stufe
+Postprocessing Progress==Posprozess Fortschritt
+Traffic \(Crawler\)==Daten-Traffic (Crawler)
+Load<==Auslastung<
 #-----------------------------
 
 #File: WatchWebStructure_p.html
@@ -3532,7 +3595,7 @@ Blacklist Administration==Blacklist Verwaltung
 Blacklist Cleaner==Blacklist aufräumen
 Blacklist Test==Blacklist testen
 Import/Export==Import / Export
-Index Cleaner==Index Aufräumer
+Content Control==Inhaltskontrolle
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
@@ -3542,15 +3605,13 @@ Peer Administration Console==Peer Administrations Konsole
 Basic Configuration==Eingangskonfiguration
 >Accounts==>Konten
 Network Configuration==Netzwerk Konfiguration
->Heuristics<==>Heuristik<
-Dictionary Loader==Wörterbuch Download
-System Update==System Aktualisierung
+Download System Update==Download System Aktualisierung
 >Performance==>Leistung
 Advanced Settings==Erweiterte Einstellungen
-Parser Configuration==Parser Einstellungen
 Local robots.txt==Lokale robots.txt
 #Web Cache==Web Cache
 Advanced Properties==Erweiterte Konfiguration
+#>Thread Dump<==>Thread Dump<
 #-----------------------------
 
 #File: env/templates/submenuContentIntegration.template
@@ -3579,7 +3640,6 @@ Local Crawling</a>==Lokales Crawlen</a>
 Global Crawling</a>==Globales Crawlen</a>
 Surrogate Import</a>==Surrogat Import</a>
 Processing Monitor==Prozess Monitor
-Crawler Queues==Crawler Puffer
 Loader<==Lade Puffer<
 Rejected URLs==Abgelehnte URLs
 >Queues<==>Warteschlangen<
@@ -3602,9 +3662,16 @@ User Profile==Benutzerprofil
 #File: env/templates/submenuIndexControl.template
 #---------------------------
 Index Administration==Indexverwaltung
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-URL References Database==URL Referenzen Datenbank
-URL Viewer==URL Betrachter
+URL Database Administration==URL Datenbank Administration
+Index Deletion==Index Löschung
+Index Sources &amp; Targets==Index Quellen &amp; Ziele
+#Solr Schema Editor==Solr Schema Editor
+Field Re-Indexing==Feld Re-Indexierung
+Reverse Word Index==Reverse Wort Index
+Index Cleaner==Index Reiniger
+Content Analysis==Kontentanalyse
+Web Cache==Webcache
+Parser Configuration==Parser Konfiguration
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
@@ -3661,6 +3728,26 @@ Publication==Veröffentlichung
 #Wiki==Wiki
 #Blog==Blog
 File Hosting==Datei Freigabe
+#-----------------------------
+
+#File: env/templates/submenuSearchConfiguration.template
+#---------------------------
+Integrated Search Configuration==Integrierte Suchkonfiguration
+Generic Search Portal==Generisches Suchportal
+Search Page Layout==Suchseite Layout
+Appearance==Darstellung
+Language==Sprache
+User Profile==Benutzerprofil
+Heuristics==Heuristik
+Solr Ranking Config==Solr Ranking Konfiguration
+RWI Ranking Config==RWI Ranking Konfiguration
+#-----------------------------
+
+#File: env/templates/submenuSearchIntegration.template
+#---------------------------
+Search Integration into External Sites==Integration der Suche in Externe Seiten
+Live Search Anywhere==Live Suche Überall
+Search Box Anywhere==Suchbox Überall
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template

@@ -61,7 +61,15 @@ import org.eclipse.jetty.util.IO;
  * proxies request, caches responses and adds urls to crawler
  */
 public class ProxyHandler extends AbstractRemoteHandler implements Handler {
-	   
+
+    protected int timeout = 10000;
+
+    @Override
+    protected void doStart() {
+        super.doStart();
+        timeout = sb.getConfigInt("proxy.clientTimeout", 10000);
+    }
+
 	public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
 		RequestHeader result = new RequestHeader();
 		Enumeration<String> headerNames = request.getHeaderNames();
@@ -100,7 +108,6 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             setProxyHeaderForClient(request, proxyHeaders);
 
             final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
-            int timeout = 10000;
             client.setTimout(timeout);
             client.setHeader(proxyHeaders.entrySet());
             client.setRedirecting(false);
