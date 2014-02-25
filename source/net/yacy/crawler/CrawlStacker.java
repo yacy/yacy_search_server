@@ -405,7 +405,7 @@ public final class CrawlStacker {
                 // do double-check
                 if (dbocc == HarvestProcess.ERRORS) {
                     final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
-                    return "double in: errors (" + errorEntry.getFailReason() + ")";
+                    return "double in: errors (" + (errorEntry == null ? "NULL" : errorEntry.getFailReason()) + ")";
                 }
                 return "double in: " + dbocc.toString();
             }
@@ -422,8 +422,8 @@ public final class CrawlStacker {
                 }
                 if (dbocc == HarvestProcess.ERRORS) {
                     final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
-                    if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.getFailReason());
-                    return "double in: errors (" + errorEntry.getFailReason() + "), oldDate = " + oldDate.toString();
+                    if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + (errorEntry == null ? "NULL" : errorEntry.getFailReason()));
+                    return "double in: errors (" + (errorEntry == null ? "NULL" : errorEntry.getFailReason()) + "), oldDate = " + oldDate.toString();
                 }
                 if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
                 return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();

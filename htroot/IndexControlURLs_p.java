@@ -183,7 +183,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final DigestURL url = segment.fulltext().getURL(ASCII.getBytes(urlhash));
+            final DigestURL url = segment.fulltext().getURL(urlhash);
             if (url == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {

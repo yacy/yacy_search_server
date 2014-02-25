@@ -413,7 +413,7 @@ public class Balancer {
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);
         if (delay && sleeptime > 0) {
             // force a busy waiting here
-            // in best case, this should never happen if the balancer works propertly
+            // in best case, this should never happen if the balancer works properly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
             ConcurrentLog.info("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, agent) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);

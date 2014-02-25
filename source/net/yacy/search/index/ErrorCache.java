@@ -166,7 +166,9 @@ public class ErrorCache {
         }
         if (failDoc != null) return failDoc;
         try {
-            SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlhash);
+            final SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.id + ":\"" + urlhash + "\" AND " + CollectionSchema.failtype_s.getSolrFieldName() + ":[* TO *]", 0, 1);
+            if (docs == null || docs.isEmpty()) return null;
+            SolrDocument doc = docs.get(0);
             if (doc == null) return null;
             return new CollectionConfiguration.FailDoc(doc);
         } catch (final IOException e) {
@@ -176,8 +178,13 @@ public class ErrorCache {
     }
 
     public boolean exists(final byte[] urlHash) {
+        String urlHashString = ASCII.String(urlHash);
         try {
-            final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(ASCII.String(urlHash), CollectionSchema.failreason_s.getSolrFieldName());
+            // first try to check if the document exists at all.
+            long loaddate = this.fulltext.getLoadTime(urlHashString);
+            if (loaddate < 0) return false;
+            // then load the fail reason, if exists
+            final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlHashString, CollectionSchema.failreason_s.getSolrFieldName());
             if (doc == null) return false;
             // check if the document contains a value in the field CollectionSchema.failreason_s
             Object failreason = doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());

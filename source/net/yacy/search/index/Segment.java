@@ -803,7 +803,7 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final DigestURL url = fulltext().getURL(urlhash);
+        final DigestURL url = fulltext().getURL(ASCII.String(urlhash));
         if (url == null) return 0;
 
         try {

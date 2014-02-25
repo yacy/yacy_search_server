@@ -58,6 +58,7 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.schema.CollectionConfiguration.FailDoc;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -182,9 +183,6 @@ public class HostBrowser {
                 
                 // collect hosts from crawler
                 final Map<String, Integer[]> crawler = (admin) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
-                for (Map.Entry<String, Integer[]> host: crawler.entrySet()) {
-                    hostscore.inc(host.getKey(), host.getValue()[0]);
-                }
                 
                 // collect the errorurls
                 Map<String, ReversibleScoreMap<String>> exclfacets = admin ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
@@ -466,7 +464,8 @@ public class HostBrowser {
                                 FailType failType = errorDocs.get(entry.getKey());
                                 if (failType == null) {
                                     // maybe this is only in the errorURL
-                                    prop.putHTML("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(ASCII.String(uri.hash())).getFailReason() : "unknown error");
+                                    FailDoc faildoc = sb.crawlQueues.errorURL.get(ASCII.String(uri.hash()));
+                                    prop.putHTML("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS && faildoc != null ? faildoc.getFailReason() : "unknown error");
                                 } else {
                                     String ids = ASCII.String(uri.hash());
                                     InfoCacheEntry ice = infoCache.get(ids);
@@ -570,12 +569,12 @@ public class HostBrowser {
                     // get all urls from the index and store them here
                     for (String id: internalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURL u = fulltext.getURL(ASCII.getBytes(id));
+                        DigestURL u = fulltext.getURL(id);
                         if (u != null) references_internal_urls.add(u.toNormalform(true));
                     }
                     for (String id: externalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURL u = fulltext.getURL(ASCII.getBytes(id));
+                        DigestURL u = fulltext.getURL(id);
                         if (u != null) references_external_urls.add(u.toNormalform(true));
                     }
                 } catch (final IOException e) {

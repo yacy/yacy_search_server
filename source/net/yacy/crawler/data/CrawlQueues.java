@@ -59,7 +59,6 @@ import net.yacy.search.IndexingQueueEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.ErrorCache;
-import net.yacy.search.schema.CollectionConfiguration;
 
 public class CrawlQueues {
     
@@ -180,10 +179,6 @@ public class CrawlQueues {
         DigestURL u = this.delegatedURL.get(ASCII.String(urlhash));
         if (u != null) {
             return u;
-        }
-        CollectionConfiguration.FailDoc ee = this.errorURL.get(ASCII.String(urlhash));
-        if (ee != null) {
-            return ee.getDigestURL();
         }
         for (final Loader w: this.workers.values()) {
             if (Base64Order.enhancedCoder.equal(w.request.url().hash(), urlhash)) {
