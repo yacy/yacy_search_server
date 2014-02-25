@@ -27,6 +27,7 @@ import java.util.Map;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -140,6 +141,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     
     @Override
     public SolrDocument getDocumentById(final String id, final String ... fields) throws IOException {
+        assert id.length() == Word.commonHashLength : "wrong id: " + id;
         String q = idQuery(id);
         SolrDocument doc = fields.length == 0 ? this.documentCache.get(q) : null;
         if (doc != null) {
@@ -209,7 +211,9 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
      */
     @Override
     public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
-        if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
+        if (offset == 0 && count == 1 && querystring.startsWith("id:") &&
+            ((querystring.length() == 17 && querystring.charAt(3) == '"' && querystring.charAt(16) == '"') ||
+             querystring.length() == 15)) {
             final SolrDocumentList list = new SolrDocumentList();
             SolrDocument doc = getDocumentById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
             list.add(doc);
