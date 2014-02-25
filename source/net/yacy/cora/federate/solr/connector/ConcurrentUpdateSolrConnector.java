@@ -35,6 +35,7 @@ import net.yacy.cora.storage.ARH;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.ConcurrentARH;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -107,6 +108,14 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                         //ConcurrentLog.info("ConcurrentUpdateSolrConnector", "sending " + docs.size() + " documents to solr");
                         try {
                             ConcurrentUpdateSolrConnector.this.connector.add(docs);
+                        } catch (final OutOfMemoryError e) {
+                            // clear and try again...
+                            clearCaches();
+                            try {
+                                ConcurrentUpdateSolrConnector.this.connector.add(docs);
+                            } catch (final IOException ee) {
+                                ConcurrentLog.logException(e);
+                            }
                         } catch (final IOException e) {
                             ConcurrentLog.logException(e);
                         }
@@ -411,6 +420,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     
     @Override
     public SolrDocument getDocumentById(final String id, String... fields) throws IOException {
+        assert id.length() == Word.commonHashLength : "wrong id: " + id;
         if (this.missCache.contains(id)) return null;
         if (existIdFromDeleteQueue(id)) return null;
         SolrInputDocument idoc = getFromUpdateQueue(id);
@@ -443,6 +453,15 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     
     @Override
     public SolrDocumentList getDocumentListByQuery(String querystring, int offset, int count, String... fields) throws IOException, SolrException {
+        if (offset == 0 && count == 1 && querystring.startsWith("id:") &&
+            ((querystring.length() == 17 && querystring.charAt(3) == '"' && querystring.charAt(16) == '"') ||
+             querystring.length() == 15)) {
+            final SolrDocumentList list = new SolrDocumentList();
+            SolrDocument doc = getDocumentById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
+            list.add(doc);
+            return list;
+        }
+        
         SolrDocumentList sdl = this.connector.getDocumentListByQuery(querystring, offset, count, AbstractSolrConnector.ensureEssentialFieldsIncluded(fields));
         /*
         Iterator<SolrDocument> i = sdl.iterator();

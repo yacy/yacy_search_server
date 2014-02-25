@@ -37,6 +37,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.LookAheadIterator;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -336,8 +337,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     
     @Override
     public SolrDocument getDocumentById(final String id, final String ... fields) throws IOException {
+        assert id.length() == Word.commonHashLength : "wrong id: " + id;
         final SolrQuery query = new SolrQuery();
-        assert id.length() == 12;
         // construct query
         StringBuilder sb = new StringBuilder(23);
         sb.append("{!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id);

@@ -28,6 +28,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.kelondro.data.word.Word;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -172,6 +173,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     
     @Override
     public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException {
+        assert key.length() == Word.commonHashLength : "wrong id: " + key;
         SolrDocument doc;
         if ((solr0 != null && ((doc = solr0.getDocumentById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getDocumentById(key, fields)) != null))) {
             return doc;
@@ -205,7 +207,9 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     @Override
     public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
         if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
-        if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
+        if (offset == 0 && count == 1 && querystring.startsWith("id:") &&
+            ((querystring.length() == 17 && querystring.charAt(3) == '"' && querystring.charAt(16) == '"') ||
+             querystring.length() == 15)) {
             final SolrDocumentList list = new SolrDocumentList();
             SolrDocument doc = getDocumentById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
             list.add(doc);
