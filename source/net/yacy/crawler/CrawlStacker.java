@@ -405,7 +405,7 @@ public final class CrawlStacker {
                 // do double-check
                 if (dbocc == HarvestProcess.ERRORS) {
                     final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
-                    return "double in: errors (" + errorEntry.getFailReason() + ")";
+                    return "double in: errors (" + (errorEntry == null ? "NULL" : errorEntry.getFailReason()) + ")";
                 }
                 return "double in: " + dbocc.toString();
             }
