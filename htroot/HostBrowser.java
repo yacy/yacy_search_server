@@ -58,6 +58,7 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.schema.CollectionConfiguration.FailDoc;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -463,7 +464,8 @@ public class HostBrowser {
                                 FailType failType = errorDocs.get(entry.getKey());
                                 if (failType == null) {
                                     // maybe this is only in the errorURL
-                                    prop.putHTML("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(ASCII.String(uri.hash())).getFailReason() : "unknown error");
+                                    FailDoc faildoc = sb.crawlQueues.errorURL.get(ASCII.String(uri.hash()));
+                                    prop.putHTML("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS && faildoc != null ? faildoc.getFailReason() : "unknown error");
                                 } else {
                                     String ids = ASCII.String(uri.hash());
                                     InfoCacheEntry ice = infoCache.get(ids);
