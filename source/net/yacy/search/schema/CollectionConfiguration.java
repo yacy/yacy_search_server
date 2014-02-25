@@ -923,10 +923,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
  
         // collect hosts from index which shall take part in citation computation
         String query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-                CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString();
+                CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]";
         ReversibleScoreMap<String> hostscore;
         try {
-            hostscore = collectionConnector.getFacets(query, 10000000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+            Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets(query, 10000000, CollectionSchema.host_s.getSolrFieldName());
+            hostscore = hostfacet.get(CollectionSchema.host_s.getSolrFieldName());
         } catch (final IOException e2) {
             ConcurrentLog.logException(e2);
             hostscore = new ClusteredScoreMap<String>();
@@ -988,6 +989,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 CRHost crh = new CRHost(segment, rrCache, host, 0.85d, 6);
                 int convergence_attempts = 0;
                 while (convergence_attempts++ < 30) {
+                    ConcurrentLog.info("CollectionConfiguration", "convergence step " + convergence_attempts + " for host " + host + " ...");
                     if (crh.convergenceStep()) break;
                 }
                 ConcurrentLog.info("CollectionConfiguration", "convergence for host " + host + " after " + convergence_attempts + " steps");
@@ -1005,8 +1007,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         
         // process all documents at the webgraph for the outgoing links of this document
         SolrDocument doc;
+        int allcount = 0;
         if (segment.fulltext().useWebgraph()) {
             try {
+                int proccount = 0;
+                long start = System.currentTimeMillis();
                 for (String host: hostscore.keyList(true)) {
                     if (hostscore.get(host) <= 0) continue;
                     // select all webgraph edges and modify their cr value
@@ -1041,7 +1046,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             ConcurrentLog.logException(e);
                         }
                         countcheck++;
+                        proccount++; allcount++;
+                        if (proccount % 1000 == 0) ConcurrentLog.info(
+                                "CollectionConfiguration", "webgraph - postprocessed " + proccount + " from " + count + " documents; " +
+                                (proccount * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " +
+                                ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining");
                     }
+                    
                     if (count != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous webgraph document count for host " + host + ": expected=" + count + ", counted=" + countcheck);
                 }
             } catch (final IOException e2) {
@@ -1054,10 +1065,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // process all documents in collection
         query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
                 CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]";
-        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
         Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
         Set<String> uniqueURLs = new HashSet<String>();
         try {
+            int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
             long count = collectionConnector.getCountByQuery(query);
             long start = System.currentTimeMillis();
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
@@ -1119,8 +1130,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     //connector.deleteById(ASCII.String(id));
                     collectionConnector.add(sid);
                     
-                    proccount++;
-                    if (proccount % 100 == 0) ConcurrentLog.info("CollectionConfiguration", "postprocessed " + proccount + " from " + count + " documents; " + (proccount * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " + ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining");
+                    proccount++; allcount++;
+                    if (proccount % 100 == 0) ConcurrentLog.info(
+                            "CollectionConfiguration", "collection - postprocessed " + proccount + " from " + count + " documents; " +
+                            (proccount * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " +
+                            ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining");
                 } catch (final Throwable e1) {
                     ConcurrentLog.logException(e1);
                     failids.add(i);
@@ -1142,7 +1156,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         } catch (IOException e3) {
             ConcurrentLog.warn("CollectionConfiguration", e3.getMessage(), e3);
         }
-        return proccount;
+        return allcount;
     }
 
     private static final class CRV {

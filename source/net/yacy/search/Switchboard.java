@@ -2057,7 +2057,7 @@ public final class Switchboard extends serverSwitch {
             // set a random password if no password is configured
             if ( getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)
                 && getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() ) {
-                // make a 'random' password
+                // make a 'random' password, this will keep the ability to log in from localhost without password
                 setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
                 setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
             }
