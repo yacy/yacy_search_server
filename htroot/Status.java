@@ -318,7 +318,7 @@ public class Status
         }
 
         // memory usage and system attributes
-        prop.put("usedMemory", Formatter.bytesToString(MemoryControl.total()));
+        prop.put("usedMemory", Formatter.bytesToString(MemoryControl.used()));
         prop.put("maxMemory", Formatter.bytesToString(MemoryControl.maxMemory()));
         prop.put("usedDisk", Formatter.bytesToString(sb.observer.getSizeOfDataPath(true)));
         prop.put("freeDisk", Formatter.bytesToString(sb.observer.getUsableSpace()));
