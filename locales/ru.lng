@@ -77,7 +77,7 @@ This is a list of searches that had been requested from remote peer search inter
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Administration==Управление черными списками
-Used Blacklist engine:==Используемый черный список:
+#Used Blacklist engine:==Используемый черный список:
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция представляет собой URL-фильтр для прокси-сервера; адреса в черном списке не
 from being loaded. You can define several blacklists and activate them separately.==загружаются. Вы можете задать несколько черных списков и активировать их по отдельности.
 You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете открыть доступ к вашему черному списку другим узлам; или
@@ -86,9 +86,9 @@ Active list:==Активный список:
 No blacklist selected==Черный список не выбран
 Select list to edit:==Выбрать список для изменения
 not shared::shared==без общего доступа::общий доступ
-"select"=="выбрать"
+"select"=="Выбрать"
 Create new list:==Создать новый список
-"create"=="создать"
+"create"=="Создать"
 Settings for this list==Настройки для этого списка
 "Save"=="Сохранить"
 Share/don't share this list==Открыть/закрыть общий доступ этому к списку
@@ -102,20 +102,22 @@ Move selected pattern\(s\) to==Переместить выбранный шаб�
 #You can select them here for deletion==Вы можете выбрать их здесь для удаления
 Add new pattern:==Добавить новый шаблон:
 "Add URL pattern"=="Добавить URL шаблон"
-The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Символом '*' (звездочка), после '/' может быть заменено <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярным выражением</a>.
+The right \'\*\', after the \'\/\', can be replaced by a==Символом '*' (звездочка), после '/' может быть заменено
+>regular expression<==>регулярным выражением<
 domain.net\/fullpath<==domain.net/полный путь<
 >domain.net\/\*<==>domain.net/*<
 \*.domain.net\/\*<==*.domain.net/*<
 \*.sub.domain.net\/\*<==*.sub.domain.net/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
 #domain.\*\/\*<==domain.*/*<
-a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полное <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленно\)
+a complete <==полное <
+\(slow\)==(медленно)
 #was removed from blacklist==был удален из черного списка
 #was added to the blacklist==был добавлен в черный список
 Activate this list for==Использовать этот список для
 Show entries:==Показать записи:
 Entries per page:==Записи на страницу:
-"Go"=="Вперед"
+"set"=="Установить"
 Edit existing pattern\(s\):==Изменить существующий шаблон:
 "Save URL pattern\(s\)"=="Сохранить URL шаблона"
 #-----------------------------
@@ -245,7 +247,7 @@ YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Закладки
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Список закладок можно также получить как RSS-ленту. Это может быть сделано при выборе конкретного тега .
 Click the API icon to load the RSS from the current selection.==Нажмите на иконку API для загрузки RSS из текущего выделения.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Чтобы увидеть список всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Чтобы увидеть список всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">wiki-страницу API</a>.
 <h3>Bookmarks==<h3>Закладки
 Bookmarks \(==Закладки \(
 #Login==Логин
@@ -302,7 +304,6 @@ Public Queue==Публичная очередь
 Websearch Comparison==Сравнение веб-поиска
 Left Search Engine==Левый поиск
 Right Search Engine==Правый поиск
-Query==Запрос
 "Compare"=="Сравнить"
 Search Result==Результат поиска
 #-----------------------------
@@ -315,7 +316,7 @@ User created:==Пользователь создан:
 User changed:==Пользователь изменён:
 Generic error.==Общая ошибка.
 Passwords do not match.==Пароли не совпадают.
-Username too short. Username must be \>\= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше 4 символов.
+Username too short. Username must be &gt;= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше 4 символов.
 No password is set for the administration account.==Пароль не установлен для учетной записи администратора.
 Please define a password for the admin account.==Пожалуйста, установите пароль для учетной записи администратора.
 Admin Account==Учетная запись администратора
@@ -351,7 +352,7 @@ You can change the appearance of the YaCy interface with skins.==Вы может
 #You can change the appearance of YaCy with skins==Вы можете изменить внешний вид YaCy со скинами
 The selected skin and language also affects the appearance of the search page.==Выбранный скин и язык, также влияют на внешний вид страницы поиска.
 If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Если вы <a href="ConfigPortal.html">создадите поиск с Yacy, </a>
-change the appearance of the search page here.==то изменить внешний вид страницы поиска вы можете <a href="ConfigPortal.html">здесь</a>
+change the appearance of the search page here.==то изменить внешний вид страницы поиска вы можете здесь.
 #and the default icons and links on the search page can be replaced with you own.==и стандартные иконки и ссылки на странице поиска будут заменены на ваши.
 Skin Selection==Выбор скина
 Select one of the default skins, download new skins, or create your own skin.==Выберите один из стандартных скинов, загрузите новые скины, или создайте свой собственный скин.
@@ -438,7 +439,7 @@ You can also use your peer without opening it, but this is not recomended.==YaCy
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==Конфигурация эвристики
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href=\"http://ru.wikipedia.org/wiki/Эвристика\">Эвристика</a> это специальный метод, который помогает в анализе и поиске лучшего результата.
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\" target="_blank">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href=\"http://ru.wikipedia.org/wiki/Эвристика\" target="_blank">Эвристика</a> это специальный метод, который помогает в анализе и поиске лучшего результата.
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска за счет предугадывания ссылок и/или запросов к другим поисковым системам. 
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, полученные ссылки не используются в поисковой выдаче напрямую, а используются для индексации новых страниц.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Это дает возможность использовать черные списки и гарантирует что что искомое слово реально есть на странице найденной эвристикой.
@@ -459,9 +460,32 @@ This means: right after the search request every page is loaded and every page t
 If you check \'add as global crawl job\' the pages to be crawled are added to the global crawl queue \(remote peers can pickup pages to be crawled\).==Wenn 'als globaler Crawl hinzufügen' gewählt ist werden die zu indexierenden Seiten dem globalen Crawler hinzugefügt (entfernte Peers können beim Crawlen unterstützen).
 Default is to add the links to the local crawl queue \(your peer crawls the linked pages\).==Vorgabe ist die Links der lokalen Crawl Queue hinzuzufügen.
 add as global crawl job==Добавить как задачу глобального индексирования
-blekko: load external search result list from==blekko: загрузить результаты внешнего поиска из
-When using this heuristic, then every search request line is used for a call to blekko.==Когда используется эта эвристика строка поиска вызывает blekko. 
-20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.==20 результатов берутся из blekko и загружаются одновременно, анализируются и индексируются сразу.
+
+opensearch load external search result list from active systems below==Загрузка результатов внешнего поиска из списка активных систем ниже
+When using this heuristic, then every search request line is used for a call to listed opensearch systems until enough results to fill the current search page are available.==При использовании эвристики, каждый поисковый запрос используется для вызова доступных opensearch-систем.
+20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 результатов берутся из удалённой системы,  загружаются одновременно, анализируются и индексируются сразу.
+To find out more about OpenSearch see==Для поиска информации об OpenSearch смотрите
+#>OpenSearch.org<==>OpenSearch.org<
+Available/Active Opensearch System==Доступная/Активная OpenSearch-система
+>Active<==>Активный<
+>Title<==>Заголовок<
+>Comment<==>Комментарий<
+Url <small>\(format opensearch==URL <small>(формат OpenSearch
+Url template syntax==шаблон синтаксиса URL
+>delete<==>удалить<
+>new<==>Новый<
+"add"=="Добавить"
+"Save"=="Сохранить"
+"reset to default list"=="Восстановить список по-умолчанию"
+"discover from index" class=="Открыть из индекса" класс
+With the button "discover from index" you can search within the metadata of your local index \(Web Structure Index\) to find systems which support the Opensearch specification.==При нажатии кнопки "Открыть из индекса" вы можете производить поиск в метаданных вашего локального индекса (вэб-индекса) с помощью систем, которые поддерживают спецификации Opensearch.
+The task is started in the background. It may take some minutes before new entries appear \(after refreshing the page\).==Задача будет запущена в фоне. Может пройти несколько минут, прежде чем появятся первые результаты (после обновления страницы).
+Alternatively you may==В качестве альтернативы вы можете
+>copy &amp; paste a example config file<==>копировать и вставить пример файла настроек<
+located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==<i>heuristicopensearch.conf</i>, хранящийся по-умолчанию в  папке DATA/SETTINGS.
+For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html\?core=webgraph">webgraph Solr schema</a>.==Für die Discover Funktion der <i>Web Graph</i> Option aus dem Web Struktur Index und den Feldern <i>target_rel_s, target_protocol_s, target_urlstub_s</i> müssen im <a href="IndexSchema_p.html?core=webgraph">Web Graph Solr Schema</a> angeschalten werden.
+"switch Solr fields on"=="Schalte Solr Felder an"
+\(\'modify Solr Schema\'\)==('Modifiziere Solr Schema')
 #-----------------------------
 
 #File: ConfigHTCache_p.html
@@ -472,12 +496,14 @@ The cache is a rotating cache: if it is full, then the oldest entries are delete
 HTCache Configuration==Настройка кэша
 The path where the cache is stored==Место хранения кэша
 The current size of the cache==Текущий размер кэша
+\#\[actualCacheSize\]\# MB for \#\[actualCacheDocCount\]\# files, \#\[docSizeAverage\]\# KB / file in average==#[actualCacheSize]# MB для #[actualCacheDocCount]# файлов, средний размер файла #[docSizeAverage]# KB
 The maximum size of the cache==Максимальный размер кэша
 "Set"=="Установить"
 Cleanup==Удаление кэша
 Cache Deletion==Очистить кэш
 Delete HTTP &amp; FTP Cache==Очистить HTTP &amp; FTP кэш
 Delete robots.txt Cache==Очистить кэш robots.txt
+Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты, полученные ошибочно во время поиска
 "Delete"=="Удалить"
 #-----------------------------
 
@@ -504,18 +530,40 @@ might overwrite existing data if a file of the same name exists already.==Воз
 #File: ConfigLiveSearch.html
 #---------------------------
 Integration of a Search Field for Live Search==Интеграция поискового модуля для живого поиска
+Integration of Live Search with YaCy Search Widget==Интеграция поиска с виджетом YaCy
+There are basically two methods for integrating the YaCy Search Widget with your web site.==Существуют два основных метода для интеграции виджета YaCy на вашем сайте.
+Static hosting of widget on own HTTP server==Размещение виджета на собственном HTTP-сервере
+Remote access through selected YaCy Peer==Удалённый доступ через выбранный узел YaCy
+Advantages:==Преимущества:
+faster connection speed==Быстрая скорость соединения
+possibility for local adaptions==Возможность локальных адаптаций
+Disadvantages:==Недостатки:
+No automatic update to future releases of YaCy Search Widget==Отсутствие обновления будущих релизов виджета
+Ajax/JSONP cross domain requests needed to query remote YaCy Peer==AJAX/JSON Cross Domain Anfragen müssen den remote YaCy Peer abfragen
+Installing:==Установка:
+download yacy-portalsearch.tar.gz from==Необходимо загрузить файл yacy-portalsearch.tar.gz из
+unpack within your HTTP servers path==распаковать на ваш HTTP-сервер 
+use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==использовать ./yacy/portalsearch/yacy-portalsearch.html как ссылку для интеграции на вашей странице поиска
+#Remote access through selected YaCy Peer==Удалённый доступ через выбранный узел YaCy
+#Advantages:==Преимущества:
+Always latest version of YaCy Search Widget==Всегда последняя версия виджета YaCy
+No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Нет AJAX/JSON перекрестных доменных запросов, так как виджет поиска и узел YaCy размещены на нескольких доменах.
+Under certain cirumstances slower than static hosting==В определённых случаях работает медленнее, чем при размещении на постоянном хостинге.
+Just use the code snippet below and paste it any place in your own portal page==Вставьте приведённый ниже фрагмент кода в любое место на вашей странице поиска
+Please check if '\#\[ip\]\#:\#\[port\]\#' is appropriate or replace it with address of the YaCy Peer holding your index==Пожалуйста, проверьте правильность адреса '#[ip]#:#[port]#'. Если необходимо, то вы можете заменить его адресом вашего узла.
 A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
 This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
-Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
-Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
-Code Snippet:==Фрагмент кода:
-YaCy Portal Search==Поисковый портал YaCy
+#Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
+Just use the code snippet below and paste it any place in your own portal page==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld auf Ihrem eigenen Webportal zu verwenden.
+#Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
+#Code Snippet:==Фрагмент кода:
+#YaCy Portal Search==Поисковый портал YaCy
 "Search"=="Поиск"
 Configuration options and defaults for \'yconf\':==Опции конфигурации и параметры по-умолчанию для 'yconf':
 Defaults<==По-умолчанию<
 url<==URL<
-is a mandatory property - no default<==является обязательным свойством<
-YaCy P2P Web Search==YaCy P2P Веб поиск
+#is a mandatory property - no default<==является обязательным свойством<
+#YaCy P2P Web Search==YaCy P2P Веб поиск
 Size and position \(width \| height \| position\)==Размер и положение \(ширина \| высота \| положение \)
 Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Специально где диалог должен быть показан. Возможные значения для позиционирования: \'центр\', \'слева\', \'справа\', \'сверху\', \'снизу\', или массив содержащий необходимую пару координат \(в пикселях от верхнего левого угла области просмотра\) или возможные строковые значения \(напр. \[\'right\',\'top\'\] для верхнего правого просмотра\)
 Animation effects \(show | hide\)==Анимационные эффекты \(показать | скрыть\)
@@ -525,14 +573,12 @@ If modal is set to true, the dialog will have modal behavior; other items on the
 Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
 If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
 Load JavaScript load_js==Загружать JavaScript load_js
-If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Wenn load_js auf false gesetzt wird, müssen Sie manuell das benötigte Javascript auf Ihrer Portalseite laden.
-This can help to avoid timing problems or double loading.==Das kann helfen Timing Probleme oder das doppelte Laden zu verhindern.
-Load Stylesheets load_css==Stylesheets laden load_css
-If load_css is set to false, you have to manually load the needed CSS on your portal page.==Wenn load_css auf false gesetzt wird, müssen Sie manuell das benötigte CSS auf Ihrer Portalseite laden. 
-#Themes==Темы
-You can <==Вы можете <
-download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==загрузить</a> готовые темы из <a href="http://jqueryui.com/themeroller/" target="_blank">или создать</a>
-свою тему. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==Ihr ganz eigenes Theme. <br/>Themes werden im folgenden Verzeichnis installiert: DATA/HTDOCS/yacy/ui/css/themes/
+Load Stylesheets load_css==Загружать таблицы стилей load_css
+This parameter is used for static hosting only.==Этот параметр используется только при постоянном хостинге.
+>Themes<==>Темы<
+You can download standard jquery-ui themes or create your own custom themes on==Вы можете загрузить стандартные jQuery UI темы или создать собственные на
+Themes are installed in ./yacy/jquery/themes/ \(static hosting\) or in DATA/HTDOCS/jquery/themes/ on remote YaCy Peer.==Темы установлены в ./yacy/jquery/themes/ (постоянный хостинг) или в DATA/HTDOCS/jquery/themes/ на удалённом узле.
+YaCy ships with 'start' and 'smoothness' themes pre-installed.==В YaCy уже установлены некоторые темы.
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -610,38 +656,17 @@ If you leave the field empty, no peer asks your peer. If you fill in a \'\*\', y
 
 #File: ConfigParser.html
 #---------------------------
-Parser Configuration==Parser Einstellungen
-Content Parser Settings==Inhalt Parser Einstellungen
-With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Dateitypen basierend auf ihren MIME-Typen ermöglichen.
-For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
+Parser Configuration==Конфигурация парсера
+Content Parser Settings==Настройки анализа содержимого
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==С помощью этих настроек вы можете включить или выключить анализ дополнительных типов контента, основанных на их типов файлов
+For a detailed description of the various MIME-types take a look at==Детальное описание различных типов файлов смотрите на
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
-enable/disable Parser==Parser aktiv / inaktiv
-# --- Parser Names are hard-coded BEGIN ---
-##Mime-Type==MIME Typ
-##Microsoft Powerpoint Parser==Microsoft Powerpoint Parser
-#Torrent Metadata Parser==Torrent Metadaten Parser
-##HTML Parser==HTML Parser
-#GNU Zip Compressed Archive Parser==GNU Zip Komprimiertes Archiv Parser
-##Adobe Flash Parser==Adobe Flash Parser
-#Word Document Parser==Word Dokument Parser
-##vCard Parser==vCard Parser
-#Bzip 2 UNIX Compressed File Parser==bzip2 UNIX Komprimierte Datei Parser
-#OASIS OpenDocument V2 Text Document Parser==OASIS OpenDocument V2 Text Dokument Parser
-##Microsoft Excel Parser==Microsoft Excel Parser
-#ZIP File Parser==ZIP Datei Parser
-##Rich Site Summary/Atom Feed Parser==Rich Site Summary / Atom Feed Parser
-#Comma Separated Value Parser==Comma Separated Value (CSV) Parser
-##Microsoft Visio Parser==Microsoft Visio Parser
-#Tape Archive File Parser==Bandlaufwerk Archiv Datei Parser
-#7zip Archive Parser==7zip Archiv Parser
-##Acrobat Portable Document Parser==Adobe Acrobat Portables Dokument Format Parser
-##Rich Text Format Parser==Rich Text Format Parser
-#Generic Image Parser==Generischer Bild Parser
-#PostScript Document Parser==PostScript Dokument Parser
-#Open Office XML Document Parser==Open Office XML Dokument Parser
-#BMP Image Parser==BMP Bild Parser
-# --- Parser Names are hard-coded END ---
-"Submit"=="Speichern"
+If you want to test a specific parser you can do so using the==Если вы желаете тестировать специальные парсеры, вы также можете использовать
+>File Viewer<==>Просмотр файлов<
+> enable/disable<==> включено / выключено<
+>Extension<==>Расширение<
+>Mime-Type<==>Тип файла<
+"Submit"=="Отправить"
 #-----------------------------
 
 #File: ConfigPortal.html
@@ -660,24 +685,31 @@ URL of a Large Corporate Image<==Адрес крупного логотипа<
 Enable Search for Everyone?==Разрешить поиск каждому
 Search is available for everyone==Поиск разрешён каждому
 Only the administator is allowed to search==Поиск разрешён только администратору
+Show additional interaction features in footer==Показать дополнительные данные в нижнем колонтитуле
+User-Logon==Вход пользователя
+Snippet Fetch Strategy &amp; Link Verification==Принцип получения фрагментов и проверка ссылок
+Speed up search results with this option! \(use CACHEONLY or FALSE to switch off verification\)==Скорость поиска результатов с этой опцией повышается! (Используйте CACHEONLY или FALSE для выключения проверки)
+NOCACHE: no use of web cache, load all snippets online==NOCACHE: не использовать вэб-кэш, загружать все фрагменты из сети
+IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFRESH: использовать кэш, если он содержит более свежие данные. Иначе загружать фрагменты из сети
+IFEXIST: use the cache if the cache exist or load online==IFEXIST: использовать кэш или загружать из сети
+If verification fails, delete index reference==Если при проверке возникают ошибки, то удалите индекс ссылок
+CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet==CACHEONLY: не загружать фрагменты из сети, использовать только содержимое кэша. Если кэша нет, то данные загрузятся как есть. Фрагменты могут отсутствовать
+FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE: нет проверки ссылок и нет загрузки фрагментов: все результаты поиска не проверяются
+Greedy Learning Mode=="Жадный" режим обучения
+load documents linked in search results, will be deactivated automatically when index size==Отображать в результатах поиска связанные документы. Может быть отключен автоматически при достижении размера индекса
 Show Navigation Bar on Search Page?==Показать панель управления на странице поиска
 Show Navigation Top-Menu&nbsp;==Показать панель управления в главном меню&nbsp;
 no link to YaCy Menu \(admin must navigate to /Status.html manually\)==не отображать ссылку на меню YaCy \ (администратор должен перейти к / Status.html вручную \)
 Show Advanced Search Options on Search Page?==Отображать расширенный поиск на поисковой странице
 Show Advanced Search Options on index.html&nbsp;==Отображать расширенный поиск на index.html странице
 do not show Advanced Search==Не отображать расширенный поиск
-Show Information Links for each Search Result Entry==Отображать информационные ссылки для каждой записи в результатах поиска
->Date&==>Дата&
->Size&==>Размер&
->Metadata&==>Метаданные&
->Parser&==>Парсер&
->Pictures==>Изображения
 Default Pop-Up Page<==Стартовая страница по-умолчанию<
 >Status Page==>Статус страницы
 >Search Front Page==>Начальная страница поиска
 >Search Page \(small header\)==>Страница поиска (небольшой заголовок)
 >Interactive Search Page==>Страница интерактивного поиска
-Default index.html Page \(by forwarder\)==Стандартная index.html страница (для переадресовки)
+Default maximum number of results per page==Максимальное количество результатов на странице
+Default index.html Page \(by forwarder\)==Стандартная страница index.html (для перехода)
 Target for Click on Search Results==Действие при нажатии на результат поиска
 
 \"_blank\" \(new window\)=="_blank" (новое окно)
@@ -686,8 +718,18 @@ Target for Click on Search Results==Действие при нажатии на 
 \"_top\" \(top of all frames\)=="_top" (поверх всех фреймов)
 \"searchresult\" \(a default custom page name for search results\)==\"searchresult\" (по умолчанию пользовательское имя страницы для результатов поиска)
 
+Special Target as Exception for an URL-Pattern==Исключение для шаблона URL
+Pattern:<==Шаблон:<
+>Exclude Hosts<==>Исключить хосты<
+List of hosts that shall be excluded from search results by default but can be included using the site:&lt;host&gt; operator:==Список хостов, которые будут исключены из результатов поиска по-умолчанию, но могут быть включены с помощью параметра 'сайт: &lt;хост&gt; оператор:'
+\'About\' Column<br/>\(shown in a column alongside<br/>with the search result page\)==Раздел 'О пользователе (компании)'<br/>(показывается в колонке рядом<br/>на странице поиска)
+\(Headline\)==(Заголовок)
+\(Content\)==(Содержимое)
 "Change Search Page"=="Изменить страницу поиска"
 "Set to Default Values"=="Установить значения по-умолчанию"
+You have==Вам необходимо
+set a remote user/password==установить пароль и имя удалённого пользователя
+to change this options.==, чтобы изменить эти опции.
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Страница поиска может быть интегрирована в ваш собственный сайт с использованием фрейма. Просто используйте следующий код:
 This would look like:==Это будет выглядить так:
 For a search page with a small header, use this code:==Для поиска страницы с небольшим заголовком используйте этот код:
@@ -721,6 +763,7 @@ Here are all configuration options from YaCy.==Здесь находятся в�
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Вы можете изменить любые опции, но некоторые из них требуют перезапуска YaCy, или даже могут, при использовании неправильных значений, вызвать падение.
 For explanation please look into defaults/yacy.init==Дополнительные сведения вы можете узнать в файле defaults/yacy.init
 "Save"=="Сохранить"
+"Clear"=="Очистить"
 #-----------------------------
 
 #File: ConfigRobotsTxt_p.html
@@ -764,6 +807,9 @@ Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Mein
 Manual System Update==Ручное обновление системы
 Current installed Release==Текущая установленная версия
 Available Releases==Доступные версии
+>changelog<==>список изменений<
+> and <==> и <
+> RSS feed<==> RSS лента<
 \(unsigned\)==(unsigniert)
 \(signed\)==(signiert)
 "Download Release"=="Загрузить версию"
@@ -860,7 +906,7 @@ Sending Client==Client (Sender)
 >Crawler Steering<==>Управление индексатором<
 >Crawl Scheduler<==>Планировщик индексирования<
 >Scheduled Crawls can be modified in this table<==>Запланированное индексирование можно изменить в этой таблице<
-Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl Profile beinhalten Informationen über einen Crawl Prozess der gerade ausgeführt wird.
+Crawl profiles hold information about a crawl process that is currently ongoing.==Профили содержат информацию о текущем индексировании.
 
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
 #The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
@@ -1263,12 +1309,10 @@ Confirm Deletion==Подтвердить удаление
 >Host List<==>Список хостов<
 Count Colors:==Обозначение цветов:
 Documents without Errors==Проиндексированные документы без ошибок
-Pending in Crawler==Индексируемые в данный момент
-Crawler Excludes==Исключения индексатора
-Load Errors==Ошибки загрузки
->Administration Options<==>Расширенные опции<
-Delete all Load Errors from index==Удалить все ошибки загрузки из индекса
-"Delete Load Errors"=="Удалить"
+Pending in Crawler==Ожидающие в индексаторе
+Crawler Excludes<==Исключения индексатора<
+Load Errors<==Ошибки загрузки<
+
 #Load Errors \(exclusion/failure\)==Ошибки загрузки
 #Browser for \#\[path\]\#==Просмотр #[path]#
 documents stored for host: \#\[hostsize\]\#==Документы сохранённые хостом: #[hostsize]#
@@ -1289,6 +1333,15 @@ Outbound Links, outgoing from \#\[host\]\# - Host List==Исходящие сс�
 Inbound Links, incoming to \#\[host\]\# - Host List==Входящие ссылки, входящие в #[host]# - список хостов
 #browse \#\[host\]\#==просмотр #[host]#
 #\#\[count\]\# URLs==#[count]# ссылок
+#-----------------------------
+
+#File: HostBrowserAdmin_p.html
+#---------------------------
+Administration Options==Расширенные опции
+Delete all==Удалить все
+>Load Errors<==>ошибки загрузки<
+from index==из индекса
+"Delete Load Errors"=="Удалить"
 #-----------------------------
 
 #File: index.html
@@ -1325,7 +1378,7 @@ only index pages==только проиндексированные страни
 #Enable web search to everyone==Разрешить веб-поиск всем
 the peer-to-peer network==P2P-сеть
 only the local index==Только локальный индекс
-Query Operators==Операторы запроса
+Query Operators==Параметры поиска
 restrictions==Ограничения
 only urls with the &lt;phrase&gt; in the url==только URL c &lt;phrase&gt; в URL
 only urls with extension==только URL с расширением
@@ -1391,7 +1444,7 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==Администрирование индекса ссылок по слову
+Reverse Word Index Administration==Управление обратным индексом слов
 The local index currently contains \#\[wcount\]\# reverse word indexes==Локальный индекс в настоящее время содержит #[wcount]# слов обратного индекса
 RWI Retrieval \(= search for a single word\)==Поиск слов
 #Select Segment:==Выбрать сегмент:
@@ -1559,9 +1612,9 @@ delete the reference to this url at every other word where the reference exists 
 
 #File: IndexCreateLoaderQueue_p.html
 #---------------------------
-Loader Queue==Очередь загрузчика
+Loader Queue==Очередь загрузки
 The loader set is empty==Очередь пуста.
-There are \#\[num\]\# entries in the loader set:==Число записей в загрузчике #[num]# :
+There are \#\[num\]\# entries in the loader set:==Число записей в загрузке #[num]# :
 Initiator==Инициатор
 Depth==Глубина
 #URL==URL-адрес
@@ -2097,8 +2150,8 @@ Your Peer:==Ваш узел:
 >Name<==>Имя<
 >Info<==>Инфо<
 >Version<==>Версия<
->UTC<==>Время по UTC<
->Uptime<==>Продолжительность работы<
+>UTC<==>UTC<
+>Uptime<==>Время работы<
 >Links<==>Ссылки<
 #>RWIs<==>RWIs<
 Sent<br/>URLs==Отправлено<br/>URL-ссылок
@@ -2490,9 +2543,9 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 >PPM<==>Страниц в минуту (PPM)<
 >QPH<==>Запросов в час (QPH)<
 >Last<br/>Seen<==>Zuletzt<br/>Gesehen<
->UTC</strong><br/>Offset<==>UTC</strong><br/>Abweichung<
-#>Uptime<==>Uptime<
-#>Links<==>Ссылки<
+>UTC</strong><br/>Offset<==>UTC</strong><br/><
+>Uptime<==>Время работы<
+>Links<==>Ссылки<
 #>RWIs<==>RWIs<
 >Age<==>Возраст<
 #-----------------------------
@@ -2793,8 +2846,8 @@ Welcome to YaCy!==Добро пожаловать в YaCy!
 Your settings are _not_ protected!</strong>==Ваши настройки не защищены паролем!</strong>
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Пожалуйста перейдите по ссылке <a href="ConfigAccounts_p.html">Настройка аккаунта</a> <strong>немедленно</strong>
 and set an administration password.==и установите пароль администратора.
-You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
-The peer must go online to get a peer address.==Ihr Peer muss online gehen, um eine Adresse zu bekommen.
+You have not published your peer seed yet. This happens automatically, just wait.==Ваш узел еще не активен. Это происходит автоматически, пожалуйста, подождите.
+The peer must go online to get a peer address.==Ваш узел должен быть онлайн для получения адресов других узлов.
 You cannot be reached from outside.==Вы недоступны извне.
 A possible reason is that you are behind a firewall, NAT or Router.==Возможно Вы находитесь за брандмауэром, NAT или роутером.
 But you can <a href="index.html">search the internet</a> using the other peers'==Но Вы можете <a href="index.html">выполнять поиск</a>, используя помощь других узлов
@@ -2829,6 +2882,8 @@ For community support, please visit our==Для поддержки сообще�
 #File: Status_p.inc
 #---------------------------
 System Status==Статус системы
+System==Система
+YaCy version==Версия YaCy
 Unknown==Неизвестный
 Uptime==Время работы
 Processors:==Процессоры:
@@ -2851,9 +2906,11 @@ not used==не используется
 Used for YaCy -> YaCy communication:==Используется для YaCy -> YaCy коммуникаций:
 WARNING:==ПРЕДУПРЕЖДЕНИЕ:
 You do this on your own risk.==Вы делаете это на свой риск.
-If you do this without YaCy running on a desktop-pc, this will possibly break startup.==Wenn Sie diese Option verwenden ohne dass YaCy auf einem Desktop PC läuft, wird YaCy vermutlich nicht mehr starten.
-In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
->Experimental<==>Экспериментально<
+If you do this without YaCy running on a desktop-pc, this will possibly break startup.==Используйте эту опцию, только если YaCy запущен.
+In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==Эту и другие опции вы можете включить вручную через файл DATA/SETTINGS/yacy.conf
+Remote:==Удалённый прокси
+Tray-Icon==Иконка в трее
+Experimental<==Включить<
 Yes==Да
 No==Нет
 Auto-popup on start-up==Запускать при старте
@@ -2910,6 +2967,17 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 See you soon!==До встречи!
 Just a moment, please!==Пожалуйста, подождите!
 Application will terminate after working off all scheduled tasks.==Приложение завершит свою работу.
+Please send us feed-back!==Пожалуйста, отправляйте нам отзывы!
+We don't track YaCy users, YaCy does not send \'home-pings\', we do not even know how many people use YaCy as their private search engine.==Мы не следим за пользователями YaCy. Мы даже не знаем как много людей пользуются поиском YaCy для личных целей.
+Therefore we like to ask you: do you like YaCy\? Will you use it again... if not, why\? Is is possible that we change a bit to suit your needs\?==Спросите себя: за что вам нравится YaCy? Вы будете использовать его снова... или нет... почему?
+Please send us feed-back about your experience with an==Пожалуйста, отправьте нам отзыв о вашем опыте использования
+>anonymous message<==>анонимно<
+or a<==или<
+posting to our==опубликовав на нашем
+web forums==форуме
+>bug report<==>отчёт о найденных ошибках.<
+>Professional Support<==>Профессиональная поддержка<
+If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see==Если вы желаете использовать YaCy для нужд своей компании, то, пожалуйста, смотрите
 Then YaCy will restart.==А затем перезагрузится
 If you can't reach YaCy's interface after 5 minutes restart failed.==Если интерфейс YaCy не открылся в течение пяти минут, то запуск неудался.
 Installing release==Устанавливаю релиз
@@ -2953,8 +3021,8 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 #File: Table_API_p.html
 #---------------------------
 : Peer Steering==: Управление узлом
-The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
-Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
+The information that is presented on this page can also be retrieved as XML==Информация представленная на этой странице, также может быть получена в XML-формате.
+Click the API icon to see the XML.==Нажмите на иконку API для просмотра XML.
 To see a list of all APIs, please visit the ==Для просмотра списка всех API, пожалуйста, посетите 
 API wiki page==страницу API в Wiki
 >Process Scheduler<==>Планировщик<
@@ -2962,7 +3030,7 @@ This table shows actions that had been issued on the YaCy interface==Эта та
 to change the configuration or to request crawl actions.==для изменения настроек или подачи запроса на выполнение сканирования.
 These recorded actions can be used to repeat specific actions and to send them==Эти сохраненые действия могут быть использованы, чтобы повторить некоторые и направить их
 to a scheduler for a periodic execution.==в планировщик для периодического выполнения.
->Recorded Actions<==>Записанные действия<
+>Recorded Actions<==>Запланированные действия<
 "next page"=="следующая страница"
 "previous page"=="предыдущая страница"
 "next page"=="следующая страница"
@@ -2976,43 +3044,44 @@ Recording<==Запись<
 Last&nbsp;Exec==Дата&nbsp;последнего запуска
 Next&nbsp;Exec==Дата&nbsp;следующего запуска
 #>URL<==>URL-адрес<
->Event Trigger<==>Ereignis Auslöser<
+>Event Trigger<==>Триггер событий<
 >Scheduler<==>Планировщик<
->no event<==>kein Ereignis<
->activate event<==>Ereignis aktivieren<
->Scheduler<==>Geplante Ausführung<
->no repetition<==>keine Wiederholung<
+>no event<==>нет события<
+>activate event<==>активировать событие<
+>Scheduler<==>Планировщик<
+>no repetition<==>не повторять<
 >activate scheduler<==>активировать планировщик<
->off<==>ausschalten<
->run once<==>einmalig ausführen<
->run regular<==>geplant ausführen<
->after start-up<==>nach dem Start<
-at 00:00h==um 00:00 Uhr
-at 01:00h==um 01:00 Uhr
-at 02:00h==um 02:00 Uhr
-at 03:00h==um 03:00 Uhr
-at 04:00h==um 04:00 Uhr
-at 05:00h==um 05:00 Uhr
-at 06:00h==um 06:00 Uhr
-at 07:00h==um 07:00 Uhr
-at 08:00h==um 08:00 Uhr
-at 09:00h==um 09:00 Uhr
-at 10:00h==um 10:00 Uhr
-at 11:00h==um 11:00 Uhr
-at 12:00h==um 12:00 Uhr
-at 13:00h==um 13:00 Uhr
-at 14:00h==um 14:00 Uhr
-at 15:00h==um 15:00 Uhr
-at 16:00h==um 16:00 Uhr
-at 17:00h==um 17:00 Uhr
-at 18:00h==um 18:00 Uhr
-at 19:00h==um 19:00 Uhr
-at 20:00h==um 20:00 Uhr
-at 21:00h==um 21:00 Uhr
-at 22:00h==um 22:00 Uhr
-at 23:00h==um 23:00 Uhr
-"Execute Selected Actions"=="Выполнить выбранные действия"
-"Delete Selected Actions"=="Удалить выбранные действия"
+>off<==>выключить<
+>run once<==>выполнить один раз<
+>run regular<==>выполнять постоянно<
+>after start-up<==>после запуска<
+at 00:00h==в 00:00 ч.
+at 01:00h==в 01:00 ч.
+at 02:00h==в 02:00 ч.
+at 03:00h==в 03:00 ч.
+at 04:00h==в 04:00 ч.
+at 05:00h==в 05:00 ч.
+at 06:00h==в 06:00 ч.
+at 07:00h==в 07:00 ч.
+at 08:00h==в 08:00 ч.
+at 09:00h==в 09:00 ч.
+at 10:00h==в 10:00 ч.
+at 11:00h==в 11:00 ч.
+at 12:00h==в 12:00 ч.
+at 13:00h==в 13:00 ч.
+at 14:00h==в 14:00 ч.
+at 15:00h==в 15:00 ч.
+at 16:00h==в 16:00 ч.
+at 17:00h==в 17:00 ч.
+at 18:00h==в 18:00 ч.
+at 19:00h==в 19:00 ч.
+at 20:00h==в 20:00 ч.
+at 21:00h==в 21:00 ч.
+at 22:00h==в 22:00 ч.
+at 23:00h==в 23:00 ч.
+"Execute Selected Actions"=="Выполнить действия"
+"Delete Selected Actions"=="Удалить действия"
+"Delete all Actions which had been created before"=="Удалить все действия старше, чем"
 >Result of API execution==>Результат выполнения API
 #>Status<==>Состояние>
 #>URL<==>URL-адрес<
@@ -3216,21 +3285,13 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Вы може
 #---------------------------
 >Crawler<==>Индексатор<
 >Queues<==>Очереди индексатора<
->Index Size<==>Размер индекса<
->Progress<==>Ход работы<
 Queue==Очередь
-Seg-==Сегменты
-ments==
 Pause/==Старт/
 Resume==Стоп
 pause reason:==Причина остановки
 resource observer:==обзор ресурсов
 not enough disk space,==нет места на диске
-PPM \(Pages Per Minute\)==PPM (страницы в минуту)
 Crawler PPM==Скорость индексатора
-Traffic \(Crawler\)==Трафик индексатора
->Load<==>Загрузка процессора<
-RWI RAM \(Word Cache\)==RWI RAM (Кэш слов)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Ошибка профиля. Пожалуйста, остановите YaCy, удалите файл DATA/PLASMADB/crawlProfiles0.db
 and restart.==и перезапустите.
 Error:==Ошибка:
@@ -3247,40 +3308,32 @@ Error with file input==Ошибка с указанным файлом
 started.==запущено.
 Please wait some seconds,==Пожалуйста, подождите несколько секунд,
 it may take some seconds until the first result appears there.==это может занять несколько секунд, пока ожидается первый результат.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Если вы индексируете нежелательные страницы, то вы можете удалить их <a href="IndexCreateWWWLocalQueue_p.html">здесь</a>.
-Crawl Queue:==Очередь индексирования:
-Queue</th>==Очередь</th>
-Profile</th>==Профиль</th>
-Initiator==Инициатор
-Depth</th>==Глубина</th>
-Modified Date==Дата изменения
-Anchor Name==Linktitel
-#URL==URL-адрес
-Delete==Удалить
-Next update in==Следующее обновление через
-/> seconds.==/> секунд.
-See a access timing <a href="api/latency_p.xml">here</a>==Смотрите сроки доступа <a href="api/latency_p.xml">по этой ссылке</a>
-Queue</th>==Очередь</th>
 >Size==>Размер
+>Progress<==>Ход работы<
 #Max==Максимально
+"set"=="Установить"
 #Indexing</td>==Индексирование</td>
-Loader==Загрузка
-Local Crawler==Локальный индексатор
-Limit Crawler==Ограничения индексатора
-No-Load Crawler==Не загружено индексатором
-unlimited==неограниченно
-Remote Crawler==Удалённый индексатор
-Speed==Скорость
-"minimum"=="минимально"
-"custom"=="настроено"
-"maximum"=="максимально"
+Loader==Загрузки
+>Index Size<==>Размер индекса<
+Seg-<br/>ments==Сегменты
+>Documents<==>Документы<
+>solr search api<==>API базы Solr<
+>Webgraph Edges<==>Вэб-графика<
+Citations<br/>\(reverse link index\)==Цитаты (ссылки обратного индекса)
+RWIs<br/>\(P2P Chunks\)==RWIs<br/>(P2P части)
+Local Crawler==Локальная
+Limit Crawler==Ограниченная
+Remote Crawler==Удалённая
+No-Load Crawler==Холостая
+Speed / PPM<br/>\(Pages Per Minute\)==Скорость (страниц в минуту)
 Database==База данных
 Entries==Значения
 Segments==Сегменты
-Pages \(URLs\)==Страниц (URL адресов)
-RWIs \(Words\)==RWIs (Слов)
 Indicator==Индикатор
 Level==Уровень
+Postprocessing Progress==Постобработка
+Traffic \(Crawler\)==Трафик индексатора
+>Load<==>Загрузка процессора<
 #-----------------------------
 
 #File: WatchWebStructure_p.html
@@ -3578,7 +3631,7 @@ Blacklist Administration==Управление чёрным списком
 Blacklist Cleaner==Очистка черного списка
 Blacklist Test==Тест черного списка
 Import/Export==Импорт/Экспорт
-Index Cleaner==Очистка индекса
+Content Control==Управление содержимым
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
@@ -3589,15 +3642,12 @@ Basic Configuration==Основная конфигурация
 >Accounts==>Учетные записи
 Network Configuration==Конфигурация сети
 Download System Update==Обновление системы
->Heuristics<==>Эвристики<
-Dictionary Loader==Загрузка словаря
-System Update==Обновление системы
 >Performance==>Производительность
 Advanced Settings==Расширенные настройки
-Parser Configuration==Конфигурация обработки
 Local robots.txt==Локальный robots.txt
 Web Cache==Веб‐кэш
 Advanced Properties==Расширенная конфигурация
+>Thread Dump<==>Дамп потока<
 #-----------------------------
 
 #File: env/templates/submenuContentIntegration.template
@@ -3628,8 +3678,8 @@ Surrogate Import</a>==Surrogat Import</a>
 Processing Monitor==Монитор процессов
 Crawler Queues==Очереди индексирования
 Crawler<==Индексатор<
-Loader<==Загрузчик<
-Rejected URLs==Отклоненные URL-адреса
+Loader<==Загружаемые ссылки<
+Rejected URLs==Отклонённые ссылки
 >Queues<==>Очереди<
 Local<==Локальный<
 Global==Глобальный
@@ -3650,16 +3700,23 @@ User Profile==Профиль пользователя
 #File: env/templates/submenuIndexControl.template
 #---------------------------
 Index Administration==Администрирование индекса
-Reverse Word Index Administration==Администрирование индекса ссылок по слову
-URL References Database==База данных URL-ссылок
-URL Viewer==Просмотр URL-адресов
+URL Database Administration==Управление базой данных индекса
+Index Deletion==Удаление индекса
+Index Sources &amp; Targets==Индекс источников и цели
+#Solr Schema Editor==Редактор схемы Solr
+Field Re-Indexing==Переиндексация
+Reverse Word Index==Обратный индекс слов
+Index Cleaner==Очистка индекса
+Content Analysis==Анализ содержимого
+Web Cache==Вэб-кэш
+Parser Configuration==Конфигурация парсера
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
 Web Crawler Control==Управление вэб-индексатором
 Start a Web Crawl==Запуск вэб-индексатора
-Crawl Start==Запуск индексатора
+Crawl Start==Запуск индексирования
 Crawl Profile Editor==Изменение профиля индексатора
 Crawler Queues==Очереди индексатора
 Indexing<==Индексирование<
@@ -3709,6 +3766,19 @@ Publication==Публикации
 #Wiki==Wiki
 #Blog==Блог
 File Hosting==Хостинг файлов
+#-----------------------------
+
+#File: env/templates/submenuSearchConfiguration.template
+#---------------------------
+Integrated Search Configuration==Конфигурация интегрированного поиска
+Generic Search Portal==Страница общего поиска
+Search Page Layout==Макет страницы поиска
+#Appearance==Внешний вид
+#Language==Язык
+User Profile==Профиль пользователя
+#Heuristics==Эвристики
+Solr Ranking Config==Конфигурация Solr
+RWI Ranking Config==Конфигурация RWI
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
