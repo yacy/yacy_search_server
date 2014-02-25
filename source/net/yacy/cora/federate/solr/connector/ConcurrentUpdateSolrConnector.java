@@ -108,6 +108,14 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                         //ConcurrentLog.info("ConcurrentUpdateSolrConnector", "sending " + docs.size() + " documents to solr");
                         try {
                             ConcurrentUpdateSolrConnector.this.connector.add(docs);
+                        } catch (final OutOfMemoryError e) {
+                            // clear and try again...
+                            clearCaches();
+                            try {
+                                ConcurrentUpdateSolrConnector.this.connector.add(docs);
+                            } catch (final IOException ee) {
+                                ConcurrentLog.logException(e);
+                            }
                         } catch (final IOException e) {
                             ConcurrentLog.logException(e);
                         }
