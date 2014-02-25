@@ -166,7 +166,9 @@ public class ErrorCache {
         }
         if (failDoc != null) return failDoc;
         try {
-            SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlhash);
+            final SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.id + ":\"" + urlhash + "\" AND " + CollectionSchema.failtype_s.getSolrFieldName() + ":[* TO *]", 0, 1);
+            if (docs == null || docs.isEmpty()) return null;
+            SolrDocument doc = docs.get(0);
             if (doc == null) return null;
             return new CollectionConfiguration.FailDoc(doc);
         } catch (final IOException e) {
