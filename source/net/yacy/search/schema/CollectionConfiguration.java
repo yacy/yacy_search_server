@@ -1211,6 +1211,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 String id;
                 while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
                     this.crt.put(ASCII.getBytes(id), new double[]{0.0d,0.0d}); //{old value, new value}
+                    if (MemoryControl.shortStatus()) {
+                        ConcurrentLog.warn("CollectionConfiguration", "terminated CRHost collection during postprocessing because of short memory");
+                        break;
+                    }
                 }
             } catch (final InterruptedException e2) {
             }
