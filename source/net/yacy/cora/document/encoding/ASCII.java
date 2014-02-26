@@ -105,6 +105,7 @@ public class ASCII implements Comparator<String> {
     }
 
     public final static String String(final byte[] bytes) {
+        if (bytes == null) return null;
         StringBuilder sb = new StringBuilder(bytes.length);
         for (byte b : bytes) {
             if (b < 0) throw new IllegalArgumentException();

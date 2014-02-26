@@ -81,14 +81,14 @@ public class ResponseAccumulator {
             for (Map.Entry<String, Object> e: facet_counts) facet_countsAcc.add(e.getKey(), e.getValue());
         }
         
-        // accumulate the index (thats the result from a luke request)
+        // accumulate the index
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> index_counts = (SimpleOrderedMap<Object>) response.get("index");
         if (index_counts != null) {
             for (Map.Entry<String, Object> e: index_counts) index_countsAcc.add(e.getKey(), e.getValue());
         }
         
-        // accumulate the fields (thats the result from a luke request)
+        // accumulate the fields
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> schema = (SimpleOrderedMap<Object>) response.get("schema");
         if (schema != null) {

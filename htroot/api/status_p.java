@@ -27,6 +27,7 @@
 
 import java.io.IOException;
 
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -138,7 +139,7 @@ public class status_p {
         long webgraphTimeSinceStart = processWebgraph && Switchboard.postprocessingRunning ? System.currentTimeMillis() - Switchboard.postprocessingStartTime[1] : 0;
 
         long collectionRemainingCount = 0;
-        if (processCollection) try {collectionRemainingCount = sb.index.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]");} catch (IOException e) {}
+        if (processCollection) try {collectionRemainingCount = sb.index.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
         long collectionCountSinceStart = Switchboard.postprocessingRunning ? Switchboard.postprocessingCount[0] - collectionRemainingCount : 0;
         int collectionSpeed = collectionTimeSinceStart == 0 ? 0 : (int) (60000 * collectionCountSinceStart / collectionTimeSinceStart); // pages per minute
         long collectionRemainingTime = collectionSpeed == 0 ? 0 : 60000 * collectionRemainingCount / collectionSpeed; // millis
@@ -146,7 +147,7 @@ public class status_p {
         int collectionRemainingTimeSeconds = (int) ((collectionRemainingTime - (collectionRemainingTimeMinutes * 60000)) / 1000);
 
         long webgraphRemainingCount = 0;
-        if (processWebgraph) try {webgraphRemainingCount = sb.index.fulltext().getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]");} catch (IOException e) {}
+        if (processWebgraph) try {webgraphRemainingCount = sb.index.fulltext().getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
         long webgraphCountSinceStart = Switchboard.postprocessingRunning ? Switchboard.postprocessingCount[1] - webgraphRemainingCount : 0;
         int webgraphSpeed = webgraphTimeSinceStart == 0 ? 0 : (int) (60000 * webgraphCountSinceStart / webgraphTimeSinceStart); // pages per minute
         long webgraphRemainingTime = webgraphSpeed == 0 ? 0 : 60000 * webgraphRemainingCount / webgraphSpeed; // millis

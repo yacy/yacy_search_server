@@ -36,6 +36,7 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.parser.html.AbstractScraper;
@@ -354,7 +355,7 @@ public class QueryGoal {
 
         // add filter to prevent that results come from failed urls
         q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND (");
-        q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(":[* TO *] OR ");
+        q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(AbstractSolrConnector.CATCHALL_DTERM + " OR ");
         q.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif) OR ");
         q.append(CollectionSchema.content_type.getSolrFieldName()).append(":(image/*))");
         

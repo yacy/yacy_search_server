@@ -20,13 +20,18 @@ package net.yacy.search.index;
  */
 
 import java.io.IOException;
+
 import net.yacy.search.Switchboard;
+
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
+
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.schema.CollectionConfiguration;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -92,7 +97,7 @@ import org.apache.solr.common.SolrInputDocument;
          */
         public void addSelectFieldname(String field) {
             if (field != null && !field.isEmpty()) {
-                querylist.add(field + ":[* TO *]");
+                querylist.add(field + AbstractSolrConnector.CATCHALL_DTERM);
             }
         }
        

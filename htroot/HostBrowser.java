@@ -156,7 +156,7 @@ public class HostBrowser {
         if (admin && post.containsKey("deleteLoadErrors")) {
             try {
                 fulltext.getDefaultConnector().deleteByQuery("-" + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " 
-                        + CollectionSchema.httpstatus_i.getSolrFieldName() + ":[* TO *]"); // make sure field exists
+                        + CollectionSchema.httpstatus_i.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM); // make sure field exists
                 ConcurrentLog.info ("HostBrowser:", "delete documents with httpstatus_i <> 200");
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.fail.name() + "\"" );
                 ConcurrentLog.info ("HostBrowser:", "delete documents with failtype_s = fail");
@@ -178,7 +178,7 @@ public class HostBrowser {
                 int maxcount = admin ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
                 
                 // collect hosts from index
-                ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_TERM, maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_QUERY, maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
                 if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
                 
                 // collect hosts from crawler
@@ -269,7 +269,7 @@ public class HostBrowser {
                     }
                 } else {
                     if (facetcount > 1000 || post.containsKey("nepr")) {
-                        q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
+                        q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(AbstractSolrConnector.CATCHALL_DTERM);
                     }
                 }
                 BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentDocumentsByQuery(q.toString(), 0, 100000, TIMEOUT, 100,

@@ -199,7 +199,7 @@ public class IndexDeletion_p {
         if (post != null && (post.containsKey("simulate-collectiondelete") || post.containsKey("engage-collectiondelete"))) {
             boolean simulate = post.containsKey("simulate-collectiondelete");
             collectiondelete = collectiondelete.replaceAll(" ","").replaceAll(",", "|");
-            String query = collectiondelete_mode_unassigned_checked ? "-" + CollectionSchema.collection_sxt + ":[* TO *]" : collectiondelete.length() == 0 ? CollectionSchema.collection_sxt + ":\"\"" : QueryModifier.parseCollectionExpression(collectiondelete);
+            String query = collectiondelete_mode_unassigned_checked ? "-" + CollectionSchema.collection_sxt + AbstractSolrConnector.CATCHALL_DTERM : collectiondelete.length() == 0 ? CollectionSchema.collection_sxt + ":\"\"" : QueryModifier.parseCollectionExpression(collectiondelete);
             if (simulate) {
                 try {
                     count = (int) defaultConnector.getCountByQuery(query);

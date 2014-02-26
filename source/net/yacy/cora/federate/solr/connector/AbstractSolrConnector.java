@@ -63,18 +63,20 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     
     public final static SolrDocument POISON_DOCUMENT = new SolrDocument();
     public final static String POISON_ID = "POISON_ID";
-    public final static String CATCHALL_TERM = "*:*";
+    public final static String CATCHALL_TERM = "[* TO *]";
+    public final static String CATCHALL_DTERM = ":" + CATCHALL_TERM;
+    public final static String CATCHALL_QUERY = "*:*";
     public final static SolrQuery catchallQuery = new SolrQuery();
     static {
-        catchallQuery.setQuery(CATCHALL_TERM);
+        catchallQuery.setQuery(CATCHALL_QUERY);
         catchallQuery.setFields(CollectionSchema.id.getSolrFieldName());
         catchallQuery.setRows(0);
         catchallQuery.setStart(0);
     }
     public final static SolrQuery catchSuccessQuery = new SolrQuery();
     static {
-        //catchSuccessQuery.setQuery("-" + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
-        catchSuccessQuery.setQuery(CATCHALL_TERM); // failreason_s is only available for core collection1
+        //catchSuccessQuery.setQuery("-" + CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
+        catchSuccessQuery.setQuery(CATCHALL_QUERY); // failreason_s is only available for core collection1
         catchSuccessQuery.setFields(CollectionSchema.id.getSolrFieldName());
         catchSuccessQuery.clearSorts();
         catchSuccessQuery.setIncludeScore(false);
@@ -200,7 +202,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
     @Override
     public Iterator<String> iterator() {
-        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_TERM, 0, Integer.MAX_VALUE, 60000);
+        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_QUERY, 0, Integer.MAX_VALUE, 60000);
         return new LookAheadIterator<String>() {
             @Override
             protected String next0() {

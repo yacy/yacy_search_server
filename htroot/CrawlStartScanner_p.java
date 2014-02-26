@@ -111,7 +111,7 @@ public class CrawlStartScanner_p
             // get a list of all hosts in the index
             ReversibleScoreMap<String> hostscore = null;
             try {
-                hostscore = sb.index.fulltext().getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_TERM, 1000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+                hostscore = sb.index.fulltext().getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_QUERY, 1000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
             } catch (final IOException e) {}
             if (hostscore != null) {
                 for (String s: hostscore) hostSet.add(s);

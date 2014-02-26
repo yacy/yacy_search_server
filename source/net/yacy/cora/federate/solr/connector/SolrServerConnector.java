@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.yacy.cora.federate.solr.instance.ServerShard;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -100,26 +101,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             }
         }
     }
-    
-    /**
-     * get the number of segments.
-     * @return the number of segments, or 0 if unknown
-     */
-    public int getSegmentCount() {
-        if (this.server == null) return 0;
-        try {
-            LukeResponse lukeResponse = getIndexBrowser(false);
-            NamedList<Object> info = lukeResponse.getIndexInfo();
-            if (info == null) return 0;
-            Integer segmentCount = (Integer) info.get("segmentCount");
-            if (segmentCount == null) return 1;
-            return segmentCount.intValue();
-        } catch (final Throwable e) {
-            clearCaches(); // prevent further OOM if this was caused by OOM
-            log.warn(e);
-            return 0;
-        }
-    }
 
     @Override
     public boolean isClosed() {
@@ -144,22 +125,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         }
     }
 
-    @Override
-    public long getSize() {
-        if (this.server == null) return 0;
-        try {
-            LukeResponse lukeResponse = getIndexBrowser(false);
-            if (lukeResponse == null) return 0;
-            Integer numDocs = lukeResponse.getNumDocs();
-            if (numDocs == null) return 0;
-            return numDocs.longValue();
-        } catch (final Throwable e) {
-            clearCaches(); // prevent further OOM if this was caused by OOM
-            log.warn(e);
-            return 0;
-        }
-    }
-
     /**
      * delete everything in the solr index
      * @throws IOException
@@ -169,7 +134,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         if (this.server == null) return;
         synchronized (this.server) {
             try {
-                this.server.deleteByQuery(AbstractSolrConnector.CATCHALL_TERM);
+                this.server.deleteByQuery(AbstractSolrConnector.CATCHALL_QUERY);
                 this.server.commit(true, true, false);
             } catch (final Throwable e) {
                 clearCaches(); // prevent further OOM if this was caused by OOM
@@ -345,9 +310,82 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         }
     }
     
+    // luke requests: these do not work for attached SolrCloud Server
+    
     public Collection<FieldInfo> getFields() throws SolrServerException {
         // get all fields contained in index
         return getIndexBrowser(false).getFieldInfo().values();
+    }
+
+    /**
+     * get the number of segments.
+     * @return the number of segments, or 0 if unknown
+     */
+    public int getSegmentCount() {
+        if (this.server == null) return 0;
+        try {
+            LukeResponse lukeResponse = getIndexBrowser(false);
+            NamedList<Object> info = lukeResponse.getIndexInfo();
+            if (info == null) return 0;
+            Integer segmentCount = (Integer) info.get("segmentCount");
+            if (segmentCount == null) return 1;
+            return segmentCount.intValue();
+        } catch (final Throwable e) {
+            clearCaches(); // prevent further OOM if this was caused by OOM
+            log.warn(e);
+            return 0;
+        }
+    }
+
+    private int useluke = 0; // 3-value logic: 1=yes, -1=no, 0=dontknow
+    
+    @Override
+    public long getSize() {
+        if (this.server == null) return 0;
+        if (this.server instanceof ServerShard) {
+            // the server can be a single shard; we don't know here
+            // to test that, we submit requests to bots variants
+            if (useluke == 1) return getSizeLukeRequest();
+            if (useluke == -1) return getSizeQueryRequest();
+            long ls = getSizeLukeRequest();
+            long qs = getSizeQueryRequest();
+            if (ls == qs) {
+                useluke = 1;
+                return ls;
+            }
+            useluke = -1;
+            return qs;
+        }
+        return getSizeLukeRequest();
+    }
+    
+    private long getSizeQueryRequest() {
+        if (this.server == null) return 0;
+        try {
+            final QueryResponse rsp = getResponseByParams(AbstractSolrConnector.catchSuccessQuery);
+            if (rsp == null) return 0;
+            final SolrDocumentList docs = rsp.getResults();
+            if (docs == null) return 0;
+            return docs.getNumFound();
+        } catch (final Throwable e) {
+            log.warn(e);
+            return 0;
+        }
+    }
+    
+    private long getSizeLukeRequest() {
+        if (this.server == null) return 0;
+        try {
+            LukeResponse lukeResponse = getIndexBrowser(false);
+            if (lukeResponse == null) return 0;
+            Integer numDocs = lukeResponse.getNumDocs();
+            if (numDocs == null) return 0;
+            return numDocs.longValue();
+        } catch (final Throwable e) {
+            clearCaches(); // prevent further OOM if this was caused by OOM
+            log.warn(e);
+            return 0;
+        }
     }
     
     private LukeResponse getIndexBrowser(final boolean showSchema) throws SolrServerException {
@@ -356,33 +394,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         lukeRequest.setResponseParser(new XMLResponseParser());
         lukeRequest.setNumTerms(0);
         lukeRequest.setShowSchema(showSchema);
-        /*
-        final SolrRequest lukeRequest = new SolrRequest(METHOD.GET, "/admin/luke") {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Collection<ContentStream> getContentStreams() throws IOException {
-                return null;
-            }
-            @Override
-            public SolrParams getParams() {
-                ModifiableSolrParams params = new ModifiableSolrParams();
-                //params.add("numTerms", "1");
-                params.add("_", "" + System.currentTimeMillis()); // cheat a proxy
-                if (showSchema) params.add("show", "schema");
-                return params;
-            }
-            @Override
-            public LukeResponse process(SolrServer server) throws SolrServerException, IOException {
-              long startTime = System.currentTimeMillis();
-              LukeResponse res = new LukeResponse();
-              this.setResponseParser(new XMLResponseParser());
-              NamedList<Object> response = server.request(this); 
-              res.setResponse(response);
-              res.setElapsedTime(System.currentTimeMillis() - startTime);
-              return res;
-            }
-        };
-        */
         LukeResponse lukeResponse = null;
         try {
             lukeResponse = lukeRequest.process(this.server);

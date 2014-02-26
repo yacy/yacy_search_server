@@ -924,7 +924,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
  
         // collect hosts from index which shall take part in citation computation
         String query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-                CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]";
+                CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
         ReversibleScoreMap<String> hostscore;
         try {
             Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets(query, 10000000, CollectionSchema.host_s.getSolrFieldName());
@@ -950,7 +950,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // This shall fulfill the following requirement:
                 // If a document A links to B and B contains a 'canonical C', then the citation rank computation shall consider that A links to C and B does not link to C.
                 // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
-                String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + ":[* TO *]";
+                String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
                 long patchquerycount = collectionConnector.getCountByQuery(patchquery);
                 BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, 0, 10000000, 600000, 100,
                         CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
@@ -1065,7 +1065,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         
         // process all documents in collection
         query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-                CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]";
+                CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
         Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
         Set<String> uniqueURLs = new HashSet<String>();
         try {
@@ -1311,7 +1311,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                 ncr += d[0] / ilc;
                             } else {
                                 // Output a warning that d[] is empty
-                                ConcurrentLog.warn("COLLECTION", "d[] is empty, iid="  + iid);
+                                ConcurrentLog.warn("COLLECTION", "d[] is empty, iid="  + ASCII.String(iid));
                                 break;
                             }
                         }

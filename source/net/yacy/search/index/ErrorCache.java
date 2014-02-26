@@ -38,6 +38,7 @@ import org.apache.solr.common.params.CommonParams;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.FailCategory;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.index.Fulltext;
@@ -65,7 +66,7 @@ public class ErrorCache {
             params.setFacet(false);
             params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
             params.setFields(CollectionSchema.id.getSolrFieldName());
-            params.setQuery(CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
+            params.setQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
             params.set(CommonParams.DF, CollectionSchema.id.getSolrFieldName()); // DisMaxParams.QF or CommonParams.DF must be given
             SolrDocumentList docList =  fulltext.getDefaultConnector().getDocumentListByParams(params);
             if (docList != null) for (int i = docList.size() - 1; i >= 0; i--) {
@@ -79,7 +80,7 @@ public class ErrorCache {
 
     public void clear() throws IOException {
         if (this.cache != null) synchronized (this.cache) {this.cache.clear();}
-        this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
+        this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
     }
 
     public void removeHosts(final Set<String> hosthashes) {
@@ -166,7 +167,7 @@ public class ErrorCache {
         }
         if (failDoc != null) return failDoc;
         try {
-            final SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.id + ":\"" + urlhash + "\" AND " + CollectionSchema.failtype_s.getSolrFieldName() + ":[* TO *]", 0, 1);
+            final SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.id + ":\"" + urlhash + "\" AND " + CollectionSchema.failtype_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM, 0, 1);
             if (docs == null || docs.isEmpty()) return null;
             SolrDocument doc = docs.get(0);
             if (doc == null) return null;
