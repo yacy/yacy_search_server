@@ -166,7 +166,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                             // switch attribute in existing document
                             SolrInputDocument sidContext = segment.fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
                             sidContext.setField(uniquefield.getSolrFieldName(), false);
-                            segment.putDocumentInQueue(sidContext);
+                            segment.putDocument(sidContext);
                             changed = true;
                         } else {
                             sid.setField(uniquefield.getSolrFieldName(), true);

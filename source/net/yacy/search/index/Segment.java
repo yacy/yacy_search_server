@@ -77,9 +77,7 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.search.StorageQueueEntry;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -117,7 +115,6 @@ public class Segment {
     protected final Fulltext                       fulltext;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
-    private   WorkflowProcessor<StorageQueueEntry> indexingPutDocumentProcessor;
 
     /**
      * create a new Segment
@@ -136,16 +133,6 @@ public class Segment {
         this.fulltext = new Fulltext(segmentPath, archivePath, collectionConfiguration, webgraphConfiguration);
         this.termIndex = null;
         this.urlCitationIndex = null;
-
-        this.indexingPutDocumentProcessor = new WorkflowProcessor<StorageQueueEntry>(
-                "putDocument",
-                "solr document put queueing",
-                new String[] {},
-                this,
-                "putDocument",
-                30,
-                null,
-                1);
     }
     
     public boolean connectedRWI() {
@@ -543,7 +530,6 @@ public class Segment {
     }
 
     public synchronized void close() {
-        this.indexingPutDocumentProcessor.shutdown();
     	if (this.termIndex != null) this.termIndex.close();
         if (this.fulltext != null) this.fulltext.close();
         if (this.urlCitationIndex != null) this.urlCitationIndex.close();
@@ -607,21 +593,12 @@ public class Segment {
      * @param queueEntry
      * @throws IOException
      */
-    public void putDocument(final StorageQueueEntry queueEntry) {
+    public void putDocument(final SolrInputDocument queueEntry) {
         try {
-            this.fulltext().putDocument(queueEntry.queueEntry);
+            this.fulltext().putDocument(queueEntry);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
-    }
-    
-    /**
-     * put a solr document into the index. This is the right point to call when enqueueing of solr document is wanted.
-     * This method exist to prevent that solr is filled concurrently with data which makes it fail or throw strange exceptions.
-     * @param queueEntry
-     */
-    public void putDocumentInQueue(final SolrInputDocument queueEntry) {
-        this.indexingPutDocumentProcessor.enQueue(new StorageQueueEntry(queueEntry));
     }
 
     public SolrInputDocument storeDocument(
@@ -659,7 +636,7 @@ public class Segment {
         
         // STORE TO SOLR
         String error = null;
-        this.putDocumentInQueue(vector);
+        this.putDocument(vector);
         List<SolrInputDocument> webgraph = vector.getWebgraphDocuments();
         if (webgraph != null && webgraph.size() > 0) {
             

@@ -1209,7 +1209,7 @@ public final class Protocol {
             Network.log.info("local search (solr): localpeer sent " + container.size() + "/" + numFound + " references");
         } else {
             for (SolrInputDocument doc: docs) {
-                event.query.getSegment().putDocumentInQueue(doc);
+                event.query.getSegment().putDocument(doc);
             }
             docs.clear(); docs = null;
             event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, numFound);

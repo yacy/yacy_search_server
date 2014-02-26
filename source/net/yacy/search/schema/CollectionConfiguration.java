@@ -79,6 +79,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ClickdepthCache;
 import net.yacy.search.index.Segment.ReferenceReport;
@@ -976,6 +977,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             }
                         }
                         patchquerycountcheck++;
+                        if (MemoryControl.shortStatus()) {
+                            ConcurrentLog.warn("CollectionConfiguration", "terminated canonical collection during postprocessing because of short memory");
+                            break;
+                        }
                     }
                 } catch (InterruptedException e) {
                     ConcurrentLog.logException(e);
@@ -992,12 +997,20 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 while (convergence_attempts++ < 30) {
                     ConcurrentLog.info("CollectionConfiguration", "convergence step " + convergence_attempts + " for host " + host + " ...");
                     if (crh.convergenceStep()) break;
+                    if (MemoryControl.shortStatus()) {
+                        ConcurrentLog.warn("CollectionConfiguration", "terminated convergenceStep during postprocessing because of short memory");
+                        break;
+                    }
                 }
                 ConcurrentLog.info("CollectionConfiguration", "convergence for host " + host + " after " + convergence_attempts + " steps");
                 // we have now the cr for all documents of a specific host; we store them for later use
                 Map<byte[], CRV> crn = crh.normalize();
                 //crh.log(crn);
                 ranking.putAll(crn); // accumulate this here for usage in document update later
+                if (MemoryControl.shortStatus()) {
+                    ConcurrentLog.warn("CollectionConfiguration", "terminated crn akkumulation during postprocessing because of short memory");
+                    break;
+                }
                 countcheck++;
             }
             if (hostscore.size() != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous host count: expected=" + hostscore.size() + ", counted=" + countcheck);
