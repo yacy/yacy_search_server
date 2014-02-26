@@ -62,10 +62,13 @@ public class InstanceMirror {
 
     public void disconnectEmbedded() {
         if (this.embeddedSolrInstance == null) return;
+        for (EmbeddedSolrConnector connector: this.embeddedConnectorCache.values()) {
+            this.mirrorConnectorCache.values().remove(connector);
+            connector.close();
+        }
+        this.embeddedConnectorCache.clear();
         for (SolrConnector connector: this.mirrorConnectorCache.values()) connector.close();
         this.mirrorConnectorCache.clear();
-        for (EmbeddedSolrConnector connector: this.embeddedConnectorCache.values()) connector.close();
-        this.embeddedConnectorCache.clear();
         this.embeddedSolrInstance.close();
         this.embeddedSolrInstance = null;
     }
@@ -85,10 +88,13 @@ public class InstanceMirror {
 
     public void disconnectRemote() {
         if (this.remoteSolrInstance == null) return;
+        for (RemoteSolrConnector connector: this.remoteConnectorCache.values()) {
+            this.mirrorConnectorCache.values().remove(connector);
+            connector.close();
+        }
+        this.remoteConnectorCache.clear();
         for (SolrConnector connector: this.mirrorConnectorCache.values()) connector.close();
         this.mirrorConnectorCache.clear();
-        for (RemoteSolrConnector connector: this.remoteConnectorCache.values()) connector.close();
-        this.remoteConnectorCache.clear();
         this.remoteSolrInstance.close();
         this.remoteSolrInstance = null;
     }
