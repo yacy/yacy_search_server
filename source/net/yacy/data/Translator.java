@@ -49,6 +49,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
 
 import java.util.*;
@@ -243,7 +244,7 @@ public class Translator {
             env.setConfig("locale.language", "default");
             ret = true;
         } else {
-            final String htRootPath = env.getConfig("htRootPath", "htroot");
+            final String htRootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
             final File sourceDir = new File(env.getAppPath(), htRootPath);
             final File destDir = new File(env.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
             // .lng

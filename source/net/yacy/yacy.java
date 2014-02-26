@@ -229,7 +229,8 @@ public final class yacy {
             yacyVersion.latestRelease = version;
 
             // create some directories
-            final File htRootPath = new File(appHome, sb.getConfig("htRootPath", "htroot"));
+            final File htRootPath = new File(appHome, sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
+            mkdirIfNeseccary(htRootPath);
             final File htDocsPath = sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
@@ -327,7 +328,7 @@ public final class yacy {
                     }
 
                     if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
-                        final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
+                        final File sourceDir = new File(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                         final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
                         if (Translator.translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
                             //write the new Versionnumber

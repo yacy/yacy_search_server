@@ -160,7 +160,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (rb != null) {
                 _resourceBase = Resource.newResource(rb);
             } else {
-                _resourceBase = Resource.newResource(Switchboard.getSwitchboard().getConfig("htRootPath", "htroot")); //default
+                _resourceBase = Resource.newResource(Switchboard.getSwitchboard().getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
             }
         } catch (IOException e) {
             ConcurrentLog.severe("FILEHANDLER", "YaCyDefaultServlet: resource base (htRootPath) missing");
