@@ -133,7 +133,7 @@ import org.apache.solr.common.SolrInputDocument;
                             
                             for (SolrDocument doc : xdocs) {
                                 SolrInputDocument idoc = colcfg.toSolrInputDocument(doc);
-                                Switchboard.getSwitchboard().index.putDocumentInQueue(idoc);
+                                Switchboard.getSwitchboard().index.putDocument(idoc);
                                 processed++;
                             }
                         }                        
