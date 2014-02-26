@@ -6,10 +6,16 @@
   <wordCacheMaxSize>#[wordCacheMaxSize]#</wordCacheMaxSize>
 
   <memory>
+    <used>#[usedMemory]#</used>
     <free>#[freeMemory]#</free>
     <total>#[totalMemory]#</total>
     <max>#[maxMemory]#</max>
   </memory>
+  
+  <disk>
+    <used>#[usedDisk]#</used>
+    <free>#[freeDisk]#</free>
+  </disk>
   
   <processors>#[processors]#</processors>
   <load>#[load]#</load>
@@ -57,7 +63,7 @@
   </noloadcrawlerqueue>
 
 <!-- crawl profile list -->
-#(crawlProfiles)#::
+#(crawlProfiles)#<crawls count="0"/>::
   <crawls count="#[count]#">
   #{list}#
     <crawl>

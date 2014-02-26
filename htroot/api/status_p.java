@@ -68,12 +68,15 @@ public class status_p {
         prop.putNum("wordCacheMaxSize", cacheMaxSize);
         
 		// memory usage and system attributes
+        prop.putNum("usedMemory", MemoryControl.used());
         prop.putNum("freeMemory", MemoryControl.free());
         prop.putNum("totalMemory", MemoryControl.total());
         prop.putNum("maxMemory", MemoryControl.maxMemory());
+        prop.putNum("usedDisk", sb.observer.getSizeOfDataPath(true));
+        prop.putNum("freeDisk", sb.observer.getUsableSpace());
         prop.putNum("processors", WorkflowProcessor.availableCPU);
         prop.putNum("load", Memory.load());
-
+        
 		// proxy traffic
 		prop.put("trafficIn", ByteCount.getGlobalCount());
 		prop.put("trafficProxy", ByteCount.getAccountCount(ByteCount.PROXY));
