@@ -1023,6 +1023,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         SolrDocument doc;
         int allcount = 0;
         if (segment.fulltext().useWebgraph()) {
+            Set<String> omitFields = new HashSet<String>();
+            omitFields.add(WebgraphSchema.process_sxt.getSolrFieldName());
+            omitFields.add(WebgraphSchema.harvestkey_s.getSolrFieldName());
             try {
                 int proccount = 0;
                 long start = System.currentTimeMillis();
@@ -1035,7 +1038,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
                     int countcheck = 0;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                        SolrInputDocument sid = webgraph.toSolrInputDocument(doc, null);
+                        SolrInputDocument sid = webgraph.toSolrInputDocument(doc, omitFields);
                         if (webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) {
                             byte[] id = ASCII.getBytes((String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName()));
                             CRV crv = ranking.get(id);
@@ -1053,6 +1056,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         try {
                             sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
                             sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
+                            segment.fulltext().getWebgraphConnector().deleteById((String) sid.getFieldValue(WebgraphSchema.id.getSolrFieldName()));
                             segment.fulltext().getWebgraphConnector().add(sid);
                         } catch (SolrException e) {
                             ConcurrentLog.logException(e);
@@ -1082,6 +1086,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
         Set<String> uniqueURLs = new HashSet<String>();
         try {
+            Set<String> omitFields = new HashSet<String>();
+            omitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
+            omitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
             int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
             long count = collectionConnector.getCountByQuery(query);
             long start = System.currentTimeMillis();
@@ -1097,7 +1104,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 try {
                     DigestURL url = new DigestURL(u, ASCII.getBytes(i));
                     byte[] id = url.hash();
-                    SolrInputDocument sid = this.toSolrInputDocument(doc);
+                    SolrInputDocument sid = collection.toSolrInputDocument(doc, omitFields);
                     
                     for (Object tag: proctags) {
                         
@@ -1141,7 +1148,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
                     
                     // send back to index
-                    //connector.deleteById(ASCII.String(id));
+                    collectionConnector.deleteById(i);
                     collectionConnector.add(sid);
                     
                     proccount++; allcount++;
