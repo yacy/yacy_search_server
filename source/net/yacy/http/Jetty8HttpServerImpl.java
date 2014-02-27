@@ -105,11 +105,11 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         domainHandler.setAlternativeResolver(sb.peers);
 
         // configure root context
-        // ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         WebAppContext htrootContext = new WebAppContext();
         htrootContext.setContextPath("/");
+        String htrootpath = sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
         try {
-            htrootContext.setBaseResource(Resource.newResource("htroot"));
+            htrootContext.setBaseResource(Resource.newResource(htrootpath));
 
             // set web.xml to use
             // make use of Jetty feature to define web.xml other as default WEB-INF/web.xml
@@ -131,7 +131,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
         // as fundamental component leave this hardcoded, other servlets may be defined in web.xml only
         ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
-        sholder.setInitParameter("resourceBase", "htroot");
+        sholder.setInitParameter("resourceBase", htrootpath);
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder,"/*");    
         

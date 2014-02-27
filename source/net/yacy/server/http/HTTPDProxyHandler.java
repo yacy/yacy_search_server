@@ -106,7 +106,6 @@ public final class HTTPDProxyHandler {
     private static BufferedReader redirectorReader = null;
 
     private static Transformer transformer = null;
-    private static File htRootPath = null;
 
     //private Properties connectionProperties = null;
     // creating a logger
@@ -123,13 +122,6 @@ public final class HTTPDProxyHandler {
 
         // set timeout
         timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "60000"));
-
-        // create a htRootPath: system pages
-        htRootPath = new File(sb.getAppPath(), sb.getConfig(SwitchboardConstants.HTROOT_PATH,SwitchboardConstants.HTROOT_PATH_DEFAULT));
-        if (!(htRootPath.exists())) {
-            if(!htRootPath.mkdir())
-                ConcurrentLog.severe("PROXY", "could not create htRoot "+ htRootPath);
-        }
 
         // do logger initialization
         try {

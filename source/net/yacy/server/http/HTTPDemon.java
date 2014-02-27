@@ -54,6 +54,7 @@ import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -371,7 +372,7 @@ public final class HTTPDemon {
             tp.put("date", systemDate);
 
             // rewrite the file
-            final File htRootPath = new File(switchboard.getAppPath(), switchboard.getConfig("htRootPath","htroot"));
+            final File htRootPath = new File(switchboard.getAppPath(), switchboard.getConfig(SwitchboardConstants.HTROOT_PATH,SwitchboardConstants.HTROOT_PATH_DEFAULT));
 
             TemplateEngine.writeTemplate(
                     fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")),

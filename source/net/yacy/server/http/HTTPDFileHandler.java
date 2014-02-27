@@ -71,7 +71,6 @@ public final class HTTPDFileHandler {
     // create a class loader
     private static serverSwitch switchboard = null;
 
-    private static File     htRootPath     = null;
     public  static File     htDocsPath     = null;
     public  static String[] defaultFiles   = null;
     private static File     htDefaultPath  = null;
@@ -105,12 +104,6 @@ public final class HTTPDFileHandler {
             // create default files array
             initDefaultPath();
 
-            // create a htRootPath: system pages
-            if (htRootPath == null) {
-                    htRootPath = new File(theSwitchboard.getAppPath(), theSwitchboard.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
-                    if (!(htRootPath.exists())) htRootPath.mkdir();
-            }
-
             // create a htDocsPath: user defined pages
             if (htDocsPath == null) {
                 htDocsPath = theSwitchboard.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
@@ -122,7 +115,7 @@ public final class HTTPDFileHandler {
             if (!repository.exists()) repository.mkdirs();
 
             // create htLocaleDefault, htLocalePath
-            if (htDefaultPath == null) htDefaultPath = theSwitchboard.getAppPath("htDefaultPath", "htroot");
+            if (htDefaultPath == null) htDefaultPath = theSwitchboard.getAppPath("htDefaultPath", SwitchboardConstants.HTROOT_PATH_DEFAULT);
             if (htLocalePath == null) htLocalePath = theSwitchboard.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
         }
     }
