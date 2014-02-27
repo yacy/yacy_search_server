@@ -108,7 +108,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Statistics about top-domains in URL Database</legend>
       <dl>
-        <dt class="TableCellLight">&nbsp;</dt>
+        <dt class="TableCellDark">&nbsp;</dt>
         <dd>Show top <input type="text" name="lines" value="#[lines]#" size="6" maxlength="6" /> domains from all URLs.
             <input type="submit" name="statistics" value="Generate Statistics" class="submitready" style="width:240px;"/>
         </dd>
@@ -147,7 +147,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Dump and Restore of Solr Index</legend>
       <dl>
-        <dt class="TableCellLight">&nbsp;</dt>
+        <dt class="TableCellDark">&nbsp;</dt>
         <dd><input type="submit" name="indexdump" value="Create Dump" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
@@ -155,7 +155,7 @@ function updatepage(str) {
         <dt class="TableCellDark">Dump File</dt>
         <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" />
         </dd>
-        <dt class="TableCellLight">&nbsp;</dt>
+        <dt class="TableCellDark">&nbsp;</dt>
         <dd><input type="submit" name="indexrestore" value="Restore Dump" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
@@ -164,7 +164,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Optimize Solr</legend>
       <dl>
-        <dt class="TableCellLight">&nbsp;</dt>
+        <dt class="TableCellDark">&nbsp;</dt>
         <dd>merge to max. <input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> segments
         <input type="submit" name="optimizesolr" value="Optimize Solr" class="submitready" style="width:240px;"/>
         </dd>
@@ -174,7 +174,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Reboot Solr Core</legend>
       <dl>
-        <dt class="TableCellLight">&nbsp;</dt>
+        <dt class="TableCellDark">&nbsp;</dt>
         <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
@@ -205,7 +205,7 @@ function updatepage(str) {
             <input type="radio" name="format" value="url-rss" />XML (RSS)
             <br />
         </dd>
-        <dt class="TableCellLight">&nbsp;</dt>
+        <dt class="TableCellDark">&nbsp;</dt>
         <dd><input type="submit" name="lurlexport" value="Export URLs" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
