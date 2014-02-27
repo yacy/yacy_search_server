@@ -3735,10 +3735,10 @@ File Hosting==Datei Freigabe
 Integrated Search Configuration==Integrierte Suchkonfiguration
 Generic Search Portal==Generisches Suchportal
 Search Page Layout==Suchseite Layout
-Appearance==Darstellung
-Language==Sprache
+>Appearance<==>Darstellung<
+>Language<==>Sprache<
 User Profile==Benutzerprofil
-Heuristics==Heuristik
+>Heuristics<==>Heuristik<
 Solr Ranking Config==Solr Ranking Konfiguration
 RWI Ranking Config==RWI Ranking Konfiguration
 #-----------------------------
