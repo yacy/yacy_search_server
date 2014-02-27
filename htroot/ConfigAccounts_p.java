@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import net.yacy.cora.order.Digest;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
@@ -55,7 +54,7 @@ public class ConfigAccounts_p {
         // admin password
         boolean localhostAccess = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
         if (post != null && post.containsKey("setAdmin")) {
-            localhostAccess = Domains.isLocalhost(post.get("access", ""));
+            localhostAccess = post.get("access", "").equals("localhost");
             final String user = post.get("adminuser", "");
             final String pw1  = post.get("adminpw1", "");
             final String pw2  = post.get("adminpw2", "");
