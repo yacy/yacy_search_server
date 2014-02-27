@@ -301,18 +301,16 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     @Override
     public void commit(boolean softCommit) {
-        if (!softCommit) {
-            long timeout = System.currentTimeMillis() + 1000;
-            ensureAliveDeletionHandler();
-            while (this.deleteQueue.size() > 0) {
-                try {Thread.sleep(10);} catch (final InterruptedException e) {}
-                if (System.currentTimeMillis() > timeout) break;
-            }
-            ensureAliveUpdateHandler();
-            while (this.updateQueue.size() > 0) {
-                try {Thread.sleep(10);} catch (final InterruptedException e) {}
-                if (System.currentTimeMillis() > timeout) break;
-            }
+        long timeout = System.currentTimeMillis() + 1000;
+        ensureAliveDeletionHandler();
+        while (this.deleteQueue.size() > 0) {
+            try {Thread.sleep(10);} catch (final InterruptedException e) {}
+            if (System.currentTimeMillis() > timeout) break;
+        }
+        ensureAliveUpdateHandler();
+        while (this.updateQueue.size() > 0) {
+            try {Thread.sleep(10);} catch (final InterruptedException e) {}
+            if (System.currentTimeMillis() > timeout) break;
         }
         this.connector.commit(softCommit);
     }
@@ -337,7 +335,9 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         ensureAliveDeletionHandler();
         try {this.deleteQueue.put(POISON_ID);} catch (final InterruptedException e) {}
         ensureAliveUpdateHandler();
-        try {this.updateQueue.put(POISON_DOCUMENT);} catch (final InterruptedException e) {}
+        for (int i = 0; i < this.updateHandler.length; i++) {
+            try {this.updateQueue.put(POISON_DOCUMENT);} catch (final InterruptedException e) {}
+        }
         try {this.deletionHandler.join();} catch (final InterruptedException e) {}
         for (Thread t: this.updateHandler) try {t.join();} catch (final InterruptedException e) {}
         this.connector.close();
@@ -361,6 +361,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         removeIdFromUpdateQueue(id);
         this.metadataCache.remove(id);
         this.missCache.add(id);
+        ensureAliveDeletionHandler();
         if (this.deletionHandler.isAlive()) {
             try {this.deleteQueue.put(id);} catch (final InterruptedException e) {}
         } else {
@@ -375,6 +376,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             this.metadataCache.remove(id);
             this.missCache.add(id);
         }
+        ensureAliveDeletionHandler();
         if (this.deletionHandler.isAlive()) {
             for (String id: ids) try {this.deleteQueue.put(id);} catch (final InterruptedException e) {}
         } else {

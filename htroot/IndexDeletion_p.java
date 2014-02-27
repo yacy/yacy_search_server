@@ -35,6 +35,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.QueryModifier;
@@ -52,8 +53,7 @@ public class IndexDeletion_p {
 
         SolrConnector defaultConnector = sb.index.fulltext().getDefaultConnector();
         SolrConnector webgraphConnector = sb.index.fulltext().getWebgraphConnector();
-        if (post != null && post.size() > 0) defaultConnector.commit(false); // we must do a commit here because the user cannot see a proper count.
-        prop.put("doccount", defaultConnector.getSize());
+        if (post == null || post.size() == 0) defaultConnector.commit(false); // we must do a commit here because the user cannot see a proper count.
 
         // Delete by URL Matching
         String urldelete = post == null ? "" : post.get("urldelete", "");
@@ -147,6 +147,7 @@ public class IndexDeletion_p {
                     prop.put("urldelete-active", count == 0 ? 2 : 1);
                 } else {
                     sb.remove(ids);
+                    defaultConnector.commit(false);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs matching with " + urldelete);
                     prop.put("urldelete-active", 2);
                 }
@@ -162,6 +163,7 @@ public class IndexDeletion_p {
                 } else {
                     try {
                         defaultConnector.deleteByQuery(regexquery);
+                        defaultConnector.commit(false);
                         sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, regex match = " + urldelete);
                     } catch (final IOException e) {
                     }
@@ -187,6 +189,7 @@ public class IndexDeletion_p {
             } else {
                 try {
                     defaultConnector.deleteByQuery(collection1Query);
+                    defaultConnector.commit(false);
                     if (webgraphConnector != null) webgraphConnector.deleteByQuery(webgraphQuery);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs older than " + timedelete_number + " " + timedelete_unit);
                 } catch (final IOException e) {
@@ -209,6 +212,7 @@ public class IndexDeletion_p {
             } else {
                 try {
                     defaultConnector.deleteByQuery(query);
+                    defaultConnector.commit(false);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, collection " + collectiondelete);
                 } catch (final IOException e) {
                 }
@@ -227,7 +231,10 @@ public class IndexDeletion_p {
                 prop.put("querydelete-active", count == 0 ? 2 : 1);
             } else {
                 try {
+                    ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size before deletion = " + defaultConnector.getSize());
                     defaultConnector.deleteByQuery(querydelete);
+                    defaultConnector.commit(false);
+                    ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size after commit = " + defaultConnector.getSize());
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, solr query, q = " + querydelete);
                 } catch (final IOException e) {
                 }
@@ -235,6 +242,7 @@ public class IndexDeletion_p {
             }
             prop.put("querydelete-active_count", count);
         }
+        prop.put("doccount", defaultConnector.getSize());
         
         // return rewrite properties
         return prop;
