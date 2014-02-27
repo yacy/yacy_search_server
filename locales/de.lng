@@ -802,7 +802,7 @@ Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Mein
 
 #File: ConfigUpdate_p.html
 #---------------------------
-Manual System Update==Manuelle Systemaktualisierung
+Manual System Update==Manuelle System-Aktualisierung
 Current installed Release==Aktuell installierte Version
 Available Releases==Verfügbare Versionen
 >changelog<==>Changelog<
@@ -818,20 +818,20 @@ no&nbsp;automated installation on development environments==Keine automatische I
 "Install Release"=="Version Installieren"
 "Delete Release"=="Version löschen"
 Automatic Update==Automatische Aktualisierung
-check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
+check for new releases, download if available and restart with downloaded release==Suche nach neuer Version, lade diese bei Bedarf herunter und starte neu mit dieser Version
 "Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
 No more recent release found.==Kein neuere Version gefunden.
-Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
-You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwaltung oder Installer installiert.
+Release will be installed. Please wait.==Das Release wird nun installiert. Bitte warten.
+You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwaltung installiert.
 To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
 Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
-Automated System Update==Automatische Systemaktualisierung
-manual update==manuelle Aktualisierung
-no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates können manuell gemacht werden (siehe die Optionen oben).
-automatic update==automatische Aktualisierung
-updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln gemacht:
+Automated System Update==Automatische System-Aktualisierung
+manual update==Manuelle Aktualisierung
+no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates können manuell vorgenommen werden (siehe die Optionen oben).
+automatic update==Automatische Aktualisierung
+updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln vorgenommen:
 Time between lookup==Zeit zwischen Update Prüfungen
 hours==Stunden
 Release blacklist==Versionen Negativliste
@@ -839,11 +839,11 @@ regex on release number strings==regex mit Versionsnummern
 Release type==Release Typ
 only main releases==nur offizielle Versionen
 any release including developer releases==jede Version, auch Entwickler Versionen
-Signed autoupdate:==signierte Aktualisierung:
+Signed autoupdate:==Signierte Aktualisierung:
 only accept signed files==Nur signierte Dateien akzeptieren
 "Submit"=="Speichern"
 Accepted Changes.==Änderungen akzeptiert.
-System Update Statistics==System Aktualisierungs Statistiken
+System Update Statistics==Statistiken zur System-Aktualisierung
 Last System Lookup==Letzter System Check
 never==niemals
 Last Release Download==Letzter Download
@@ -2234,8 +2234,7 @@ RAM==Arbeitsspeicher
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Änderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
 restart now</a>==jetzt neustarten</a>
 Confirm Restart==Bestätige Neustart
-refresh graph==aktualisiere Diagramm
-#show memory tables==Zeige Speicher-Tabellen
+refresh graph==Aktualisiere Diagramm
 Use Default Profile:==Standard Profil benutzen:
 and use==und nutze
 of the defined performance.==der vorgegebenen Geschwindigkeit.
@@ -2265,7 +2264,9 @@ Remote Search:==Remote Suche:
 #File: PerformanceMemory_p.html
 #---------------------------
 Performance Settings for Memory==Performanceeinstellungen für Speicher
-refresh graph==aktualisiere Diagramm
+refresh graph==Aktualisiere Diagramm
+simulate short memory status==Simuliere kurzen Speicherstatus
+use Standard Memory Strategy</label> \(current: \#\[memoryStrategy\]\#\)==Verwende Standard Speicher-Strategie</label> (Aktuell: #[memoryStrategy]#)
 Memory Usage:==Speichernutzung:
 After Startup==Nach Start
 After Initializations==Nach Initialisierungen
@@ -2283,9 +2284,13 @@ total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speiche
 free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
+Solr Resources:==Solr Resourcen:
+>Class<==>Klasse<
+>Type<==>Typ<
+>Statistics<==>Statistiken<
+>Size<==>Größe<
 #EcoTable RAM Index:==EcoTabelle RAM Index:
 Table RAM Index:==Tabelle RAM Speicher Index:
->Size==>Größe
 >Key==>Schlüssel
 >Value==>Wert
 #FlexTable RAM Index:==FlexTabelle RAM Index:
@@ -2313,7 +2318,6 @@ Stop Grow when less than \#\[objectCacheStopGrow\]\# MB available left==Beende E
 Start Shrink when less than \#\[objectCacheStartShrink\]\# MB availabe left==Starte Verkleinerung wenn weniger als #[objectCacheStartShrink]# MB verfügbar sind
 
 Other Caching Structures:==Andere Zwischenspeicher Strukturen:
-Type</td>==Typ</td>
 >Hit<==>Treffer<
 >Miss<==>Verfehler<
 Insert<==Einfügen<
@@ -2409,7 +2413,7 @@ Result-Count==Anzahl Ergebnisse
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zuständigen Peers im DHT gelöst wurde.
 red -&gt; request list alive==rot -&gt; Request Liste aktiv
 green -&gt; request has terminated==grün -&gt; Request wurde beendet
-grey -&gt; the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -&gt; Das Suchergebnis hash order position(s) (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
+grey -&gt; the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -&gt; Position(en) in der Hash Ordnung des Suchergebnisses (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
 "Search event picture"=="Such Ereignis Bild"
 #-----------------------------
 
@@ -3598,6 +3602,27 @@ Import/Export==Import / Export
 Content Control==Inhaltskontrolle
 #-----------------------------
 
+#File: env/templates/submenuComputation.template
+#---------------------------
+>Computation Monitor<==>Server Monitor<
+## Processes Submenu
+>Processes<==>Prozesse<
+>Server Log<==>Server Log<
+>Concurrent Indexing<==>Gleichzeitiges Indexieren<
+>Memory Usage<==>Speicherverbrauch<
+>Search Sequence<==>Suchsequenz<
+## Messages Submenu
+>Messages<==>Nachrichten<
+>Overview<==>Überblick<
+>Incoming&nbsp;News<==>Eingehende&nbsp;Nachrichten<
+>Processed&nbsp;News<==>Bearbeitete&nbsp;Nachrichten<
+>Outgoing&nbsp;News<==>Ausgehende&nbsp;Nachrichten<
+>Published&nbsp;News<==>Veröffentlichte&nbsp;Nachrichten<
+## Community Data Submenu
+>Community Data<==>Gemeinschaftsdaten<
+>Local Peer Wiki<==>Lokales Peer Wiki<
+#-----------------------------
+
 #File: env/templates/submenuConfig.template
 #---------------------------
 Peer Administration Console==Peer Administrations Konsole
@@ -3605,7 +3630,7 @@ Peer Administration Console==Peer Administrations Konsole
 Basic Configuration==Eingangskonfiguration
 >Accounts==>Konten
 Network Configuration==Netzwerk Konfiguration
-Download System Update==Download System Aktualisierung
+Download System Update==Download System-Aktualisierung
 >Performance==>Leistung
 Advanced Settings==Erweiterte Einstellungen
 Local robots.txt==Lokale robots.txt
