@@ -1,13 +1,12 @@
-package de.anomic.document.parser;
+package net.yacy.document.parser;
 
 import java.nio.charset.Charset;
-
-import net.yacy.document.parser.htmlParser;
-
 import junit.framework.TestCase;
+import org.junit.Test;
 
 public class htmlParserTest extends TestCase {
-	
+
+        @Test
 	public void testGetRealCharsetEncoding() {
 		String[][] testStrings = new String[][] {
 	       new String[]{null,null},

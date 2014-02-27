@@ -1,12 +1,12 @@
 package net.yacy.cora.document.id;
 
 import java.net.MalformedURLException;
-
 import junit.framework.TestCase;
+import org.junit.Test;
 
 public class DigestURLTest extends TestCase {
 
-
+    @Test
     public void testIdentPort() throws MalformedURLException {
         String[][] testStrings = new String[][]{
             new String[]{"http://www.yacy.net:", "http://www.yacy.net/"},

@@ -1,17 +1,15 @@
-package de.anomic.kelondro.util;
+package net.yacy.cora.protocol;
 
 import java.util.Date;
-
-import net.yacy.cora.protocol.HeaderFramework;
-
-
 import junit.framework.TestCase;
+import org.junit.Test;
 
-public class DateFormatterTest extends TestCase {
+public class HeaderFrameworkTest extends TestCase {
 
 	/**
 	 * Test of httpHeader date parsing routine
 	 */
+        @Test
 	public void testParseHTTPDate() {
 		Date parsedDate = HeaderFramework.parseHTTPDate("Tue, 08 Jul 2003 21:22:46 GMT");
 		

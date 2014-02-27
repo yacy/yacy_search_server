@@ -1,8 +1,8 @@
-package de.anomic.yacy;
+package net.yacy.peers.operation;
 
-import net.yacy.peers.operation.yacyVersion;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class yacyVersionTest extends TestCase {
 
@@ -10,6 +10,7 @@ public class yacyVersionTest extends TestCase {
 	 * Test method for 'yacy.combinedVersionString2PrettyString(String)'
 	 * @author Bost
 	 */
+        @Test
 	public void testCombinedVersionString2PrettyString() {
         Assert.assertArrayEquals(new String[]{"dev","0000"},        yacyVersion.combined2prettyVersion(""));                 // not a number
         Assert.assertArrayEquals(new String[]{"dev","0000"},        yacyVersion.combined2prettyVersion(" "));                // not a number

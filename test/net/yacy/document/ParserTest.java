@@ -1,4 +1,4 @@
-package de.anomic.document;
+package net.yacy.document;
 
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
@@ -12,10 +12,6 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.document.AbstractParser;
-
-import net.yacy.document.Document;
-import net.yacy.document.Parser;
 import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.odtParser;
 import net.yacy.document.parser.ooxmlParser;

@@ -44,20 +44,15 @@ public class EmbeddedSolrConnectorTest {
      * Test of query solr via jetty
      */
     @Test
-    public void testQuery() {
+    public void testQuery() throws IOException {
         System.out.println("adding test document to solr");
         SolrInputDocument doc = new SolrInputDocument();
         doc.addField(CollectionSchema.id.name(), "ABCD0000abcd");
         doc.addField(CollectionSchema.title.name(), "Lorem ipsum");
         doc.addField(CollectionSchema.host_s.name(), "yacy.net");
         doc.addField(CollectionSchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-        try {
-            solr.add(doc);
-        } catch (final IOException ex) {
-            fail("IOException adding test document to Solr");
-        } catch (final SolrException ex) {
-            fail("SolrExceptin adding test document to Solr");
-        }
+
+        solr.add(doc);
         solr.commit(true);
 
         System.out.println("query solr");

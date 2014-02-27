@@ -79,13 +79,16 @@ public class MultiProtocolURLTest {
         // valid IPv6 local loopback addresses
         testurls.put("http://[0:0:0:0:0:0:0:1]/index.html", Boolean.TRUE);
         testurls.put("http://[::1]/index.html", Boolean.TRUE);
+        testurls.put("http://[::1]:8090/index.html", Boolean.TRUE);
+        testurls.put("http://[0::1]/index.html", Boolean.TRUE);
 
-        // test urls for issue with IPv6 misinterpretation
+        // test urls for possible issue with IPv6 misinterpretation
         testurls.put("http://fcedit.com", Boolean.FALSE);
         testurls.put("http://fdedit.com", Boolean.FALSE);
+        testurls.put("http://fe8edit.com", Boolean.FALSE);
 
         // valid IPv6 examples taken from http://www.ietf.org/rfc/rfc2732.txt  cap 2.
-        testurls.put("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html", Boolean.FALSE);
+        testurls.put("http://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html", Boolean.TRUE); // ip is link-local (fe80/10)
         testurls.put("http://[1080:0:0:0:8:800:200C:417A]/index.html", Boolean.FALSE);
         testurls.put("http://[3ffe:2a00:100:7031::1]", Boolean.FALSE);
         testurls.put("http://[1080::8:800:200C:417A]/foo", Boolean.FALSE);
@@ -98,8 +101,8 @@ public class MultiProtocolURLTest {
             MultiProtocolURL uri = new MultiProtocolURL(u);
             boolean result = uri.isLocal();
 
-            assertEquals(u, testurls.get(u), result);
             System.out.println ("testIsLocal: " + u + " -> " + result);
+            assertEquals(u, testurls.get(u), result);
 
         }
     }
