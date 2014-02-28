@@ -2295,7 +2295,7 @@ public final class Switchboard extends serverSwitch {
             Fulltext fulltext = index.fulltext();
             CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
             WebgraphConfiguration webgraphConfiguration = fulltext.getWebgraphConfiguration();
-            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && MemoryControl.available() > 512L * 1024L * 1024L && Memory.load() < 2.0f) {
+            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && MemoryControl.available() > 512L * 1024L * 1024L && Memory.load() < 2.5f) {
                 
                 // we optimize first because that is useful for postprocessing
                 int proccount = 0;
