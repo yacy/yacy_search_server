@@ -108,8 +108,8 @@ function handleStatus(){
 
 	postprocessing=getFirstChild(statusTag, "postprocessing");
 	document.getElementById("postprocessing_status").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "status"));
-	document.getElementById("postprocessing_collection").firstChild.nodeValue="pending in collection: " + getValue(getFirstChild(postprocessing, "collectionRemainingCount"));
-	document.getElementById("postprocessing_webgraph").firstChild.nodeValue="pending in webgraph: " + getValue(getFirstChild(postprocessing, "webgraphRemainingCount"));
+	document.getElementById("postprocessing_collection").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "collectionRemainingCount"));
+	document.getElementById("postprocessing_webgraph").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "webgraphRemainingCount"));
 	document.getElementById("postprocessing_remainingTimeMinutes").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "remainingTimeMinutes"));
 	document.getElementById("postprocessing_remainingTimeSeconds").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "remainingTimeSeconds"));
 	postprocessingElapsedTime=getValue(getFirstChild(postprocessing, "postprocessingElapsedTime"));
