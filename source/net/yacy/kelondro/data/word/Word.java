@@ -151,6 +151,7 @@ public class Word {
                 ConcurrentLog.logException(e);
                 return hashes;
             }
+        hashes.optimize();
         return hashes;
     }
 
@@ -163,6 +164,7 @@ public class Word {
                 ConcurrentLog.logException(e);
                 return hashes;
             }
+        hashes.optimize();
         return hashes;
     }
 }

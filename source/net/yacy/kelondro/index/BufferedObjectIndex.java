@@ -82,6 +82,12 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
+    public void optimize() {
+        this.backend.optimize();
+        this.buffer.optimize();
+    }
+    
+    @Override
     public long mem() {
         return this.backend.mem() + this.buffer.mem();
     }
@@ -356,6 +362,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
                     break;
                 }
             }
+            handles.optimize();
             return handles;
         }
     }

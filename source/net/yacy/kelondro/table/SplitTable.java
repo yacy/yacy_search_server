@@ -108,6 +108,11 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     }
 
     @Override
+    public void optimize() {
+        for (Index table: tables.values()) table.optimize();
+    }
+    
+    @Override
     public long mem() {
         long m = 0;
         for (final Index i: this.tables.values()) m += i.mem();

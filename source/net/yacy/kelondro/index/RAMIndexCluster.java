@@ -63,8 +63,8 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         this.rowdef = rowdef;
     }
 
-    public void trim() {
-        for (final RAMIndex i: this.cluster) if (i != null)  i.trim();
+    public void optimize() {
+        for (final RAMIndex i: this.cluster) if (i != null) i.optimize();
     }
 
     @Override

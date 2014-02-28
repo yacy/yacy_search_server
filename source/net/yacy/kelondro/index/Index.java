@@ -38,6 +38,7 @@ public interface Index extends Iterable<Row.Entry> {
 
     public String filename(); // returns a unique identified for this index; can be a real or artificial file name
     public int size();
+    public void optimize();
     public long mem();
     public boolean isEmpty();
     public Row row();

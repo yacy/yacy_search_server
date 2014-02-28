@@ -68,8 +68,8 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     }
 
     @Override
-    public void trim() {
-        this.backend.trim();
+    public void optimize() {
+        this.backend.optimize();
     }
 
     @Override

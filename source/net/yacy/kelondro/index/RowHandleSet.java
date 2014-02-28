@@ -81,6 +81,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
 
     @Override
     public RowHandleSet clone() {
+        optimize();
         return new RowHandleSet(this.rowdef, this.index.clone());
     }
 
@@ -92,6 +93,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
     @Override
     public void optimize() {
         this.index.sort();
+        this.index.trim();
     }
     
     /**
@@ -305,6 +307,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
             o = mi.next();
             if (large.has(o)) result.put(o);
         }
+        result.optimize();
         return result;
     }
 
@@ -331,6 +334,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
                 }
             }
         }
+        result.optimize();
         return result;
     }
 

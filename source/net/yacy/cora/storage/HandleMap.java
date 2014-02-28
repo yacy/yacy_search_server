@@ -32,7 +32,7 @@ public interface HandleMap extends Iterable<Map.Entry<byte[], Long>> {
 
     public long mem();
 
-    public void trim();
+    public void optimize();
 
     /**
      * write a dump of the index to a file. All entries are written in order

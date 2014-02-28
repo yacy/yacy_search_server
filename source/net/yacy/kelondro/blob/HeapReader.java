@@ -131,8 +131,8 @@ public class HeapReader {
         return this.index.mem(); // don't add the memory for free here since then the asserts for memory management don't work
     }
 
-    public void trim() {
-        this.index.trim();
+    public void optimize() {
+        this.index.optimize();
     }
 
     protected byte[] normalizeKey(byte[] key) {

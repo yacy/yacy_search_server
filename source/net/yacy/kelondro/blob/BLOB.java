@@ -63,7 +63,7 @@ public interface BLOB {
      * trim the index of the database: this releases memory not currently used
      * @throws IOException
      */
-    public void trim();
+    public void optimize();
     
     /**
      * calculate the memory in RAM that the BLOB occupies

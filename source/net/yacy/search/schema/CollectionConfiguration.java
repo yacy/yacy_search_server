@@ -1322,7 +1322,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             try {
                 for (Map.Entry<String, double[]> entry: this.crt.entrySet()) {
                     String id = entry.getKey();
-                    ReferenceReport rr = this.rrCache.getReferenceReport(ASCII.getBytes(id), false);
+                    ReferenceReport rr = this.rrCache.getReferenceReport(id, false);
                     // sum up the cr of the internal links
                     HandleSet iids = rr.getInternallIDs();
                     double ncr = 0.0d;

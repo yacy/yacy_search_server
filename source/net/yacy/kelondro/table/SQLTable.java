@@ -103,6 +103,10 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         }
 
     }
+    
+    @Override
+    public void optimize() {
+    }
 
     @Override
     public long mem() {

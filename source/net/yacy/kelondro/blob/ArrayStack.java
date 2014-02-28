@@ -206,7 +206,7 @@ public class ArrayStack implements BLOB {
                            oneBlob = new Heap(f, keylength, ordering, buffersize);
                        } else {
                            oneBlob = new HeapModifier(f, keylength, ordering);
-                           oneBlob.trim(); // no writings here, can be used with minimum memory
+                           oneBlob.optimize(); // no writings here, can be used with minimum memory
                        }
                        sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                    } catch (final IOException e) {
@@ -236,7 +236,7 @@ public class ArrayStack implements BLOB {
     }
 
     @Override
-    public void trim() {
+    public void optimize() {
         // trim shall not be called for ArrayStacks because the characteristics of an ArrayStack is that the 'topmost' BLOB on the stack
         // is used for write operations and all other shall be trimmed automatically since they are not used for writing. And the
         // topmost BLOB must not be trimmed to support fast writings.
@@ -261,7 +261,7 @@ public class ArrayStack implements BLOB {
             oneBlob = new Heap(location, this.keylength, this.ordering, this.buffersize);
         } else {
             oneBlob = new HeapModifier(location, this.keylength, this.ordering);
-            oneBlob.trim();
+            oneBlob.optimize();
         }
         this.blobs.add(new blobItem(d, location, oneBlob));
     }

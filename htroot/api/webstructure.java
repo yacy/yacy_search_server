@@ -141,7 +141,7 @@ public class webstructure {
                 prop.put("citations", 1);
                 ReferenceReportCache rrc = sb.index.getReferenceReportCache();
                 ReferenceReport rr = null;
-                try {rr = rrc.getReferenceReport(urlhash, true);} catch (IOException e) {}
+                try {rr = rrc.getReferenceReport(ASCII.String(urlhash), true);} catch (IOException e) {}
             	if (rr != null && rr.getInternalCount() > 0 && rr.getExternalCount() > 0) {
                     prop.put("citations_count", 1);
                     prop.put("citations_documents", 1);

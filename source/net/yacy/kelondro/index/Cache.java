@@ -101,6 +101,13 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return this.index.mem() + this.readHitCache.mem() + this.readMissCache.mem();
     }
 
+    @Override
+    public void optimize() {
+        this.index.optimize();
+        this.readHitCache.optimize();
+        this.readMissCache.optimize();
+    }
+
     public final int writeBufferSize() {
         return 0;
     }

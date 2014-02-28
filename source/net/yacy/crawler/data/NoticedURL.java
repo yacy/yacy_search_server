@@ -42,6 +42,7 @@ import net.yacy.crawler.Balancer;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 
 public class NoticedURL {
@@ -184,7 +185,7 @@ public class NoticedURL {
      */
     public boolean removeByURLHash(final byte[] urlhashBytes) {
         try {
-            final HandleSet urlHashes = new RowHandleSet(12, Base64Order.enhancedCoder, 1);
+            final HandleSet urlHashes = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
             urlHashes.put(urlhashBytes);
             boolean ret = false;
             try {ret |= this.noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}

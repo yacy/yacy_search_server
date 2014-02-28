@@ -244,6 +244,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
                 }
             }
         }
+        remaininghashes.optimize();
         return remaininghashes;
     }
 

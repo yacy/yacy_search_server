@@ -104,12 +104,12 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         is.close();
         is = null;
         assert this.index.size() == file.length() / (keylength + idxbytes);
-        trim();
+        optimize();
     }
 
     @Override
-    public void trim() {
-        this.index.trim();
+    public void optimize() {
+        this.index.optimize();
     }
 
     public long mem() {

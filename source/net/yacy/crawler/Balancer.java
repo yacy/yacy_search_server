@@ -331,7 +331,7 @@ public class Balancer {
         HostHandles hh = this.domainStacks.get(host);
         if (hh == null) {
             // create new list
-            HandleSet domainList = new RowHandleSet(12, Base64Order.enhancedCoder, 1);
+            HandleSet domainList = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
             domainList.put(urlhash);
             this.domainStacks.put(host, new HostHandles(hosthash, domainList));
         } else {

@@ -82,9 +82,10 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 		reset();
 	}
 
-    public void trim() {
-        if (this.index0 != null) this.index0.trim();
-        if (this.index1 != null) this.index1.trim();
+    @Override
+    public void optimize() {
+        if (this.index0 != null) this.index0.optimize();
+        if (this.index1 != null) this.index1.optimize();
     }
 
     public final synchronized void reset() {

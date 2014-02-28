@@ -676,6 +676,11 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
 
     }
 
+    public void optimize() {
+        sort();
+        trim();
+    }
+    
     public final void sort() {
         if (this.sortBound == this.chunkcount) return; // this is sorted
         synchronized (this) {

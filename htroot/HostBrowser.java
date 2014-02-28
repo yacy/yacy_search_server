@@ -559,7 +559,7 @@ public class HostBrowser {
             if (fetchReferences) {
                 // get the references from the citation index
                 try {
-                    ReferenceReport rr = rrCache.getReferenceReport(ASCII.getBytes(urlhash), false);
+                    ReferenceReport rr = rrCache.getReferenceReport(urlhash, false);
                     List<String> internalIDs = new ArrayList<String>();
                     List<String> externalIDs = new ArrayList<String>();
                     HandleSet iids = rr.getInternallIDs();

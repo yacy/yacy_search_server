@@ -30,12 +30,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
@@ -52,7 +52,6 @@ import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
-import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
@@ -215,9 +214,9 @@ public class Segment {
         final byte[] searchhash = url.hash();
         RowHandleSet rootCandidates = getPossibleRootHashes(url);
         
-        Set<byte[]> ignore = new TreeSet<byte[]>(NaturalOrder.naturalOrder); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
-        Set<byte[]> levelhashes = new TreeSet<byte[]>(NaturalOrder.naturalOrder); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
-        levelhashes.add(searchhash);
+        Set<String> ignore = new HashSet<String>(); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
+        Set<String> levelhashes = new HashSet<String>(); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
+        levelhashes.add(ASCII.String(searchhash));
         int leveldepth = 0; // the recursion depth and therefore the result depth-1. Shall be 0 for the first call
         final byte[] hosthash = new byte[6]; // the host of the url to be checked
         System.arraycopy(searchhash, 6, hosthash, 0, 6);
@@ -225,13 +224,13 @@ public class Segment {
         long timeout = System.currentTimeMillis() + maxtime;
         mainloop: for (int maxdepth = 0; maxdepth < 6 && System.currentTimeMillis() < timeout; maxdepth++) {
             
-            Set<byte[]> checknext = new TreeSet<byte[]>(NaturalOrder.naturalOrder);
+            Set<String> checknext = new HashSet<String>();
             
             // loop over all hashes at this clickdepth; the first call to this loop should contain only one hash and a leveldepth = 0
-            checkloop: for (byte[] urlhash: levelhashes) {
+            checkloop: for (String urlhashs: levelhashes) {
     
                 // get all the citations for this url and iterate
-                ReferenceReport rr = rrc.getReferenceReport(urlhash, false);
+                ReferenceReport rr = rrc.getReferenceReport(urlhashs, false);
                 //ReferenceContainer<CitationReference> references = this.urlCitationIndex.get(urlhash, null);
                 if (rr == null || rr.getInternalCount() == 0) continue checkloop; // don't know
                 Iterator<byte[]> i = rr.getInternallIDs().iterator();
@@ -241,17 +240,17 @@ public class Segment {
                     
                     // check if this is from the same host
                     assert (ByteBuffer.equals(u, 6, hosthash, 0, 6));
-                    
+                    String us = ASCII.String(u);
                     // check ignore
-                    if (ignore.contains(u)) continue nextloop;
+                    if (ignore.contains(us)) continue nextloop;
                     
                     // check if the url is a root url
                     if (rootCandidates.has(u)) {
                         return leveldepth + 1;
                     }
                     
-                    checknext.add(u);
-                    ignore.add(u);
+                    checknext.add(us);
+                    ignore.add(us);
                 }
                 if (System.currentTimeMillis() > timeout) break mainloop;
             }
@@ -286,16 +285,16 @@ public class Segment {
     }
     
     public class ReferenceReportCache {
-        Map<byte[], ReferenceReport> cache;
+        private final Map<String, ReferenceReport> cache;
         public ReferenceReportCache() {
-            this.cache = new TreeMap<byte[], ReferenceReport>(Base64Order.enhancedCoder);
+            this.cache = new HashMap<String, ReferenceReport>();
         }
-        public ReferenceReport getReferenceReport(final byte[] id, final boolean acceptSelfReference) throws IOException {
+        public ReferenceReport getReferenceReport(final String id, final boolean acceptSelfReference) throws IOException {
             ReferenceReport rr = cache.get(id);
             if (MemoryControl.shortStatus()) cache.clear();
             if (rr != null) return rr;
             try {
-                rr = new ReferenceReport(id, acceptSelfReference);
+                rr = new ReferenceReport(ASCII.getBytes(id), acceptSelfReference);
                 cache.put(id, rr);
                 return rr;
             } catch (final SpaceExceededException e) {
@@ -311,13 +310,13 @@ public class Segment {
     
     public class ClickdepthCache {
         ReferenceReportCache rrc;
-        Map<byte[], Integer> cache;
+        Map<String, Integer> cache;
         public ClickdepthCache(ReferenceReportCache rrc) {
             this.rrc = rrc;
-            this.cache = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
+            this.cache = new HashMap<String, Integer>();
         }
         public int getClickdepth(final DigestURL url, int maxtime) throws IOException {
-            Integer clickdepth = cache.get(url.hash());
+            Integer clickdepth = cache.get(ASCII.String(url.hash()));
             if (MemoryControl.shortStatus()) cache.clear();
             if (clickdepth != null) {
                 //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth + " CACHE HIT");
@@ -325,7 +324,7 @@ public class Segment {
             }
             clickdepth = Segment.this.getClickDepth(this.rrc, url, maxtime);
             //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth);
-            this.cache.put(url.hash(), clickdepth);
+            this.cache.put(ASCII.String(url.hash()), clickdepth);
             return clickdepth.intValue();
         }
     }
@@ -343,8 +342,8 @@ public class Segment {
             this.internal = 0;
             this.external = 0;
             this.externalHosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
-            this.internalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
-            this.externalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
+            this.internalIDs = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 0);
+            this.externalIDs = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 0);
             try {
                 if (connectedCitation()) {
                     // read the references from the citation index
@@ -397,6 +396,9 @@ public class Segment {
                     ConcurrentLog.logException(e);
                 }
             }
+            this.externalHosts.optimize();
+            this.internalIDs.optimize();
+            this.externalIDs.optimize();
         }
         public int getInternalCount() {
             return this.internal;

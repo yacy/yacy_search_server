@@ -204,7 +204,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         Integer exthosts_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
         Integer hostextc_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.host_extent_i.getSolrFieldName());
         try {
-            ReferenceReport rr = rrCache.getReferenceReport(url.hash(), false);
+            ReferenceReport rr = rrCache.getReferenceReport(ASCII.String(url.hash()), false);
             List<String> internalIDs = new ArrayList<String>();
             HandleSet iids = rr.getInternallIDs();
             for (byte[] b: iids) internalIDs.add(ASCII.String(b));

@@ -196,7 +196,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                     this.table = null;
                 }
             }
-            this.index.trim();
+            optimize();
 
             // open the file
             this.file = new BufferedRecords(new Records(tablefile, rowdef.objectsize), this.buffersize);
@@ -270,6 +270,13 @@ public class Table implements Index, Iterable<Row.Entry> {
         } catch (final IOException e) {
             ConcurrentLog.severe("Table", "", e);
         }
+        optimize();
+    }
+
+    @Override
+    public void optimize() {
+        this.index.optimize();
+        if (this.table != null) this.table.optimize();
     }
 
     @Override
