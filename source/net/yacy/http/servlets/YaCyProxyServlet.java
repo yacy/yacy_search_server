@@ -77,7 +77,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         final HttpServletResponse response = (HttpServletResponse) res;
 
         if (!Switchboard.getSwitchboard().getConfigBool("proxyURL", false)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed.");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed. URL proxy globally switched off (see: Content Semantic -> Augmented Browsing -> URL proxy)");
             return;
         }
         
@@ -85,7 +85,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         if (!Domains.isThisHostIP(remoteHost)) {
             if (!proxyippatternmatch(remoteHost)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                        "proxy use not granted for IP " + remoteHost);
+                        "proxy use not granted for IP " + remoteHost + " (see: Content Semantic -> Augmented Browsing -> Restrict URL proxy use filter)");
                 return;
             }
         }
@@ -145,7 +145,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             prop.put(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
             prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
             prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
-            prop.put("CLIENTIP", "0:0:0:0:0:0:0:1");
+            prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, "0:0:0:0:0:0:0:1");
 
             yacyRequestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
             // temporarily add argument to header to pass it on to augmented browsing
@@ -187,7 +187,6 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                 } else {
                     location = "/proxy.html?" + actioncmdstr + "url=http://" + proxyurl.getHost() + "/" + location;
                 }
-                //outgoingHeader.put(HeaderFramework.LOCATION, location);
                 response.addHeader(HeaderFramework.LOCATION, location);
             }
 

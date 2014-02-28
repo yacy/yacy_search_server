@@ -69,7 +69,7 @@
     <dt><a href="PerformanceMemory_p.html">Memory Usage</a></dt>
     <dd><table border="0" cellspacing="0">
     <tr><td>RAM used:</td><td align="right">#[usedMemory]#</td></tr>
-    <tr><td>RAM max:</td><td align="right">#[maxMemory]#</td></tr>
+    <tr><td><a href="Performance_p.html">RAM max:</a></td><td align="right">#[maxMemory]#</td></tr>
     <tr><td>DISK used:</td><td align="right">(approx.) #[usedDisk]#</td></tr>
     <tr><td>DISK free:</td><td align="right">#[freeDisk]#</td></tr>
     </table></dd>
