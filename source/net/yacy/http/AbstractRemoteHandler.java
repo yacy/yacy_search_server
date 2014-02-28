@@ -108,7 +108,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
  
         if (!Switchboard.getSwitchboard().getConfigBool("isTransparentProxy", false)) {
             // transparent proxy not swiched on
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed.");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed (see Advanced Settings -> HTTP Networking -> Transparent Proxy; switched off).");
             baseRequest.setHandled(true);
             return;
         }
@@ -117,7 +117,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         if (!proxyippatternmatch(remoteHost)) {
             // TODO: handle proxy account
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "proxy use not granted for IP " + remoteHost + " (see Server Proxy Access settings).");
+                    "proxy use not granted for IP " + remoteHost + " (see Advanced Settings -> Proxy Access Settings -> IP-Number filter).");
             baseRequest.setHandled(true);
             return;
         }
