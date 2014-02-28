@@ -212,6 +212,7 @@ public class EmbeddedInstance implements SolrInstance {
 
     @Override
     public synchronized void close() {
+        for (SolrCore core: cores.values()) core.close();
         if (this.coreContainer != null) try {
             this.coreContainer.shutdown();
             this.coreContainer = null;

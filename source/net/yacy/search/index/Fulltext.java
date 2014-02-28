@@ -529,13 +529,11 @@ public final class Fulltext {
         File zipOut = new File(this.archivePath, storagePath.getName() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
-            this.solrInstances.close();
             try {
                 ZIPWriter.zip(storagePath, zipOut);
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             } finally {
-                this.solrInstances = new InstanceMirror();
                 try {
                     this.connectLocalSolr();
                 } catch (final IOException e) {
