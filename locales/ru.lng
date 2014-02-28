@@ -43,7 +43,7 @@ Date<==Дата<
 Access Count During==Количество запросов
 last Second==последняя секунда
 last Minute==последняя минута
-last 10 Minutes==последние 10 минут
+last Minutes==последние 10 минут
 last Hour==последний час
 The following hosts are registered as source for brute-force requests to protected pages==Следующие хосты зарегистрированы, как пытающиеся получить доступ к защищенным страницам с помощью перебора пароля.
 #>Host==>Хост
@@ -392,6 +392,7 @@ Error saving the skin.==Ошибка сохранения файла скина.
 Access Configuration==Конфигурация доступа
 Basic Configuration==Основная конфигурация
 Your port has changed. Please wait 10 seconds.==Порт вашего узла был изменён. Пожалуйста, подождите 10 секунд.
+The peer port was changed successfully. Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==Порт узла был успешно изменён. Ваш браузер перейдёт на новую страницу в течение 10 секунд.
 Your YaCy Peer needs some basic information to operate properly==Укажите основную информацию для работы вашего узла
 Select a language for the interface==Выберите язык интерфейса
 Use Case: what do you want to do with YaCy:==Цель использования YaCy:
@@ -2271,7 +2272,9 @@ Remote Search:==Удалённый поиск:
 #File: PerformanceMemory_p.html
 #---------------------------
 Performance Settings for Memory==Настройки производительности памяти
-refresh graph==обновить диаграмму
+refresh graph==Обновлять диаграмму
+simulate short memory status==Имитация состояния малого размера памяти 
+use Standard Memory Strategy</label> \(current: \#\[memoryStrategy\]\#\)==Использовать стратегию стандартного размера памяти</label> (Текущая: #[memoryStrategy]#)
 Memory Usage:==Использование памяти:
 After Startup==После запуска
 After Initializations==После инициализации
@@ -2280,126 +2283,136 @@ after GC==после GC
 >Now==>Сейчас
 before <==до <
 Description==Описание
-maximum memory that the JVM will attempt to use==максимум доступно памяти для JVM
+maximum memory that the JVM will attempt to use==максимум выделено памяти для Java
 >Available<==>Доступно<
-total available memory including free for the JVM within maximum==gesamter verfügbarer Speicher für die JVM innerhalb des Maximums.
+total available memory including free for the JVM within maximum==всего доступной памяти, включая свободную для Java без максимальной
+>Max<==>Максимум<
 >Total<==>Всего<
-total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speicher
+total memory taken from the OS==всего памяти, выделенной операционной системой
 >Free<==>Свободно<
-free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
->Used<==>Belegt<
-used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
+free memory in the JVM within total amount==свободная память в Java без учёта всей памяти
+>Used<==>Используется<
+used memory in the JVM within total amount==используемая память в Java без учёта всей памяти
+Solr Resources:==Ресурсы базы данных Solr:
+>Class<==>Класс<
+>Type<==>Тип<
+>Statistics<==>Статистика<
+>Size<==>Размер<
 #EcoTable RAM Index:==EcoTabelle RAM Index:
 Table RAM Index:==Таблица индекса RAM:
->Size==>Размер
 >Key==>Ключ
 >Value==>Значение
 #FlexTable RAM Index:==FlexTabelle RAM Index:
-Table</td>==Tabelle</td>
-Chunk Size<==Chunk Größe<
-#Count</td>==Anzahl</td>
-Used Memory<==Benutzter Speicher<
-#Node Caches:==Knoten Cache:
-Object Index Caches:==Objekt Index Caches:
-Needed Memory==Benötigter Speicher
+Table</td>==Таблица</td>
+Chunk Size<==Размер части<
+#Count</td>==Счёт</td>
+Used Memory<==Использовано памяти<
+#Node Caches:==Кэш нода:
+Object Index Caches:==Кэш индекса объектов:
+Needed Memory==Необходимо памяти
 
-Object Read Caches==Objekt Lese Caches
->Read Hit Cache<==>Lese Treffer Cache<
->Read Miss Cache<==>Lese Miss Cache<
->Read Hit<==>Lese Hit<
->Read Miss<==>Lese Verfehler<
-Write Unique<==Schreiben einzigartig<
-Write Double<==Schreiben mehrfach<
-Deletes<==Löschungen<
-Flushes<==Leerungen<
-Total Mem==Gesamter Speicher
-MB \(hit\)==MB (Treffer)
-MB \(miss\)==MB (Verfehler)
-Stop Grow when less than \#\[objectCacheStopGrow\]\# MB available left==Beende Erweiterung wenn weniger als #[objectCacheStopGrow]# MB verfügbar sind
-Start Shrink when less than \#\[objectCacheStartShrink\]\# MB availabe left==Starte Verkleinerung wenn weniger als #[objectCacheStartShrink]# MB verfügbar sind
+Object Read Caches==Чтение кэшированных объектов
+>Read Hit Cache<==>Считано ударов в кэш  <
+>Read Miss Cache<==>Считано попаданий в кэш<
+>Read Hit<==>Считано ударов<
+>Read Miss<==>Считано попаданий<
+Write Unique<==Уникальная запись<
+Write Double<==Двойная запись<
+Deletes<==Удаления<
+Flushes<==Скрытые<
+Total Mem==Всего памяти
+MB \(hit\)==MB (удары)
+MB \(miss\)==MB (попадания)
+Stop Grow when less than \#\[objectCacheStopGrow\]\# MB available left==Остановить рост при сокращении до #[objectCacheStopGrow]# MB из доступной
+Start Shrink when less than \#\[objectCacheStartShrink\]\# MB availabe left==Начать сжатие при сокращении до #[objectCacheStartShrink]# MB из доступной
 
-Other Caching Structures:==Andere Zwischenspeicher Strukturen:
-Type</td>==Typ</td>
->Hit<==>Treffer<
->Miss<==>Verfehler<
-Insert<==Einfügen<
-Delete<==Löschen<
+Other Caching Structures:==Другие структуры кэша:
+>Hit<==>Удары<
+>Miss<==>Попадания<
+Insert<==Вставлено<
+Delete<==Удалено<
 #DNSCache</td>==DNSCache</td>
 #DNSNoCache</td>==DNSNoCache</td>
 #HashBlacklistedCache==HashBlacklistedCache
-Search Event Cache<==Suchereignis Cache<
+Search Event Cache<==Поиск события кэша<
 #-----------------------------
 
 #File: PerformanceQueues_p.html
 #---------------------------
-Performance Settings of Queues and Processes==Performanceeinstellungen für Puffer und Prozesse
-Scheduled tasks overview and waiting time settings:==Übersicht geplanter Aufgaben und Wartezeiteinstellungen:
-Queue Size==Warteschl.-<br />länge
->Total==>gesamte
-#Block Time==
-#Sleep Time==
-#Exec Time==
-<td>Idle==<td>untät.
->Busy==>beschäft.
-Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
->per Cycle==>pro Durchlauf
->per Busy-Cycle==>pro beschäft. Durchl.
->Memory Use==>Speicher-<br />nutzung
->Delay between==>Verzögerung zwischen
->idle loops==>untät. Durchl.
->busy loops==>beschäft. Durchl.
-Minimum of<br />Required Memory==Mindestens<br />benötigter Speicher
-Maximum of<br />System-Load==Maximum der<br />Systemlast
-Full Description==Vollständige Beschreibung
-Submit New Delay Values==Neue Verzögerungswerte speichern
-Re-set to default==Auf Defaultwerte zurücksetzen
-Changes take effect immediately==Änderungen werden sofort wirksam
-Cache Settings:==Cache Einstellungen:
-#RAM Cache==RAM Cache
-<td>Description==<td>Beschreibung
-Words in RAM cache:==Wörter im RAM-Cache
-This is the current size of the word caches.==Dies ist die momentane Größe des Wort-Caches.
-The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.==Der Indexing Cache beschleunigt den Indexier Prozess, der DHT Cache enthält temporäre Indizes zum Bestätigen.
-The maximum of this caches can be set below.==Das Maximum dieses Cache kann unten festgesetzt werden.
-Maximum URLs currently assigned<br />to one cached word:==höchste Anzahl URLs die derzeit einem Wort im Zwischenspeicher zugewiesen wurde:
-This is the maximum size of URLs assigned to a single word cache entry.==Dies ist die maximale Menge an URLs, die einem einzelnen Wort-Cache Eintrag zugewiesen wurden.
-If this is a big number, it shows that the caching works efficiently.==Wenn diese Zahl hoch ist, heißt das, dass der Wort-Cache effizient arbeitet.
-Maximum age of a word:==Maximales Alter eines Wortes:
-This is the maximum age of a word in an index in minutes.==Dies ist das maximale Alter eines Wortes in einem Index in Minuten.
-Minimum age of a word:==Minimales Alter eines Wortes:
-This is the minimum age of a word in an index in minutes.==Dies ist das minimale Alter eines Wortes in einem Index in Minuten.
-Maximum number of words in cache:==Maximale Wortzahl im Cache:
-This is is the number of word indexes that shall be held in the==Dies ist die Anzahl der Wort-indexe die während des Indexierens im
-ram cache during indexing. When YaCy is shut down, this cache must be==RAM-Cache gehalten werden sollen. Sobald YaCy herunterfährt muss dieser Cache
-flushed to disc; this may last some minutes.==auf die Festplatte gesichert werden; dies kann einige Minuten dauern.
-#Initial space of words in cache:==Anfangs Freiraum im Word Cache:
-#This is is the init size of space for words in cache.==Dies ist die Anfangsgröße von Wörtern im Cache.
-Enter New Cache Size==Neue Cachegröße eintragen
-Thread Pool Settings:==Threadpool-Einstellungen:
-maximum Active==max. aktiv
-current Active==derzeit aktiv
-Enter new Threadpool Configuration==Neue Threadpool-Konfiguration eintragen
-milliseconds<==Millisekunden<
-kbytes<==KBytes<
-load<==Last<
+Performance Settings of Queues and Processes==Настройки производительности очередей и процессов
+Scheduled tasks overview and waiting time settings:==Обзор запланированных задач и настройки времени ожидания:
+>Thread<==>Поток<
+Queue Size==Размер очереди
+>Total==>Общее
+Cycles==циклов
+Block Time==время блокировки
+Sleep Time==время сна
+Exec Time==время выполнения
+<td>Idle==<td>Ожидание,
+>Busy==>Пройдено,
+Short Mem<br />Cycles==Циклы<br />короткой памяти
+>per Cycle==>на цикл
+>per Busy-Cycle==>на пройденный цикл.
+>Memory Use==>Использовано памяти
+>Delay between==>Задержка между
+>idle loops==>ожидающими циклами
+>busy loops==>пройденными циклами
+Minimum of<br />Required Memory==Минимально<br />необходимая память
+Maximum of<br />System-Load==Макс.<br />загрузка системы
+Full Description==Полное описание
+Submit New Delay Values==Применить новые значения задержек
+Re-set to default==Установить значения по-умолчанию
+Changes take effect immediately==Изменения будут применены немедленно
+Cache Settings:==Настройки кэша:
+RAM Cache==Кэш RAM
+<td>Description==<td>Описание
+Words in RAM cache:==Слов в кэше оперативной памяти
+(Size in KBytes)==размер в КБайтах
+This is the current size of the word caches.==Текущий размер кэша слов.
+The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.==Индексация кэша ускоряет общий процесс индексации. Кэш DHT содержит временно разрешённые индексы.
+The maximum of this caches can be set below.==Максимальное значения кэшей может быть установлено ниже.
+Maximum URLs currently assigned<br />to one cached word:==Максимальное число ссылок на одно кэшированное слово в данный момент:
+This is the maximum size of URLs assigned to a single word cache entry.==Это максимальное число ссылок, описывающих одно кэшированное слово.
+If this is a big number, it shows that the caching works efficiently.==Если число большое, то кэширование выполняется эффективно.
+Maximum age of a word:==Максимальный возраст слова:
+This is the maximum age of a word in an index in minutes.==Это максимальный возраст слова в индексе в минутах.
+Minimum age of a word:==Минимальный возраст слова:
+This is the minimum age of a word in an index in minutes.==Это минимальный возраст слова в индексе в минутах.
+Maximum number of words in cache:==Максимальное число слов в кэше:
+This is is the number of word indexes that shall be held in the==Это число слов индекса, находящихся
+ram cache during indexing. When YaCy is shut down, this cache must be==в оперативной памяти во время индексирования. Когда YaCy выключается, содержимое кэша 
+flushed to disc; this may last some minutes.==сохраняется на диск; это может занять несколько минут.
+#Initial space of words in cache:==Первоначальное число слов в кэше:
+#This is is the init size of space for words in cache.==Начальный размер слов в кэше.
+Enter New Cache Size==Установить новый размер кэша
+Thread Pool Settings:==Настройка пула:
+Thread Pool==Пул
+Crawler Pool==Очередь индексатора
+httpd Session Pool==Количество соединений
+maximum Active==Максимум возможно
+current Active==В данный момент
+Enter new Threadpool Configuration==Установить новые значения
+milliseconds<==мс<
+kbytes<==Кбайт<
+load<==Загрузка<
 #-----------------------------
 
 #File: PerformanceConcurrency_p.html
 #---------------------------
-Performance of Concurrent Processes==Performance gleichzeitig laufender Prozesse
-serverProcessor Objects==serverProcessor Objekte
-#Thread==Thread
-Queue Size<br />Current==Größe der Warteschlange<br />Aktuell
-Queue Size<br />Maximum==Größe der Warteschlange<br />Maximum
-Executors:<br />Current Number of Threads==Executors:<br />Aktuelle Anzahl der Threads
-Concurrency:<br />Maximum Number of Threads==Concurrency:<br />Maximale Anzahl der Threads
-Concurrency:<br />Number of Threads==Gleichzeitigkeit:<br />Anzahl der Threads
-Childs==Kindprozesse
-Average<br />Block Time<br />Reading==Durchschnittlich<br />reservierte Zeit<br />lesend
-Average<br />Exec Time==Durchschnittliche Ausführungszeit
-Average<br />Block Time<br />Writing==Durchschnittlich<br />reservierte Zeit<br />schreibend
-Total<br />Cycles==Gesamtanzahl Zyklen
-Full Description==Volle Beschreibung
+Performance of Concurrent Processes==Производительность параллельных процессов
+serverProcessor Objects==Процессы сервера
+#Thread==Поток
+Queue Size<br />Current==Текущий<br />размер очереди
+Queue Size<br />Maximum==Макс.<br />размер очереди
+Executors:<br />Current Number of Threads==Исполнители:<br />Текущее число потоков
+Concurrency:<br />Maximum Number of Threads==Параллельность:<br />Макс. число потоков
+Concurrency:<br />Number of Threads==Параллельность:<br />Число потоков
+Childs==Потомки
+Average<br />Block Time<br />Reading==Среднее<br />время блокировки<br />чтения
+Average<br />Exec Time==Среднее время выполнения
+Average<br />Block Time<br />Writing==Среднее<br />время блокировки<br />записи
+Total<br />Cycles==Всего циклов
+Full Description==Полное описание
 #-----------------------------
 
 #File: PerformanceSearch_p.html
@@ -2478,17 +2491,17 @@ Page.==
 #File: QuickCrawlLink_p.html
 #---------------------------
 Quick Crawl Link==Schnell Crawl Link
-Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
+Quickly adding Bookmarks:==Быстрое добавление закладок:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
 If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
 Crawl with YaCy==Mit YaCy crawlen
-Title:==Titel:
-Link:==link:
-Status:==Status:
-URL successfully added to Crawler Queue==Die Url wurde erfolgreich zum Crawler-Puffer hinzugefügt.
-Malformed URL==Fehler in der URL
+Title:==Заголовок:
+Link:==Ссылка:
+Status:==Состояние:
+URL successfully added to Crawler Queue==Ссылка успешно добавлена в очередь индексатора.
+Malformed URL==Некорректная ссылка
 Unable to create new crawling profile for URL:==Es ist nicht möglich für diese URL ein Crawling Profil zu erstellen:
-Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
+Unable to add URL to crawler queue:==Невозможно добавить ссылку в очередь индексатора:
 #-----------------------------
 
 #File: Ranking_p.html
@@ -2561,8 +2574,8 @@ delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder an
 Performance Settings of Busy Queues==Настройки производительности очередей и процессов
 Viewer and administration for database tables==Просмотр и управление таблицами базы данных
 Viewer for Cookies in Proxy==Просмотр сведений о куки (при использовании прокси-сервера)
-Server Access Settings==Настройки доступности сервера
-Proxy Access Settings==Настройки доступности прокси-сервера
+Server Access Settings==Настройки доступа к серверу
+Proxy Access Settings==Настройки доступа к прокси-серверу
 Crawler Settings==Настройки индексатора
 HTTP Networking==HTTP сеть
 Remote Proxy \(optional\)==Удалённый прокси (опционально)
@@ -2572,178 +2585,182 @@ Message Forwarding \(optional\)==Отправка уведомления (опц
 
 #File: Settings_Crawler.inc
 #---------------------------
-Generic Crawler Settings==Allgemeine Crawler Einstellungen
-Connection timeout in ms==Verbindungs-Timeout in ms
-means unlimited==schaltet die Begrenzung ab
-HTTP Crawler Settings:==HTTP Crawler Einstellungen:
+>Crawler Settings<==>Настройки индексатора<
+Generic Crawler Settings==Общие настройки индексатора
+Connection timeout in ms==Соединение в миллисекундах
+means unlimited==означает неограниченный
+HTTP Crawler Settings:==Настройки индексации по HTTP:
 Maximum Filesize==Максимальный размер файла
-FTP Crawler Settings==FTP Crawler Einstellungen
-SMB Crawler Settings==SMB Crawler Einstellungen
-Local File Crawler Settings==Lokales Dateisystem Crawler Einstellungen
-Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Datei in Byte
-Larger files will be skipped==Größere Dateien werden übersprungen
-Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Beachten Sie, dass beim Herunterladen der Dateien mittels "Content-Compression" die komprimierte Dateigröße maßgeblich ist
+FTP Crawler Settings==Настройки индексации по FTP
+SMB Crawler Settings==Настройки индексации по SMB
+Local File Crawler Settings==Настройки индексации локальных файлов
+Maximum allowed file size in bytes that should be downloaded==Максимально разрешённый размер загружаемого файла
+Larger files will be skipped==Файлы большего размера будут пропущены
+Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Обратите внимание, что если индексатор использует сжатый контент, то это ограничение проверяет размер сжатого контента
 Submit==Сохранить
 Changes will take effect immediately==Изменения будут применены немедленно
 #-----------------------------
 
 #File: Settings_Http.inc
 #---------------------------
-HTTP Networking==HTTP сеть
+HTTP Networking==Настройки протокола HTTP
 Transparent Proxy==Прозрачный прокси
-With this you can specify if YaCy can be used as transparent proxy.==Hiermit können Sie festlegen ob YaCy als transparenter Proxy genutzt werden kann.
-Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Hinweis: Unter Linux können Sie Ihre Firewall darauf einstellen, alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden.
-Connection Keep-Alive==Verbindung halten
-With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit können Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalität unterstützen soll.
-Send "Via" Header==Sende "Via" Header
-Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
-http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
-Send "X-Forwarded-For" Header== Sende "X-Forward-For" Header
-Specifies if the proxy should send the X-Forwarded-For http header.==Gibt an, ob der Proxy den X-forwarded-For HTTP-Header setzen soll.
-"Submit"=="Speichern"
-Changes will take effect immediately.==Änderungen sind sofort wirksam.
+With this you can specify if YaCy can be used as transparent proxy.==Включите эту опцию, если вам нужно использовать YaCy в качестве прозрачного прокси.
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Совет: В линукс-системах вы можете настроить файервол на прозрачное перенаправление всего трафика через YaCy с этими правилами iptables
+Connection Keep-Alive==Постоянное соединение
+With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Включите эту опцию, если вам необходимо постоянное соединение с YaCy.
+Send "Via" Header==Отправлять заголовок "Via"
+Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Отметьте, если прокси должен отправлять заголовок <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
+http header according to RFC 2616 Sect 14.45.==, описанный в RFC 2616 раздел 14.45.
+Send "X-Forwarded-For" Header==Отправлять заголовок "X-Forward-For"
+Specifies if the proxy should send the X-Forwarded-For http header.==Отметьте, если прокси должен отправлять заголовок "X-Forward-For"
+"Submit"=="Сохранить"
+Changes will take effect immediately.==Изменения будут применены немедленно.
+HTTP Server==HTTP сервер
+Version==версии
 #-----------------------------
 
 #File: Settings_Proxy.inc
 #---------------------------
-YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy kann einen anderen Proxy nutzen um sich zum Internet zu verbinden. Sie können die Adresse für den Remote Proxy hier eingeben.
-Use remote proxy</label>==Nutze Remote Proxy</label>
-Enables the usage of the remote proxy by yacy==Aktiviert die Nutzung des Remote Proxies durch YaCy
-Use remote proxy for yacy &lt;-&gt; yacy communication==Nutze Remote Proxy für YaCy &lt;-&gt; YaCy Kommunikation
-Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Gibt an, ob der Remote Proxy für Kommunikation zwischen diesem und anderen YaCy-Peers genutzt werden soll.
-<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>Hinweis:</em> Dies könnte dazu führen, dass dieser Peer im Junior-Status verbleibt.
-Use remote proxy for HTTPS==Nutze Remote Proxy für HTTPS
-Specifies if YaCy should forward ssl connections to the remote proxy.==Gibt an, ob YaCy SSL-Verbindungen zum Remote Proxy weiterleiten soll.
-Remote proxy host==Remote Proxy Host
-The ip address or domain name of the remote proxy==Die IP-Adresse oder der Domainname des Remote Proxy
-Remote proxy port==Remote Proxy Port
-the port of the remote proxy==Der Port des Remote Proxy
-Remote proxy user==Remote Proxy Benutzer
-Remote proxy password==Remote Proxy Passwort
-No-proxy adresses==Proxylose Adressen
-IP addresses for which the remote proxy should not be used==IP-Adressen für die der Remote Proxy nicht genutzt werden soll
-"Submit"=="Speichern"
-Changes will take effect immediately.==Änderungen sind sofort wirksam.
+YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy может использовать другой прокси для соединения с интернетом. Вы можете указать адрес удалённого прокси здесь.
+Use remote proxy</label>==Использовать удалённый прокси</label>
+Enables the usage of the remote proxy by yacy==Разрешает использование удалённого прокси
+Use remote proxy for yacy &lt;-&gt; yacy communication==Использовать удалённый прокси для связи между узлами
+Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Разрешает использование удалённого прокси для связи вашего узла с другими узлами.
+<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>Совет:</em> Включение этой опции может присвоить вашему узлу статус "Junior".
+Use remote proxy for HTTPS==Использовать удалённый прокси для HTTPS-протокола
+Specifies if YaCy should forward ssl connections to the remote proxy.==Разрешает использовать SSL-соединения для удалённого прокси.
+Remote proxy host==Хост удалённого прокси
+The ip address or domain name of the remote proxy==IP-адрес или домен удалённого прокси
+Remote proxy port==Порт удалённого прокси
+the port of the remote proxy==
+Remote proxy user==Пользователь удалённого прокси
+Remote proxy password==Пароль удалённого прокси
+No-proxy adresses==Не использовать для прокси адреса
+IP addresses for which the remote proxy should not be used==IP-адреса, для которых удалённый прокси не используется
+"Submit"=="Сохранить"
+Changes will take effect immediately.==Изменения будут применены немедленно.
 #-----------------------------
 
 #File: Settings_ProxyAccess.inc
 #---------------------------
-Proxy Access Settings==Proxyzugangs Einstellungen
-These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
-All traffic is routed throug one single port, for both proxy and server.==Alle Verbindungen werden durch einen einzigen Port hergestellt, für beides (Proxy und Server).
-Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
-The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
-You have four possibilities to specify the address:==Sie haben vier Möglichkeiten die Adresse anzugeben:
-defining a port only==nur einen Port angeben
-<em>e.g. 8090</em>==<em>z.B. 8090</em>
-defining IP address and port==eine IP-Adresse und Port angeben
-<em>e.g. 192.168.0.1:8090</em>==<em>z.B. 192.168.0.1:8090</em>
-defining host name and port==einen Hostnamen und Port angeben
-<em>e.g. home:8090</em>==<em>z.B. home:8090</em>
-defining interface name and port==einen Interface-namen und Port angeben
-<em>e.g. #eth0:8090</em>==<em>z.B. #eth0:8090</em>
-Hint: Dont forget to change your firewall configuration after you have changed the port.==Hinweis: Denken Sie daran Ihre Firewalleinstellungen zu ändern nachdem Sie den Port geändert haben.
-Proxy and http-Server Administration Port==Proxy und HTTP-Server Administrations Port
-Changes will take effect in 5-10 seconds==Die Änderungen werden in 5-10 Sekunden wirksam
-Server Access Restrictions==Server Zugangsbeschränkungen
-You can restrict the access to this proxy/server using a two-stage security barrier:==Sie können den Zugang zu diesem Proxy/Server mit einer 2-stufigen Sicherheitsbarriere einschränken:
-define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==geben Sie einen <em>Netzwerkadressraum</em> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
-define an <em>user account</em> with an user:password - pair==geben Sie einen <em>Nutzeraccount</em> mit einem nutzer:passwort-Paar an
-This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gewährt wird.
-You probably don't want to share the proxy to the internet, so you should set the==Sie wollen den Proxy vermutlich nicht im Internet zur Verfügung stellen, deshalb sollten Sie
-IP-Number Access Domain to a pattern that corresponds to you local intranet.==den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
-The default setting should be right in most cases. If you want, you can also set a proxy account==Die Standardwerte sollten in den meisten Fällen richtig sein. Wenn Sie wollen können Sie auch Proxyaccounts erstellen
-so that every proxy user must authenticate first, but this is rather unusual.==, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher unüblich.
-IP-Number filter==IP-Adressen Filter
-Use <a==Nutze <a
+Proxy Access Settings==Настройки доступа к прокси
+These settings configure the access method to your own http proxy and server.==Здесь вы можете настроить доступ к вашему http-прокси и серверу.
+All traffic is routed throug one single port, for both proxy and server.==Весь трафик направляется на один порт для прокси и сервера.
+Server/Proxy Port Configuration==Настройка порта сервера/прокси
+The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Адреса сокетов, которые прослушиваются на входящие соединения от других узлов или http-клиентов.
+You have four possibilities to specify the address:==Вы можете указать четыре адреса:
+defining a port only==задать только порт
+<em>e.g. 8090</em>==<em>например, 8090</em>
+defining IP address and port==задать IP-адрес и порт
+<em>e.g. 192.168.0.1:8090</em>==<em>например, 192.168.0.1:8090</em>
+defining host name and port==задать имя хоста и порт
+<em>e.g. home:8090</em>==<em>например, home:8090</em>
+defining interface name and port==задать имя интерфейса и порт
+<em>e.g. #eth0:8090</em>==<em>например, #eth0:8090</em>
+Hint: Dont forget to change your firewall configuration after you have changed the port.==Совет: Не забудьте изменить настройки фаервола после изменения порта.
+Proxy and http-Server Administration Port==Порт прокси и http-сервера
+Changes will take effect in 5-10 seconds==Изменения будут применены через 5-10 секунд
+Server Access Restrictions==Ограничения доступа к серверу
+You can restrict the access to this proxy/server using a two-stage security barrier:==Вы можете ограничить доступ к своему прокси/серверу используя двухуровневый барьер:
+define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==установить <em>доступ к домену</em> списком предоставленных клиенту IP-адреса или символов
+define an <em>user account</em> with an user:password - pair==установить <em>учётную запись пользователя</em> с логином и паролем
+This is the account that restricts access to the proxy function.==Такая учётная запись будет иметь ограниченный доступ к функциям прокси.
+You probably don't want to share the proxy to the internet, so you should set the==Если вы не желаете использовать общий прокси для интернета, вы можете указать
+IP-Number Access Domain to a pattern that corresponds to you local intranet.==IP-адрес вашей локальной сети в фильтре ниже.
+The default setting should be right in most cases. If you want, you can also set a proxy account==Настройки по-умолчанию подходят в большинстве случаев. Вы также можете установить учётную запись прокси
+so that every proxy user must authenticate first, but this is rather unusual.==, чтобы сначала авторизовывался каждый пользователь прокси. Обычно это не практикуется.
+IP-Number filter==Фильтр IP-адресов
+Use <a==Использовать <a
+"Submit"=="Сохранить"
 #-----------------------------
 
 #File: Settings_Seed.inc
 #---------------------------
-Seed Upload Settings==Seed Upload Einstellungen
-With these settings you can configure if you have an account on a public accessible==Mit diesen Einstellungen können Sie bestimmen ob Sie einen Account auf einem öffentlich zugänglichen
-server where you can host a seed-list file.==Server haben, wo Sie eine Seed-Liste bereitstellen können.
-General Settings:==Allgemeine Einstellungen:
-If you enable one of the available uploading methods, you will become a principal peer.==Wenn Sie eine der verfügbaren Upload-Methoden aktivieren, werden Sie ein Principal-Peer.
-Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
-but only if there have been changes to the seed-list.==jedoch nur wenn Änderungen an der Seed-Liste vorgenommen wurden.
-Upload Method==Upload-Methode
-"Submit"=="Speichern"
-Retry Uploading==Upload erneut versuchen
-Here you can specify which upload method should be used.==Hier können Sie auswählen welche Upload-Methode verwendet werden soll.
-Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
-The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
+Seed Upload Settings==Настройки загрузка сида
+With these settings you can configure if you have an account on a public accessible==Здесь вы можете указать данные вашей учетной записи на общем
+server where you can host a seed-list file.==сервере, где вы храните сид-список.
+General Settings:==Общие настройки:
+If you enable one of the available uploading methods, you will become a principal peer.==В случае установки, ваш узел будет работать в режиме "Principal". 
+Your peer will then upload the seed-bootstrap information periodically,==Ваш узел загрузит начальную информацию о сиде,
+but only if there have been changes to the seed-list.==только если сид-список будет изменён.
+Upload Method==Способ загрузки
+"Submit"=="Сохранить"
+Retry Uploading==Повторить загрузку
+Here you can specify which upload method should be used.==Здесь вы можете указать желаемый способ загрузки.
+Select 'none' to deactivate uploading.==Выберите 'none' для отключения загрузки.
+The URL that can be used to retrieve the uploaded seed file, like==Ссылка для загрузки файла сида, наподобие
 #-----------------------------
 
 #File: Settings_Seed_UploadFile.inc
 #---------------------------
-Store into filesystem:==Ablegen im Dateisystem:
-You must configure this if you want to store the seed-list file onto the file system.==Sie müssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Dateisystem ablegen wollen.
-File Location==Speicherort
-Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier können Sie den Pfad im Dateisystem festlegen, in dem die Seed-Liste abgelegt werden soll.
-"Submit"=="Speichern"
+Store into filesystem:==Загрузка из локальной папки:
+You must configure this if you want to store the seed-list file onto the file system.==Локальный путь к сид-списку.
+File Location==Путь к файлу
+Here you can specify the path within the filesystem where the seed-list file should be stored.==Здесь вы можете указать путь к сид-списку.
+"Submit"=="Сохранить"
 #-----------------------------
 
 #File: Settings_Seed_UploadFtp.inc
 #---------------------------
-Uploading via FTP:==Upload per FTP:
-This is the account for a FTP server where you can host a seed-list file.==Dies ist der Account für einen FTP-Server, auf dem Sie eine Seed-Liste bereitstellen können.
-If you set this, you will become a principal peer.==Wenn Sie das tun, werden Sie zum Principal-Peer.
-Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
-but only if there had been changes to the seed-list.==jedoch nur wenn Änderungen an der Seed-Liste existieren.
-The host where you have a FTP account, like==Der Host zu Ihrem FTP-Account, wie
-Path</label>==Pfad</label>
-The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
-Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
-Username==Benutzername
-Your log-in at the FTP server==Ihr Login auf dem FTP-Server
-Password</label>==Passwort</label>
-The password==Das Passwort
-"Submit"=="Speichern"
+Uploading via FTP:==Загрузка из FTP:
+This is the account for a FTP server where you can host a seed-list file.==Это данные FTP-сервера, где вы разместили свой сид-список.
+If you set this, you will become a principal peer.==В случае установки, ваш узел будет работать в режиме "Principal".
+Your peer will then upload the seed-bootstrap information periodically,==Ваш узел загрузит начальную информацию о сиде,
+but only if there had been changes to the seed-list.==только если сид-список будет изменён.
+The host where you have a FTP account, like==Данные вашего FTP-сервера, наподобие
+Path</label>==Путь</label>
+The remote path on the FTP server, like==Удалённый путь FTP-сервера, наподобие
+Missing sub-directories are NOT created automatically.==Отсутствующие подпапки не создаются автоматически.
+Username==Имя пользователя
+Your log-in at the FTP server==Ваш логин на FTP-сервере
+Password</label>==Пароль</label>
+The password==Ваш пароль
+"Submit"=="Сохранить"
 #-----------------------------
 
 #File: Settings_Seed_UploadScp.inc
 #---------------------------
 
-Uploading via SCP:==Upload per SCP:
-This is the account for a server where you are able to login via ssh.==Dies ist der Account für einen Server, auf dem Sie sich per SSH anmelden müssen.
-#Server==Server
-The host where you have an account, like 'my.host.net'==Der Host auf dem Sie einen Account haben, wie z.B. 'mein.host.net' 
-#Server&nbsp;Port==Server&nbsp;Port
-The sshd port of the host, like '22'==Der SSHD Port vom Host z.B. '22'
-Path</label>==Pfad</label>
-The remote path on the server, like '~/yacy/seed.txt'. Missing sub-directories are NOT created automatically.==Der Remote Pfad auf dem Server z.B. '~/yacy/seed.txt'. Fehlende Unterverzeichnise werden NICHT automatisch erstellt.
-Username==Benutzername
-Your log-in at the server==Ihr Login auf dem Server
-Password</label>==Passwort</label>
-The password==Das Passwort
-"Submit"=="Speichern"
+Uploading via SCP:==Загрузка по SCP:
+This is the account for a server where you are able to login via ssh.==Это учётная запись для сервера, на который вы сможете войти через ssh.
+#Server==Сервер
+The host where you have an account, like 'my.host.net'==Хост, на котором вы имеете учётную запись, наподобие 'mein.host.net' 
+Server&nbsp;Port==Порт&nbsp;сервера
+The sshd port of the host, like '22'==Sshd-порт хоста, наподобие '22'
+Path</label>==Путь</label>
+The remote path on the server, like '~/yacy/seed.txt'. Missing sub-directories are NOT created automatically.==Удалённый путь на сервере, наподобие '~/yacy/seed.txt'. Отсутствующие подпапки не создаются автоматически.
+Username==Имя пользователя
+Your log-in at the server==Ваш логин на сервере
+Password</label>==Пароль</label>
+The password==Ваш пароль
+"Submit"=="Сохранить"
 #-----------------------------
 
 #File: Settings_ServerAccess.inc
 #---------------------------
-Server Access Settings==Serverzugangs Einstellungen
-IP-Number filter:==IP-Addressfilter:
-requires restart==erfordert Neustart
-Here you can restrict access to the server.==Hier können Sie den Zugang zum Server beschränken.
-By default, the access is not limited,==Standardmäßig ist der Zugang unbeschränkt,
-because this function is needed to spawn the p2p index-sharing function.==da dies notwendig ist um den P2P-Indextausch zu ermöglichen.
-If you block access to your server \(setting anything else than \'\*\'\), then you will also be blocked==Wenn Sie den Zugang zu Ihrem Server blockieren (Einstellen von irgendetwas anderem als '*') dann werden Sie auch davon ausgeschlossen
-from using other peers' indexes for search service.==den Index anderer Peers zur Suche zu verwenden.
-However, blocking access may be correct in enterprise environments where you only want to index your==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein,
-company's own web pages.==wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
-staticIP \(optional\):==statische IP (optional):
-<strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>Die statische IP kann helfen Ihren Peer für andere Peers erreichbar zu machen, falls Sie
-peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==hinter einer Firewall oder einem Proxy sind.</strong> Sie können einen Tunnel durch die Firewall/Proxy erzeugen
-\(look out for 'tunneling through https proxy with connect command'\) and create==(sehen Sie nach "Tunnelung durch einen https Proxy mit verbinden-Befehl") und erzeugen Sie
-an access point for incoming connections.==einen Zugriffspunkt für eingehende Verbindungen.
-This access address can be set here \(either as IP number or domain name\).==Diese Zugrifssadresse kann hier angegeben werden (oder als IP Nummer oder Domain-Name).
-If the address of outgoing connections is equal to the address of incoming connections,==Wenn die Zugriffsadresse der ausgehenden Verbindungen dieselbe ist wie die der eingehenden Verbindungen,
-you don't need to set anything here, please leave it blank.==brauchen Sie hier nichts angeben. Bitte lassen Sie das Feld leer.
-ATTENTION: Your current IP is recognized as "#\[clientIP\]#".==ACHTUNG: Ihre aktuelle IP wird als "#[clientIP]#" erkannt.
-If the value you enter here does not match with this IP,==Wenn der Wert, den Sie hier eingegeben haben, nicht mit dieser IP übereinstimmt,
-you will not be able to access the server pages anymore.==wird es nicht möglich sein auf die Serverseiten zuzugreifen.
-value="Submit"==value="speichern"
+Server Access Settings==Настройки доступа к серверу
+IP-Number filter:==Фильтр IP-адресов:
+requires restart==потребуется перезапуск
+Here you can restrict access to the server.==Здесь вы можете разрешить доступ к серверу.
+By default, the access is not limited,==По-умолчанию доступ неограничен,
+because this function is needed to spawn the p2p index-sharing function.==потому что это необходимо для начала передачи индекса посредством пиринга.
+If you block access to your server \(setting anything else than \'\*\'\), then you will also be blocked==Если вы заблокируете доступ к вашему серверу, то вы также заблокируете
+from using other peers' indexes for search service.==использование поиска индексов другими узлами.
+However, blocking access may be correct in enterprise environments where you only want to index your==Ограничение доступа может быть полезным в корпоративной сети, где требуется только индексирование,
+company's own web pages.==вэб-страниц компаний.
+staticIP \(optional\):==Постоянный IP-адрес (необязательно):
+<strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>Использование постоянного IP-адреса может помочь вашему узлу соединиться с другиму узлами
+peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==в случае, если вы используете фаервол или прокси.</strong> Вы можете создать туннель через фаервол или прокси
+\(look out for 'tunneling through https proxy with connect command'\) and create==(найдите "туннелирование через HTTPS-прокси с подключением") и создайте
+an access point for incoming connections.==точку доступа для входящих соединений.
+This access address can be set here \(either as IP number or domain name\).==Адрес сервера может быть установлен здесь (как IP-адрес или как домен).
+If the address of outgoing connections is equal to the address of incoming connections,==Если адреса исходящих и входящих соединений одинаковы,
+you don't need to set anything here, please leave it blank.==то оставьте поле пустым.
+ATTENTION: Your current IP is recognized as "#\[clientIP\]#".==Внимание: Ваш текущий IP-адрес определён как "#[clientIP]#".
+If the value you enter here does not match with this IP,==Если IP-адрес указанный вами, не будет совпадать с этим IP-адресом,
+you will not be able to access the server pages anymore.==то вы больше не сможете получить доступ к страницам сервера.
+value="Submit"==value="Сохранить"
 #-----------------------------
 
 #File: SettingsAck_p.html
@@ -2810,17 +2827,17 @@ You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun
 
 #File: Settings_MessageForwarding.inc
 #---------------------------
-Message Forwarding==Nachrichten Weiterleitung
-With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen können Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
-Enable message forwarding==Aktiviere Nachrichten Weiterleitung
-Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
-Forwarding Command==Weiterleitungskommando
-The command-line program that should be used to forward the message.<br />==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />
-Forwarding To==Weiterleiten An
-The recipient email-address.<br />==Die E-Mail Adresse des Empfängers.<br />
-e.g.:==z.B.:
-"Submit"=="Speichern"
-Changes will take effect immediately.==Änderungen sind sofort wirksam.
+Message Forwarding==Отправка сообщения
+With this settings you can activate or deactivate forwarding of yacy-messages via email.==Вы можете включать и отключать отправку сообщений YaCy по электронной почте.
+Enable message forwarding==Включить отправку сообщений
+Enabling/Disabling message forwarding via email.==Включение/отключение отправки сообщений на электронную почту
+Forwarding Command==Команда для отправки
+The command-line program that should be used to forward the message.<br />==Путь к программе, которая будет использоваться для отправки сообщения.<br />
+Forwarding To==Отправить на
+The recipient email-address.<br />==Адрес электронной почты получателя<br />
+e.g.:==Например:
+"Submit"=="Сохранить"
+Changes will take effect immediately.==Изменения будут применены немедленно.
 #-----------------------------
 
 #File: sharedBlacklist_p.html
@@ -2843,7 +2860,7 @@ value="add"==value="hinzufügen"
 #File: Status.html
 #---------------------------
 Console Status==Статус консоли
-Log-in as administrator to see full status==Войдите как администратор, чтобы увидеть всю статистику
+Log-in as administrator to see full status==Войдите как администратор. 
 Welcome to YaCy!==Добро пожаловать в YaCy!
 Your settings are _not_ protected!</strong>==Ваши настройки не защищены паролем!</strong>
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Пожалуйста перейдите по ссылке <a href="ConfigAccounts_p.html">Настройка аккаунта</a> <strong>немедленно</strong>
@@ -2851,29 +2868,29 @@ and set an administration password.==и установите пароль адм
 You have not published your peer seed yet. This happens automatically, just wait.==Ваш узел еще не активен. Это происходит автоматически, пожалуйста, подождите.
 The peer must go online to get a peer address.==Ваш узел должен быть онлайн для получения адресов других узлов.
 You cannot be reached from outside.==Вы недоступны извне.
-A possible reason is that you are behind a firewall, NAT or Router.==Возможно Вы находитесь за брандмауэром, NAT или роутером.
+A possible reason is that you are behind a firewall, NAT or Router.==Возможно, вы находитесь за брандмауэром, NAT или роутером.
 But you can <a href="index.html">search the internet</a> using the other peers'==Но Вы можете <a href="index.html">выполнять поиск</a>, используя помощь других узлов
-global index on your own search page.==перейдя на главную страницу поиска.
+global index on your own search page.==на главной странице поиска.
 "bad"=="плохой"
 "idea"="идея"
 "good"="хороший"
 "Follow YaCy on Twitter"=="Следуй за YaCy на Twitter"
-We encourage you to open your firewall for the port you configured \(usually: 8090\),==Мы рекомендуем Вам открыть доступ к порту на Вашем брандмауэре, который Вы настроили (обычно: 8090),
+We encourage you to open your firewall for the port you configured \(usually: 8090\),==Рекомендуем открыть доступ к порту на Вашем брандмауэре, который Вы настроили (обычно: 8090),
 or to set up a 'virtual server' in your router settings \(often called DMZ\).==или выполните настройку "виртуального сервера" в настройках Вашего роутера (настройка обычно называется DMZ).
-Please be fair, contribute your own index to the global index.==Пожалуйста примите участие в создании глобального поискового индекса.
+Please be fair, contribute your own index to the global index.==Пожалуйста, примите участие в создании глобального поискового индекса.
 Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Свободное место на диске меньше, чем #[minSpace]#. индексирование сайтов приостановлено. Пожалуйста, освободите место на диске.
 it as soon as possible and restart YaCy.==Потребуется перезапуск YaCy.
 Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==Свободной памяти меньше, чем \#\[minSpace\]\#. DHT отключен. Пожалуйста, исправьте. 
 Crawling is paused! If the crawling was paused automatically, please check your disk space.==Индексирование остановлено! Если индексирование остановлено не вами, то проверьте свободное место на диске.
 Latest public version is==Последняя доступная версия
-You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
+You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Вы можете загрузить самую последнюю версию программы. Нажмите здесь для установки этого обновления и перезапуска YaCy:
 #"Update YaCy"=="Обновить YaCy"
 Install YaCy==Установка YaCy
-You can download the latest releases here:=Hier kann die neueste Version heruntergeladen werden:
-You are running a server in senior mode and you support the global internet index,==Ваш узел в senior-режиме и Вы поддерживаете глобальный индекс Интернет,
+You can download the latest releases here:=Вы можете загрузить последние версии программы здесь:
+You are running a server in senior mode and you support the global internet index,==Ваш узел имеет статус "Senior" и Вы поддерживаете глобальный индекс Интернет,
 which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
-You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
-where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
+You have a principal peer because you publish your seed-list to a public accessible server==Ваш узел имеет статус "Principal" и вы можете публиковать свой сид-лист на публично-доступном сервере,
+where it can be retrieved using the URL==где он может быть получен с помощью ссылки:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб-сайтов остановлен. Вы можете начать индексирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
 Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Ваш индексатор веб-сайтов работает. Вы можете посмотреть его работу <a href="Crawler_p.html">по этой ссылке</a>
 If you need professional support, please write to==Если вам нужна профессиональная поддержка, пожалуйста, напишите
@@ -3635,6 +3652,29 @@ Blacklist Test==Тест черного списка
 Import/Export==Импорт/Экспорт
 Content Control==Управление контентом
 #-----------------------------
+
+#File: env/templates/submenuComputation.template
+#---------------------------
+>Computation Monitor<==>Монитор производительности<
+## Processes Submenu
+>Processes<==>Процессы<
+>Server Log<==>Лог сервера<
+>Concurrent Indexing<==>Параллельное индексирование<
+>Memory Usage<==>Использование памяти<
+>Search Sequence<==>Последовательность поиска<
+## Messages Submenu
+>Messages<==>Сообщения<
+>Overview<==>Обзор<
+>Incoming&nbsp;News<==>Входящие&nbsp;новости<
+>Processed&nbsp;News<==>Обработанные&nbsp;новости<
+>Outgoing&nbsp;News<==>Исходящие&nbsp;новости<
+>Published&nbsp;News<==>Опубликованные&nbsp;новости<
+## Community Data Submenu
+>Community Data<==>Ресурсы сообщества<
+>Surftips<==>Советы<
+>Local Peer Wiki<==>Wiki локального узла<
+#-----------------------------
+
 
 #File: env/templates/submenuConfig.template
 #---------------------------
