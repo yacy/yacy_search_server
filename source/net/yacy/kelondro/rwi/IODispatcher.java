@@ -65,6 +65,7 @@ public class IODispatcher extends Thread {
         this.mergeQueue = new ArrayBlockingQueue<MergeJob>(mergeQueueLength);
         this.writeBufferSize = writeBufferSize;
         this.terminate = false;
+        this.setName("IODispatcher");
     }
 
     public void terminate() {

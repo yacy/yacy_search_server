@@ -272,6 +272,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
             @Override
             public void run() {
+                this.setName("Jetty8HttpServer.reconnect");
                 try {
                     Thread.sleep(milsec);
                 } catch (final InterruptedException e) {

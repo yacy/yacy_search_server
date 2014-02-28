@@ -266,6 +266,7 @@ public class RemoteSearch extends Thread {
         Thread secondary = new Thread() {
             @Override
             public void run() {
+                this.setName("RemoteSearch.secondaryRemoteSearch(" + wordhashes + " to " + targethash + ")");
                 event.oneFeederStarted();
                 try {
                     int urls = Protocol.secondarySearch(
@@ -318,6 +319,7 @@ public class RemoteSearch extends Thread {
         Thread solr = new Thread() {
             @Override
             public void run() {
+                this.setName("RemoteSearch.solrRemoteSearch(" + solrQuery.getQuery() + " to " + targetPeer.hash + ")");
                     int urls = 0;
                     try {
                         event.oneFeederStarted();

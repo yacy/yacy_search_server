@@ -64,6 +64,7 @@ public class Array {
 
     private static class SortJobWorker extends Thread {
         public void run() {
+            this.setName("Array.SortJobWorker");
             SortJob<?> job;
             try {
                 while ((job = sortJobs.take()) != POISON_JOB_WORKER) {

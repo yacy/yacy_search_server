@@ -58,9 +58,10 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     private final static Object POISON_PROCESS = new Object();
     
-    private class ProcessHandler implements Runnable {
+    private class ProcessHandler extends Thread {
         @Override
         public void run() {
+            
             try {
                 Object process;
                 Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
@@ -114,7 +115,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     private ARC<String, Metadata> metadataCache;
     private ARH<String> missCache;
     private BlockingQueue<Object> processQueue;
-    private Thread processHandler;
+    private ProcessHandler processHandler;
     
     public ConcurrentUpdateSolrConnector(final SolrConnector connector, final int updateCapacity, final int idCacheCapacity, final int concurrency) {
         this.connector = connector;
@@ -200,7 +201,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     
     public void ensureAliveProcessHandler() {
         if (this.processHandler == null || !this.processHandler.isAlive()) {
-            this.processHandler = new Thread(new ProcessHandler());
+            this.processHandler = new ProcessHandler();
             this.processHandler.setName(this.getClass().getName() + "_ProcessHandler");
             this.processHandler.start();
         }

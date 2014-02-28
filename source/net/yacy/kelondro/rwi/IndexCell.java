@@ -107,11 +107,14 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.writeBufferSize = writeBufferSize;
         this.removeDelayedURLs = new TreeMap<byte[], HandleSet>(Word.commonHashOrder);
         this.flushShallRun = true;
-        this.flushThread = new FlushThread();
+        this.flushThread = new FlushThread(cellPath.toString());
         this.flushThread.start();
     }
 
     private class FlushThread extends Thread {
+        public FlushThread(String name) {
+            this.setName("IndexCell.FlushThread(" + name + ")");
+        }
         @Override
         public void run() {
             while (IndexCell.this.flushShallRun) {

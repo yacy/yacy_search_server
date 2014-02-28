@@ -365,6 +365,7 @@ public class ServerShard extends SolrServer {
             Thread t0 = new Thread() {
                 @Override
                 public void run() {
+                    this.setName("ServerShard.query/1(" + params.toString() + ")");
                     QueryResponse rsp;
                     try {
                         rsp = s.query(params);
@@ -397,6 +398,7 @@ public class ServerShard extends SolrServer {
             Thread t0 = new Thread() {
                 @Override
                 public void run() {
+                    this.setName("ServerShard.query/2(" + params.toString() + ")");
                     QueryResponse rsp;
                     try {
                         rsp = s.query(params, method);

@@ -1060,6 +1060,7 @@ public final class Protocol {
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
                     Thread remoteRequest = new Thread() {
                         public void run() {
+                            this.setName("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + target.hash + ")");
                             try {
                                 RemoteInstance instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
                                 try {

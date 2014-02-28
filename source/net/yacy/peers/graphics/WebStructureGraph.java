@@ -139,6 +139,7 @@ public class WebStructureGraph {
 
     private class PublicRefDNSResolvingProcess extends Thread {
         private PublicRefDNSResolvingProcess() {
+            this.setName("WebStructureGraph.PublicRefDNSResolvingProcess");
         }
 
         @Override

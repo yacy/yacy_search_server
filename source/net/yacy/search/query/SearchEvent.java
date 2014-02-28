@@ -316,6 +316,7 @@ public final class SearchEvent {
                 new Thread() {
                     @Override
                     public void run() {
+                        this.setName("SearchEvent.init(" + query.getQueryGoal().getQueryString(false) + ")");
                         Thread.currentThread().setName("SearchEvent.primaryRemoteSearches");
                         RemoteSearch.primaryRemoteSearches(
                         	SearchEvent.this,

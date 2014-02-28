@@ -423,6 +423,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         final Thread t = new Thread() {
             @Override
             public void run() {
+                this.setName("EmbeddedSolrConnector.concurrentIDsByQuery(" + querystring + ")");
                 int o = offset, responseCount = 0;
                 DocListSearcher docListSearcher = null;
                 while (System.currentTimeMillis() < endtime) {

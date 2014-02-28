@@ -347,6 +347,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         Thread t0 = new Thread() {
             @Override
             public void run() {
+                this.setName("MirrorSolrConnector.getCountByQuery/t0");
                 try {
                     count.addAndGet(MirrorSolrConnector.this.solr0.getCountByQuery(querystring));
                 } catch (final IOException e) {}
@@ -356,6 +357,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         Thread t1 = new Thread() {
             @Override
             public void run() {
+                this.setName("MirrorSolrConnector.getCountByQuery/t1");
                 try {
                     count.addAndGet(MirrorSolrConnector.this.solr1.getCountByQuery(querystring));
                 } catch (final IOException e) {}

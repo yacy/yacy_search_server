@@ -147,6 +147,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final Thread t = new Thread() {
             @Override
             public void run() {
+                this.setName("AbstractSolrConnector:concurrentDocumentsByQuery(" + querystring + ")");
                 int o = offset;
                 int count = 0;
                 while (System.currentTimeMillis() < endtime && count < maxcount) {
@@ -178,6 +179,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final Thread t = new Thread() {
             @Override
             public void run() {
+                this.setName("AbstractSolrConnector:concurrentIDsByQuery(" + querystring + ")");
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {

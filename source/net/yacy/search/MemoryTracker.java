@@ -48,6 +48,7 @@ public class MemoryTracker extends Thread {
     public MemoryTracker(final long time) {
     	this.delaytime = time;
     	running = true;
+    	this.setName("MemoryTracker");
     }
     
     public void run() {

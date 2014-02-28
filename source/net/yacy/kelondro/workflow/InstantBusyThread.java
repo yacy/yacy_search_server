@@ -78,7 +78,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
         }
         this.environment = (env instanceof Class<?>) ? null : env;
-        setName(theClass.getName() + "." + jobExec);
+        setName("BusyThread " + theClass.getName() + "." + jobExec);
         this.handle = Long.valueOf(System.currentTimeMillis() + getName().hashCode());
     }
 

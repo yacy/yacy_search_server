@@ -691,6 +691,7 @@ public class HTTPClient {
 	            final Throwable[] te = new Throwable[]{null};
 	            Thread t = new Thread() {
 	                public void run() {
+	                   this.setName("HTTPClient.execute(" + httpUriRequest.getURI() + ")");
 	                   try {
 	                       thr[0] = client.execute(httpUriRequest, context);
 	                   } catch (Throwable e) {
@@ -883,6 +884,7 @@ public class HTTPClient {
 	    
 	    public IdleConnectionMonitorThread(HttpClientConnectionManager connMgr) {
 	        super();
+	        this.setName("HTTPClient.IdleConnectionMonitorThread");
 	        this.connMgr = connMgr;
 	    }
 

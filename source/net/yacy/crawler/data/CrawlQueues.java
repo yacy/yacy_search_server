@@ -627,6 +627,7 @@ public class CrawlQueues {
             this.code = Integer.valueOf(entry.hashCode());
             this.setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
             this.profile = CrawlQueues.this.sb.crawler.get(UTF8.getBytes(this.request.profileHandle()));
+            this.setName("CrawlQueues.Loader(" + entry.url() + ")");
         }
 
         private long age() {

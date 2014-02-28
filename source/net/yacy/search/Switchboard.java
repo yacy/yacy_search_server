@@ -1148,6 +1148,7 @@ public final class Switchboard extends serverSwitch {
         // finally start jobs which shall be started after start-up
         new Thread() {
             public void run() {
+                Thread.currentThread().setName("Switchboard.setHttpServer");
                 try {Thread.sleep(10000);} catch (final InterruptedException e) {} // needs httpd up
                 execAPIActions(); // trigger startup actions
             }
