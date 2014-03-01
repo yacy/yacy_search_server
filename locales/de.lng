@@ -80,6 +80,61 @@ Access Dates==Zugriffszeiten
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
 #-----------------------------
 
+#File: AugmentedBrowsing_p.html
+#---------------------------
+Augmented Browsing<==Angereichertes Browsen<
+URL Proxy Settings<==URL Proxy Einstellungen<
+With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==Mit diesen Einstellungen können Sie den URL Proxy an- oder abschalten der als Methode zum Anreichern verwendet wird.
+Service call: ==Serviceaufruf: 
+, where parameter is the url of an external web page.==, wobei der parameter für die URL der externen Webseite steht.
+#URL proxy:==URL Proxy:
+>Enabled<==>Aktiviert<
+Globally enables or disables URL proxy via ==Schaltet den URL Proxy global an oder ab der verfügbar ist über 
+Show search results via URL proxy:==Zeige Suchergebnisse mit dem URL Proxy an:
+Enables or disables URL proxy for all search results. If enabled, all search results will be tunneled through URL proxy.==Schaltet den URL Proxy für alle Suchergebnisse an oder ab. Wenn aktiviert werden alle Suchergebnisse durch den URL Proxy getunnelt.
+Restrict URL proxy use:==Schränke die URL Proxy Verwendung ein:
+Define client filter. Default: ==Definiere den Client Filter. Standardeinstellung: 
+URL substitution:==Ersetzen von URLs:
+Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==Definiere die Regeln zum Ersetzen von URLs die Navigation in der Proxy Umgebung erlauben. Mögliche Werte: all, domainlist. Standardeinstellung: domainlist.
+"Submit"=="Absenden"
+Augmented Browsing Settings==Angereicherte Browser Einstellungen
+With this settings you can activate or deactivate augmented browsing which happens usually via the URL proxy.==Mit diesen Einstellungen können Sie das angereicherte Browsing an- oder abschalten das normalerweise über den URL Proxy passiert.
+Augmented Browsing:==Angereichertes Browsing:
+#>Enabled<==>Aktiviert<
+Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==Schaltet angereichertes Browsing an oder ab. Wenn aktiviert werden alle Webseite während des Ladens modifiziert.
+#"Submit"=="Absenden"
+#-----------------------------
+
+#File: AugmentedBrowsingFilters_p.html
+#---------------------------
+Augmented Browsing - Filters and Modules==Angereichertes Browsen - Filter und Module
+Augmented Browsing Filters<==Filter für angereichertes Browsen<
+Select the desired functionality.==Wählen Sie die gewünschte Funktionalität.
+External REFLECT:<==Externed REFLECT:<
+>Enabled<==>Aktiviert<
+Send webpages to REFLECT \(==Sende Webseiten zu (
+Select the desired inbuilt functionality==Wählen Sie die gewünschte eingebaute Funktionalität.
+Add DOCTYPE:==Füge DOCTYPE hinzu:
+Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.==Füge DOCTYPE Informatione hinzu wenn nicht angegeben. Das ist notwendig für den IE damit position:absolute korrekt angezeigt wird.
+Reparse webpage:==Parse Webseite erneut:
+Put webpage back into schema \(htmlparser document\) to allow node by node manipulation.==Setze Webseite zurück ins Schema (htmlpaser Dokuement), um Knoten bei Knoten Manipulation zu ermöglichen.
+Show overlay interaction buttons:==Zeige Overlay Schaltflächen zur Interaktion:
+Show overlay interaction buttons.==Zeige Overlay Schaltflächen zur Interaktion.
+"Submit"=="Absenden"
+#-----------------------------
+
+#File: AugmentedParsing_p.html
+#---------------------------
+Augmented Parsing<==Angereichertes Parsen<
+Global Status==Globaler Status
+With this settings you can activate or deactivate augmented parsing which combines the documents with information from external sources \(tags etc.\).==Mit dieser Einstellung können Sie angereichertes Parsen an- oder abschalten das Dokumente mit Informationen von externen Webseiten kombiniert (z.B. Tags, etc.).
+Augmented Parser:==Angereicherter Parser:
+>Enabled<==>Aktiviert<
+Globally enables or disables the augmented parser. This setting requires a restart.==Schaltet den angereicherten Parser global an oder ab. Diese Einstellung erfordert einen Neustart.
+Augmented Parser - RDFa:==Angereicherter Parser - RDFa:
+Globally enables or disables the RDFa parser. This setting requires a restart.==Schaltet den RDFs Parser global ein oder aus. Diese Einstellung erfordert einen Neustart.
+"Submit"=="Absenden"
+#-----------------------------
 
 #File: Blacklist_p.html
 #---------------------------
@@ -134,7 +189,7 @@ Edit existing pattern\(s\):==Bearbeite existierende Einträge:
 Blacklist Cleaner==Blacklist aufräumen
 Here you can remove or edit illegal or double blacklist-entries.==Hier können Sie ungültige oder doppelte Einträge auf der Blacklist entfernen oder bearbeiten.
 Check list==Liste testen
-"Check"=="Teste"
+"Check"=="Testen"
 Allow regular expressions in host part of blacklist entries.==Erlaube reguläre Ausdrücke im Hostnamen Teil der Blacklist Einträge.
 The blacklist-cleaner only works for the following blacklist-engines up to now:==Der Blacklist-Cleaner arbeitet zur Zeit nur mit den folgenden Blacklist-Engines:
 Illegal Entries in \#\[blList\]\# for==Ungültige Einträge in #[blList]# für
@@ -876,6 +931,31 @@ Duration==Dauer
 #ID==ID
 #-----------------------------
 
+#File: ContentControl_p.html
+#---------------------------
+Content Control<==Inhaltskontrolle<
+Peer Content Control URL Filter==Peer Inhaltskontrolle URL Filter
+With this settings you can activate or deactivate content control on this peer.==Mit dieser Einstellung kann die Inhaltskontrolle auf diesem Peer an- oder abgeschalten werden.
+Use content control filtering:==Verwende Inhaltskontrollfilter:
+>Enabled<==>Aktiviert<
+Enables or disables content control.==Schaltet Inhaltskontrolle an- oder ab.
+Use this table to create filter:==Verwenden Sie diese Tabelle, um Filter zu erzeugen:
+Define a table. Default:==Definieren Sie ein Tabelle. Standardeinstellung:
+Content Control SMW Import Settings==Inhaltskontrolle SMW Importeinstellungen
+With this settings you can define the content control import settings. You can define a==Mit diesen Einstellungen können Sie die Importeinstellungen für die Inhaltskontrolle definieren. Definieren Sie ein
+Semantic Media Wiki with the appropriate extensions.==Semantisches Media Wiki mit den passenden Erweiterungen.
+SMW import to content control list:==SMW Import für die Inhalts-Kontroll-Liste:
+Enable or disable constant background synchronization of content control list from SMW \(Semantic Mediawiki\). Requires restart!==Konstante Synchronisation der Inhalts-Kontroll-Liste vom SMW (Semantisches Medienwiki) im Hintergrund. Benötigt Neustart!
+SMW import base URL:==SMW Import Basis URL:
+Define base URL for SMW special page "Ask". Example: ==Definiere Basis URL für SMW Spezialseite "Ask". Beispiel: 
+SMW import target table:==SMW Import Ziele Tabelle:
+Define import target table. Default: contentcontrol==Definieren Import Ziel Tabelle. Standardeinstellung: contentcontrol
+Purge content control list on initial sync:==Verwerfe Inhalts-Kontroll-Listen bei der ersten Synchronisation:
+Purge content control list on initial synchronisation after startup.==Verwerfe Inhalts-Kontroll-Listen bei der ersten Synchronisation nach dem Start.
+"Submit"=="Absenden"
+#-----------------------------
+
+
 #File: CookieMonitorIncoming_p.html
 #---------------------------
 Incoming Cookies Monitor==Überwachung eingehender Cookies
@@ -916,6 +996,52 @@ List of possible crawl start URLs==Liste aller möglichen Crawl Start URLs
 #>Robots<==>Robots<
 >Crawl-Delay<==>Crawl-Verzögerung<
 >Sitemap<==>Seitenverzeichnis(Sitemap)<
+#-----------------------------
+
+#File: Crawler_p.html
+#---------------------------
+#Crawler==Crawler
+Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, löschen Sie die Datei DATA/PLASMADB/crawlProfiles0.db
+and restart.==und starten Sie YaCy neu.
+Error:==Fehler:
+Application not yet initialized. Sorry. Please wait some seconds and repeat==Anwendung noch nicht initialisiert. Bitte warten Sie noch ein paar Sekunden und versuchen 
+ERROR: Crawl filter==FEHLER: Crawl Maske
+does not match with==stimmt nicht überein mit
+crawl root==dem Crawlstart
+Please try again with different==Bitte probieren Sie es erneut mit einer anderen
+filter. ::==Maske. ::
+Crawling of==Crawling von
+failed. Reason:==schlug fehl. Grund:
+Error with URL input==Fehler mit URL Eingabe
+Error with file input==Fehler mit Datei Eingabe
+started.==gestartet.
+Please wait some seconds,==Bitte warten Sie einige Sekunden, 
+it may take some seconds until the first result appears there.==es kann einige Sekunden dauern, bis hier die ersten Ergebnisse zu sehen sind.
+>Size==>Größe
+>Progress<==>Fortschritt<
+#Max==Max
+"set"=="Setzen"
+#Indexing</td>==Indexieren</td>
+Loader==Lader
+>Index Size<==>Index Größe<
+Seg-<br/>ments==Seg-<br/>mente
+>Documents<==>Documente<
+>solr search api<==>Solr Such-API<
+>Webgraph Edges<==>Webgraph Kanten<
+Citations<br/>\(reverse link index\)==Citations<br/>(Rückwärts Such Index)
+RWIs<br/>\(P2P Chunks\)==RWIs<br/>(P2P Anteile)<
+Local Crawler==Lokaler Crawler
+Limit Crawler==Limitierter Crawler
+Remote Crawler==Entfernter Crawler
+No-Load Crawler==Keine-Ladung Crawler
+Speed / PPM<br/>\(Pages Per Minute\)==Geschwindigkeit / PPM<br/>\(PPM = Seiten pro Minute)
+Database==Datenbank
+Entries==Einträge
+Indicator==Indikator
+Level==Stufe
+Postprocessing Progress==Posprozess Fortschritt
+Traffic \(Crawler\)==Daten-Traffic (Crawler)
+Load<==Auslastung<
 #-----------------------------
 
 #File: CrawlProfileEditor_p.html
@@ -1702,7 +1828,7 @@ Import failed:==Import fehlgeschlagen:
 
 #File: DictionaryLoader_p.html
 #---------------------------
-Knowledge Loader==Wissens Datenbanken Laden
+Knowledge Loader==Wissensdatenbank-Lader
 YaCy can use external libraries to enable or enhance some functions. These libraries are not==YaCy kann externe Bibliotheken zum Erweitern oder Aktivieren bestimmter Funktionen verwenden. Diese Bibliotheken sind nicht
 included in the main release of YaCy because they would increase the application file too much.==im Standard Release von YaCy enthalten weil diese die Anwendungsdatei zu stark vergrößern würden.
 You can download additional files here.==Sie können zusätzliche Dateien hier herunterladen.
@@ -3066,6 +3192,7 @@ Last&nbsp;Exec==Letzte&nbsp;Ausführung
 Next&nbsp;Exec==Nächste&nbsp;Ausführung
 #>URL<==>URL<
 >Event Trigger<==>Ereignis Auslöser<
+"clone"=="Ereignis klonen"
 >Scheduler<==>Planer<
 >no event<==>kein Ereignis<
 >activate event<==>Ereignis aktivieren<
@@ -3303,50 +3430,45 @@ View this profile as==Zeige dieses Profil als
 You can edit your profile <a href="ConfigProfile_p.html">here</a>==Sie können Ihr Profil <a href="ConfigProfile_p.html">hier</a> bearbeiten.
 #-----------------------------
 
-#File: Crawler_p.html
+#File: Vocabulary_p.html
 #---------------------------
-#Crawler==Crawler
-Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, löschen Sie die Datei DATA/PLASMADB/crawlProfiles0.db
-and restart.==und starten Sie YaCy neu.
-Error:==Fehler:
-Application not yet initialized. Sorry. Please wait some seconds and repeat==Anwendung noch nicht initialisiert. Bitte warten Sie noch ein paar Sekunden und versuchen 
-ERROR: Crawl filter==FEHLER: Crawl Maske
-does not match with==stimmt nicht überein mit
-crawl root==dem Crawlstart
-Please try again with different==Bitte probieren Sie es erneut mit einer anderen
-filter. ::==Maske. ::
-Crawling of==Crawling von
-failed. Reason:==schlug fehl. Grund:
-Error with URL input==Fehler mit URL Eingabe
-Error with file input==Fehler mit Datei Eingabe
-started.==gestartet.
-Please wait some seconds,==Bitte warten Sie einige Sekunden, 
-it may take some seconds until the first result appears there.==es kann einige Sekunden dauern, bis hier die ersten Ergebnisse zu sehen sind.
->Size==>Größe
->Progress<==>Fortschritt<
-#Max==Max
-"set"=="Setzen"
-#Indexing</td>==Indexieren</td>
-Loader==Lader
->Index Size<==>Index Größe<
-Seg-<br/>ments==Seg-<br/>mente
->Documents<==>Documente<
->solr search api<==>Solr Such-API<
->Webgraph Edges<==>Webgraph Kanten<
-Citations<br/>\(reverse link index\)==Citations<br/>(Rückwärts Such Index)
-RWIs<br/>\(P2P Chunks\)==RWIs<br/>(P2P Anteile)<
-Local Crawler==Lokaler Crawler
-Limit Crawler==Limitierter Crawler
-Remote Crawler==Entfernter Crawler
-No-Load Crawler==Keine-Ladung Crawler
-Speed / PPM<br/>\(Pages Per Minute\)==Geschwindigkeit / PPM<br/>\(PPM = Seiten pro Minute)
-Database==Datenbank
-Entries==Einträge
-Indicator==Indikator
-Level==Stufe
-Postprocessing Progress==Posprozess Fortschritt
-Traffic \(Crawler\)==Daten-Traffic (Crawler)
-Load<==Auslastung<
+The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
+Click the API icon to see the RDF Ontology definition for this vocabulary.==Klicken Sie auf das API Symbol, um die RDF Ontology Definition für diese Vokabelliste anzuzeigen.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
+Vocabulary Administration==Vokabel Administration
+Vocabularies can be used to produce a search navigation. A vocabulary must be created before content is indexed.==Vokabeln können genutzt werden, um eine Suchnavigation zu erzeugen. Eine Vokabelliste muss erzeugt werden bevor der Inhalt indexiert wird.
+The vocabulary is used to annotate the indexed content with a reference to the object that is denoted by the term of the vocabulary.==Die Vokabelliste wird benutzt, um den indexierten Inhalt mit einer Referenz auf das Objekt zu versehen dass in der Bedeutung der Vokabel hinterlegt ist.
+The object can be denoted by a url stub that, combined with the term, becomes the url for the object.==Das Object kann mit einem URL Stub beschrieben werden, der zusammen mit der Bedeutung die URL für das Objekt wird.
+Vocabulary Selection==Vokabellisten-Auswahl
+Vocabulary Name==Vokabelliste Name
+"View"=="Anzeigen"
+Vocabulary Production==Vokabellisten Produktion
+It is possible to produce a vocabulary out of the existing search index. This is done using a given \'objectspace\' which you can enter as a URL Stub.==Es ist möglich eine Vokabelliste aus einem existierenden Suchindex zu generieren. Das passiert durch die Angabe eines 'objectspace' den Sie als URL Stub angeben können.
+This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.==Dieser Stub wird verwendet, um alle passenden URLs zu finden. Wenn der verbleibende Pfad von den zutreffenden URLs nur noch eine einzelne Datei ausmacht, wird der Dateiname als Bedeutung der Vokabel verwendet.
+This works best with wikis. Try to use a wiki url as objectspace path.==Dies funktioniert am Besten mit Wikis. Versuchen Sie eine Wiki URL als objectspace Pfad.
+#Vocabulary Name==Vokabelliste Name
+#Objectspace==Objectspace
+Discover Terms:==Entdecke Bedeutungen:
+no auto-discovery \(empty vocabulary\)==Kein Auto-Erkennen (leere Vokabelliste)
+from file name==von Dateiname
+from page title&nbsp;==vom Seitentitel&nbsp;
+from page title \(splitted\)==vom Seitentitel (gesplittet)
+from page author==vom Seitenautor
+"Create"=="Erzeugen"
+Vocabulary Editor==Vokabellisten Editor
+This produces the following triples in the==Das produziert die folgenden Tripel im
+#>triplestore<==>triplestore<
+if a term or synonym matches in a document:==wenn eine Bedeutung oder ein Synoym zutrifft.
+more Triples for linking into objectspace==mehr Tripel zur Verlinkung im Objectspace
+>Modify<==>Modifiziere<
+>Delete<==>Lösche<
+>Literal<==>Literal<
+>Synonyms<==>Synonyme<
+>Object Link<==>Objekt Verweis<
+>add<==>Hinzufügen<
+clear table \(remove all terms\)==Leere Tabelle (Entferne alle Bedeutungen)
+delete vocabulary<==Lösche Vokabelliste<
+"Submit"=="Absenden"
 #-----------------------------
 
 #File: WatchWebStructure_p.html
@@ -3553,6 +3675,12 @@ Table Viewer==Tabellen Betrachter
 #>Referrer URL<==>Referrer URL<
 >Document size<==>Dokument Größe<
 >Number of Words<==>Anzahl der Wörter<
+#-----------------------------
+
+#File: env/templates/metas.template
+#---------------------------
+English, Englisch==German, Deutsch
+
 #-----------------------------
 
 ### Subdirectory env/templates ###
@@ -3816,6 +3944,20 @@ RWI Ranking Config==RWI Ranking Konfiguration
 Search Integration into External Sites==Integration der Suche in Externe Seiten
 Live Search Anywhere==Live Suche Überall
 Search Box Anywhere==Suchbox Überall
+#-----------------------------
+
+#File: env/templates/submenuSemantic.template
+#---------------------------
+Content Semantic==Inhalt Semantik
+# Subemenu: Automated Annotation
+>Automated Annotation<==>Automatische Annotation<
+Auto-Annotation Vocabulary Editor==Auto-Annotation Vokabellisten Editor
+Knowledge Loader==Wissensdatenbank-Lader
+# Submenu Augmented Content
+>Augmented Content<==>Angereicherter Inhalt<
+Augmented Browsing==Angereichertes Browsing
+Filters and Modules==Filter und Module
+Augmented Parsing==Angereichertes Parsen
 #-----------------------------
 
 #File: env/templates/submenuTargetAnalysis.template
