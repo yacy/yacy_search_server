@@ -30,6 +30,13 @@
 <!-- maintainer -->==&lt;webmaster@daburna.de&gt;
 #-----------------------------
 
+#File: AccessGrid_p.html
+#---------------------------
+YaCy Network Access==Доступ к сети YaCy
+Server Access Grid==Доступ к серверу сети
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Эти изображения показывают входящие соединения в вашему узлу и исходящие соединения от вашего узла к другим узлам и вэб-серверам.
+#-----------------------------
+
 #File: AccessTracker_p.html
 #---------------------------
 Access Tracker==Доступ к трекеру
@@ -70,9 +77,64 @@ Search Word Hashes==Поиск слова по хэшу
 Count</td>==Количество</td>
 Queries Per Last Hour==Запросов за последний час
 Access Dates==Время доступа
-This is a list of searches that had been requested from remote peer search interface==Это список запросов, которые были запрошены удалёнными узлами. 
+This is a list of searches that had been requested from remote peer search interface==Это список поисковых запросов, которые были запрошены удалёнными узлами. 
 #-----------------------------
 
+#File: AugmentedBrowsing_p.html
+#---------------------------
+Augmented Browsing<==Расширенный просмотр<
+URL Proxy Settings<==Настройки URL-прокси<
+With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==Эти настройки позволяют включить или отключить URL-прокси - способ используемый для расширенного просмотра.
+Service call: ==Вызов сервиса: 
+, where parameter is the url of an external web page.==, где параметр это ссылка на внешнюю вэб-страницу
+>URL proxy:<==>URL-прокси:<
+>Enabled<==>Включить<
+Globally enables or disables URL proxy via ==Глобальное включение или отключение URL-прокси через 
+Show search results via URL proxy:==Показывать результаты поиска через URL-прокси:
+Enables or disables URL proxy for all search results. If enabled, all search results will be tunneled through URL proxy.==Включение или отключение URL-прокси для всех результатов поиска. Если включено, то все результаты поиска будут выводиться через URL-прокси. 
+Restrict URL proxy use:==Запретить использование URL-прокси для:
+Define client filter. Default: ==Задать фильтр для клиента. По-умолчанию: 
+URL substitution:==Замена ссылки:
+Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==Задать правила замены ссылки, которые разрешат навигацию через прокси. Возможные значения: all, domainlist. По-умолчанию: domainlist.
+"Submit"=="Сохранить"
+Augmented Browsing Settings==Настройки расширенного просмотра
+With this settings you can activate or deactivate augmented browsing which happens usually via the URL proxy.==Эти настройки позволяют вам включить или отключить расширенный просмотр через URL-прокси.
+Augmented Browsing:==Расширенный просмотр:
+#>Enabled<==>Включить<
+Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==Включение или отключение расширенного просмотра. Если включено, то все вэб-страницы будут изменяться во время загрузки.
+#"Submit"=="Сохранить"
+#-----------------------------
+
+#File: AugmentedBrowsingFilters_p.html
+#---------------------------
+Augmented Browsing - Filters and Modules==Расширенный просмотр - ссылки и модули
+Augmented Browsing Filters<==Фильтры расширенного просмотра<
+Select the desired functionality.==Выберите нужный функционал.
+External REFLECT:<==Внешний REFLECT:<
+>Enabled<==>Включить<
+Send webpages to REFLECT \(==Отправлять вэб-страницы на REFLECT (
+Select the desired inbuilt functionality==Выберите нужный встроенный функционал.
+Add DOCTYPE:==Добавить DOCTYPE:
+Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.==Добавить информацию DOCTYPE, если не задано. Это может потребоваться для просмотра позиции через Internet Explorer.
+Reparse webpage:==Повторная обработка вэб-страницы:
+Put webpage back into schema \(htmlparser document\) to allow node by node manipulation.==Setze Webseite zurück ins Schema (htmlpaser Dokuement), um Knoten bei Knoten Manipulation zu ermöglichen.
+Show overlay interaction buttons:==Zeige Overlay Schaltflächen zur Interaktion:
+Show overlay interaction buttons.==Zeige Overlay Schaltflächen zur Interaktion.
+"Submit"=="Сохранить"
+#-----------------------------
+
+#File: AugmentedParsing_p.html
+#---------------------------
+Augmented Parsing<==Расширенный анализ<
+Global Status==Глобальный статус
+With this settings you can activate or deactivate augmented parsing which combines the documents with information from external sources \(tags etc.\).==Эти настройки позволяют включить или отключить расширенный анализ, который совмещает документы с информацией из внешних источников  (например, тэги, и т.п.).
+Augmented Parser:==Расширенный анализ:
+>Enabled<==>Включить<
+Globally enables or disables the augmented parser. This setting requires a restart.==Глобальное включение или отключение расширенного анализа. Изменение этой настройки потребует перезапуск программы.
+Augmented Parser - RDFa:==Расширенный анализ - RDFa:
+Globally enables or disables the RDFa parser. This setting requires a restart.==Глобальное включение или отключение анализа RDFa. Изменение этой настройки потребует перезапуск программы.
+"Submit"=="Сохранить"
+#-----------------------------
 
 #File: Blacklist_p.html
 #---------------------------
@@ -874,6 +936,31 @@ Duration==Длительность
 #ID==ID
 #-----------------------------
 
+#File: ContentControl_p.html
+#---------------------------
+Content Control<==Управление контентом<
+Peer Content Control URL Filter==Управление контентом узла
+With this settings you can activate or deactivate content control on this peer.==Эти настройки позволяют включить или отключить управление контентом для вашего узла.
+Use content control filtering:==Использовать фильтр управления контентом:
+>Enabled<==>Включить<
+Enables or disables content control.==Включение или отключение управления контентом.
+Use this table to create filter:==Использовать это поле для создания фильтра:
+Define a table. Default:==Задать значение поля. По-умолчанию:
+Content Control SMW Import Settings==Импорт настроек управления контентом SMW
+With this settings you can define the content control import settings. You can define a==Эти настройки позволяют задать параметры импорта настроек управления контентом 
+Semantic Media Wiki with the appropriate extensions.==Semantic Media Wiki с соответствующими расширениями.
+SMW import to content control list:== Импорт SMW в список управления контентом:
+Enable or disable constant background synchronization of content control list from SMW \(Semantic Mediawiki\). Requires restart!==Включение или отключение постоянной фоновой синхронизации списка управления контентом из SMW (Semantic Mediawiki). Потребуется перезапуск программы!
+SMW import base URL:==Ссылка на импортируемую базу SMW:
+Define base URL for SMW special page "Ask". Example: ==Укажите ссылку на базу SMW на специальной странице "Ask". Например: 
+SMW import target table:==Поле назначения импорта SMW:
+Define import target table. Default: contentcontrol==Укажите поле назначения импорта.  По-умолчанию: contentcontrol
+Purge content control list on initial sync:==Удалить список управления контентом в начале синхронизации:
+Purge content control list on initial synchronisation after startup.==Удалить список управления контентом в начале синхронизации после запуска программы.
+"Submit"=="Сохранить"
+#-----------------------------
+
+
 #File: CookieMonitorIncoming_p.html
 #---------------------------
 Incoming Cookies Monitor==Монитор полученных куки
@@ -900,6 +987,20 @@ Sending Client==Клиент-отправитель
 >Cookie<==>Куки<
 "Enable Cookie Monitoring"=="Мониторинг куки разрешен"
 "Disable Cookie Monitoring"=="Мониторинг куки запрещён"
+#-----------------------------
+
+#File: CrawlCheck_p.html
+#---------------------------
+Crawl Check==Проверка индексирования
+This pages gives you an analysis about the possible success for a web crawl on given addresses.==Здесь вы можете проверить нужную вам ссылку на возможность проведения индексирования.
+List of possible crawl start URLs==Список ссылок для проверки
+"Check given urls"=="Проверить"
+>Analysis<==>Анализ<
+#>URL<==>URL<
+>Access<==>Доступ<
+>Robots<==>Роботы<
+>Crawl-Delay<==>Задержка индексации<
+>Sitemap<==>Карта сайта<
 #-----------------------------
 
 #File: CrawlProfileEditor_p.html
@@ -2533,6 +2634,19 @@ Post-Ranking==Nach-Ranking
 "Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
 #-----------------------------
 
+#File: RegexTest.html
+#---------------------------
+RegexTest==Тест регулярного выражения
+Regex Test==Тест регулярного выражения
+Test String==Тест строки
+Regular Expression==Регулярное выражение
+This is a ==это 
+Java Pattern==шаблон Java
+Result<==Результат<
+no match<==Нет совпадений<
+> match<==> Совпадение<
+error in expression:==Ошибка в выражении:
+#-----------------------------
 
 #File: RemoteCrawl_p.html
 #---------------------------
@@ -3064,6 +3178,7 @@ Last&nbsp;Exec==Дата&nbsp;последнего запуска
 Next&nbsp;Exec==Дата&nbsp;следующего запуска
 #>URL<==>URL-адрес<
 >Event Trigger<==>Триггер событий<
+"clone"=="клонировать"
 >Scheduler<==>Планировщик<
 >no event<==>нет события<
 >activate event<==>активировать событие<
@@ -3100,13 +3215,21 @@ at 22:00h==в 22:00 ч.
 at 23:00h==в 23:00 ч.
 "Execute Selected Actions"=="Выполнить действия"
 "Delete Selected Actions"=="Удалить действия"
-"Delete all Actions which had been created before"=="Удалить все действия старше, чем"
+"Delete all Actions which had been created before "=="Удалить все действия старше, чем"
+day<==день<
+days<==дней<
+week<==неделя<
+weeks<==недели<
+month<==месяц<
+months<==месяцев<
+year<==год<
+years<==года<
 >Result of API execution==>Результат выполнения API
 #>Status<==>Состояние>
 #>URL<==>URL-адрес<
 >minutes<==>минуты<
 >hours<==>часы<
->days<==>дни<
+#>days<==>дни<
 Scheduled actions are executed after the next execution date has arrived within a time frame of \#\[tfminutes\]\# minutes.==Geplante Aktionen werden innerhalb eines #[tfminutes]# Minuten Zeitfensters ausgeführt wenn der nächste Ausführungszeitpunkt erreicht wurde.
 #-----------------------------
 
@@ -3178,7 +3301,7 @@ search rows for==Найти строки
 
 #File: terminal_p.html
 #---------------------------
-YaCy System Monitor==Системный монитор YaCy
+YaCy System Terminal Monitor==Системный монитор YaCy
 Search Form==Форма поиска
 Crawl Start==Запуск индексирования
 Status Page==Страница состояния
@@ -3300,6 +3423,47 @@ View this profile as==Просмотр этого профиля как
 You can edit your profile <a href="ConfigProfile_p.html">here</a>==Вы можете изменить свой профиль <a href="ConfigProfile_p.html">по этой ссылке</a>
 #-----------------------------
 
+#File: Vocabulary_p.html
+#---------------------------
+The information that is presented on this page can also be retrieved as XML==Информация представленная на этой странице, также может быть получена в виде XML.
+Click the API icon to see the RDF Ontology definition for this vocabulary.==Нажмите на иконку API для просмотра определения онтологии RDF для этого словаря.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">страницу API Wiki</a>.
+Vocabulary Administration==Управление словарём
+Vocabularies can be used to produce a search navigation. A vocabulary must be created before content is indexed.==Словари могут использоваться при выполнении навигации по поиску. Словарь должен быть создан до индексации содержимого сайта.
+The vocabulary is used to annotate the indexed content with a reference to the object that is denoted by the term of the vocabulary.==Словарь используется для комментирования проиндексированного содержимого с ссылкой на объект, которому присвоено значение из словаря.
+The object can be denoted by a url stub that, combined with the term, becomes the url for the object.==Объект может обозначаться законченной ссылкой, в сочетании с ссылкой на объект.
+Vocabulary Selection==Выбор словаря
+Vocabulary Name==Название словаря
+"View"=="Показать"
+Vocabulary Production==Создание словаря
+It is possible to produce a vocabulary out of the existing search index. This is done using a given \'objectspace\' which you can enter as a URL Stub.==Возможно создание словаря из существующего индекса поиска. Это делается через использование заданного 'объекта', который может быть введён как законченная ссылка.
+This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.==Это используется для поиска всех совпадающих ссылок. Если оставшийся путь из совпадающих ссылок обозначает один файл, то имя файла используется в качестве значения словаря.
+This works best with wikis. Try to use a wiki url as objectspace path.==Это лучше работает с Wiki . Попробуйте использовать wiki-ссылку в качестве объекта.
+#Vocabulary Name==Название словаря
+Objectspace==Объект
+Discover Terms:==Параметры открытия:
+no auto-discovery \(empty vocabulary\)==ручное открытие (словарь пуст)
+from file name==из названия файла
+from page title&nbsp;==из заголовка страницы&nbsp;
+from page title \(splitted\)==из заголовка страницы (разделённой)
+from page author==из страницы автора
+"Create"=="Создать"
+Vocabulary Editor==Редактор словаря
+This produces the following triples in the==Das produziert die folgenden Tripel im
+#>triplestore<==>triplestore<
+if a term or synonym matches in a document:==если значение или синоним совпадают в документе
+more Triples for linking into objectspace==больше трех ссылок на объект
+>Modify<==>Изменить<
+>Delete<==>Удалить<
+>Literal<==>Буквенный<
+>Synonyms<==>Синонимы<
+>Object Link<==>Ссылка объекта<
+>add<==>Добавить<
+clear table \(remove all terms\)==Очистить таблицу (удалить все значения)
+delete vocabulary<==Удалить словарь<
+"Submit"=="Сохранить"
+#-----------------------------
+
 #File: Crawler_p.html
 #---------------------------
 >Crawler<==>Индексатор<
@@ -3312,7 +3476,7 @@ resource observer:==обзор ресурсов
 not enough disk space,==нет места на диске
 Crawler PPM==Скорость индексатора
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Ошибка профиля. Пожалуйста, остановите YaCy, удалите файл DATA/PLASMADB/crawlProfiles0.db
-and restart.==и перезапустите.
+and restart.==и перезапустите программу.
 Error:==Ошибка:
 Application not yet initialized. Sorry. Please wait some seconds and repeat==Приложение не запущено. Подождите несколько секунд и повторите.
 ERROR: Crawl filter==ОШИБКА: фильтр индексирования
@@ -3332,7 +3496,7 @@ it may take some seconds until the first result appears there.==это може�
 #Max==Максимально
 "set"=="Установить"
 #Indexing</td>==Индексирование</td>
-Loader==Загрузки
+Loader==Загрузок
 >Index Size<==>Размер индекса<
 Seg-<br/>ments==Сегменты
 >Documents<==>Документы<
@@ -3344,12 +3508,12 @@ Local Crawler==Локальная
 Limit Crawler==Ограниченная
 Remote Crawler==Удалённая
 No-Load Crawler==Холостая
-Speed / PPM<br/>\(Pages Per Minute\)==Скорость (страниц в минуту)
+Speed / PPM<br/>\(Pages Per Minute\)==Скорость (страницы в минуту)
 Database==База данных
 Entries==Значения
 Segments==Сегменты
-Indicator==Индикатор
-Level==Уровень
+Indicator==Показатель
+Level==Значение
 Postprocessing Progress==Постобработка
 Traffic \(Crawler\)==Трафик индексатора
 >Load<==>Загрузка процессора<
@@ -3357,6 +3521,7 @@ Traffic \(Crawler\)==Трафик индексатора
 
 #File: WatchWebStructure_p.html
 #---------------------------
+Web Structure<==Вэб-структура<
 The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
@@ -3560,6 +3725,12 @@ Table Viewer==Просмотр таблиц
 >Number of Words<==>Количество слов<
 #-----------------------------
 
+#File: env/templates/metas.template
+#---------------------------
+English, Englisch==Русский, Русский
+
+#-----------------------------
+
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
@@ -3590,7 +3761,7 @@ Crawler / Harvester==Индексирование / Сканер сети
 Creation Monitor==Монитор индексирования
 Index Administration==Администрирование индекса
 Filter &amp; Blacklists==Фильтр и чёрный список
-Content Semantic==Content Semantic
+Content Semantic==Семантический контент
 Target Analysis==Анализ цели
 Process Scheduler==Планировщик
 ### MONITORING ###
@@ -3665,10 +3836,10 @@ Content Control==Управление контентом
 ## Messages Submenu
 >Messages<==>Сообщения<
 >Overview<==>Обзор<
->Incoming&nbsp;News<==>Входящие&nbsp;новости<
->Processed&nbsp;News<==>Обработанные&nbsp;новости<
->Outgoing&nbsp;News<==>Исходящие&nbsp;новости<
->Published&nbsp;News<==>Опубликованные&nbsp;новости<
+>Incoming&nbsp;News<==>Входящие&nbsp;сообщения<
+>Processed&nbsp;News<==>Обработанные&nbsp;сообщения<
+>Outgoing&nbsp;News<==>Исходящие&nbsp;сообщения<
+>Published&nbsp;News<==>Опубликованные&nbsp;сообщения<
 ## Community Data Submenu
 >Community Data<==>Ресурсы сообщества<
 >Surftips<==>Советы<
@@ -3800,6 +3971,28 @@ Search Portal Integration==Интеграция поискового порта�
 Live Search Anywhere==Живой поиск везде
 Generic Search Portal==Общий поисковый портал
 Search Box Anywhere==Поле поиска везде
+#-----------------------------
+
+#File: env/templates/submenuSemantic.template
+#---------------------------
+Content Semantic==Семантический контент
+# Subemenu: Automated Annotation
+>Automated Annotation<==>Автоматическое комментирование<
+Auto-Annotation Vocabulary Editor==Редактор словаря авто-комментирования
+Knowledge Loader==Загрузчик знаний
+# Submenu Augmented Content
+>Augmented Content<==>Расширенный контент<
+Augmented Browsing==Расширенный просмотр
+Filters and Modules==Фильтры и модули
+Augmented Parsing==Расширенный анализ
+#-----------------------------
+
+#File: env/templates/submenuTargetAnalysis.template
+#---------------------------
+Target Analysis==Анализ цели
+Robots.txt Database==База данных Robots.txt
+Mass Crawl Check==Массовая проверка индексирования
+Regex Test==Тест регулярного выражения
 #-----------------------------
 
 #File: env/templates/submenuPublication.template
