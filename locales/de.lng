@@ -30,6 +30,13 @@
 <!-- maintainer -->==&lt;webmaster@daburna.de&gt;
 #-----------------------------
 
+#File: AccessGrid_p.html
+#---------------------------
+YaCy Network Access==YaCy Netzwerk Zugriff
+Server Access Grid==Server Zugriffsnetz
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Diese Bilder zeigen eingehende Verbindungen zu Ihrem YaCy Peer und ausgehende Verbindungen von Ihrem Peer zu anderen Peers und Webservern.
+#-----------------------------
+
 #File: AccessTracker_p.html
 #---------------------------
 Access Tracker==Zugriffe
@@ -895,6 +902,20 @@ Sending Client==Client (Sender)
 #Cookie==Cookie
 "Enable Cookie Monitoring"=="Cookie Überwachung aktivieren"
 "Disable Cookie Monitoring"=="Cookie Überwachung deaktivieren"
+#-----------------------------
+
+#File: CrawlCheck_p.html
+#---------------------------
+Crawl Check==Crawl Überprüfung
+This pages gives you an analysis about the possible success for a web crawl on given addresses.==Diese Seite zeigt Ihnen eine Analyse über den möglichen Erfolg eines Web Crawls auf einer bestimmten Adresse.
+List of possible crawl start URLs==Liste aller möglichen Crawl Start URLs
+"Check given urls"=="Angegebene URLs überprüfen"
+>Analysis<==>Analyse<
+#>URL<==>URL<
+>Access<==>Zugriff<
+#>Robots<==>Robots<
+>Crawl-Delay<==>Crawl-Verzögerung<
+>Sitemap<==>Seitenverzeichnis(Sitemap)<
 #-----------------------------
 
 #File: CrawlProfileEditor_p.html
@@ -2518,6 +2539,18 @@ Post-Ranking==Nach-Ranking
 "Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
 #-----------------------------
 
+#File: RegexTest.html
+#---------------------------
+Regex Test==Regulärer Ausdruck Test
+Test String==Test String
+Regular Expression==Regulärer Ausdruck
+This is a ==Verwenden Sie ein 
+Java Pattern==Java Muster
+Result<==Ergebnis<
+no match<==keine Übereinstimmung<
+> match<==> Übereinstimmung<
+error in expression:==Fehler in Ausdruck:
+#-----------------------------
 
 #File: RemoteCrawl_p.html
 #---------------------------
@@ -3069,12 +3102,21 @@ at 22:00h==um 22:00 Uhr
 at 23:00h==um 23:00 Uhr
 "Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
 "Delete Selected Actions"=="Lösche ausgewählte Aktionen"
+"Delete all Actions which had been created before "=="Lösche alle Aktionen die generiert wurden und älter sind als "
+day<==Tag<
+days<==Tage<
+week<==Woche<
+weeks<==Wochen<
+month<==Monat<
+months<==Monate<
+year<==Jahr<
+years<==Jahre<
 >Result of API execution==>Ergebnis der API Ausführung
 #>Status<==>Status>
 #>URL<==>URL<
 >minutes<==>Minuten<
 >hours<==>Stunden<
->days<==>Tage<
+#>days<==>Tage<
 Scheduled actions are executed after the next execution date has arrived within a time frame of \#\[tfminutes\]\# minutes.==Geplante Aktionen werden innerhalb eines #[tfminutes]# Minuten Zeitfensters ausgeführt wenn der nächste Ausführungszeitpunkt erreicht wurde.
 #-----------------------------
 
@@ -3098,7 +3140,7 @@ Select Table:==Auswahl Tabelle:
 show max.==Zeige max.
 >all<==>alle<
 entries,==Einträge,
-search rows for==filtere Zeilen nach
+search rows for==Filtere Zeilen nach
 "Search"=="Suche"
 Table Editor: showing table==Tabellen Editor: zeige Tabelle
 #PK==Primärschlüssel
@@ -3146,7 +3188,7 @@ search rows for==Suche Reihen mit
 
 #File: terminal_p.html
 #---------------------------
-#YaCy System Monitor==YaCy System Monitor
+#YaCy System Terminal Monitor==YaCy System Terminal Monitor
 Search Form==Suchformular
 Crawl Start==Crawl starten
 Status Page==Status Seite
@@ -3309,6 +3351,7 @@ Load<==Auslastung<
 
 #File: WatchWebStructure_p.html
 #---------------------------
+Web Structure<==Webstruktur<
 The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
@@ -3775,6 +3818,14 @@ Live Search Anywhere==Live Suche Überall
 Search Box Anywhere==Suchbox Überall
 #-----------------------------
 
+#File: env/templates/submenuTargetAnalysis.template
+#---------------------------
+Target Analysis==Zielanalyse
+Robots.txt Database==Robots.txt Datenbank
+Mass Crawl Check==Massen Crawl-Überprüfung
+Regex Test==Regulärer Ausdruck Test
+#-----------------------------
+
 #File: env/templates/submenuViewLog.template
 #---------------------------
 Server Log Menu==Server Log Menü
@@ -3784,7 +3835,7 @@ Server Log Menu==Server Log Menü
 #File: env/templates/submenuWebStructure.template
 #---------------------------
 Web Visualization==Internet Visualisierung
-Web Structure==Internet Struktur
+Web Structure==Webstruktur
 Image Collage==Bilder Collage
 #-----------------------------
 
