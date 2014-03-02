@@ -89,7 +89,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         int hostSplitPos = host.indexOf(':');
         String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
         
-        if (hostOnly == sb.peers.mySeed().getHexHash() + ".yacyh") return; // bugfix by P. Dahl
+        if (hostOnly.equals(sb.peers.mySeed().getHexHash() + ".yacyh")) return; // bugfix by P. Dahl
         if (localVirtualHostNames.contains(hostOnly)) return; // no proxy request (quick check), continue processing by handlers        
         if (Domains.isLocal(hostOnly, null)) return; // no proxy, continue processing by handlers
         if (hostOnly.startsWith(sb.peers.myIP())) { // remote access to my external IP, continue processing by handlers
