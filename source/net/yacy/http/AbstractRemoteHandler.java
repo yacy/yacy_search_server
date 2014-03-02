@@ -82,13 +82,14 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
             HttpServletResponse response) throws IOException, ServletException {
-        
+
         String host = request.getHeader("Host");
         if (host == null) return; // no proxy request, continue processing by handlers
                    
         int hostSplitPos = host.indexOf(':');
         String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
-
+        
+        if (hostOnly == sb.peers.mySeed().getHexHash() + ".yacyh") return; // bugfix by P. Dahl
         if (localVirtualHostNames.contains(hostOnly)) return; // no proxy request (quick check), continue processing by handlers        
         if (Domains.isLocal(hostOnly, null)) return; // no proxy, continue processing by handlers
         if (hostOnly.startsWith(sb.peers.myIP())) { // remote access to my external IP, continue processing by handlers
