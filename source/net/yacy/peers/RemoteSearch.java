@@ -319,7 +319,7 @@ public class RemoteSearch extends Thread {
         Thread solr = new Thread() {
             @Override
             public void run() {
-                this.setName("RemoteSearch.solrRemoteSearch(" + solrQuery.getQuery() + " to " + targetPeer.hash + ")");
+                this.setName("RemoteSearch.solrRemoteSearch(" + solrQuery.getQuery() + " to " + (targetPeer == null ? "myself" : targetPeer.hash) + ")");
                     int urls = 0;
                     try {
                         event.oneFeederStarted();
