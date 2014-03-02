@@ -477,6 +477,7 @@ Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreich
 Peer Port:==Peer-Port:
 with SSL== mit SSL
 https enabled==https aktiviert
+ on port == auf Port 
 Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern
@@ -522,7 +523,7 @@ If you check \'add as global crawl job\' the pages to be crawled are added to th
 Default is to add the links to the local crawl queue \(your peer crawls the linked pages\).==Vorgabe ist die Links der lokalen Crawl Queue hinzuzufügen.
 add as global crawl job==als globaler Crawl hinzufügen
 
-opensearch load external search result list from active systems below==opensearch lade externe Suchergebnisse von aktiven System die unten gelistet sind
+opensearch load external search result list from active systems below==Lade externe Suchergebnisse von den gelisteten aktiven OpenSearch Systemen
 When using this heuristic, then every search request line is used for a call to listed opensearch systems until enough results to fill the current search page are available.==Wenn diese Heuristik genutzt wird, dann wird jede Suchanfragezeile für einen Aufruf der aufgelisteten OpenSearch Systeme bis genügend Resultate verfügbar sind, um die aktuelle Suchseite zu füllen.
 20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 Resultate werden vom remote System genommen und simultan geladen, geparsed und sofort indexiert.
 To find out more about OpenSearch see==Um mehr über OpenSearch zu erfahren besuche
@@ -539,6 +540,7 @@ Url template syntax==URL Template Syntax
 "Save"=="Speichern"
 "reset to default list"=="Reset zur Standardliste"
 "discover from index" class=="Discover vom Index" class
+start background task, depending on index size this may run a long time==Starte Hintergrund-Task. Abhängig von der Indexgröße kann der Vorgang sehr lange dauern
 With the button "discover from index" you can search within the metadata of your local index \(Web Structure Index\) to find systems which support the Opensearch specification.==Mit dem Knopf "Discover vom Index" können Sie in den Metadaten Ihres lokalen Suchindexes (Web Struktur Index) suchen, um Systeme zu finden, die die OpenSearch Spezifikation unterstützen.
 The task is started in the background. It may take some minutes before new entries appear \(after refreshing the page\).==Der Task wird im Hintergrund gestartet. Es kann einige Minuten dauern bevor neue Einträge erscheinen (nachdem die Seite erneut geladen wurde).
 Alternatively you may==Alternativ können Sie
@@ -862,6 +864,56 @@ Replace the given colors \#eeeeee \(box background\) and \#cccccc \(box border\)
 Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Meine Suche" mit Ihrer eigenen Nachricht
 #-----------------------------
 
+#File: ConfigSearchPage_p.html
+#---------------------------
+Search Page<==Suchseite<
+>Search Result Page Layout Configuration<==>Konfiguration des Seitenlayouts der Seite für Suchergebnisse<
+Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Im Folgenden wird ein generisches Template einer Suchergebnisseite. Markieren Sie die Checkboxen für alle Features die angezeigt werden sollen.
+To change colors and styles use the ==Um die Farben und Stile zu ändern, verwenden Sie das
+>Appearance<==>Erscheinungsbild<
+ menu for different skins.== Menü für verschiedene Skins.
+Other portal settings can be adjusted in==Andere Einstellungen für das Portal können im
+>Generic Search Portal<==>Generisches Suchportal<
+menu.=Menü geändert werden.
+>Page Template<==>Seiten Template<
+#>Administration<==>Administration<
+>Web Search<==>Websuche<
+>File Search<==>Dateisuche<
+>HostBrowser<==>Host Browser<
+>About Us<==>Über Uns<
+>Help / YaCy Wiki<==>Hilfe / YaCy Wiki<
+"Search"=="Suche"
+#>Text<==>Text<
+>Images<==>Bilder<
+#>Audio<==>Audio<
+#>Video<==>Video<
+>Applications<==>Anwendungen<
+>more options<==>mehr Optionen<
+#>Tag<==>Tag<
+>Topics<==>Themen<
+#>Cloud<==>Cloud<
+>Protocol Navigator<==>Protokoll Navigator<
+>Filetype Navigator<==>Dateityp Navigator<
+>Domain Navigator<==>Domänen Navigator<
+>Wiki Name Space Navigator<==>Wiki Namespace Navigator<
+>Language Navigator<==>Sprache Navigator<
+>Author Navigator<==>Autoren Navigator<
+>Vocabulary Navigator<==>Vokabellisten Navigator<
+>Title of Result<==>Ergebnis Titel<
+Description and text snippet of the search result==Beschreibung und Textauschnitt der Suchergebnisse
+http://url-of-the-search-result.net==http://URL-des-Suchergebnisses.de
+42 kbyte<==42 KB<
+>Metadata<==>Metadaten<
+#>Parser<==>Parser<
+#>Citation<==>Citation<
+>Pictures<==>Bilder<
+#>Cache<==>Cache<
+>Augmented Browsing<==>Angereichertes Browsen<
+"Save Settings"=="Einstellungen Speichern"
+"Set Default Values"=="Setze Standardwerte"
+#-----------------------------
+
+
 #File: ConfigUpdate_p.html
 #---------------------------
 Manual System Update==Manuelle System-Aktualisierung
@@ -1025,7 +1077,7 @@ it may take some seconds until the first result appears there.==es kann einige S
 Loader==Lader
 >Index Size<==>Index Größe<
 Seg-<br/>ments==Seg-<br/>mente
->Documents<==>Documente<
+>Documents<==>Dokumente<
 >solr search api<==>Solr Such-API<
 >Webgraph Edges<==>Webgraph Kanten<
 Citations<br/>\(reverse link index\)==Citations<br/>(Rückwärts Such Index)
@@ -2663,6 +2715,56 @@ Post-Ranking==Nach-Ranking
 
 "Set as Default Ranking"=="Als Standard Ranking speichern"
 "Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
+#-----------------------------
+
+#File: RankingRWI_p.html
+#---------------------------
+RWI Ranking Configuration<==RWI Ranking Konfiguration<
+The document ranking influences the order of the search result entities.==Das Dokument-Rating beeinflusst die Ordnung der Suchergebnis-Einheiten.
+A ranking is computed using a number of attributes from the documents that match with the search word.==Ein Ranking wird berechnet durch eine Reihe von Attributen von Dokumenten die mit dem Suchwort übereinstimmen.
+The attributes are first normalized over all search results and then the normalized attribute is multiplied with the ranking coefficient computed from this list.==Die Attribute werden zuerst normalisiert über alle Suchergebnisse und dann wird das normalisierte Attribut mit dem aus dieser Liste berechneten Ranking Koeffizienten multipliziert.
+The ranking coefficient grows exponentially with the ranking levels given in the following table. If you increase a single value by one, then the strength of the parameter doubles.==Der Ranking Koeffizient wächst exponentiell mit dem Ranking Level das in der folgenden Tabelle festgelegt wird. Wenn Sie einen einzelnen Wert um eins erhöhen, dann verdoppelt sich der Wert des Parameters.
+There are two ranking stages: first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==Es gibt zwei Ranking Phasen: Zuerst werden alle Ergebnisse unter Verwendung des Pre-Rankings ausgewertet und dann aus der resultierenden Liste werden die Dokumente ein zweites Mal im Post-Ranking ausgewertet.
+The two stages are separated because they need statistical information from the result of the pre-ranking.==Die zwei Phasen sind getrennt weil sie statistische Informationen aus dem Ergebnis des Pre-Rankings benötigen.
+>Post-Ranking<==>Post-Ranking<
+"Set as Default Ranking"=="Setze als Standard Ranking"
+"Re-Set to Built-In Ranking"=="Reset auf eingebautes Ranking"
+#-----------------------------
+
+#File: RankingSolr_p.html
+#---------------------------
+Solr Ranking Configuration<==Solr Ranking Konfiguration<
+These are ranking attributes for Solr. This ranking applies for internal and remote \(P2P or shard\) Solr access.==Das sind die Ranking Attribute für Solr. Dieses Ranking bezieht sich auf internen und remote (P2P und geteilten) Solr Zugriff.
+Select a profile:==Wählen Sie ein Profil:
+>Boost Function<==>Boost Funktion<
+A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.==Eine Boost Funktion kann numerische Werte von Ergebnis-Dokumenten kombinieren, um eine Nummer zu erzeugen die mit den Scoring Werten der Suchergebnisse multipliziert wird.
+To see all available fields, see the==Um alle verfügbaren Felder zu sehen, besuchen Sie
+#>YaCy Solr Schema<==>YaCy Solr Schema<
+and look for numeric values \(these are names with suffix '_i'\).==und schauen Sie nach den numerischen Werten (Die Namen mit Suffix '_i').
+To find out which kind of operations are possible, see the==Um herauszufinden welche Operationen möglich sind, nutzen Sie die Dokumentation der
+>Solr Function Query<==>Solr Funktionen Abfrage<
+documentation.==.
+Example: to order by date, use==Beispiel: Um nach Datum zu sortieren, verwenden Sie
+, to order by clickdepth, use==, um nach Klicktiefe zu sortieren, verwenden Sie
+>boost<==>Boost<
+"Set Boost Function"=="Setze Boost Funktion"
+"Re-Set to default"=="Reset auf Standardwerte"
+>Boost Query<==>Boost Abfrage<
+The Boost Query is attached to every query. Use this to statically boost specific content in the index.==Die Boost Abfrage wird an jede Abfrage angehängt. Verwenden sie diese Einstellung, um spezifischen Inhalt im Index zu boosten.
+Example: "fuzzy==Beispiel: "fuzzy
+ means that documents, identified as 'double' are ranked very bad and appended to the end of all results \(because the unique are ranked high\).== bedeutet dass Dokumente die als 'double' identifiziert werden sehr schlecht geranked werden und an das Ende der Suchergebnisliste angehängt werden (weil die eindeutigen hoch geranked werden).
+To find appropriate fields for this query, see the ==Um passende Felder für diese Abfrage zu finden, nutzen Sie das
+#>YaCy Solr Schema<==>YaCy Solr Schema<
+ and look for boolean values \(with suffix '_b'\) or tags inside string fields \(with suffix '_s' or '_sxt'\).== und suchen Sie nach Werten mit boolschen Werten (mit Suffix '_b') oder Tags in String-Feldern (mit Suffix '_s' oder '_sxt')
+
+#>bq<==>bq<
+"Set Boost Query"=="Setze Boost Abfrage"
+#"Re-Set to default"=="Reset auf Standardwerte"
+#>Solr Boosts<==>Solr Boosts<
+This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
+field not in local index \(boost has no effect\)==Feld ist nicht im lokalen Index (Boost hat keinen Effekt)
+"Set Field Boosts"=="Setze Feld Boosts"
+#"Re-Set to default"=="Reset auf Standardwerte"
 #-----------------------------
 
 #File: RegexTest.html
