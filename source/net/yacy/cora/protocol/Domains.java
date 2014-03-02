@@ -75,8 +75,8 @@ public class Domains {
     private static final Set<String> ccSLD_TLD = new HashSet<String>();
     private static final String PRESENT = "";
     private static final Pattern LOCALHOST_PATTERNS = Pattern.compile("(127\\..*)|(localhost)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
-    private static final Pattern INTRANET_PATTERNS = Pattern.compile("(10\\..*)|(127\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)|(localhost)|(\\[?\\:\\:1/.*)|(\\[?fc.*)|(\\[?fd.*)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
-    
+    private static final Pattern INTRANET_PATTERNS = Pattern.compile("(10\\..*)|(127\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)|(localhost)|(\\[?\\:\\:1/.*)|(\\[?fc.*\\:.*)|(\\[?fd.*\\:.*)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)", Pattern.CASE_INSENSITIVE);
+
     private static final int MAX_NAME_CACHE_HIT_SIZE = 10000;
     private static final int MAX_NAME_CACHE_MISS_SIZE = 1000;
     private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() * 2;

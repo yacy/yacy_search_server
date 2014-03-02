@@ -81,6 +81,13 @@ public class MultiProtocolURLTest {
         testurls.put("http://[::1]/index.html", Boolean.TRUE);
         testurls.put("http://[::1]:8090/index.html", Boolean.TRUE);
         testurls.put("http://[0::1]/index.html", Boolean.TRUE);
+        testurls.put("http://[::0:1]:80/index.html", Boolean.TRUE);
+
+        testurls.put("http://[fc00:0:0:0:0:0:0:1]/index.html", Boolean.TRUE);
+        testurls.put("http://[fc00::fa01:ff]/index.html", Boolean.TRUE);
+        testurls.put("http://[fD00:0:0:0:0:0:0:1]/index.html", Boolean.TRUE);
+        testurls.put("http://[fe80:0:0:0:0:0:0:1]/index.html", Boolean.TRUE);
+        testurls.put("http://[fe80::1]/index.html", Boolean.TRUE);
 
         // test urls for possible issue with IPv6 misinterpretation
         testurls.put("http://fcedit.com", Boolean.FALSE);
