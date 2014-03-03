@@ -1763,7 +1763,7 @@ Dump File=Dump Datei
 "Create Dump"=="Erstelle Dump"
 "Restore Dump"=="Stelle Dump wieder her"
 Optimize Solr==Optimiere Solr
-merge to max. <==merge mit max. <
+merge to max. <==Merge mit max. <
 > segments==> Segmenten
 Reboot Solr Core==Starte Solr Core neu
 "Shut Down and Re-Start Solr"=="Fahre Solr herunter und Neustart"
@@ -1975,7 +1975,48 @@ Modified Date==Änderungsdatum
 Anchor Name==Anker Name
 URL==URL
 Delete==Löschen
-#-----------------------------        
+#-----------------------------
+
+#File: IndexDeletion_p.html
+#---------------------------
+Index Deletion<==Indexlöschung<
+The search index contains \#\[doccount\]\# documents. You can delete them here.==Der Suchindex enthält #[doccount]# Dokumenta. Diese können Sie hier löschen.
+Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.==Löschungen erfolgen nebenläufig was dazu führen kann, dass kürzlich gelöschte Dokumente noch nicht im Dokumentenzähler sichtbar sind.
+Delete by URL Matching<==Löschung durch URL Vergleich<
+Delete all documents within a sub-path of the given urls. That means all documents must start with one of the url stubs as given here.==Lösche alle Dokumente innerhalb eines Unterpfades der gegebenen URLs. Das bedeutet dass alle Dokumente mit einem der angegebenen URL Stubs übereinstimmen muss.
+One URL stub, a list of URL stubs<br/>or a regular expression==Ein URL Stub, eine Liste von URL Stubs<br/>oder ein regulärer Ausdruck
+Matching Method<==Vergleichsmethode<
+sub-path of given URLs==Unterpfad der angegebenen URLs
+matching with regular expression==Vergleich mit regulärem Ausdruck
+"Simulate Deletion"=="Simuliere Löschung"
+"no actual deletion, generates only a deletion count"=="Kein eigentliches Löschen. Gibt nur die Anzahl der Löschungen aus."
+"Engage Deletion"=="Starte Löschung"
+"simulate a deletion first to calculate the deletion count"=="Simulieren Sie zuerst die Löschung, um die Menge der Löschungen zu erfahren"
+"engaged"=="scharf"
+selected \#\[count\]\# documents for deletion==#[count]# Dokumente zur Löschung ausgewählt
+deleted \#\[count\]\# documents==#[count]# Dokumente gelöscht
+Delete by Age<==Löschen nach Alter<
+Delete all documents which are older than a given time period.==Lösche alle Dokumente die älter als die angegebene Zeitperiode sind.
+Time Period<==Zeitperiode<
+All documents older than==Alle Dokumente älter als
+years<==Jahre<
+months<==Monate<
+days<==Tage<
+hours<==Stunden<
+Age Identification<==Altersidentifikation<
+>load date==>Lade Datum
+>last-modified==>Zuletzt geändert
+Delete Collections<==Kollektionen Löschen<
+Delete all documents which are inside specific collections.==Lösche alle Dokumente die sich innerhalb spezifischer Kollektionen befinden.
+Not Assigned<==Nicht zugewiesen<
+Delete all documents which are not assigned to any collection==Lösche alle Dokumente die keiner Kollektion zugewiesen sind
+, separated by \',\' \(comma\) or \'\|\' \(vertical bar\); or==, getrennt durch ',' (Komma) oder '|' (Vertikaler Trennstrich); oder
+>generate the collection list...==>generiere die Liste der Kollektion...
+Assigned<==Zugewiesen<
+Delete all documents which are assigned to the following collection\(s\)==Lösche alle Dokumente die der(n) folgenden Kollektion(en) zugewiesen sind
+Delete by Solr Query<==Löschen durch Solr Abfrage
+This is the most generic option: select a set of documents using a solr query.==Dies ist die allgemeinste Option: Wählen Sie einen Satz Dokumente anhand einer Solr Abfrage aus.
+#-----------------------------
 
 #File: IndexImport_p.html
 #---------------------------
@@ -2100,6 +2141,26 @@ Import List==Importierte Liste
 >Processed<br />Chunks<==>Bearbeitete<br />Datenblöcke<
 >Imported<br />Records<==>Importierte<br />Datensätze<
 >Speed<br />\(records/second\)==>Geschwindigkeit<br />==(Datensätze/Sekunde)
+#-----------------------------
+
+#File: IndexReIndexMonitor_p.html
+#---------------------------
+Field Re-Indexing<==Feld Re-Indexierung<
+In case that an index schema has changed, all documents with missing field entries can be indexed again with a reindex job.==Im Falle einer Änderung des Index-Schemas, können alle Dokumente mit fehlenden Feldeinträgen mit einem Re-Indexierungs-Job erneut indexiert werden.
+"refresh page"=="Seite neu laden"
+Documents in current queue<==Dokumente in aktueller Warteschlange<
+Documents processed<==Bearbeitete Dokumente<
+current select query==Aktuelle SELECT Anfrage
+"start reindex job now"=="Starte den Re-Indexierungs-Job jetzt"
+"stop reindexing"=="Beende Re-Indexierung"
+Remaining field list==Noch zu erledigende Feld Liste
+reindex documents containing these fields:==Re-Indiziere Dokumente die folgende Felder enthalten:
+# The following lines are hard-coded and would need to be translated in the .java bean
+#"reindex job stopped"=="Re-Indexierungs-Job angehalten"
+#"reindex is running"=="Re-Indexierungs-Job läuft"
+#"is empty"=="ist leer"
+#"no reindex job running"=="Es läuft kein Re-Indexierungs-Job"
+#"! reindex works only with embedded Solr index !"=="! Re-Indexierung funktioniert nur mit eingebautem Solr Index !"
 #-----------------------------
 
 #File: Load_MediawikiWiki.html
@@ -2627,7 +2688,9 @@ When scraping proxy pages then <strong>no personal or protected page is indexed<
 those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==Solche Seiten werden entweder durch Merkmale im HTTP Header (Kopf der Seite) (z.B.: Cookies oder HTTP Authorisierung)
 or by POST-Parameters \(either in URL or as HTTP protocol\)==oder durch POST-Parameter (z.B. in einer URL oder im HTTP Protokoll) erkannt
 and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
-
+You have to==Sie müssen den
+>setup the proxy<==>Proxy aufsetzen<
+before use.==bevor Sie ihn benutzen können.
 Proxy Auto Config:==Automatische Proxy Konfiguration:
 this controls the proxy auto configuration script for browsers at http://localhost:8090/autoconfig.pac==Diese Einstellung regelt das Automatische Proxy Konfigurationsskript unter http://localhost:8090/autoconfig.pac
 .yacy-domains only==nur .yacy Domains
@@ -2788,6 +2851,7 @@ The remote crawler is a process that requests urls from other peers.==Der Remote
 Peers offer remote-crawl urls if the flag \'Do Remote Indexing\'==Peers bieten Remote Crawls an wenn das Flag 'Nutze Remote Indexierung'
 is switched on when a crawl is started.==gesetzt ist wenn ein Crawl gestartet wird.
 Remote Crawler Configuration==Remote Crawler Konfiguration
+Your peer cannot accept remote crawls because you need senior or principal peer status for that!==Ihr Peer kann keine Remote Crawls akzeptieren weil dafür Senior oder Principal Status erforderlich ist!
 >Accept Remote Crawl Requests<==>Akzeptiere Remote Crawl Anfragen<
 Perform web indexing upon request of another peer.==Führe auf Anfragen eines anderen Peers Web Indexing durch.
 Load with a maximum of==Lade mit einem Maximum an
@@ -2908,12 +2972,13 @@ You can restrict the access to this proxy/server using a two-stage security barr
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==geben Sie einen <em>Netzwerkadressraum</em> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
 define an <em>user account</em> with an user:password - pair==geben Sie einen <em>Nutzeraccount</em> mit einem nutzer:passwort-Paar an
 This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gewährt wird.
-You probably don't want to share the proxy to the internet, so you should set the==Sie wollen den Proxy vermutlich nicht im Internet zur Verfügung stellen, deshalb sollten Sie
+You probably don\'t want to share the proxy to the internet, so you should set the==Sie wollen den Proxy vermutlich nicht im Internet zur Verfügung stellen, deshalb sollten Sie
 IP-Number Access Domain to a pattern that corresponds to you local intranet.==den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
 The default setting should be right in most cases. If you want, you can also set a proxy account==Die Standardwerte sollten in den meisten Fällen richtig sein. Wenn Sie wollen können Sie auch Proxyaccounts erstellen
 so that every proxy user must authenticate first, but this is rather unusual.==, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher unüblich.
 IP-Number filter==IP-Adressen Filter
 Use <a==Nutze <a
+"Submit"=="Abschicken"
 #-----------------------------
 
 #File: Settings_Seed.inc
@@ -3001,7 +3066,7 @@ you don't need to set anything here, please leave it blank.==brauchen Sie hier n
 ATTENTION: Your current IP is recognized as "#\[clientIP\]#".==ACHTUNG: Ihre aktuelle IP wird als "#[clientIP]#" erkannt.
 If the value you enter here does not match with this IP,==Wenn der Wert, den Sie hier eingegeben haben, nicht mit dieser IP übereinstimmt,
 you will not be able to access the server pages anymore.==wird es nicht möglich sein auf die Serverseiten zuzugreifen.
-value="Submit"==value="speichern"
+value="Submit"==value="Speichern"
 #-----------------------------
 
 #File: SettingsAck_p.html
@@ -3037,6 +3102,7 @@ Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geänd
 Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
 Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
 The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
+If you open any public web page through the proxy, you must log-in.==Wenn Sie öffentliche Webseiten über den Proxy öffnen, müssen Sie sich anmelden.
 The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
 The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Peername wurde nicht geändert.
 Your Peer Language is:==Ihre Peer Sprache ist:
