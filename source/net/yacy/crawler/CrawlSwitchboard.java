@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
@@ -596,8 +597,8 @@ public final class CrawlSwitchboard {
                 if (deletionCandidate.size() == 0) return new HashSet<String>(0);
             }
             // look into the CrawlQueues.worker as well
-            Request[] requests = switchboard.crawlQueues.activeWorkerEntries();
-            for (Request request: requests) {
+            Map<DigestURL, Request> map = switchboard.crawlQueues.activeWorkerEntries();
+            for (Request request: map.values()) {
                 deletionCandidate.remove(request.profileHandle());
             }
         } catch (final Throwable e) {
@@ -610,7 +611,7 @@ public final class CrawlSwitchboard {
     public boolean allCrawlsFinished(CrawlQueues crawlQueues) {
         if (!crawlQueues.noticeURL.isEmpty()) return false;
         // look into the CrawlQueues.worker as well
-        if (switchboard.crawlQueues.activeWorkerEntries().length > 0) return false;
+        if (switchboard.crawlQueues.activeWorkerEntries().size() > 0) return false;
         return true;
     }
     

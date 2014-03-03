@@ -96,6 +96,24 @@ public class Request extends WorkflowJob
     private String statusMessage;
     private int initialHash; // to provide a object hash that does not change even if the url changes because of redirection
 
+    public Request() {
+        // used only to create poison entries
+        this.initiator = null;
+        this.url = null;
+        this.refhash = null;
+        this.name = null;
+        this.appdate = 0;
+        this.profileHandle = null;
+        this.depth = 0;
+        this.anchors = 0;
+        this.forkfactor = 0;
+        this.flags = null;
+        this.statusMessage = null;
+        this.initialHash = 0;
+        this.status = 0;
+        this.size = 0;
+    }
+    
     /**
      * convenience method for 'full' request object
      *

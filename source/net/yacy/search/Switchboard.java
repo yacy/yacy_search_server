@@ -1698,7 +1698,7 @@ public final class Switchboard extends serverSwitch {
      */
     public boolean cleanProfiles() throws InterruptedException {
         if (getIndexingProcessorsQueueSize() > 0 ||
-            this.crawlQueues.workerSize() > 0 ||
+            this.crawlQueues.activeWorkerEntries().size() > 0 ||
             this.crawlQueues.coreCrawlJobSize() > 0 ||
             this.crawlQueues.limitCrawlJobSize() > 0 ||
             this.crawlQueues.remoteTriggeredCrawlJobSize() > 0 ||
@@ -2072,9 +2072,6 @@ public final class Switchboard extends serverSwitch {
                     log.info("finishing greedy learning phase, size=" +cs);
                 }
             }
-            
-            // cleanup crawl loader jobs
-            this.crawlQueues.cleanup();
             
             // refresh recrawl dates
             try {

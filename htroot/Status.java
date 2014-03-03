@@ -29,7 +29,6 @@
 
 import java.net.InetAddress;
 import java.util.Date;
-
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Memory;
@@ -337,7 +336,7 @@ public class Status
         prop.putNum("connectionsMax", httpd.getMaxSessionCount());
 
         // Queue information
-        final int loaderJobCount = sb.crawlQueues.workerSize();
+        final int loaderJobCount = sb.crawlQueues.activeWorkerEntries().size();
         final int loaderMaxCount = sb.getConfigInt(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
         final int loaderPercent = (loaderMaxCount == 0) ? 0 : loaderJobCount * 100 / loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);

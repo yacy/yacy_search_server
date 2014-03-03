@@ -27,7 +27,10 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+import java.util.Map;
+
 import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.peers.Seed;
@@ -42,16 +45,15 @@ public class IndexCreateLoaderQueue_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-
-        if (sb.crawlQueues.workerSize() == 0) {
+        Map<DigestURL, Request> map = sb.crawlQueues.activeWorkerEntries();
+        if (map.size() == 0) {
             prop.put("loader-set", "0");
         } else {
             prop.put("loader-set", "1");
             boolean dark = true;
-            final Request[] w = sb.crawlQueues.activeWorkerEntries();
             Seed initiator;
             int count = 0;
-            for (Request element : w) {
+            for (Request element : map.values()) {
                 if (element == null) continue;
 
                 initiator = sb.peers.getConnected((element.initiator() == null) ? "" : ASCII.String(element.initiator()));

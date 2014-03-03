@@ -93,7 +93,7 @@ public class status_p {
         prop.putNum("rwipublictextSegmentCount", segment.RWISegmentCount());
 
         // loader queue
-        prop.putNum("loaderSize", sb.crawlQueues.workerSize());
+        prop.putNum("loaderSize", sb.crawlQueues.activeWorkerEntries().size());
         prop.putNum("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
 
         //local crawl queue
