@@ -1719,6 +1719,7 @@ public final class Switchboard extends serverSwitch {
         // closing all still running db importer jobs
         this.crawlStacker.announceClose();
         this.crawlStacker.close();
+        this.crawlQueues.close();
         this.indexingDocumentProcessor.shutdown();
         this.indexingCondensementProcessor.shutdown();
         this.indexingAnalysisProcessor.shutdown();
@@ -1736,7 +1737,6 @@ public final class Switchboard extends serverSwitch {
         }
         this.messageDB.close();
         this.webStructure.close();
-        this.crawlQueues.close();
         this.crawler.close();
         this.log.config("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         this.index.close();

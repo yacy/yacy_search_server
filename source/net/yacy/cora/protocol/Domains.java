@@ -758,6 +758,7 @@ public class Domains {
             //if (!matchesList(host, nameCacheNoCachingPatterns)) System.out.println("DNSLOOKUP " + host);
             try {
                 //final long t = System.currentTimeMillis();
+                String oldName = Thread.currentThread().getName();
                 Thread.currentThread().setName("Domains: DNS resolve of '" + host + "'"); // thread dump show which host is resolved
                 if (InetAddresses.isInetAddress(host)) {
                     try {
@@ -767,6 +768,7 @@ public class Domains {
                         ip = null;
                     }
                 }
+                Thread.currentThread().setName(oldName);
                 if (ip == null) try {
                     ip = timeLimiter.callWithTimeout(new Callable<InetAddress>() {
                         @Override
