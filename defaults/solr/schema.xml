@@ -157,7 +157,7 @@
    
    <dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
    <dynamicField name="*_s"  type="string"  indexed="true"  stored="true" />
-   <dynamicField name="*_val" type="int" indexed="false" stored="true" multiValued="true"/> <!-- YaCy special -->
+   <dynamicField name="*_val" type="int" indexed="true" stored="true" multiValued="true"/> <!-- YaCy special -->
    <dynamicField name="*_sxt" type="string" indexed="true" stored="true" multiValued="true"/> <!-- YaCy special -->
    <dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
    <dynamicField name="*_ls" type="long"   indexed="true"  stored="true"  multiValued="true"/>
