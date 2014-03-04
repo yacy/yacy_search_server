@@ -55,7 +55,7 @@ public class IndexImportOAIPMHList_p {
                 prop.put("source_table_" + count + "_dark", (dark) ? "1" : "0");
                 prop.put("source_table_" + count + "_count", count);
                 prop.put("source_table_" + count + "_source", CharacterCoding.unicode2html(root, true));
-                prop.put("source_table_" + count + "_loadurl", "<a href=\"/IndexImportOAIPMH_p.html?urlstart=" + CharacterCoding.unicode2html(root, true) + "\" target=\"_top\">" + CharacterCoding.unicode2html(root, true) + "</a>");
+                prop.put("source_table_" + count + "_loadurl", "<a href=\"IndexImportOAIPMH_p.html?urlstart=" + CharacterCoding.unicode2html(root, true) + "\" target=\"_top\">" + CharacterCoding.unicode2html(root, true) + "</a>");
                 dark = !dark;
                 count++;
             }

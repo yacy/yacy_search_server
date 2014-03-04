@@ -115,12 +115,22 @@ public class DCEntry extends MultiMapSolrParams {
         }
     }
 
+    /**
+     * get Identifier (url) (so far only used for surrogate processing)
+     * @param useRelationAsAlternative true = take relation if no identifier resolves to url
+     * @return
+     */
     public DigestURL getIdentifier(boolean useRelationAsAlternative) {
+        // identifier may be included multiple times (with all kinds of syntax - example is from on record)
+        // <dc:identifier>Astronomy and Astrophysics, 539, A99, 2012</dc:identifier>
+        // <dc:identifier>http://hdl.handle.net/2104/8302</dc:identifier>
+        // <dc:identifier>10.1051/0004-6361/201117940</dc:identifier>
         String u = this.get("url");
-        if (u == null) u = this.get("dc:identifier");
-        if (u == null) return useRelationAsAlternative ? getRelation() : null;
-        String[] urls = u.split(";");
-        if (urls.length > 1) {
+        String[] urls = null;
+        if (u == null) urls = this.getParams("dc:identifier");
+        if (urls == null) return useRelationAsAlternative ? getRelation() : null;
+        // String[] urls = u.split(";"); // splitting may not succeed (see above)
+        if (urls.length > 0) { // check best also with 1 in case it's not http urn
             // select one that fits
             u = bestU(urls);
         }
@@ -154,16 +164,27 @@ public class DCEntry extends MultiMapSolrParams {
     }
 
     private static String bestU(String[] urls) {
+        if (urls.length > 1) { // with only one ... no choice
+            for (String uu: urls) {
+                if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
+            }
+            for (String uu: urls) {
+                if (uu.startsWith("http://")) return uu;
+            }
+            for (String uu: urls) {
+                if (uu.startsWith("https://")) return uu;
+            }
+            for (String uu: urls) {
+                if (uu.startsWith("ftp://")) return uu;
+            }
+        } // but check urn:/doi: resolve
         for (String uu: urls) {
-            if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
-        }
-        for (String uu: urls) {
-            if (uu.startsWith("http://")) return uu;
-        }
-        for (String uu: urls) {
-            if (uu.startsWith("ftp://")) return uu;
-        }
-        for (String uu: urls) {
+            //doi identifier can be resolved through dx.doi.org:
+            //   http://dx.doi.org/doi:10.12775/SIT.2010.010
+            //or http://dx.doi.org/10.12775/SIT.2010.010
+            if (uu.startsWith("DOI:") || uu.startsWith("doi:")) // saw it upper & lower-case
+                return "http://dx.doi.org/" + uu;
+
             //urn identifier koennen ueber den resolver der d-nb aufgeloest werden:
             //http://nbn-resolving.de/urn:nbn:de:bsz:960-opus-1860
             if (uu.startsWith("urn:")) return "http://nbn-resolving.de/" + uu;
