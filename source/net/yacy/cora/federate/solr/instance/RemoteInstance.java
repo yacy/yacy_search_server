@@ -183,6 +183,16 @@ public class RemoteInstance implements SolrInstance {
         if (this.defaultServer == null) throw new IOException("cannot connect to url " + url + " and connect core " + defaultCoreName);
     }
 
+    @Override
+    public int hashCode() {
+        return this.solrurl.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof RemoteInstance && ((RemoteInstance) o).solrurl.equals(this.solrurl);
+    }
+
     public String getAdminInterface() {
         final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
         final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();

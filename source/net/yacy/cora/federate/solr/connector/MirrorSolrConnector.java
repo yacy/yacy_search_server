@@ -52,6 +52,19 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         this.solr0 = solr0;
         this.solr1 = solr1;
     }
+
+    @Override
+    public int hashCode() {
+        return (this.solr0 == null ? 0 : this.solr0.hashCode()) + (this.solr1 == null ? 0 : this.solr1.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof MirrorSolrConnector &&
+                ((this.solr0 == null && ((MirrorSolrConnector) o).solr0 == null) || (((this.solr0 != null && ((MirrorSolrConnector) o).solr0 != null)) && this.solr0.equals(((MirrorSolrConnector) o).solr0))) &&
+                ((this.solr1 == null && ((MirrorSolrConnector) o).solr1 == null) || (((this.solr1 != null && ((MirrorSolrConnector) o).solr1 != null)) && this.solr1.equals(((MirrorSolrConnector) o).solr1)));
+    }
+    
     
     @Override
     public int bufferSize() {

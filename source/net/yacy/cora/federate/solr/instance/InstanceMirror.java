@@ -22,7 +22,9 @@ package net.yacy.cora.federate.solr.instance;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.federate.solr.connector.ConcurrentUpdateSolrConnector;
@@ -92,7 +94,9 @@ public class InstanceMirror {
     }
 
     public synchronized void close() {
-        for (SolrConnector connector: this.mirrorConnectorCache.values()) connector.close();
+        Set<SolrConnector> connectors = new HashSet<SolrConnector>();
+        connectors.addAll(this.mirrorConnectorCache.values());
+        for (SolrConnector connector: connectors) connector.close();
         this.mirrorConnectorCache.clear();
     }
 

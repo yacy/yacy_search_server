@@ -100,6 +100,16 @@ public class EmbeddedInstance implements SolrInstance {
         this.server.put(this.defaultCoreName, this.defaultCoreServer);
     }
 
+    @Override
+    public int hashCode() {
+        return this.containerPath.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof EmbeddedInstance && this.containerPath.equals(((EmbeddedInstance) o).containerPath);
+    }
+    
     private void initializeCoreConf(final File solr_config, final File containerPath, String coreName) {
 
         // ensure that default core path exists

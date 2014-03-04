@@ -98,6 +98,16 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         this.requestHandler.inform(this.core);
         super.init(this.instance.getServer(coreName));
     }
+
+    @Override
+    public int hashCode() {
+        return this.instance.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof EmbeddedSolrConnector && this.instance.equals(((EmbeddedSolrConnector) o).instance);
+    }
     
     @Override
     public int bufferSize() {

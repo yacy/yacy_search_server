@@ -127,6 +127,16 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
+    public int hashCode() {
+        return this.connector.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof ConcurrentUpdateSolrConnector && this.connector.equals(((ConcurrentUpdateSolrConnector) o).connector);
+    }
+
+    @Override
     public int bufferSize() {
         return this.processQueue.size();
     }

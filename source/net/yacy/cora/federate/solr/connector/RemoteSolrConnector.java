@@ -66,6 +66,16 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         super.init(s);
     }
 
+    @Override
+    public int hashCode() {
+        return this.instance.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof RemoteSolrConnector && ((RemoteSolrConnector) o).instance.equals(this.instance);
+    }
+
     public SolrInstance getInstance() {
         return this.instance;
     }
