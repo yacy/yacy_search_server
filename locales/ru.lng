@@ -309,7 +309,7 @@ YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Закладки
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Список закладок можно также получить как RSS-ленту. Это может быть сделано при выборе конкретного тега .
 Click the API icon to load the RSS from the current selection.==Нажмите на иконку API для загрузки RSS из текущего выделения.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Чтобы увидеть список всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">wiki-страницу API</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списока всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">wiki-страницу API</a>.
 <h3>Bookmarks==<h3>Закладки
 Bookmarks \(==Закладки \(
 #Login==Логин
@@ -454,7 +454,7 @@ Error saving the skin.==Ошибка сохранения файла скина.
 Access Configuration==Конфигурация доступа
 Basic Configuration==Основная конфигурация
 Your port has changed. Please wait 10 seconds.==Порт вашего узла был изменён. Пожалуйста, подождите 10 секунд.
-The peer port was changed successfully. Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==Порт узла был успешно изменён. Ваш браузер перейдёт на новую страницу в течение 10 секунд.
+The peer port was changed successfully. Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==Порт узла был успешно изменён. Ваш браузер перейдёт на <a href="http://#[host]#:#[port]#/ConfigBasic.html">новую страницу</a> в течение 10 секунд.
 Your YaCy Peer needs some basic information to operate properly==Укажите основную информацию для работы вашего узла
 Select a language for the interface==Выберите язык интерфейса
 Use Case: what do you want to do with YaCy:==Цель использования YaCy:
@@ -854,7 +854,7 @@ Impressum==Реквизитам
 
 #File: ConfigSearchBox.html
 #---------------------------
-Integration of a Search Box==Интеграция Search Box
+Integration of a Search Box==Интеграция поиска
 We give information how to integrate a search box on any web page that==Предлагаем вам инструкцию по интеграции поиска YaCy на любую вэб-страницу.
 calls the normal YaCy search window.==
 Simply use the following code:==Просто используете следующий код:
@@ -1101,10 +1101,10 @@ Edit Profile==Изменить профиль
 #---------------------------
 Crawl Results<==Результаты индексирования<
 >Crawl Results Overview<==>Обзор результатов индексирования<
-These are monitoring pages for the different indexing queues.==Das sind die Seiten zur Überwachung der verschiedenen Indexier Warteschlangen.
-YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermenüs oben beschrieben.
-above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
-so you need to log-in with your administration password.==also müssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
+These are monitoring pages for the different indexing queues.==Это страницы мониторинга различныx очередей индексации.
+YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy получает вэб-индекс пятью различными способами. Детали этих процессов (1-5) вы можете увидеть, выбрав пункты меню справа.
+above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Так как представленная информация содержит личные сведения,
+so you need to log-in with your administration password.==то потребуется ввести пароль администратора.
 Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enthält ausserdem einen Index Resulate Monitor, ist aber nicht privat,
 since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
 Case \(7\) occurs if surrogate files are imported==Fall (7) tritt ein wenn Surrogat Dateien importiert werden.
@@ -1114,7 +1114,7 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==Здесь указаны вэб-страницы, инициированные вашим узлом для индексирования,
 but had been crawled by <em>other</em> peers.==но проиндексированные другими узлами.
 This is the 'mirror'-case of process \(6\).==Это действие обратное глобальному индексированию. (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Вариант использования:</em> Вы берёте значения здесь, запускаете локальное индексирование на странице 'Монитор индексирования' и проверяете
+<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==Вы берёте значения здесь, запускаете локальное индексирование на странице 'Индексирование/Сканер сети' и проверяете
 'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request== флаг 'Выполнять удалённое индексирование'. Каждая страница, проиндексированная удалённым узлом
 is reported back and can be monitored here.== отображается здесь.
 \(2\) Results for Result of Search Queries==(2) Результаты поисковых запросов
@@ -1122,36 +1122,36 @@ This index transfer was initiated by your peer by doing a search query.==Пер�
 The index was crawled and contributed by other peers.==Индексация производилась другими узлами.
 <em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==Здесь отображается список запросов, произведённых вами на странице поиска.
 \(3\) Results for Index Transfer==(3) Результаты передачи индекса
-The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgeführt.
-These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer übermittelt, da er am angemessensten zur Speicherung
-the logic of the Global Distributed Hash Table.==übereinstimmend mit der Logic der verteilten Hash Tabelle ist.
+The url fetch was initiated and executed by other peers.==Полученные ссылки были иницированы и выполнены другими узлами.
+These links here have been transmitted to you because your peer is the most appropriate for storage according to==Эти ссылки были переданы вам, потому что ваш узел более подходит для их хранения,
+the logic of the Global Distributed Hash Table.==в соответствии с логикой глобальной DHT.
 <em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Anwendung:</em> Dies Liste füllt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
 \(4\) Results for Proxy Indexing==(4) Результаты  индексирования через прокси
 These web pages had been indexed as result of your proxy usage.==Эти вэб-страницы были проиндексированы в результате использования вами прокси.
 No personal or protected page is indexed==Личные или защищённые страницы не индексируются.
 such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Такие страницы определяются по свойствам HTTP-заголовка (использование куки или HTTP-авторизации) или по параметрам POST (в адресе или передающиеся через HTTP-протокол)
 and automatically excluded from indexing.==и автоматически исключаются из индексирования.
-<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Anwendung:</em> Sie müssen YaCy als Proxy benutzen, um diese Tabelle zu füllen.
-Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
-on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
+<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==Таблица будет наполняться при использовании вами YaCy в качестве прокси-сервера.
+Set the proxy settings of your browser to the same port as given==Задайте выбранный порт (по-умолчанию 8090) в настройках прокси в вашем браузере.
+on the 'Settings'-page in the 'Proxy and Administration Port' field.==
 \(5\) Results for Local Crawling==(5) Результаты локального индексирования
 These web pages had been crawled by your own crawl task.==Эти вэб-страницы были проиндексированы вашим узлом по вашему указанию.
-<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
+<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==Запустите индексацию, указав начальную точку на странице "Индексирование/Сканер сети"
 \(6\) Results for Global Crawling==(6) Результаты глобального индексирования
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Эти страницы проиндексированы вашим узлом, но индексатор был инициирован удалённым узлом..
 This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
 <em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
-The stack is empty.==Die Liste ist leer.
-Statistics about \#\[domains\]\# domains in this stack:==Statistiken über #[domains]# Domains in diesem Bereich:
-\(7\) Results from surrogates import==\(7\) Ergebnisse aus dem Surrogat Import
-These records had been imported from surrogate files in DATA/SURROGATES/in==Diese Datensätze wurden aus Surrogat Dateien in DATA/SURROGATES/in importiert
+The stack is empty.==Список пуст.
+Statistics about \#\[domains\]\# domains in this stack:==В этой таблице данные о #[domains]# доменах:
+\(7\) Results from surrogates import==\(7\) Результаты замещающего импорта
+These records had been imported from surrogate files in DATA/SURROGATES/in==Эти данные импортированы из замещающих файлов в DATA/SURROGATES/in
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/SURROGATES/in kopieren oder eine der Index Import Funktionen nutzen
 \(i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
 #Domain==Домен
 #URLs=URLs
 "delete all"=="удалить все"
-Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Einträge in diesem Bereich.
-Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Einträge aus diesem Bereich von insgesamt #[all]# Einträgen.
+Showing all \#\[all\]\# entries in this stack.==Показаны все #[all]# записей.
+Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Показаны последние #[count]# записей из #[all]#.
 "clear list"=="очистить список"
 #Initiator==Инициатор
 >Executor==>Исполняющий
@@ -1173,7 +1173,7 @@ A crawl can also be started using wget and the==Индексирование м�
 >post arguments<==>POST-аргументы<
 > for this web page.==> на этой вэб-странице.
 
-#>Crawl Job<==>Индексирование<
+>Crawl Job<==>Индексирование<
 A Crawl Job consist of one or more start point, crawl limitations and document freshness rules.==Индексирование состоит из одной или более начальных точек, ограничений и правил индексирования документов.
 
 >Start Point<==>Начальная точка<
@@ -1238,7 +1238,7 @@ never use the cache, all content from fresh internet source;==Den Cache nie verw
 use the cache if the cache exists and is fresh using the proxy-fresh rules;==Verwende den Cache, wenn ein Treffer im Cache existiert und dieser aktuell ist.
 use the cache if the cache exist. Do no check freshness. Otherwise use online source;==Verwende den Cache, wenn ein Treffer existiert ohne die Aktualität zu prüfen. Andernfalls verwende die Quelle online;
 never go online, use all content from cache. If no cache exist, treat content as unavailable==Gehe niemals online, verwende nur den Cache Inhalt. Wenn kein Cache existiert, behandle den Inhalt als nicht verfügbar
-#>Crawler Filter<==>Crawler Filter<
+>Crawler Filter<==>Фильтр индексатора<
 These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.==Das sind Limitierungen auf den Crawl-Stacker. Die Filter werden angewandt bevor eine Webseite geladen wurde.
 Crawling Depth<==Crawling Tiefe<
 This defines how often the Crawler will follow links \(of links..\) embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links (von Links ...) in Webseiten folgen wird.
@@ -1778,9 +1778,10 @@ Depth==Глубина
 
 #File: IndexCreateParserErrors_p.html
 #---------------------------
-Parser Errors==Parser Fehler
-Rejected URL List:==Список отклонённых URL-ссылок:
-There are \#\[num\]\# entries in the rejected-urls list.==Число записей в списке отклонённых ссылок #[num]#.
+Parser Errors==Ошибки парсера
+Rejected URLs==Отклонённые ссылки
+Rejected URL List:==
+There are \#\[num\]\# entries in the rejected-urls list.==Число записей в списке #[num]#.
 Showing latest \#\[num\]\# entries.==Показаны #[num]# последних записей.
 "show more"=="Показать больше"
 "clear list"=="Очистить список"
@@ -1791,6 +1792,12 @@ Time==Дата и время
 #URL==URL-ссылка
 Fail-Reason==Причина ошибки
 #-----------------------------
+
+#File: IndexCreateQueues_p.html
+#-----------------------------
+This crawler queue is empty==Очередь этого индексатора пуста
+#-----------------------------
+
 
 #File: ContentIntegrationPHPBB3_p.html
 #---------------------------
@@ -1841,43 +1848,42 @@ Import failed:==Import fehlgeschlagen:
 #File: DictionaryLoader_p.html
 #---------------------------
 Knowledge Loader==Загрузка словаря
-YaCy can use external libraries to enable or enhance some functions. These libraries are not==YaCy kann externe Bibliotheken zum Erweitern oder Aktivieren bestimmter Funktionen verwenden. Diese Bibliotheken sind nicht
-included in the main release of YaCy because they would increase the application file too much.==im Standard Release von YaCy enthalten weil diese die Anwendungsdatei zu stark vergrößern würden.
-You can download additional files here.==Sie können zusätzliche Dateien hier herunterladen.
->Geolocalization<==>Geolokalisierung<
-Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.==Geolokalisierung erlaubt es YaCy bestimmte Orte auf OpenStreetMap zu bestimmten Suchbegriffen zu präsentieren.
->GeoNames<==>Geografische Namen<
-With this file it is possible to find cities all over the world.==Mit dieser Datei ist es möglich Städte überall auf der Erde zu finden.
-Content<==Inhalt<
-cities with a population &gt; 1000 all over the world==Städte überall auf der Erde mit mehr als 1000 Einwohnern
-cities with a population &gt; 5000 all over the world==Städte überall auf der Erde mit mehr als 5000 Einwohnern
-cities with a population &gt; 100000 all over the world \(the set is is reduced to cities &gt; 100000\)==Städte 
-überall auf der Erde mit mehr als 100000 Einwohnern (Der Datensatz wurde auf Städte mit &gt; 100000 Einwohnern reduziert)
->Download from<==>Download von<
->Storage location<==>Speicherort<
-#>Status<==>Status<
->not loaded<==>nicht geladen<
->loaded<==>geladen<
-:deactivated==:deaktiviert
->Action<==>Aktion<
->Result<==>Resultat<
-"Load"=="Laden"
-"Deactivate"=="Deaktivieren"
-"Remove"=="Entfernen"
-"Activate"=="Aktivieren"
->loaded and activated dictionary file<==>Wörterbuch Datei geladen und aktiviert<
->loading of dictionary file failed: \#\[error\]\#<==>Laden der Wörterbuch Datei ist fehlgeschlagen: #[error]#<
->deactivated and removed dictionary file<==>Wörterbuch Datei deaktiviert und entfernt<
->cannot remove dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht entfernt werden: #[error]#<
->deactivated dictionary file<==>Wörterbuch Datei deaktiviert<
->cannot deactivate dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht deaktiviert werden: #[error]#<
->activated dictionary file<==>Wörterbuch Datei aktiviert<
->cannot activate dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht aktiviert werden: #[error]#<
+YaCy can use external libraries to enable or enhance some functions. These libraries are not==YaCy может использовать внешние библиотеки, чтобы включить или улучшить некоторые функции. Эти библиотеки
+included in the main release of YaCy because they would increase the application file too much.==не включены в главный релиз YaCy, так как они значительно увеличивают размер приложения.
+You can download additional files here.==Вы можете загрузить дополнительные файлы здесь.
+>Geolocalization<==>Геолокализация<
+Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.==Геолокализация позволит YaCy предоставить информацию о местоположении из OpenStreetMap, согласно поисковому запросу.
+>GeoNames<==>Географические названия<
+With this file it is possible to find cities all over the world.==С помощью этих библиотек возможен поиск городов по всему миру.
+Content<==Содержание<
+cities with a population &gt; 1000 all over the world==Города с населением 1000 человек
+cities with a population &gt; 5000 all over the world==Города с населением 5000 человек
+cities with a population &gt; 100000 all over the world \(the set is is reduced to cities &gt; 100000\)==Города с населением 100000 человек (установите для уменьшения жителей городов до &gt; 100000)
+>Download from<==>Загрузить из<
+>Storage location<==>Локальное хранилище<
+>Status<==>Состояние<
+>not loaded<==>не загружено<
+>loaded<==>загружено<
+:deactivated==:отключено
+>Action<==>Действие<
+>Result<==>Результат<
+"Load"=="Загрузить"
+"Deactivate"=="Отключить"
+"Remove"=="Удалить"
+"Activate"=="Включить"
+>loaded and activated dictionary file<==>Загрузить и включить файл словаря<
+>loading of dictionary file failed: \#\[error\]\#<==>Загрузка файла словаря неудачна: #[error]#<
+>deactivated and removed dictionary file<==>Отключить и удалить файл словаря<
+>cannot remove dictionary file: \#\[error\]\#<==>Невозможно удалить файл словаря: #[error]#<
+>deactivated dictionary file<==Отключённый файла словаря<
+>cannot deactivate dictionary file: \#\[error\]\#<==>Невозможно отключить файл словаря: #[error]#<
+>activated dictionary file<==>Включённый файл словаря<
+>cannot activate dictionary file: \#\[error\]\#<==>Невозможно включить файл словаря: #[error]#<
 #>OpenGeoDB<==>OpenGeoDB<
->With this file it is possible to find locations in Germany using the location \(city\) name, a zip code, a car sign or a telephone pre-dial number.<==>Mit dieser Datei ist es möglich, Orte in Deutschland anhand des (Stadt)Namens, der Postleitzahl, eines Autokennzeichens oder einer Telefonvorwahl zu finden.<
-Suggestions<==Eingabevorschläge<
-Suggestion dictionaries will help YaCy to provide better suggestions during the input of search words==Wörterbücher mit Vorschlägen helfen YaCy bessere Suchtips bei der Eingabe von Suchworten anzuzeigen
-This file provides 100000 most common german words for suggestions==Diese Datei stell die 100000 häufigsten deutschen Wörter für Suchvorschläge bereit
+>With this file it is possible to find locations in Germany using the location \(city\) name, a zip code, a car sign or a telephone pre-dial number.<==>С помощью этих библиотек возможен поиск мест, городов, почтовых индексов и телефонных кодов в Германии.<
+Suggestions<==Словари<
+Suggestion dictionaries will help YaCy to provide better suggestions during the input of search words==Предлагаемые словари делают поиск YaCy лучше.
+This file provides 100000 most common german words for suggestions==Этот файл содержит более 100000 наиболее распространённых немецких слов.
 #-----------------------------
 
 #File: IndexCreateWWWGlobalQueue_p.html
@@ -1901,7 +1907,7 @@ Anchor Name==Anker Name
 #File: IndexCreateWWWLocalQueue_p.html
 #---------------------------
 Local Crawl Queue==Очередь локального индексатора
-This queue stores the urls that shall be crawled localy by this peer.==Эта очередь содержит ссылки, проиндексированных локально вашим узлом.
+This queue stores the urls that shall be crawled localy by this peer.==Эта очередь содержит ссылки, проиндексированные локально вашим узлом.
 It may also contain urls that are computed by the proxy-prefetch.==Также здесь могут указываться ссылки, полученные предварительной выборкой через прокси.
 The local crawler queue is empty==Очередь локального индексатора пуста.
 There are <strong>\#\[num\]\#</strong> entries in the local crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Число записей в очереди локального индексатора <strong>#[num]#</strong>. Показано <strong>#[show-num]#</strong> последних записей.
@@ -1937,6 +1943,48 @@ Anchor Name==Anker Name
 #URL==URL-адрес
 Delete==Удалить
 #-----------------------------        
+
+#File: IndexDeletion_p.html
+#---------------------------
+Index Deletion<==Удаление индекса<
+The search index contains \#\[doccount\]\# documents. You can delete them here.==Поисковый индекс содержит #[doccount]# документов. Вы можете удалить их здесь.
+Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.==Удаление производится параллельно, поэтому недавно удалённые документы могут не учитываться в счетчике документов.
+Delete by URL Matching<==Удаление совпадающих ссылок<
+Delete all documents within a sub-path of the given urls. That means all documents must start with one of the url stubs as given here.==Удалить все документы, включая подпапки указанных ссылок. Заданная ссылка на все документы должна начинаться одинаково.
+One URL stub, a list of URL stubs<br/>or a regular expression==Одна ссылка, список ссылок<br/>или регулярное выражение
+Matching Method<==Способ поиска совпадений<
+sub-path of given URLs==включая подпапки указанных ссылок
+matching with regular expression==совпадение с регулярным выражением
+"Simulate Deletion"=="Предпросмотр"
+"no actual deletion, generates only a deletion count"=="Ничего не удаляется, показывается только возможное число документов для удаления"
+"Engage Deletion"=="Подтвердить удаление"
+"simulate a deletion first to calculate the deletion count"=="Сначала нажмите предпросмотр."
+"engaged"=="Подтвердить"
+selected \#\[count\]\# documents for deletion==выбор #[count]# документов для удаления
+deleted \#\[count\]\# documents==удалено #[count]# документов
+Delete by Age<==Удаление по возрасту<
+Delete all documents which are older than a given time period.==Удалить все документы, которые старше указанного периода времени.
+Time Period<==По времени<
+All documents older than==Все документы, старше чем
+years<==лет<
+months<==месяцев<
+days<==дней<
+hours<==часов<
+Age Identification<==По дате<
+>load date==>Дата загрузки
+>last-modified==>Дата последнего изменения документа
+Delete Collections<==Удаление хранилищ<
+Delete all documents which are inside specific collections.==Удалить все документы внутри специальных хранилищ.
+Not Assigned<==Не закреплено<
+Delete all documents which are not assigned to any collection==Удалить все документы незакреплённые ни за одним хранилищем
+, separated by \',\' \(comma\) or \'\|\' \(vertical bar\); or==, разделённые ',' (запятой) или '|' (вертикальной чертой (пайп)); или
+>generate the collection list...==>показать список хранилищ...
+Assigned<==Закреплено<
+Delete all documents which are assigned to the following collection\(s\)==Удалить все документы закреплённые за указанной ниже коллекцией
+Delete by Solr Query<==Удаление запросов из базы Solr<
+This is the most generic option: select a set of documents using a solr query.==Это наиболее универсальный вариант: выберите набор документов с помощью запроса в базу Solr.
+#-----------------------------
+
 
 #File: IndexImport_p.html
 #---------------------------
@@ -2030,7 +2078,7 @@ Remaining Time:==Осталось времени:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 OAI-PMH Import==Импорт OAI-PMH
-Results from the import can be monitored in the <a href=\"CrawlResults.html\?process=7\">indexing results for surrogates==Результаты импорта можно увидеть на странице <a href="CrawlResults.html?process=7">результатов индексации суррогатного импорта.
+Results from the import can be monitored in the <a href=\"CrawlResults.html\?process=7\">indexing results for surrogates==Результаты импорта можно увидеть на странице <a href="CrawlResults.html?process=7">результатов индексации замещающего импорта.
 Single request import==Один запрос импорта
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==Это позволит отправить только один запрос на сервер OAI-PMH и импортировать записи в индекс
 "Import OAI-PMH source"=="Импортировать источник OAI-PMH"
@@ -2063,6 +2111,26 @@ Import List==Импортировать список
 >Speed<br />\(records/second\)==>Скорость<br />(записей в секунду)
 Complete at==Всего записей
 Records==
+#-----------------------------
+
+#File: IndexReIndexMonitor_p.html
+#---------------------------
+Field Re-Indexing<==Перестроение индекса<
+In case that an index schema has changed, all documents with missing field entries can be indexed again with a reindex job.==В случае, если схема индекса была изменена, все документы c потерянными значениями полей могут быть проиндексированы опять с помощью переиндексации.
+"refresh page"=="Обновить страницу"
+Documents in current queue<==Документы в текущей очереди:<
+Documents processed<==Документы выполняются:<
+current select query==Выбор текущей очереди:
+"start reindex job now"=="Начать переиндексацию"
+"stop reindexing"=="Остановить"
+Remaining field list==Оставшиеся поля списка
+reindex documents containing these fields:==Переиндексировать документы, содержащие эти поля:
+# The following lines are hard-coded and would need to be translated in the .java bean
+#"reindex job stopped"=="Переиндексация остановлена"
+#"reindex is running"=="Переиндексация выполняется"
+#"is empty"=="Пусто"
+#"no reindex job running"=="Нет выполняющейся переиндексации"
+#"! reindex works only with embedded Solr index !"=="! Переиндексация слов только с встроенным индексом базы Solr !"
 #-----------------------------
 
 #File: Load_MediawikiWiki.html
@@ -2347,36 +2415,35 @@ this peer==Ваш узел
 
 #File: News.html
 #---------------------------
-Overview==Überblick
-Incoming&nbsp;News==Eingehende News
-Processed&nbsp;News==Gelesene News
-Outgoing&nbsp;News==Ausgehende News
-Published&nbsp;News==Veröffentlichte News
-This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News-System (zur Zeit noch im Test).
-The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiiert:
-A crawl start with activated remote indexing will automatically create a news entry.==Wird ein neuer Crawl mit aktivierter Remote-Crawling-Funktion gestartet, dann wird automatisch ein News-Eintrag erstellt.
-Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers können diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
-A table with recently started crawls is presented on the Index Create - page==Eine Tabelle mit gerade gestarteten Crawls wird auf der "Index erzeugen"-Seite angezeigt.
-A change in the personal profile will create a news entry. You can see recently made changes of==Bei einer Änderung im Profil wird auch ein News-Eintrag erstellt.
-profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==Profil Einträge auf der Netzwerk Seite werden nach einer Änderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
-More news services will follow.==Mehr News Services werden folgen.
-
-Above you can see four menues:==Sie können diese vier Menüs sehen:
-<strong>Incoming News \(\#\[insize\]\#\)</strong>: latest news that arrived your peer.==<strong>Eingehende News(#[insize]#)</strong>: Die neuesten News, die Ihren Peer erreicht haben.
-Only these news will be used to display specific news services as explained above.==Nur diese News werden benutzt, um spezifische News Services anzuzeigen.
-You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Sie können diese News mit einem Button auf der Seite abarbeiten (als "gelesen" markieren). Dann werden diese Nachrichten nicht mehr auf der Netzwerk und der Index Create Seite erscheinen.
-<strong>Processed News \(\#\[prsize\]\#\)</strong>: this is simply an archive of incoming news that you removed by processing.==<strong>Gelesene News (#[prsize]#)</strong>: Hier ist ein simples Archiv der bereits gelesenen News.
-<strong>Outgoing News \(\#\[ousize\]\#\)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<strong>Ausgehende News (#[ousize]#)</strong>: Hier können Sie die News sehen, die durch Sie enstanden sind. Diese News werden sofort an andere Peers übertragen.
-you can stop the broadcast if you want.==Sie können die Weiterverteilung stoppen, wenn Sie wollen.
-<strong>Published News \(\#\[pusize\]\#\)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<strong>Veröffentlichte News (#[pusize]#)</strong>: Ihre News, die genügend verbreitet oder aus der Verbreitungsliste gelöscht wurden.
-Originator==Initiator
-Created==Erstellt
-Category==Kategorie
-Received==Empfangen
-Distributed==Verteilt
-Attributes==Attribute
-"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"=="#(page)#::Gewählte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Gewählte&nbsp;News&nbsp;löschen::Verbreitung&nbsp;gewählter&nbsp;News&nbsp;abbrechen::Gewählte&nbsp;News&nbsp;löschen#(/page)#"
-"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"=="#(page)#::Alle&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Alle&nbsp;News&nbsp;löschen::Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;abbrechen::Alle&nbsp;News&nbsp;löschen#(/page)#"
+Overview==Обзор
+Incoming&nbsp;News==Входящие сообщения
+Processed&nbsp;News==Обработанные сообщения
+Outgoing&nbsp;News==Исходящие сообщения
+Published&nbsp;News==Опубликованные сообщения
+This is the YaCyNews system \(currently under testing\).==Это система сообщений YaCy (тестируется).
+The news service is controlled by several entry points:==Сообщения создаются в некоторых случаях:
+A crawl start with activated remote indexing will automatically create a news entry.==Запуск индексирования с включением удалённого индексирования автоматически создаёт сообщение.
+Other peers may use this information to prevent double-crawls from the same start point.==Другие узлы могут использовать эту информацию, чтобы исключить двойное индексирование из нескольких начальных точек.
+A table with recently started crawls is presented on the Index Create - page==Таблица с недавно запущенным индексированием представлена на странице "Монитор индексирования".
+A change in the personal profile will create a news entry. You can see recently made changes of==Изменение персонального профиля также создаёт сообщение. Вы можете увидеть недавно сделанные изменения в
+profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==профиле на странице сети. Изменение профиля отмечено звёздочкой '*' рядом с 'P' (профиль) выбор.
+More news services will follow.==
+Above you can see four menues:==Вы увидете четыре меню:
+<strong>Incoming News \(\#\[insize\]\#\)</strong>: latest news that arrived your peer.==<strong>Входящие сообщения(#[insize]#)</strong>: Последние сообщения, полученные вашим узлом.
+Only these news will be used to display specific news services as explained above.==Только эти сообщения будут использоваться для отображения определённых служб сообщений.
+You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Вы можете управлять этими сообщениями через кнопку на странице, для удаления их из Монитора индексирования и страницы сети.
+<strong>Processed News \(\#\[prsize\]\#\)</strong>: this is simply an archive of incoming news that you removed by processing.==<strong>Обработанные сообщения (#[prsize]#)</strong>: Это простой архив входящих сообщений, удалённых вами при обработке.
+<strong>Outgoing News \(\#\[ousize\]\#\)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<strong>Исходящие сообщения (#[ousize]#)</strong>: Здесь вы можете увидеть сообщения, созданные вами. Эти сообщения передаются другим узлам в данный момент.
+you can stop the broadcast if you want.==Вы можете остановить передачу сообщений, если пожелаете.
+<strong>Published News \(\#\[pusize\]\#\)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<strong>Опубликованные сообщения (#[pusize]#)</strong>: Ваши сообщения, переданные другим узлам или удалёнными вами из списка получателей.
+Originator==Инициатор
+Created==Создано
+Category==Категория
+Received==Получено
+Distributed==Распределение
+Attributes==Аттрибуты
+"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"=="#(page)#::Выполнить&nbsp;выбранные&nbsp;сообщения::Удалить&nbsp;выбранные&nbsp;сообщения::Прервать&nbsp;публикацию&nbsp;выбранных&nbsp;сообщений::Удалить&nbsp;выбранные&nbsp;сообщения#(/page)#"
+"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"=="#(page)#::Выполнить&nbsp;все&nbsp;сообщения::Удалить&nbsp;все&nbsp;сообщения::Прервать&nbsp;публикацию&nbsp;всех&nbsp;сообщений::Удалить&nbsp;все&nbsp;сообщения#(/page)#"
 #-----------------------------
 
 #File: Performance_p.html
@@ -2412,14 +2479,14 @@ Below normal==Ниже нормального
 Idle</option>==Ожидание</option>
 "Set new Priority"=="Установить новый приоритет"
 Changes take effect after <strong>restart</strong> of YaCy==Изменения будут применены после <strong>перезапуска</strong> YaCy.
-Online Caution Settings==Onlinezugriff Verzögerung Einstellungen
-This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird, oder eine lokale oder globale Suche durchgeführt wird.
-The delay is extended by this time each time the proxy is accessed afterwards.==Die normale Verzögerung wird um diese Zeit verlängert, wenn auf den Proxy zugegriffen wird.
-This shall improve performance of the affected process \(proxy or search\).==Dies soll die Performance des betroffenen Prozesses (Proxy oder Suche) erhöhen.
-\(current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
-seconds since last proxy/local-search/remote-search access.\)==Sekunden vergangen.)
-Online Caution Case==Onlinezugriff Typ
-indexer delay \(milliseconds\) after case occurency==Indexierer Verzögerung (Millisekunden) nach Onlinezugriff
+Online Caution Settings==Настройки онлайн задержек
+This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Это время ожидания индексатора при работе прокси-сервера, выполнении локального или удалённого поиска.
+The delay is extended by this time each time the proxy is accessed afterwards.==Задержка выполняется каждый раз при доступности прокси.
+This shall improve performance of the affected process \(proxy or search\).==Это должно улучшить производительность соответствующих процессов (прокси или поиск).
+\(current delta is==\(Текущая разница 
+seconds since last proxy/local-search/remote-search access.\)==секунд после последнего доступа к прокси/локальному поиску/удалённому поиску.\)
+Online Caution Case==Индексатор
+indexer delay \(milliseconds\) after case occurency==Задержка индексатора (мс)
 Proxy:==Прокси:
 Local Search:==Локальный поиск:
 Remote Search:==Удалённый поиск:
@@ -2601,6 +2668,10 @@ When scraping proxy pages then <strong>no personal or protected page is indexed<
 those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==Такие страницы определяются по свойствам HTTP-заголовка (использование куки или HTTP-авторизации)
 or by POST-Parameters \(either in URL or as HTTP protocol\)==или по параметрам POST (в адресе или передающиеся через HTTP-протокол)
 and automatically excluded from indexing.==и автоматически исключаются из индексирования.
+
+You have to==Перед использованием прокси, сначала вы должны его
+>setup the proxy<==>настроить<
+before use.==.
 Proxy Auto Config:==Автоматическая конфигурация прокси:
 this controls the proxy auto configuration script for browsers at http://localhost:8090/autoconfig.pac==Используйте скрипт автоматической конфигурации прокси для браузеров http://localhost:8090/autoconfig.pac
 .yacy-domains only==Только домены .yacy
@@ -2615,14 +2686,14 @@ this means that only embedded href-anchors are prefetched additionally.==буд�
 Store to Cache==Сохранять в кэш
 It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Рекомендуется отключать только в том случае, если вы используете второй кэширующий прокси-сервер и YaCy настроен на использование в режиме прокси-прокси.
 Do Local Text-Indexing==Индексировать локальный текст
-If this is on, all pages \(except private content\) that passes the proxy is indexed.==Если включено, то все страницы, включая личные, будут проиндексированы.
+If this is on, all pages \(except private content\) that passes the proxy is indexed.==Если включено, то все страницы, за исключением личных, будут проиндексированы.
 Do Local Media-Indexing==Индексировать локальные медиа-файлы
 This is the same as for Local Text-Indexing, but switches only the indexing of media content on.==Если включено, то все медиа-файлы будут индексироваться.
 Do Remote Indexing==Производить удалённое индексирование
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Если включено, то для индексирования также будут использоваться удалённые узлы.
 If you need your crawling results locally, you should switch this off.==Если вам необходимы данные о локальной индексации, то снимите этот флажок.
 Only senior and principal peers can initiate or receive remote crawls.==Только узлы работающие в режимах senior и principal, могут участвовать в удалённой индексации.
-Please note that this setting only take effect for a prefetch depth greater than 0.==Обратите внимение, что это действует только отключена предварительная выборка.
+Please note that this setting only take effect for a prefetch depth greater than 0.==Обратите внимание, что это действует только если отключена предварительная выборка.
 Proxy generally==Кэш прокси
 Path==Путь
 The path where the pages are stored \(max. length 300\)==Место хранения кэша
@@ -2651,13 +2722,13 @@ Quick Crawl Link==Schnell Crawl Link
 Quickly adding Bookmarks:==Быстрое добавление закладок:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
 If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
-Crawl with YaCy==Mit YaCy crawlen
+Crawl with YaCy==Индексировать с YaCy
 Title:==Заголовок:
 Link:==Ссылка:
 Status:==Состояние:
 URL successfully added to Crawler Queue==Ссылка успешно добавлена в очередь индексатора.
 Malformed URL==Некорректная ссылка
-Unable to create new crawling profile for URL:==Es ist nicht möglich für diese URL ein Crawling Profil zu erstellen:
+Unable to create new crawling profile for URL:==Невозможно создать новый профиль индексирования для ссылки:
 Unable to add URL to crawler queue:==Невозможно добавить ссылку в очередь индексатора:
 #-----------------------------
 
@@ -2778,7 +2849,7 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 #>Release/<br/>SVN<==>Версия/<br/>SVN<
 >PPM<==>Страниц в минуту (PPM)<
 >QPH<==>Запросов в час (QPH)<
->Last<br/>Seen<==>Zuletzt<br/>Gesehen<
+>Last<br/>Seen<==>Последний<br/>просмотр<
 >UTC</strong><br/>Offset<==>UTC</strong><br/><
 >Uptime<==>Время работы<
 >Links<==>Ссылки<
@@ -3017,6 +3088,7 @@ Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geänd
 Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
 Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
 The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
+If you open any public web page through the proxy, you must log-in.==Wenn Sie öffentliche Webseiten über den Proxy öffnen, müssen Sie sich anmelden.
 The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
 The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Peername wurde nicht geändert.
 Your Peer Language is:==Ihre Peer Sprache ist:
@@ -3168,7 +3240,6 @@ on::off==вкл::выкл
 
 Configure==Настройка
 max:==Максимально:
-
 Configure==Настройка
 Traffic==Трафик
 Reset</a>==Сброс</a>
@@ -3240,17 +3311,17 @@ provided by YaCy peers with an URL in their profile. This shows only URLs from p
 
 #File: Surftips.html
 #---------------------------
-Surftips</title>==Surftipps</title>
+Surftips</title>==Советы</title>
 Surftips</h2>==Surftipps</h2>
 Surftips are switched off==Surftipps sind ausgeschaltet
-title="bookmark"==title="Lesezeichen"
-alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
-title="positive vote"==title="Positive Bewertung"
-alt="Give positive vote"==alt="Link positiv bewerten"
-title="negative vote"==title="Negative Bewertung"
-alt="Give negative vote"==alt="Link negativ bewerten"
-YaCy Supporters<==YaCy Unterstützer<
->a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
+title="bookmark"==title="Закладка"
+alt="Add to bookmarks"==alt="Добавить в закладки"
+title="positive vote"==title="Понравилось"
+alt="Give positive vote"==alt="Ссылка понравилась"
+title="negative vote"==title="Не понравилось"
+alt="Give negative vote"==alt="Ссылка не понравилась"
+YaCy Supporters<==Сторонники YaCy<
+>a list of home pages of yacy users<==>Список домашних страниц пользователей YaCy<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
 #"authentication required"=="Autorisierung erforderlich"
@@ -3633,9 +3704,10 @@ Web Structure<==Вэб-структура<
 The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
-Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
-To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
-API wiki page==API Seite im WikiWeb Structure==Netz Struktur
+Click the API icon to see the XML file.==Нажмите на иконку API для просмотра XML-файла.
+To see a list of all APIs, please visit the==Для просмотра списка всех API, пожалуйста, посетите
+API wiki page==страницу API Wiki
+Web Structure==Вэб-структура
 >Host List<==>Список хостов<
 \#\[count\]\# outlinks==#[count]# внешних ссылок
 host<==Хост<
@@ -3842,6 +3914,7 @@ English, Englisch==Русский, Русский
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
+YaCy Administration==Управление YaCy
 YaCy - Distributed Search Engine==YaCy - Система распределённого поиска
 ### SEARCH INTERFACES ###
 Search Interfaces==Интерфейсы поиска
@@ -3901,7 +3974,7 @@ Peer Statistics::YaCy Statistics==Статистика узлов::YaCy Стат
 #File: env/templates/simpleheader.template
 #---------------------------
 Administration<==Администрирование<
->Web Search<==>Веб‐поиск<
+>Web Search<==>Вэб‐поиск<
 >File Search<==>Поиск файлов<
 >HostBrowser<==>Просмотр хостов<
 >About Us<==>О пользователе<
@@ -3920,6 +3993,13 @@ Local Search<==Локальный поиск<
 #Log==Лог
 Host Tracker==Хост-трекер
 Remote Search<==Удалённый поиск<
+#-----------------------------
+
+#File: env/templates/submenuSearchIntegration.template
+#---------------------------
+Search Integration into External Sites==Интеграция поиска во внешние сайты
+Live Search Anywhere=="Живой" поиск везде
+Search Box Anywhere==Поиск везде
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -3958,7 +4038,7 @@ Content Control==Управление контентом
 #File: env/templates/submenuConfig.template
 #---------------------------
 Peer Administration Console==Консоль администрирования узла
-#Status==Состояние
+>Status==>Состояние
 Basic Configuration==Основная конфигурация
 >Accounts==>Учетные записи
 Network Configuration==Конфигурация сети
@@ -3995,16 +4075,18 @@ DHT Transfer==DHT-передача
 Proxy Use==Использование прокси
 Local Crawling</a>==Локальное индексирование</a>
 Global Crawling</a>==Глобальное индексирование</a>
-Surrogate Import</a>==Surrogat Import</a>
+Surrogate Import</a>==Замещающий импорт</a>
 Processing Monitor==Монитор процессов
 Crawler Queues==Очереди индексирования
+Web==
 Crawler<==Индексатор<
 Loader<==Загружаемые ссылки<
 Rejected URLs==Отклонённые ссылки
 >Queues<==>Очереди<
-Local<==Локальный<
-Global==Глобальный
-Remote==Удалённый
+Local<==Локальная<
+Global==Глобальная
+Remote==Удалённая
+No-Load==Холостая
 Crawler Steering==Управление индексатором
 Scheduler and Profile Editor<==Планировщик и редактор профиля<
 robots.txt Monitor==Монитор robots.txt
@@ -4041,12 +4123,13 @@ Crawl Start==Запуск индексирования
 Crawl Profile Editor==Изменение профиля индексатора
 Crawler Queues==Очереди индексатора
 Indexing<==Индексирование<
+Full Site Crawl/<br/>Sitemap Loader==Полное индексирование сайта/<br/>Загрузка карты сайта
 Loader<==Загрузчик<
 URLs to be processed==выполняются URL-адреса
 Processing Queues==Состояние очередей
 Local<==Локальный<
 Global<==Глобальный<
-Remote<==Удалённый<
+#Remote<==Удалённый<
 Overhang<==Überhang<
 Media Crawl Queues==Очереди индексирования медиа-файлов
 >Images==>Картинки
@@ -4055,17 +4138,17 @@ Media Crawl Queues==Очереди индексирования медиа-фа�
 #--- New menu items ---
 Index Creation==Создание индекса
 Crawler/Spider<==Индексатор<
-Full Site Crawl==Полное индексирование сайта
-Sitemap Loader==Загрузка карты сайта
-Crawl Start \(Expert\)==Запуск индексирования \(Эксперт\)
+#Crawl Start<br/>(Expert)==Запуск индексирования<br/>(Эксперт)
 Network<br/>Scanner==Сканер<br/>сети
 #>Intranet<br/>Scanner<==>Сканер<br/>Интранет<
 Crawling of==Индексирование
 MediaWikis==MediaWiki
 >phpBB3 Forums<==>phpBB3‐форумов<
 Content Import<==Импорт контента<
+RSS Feed<br/>Importer==Импорт<br/>RSS-лент
+OAI-PMH<br/>Importer==Импорт данных<br/>OAI-PMH
 Network Harvesting<==Сеть индексирования<
->Remote Crawling<==>Удалённое индексирование<
+Remote<br/>Crawling==Удалённое<br/> индексирование
 Scraping<br/>Proxy==Кэширующий<br/>прокси
 Database Reader<==Обозреватель баз данных<
 for phpBB3 Forums==для форумов phpBB3
@@ -4087,7 +4170,7 @@ Content Semantic==Семантический контент
 # Subemenu: Automated Annotation
 >Automated Annotation<==>Автоматическое комментирование<
 Auto-Annotation Vocabulary Editor==Редактор словаря авто-комментирования
-Knowledge Loader==Загрузчик знаний
+Knowledge Loader==Загрузка словарей
 # Submenu Augmented Content
 >Augmented Content<==>Расширенный контент<
 Augmented Browsing==Расширенный просмотр
@@ -4132,8 +4215,8 @@ Server Log==Лог сервера
 
 #File: env/templates/submenuWebStructure.template
 #---------------------------
-Web Visualization==Веб визуализация
-Web Structure==Веб структура
+Web Visualization==Вэб-визуализация
+Web Structure==Вэб-структура
 Image Collage==Коллаж изображений
 #-----------------------------
 
