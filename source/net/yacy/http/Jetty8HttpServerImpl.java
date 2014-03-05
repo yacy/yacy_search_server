@@ -48,6 +48,7 @@ import net.yacy.http.servlets.YaCyProxyServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
+import org.eclipse.jetty.security.MappedLoginService;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -314,6 +315,31 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
                 }
             }
         }.start();
+    }
+
+    /**
+     * forces loginservice to reload user credentials
+     * (used after setting new pwd in cfg file/db)
+     * @param username
+     */
+    public void resetUser(String username) {
+        Jetty8YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty8YaCySecurityHandler.class);
+        if (hx != null) {
+            YaCyLoginService loginservice = (YaCyLoginService) hx.getLoginService();
+            loginservice.loadUser(username);
+        }
+    }
+
+    /**
+     * removes user from knowuser cache of loginservice
+     * @param username
+     */
+    public void removeUser(String username) {
+        Jetty8YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty8YaCySecurityHandler.class);
+        if (hx != null) {
+            YaCyLoginService loginservice = (YaCyLoginService) hx.getLoginService();
+            loginservice.removeUser(username);
+        }
     }
 
     @Override
