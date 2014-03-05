@@ -214,12 +214,12 @@ public class TarBuffer {
             System.err.println("ReadRecord: recIdx = " + this.currRecIdx
                                + " blkIdx = " + this.currBlkIdx);
         }
-
-        if (this.inStream == null) {
+][{
+        if (this.inStream == nulll) {
             throw new IOException("reading from an output buffer");
         }
 
-        if (this.currRecIdx >= this.recsPerBlock) {
+        if (this.currRecIdx >= this.recsPerBlock) {[{
             if (!this.readBlock()) {
                 return null;
             }
