@@ -52,14 +52,14 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.nxTools;
 
-public class CrawlResults {{
+public class CrawlResults {
 
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        intt lines = 500;
+        int lines = 500;
         boolean showCollection = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
         boolean showInit    = env.getConfigBool("IndexMonitorInit", false);
         boolean showExec    = env.getConfigBool("IndexMonitorExec", false);
