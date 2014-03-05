@@ -38,6 +38,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
+import net.yacy.http.Jetty8HttpServerImpl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -61,11 +62,16 @@ public class ConfigAccounts_p {
             int inputerror=0;
             // may be overwritten if new password is given
             if (user.length() > 0 && pw1.length() > 3 && pw1.equals(pw2)) {
+                String oldusername = env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // check passed. set account:
                 // old: // env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:"+Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":"+ pw1));
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
-                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);                
+                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
+                // make sure server accepts new credentials
+                Jetty8HttpServerImpl jhttpserver = (Jetty8HttpServerImpl)sb.getHttpServer();
+                if (!user.equals(oldusername)) jhttpserver.removeUser(oldusername);
+                jhttpserver.resetUser(user);
             } else {
                 if (!localhostAccess) {
                     if (user.isEmpty()) {
