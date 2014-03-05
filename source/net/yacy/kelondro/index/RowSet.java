@@ -47,7 +47,6 @@ import net.yacy.kelondro.util.MemoryControl;
 public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>, Serializable {
 
     private static final long serialVersionUID=-6036029762440788566L;
-    private static final int collectionReSortLimit = 3000;
 
     public RowSet(final RowSet rs) {
         super(rs);
@@ -184,6 +183,10 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         }
     }
 
+    private final int collectionReSortLimit() {
+        return Math.min(3000, Math.max(100, this.chunkcount / 3));
+    }
+    
     @Override
     public final Row.Entry replace(final Row.Entry entry) throws SpaceExceededException {
         assert (entry != null);
@@ -195,7 +198,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
             int index = -1;
             Row.Entry oldentry = null;
             // when reaching a specific amount of un-sorted entries, re-sort all
-            if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
+            if ((this.chunkcount - this.sortBound) > collectionReSortLimit()) {
                 sort();
             }
             index = find(key, 0);
@@ -287,7 +290,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
 
         if (this.rowdef.objectOrder == null) return iterativeSearch(a, astart, 0, this.chunkcount);
 
-        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit()) {
             sort();
         }
 
