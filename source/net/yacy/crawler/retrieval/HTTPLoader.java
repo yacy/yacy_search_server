@@ -41,7 +41,6 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.http.AlternativeDomainNames;
-import net.yacy.server.http.HTTPDemon;
 
 public final class HTTPLoader {
 
@@ -99,7 +98,7 @@ public final class HTTPLoader {
         }
 
         // resolve yacy and yacyh domains
-        final AlternativeDomainNames yacyResolver = HTTPDemon.getAlternativeResolver();
+        final AlternativeDomainNames yacyResolver = this.sb.peers;
         if(yacyResolver != null) {
         	final String yAddress = yacyResolver.resolve(host);
         	if(yAddress != null) {

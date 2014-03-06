@@ -730,7 +730,7 @@ public final class HTTPDProxyHandler {
      * @return
      */
     private static String resolveYacyDomains(final String host) {
-        return (HTTPDemon.getAlternativeResolver() == null) ? null : HTTPDemon.getAlternativeResolver().resolve(host);
+        return (sb.peers == null) ? null : sb.peers.resolve(host);
     }
 
     /**
@@ -911,7 +911,7 @@ public final class HTTPDProxyHandler {
 
     private static void setViaHeader(final HeaderFramework header, final String httpVer) {
         if (!sb.getConfigBool("proxy.sendViaHeader", true)) return;
-        final String myAddress = (HTTPDemon.getAlternativeResolver() == null) ? null : HTTPDemon.getAlternativeResolver().myAlternativeAddress();
+        final String myAddress = (sb.peers == null) ? null : sb.peers.myAlternativeAddress();
         if (myAddress != null) {
 
             // getting header set by other proxies in the chain
