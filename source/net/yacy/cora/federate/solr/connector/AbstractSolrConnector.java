@@ -138,10 +138,18 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @param maxcount the maximum number of results
      * @param maxtime the maximum time in milliseconds
      * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
+     * @param concurrency is the number of AbstractSolrConnector.POISON_DOCUMENT entries to add at the end of the feed
      * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
     @Override
-    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields) {
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(
+            final String querystring,
+            final int offset,
+            final int maxcount,
+            final long maxtime,
+            final int buffersize,
+            final int concurrency,
+            final String ... fields) {
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final Thread t = new Thread() {
@@ -157,7 +165,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                             try {queue.put(d);} catch (final InterruptedException e) {break;}
                             count++;
                         }
-                        if (sdl.size() <= 0) break;
+                        if (sdl.size() < pagesize) break;
                         o += sdl.size();
                     } catch (final SolrException e) {
                         break;
@@ -165,7 +173,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         break;
                     }
                 }
-                try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (final InterruptedException e1) {}
+                for (int i = 0; i < concurrency; i++) {
+                    try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (final InterruptedException e1) {}
+                }
             }
         };
         t.start();
@@ -173,8 +183,14 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
 
     @Override
-    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime) {
-        final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+    public BlockingQueue<String> concurrentIDsByQuery(
+            final String querystring,
+            final int offset,
+            final int maxcount,
+            final long maxtime,
+            final int buffersize,
+            final int concurrency) {
+        final BlockingQueue<String> queue = buffersize <= 0 ? new LinkedBlockingQueue<String>() : new ArrayBlockingQueue<String>(buffersize);
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final Thread t = new Thread() {
             @Override
@@ -187,7 +203,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         for (SolrDocument d: sdl) {
                             try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
                         }
-                        if (sdl.size() <= 0) break;
+                        if (sdl.size() < pagesize) break;
                         o += sdl.size();
                     } catch (final SolrException e) {
                         break;
@@ -195,7 +211,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         break;
                     }
                 }
-                try {queue.put(AbstractSolrConnector.POISON_ID);} catch (final InterruptedException e1) {}
+                for (int i = 0; i < concurrency; i++) {
+                    try {queue.put(AbstractSolrConnector.POISON_ID);} catch (final InterruptedException e1) {}
+                }
             }
         };
         t.start();
@@ -204,7 +222,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
     @Override
     public Iterator<String> iterator() {
-        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_QUERY, 0, Integer.MAX_VALUE, 60000);
+        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_QUERY, 0, Integer.MAX_VALUE, 60000, 2 * pagesize, 1);
         return new LookAheadIterator<String>() {
             @Override
             protected String next0() {

@@ -415,13 +415,13 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
-    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(String querystring, int offset, int maxcount, long maxtime, int buffersize, String... fields) {
-        return this.connector.concurrentDocumentsByQuery(querystring, offset, maxcount, maxtime, buffersize, fields);
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(String querystring, int offset, int maxcount, long maxtime, int buffersize, final int concurrency, String... fields) {
+        return this.connector.concurrentDocumentsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency, fields);
     }
 
     @Override
-    public BlockingQueue<String> concurrentIDsByQuery(String querystring, int offset, int maxcount, long maxtime) {
-        return this.connector.concurrentIDsByQuery(querystring, offset, maxcount, maxtime);
+    public BlockingQueue<String> concurrentIDsByQuery(String querystring, int offset, int maxcount, long maxtime, int buffersize, final int concurrency) {
+        return this.connector.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
     }
 
 }

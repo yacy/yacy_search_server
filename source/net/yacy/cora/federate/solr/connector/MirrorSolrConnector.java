@@ -427,10 +427,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public BlockingQueue<String> concurrentIDsByQuery(String querystring, int offset, int maxcount, long maxtime) {
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.concurrentIDsByQuery(querystring, offset, maxcount, maxtime);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.concurrentIDsByQuery(querystring, offset, maxcount, maxtime);
-        return super.concurrentIDsByQuery(querystring, offset, maxcount, maxtime);
+    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final int concurrency) {
+        if (this.solr0 != null && this.solr1 == null) return this.solr0.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
+        if (this.solr0 == null && this.solr1 != null) return this.solr1.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
+        return super.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
     }
     
 }

@@ -178,7 +178,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return changed;
     }
     
-    public boolean postprocessing_clickdepth(ClickdepthCache clickdepthCache, SolrInputDocument sid, DigestURL url, SchemaDeclaration clickdepthfield, int maxtime) {
+    public boolean postprocessing_clickdepth(final ClickdepthCache clickdepthCache, final SolrInputDocument sid, final DigestURL url, final SchemaDeclaration clickdepthfield, final int maxtime) {
         if (!this.contains(clickdepthfield)) return false;
         // get new click depth and compare with old
         Integer oldclickdepth = (Integer) sid.getFieldValue(clickdepthfield.getSolrFieldName());
@@ -194,7 +194,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return false;
     }
 
-    public boolean postprocessing_references(ReferenceReportCache rrCache, SolrInputDocument sid, DigestURL url, Map<String, Long> hostExtentCount) {
+    public boolean postprocessing_references(final ReferenceReportCache rrCache, final SolrInputDocument sid, final DigestURL url, final Map<String, Long> hostExtentCount) {
         if (!(this.contains(CollectionSchema.references_i) ||
               this.contains(CollectionSchema.references_internal_i) ||
               this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;

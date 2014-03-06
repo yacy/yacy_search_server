@@ -35,7 +35,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
@@ -48,15 +47,11 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
-import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segment.ClickdepthCache;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
 
@@ -305,74 +300,6 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         
         // return the edge
         return edge;
-    }
-    
-    
-    public int postprocessing(final Segment segment, ClickdepthCache clickdepthCache, final String harvestkey) {
-        if (!this.contains(WebgraphSchema.process_sxt)) return 0;
-        if (!segment.fulltext().useWebgraph()) return 0;
-        SolrConnector webgraphConnector = segment.fulltext().getWebgraphConnector();
-        // that means we must search for those entries.
-        webgraphConnector.commit(true); // make sure that we have latest information that can be found
-        //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-        String query = (harvestkey == null || !this.contains(WebgraphSchema.harvestkey_s) ? "" : WebgraphSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") + WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
-        BlockingQueue<SolrDocument> docs = webgraphConnector.concurrentDocumentsByQuery(query, 0, 10000000, 1800000, 100);
-        
-        SolrDocument doc;
-        String protocol, urlstub, id;
-        DigestURL url;
-        int proccount = 0, proccount_clickdepthchange = 0;
-        try {
-            while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                // for each to-be-processed entry work on the process tag
-                Collection<Object> proctags = doc.getFieldValues(WebgraphSchema.process_sxt.getSolrFieldName());
-
-                try {
-                    SolrInputDocument sid = this.toSolrInputDocument(doc);
-                    //boolean changed = false;
-                    for (Object tag: proctags) {
-                                             
-                        // switch over tag types
-                        ProcessType tagtype = ProcessType.valueOf((String) tag);
-                        if (tagtype == ProcessType.CLICKDEPTH) {
-                            if (this.contains(WebgraphSchema.source_clickdepth_i) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
-                                protocol = (String) doc.getFieldValue(WebgraphSchema.source_protocol_s.getSolrFieldName());
-                                urlstub = (String) doc.getFieldValue(WebgraphSchema.source_urlstub_s.getSolrFieldName());
-                                id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
-                                url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
-                                if (postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.source_clickdepth_i, 100)) {
-                                    proccount_clickdepthchange++;
-                                    //changed = true;
-                                }
-                                //ConcurrentLog.info("WebgraphConfiguration", "postprocessing webgraph source id " + id + ", url=" + protocol + "://" + urlstub + ", result: " + (changed ? "changed" : "not changed"));
-                            }
-                            if (this.contains(WebgraphSchema.target_clickdepth_i) && this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
-                                protocol = (String) doc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName());
-                                urlstub = (String) doc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
-                                id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
-                                url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
-                                if (postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.target_clickdepth_i, 100)) {
-                                    proccount_clickdepthchange++;
-                                    //changed = true;
-                                }
-                                //ConcurrentLog.info("WebgraphConfiguration", "postprocessing webgraph target id " + id + ", url=" + protocol + "://" + urlstub + ", result: " + (changed ? "changed" : "not changed"));
-                            }
-                        }
-                    }
-                    // all processing steps checked, remove the processing tag
-                    sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
-                    if (this.contains(WebgraphSchema.harvestkey_s)) sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
-                    // send back to index
-                    webgraphConnector.add(sid);
-                    proccount++;
-                } catch (Throwable e1) {
-                    ConcurrentLog.warn(WebgraphConfiguration.class.getName(), "postprocessing failed", e1);
-                }
-            }
-            ConcurrentLog.info("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " + proccount_clickdepthchange + " clickdepth values changed.");
-        } catch (final InterruptedException e) {
-        }
-        return proccount;
     }
 
     /**

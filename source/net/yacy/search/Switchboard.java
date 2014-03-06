@@ -2292,7 +2292,6 @@ public final class Switchboard extends serverSwitch {
             // execute the (post-) processing steps for all entries that have a process tag assigned
             Fulltext fulltext = index.fulltext();
             CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
-            WebgraphConfiguration webgraphConfiguration = fulltext.getWebgraphConfiguration();
             if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && MemoryControl.available() > 512L * 1024L * 1024L && Memory.load() < 2.5f) {
                 
                 // we optimize first because that is useful for postprocessing
@@ -2302,10 +2301,9 @@ public final class Switchboard extends serverSwitch {
                 Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
                         this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
                 int cleanupByHarvestkey = deletionCandidates.size();
-                boolean processCollection =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.useWebgraph());
-                boolean processWebgraph =  webgraphConfiguration.contains(WebgraphSchema.process_sxt) && fulltext.useWebgraph();
+                boolean postprocessing =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.useWebgraph());
                 boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
-                if ((processCollection || processWebgraph) && (cleanupByHarvestkey > 0 || allCrawlsFinished)) {
+                if (postprocessing && (cleanupByHarvestkey > 0 || allCrawlsFinished)) {
                     if (cleanupByHarvestkey > 0) {
                         // run postprocessing on these profiles
                         postprocessingRunning = true;
@@ -2315,13 +2313,6 @@ public final class Switchboard extends serverSwitch {
                         postprocessingStartTime[0] = 0;
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
                         
-                        if (processWebgraph) {
-                            postprocessingStartTime[1] = System.currentTimeMillis();
-                            try {postprocessingCount[1] = (int) fulltext.getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-                            for (String profileHash: deletionCandidates) proccount += webgraphConfiguration.postprocessing(index, clickdepthCache, profileHash);
-                            postprocessingStartTime[1] = 0;
-                            try {postprocessingCount[1] = (int) fulltext.getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-                        }
                         this.crawler.cleanProfiles(deletionCandidates);
                         log.info("cleanup removed " + cleanupByHarvestkey + " crawl profiles, post-processed " + proccount + " documents");
                     } else if (allCrawlsFinished) {
@@ -2333,13 +2324,6 @@ public final class Switchboard extends serverSwitch {
                         postprocessingStartTime[0] = 0;
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
 
-                        if (processWebgraph) {
-                            postprocessingStartTime[1] = System.currentTimeMillis();
-                            try {postprocessingCount[1] = (int) fulltext.getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-                            proccount += webgraphConfiguration.postprocessing(index, clickdepthCache, null);
-                            postprocessingStartTime[1] = 0;
-                            try {postprocessingCount[1] = (int) fulltext.getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-                        }
                         this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
                         log.info("cleanup post-processed " + proccount + " documents");
                     }

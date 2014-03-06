@@ -30,13 +30,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
@@ -287,7 +287,7 @@ public class Segment {
     public class ReferenceReportCache {
         private final Map<String, ReferenceReport> cache;
         public ReferenceReportCache() {
-            this.cache = new HashMap<String, ReferenceReport>();
+            this.cache = new ConcurrentHashMap<String, ReferenceReport>();
         }
         public ReferenceReport getReferenceReport(final String id, final boolean acceptSelfReference) throws IOException {
             ReferenceReport rr = cache.get(id);
@@ -309,11 +309,11 @@ public class Segment {
     }
     
     public class ClickdepthCache {
-        ReferenceReportCache rrc;
-        Map<String, Integer> cache;
+        final ReferenceReportCache rrc;
+        final Map<String, Integer> cache;
         public ClickdepthCache(ReferenceReportCache rrc) {
             this.rrc = rrc;
-            this.cache = new HashMap<String, Integer>();
+            this.cache = new ConcurrentHashMap<String, Integer>();
         }
         public int getClickdepth(final DigestURL url, int maxtime) throws IOException {
             Integer clickdepth = cache.get(ASCII.String(url.hash()));
@@ -371,7 +371,7 @@ public class Segment {
             if ((internalIDs.size() == 0 || !connectedCitation()) && Segment.this.fulltext.useWebgraph()) {
                 // reqd the references from the webgraph
                 SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
-                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), 0, 10000000, 1000, 100, WebgraphSchema.source_id_s.getSolrFieldName());
+                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), 0, 10000000, 1000, 100, 1, WebgraphSchema.source_id_s.getSolrFieldName());
                 SolrDocument doc;
                 try {
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -474,12 +474,12 @@ public class Segment {
         final BlockingQueue<SolrDocument> docQueue;
         final String urlstub;
         if (stub == null) {
-            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(AbstractSolrConnector.CATCHALL_QUERY, 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(AbstractSolrConnector.CATCHALL_QUERY, 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = null;
         } else {
             final String host = stub.getHost();
             String hh = DigestURL.hosthash(host);
-            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = stub.toNormalform(true);
         }
 

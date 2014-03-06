@@ -214,10 +214,18 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param maxcount the maximum number of results
      * @param maxtime the maximum time in milliseconds
      * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
+     * @param concurrency is the number of AbstractSolrConnector.POISON_DOCUMENT entries to add at the end of the feed
      * @param fields list of fields
      * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
-    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields);
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(
+            final String querystring,
+            final int offset,
+            final int maxcount,
+            final long maxtime,
+            final int buffersize,
+            final int concurrency,
+            final String ... fields);
 
     /**
      * get a document id result stream from a solr query.
@@ -226,8 +234,16 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param querystring
      * @param offset
      * @param maxcount
+     * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
+     * @param concurrency is the number of AbstractSolrConnector.POISON_ID entries to add at the end of the feed
      * @return
      */
-    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime);
+    public BlockingQueue<String> concurrentIDsByQuery(
+            final String querystring,
+            final int offset,
+            final int maxcount,
+            final long maxtime,
+            final int buffersize,
+            final int concurrency);
 
 }
