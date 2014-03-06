@@ -82,10 +82,8 @@ public final class HTTPDemon {
     private static final int SIZE_FILE_THRESHOLD = 20 * 1024 * 1024;
     private static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
 
-    private static AlternativeDomainNames alternativeResolver = null;
-
     // static objects
-    private static volatile Switchboard switchboard;
+    private static volatile Switchboard switchboard = Switchboard.getSwitchboard();
 
     public static boolean keepAliveSupport = false;
 
@@ -333,7 +331,7 @@ public final class HTTPDemon {
                 tp.put("port", switchboard.getConfig("port", "8090"));
             }
 
-            tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());
+            tp.put("peerName", (switchboard.peers == null) ? "" : switchboard.peers.myName());
             tp.put("errorMessageType", Integer.toString(errorcase));
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD));
@@ -509,19 +507,4 @@ public final class HTTPDemon {
             throw new IOException(e.getMessage());
         }
     }
-
-    /**
-     * @param alternativeResolver the alternativeResolver to set
-     */
-    public static void setAlternativeResolver(final AlternativeDomainNames alternativeResolver) {
-        HTTPDemon.alternativeResolver = alternativeResolver;
-    }
-
-    /**
-     * @return the alternativeResolver
-     */
-    public static AlternativeDomainNames getAlternativeResolver() {
-        return alternativeResolver;
-    }
-
 }

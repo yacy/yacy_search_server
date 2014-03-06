@@ -60,7 +60,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.AlternativeDomainNames;
-import net.yacy.server.http.HTTPDemon;
 
 public final class SeedDB implements AlternativeDomainNames {
 
@@ -123,9 +122,6 @@ public final class SeedDB implements AlternativeDomainNames {
 
         this.lastSeedUpload_seedDBSize = sizeConnected();
 
-        // tell the httpdProxy how to find this table as address resolver
-        HTTPDemon.setAlternativeResolver(this);
-
         // create or init news database
         this.newsPool = new NewsPool(networkRoot, useTailCache, exceed134217727);
 
@@ -173,9 +169,6 @@ public final class SeedDB implements AlternativeDomainNames {
         removeMySeed();
 
         this.lastSeedUpload_seedDBSize = sizeConnected();
-
-        // tell the httpdProxy how to find this table as address resolver
-        HTTPDemon.setAlternativeResolver(this);
 
         // create or init news database
         this.newsPool = new NewsPool(newNetworkRoot, useTailCache, exceed134217727);

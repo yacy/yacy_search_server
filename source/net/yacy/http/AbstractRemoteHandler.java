@@ -73,6 +73,7 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         if (sb.peers != null) {
             localVirtualHostNames.add(sb.peers.mySeed().getIP());
             localVirtualHostNames.add(sb.peers.myAlternativeAddress()); // add the "peername.yacy" address
+            localVirtualHostNames.add(sb.peers.mySeed().getHexHash() + ".yacyh"); // bugfix by P. Dahl
         }
     }
 	
@@ -89,7 +90,6 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         int hostSplitPos = host.indexOf(':');
         String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
         
-        if (hostOnly.equals(sb.peers.mySeed().getHexHash() + ".yacyh")) return; // bugfix by P. Dahl
         if (localVirtualHostNames.contains(hostOnly)) return; // no proxy request (quick check), continue processing by handlers        
         if (Domains.isLocal(hostOnly, null)) return; // no proxy, continue processing by handlers
         if (hostOnly.startsWith(sb.peers.myIP())) { // remote access to my external IP, continue processing by handlers
