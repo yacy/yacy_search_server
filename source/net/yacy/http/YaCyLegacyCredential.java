@@ -70,7 +70,7 @@ public class YaCyLegacyCredential extends Credential {
         }
         if (credentials instanceof String) { // for BASIC auth
             final String pw = (String) credentials;
-            if (isBase64enc) {
+            if (isBase64enc) { // for old B64MD5 admin hashes
                 if (serverAccessTracker.timeSinceAccessFromLocalhost() < 100) {
                     // we allow localhost accesses also to submit the hash as password
                     // this is very important since that method is used by the scripts in bin/ which are based on bin/apicall.sh
@@ -83,11 +83,20 @@ public class YaCyLegacyCredential extends Credential {
                 return calcHash(foruser + ":" + pw).equals(this.hash); // for admin user
             }
 
-            // normal users (and new admin pwd)
+            // normal users (and new admin pwd) for BASIC auth
             if (hash.startsWith(MD5.__TYPE) && hash != null) {
-                return (Digest.encodeMD5Hex(foruser + ":" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":" + pw).equals(hash.substring(4)));
+                boolean success = (Digest.encodeMD5Hex(foruser + ":" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":" + pw).equals(hash.substring(4)));
+                // exception: allow the hash as pwd (used  in bin/apicall.sh)
+                if (!success && foruser.equals(Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"))) {
+                    if (pw.equals(hash)) {
+                        if (serverAccessTracker.timeSinceAccessFromLocalhost() < 100) {
+                            return true;
+                        }
+                    }
+                }
+                return success;
             }
-            return Digest.encodeMD5Hex(foruser + ":" + pw).equals(hash);
+            return Digest.encodeMD5Hex(foruser + ":" + pw).equals(hash); // for old userdb hashes
         }
         throw new UnsupportedOperationException();
     }
