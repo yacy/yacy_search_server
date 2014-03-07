@@ -48,7 +48,6 @@ import net.yacy.http.servlets.YaCyProxyServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
-import org.eclipse.jetty.security.MappedLoginService;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -503,7 +502,6 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
             final String errorMsg = "FATAL ERROR: Unable to initialize the SSL Socket factory. " + e.getMessage();
             ConcurrentLog.severe("SERVER",errorMsg);
             System.out.println(errorMsg);
-            System.exit(0);
             return null;
         }
     }
