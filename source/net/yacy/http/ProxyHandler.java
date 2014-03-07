@@ -84,7 +84,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		return result;
 	}
 	
-	static void convertHeaderToJetty(HttpResponse in, HttpServletResponse out) {
+	private void convertHeaderToJetty(HttpResponse in, HttpServletResponse out) {
 		for(Header h: in.getAllHeaders()) {
 			out.addHeader(h.getName(), h.getValue());
 		}
@@ -94,60 +94,90 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		headers.removeHeaders(HeaderFramework.CONTENT_ENCODING);
 		headers.removeHeaders(HeaderFramework.CONTENT_LENGTH);
 	}
+	
+	private void deleteFromCache(final byte[] hash) {
+		// long size = -1;
+        ResponseHeader rh = Cache.getResponseHeader(hash);
+        if (rh != null) {
+            // delete the cache
+            // if ((size = rh.getContentLength()) == 0) {
+            //    byte[] b = Cache.getContent(hash);
+            //    if (b != null) size = b.length;
+            // }
+            try {
+				Cache.delete(hash);
+			} catch (final IOException e) {
+	            // log refresh miss 
+				HTTPDProxyHandler.proxyLog.fine(e.getMessage());
+			}
+        }
+	}
+	
+	private void storeToCache(final Response response, final byte[] array) {
+        final Thread t = new Thread() {
+        	final Response yacyResponse = response;
+        	final byte[] cacheArray = array;
+	        public void run() {
+	           this.setName("ProxyHandler.storeToCache(" + yacyResponse.url() + ")");
+	           if (yacyResponse == null) return;
+	   		
+	           // the cache does either not exist or is (supposed to be) stale
+	           deleteFromCache(yacyResponse.url().hash());
+	           
+	           if (cacheArray == null || cacheArray.length <= 0) return;
+	           
+	           yacyResponse.setContent(cacheArray);
+	           try {
+	               Cache.store(yacyResponse.url(), yacyResponse.getResponseHeader(), cacheArray);
+	               sb.toIndexer(yacyResponse);
+	           } catch (IOException e) {
+	               //log.logWarning("cannot write " + response.url() + " to Cache (1): " + e.getMessage(), e);
+	           }
+	        }
+	    };
+	    t.setPriority(Thread.MIN_PRIORITY);
+	    t.start();
+	}
 
 	@Override
 	public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
+		HttpServletResponse response) throws IOException, ServletException {
+		
+		sb.proxyLastAccess = System.currentTimeMillis();
 
-            if (request.getMethod().equalsIgnoreCase(HeaderFramework.METHOD_CONNECT)) {
-                handleConnect(request, response);
-                return;
+        if (request.getMethod().equalsIgnoreCase(HeaderFramework.METHOD_CONNECT)) {
+            handleConnect(request, response);
+            return;
+        }
+        
+        RequestHeader proxyHeaders = convertHeaderFromJetty(request);
+        setProxyHeaderForClient(request, proxyHeaders);
+
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
+        client.setTimout(timeout);
+        client.setHeader(proxyHeaders.entrySet());
+        client.setRedirecting(false);
+        // send request
+        try {
+            String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
+            DigestURL digestURI = new DigestURL(request.getScheme(), request.getServerName(), request.getServerPort(), request.getPathInfo() + queryString);
+            if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
+                client.GET(digestURI, false);
+            } else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
+                client.POST(digestURI, request.getInputStream(), request.getContentLength(), false);
+            } else if (request.getMethod().equals(HeaderFramework.METHOD_HEAD)) {
+                client.HEADResponse(digestURI, false);
+            } else {
+                throw new ServletException("Unsupported Request Method");
             }
-            
-            RequestHeader proxyHeaders = convertHeaderFromJetty(request);
-            setProxyHeaderForClient(request, proxyHeaders);
+            HttpResponse clientresponse = client.getHttpResponse();
+            int statusCode = clientresponse.getStatusLine().getStatusCode();
+            final ResponseHeader responseHeaderLegacy = new ResponseHeader(statusCode, clientresponse.getAllHeaders());
 
-            final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
-            client.setTimout(timeout);
-            client.setHeader(proxyHeaders.entrySet());
-            client.setRedirecting(false);
-            // send request
-            try {
-                String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
-                DigestURL digestURI = new DigestURL(request.getScheme(), request.getServerName(), request.getServerPort(), request.getPathInfo() + queryString);
-                if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
-                    client.GET(digestURI, false);
-                } else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
-                    client.POST(digestURI, request.getInputStream(), request.getContentLength(), false);
-                } else if (request.getMethod().equals(HeaderFramework.METHOD_HEAD)) {
-                    client.HEADResponse(digestURI, false);
-                } else {
-                    throw new ServletException("Unsupported Request Method");
-                }
-                HttpResponse clientresponse = client.getHttpResponse();
-                int statusCode = clientresponse.getStatusLine().getStatusCode();
-                final ResponseHeader responseHeaderLegacy = new ResponseHeader(statusCode, clientresponse.getAllHeaders());
-
-                if (responseHeaderLegacy.isEmpty()) {
-                    throw new SocketException(clientresponse.getStatusLine().toString());
-                }
-                cleanResponseHeader(clientresponse);
-
-                // TODO: is this fast, if not, use value from ProxyCacheHandler
-                ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI.hash());
-
-            // the cache does either not exist or is (supposed to be) stale
-            long sizeBeforeDelete = -1;
-            if (cachedResponseHeader != null) {
-                // delete the cache
-                ResponseHeader rh = Cache.getResponseHeader(digestURI.hash());
-                if (rh != null && (sizeBeforeDelete = rh.getContentLength()) == 0) {
-                    byte[] b = Cache.getContent(digestURI.hash());
-                    if (b != null) sizeBeforeDelete = b.length;
-                }
-                Cache.delete(digestURI.hash());
-                // log refresh miss 
+            if (responseHeaderLegacy.isEmpty()) {
+                throw new SocketException(clientresponse.getStatusLine().toString());
             }
+            cleanResponseHeader(clientresponse);
             
             // reserver cache entry
             final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
@@ -190,46 +220,11 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                 final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);                
                 final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {response.getOutputStream(), byteStream});
                 convertHeaderToJetty(clientresponse, response);
- 		response.setStatus(statusCode);
+                response.setStatus(statusCode);
                 client.writeTo(toClientAndMemory);
                 
-             // cached bytes
-                byte[] cacheArray;
-                if (byteStream.size() > 0) {
-                    cacheArray = byteStream.toByteArray();
-                } else {
-                    cacheArray = null;
-                }
-                //if (log.isFine()) log.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
-
-                if (sizeBeforeDelete == -1) {
-                    // totally fresh file
-                	yacyResponse.setContent(cacheArray);
-                    try {
-                        Cache.store(yacyResponse.url(), yacyResponse.getResponseHeader(), cacheArray);
-                        sb.toIndexer(yacyResponse);
-                    } catch (IOException e) {
-                        //log.logWarning("cannot write " + response.url() + " to Cache (1): " + e.getMessage(), e);
-                    }
-                    // log cache miss
-                } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
-                	// TODO: what should happen here?
-                    // before we came here we deleted a cache entry
-                    cacheArray = null;
-                    //cacheManager.push(cacheEntry); // unnecessary update
-                    // log cache refresh fail miss
-                } else {
-                    // before we came here we deleted a cache entry
-                	yacyResponse.setContent(cacheArray);
-                    try {
-                        Cache.store(yacyResponse.url(), yacyResponse.getResponseHeader(), cacheArray);
-                        sb.toIndexer(yacyResponse);
-                    } catch (IOException e) {
-                        //log.logWarning("cannot write " + response.url() + " to Cache (2): " + e.getMessage(), e);
-                    }
-                    // log refresh cache miss
-                }
-
+                // cached bytes
+                storeToCache(yacyResponse, byteStream.toByteArray());
             } else {
                 // no caching
                 /*if (log.isFine()) log.logFine(reqID +" "+ url.toString() + " not cached." +
@@ -241,16 +236,16 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
     			
     			client.writeTo(response.getOutputStream());
             }
-		} catch(SocketException se) {
+		} catch(final SocketException se) {
 			throw new ServletException("Socket Exception: " + se.getMessage());
 		} finally {
 			client.finish();
 		}
-		
+        
         // we handled this request, break out of handler chain
         logProxyAccess(request);
-	baseRequest.setHandled(true);
-        }
+        baseRequest.setHandled(true);
+	}
        
     /**
      * adds specific header elements for the connection of the internal
