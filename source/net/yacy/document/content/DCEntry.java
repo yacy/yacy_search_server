@@ -255,12 +255,26 @@ public class DCEntry extends MultiMapSolrParams {
         return descriptions;
     }
 
+    /**
+     * return list of subjects (keywords)
+     * @return string list or null
+     */
     public String[] getSubject() {
         String t = this.get("categories");
-        if (t == null) t = this.get("dc:subject");
-        t = stripCDATA(t);
-        if (t == null) return new String[]{};
-        return t.split(";");
+        String[] tx;
+        if (t != null) {
+            t = stripCDATA(t);
+            return t.split(";");
+        } else {
+            tx = this.getParams("dc:subject");
+        }
+        
+        if (tx != null) {
+            for (int i = 0; i < tx.length; i++) {
+                tx[i] = stripCDATA(tx[i]);
+            }
+        }
+        return tx;
     }
 
     public double getLon() {
@@ -298,7 +312,7 @@ public class DCEntry extends MultiMapSolrParams {
             "UTF-8",
             this,
             languages,
-            getSubject(),
+            getSubject(), // might be null
             t,
             getCreator(),
             getPublisher(),
