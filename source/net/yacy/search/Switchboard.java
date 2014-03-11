@@ -199,7 +199,6 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
-import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.RobotsTxtConfig;
@@ -1926,7 +1925,6 @@ public final class Switchboard extends serverSwitch {
                     this.crawler.defaultSurrogateProfile.handle(),
                     0,
                     0,
-                    0,
                     0);
             response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false);
             final IndexingQueueEntry queueEntry =
@@ -2634,8 +2632,7 @@ public final class Switchboard extends serverSwitch {
                         response.profile().handle(),
                         response.depth() + 1,
                         0,
-                        0,
-                        response.size() < 0 ? 0 : response.size()));
+                        0));
                 } catch (final MalformedURLException e ) {
                     ConcurrentLog.logException(e);
                 }
@@ -3011,7 +3008,6 @@ public final class Switchboard extends serverSwitch {
                 "CRAWLING-ROOT",
                 new Date(),
                 profile.handle(),
-                0,
                 0,
                 0,
                 0

@@ -1,5 +1,5 @@
 // YMarkCrawlStart.java
-// (C) 2012 by Stefan Förster, sof@gmx.de, Norderstedt, Germany
+// (C) 2012 by Stefan F��rster, sof@gmx.de, Norderstedt, Germany
 // first published 2011 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
@@ -195,7 +195,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
         null,
         "CRAWLING-ROOT",
         new Date(),
-        pe.handle(), 0, 0, 0, 0
+        pe.handle(), 0, 0, 0
         ));
 	}
 }

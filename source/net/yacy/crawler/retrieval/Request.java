@@ -92,7 +92,6 @@ public class Request extends WorkflowJob
     private int anchors; // number of anchors of the parent
     private int forkfactor; // sum of anchors of all ancestors
     private Bitfield flags;
-    private long size; // size of resource in bytes (if known) or 0 if not known
     private String statusMessage;
     private int initialHash; // to provide a object hash that does not change even if the url changes because of redirection
 
@@ -111,7 +110,6 @@ public class Request extends WorkflowJob
         this.statusMessage = null;
         this.initialHash = 0;
         this.status = 0;
-        this.size = 0;
     }
     
     /**
@@ -121,7 +119,7 @@ public class Request extends WorkflowJob
      * @param referrerhash
      */
     public Request(final DigestURL url, final byte[] referrerhash) {
-        this(null, url, referrerhash, null, null, null, 0, 0, 0, 0);
+        this(null, url, referrerhash, null, null, null, 0, 0, 0);
     }
 
     /**
@@ -146,8 +144,7 @@ public class Request extends WorkflowJob
         final String profileHandle,
         final int depth,
         final int anchors,
-        final int forkfactor,
-        final long size) {
+        final int forkfactor) {
         // create new entry and store it into database
         assert url != null;
         assert profileHandle == null || profileHandle.length() == Word.commonHashLength : profileHandle
@@ -167,7 +164,6 @@ public class Request extends WorkflowJob
         this.statusMessage = "loaded(args)";
         this.initialHash = url.hashCode();
         this.status = WorkflowJob.STATUS_INITIATED;
-        this.size = size;
     }
 
     public Request(final Row.Entry entry) throws IOException {
@@ -195,7 +191,6 @@ public class Request extends WorkflowJob
             this.flags = new Bitfield(entry.getColBytes(10, true));
             //this.loaddate = entry.getColLong(12);
             //this.lastmodified = entry.getColLong(13);
-            this.size = entry.getColLong(14);
             this.statusMessage = "loaded(kelondroRow.Entry)";
             this.initialHash = this.url.hashCode();
         } catch (final  Throwable e ) {
@@ -224,7 +219,6 @@ public class Request extends WorkflowJob
         final byte[] appdatestr = NaturalOrder.encodeLong(this.appdate, rowdef.width(5));
         final byte[] loaddatestr = NaturalOrder.encodeLong(0 /*loaddate*/, rowdef.width(12));
         final byte[] serverdatestr = NaturalOrder.encodeLong(0 /*lastmodified*/, rowdef.width(13));
-        final byte[] sizestr = NaturalOrder.encodeLong(this.size, rowdef.width(14));
         // store the hash in the hash cache
         final byte[] namebytes = UTF8.getBytes(this.name);
         final byte[][] entry =
@@ -243,7 +237,7 @@ public class Request extends WorkflowJob
                 NaturalOrder.encodeLong(0, rowdef.width(11)),
                 loaddatestr,
                 serverdatestr,
-                sizestr
+                new byte[0] // dummy, not used (any more)
             };
         return rowdef.newEntry(entry);
     }
@@ -277,27 +271,7 @@ public class Request extends WorkflowJob
         // the date when the url appeared first
         return new Date(this.appdate);
     }
-
-    /*
-    public Date loaddate() {
-        // the date when the url was loaded
-        return new Date(this.loaddate);
-    }
-
-    public Date lastmodified() {
-        // the date that the server returned as document date
-        return new Date(this.lastmodified);
-    }
-    */
-    public long size() {
-        // the date that the client (browser) send as ifModifiedSince in proxy mode
-        return this.size;
-    }
     
-    public boolean isEmpty() {
-        return this.size == 0;
-    }
-
     public String name() {
         // return the anchor name (text inside <a> tag)
         return this.name;

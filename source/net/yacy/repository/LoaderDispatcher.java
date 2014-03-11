@@ -128,7 +128,6 @@ public final class LoaderDispatcher {
                             this.sb.crawler.defaultMediaSnippetLocalProfile.handle()), // crawl profile
                     0,
                     0,
-                    0,
                     0);
     }
 

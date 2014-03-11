@@ -57,6 +57,7 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.CharacterCoding;
 
 /**
@@ -1353,7 +1354,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 			        } else if (host_tld.equals("lk")) {//Sri Lanka /1,770,000
 			        	language = "si";//sinhala; sin
 			        	//language = "ta";//tamil; tam
-			        } else if (host_tld.equals("la")) {//Laos (Lao People’s Democratic Republic) /932,000
+			        } else if (host_tld.equals("la")) {//Laos (Lao People���s Democratic Republic) /932,000
 			        	language = "lo";//lao; lao
 			        } else if (host_tld.equals("ly")) {//Libya /388,000
 			        	language = "ar";//libyan arabic; ara; ayl
@@ -1597,7 +1598,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 			        	//language = "en";//english (official)
 			        } else if (host_tld.equals("sb")) {//Solomon Islands /11,800
 			        	language = "en";//Pijin (Solomons Pidgin or Neo-Solomonic); cpe; pis
-			        	//language = "en";//english (1–2%)
+			        	//language = "en";//english (1���2%)
 			        } else if (host_tld.equals("sd")) {//Sudan /11,700
 			        	language = "ar";//sudanese arabic; ara; apd
 			        	//language = "en";//english
@@ -1995,11 +1996,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isFile()) try {
             return getFSFile().length();
         } catch (final Throwable e) {
+            ConcurrentLog.logException(e);
             return -1;
         }
         if (isSMB()) try {
             return TimeoutRequest.length(getSmbFile(), SMB_TIMEOUT);
         } catch (final Throwable e) {
+            ConcurrentLog.logException(e);
             return -1;
         }
         return -1;

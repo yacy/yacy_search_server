@@ -380,7 +380,6 @@ public final class HTTPDProxyHandler {
                         sb.crawler.defaultProxyProfile.handle(),
                         0,
                         0,
-                        0,
                         0);
                 final Response response = new Response(
                 		request,
@@ -509,8 +508,7 @@ public final class HTTPDProxyHandler {
                         sb.crawler.defaultProxyProfile.handle(),
                         0,
                         0,
-                        0,
-                        sizeBeforeDelete < 0 ? 0 : sizeBeforeDelete);
+                        0);
 
 
                 // handle incoming cookies

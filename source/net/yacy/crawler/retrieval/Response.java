@@ -159,6 +159,9 @@ public class Response {
         this.status = QUEUE_STATE_FRESH;
         this.content = content;
         this.fromCache = fromCache;
+        if (this.responseHeader != null && content != null && Integer.parseInt(this.responseHeader.get(HeaderFramework.CONTENT_LENGTH, "0")) <= content.length) {
+            this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(content.length)); // repair length 
+        }
     }
 
     /**
@@ -173,11 +176,11 @@ public class Response {
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader(200);
         this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(MultiProtocolURL.getFileExtension(request.url().getFileName()), "text/plain")); // tell parser how to handle the content
-        if (!request.isEmpty()) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
         this.content = request.name().length() > 0 ? UTF8.getBytes(request.name()) : UTF8.getBytes(request.url().toTokens());
         this.fromCache = true;
+        if (this.responseHeader != null) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0"); // 'virtual' length, shows that the resource was not loaded
     }
 
     public Response(
@@ -262,6 +265,9 @@ public class Response {
 
     public void setContent(final byte[] data) {
         this.content = data;
+        if (this.responseHeader != null && this.content != null && Integer.parseInt(this.responseHeader.get(HeaderFramework.CONTENT_LENGTH, "0")) <= content.length) {
+            this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(content.length)); // repair length 
+        }
     }
 
     public byte[] getContent() {

@@ -141,7 +141,7 @@ public class HostBrowser {
                         sb.peers.mySeed().hash.getBytes(),
                         url, null, load, new Date(),
                         sb.crawler.defaultProxyProfile.handle(),
-                        0, 0, 0, 0
+                        0, 0, 0
                     ));
                 prop.putHTML("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
                 if (wait) for (int i = 0; i < 30; i++) {

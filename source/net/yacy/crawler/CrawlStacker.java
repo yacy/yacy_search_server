@@ -50,10 +50,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL;
-import net.yacy.crawler.retrieval.FTPLoader;
-import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
-import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.citation.CitationReference;
@@ -228,7 +225,6 @@ public final class CrawlStacker {
                         profileHandle,
                         0,
                         0,
-                        0,
                         0
                         ));
             }
@@ -270,9 +266,7 @@ public final class CrawlStacker {
                                 profileHandle,
                                 0,
                                 0,
-                                0,
-                                entry.size
-                                ));
+                                0));
                     }
                 } catch (final IOException e1) {
                     ConcurrentLog.logException(e1);
@@ -298,9 +292,7 @@ public final class CrawlStacker {
                 pe.handle(),
                 0,
                 0,
-                0,
-                0
-                ));
+                0));
     }
 
     /**
@@ -344,19 +336,10 @@ public final class CrawlStacker {
             return error;
         }
 
-        long maxFileSize = Long.MAX_VALUE;
-        if (!entry.isEmpty()) {
-            final String protocol = entry.url().getProtocol();
-            if (protocol.equals("http") || protocol.equals("https")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-            if (protocol.equals("ftp")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.ftp.maxFileSize", FTPLoader.DEFAULT_MAXFILESIZE);
-            if (protocol.equals("smb")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.smb.maxFileSize", SMBLoader.DEFAULT_MAXFILESIZE);
-        }
-
         // check availability of parser and maxfilesize
         String warning = null;
         ContentDomain contentDomain = entry.url().getContentDomainFromExt();
-        if ((maxFileSize >= 0 && entry.size() > maxFileSize) ||
-            contentDomain == ContentDomain.APP  ||
+        if (contentDomain == ContentDomain.APP  ||
             (contentDomain == ContentDomain.IMAGE && TextParser.supportsExtension(entry.url()) != null) ||
             contentDomain == ContentDomain.AUDIO  ||
             contentDomain == ContentDomain.VIDEO ||

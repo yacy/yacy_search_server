@@ -189,7 +189,6 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                     sb.crawler.defaultProxyProfile.handle(),
                     0, 
                     0, 
-                    0,
                     0); //sizeBeforeDelete < 0 ? 0 : sizeBeforeDelete);
             final Response yacyResponse = new Response(
                     yacyRequest,
@@ -251,7 +250,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
      * adds specific header elements for the connection of the internal
      * httpclient to the remote server according to local config
      *
-     * @param header header für http client (already preset with headers from
+     * @param header header f��r http client (already preset with headers from
      * original ServletRequest
      * @param origServletRequest original request/header
      */

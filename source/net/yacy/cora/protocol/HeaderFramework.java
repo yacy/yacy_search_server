@@ -43,6 +43,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 
 
@@ -458,6 +459,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             try {
                 return (int) Long.parseLong(get(CONTENT_LENGTH));
             } catch (final NumberFormatException e) {
+                ConcurrentLog.warn("HeaderFramework", "content-length cannot be parsed: " + get(CONTENT_LENGTH));
                 return -1;
             }
         }

@@ -524,8 +524,7 @@ public class CrawlQueues {
                         this.sb.crawler.defaultRemoteProfile.handle(),
                         0,
                         0,
-                        0,
-                        item.getSize()
+                        0
                 ));
             } else {
                 CrawlQueues.log.warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
