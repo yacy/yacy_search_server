@@ -126,14 +126,18 @@ public class DCEntry extends MultiMapSolrParams {
         // <dc:identifier>http://hdl.handle.net/2104/8302</dc:identifier>
         // <dc:identifier>10.1051/0004-6361/201117940</dc:identifier>
         String u = this.get("url");
-        String[] urls = null;
-        if (u == null) urls = this.getParams("dc:identifier");
-        if (urls == null) return useRelationAsAlternative ? getRelation() : null;
-        // String[] urls = u.split(";"); // splitting may not succeed (see above)
-        if (urls.length > 0) { // check best also with 1 in case it's not http urn
-            // select one that fits
-            u = bestU(urls);
+        
+        if (u == null) {
+            final String[] urls = this.getParams("dc:identifier");
+            if (urls == null) {
+                return useRelationAsAlternative ? getRelation() : null;
+            }
+            if (urls.length > 0) { // check best also with 1 in case it's not http urn
+                // select one that fits
+                u = bestU(urls);
+            }
         }
+
         try {
             return new DigestURL(u);
         } catch (final MalformedURLException e) {
