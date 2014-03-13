@@ -145,7 +145,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             prop.put(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
             prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
             prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
-            prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, "0:0:0:0:0:0:0:1");
+            prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
             yacyRequestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
             // temporarily add argument to header to pass it on to augmented browsing
@@ -181,11 +181,11 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             if (response.getHeader(HeaderFramework.LOCATION) != null) {
                 // rewrite location header
                 String location = response.getHeader(HeaderFramework.LOCATION);
-                String actioncmdstr = (action != null) ? "action=" + action + "&" : "";
+                final String actioncmdstr = (action != null) ? "?action=" + action + "&" : "?";
                 if (location.startsWith("http")) {
-                    location = "/proxy.html?" + actioncmdstr + "url=" + location;
+                    location = request.getServletPath() + actioncmdstr + "url=" + location;
                 } else {
-                    location = "/proxy.html?" + actioncmdstr + "url=http://" + proxyurl.getHost() + "/" + location;
+                    location = request.getServletPath() + actioncmdstr + "url=http://" + proxyurl.getHost() + "/" + location;
                 }
                 response.addHeader(HeaderFramework.LOCATION, location);
             }
@@ -205,7 +205,8 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                 final Pattern p = Pattern.compile("(href=\"|src=\")([^\"]+)|(href='|src=')([^']+)|(url\\(')([^']+)|(url\\(\")([^\"]+)|(url\\()([^\\)]+)");
                 final Matcher m = p.matcher(sbuffer);
                 final StringBuffer result = new StringBuffer(80);
-                Switchboard sb = Switchboard.getSwitchboard();
+                final Switchboard sb = Switchboard.getSwitchboard();
+                final String servletstub = request.getServletPath()+"?url=";
                 while (m.find()) {
                     String init = null;
                     if (m.group(1) != null) { init = m.group(1); }
@@ -237,7 +238,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                             }
                         }
 
-                        String newurl = init + "/proxy.html?url=" + url;
+                        String newurl = init + servletstub + url;
                         newurl = newurl.replaceAll("\\$", "\\\\\\$");
                         m.appendReplacement(result, newurl);
 
@@ -255,13 +256,13 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                             }
                         }
 
-                        String newurl = init + "/proxy.html?url=" + complete_url;
+                        String newurl = init + servletstub + complete_url;
                         newurl = newurl.replaceAll("\\$", "\\\\\\$");
                         m.appendReplacement(result, newurl);
 
                     } else if (url.startsWith("/")) {
                         // absolute path of form href="/absolute/path/to/linked/page"
-                        String newurl = init + "/proxy.html?url=http://" + host + url;
+                        String newurl = init + servletstub + "http://" + host + url;
                         newurl = newurl.replaceAll("\\$", "\\\\\\$");
                         m.appendReplacement(result, newurl);
 
@@ -269,7 +270,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                         // relative path of form href="relative/path"
                         try {
                             MultiProtocolURL target = new MultiProtocolURL("http://" + host + directory + "/" + url);
-                            String newurl = init + "/proxy.html?url=" + target.toString();
+                            String newurl = init + servletstub + target.toString();
                             newurl = newurl.replaceAll("\\$", "\\\\\\$");
                             m.appendReplacement(result, newurl);
                         } catch (final MalformedURLException e) {}
