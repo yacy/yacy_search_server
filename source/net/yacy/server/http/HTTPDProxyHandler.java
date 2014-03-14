@@ -282,12 +282,7 @@ public final class HTTPDProxyHandler {
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
             countedRespond = new ByteCountOutputStream(respond,((String) conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE)).length() + 2,"PROXY");
 
-            String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-            String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);           // always starts with leading '/'
-            final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
             final String ip   = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
-            int pos=0;
-            int port=0;
 
             DigestURL url = null;
             try {
@@ -314,35 +309,30 @@ public final class HTTPDProxyHandler {
                     requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
                 }
             } catch (final MalformedURLException e) {
+                // get header info for error logging
+                final String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
+                final String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); // always starts with leading '/'
+                final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); // may be null if no args were given
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
-                                  host + ", port=" + port + ", path=" + path + ", args=" + args;
+                                  host + ", path=" + path + ", args=" + args;
                 log.severe(errorMsg);
                 HTTPDemon.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
                 return;
             }
 
-            if ((pos = host.indexOf(':')) < 0) {
-                port = 80;
-            } else {
-                port = Integer.parseInt(host.substring(pos + 1));
-                host = host.substring(0, pos);
-            }
-
             // check the blacklist
             // blacklist idea inspired by [AS]:
             // respond a 404 for all AGIS ("all you get is shit") servers
-            final String hostlow = host.toLowerCase();
-            if (args != null) { path = path + "?" + args; }
-            if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostlow, path)) {
-                log.info("AGIS blocking of host '" + hostlow + "'");
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, url)) {
+                log.info("AGIS blocking of host '" + url.getHost() + "'");
                 HTTPDemon.sendRespondError(conProp,countedRespond,4,403,null,
-                        "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
+                        "URL '" + url.getHost() + "' blocked by yacy proxy (blacklisted)",null);
                 return;
             }
 
             // handle outgoing cookies
-            handleOutgoingCookies(requestHeader, host, ip);
-            prepareRequestHeader(conProp, requestHeader, hostlow);
+            handleOutgoingCookies(requestHeader, url.getHost(), ip);
+            prepareRequestHeader(conProp, requestHeader, url.getHost().toLowerCase());
             final ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
 
             // why are files unzipped upon arrival? why not zip all files in cache?
