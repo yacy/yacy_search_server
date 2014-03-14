@@ -72,7 +72,7 @@ public final class RobotsTxtParser {
 
     private final ArrayList<String> allowList;
     private final ArrayList<String> denyList;
-    private       String sitemap;
+    private       ArrayList<String> sitemaps;
     private       long crawlDelayMillis;
     private final String[] myNames; // a list of own name lists
     private       String agentName; // the name of the agent that was used to return the result
@@ -80,7 +80,7 @@ public final class RobotsTxtParser {
     protected RobotsTxtParser(final String[] myNames) {
         this.allowList = new ArrayList<String>(0);
         this.denyList = new ArrayList<String>(0);
-        this.sitemap = "";
+        this.sitemaps = new ArrayList<String>(0);
         this.crawlDelayMillis = 0;
         this.myNames = myNames;
         this.agentName = null;
@@ -128,10 +128,10 @@ public final class RobotsTxtParser {
 
                 // parse sitemap; if there are several sitemaps then take the first url
                 // TODO: support for multiple sitemaps
-                if (lineUpper.startsWith(ROBOTS_SITEMAP) && (this.sitemap == null || this.sitemap.isEmpty())) {
+                if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
                     pos = line.indexOf(' ');
                     if (pos != -1) {
-                        this.sitemap = line.substring(pos).trim();
+                        this.sitemaps.add(line.substring(pos).trim());
                     }
                     continue lineparser;
                 }
@@ -258,8 +258,8 @@ public final class RobotsTxtParser {
         return this.agentName;
     }
 
-    protected String sitemap() {
-        return this.sitemap;
+    protected ArrayList<String> sitemap() {
+        return this.sitemaps;
     }
 
     protected ArrayList<String> allowList() {

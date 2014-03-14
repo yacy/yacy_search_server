@@ -94,7 +94,7 @@ public class CrawlCheck_p {
                         robotsAllowed = !entry.robotsTxtEntry.isDisallowed(entry.digestURL);
                         prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
                         prop.put("table_list_" + row + "_crawldelay", Math.max(agent.minimumDelta, entry.robotsTxtEntry.getCrawlDelayMillis()) + " ms");
-                        prop.put("table_list_" + row + "_sitemap", entry.robotsTxtEntry.getSitemap() == null ? "-" : entry.robotsTxtEntry.getSitemap().toNormalform(true));
+                        prop.put("table_list_" + row + "_sitemap", entry.robotsTxtEntry.getSitemaps().toString());
                     }
                     
                     // try to load the url

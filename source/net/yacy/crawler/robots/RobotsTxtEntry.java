@@ -28,7 +28,6 @@
 
 package net.yacy.crawler.robots;
 
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -47,17 +46,17 @@ public class RobotsTxtEntry {
     private static final String HOST_NAME          = "hostname";
     private static final String ALLOW_PATH_LIST    = "allow";
     private static final String DISALLOW_PATH_LIST = "disallow";
+    private static final String SITEMAP_LIST       = "sitemap";
     private static final String LOADED_DATE        = "date";
     private static final String MOD_DATE           = "modDate";
     private static final String ETAG               = "etag";
-    private static final String SITEMAP            = "sitemap";
     private static final String CRAWL_DELAY        = "crawlDelay";
     private static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
     private static final String AGENT_NAME         = "agentname";
 
     // this is a simple record structure that holds all properties of a single crawl start
     private final Map<String, byte[]> mem;
-    private final List<String> allowPathList, denyPathList;
+    private final List<String> allowPathList, denyPathList, sitemapList;
     private final String hostName, agentName;
     private String info; // this is filled if robots disallowed access; then the reason is noted there;
 
@@ -66,33 +65,27 @@ public class RobotsTxtEntry {
         this.mem = mem;
         this.info = "";
 
-        if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
-            this.denyPathList = new LinkedList<String>();
-            final String csPl = UTF8.String(this.mem.get(DISALLOW_PATH_LIST));
-            if (csPl.length() > 0){
-                final String[] pathArray = csPl.split(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
-                if ((pathArray != null)&&(pathArray.length > 0)) {
-                    this.denyPathList.addAll(Arrays.asList(pathArray));
-                }
-            }
-        } else {
-            this.denyPathList = new LinkedList<String>();
-        }
-        if (this.mem.containsKey(ALLOW_PATH_LIST)) {
-            this.allowPathList = new LinkedList<String>();
-            final String csPl = UTF8.String(this.mem.get(ALLOW_PATH_LIST));
-            if (csPl.length() > 0){
-                final String[] pathArray = csPl.split(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
-                if ((pathArray != null)&&(pathArray.length > 0)) {
-                    this.allowPathList.addAll(Arrays.asList(pathArray));
-                }
-            }
-        } else {
-            this.allowPathList = new LinkedList<String>();
-        }
+        this.denyPathList = new LinkedList<String>();
+        fillMultiValue(this.denyPathList, DISALLOW_PATH_LIST);
+        this.allowPathList = new LinkedList<String>();
+        fillMultiValue(this.allowPathList, ALLOW_PATH_LIST);
+        this.sitemapList = new LinkedList<String>();
+        fillMultiValue(this.sitemapList, SITEMAP_LIST);
         this.agentName = this.mem.containsKey(AGENT_NAME) ? UTF8.String(this.mem.get(AGENT_NAME)) : null;
     }
 
+    private void fillMultiValue(List<String> list, String listName) {
+        if (this.mem.containsKey(listName)) {
+            final String csPl = UTF8.String(this.mem.get(listName));
+            if (csPl.length() > 0){
+                final String[] pathArray = csPl.split(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
+                if ((pathArray != null) && (pathArray.length > 0)) {
+                    list.addAll(Arrays.asList(pathArray));
+                }
+            }
+        }
+    }
+    
     protected RobotsTxtEntry(
             final MultiProtocolURL theURL,
             final List<String> allowPathList,
@@ -100,7 +93,7 @@ public class RobotsTxtEntry {
             final Date loadedDate,
             final Date modDate,
             final String eTag,
-            final String sitemap,
+            final List<String> sitemapList,
             final long crawlDelayMillis,
             final String agentName
     ) {
@@ -109,6 +102,7 @@ public class RobotsTxtEntry {
         this.hostName = RobotsTxt.getHostPort(theURL).toLowerCase();
         this.allowPathList = new LinkedList<String>();
         this.denyPathList = new LinkedList<String>();
+        this.sitemapList = new LinkedList<String>();
         this.agentName = agentName;
 
         this.mem = new LinkedHashMap<String, byte[]>(10);
@@ -116,33 +110,26 @@ public class RobotsTxtEntry {
         if (loadedDate != null) this.mem.put(LOADED_DATE, ASCII.getBytes(Long.toString(loadedDate.getTime())));
         if (modDate != null) this.mem.put(MOD_DATE, ASCII.getBytes(Long.toString(modDate.getTime())));
         if (eTag != null) this.mem.put(ETAG, UTF8.getBytes(eTag));
-        if (sitemap != null) this.mem.put(SITEMAP, UTF8.getBytes(sitemap));
         if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, ASCII.getBytes(Long.toString(crawlDelayMillis)));
         if (agentName != null) this.mem.put(AGENT_NAME, UTF8.getBytes(agentName));
 
-        if (allowPathList != null && !allowPathList.isEmpty()) {
-            this.allowPathList.addAll(allowPathList);
-
-            final StringBuilder pathListStr = new StringBuilder(allowPathList.size() * 30);
-            for (final String element : allowPathList) {
-                pathListStr.append(element)
-                           .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
-            }
-            this.mem.put(ALLOW_PATH_LIST, UTF8.getBytes(pathListStr.substring(0,pathListStr.length()-1)));
-        }
-
-        if (disallowPathList != null && !disallowPathList.isEmpty()) {
-            this.denyPathList.addAll(disallowPathList);
-
-            final StringBuilder pathListStr = new StringBuilder(disallowPathList.size() * 30);
-            for (final String element : disallowPathList) {
-                pathListStr.append(element)
-                           .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
-            }
-            this.mem.put(DISALLOW_PATH_LIST, UTF8.getBytes(pathListStr.substring(0, pathListStr.length()-1)));
-        }
+        readMultiValue(allowPathList,    this.allowPathList, ALLOW_PATH_LIST);
+        readMultiValue(disallowPathList, this.denyPathList,  DISALLOW_PATH_LIST);
+        readMultiValue(sitemapList,      this.sitemapList,   SITEMAP_LIST);
     }
 
+    private void readMultiValue(List<String> externallist, List<String> internallist, String listName) {
+        if (externallist != null && !externallist.isEmpty()) {
+            internallist.addAll(externallist);
+
+            final StringBuilder pathListStr = new StringBuilder(externallist.size() * 30);
+            for (final String element : externallist) {
+                pathListStr.append(element).append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
+            }
+            this.mem.put(listName, UTF8.getBytes(pathListStr.substring(0, pathListStr.length()-1)));
+        }
+    }
+    
     protected String getHostName() {
         return this.hostName;
     }
@@ -174,17 +161,11 @@ public class RobotsTxtEntry {
     }
 
     /**
-     * get the sitemap url
-     * @return the sitemap url or null if no sitemap url is given
+     * get the sitemap urls
+     * @return a list of sitemap urls (possibly empty), but not null
      */
-    public MultiProtocolURL getSitemap() {
-        final String url = this.mem.containsKey(SITEMAP)? UTF8.String(this.mem.get(SITEMAP)): null;
-        if (url == null) return null;
-        try {
-            return new MultiProtocolURL(url);
-        } catch (final MalformedURLException e) {
-            return null;
-        }
+    public List<String> getSitemaps() {
+        return this.sitemapList;
     }
 
     protected Date getLoadedDate() {

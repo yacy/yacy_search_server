@@ -26,7 +26,9 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -35,7 +37,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -158,8 +159,11 @@ public class getpageinfo_p {
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 
                     // get the sitemap URL of the domain
-                    final MultiProtocolURL sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
-                    prop.putXML("sitemap", sitemapURL == null ? "" : sitemapURL.toString());
+                    final List<String> sitemaps = robotsEntry == null ? new ArrayList<String>(0) : robotsEntry.getSitemaps();
+                    for (int i = 0; i < sitemaps.size(); i++) {
+                        prop.putXML("sitemaps_" + i + "_sitemap", sitemaps.get(i));
+                    }
+                    prop.put("sitemaps", sitemaps.size());
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
                 }
