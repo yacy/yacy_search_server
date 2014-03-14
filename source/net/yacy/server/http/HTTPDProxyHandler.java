@@ -121,7 +121,7 @@ public final class HTTPDProxyHandler {
         if (sb != null) {
 
         // set timeout
-        timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "60000"));
+        timeout = sb.getConfigInt("proxy.clientTimeout", 60000);
 
         // do logger initialization
         try {
@@ -276,7 +276,6 @@ public final class HTTPDProxyHandler {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) net.yacy.peers.Network.triggerOnlineAction();
             sb.proxyLastAccess = System.currentTimeMillis();
 
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)

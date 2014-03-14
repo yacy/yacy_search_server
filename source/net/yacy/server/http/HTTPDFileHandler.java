@@ -77,19 +77,11 @@ public final class HTTPDFileHandler {
     private static File     htLocalePath   = null;
     public  static String   indexForward   = "";
 
-    protected static final class TemplateCacheEntry {
-        Date lastModified;
-        byte[] content;
-    }
-
-    public static final boolean useTemplateCache;
-
     //private Properties connectionProperties = null;
     // creating a logger
 
     static {
         final serverSwitch theSwitchboard = Switchboard.getSwitchboard();
-        useTemplateCache = theSwitchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
 
         if (switchboard == null) {
             switchboard = theSwitchboard;

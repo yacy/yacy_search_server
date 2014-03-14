@@ -851,10 +851,6 @@ useYacyReferer = false
 # if you want to tunnel other protocols, set to false
 secureHttps = true
 
-# specifies if the httpdFileHandler should cache 
-# the template-files from the htroot directory
-enableTemplateCache = true
-
 # specifies if the http post body should be transfered
 # using content-encoding gzip during index transfer
 # a) indexDistribution: which is done periodically if you have enabled 

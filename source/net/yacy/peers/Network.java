@@ -71,7 +71,6 @@ public class Network
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
     public static final ConcurrentLog log = new ConcurrentLog("YACY");
-    public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup */
     public static long speedKey = 0;
     public static long magic = System.currentTimeMillis();
@@ -121,11 +120,6 @@ public class Network
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
 
         speedKey = System.currentTimeMillis() - time;
-        lastOnlineTime = 0;
-    }
-
-    synchronized static public void triggerOnlineAction() {
-        lastOnlineTime = System.currentTimeMillis();
     }
 
     public final void publishSeedList() {
