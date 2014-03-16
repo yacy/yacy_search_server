@@ -127,14 +127,10 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
                 return;
             }
-            int port = proxyurl.getPort();
-            if (port < 1) {
-                port = 80;
-            }
 
-            String host = proxyurl.getHost();
+            String hostwithport = proxyurl.getHost();
             if (proxyurl.getPort() != -1) {
-                host += ":" + proxyurl.getPort();
+                hostwithport += ":" + proxyurl.getPort();
             }
             RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
             yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
@@ -142,12 +138,12 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             
             final HashMap<String, Object> prop = new HashMap<String, Object>();
             prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-            prop.put(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
+            prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
             prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
             prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
             prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
-            yacyRequestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
+            yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
             // temporarily add argument to header to pass it on to augmented browsing
             if (action != null) yacyRequestHeader.put("YACYACTION", action);
 
@@ -185,7 +181,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                 if (location.startsWith("http")) {
                     location = request.getServletPath() + actioncmdstr + "url=" + location;
                 } else {
-                    location = request.getServletPath() + actioncmdstr + "url=http://" + proxyurl.getHost() + "/" + location;
+                    location = request.getServletPath() + actioncmdstr + "url=http://" + hostwithport + "/" + location;
                 }
                 response.addHeader(HeaderFramework.LOCATION, location);
             }
@@ -262,14 +258,14 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
 
                     } else if (url.startsWith("/")) {
                         // absolute path of form href="/absolute/path/to/linked/page"
-                        String newurl = init + servletstub + "http://" + host + url;
+                        String newurl = init + servletstub + "http://" + hostwithport + url;
                         newurl = newurl.replaceAll("\\$", "\\\\\\$");
                         m.appendReplacement(result, newurl);
 
                     } else {
                         // relative path of form href="relative/path"
                         try {
-                            MultiProtocolURL target = new MultiProtocolURL("http://" + host + directory + "/" + url);
+                            MultiProtocolURL target = new MultiProtocolURL("http://" + hostwithport + directory + "/" + url);
                             String newurl = init + servletstub + target.toString();
                             newurl = newurl.replaceAll("\\$", "\\\\\\$");
                             m.appendReplacement(result, newurl);
