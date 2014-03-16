@@ -93,7 +93,6 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
             handleConnect(request, response);
         } else {
-            String action = null;
 
             final Continuation continuation = ContinuationSupport.getContinuation(request);
 
@@ -108,11 +107,6 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                 return;
             }
 
-            if (strARGS.startsWith("action=")) {
-                int detectnextargument = strARGS.indexOf("&");
-                action = strARGS.substring(7, detectnextargument);
-                strARGS = strARGS.substring(detectnextargument + 1);
-            }
             if (strARGS.startsWith("url=")) {
                 final String strUrl = strARGS.substring(4); // strip "url="
 
@@ -144,8 +138,6 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
             yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
-            // temporarily add argument to header to pass it on to augmented browsing
-            if (action != null) yacyRequestHeader.put("YACYACTION", action);
 
             final ByteArrayOutputStream tmpproxyout = new ByteArrayOutputStream();
             HTTPDProxyHandler.doGet(prop, yacyRequestHeader, tmpproxyout, ClientIdentification.yacyProxyAgent);
@@ -177,11 +169,10 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             if (response.getHeader(HeaderFramework.LOCATION) != null) {
                 // rewrite location header
                 String location = response.getHeader(HeaderFramework.LOCATION);
-                final String actioncmdstr = (action != null) ? "?action=" + action + "&" : "?";
                 if (location.startsWith("http")) {
-                    location = request.getServletPath() + actioncmdstr + "url=" + location;
+                    location = request.getServletPath() + "?url=" + location;
                 } else {
-                    location = request.getServletPath() + actioncmdstr + "url=http://" + hostwithport + "/" + location;
+                    location = request.getServletPath() + "?url=http://" + hostwithport + "/" + location;
                 }
                 response.addHeader(HeaderFramework.LOCATION, location);
             }
