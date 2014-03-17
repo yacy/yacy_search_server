@@ -29,7 +29,6 @@ import java.util.Map;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.http.ProxySettings;
 
 public class loaderThreads {
 
@@ -37,7 +36,6 @@ public class loaderThreads {
     protected int timeout;
     protected String user;
     protected String password;
-    protected ProxySettings remoteProxyConfig;
 
     // management objects for collection of threads
     private final Map<String, Thread> threads;

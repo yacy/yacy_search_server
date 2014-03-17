@@ -368,47 +368,60 @@ public class Crawler_p {
                     prop.putHTML("info_error", e.getMessage());
                 } 
                 
+                boolean hasCrawlstartDataOK = true;
+                // check crawlurl was given in sitecrawl
+                if ("url".equals(crawlingMode) && rootURLs.size() == 0) hasCrawlstartDataOK = false;
+
                 // prepare a new crawling profile
-                final CrawlProfile profile = new CrawlProfile(
-                        crawlName,
-                        newcrawlingMustMatch,
-                        newcrawlingMustNotMatch,
-                        ipMustMatch,
-                        ipMustNotMatch,
-                        countryMustMatch,
-                        crawlerNoDepthLimitMatch,
-                        indexUrlMustMatch,
-                        indexUrlMustNotMatch,
-                        indexContentMustMatch,
-                        indexContentMustNotMatch,
-                        newcrawlingdepth,
-                        directDocByURL,
-                        crawlingIfOlder,
-                        crawlingDomMaxPages,
-                        crawlingQ, followFrames, obeyHtmlRobotsNoindex,
-                        indexText,
-                        indexMedia,
-                        storeHTCache,
-                        crawlOrder,
-                        cachePolicy,
-                        collection,
-                        agentName);
-                byte[] handle = ASCII.getBytes(profile.handle());
-                
-                // before we fire up a new crawl, we make sure that another crawl with the same name is not running
-                sb.crawler.removeActive(handle);
-                sb.crawler.removePassive(handle);
-                try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (final SpaceExceededException e1) {}
-                
-                // delete all error urls for that domain
-                Set<String> hosthashes = new HashSet<String>();
-                for (DigestURL u: rootURLs) {
-                    sb.index.fulltext().remove(u.hash());
-                    hosthashes.add(u.hosthash());
+                final CrawlProfile profile;
+                byte[] handle;
+                if (hasCrawlstartDataOK) {
+                    profile = new CrawlProfile(
+                            crawlName,
+                            newcrawlingMustMatch,
+                            newcrawlingMustNotMatch,
+                            ipMustMatch,
+                            ipMustNotMatch,
+                            countryMustMatch,
+                            crawlerNoDepthLimitMatch,
+                            indexUrlMustMatch,
+                            indexUrlMustNotMatch,
+                            indexContentMustMatch,
+                            indexContentMustNotMatch,
+                            newcrawlingdepth,
+                            directDocByURL,
+                            crawlingIfOlder,
+                            crawlingDomMaxPages,
+                            crawlingQ, followFrames, obeyHtmlRobotsNoindex,
+                            indexText,
+                            indexMedia,
+                            storeHTCache,
+                            crawlOrder,
+                            cachePolicy,
+                            collection,
+                            agentName);
+                    handle = ASCII.getBytes(profile.handle());
+
+                    // before we fire up a new crawl, we make sure that another crawl with the same name is not running
+                    sb.crawler.removeActive(handle);
+                    sb.crawler.removePassive(handle);
+                    try {
+                        sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);
+                    } catch (final SpaceExceededException e1) { }
+
+                    // delete all error urls for that domain
+                    Set<String> hosthashes = new HashSet<String>();
+                    for (DigestURL u : rootURLs) {
+                        sb.index.fulltext().remove(u.hash());
+                        hosthashes.add(u.hosthash());
+                    }
+                    sb.crawlQueues.errorURL.removeHosts(hosthashes);
+                    sb.index.fulltext().commit(true);
+                } else {
+                    profile = null;
+                    handle = null;
                 }
-                sb.crawlQueues.errorURL.removeHosts(hosthashes);
-                sb.index.fulltext().commit(true);
-                
+
                 // start the crawl
                 if ("url".equals(crawlingMode)) {
                     if (rootURLs.size() == 0) {

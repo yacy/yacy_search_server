@@ -21,7 +21,7 @@
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler</h2>
 <noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
-<fieldset style="width:180px;height:180px;float:left;">
+<fieldset id="queues" style="width:180px;float:left;">
 <legend>Queues</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -75,7 +75,7 @@
       </table>
       <div class="warning" id="message">&nbsp;#[queuemessage]#<div>
 </fieldset>
-<fieldset style="width:280px;height:180px;float:left;">
+<fieldset id="indexsize" style="width:280px;float:left;">
 <legend>Index Size</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -107,7 +107,7 @@
         </tbody>
       </table>
 </fieldset>
-<fieldset style="width:500px;height:180px;;float:left;">
+<fieldset id="progress" style="width:500px;float:left;">
 <legend>Progress</legend>
       <form action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
@@ -158,8 +158,17 @@
         </tbody>
       </table>
       </form>
-
 </fieldset>
+<script>
+if (document.getElementById("progress").clientHeight > document.getElementById("indexsize").clientHeight) {
+	document.getElementById("indexsize").style.height = (document.getElementById("progress").clientHeight-20)+"px";
+	document.getElementById("progress").style.height = (document.getElementById("progress").clientHeight-20)+"px";
+} else {
+	document.getElementById("progress").style.height = (document.getElementById("indexsize").clientHeight-20)+"px";
+	document.getElementById("indexsize").style.height = (document.getElementById("indexsize").clientHeight-20)+"px";
+}
+document.getElementById("queues").style.height = (document.getElementById("indexsize").clientHeight-20)+"px"; 
+</script>
 <p class="watchCrawler" style="clear:both;">
 #(info)#
         <!-- 0 -->
