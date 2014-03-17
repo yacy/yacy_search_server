@@ -1166,9 +1166,6 @@ core.service.webgraph.tmp = false
 parserAugmentation = false
 parserAugmentation.RDFa = false
 proxyAugmentation = false
-augmentation.reflect = false
-augmentation.addDoctype = false
-augmentation.reparse = false
 
 # Content control settings
 contentcontrol.enabled = false
@@ -1192,7 +1189,6 @@ interaction.addcontent.enabled = false
 interaction.userlogon.enabled = false
 interaction.approvelist.enabled = false
 interaction.suggestrejected.enabled = false
-interaction.overlayinteraction.enabled = false
 
 interaction.globalmenu.enabled = true
 interaction.portalconfigbutton.enabled = true
