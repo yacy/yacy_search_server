@@ -34,7 +34,7 @@
     <fieldset>
       <legend>
         <input type="checkbox" name="site_check" id="site" onclick="window.location.href='ConfigHeuristics_p.html?#(site.checked)#site_on=::site_off=#(/site.checked)#'" value="site"#(site.checked)#:: checked="checked"#(/site.checked)# />
-        <label for="site">'site'-operator: instant shallow crawl</label>
+        'site'-operator: instant shallow crawl
       </legend>
       <p>
       When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.
@@ -51,13 +51,13 @@
                     <td>
                         <legend>
                             <input type="checkbox" name="searchresult_check" id="searchresult" onclick="window.location.href='ConfigHeuristics_p.html?#(searchresult.checked)#searchresult_on=::searchresult_off=#(/searchresult.checked)#'" value="searchresult"#(searchresult.checked)#:: checked="checked"#(/searchresult.checked)# />
-                            <label for="searchresult">search-result: shallow crawl on all displayed search results</label>
+                            search-result: shallow crawl on all displayed search results
                         </legend>
                     </td>
                     <td>
                         <legend>
                             <input type="checkbox" name="searchresultglobal_check" id="searchresultglobal" onclick="window.location.href='ConfigHeuristics_p.html?#(searchresultglobal.checked)#searchresultglobal_on=::searchresultglobal_off=#(/searchresultglobal.checked)#'" value="siteresultglobal"#(searchresultglobal.checked)#:: checked="checked"#(/searchresultglobal.checked)# />
-                            <label for="searchresultglobal">add as global crawl job</label>
+                            add as global crawl job
                         </legend>
                     </td>
                 </tr>
@@ -75,7 +75,7 @@
       <form id="HeuristicFormOpenSearch" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
         <legend>
           <input type="checkbox" name="opensearch_check" id="opensearch" onclick="window.location.href='ConfigHeuristics_p.html?#(opensearch.checked)#opensearch_on=::opensearch_off=#(/opensearch.checked)#'" value="opensearch"#(opensearch.checked)#:: checked="checked"#(/opensearch.checked)# />
-          <label for="opensearch">opensearch load external search result list from active systems below</label>
+          opensearch load external search result list from active systems below
         </legend>
         <p>
         When using this heuristic, then every search request line is used for a call to listed opensearch systems until enough results to fill the current search page are available.

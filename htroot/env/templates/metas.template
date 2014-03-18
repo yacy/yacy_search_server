@@ -4,16 +4,30 @@
   <meta name="keywords" content="YaCy HTTP search engine spider indexer java network open free download Mac Windows Linux Software development" />
   <meta name="description" content="Software HTTP Freeware Home Page" />
   <meta name="copyright" content="Michael Christen et al." />
-  <link rel="stylesheet" type="text/css" media="all" href="env/base.css" />
-  <link rel="stylesheet" type="text/css" media="screen" href="env/style.css" />
+  
+  <!-- Bootstrap core CSS -->
+  <link href="/env/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template, i.e. navigation (move this to base.css) -->
+  <link href="/env/bootstrap-base.css" rel="stylesheet">
+    
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="/env/bootstrap/js/html5shiv.js"></script>
+    <script src="/env/bootstrap/js/respond.min.js"></script>
+  <![endif]-->
+    
+  <!-- old css styles -->
+  <link rel="stylesheet" type="text/css" media="all" href="/env/base.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="/env/style.css" />
   <!--[if lt IE 6]>
-   <link rel="stylesheet" type="text/css" media="screen" href="env/oldie.css" />
+   <link rel="stylesheet" type="text/css" media="screen" href="/env/oldie.css" />
   <![endif]-->
   <!--[if lte IE 6.0]>
-   <link rel="stylesheet" type="text/css" media="screen" href="env/ie6.css" />
+   <link rel="stylesheet" type="text/css" media="screen" href="/env/ie6.css" />
   <![endif]-->
   <!--[if lte IE 7.0]>
-   <link rel="stylesheet" type="text/css" media="screen" href="env/ie7.css" />
+   <link rel="stylesheet" type="text/css" media="screen" href="/env/ie7.css" />
   <![endif]-->
   #%env/templates/jqueryheader.template%#
   #%env/templates/portalheader.template%#

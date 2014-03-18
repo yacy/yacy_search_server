@@ -68,6 +68,12 @@ function updatepage(str) {
     #%env/templates/embeddedheader.template%#
     ::
     #%env/templates/simpleheader.template%#
+    <script type="text/javascript">
+      document.getElementById("header_hostbrowser").className += " active";
+      //document.getElementById("greeting").innerHTML="#[promoteSearchPageGreeting]#";
+      document.getElementById("greeting-icon").src="#[promoteSearchPageGreeting.smallImage]#";
+      document.getElementById("navbar-brand").href="#[promoteSearchPageGreeting.homepage]#";
+    </script>
     #(/topmenu)#
     <h2>Host Browser</h2>
     <p>Browse the index of #[ucount]# documents. Enter a host or an URL for a file list or view a list of <a href="HostBrowser.html?hosts=">all hosts</a>, <a href="HostBrowser.html?hosts=crawling">only hosts with urls pending in the crawler</a> or <a href="HostBrowser.html?hosts=error">only with load errors</a>.</p>

@@ -5,11 +5,6 @@
     #%env/templates/metas.template%#
   </head>
   <body id="IndexCreateQueues">
-    
-<div id="api">
-<a href="api/latency_p.xml" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
-<span>Click on this API button to see an XML with information about the crawler latency and other statistics.</span>
-</div>
   
     <div id="fullcontent">
     #(embed)#
@@ -17,6 +12,10 @@
     #%env/templates/submenuCrawlMonitor.template%#
     <h2>'#[queuename]#' Crawl Queue</h2>
     ::#(/embed)#
+<div id="api">
+<a href="api/latency_p.xml" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>Click on this API button to see an XML with information about the crawler latency and other statistics.</span>
+</div>
     
     #(crawler)#
     <p>This crawler queue is empty</p>

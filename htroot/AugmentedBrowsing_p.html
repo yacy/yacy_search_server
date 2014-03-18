@@ -18,7 +18,7 @@
 
             <dl>
             
-            <dt><label for="content">URL proxy:</label></dt>
+            <dt>URL proxy:</dt>
               <dd>
                 <input type="checkbox" name="urlproxyenabled" id="urlproxyenabled" #(urlproxyenabled_checked)#:: checked="checked"#(/urlproxyenabled_checked)# />Enabled<br/>
                 <p class="help">
@@ -26,7 +26,7 @@
                 </p>
               </dd>
               
-              <dt><label for="content">Show search results via URL proxy:</label></dt>
+              <dt>Show search results via URL proxy:</dt>
               <dd>
                 <input type="checkbox" name="urlproxyuseforresults" id="urlproxyuseforresults" #(urlproxyuseforresults_checked)#:: checked="checked"#(/urlproxyuseforresults_checked)# />Enabled<br/>
                 <p class="help">
@@ -34,14 +34,14 @@
                 </p>
               </dd>
               
-              <dt><label for="author">Restrict URL proxy use:</label></dt>
+              <dt>Restrict URL proxy use:</dt>
               <dd>
                 <input type="text" name="urlproxyfilter" value="#[urlproxyfilter]#" size="60" /><br/><br/>
                 <p class="help">
                   Define client filter. Default: 127.0.0.1,0:0:0:0:0:0:0:1.
                 </p>
               </dd>
-              <dt><label for="subject">URL substitution:</label></dt>
+              <dt>URL substitution:</dt>
               <dd>
                 <input type="text" name="urlproxydomains" value="#[urlproxydomains]#" size="60" /><br/><br/>
                 <p class="help">

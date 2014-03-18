@@ -40,16 +40,19 @@
     #%env/templates/embeddedheader.template%#
     ::
     #%env/templates/simpleheader.template%#
+    <script type="text/javascript">
+      document.getElementById("header_websearch").className += " active";
+      document.getElementById("greeting-icon").src="#[promoteSearchPageGreeting.smallImage]#";
+      document.getElementById("navbar-brand").href="#[promoteSearchPageGreeting.homepage]#";
+    </script>
     #(/topmenu)#
 
     #(pi)#::
     <div style="position:fixed; bottom: 0; right: 1px;"><a href="Status.html">&pi;</a></div>
     #(/pi)#
 
-    <h2 class="yacy">
-    <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="yacy" style="margin: auto;"/></a><br /><br />
-      #[promoteSearchPageGreeting]#
-    </h2>
+	<h2 class="yacy"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="yacy" style="margin: auto;"/></a></h2>
+    <h2 class="yacy">#[promoteSearchPageGreeting]#</h2>
   
     <form class="search" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
       <fieldset class="maininput">

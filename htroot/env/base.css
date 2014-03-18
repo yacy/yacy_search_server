@@ -44,11 +44,6 @@ dl {
   width:96%;
 }
 
-body {
-  margin:0;
-  padding:0;
-}
-
 body, table, textarea {
   font-size: 12px;
 }
@@ -124,7 +119,6 @@ input {
 margin:0.2em;
 margin-top:0px;
 margin-bottom:0px;
-vertical-align:text-bottom;
 }
 
 pre {
@@ -398,9 +392,18 @@ img.favicon{
   float: left;
 }
 
+br {
+   display: block;
+   margin: 0;
+}
+
 /*----------
 <p>
 */
+
+p {
+  line-height: 14px;
+}
 
 p.aftersurftips {
   clear:both;
@@ -461,7 +464,7 @@ div.welcome { /* The heading in Status.html */
   width:680px;
 }
 
-div.sidebar { /* sidebars on the right side */
+div.rightbar { /* sidebar on the right side */
   float:left;
 /*  width:120px; too small */
   margin:10px 0;
@@ -520,17 +523,11 @@ a.BookmarkLink {
 }
 
 a.MenuItemLink{
-  display:block;
   text-decoration:none;
   margin-top:1px;
   margin-bottom:1px;
   padding:1px 10px 1px 15px;
-  font-size:0.9em;
-  white-space:nowrap;
-}
-
-li.menugroup a {
-	white-space:normal;
+  font-size:1.0em;
 }
 
 a.MenuItemLink.lock{
@@ -541,6 +538,10 @@ a.MenuItemLink.lock{
 
 a:hover.MenuItemLink {
   text-decoration:none;
+}
+
+li.menugroup a {
+	white-space:normal;
 }
 
 div.urlactions a {
@@ -640,11 +641,11 @@ li.menugroup {
 
 dd {
   text-align:left;
+  vertical-align:top;
 }
 
 dl.pairs dd, form dd {
   padding:0.25%;
-  margin:0 0 0.25% 0.25%;
   float:left;
   width:74%;
 }
@@ -952,7 +953,7 @@ div#kiosk:hover span {
 /* API */
 div#api {
   position:absolute;
-  top:20px;
+  top:60px;
   right:20px;
   z-index: 100;
 }
@@ -1003,12 +1004,8 @@ div#searchmode:hover span {
  }
 
 div#yacylivesearch {
-  float:right;
-  margin-right: 90px;
-  margin-top: -27px;
 }
- 
- 
+
 div#info {
   float:left;
 } 

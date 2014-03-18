@@ -54,6 +54,7 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
@@ -96,7 +97,14 @@ public class HostBrowser {
         } else { // for other respect setting in Search Design Configuration
             prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         }
-        
+        final String promoteSearchPageGreeting =
+                (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ?
+                    env.getConfig("network.unit.description", "") :
+                    env.getConfig(SwitchboardConstants.GREETING, "");
+        prop.put("topmenu_promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("topmenu_promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("topmenu_promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+
         if (!searchAllowed) {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
             prop.putNum("ucount", 0);

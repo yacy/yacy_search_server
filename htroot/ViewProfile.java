@@ -50,6 +50,7 @@ import net.yacy.peers.NewsPool;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -61,6 +62,15 @@ public class ViewProfile {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
+        final String promoteSearchPageGreeting =
+                (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ?
+                    env.getConfig("network.unit.description", "") :
+                    env.getConfig(SwitchboardConstants.GREETING, "");
+        prop.put("display_promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("display_promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("display_promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+
+        
         prop.put("edit", authenticated ? 1 : 0);
         final String hash = (post == null) ? null : post.get("hash");
 

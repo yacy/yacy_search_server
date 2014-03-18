@@ -29,27 +29,27 @@
     <script type="text/javascript" src="js/sorttable.js"></script>
   </head>
   <body id="Tables">
-  
-<div id="api">
-<a href="api/table_p.xml?table=api&count=100&search=" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
-<span>The information that is presented on this page can also be retrieved as XML
-Click the API icon to see the XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
-</div>
-  
+
     <div id="fullcontent">
   	#(inline)##%env/templates/header.template%#
-    
     <h2>Process Scheduler</h2>
     <p>This table shows actions that had been issued on the YaCy interface
     to change the configuration or to request crawl actions.
     These recorded actions can be used to repeat specific actions and to send them
     to a scheduler for a periodic execution.
     </p>::#(/inline)#
+          
+<div id="api">
+<a href="api/table_p.xml?table=api&count=100&search=" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+
     #(showtable)#::	
     <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="apilist">
       <fieldset>
-      <legend><label for="apilist">Recorded Actions</label></legend>
+      <legend>Recorded Actions</legend>
       <br />
       <span id="resCounter" style="display: inline;">
       #(navigation)#

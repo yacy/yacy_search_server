@@ -1,19 +1,14 @@
-<div style="float:right;width:25%;">
 
 #(cat-location)#::
-<div style="float:right; margin-top:5px; width:230px;">
 <a href="yacysearch_location.html?query=#[queryenc]#">
 <img src="env/grafics/earthsearch.png" width="215" height="159" alt="earthsearchlogo" /></a>
 <a href="yacysearch_location.html?query=#[queryenc]#">Show search results for "#[query]#" on map</a>
-</div>
 #(/cat-location)#
 
 #(nav-topics)#::
-<div style="float: right; margin-top:5px; width: 230px; height: 72px">
 <div id="tagcloud" style="text-align:justify">#{element}#
 <a rel="#[count]#" href="#[url]#" style="text-decoration: none;">#[name]#</a>
 #{/element}#</div>
-</div>
 <script type="text/javascript" charset="utf-8">
   $.fn.tagcloud.defaults = {
     size: {start: 8, end: 16, unit: 'pt'},
@@ -27,13 +22,11 @@
 #(/nav-topics)#
 
 #(nav-protocols)#::
-<div id="sidebarProtocols" style="float:right; margin-top:5px; width:230px;">
-<h3 style="padding-left:25px;">Protocol Navigator</h3>
-<dl class="bplike" style="padding-left:5px;">#{element}#
-<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
-<dd>#[name]# (#[count]#)</dd>
-#{/element}#</dl>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Protocol Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
 #(activate)#
 <script type="text/javascript">
 //<![CDATA[
@@ -44,13 +37,11 @@ $(function() { $("#sidebarProtocols").accordion('activate', false); });
 #(/nav-protocols)#
 
 #(nav-filetypes)#::
-<div id="sidebarFiletypes" style="float:right; margin-top:5px; width:230px;">
-<h3 style="padding-left:25px;">Filetype Navigator</h3>
-<dl class="bplike" style="padding-left:5px;">#{element}#
-<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
-<dd>#[name]# (#[count]#)</dd>
-#{/element}#</dl>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Filetype Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
 #(activate)#
 <script type="text/javascript">
 //<![CDATA[
@@ -61,13 +52,11 @@ $(function() { $("#sidebarFiletypes").accordion('activate', false); });
 #(/nav-filetypes)#
 
 #(nav-domains)#::
-<div id="sidebarDomains" style="float:right; margin-top:5px; width:230px;">
-<h3 style="padding-left:25px;">Domain Navigator</h3>
-<dl class="bplike" style="padding-left:5px;">#{element}#
-<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
-<dd>#[name]# (#[count]#)</dd>
-#{/element}#</dl>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Domain Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
 #(activate)#
 <script type="text/javascript">
 //<![CDATA[
@@ -78,13 +67,11 @@ $(function() { $("#sidebarDomains").accordion('activate', false); });
 #(/nav-domains)#
 
 #(nav-languages)#::
-<div id="sidebarLanguages" style="float:right; margin-top:5px; width:230px;">
-<h3 style="padding-left:25px;">Language Navigator</h3>
-<dl class="bplike" style="padding-left:5px;">#{element}#
-<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
-<dd>#[name]# (#[count]#)</dd>
-#{/element}#</dl>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Language Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
 #(activate)#
 <script type="text/javascript">
 //<![CDATA[
@@ -95,13 +82,11 @@ $(function() { $("#sidebarLanguages").accordion('activate', false); });
 #(/nav-languages)#
 
 #(nav-namespace)#::
-<div id="sidebarNameSpace" style="float:right; margin-top:5px; width:230px;">
-<h3 style="padding-left:25px;">Name Space Navigator</h3>
-<dl class="bplike" style="padding-left:5px;">#{element}#
-<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
-<dd>#[name]# (#[count]#)</dd>
-#{/element}#</dl>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Name Space Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
 #(activate)#
 <script type="text/javascript">
 //<![CDATA[
@@ -112,13 +97,11 @@ $(function() { $("#sidebarNameSpace").accordion('activate', false); });
 #(/nav-namespace)#
 
 #(nav-authors)#::
-<div id="sidebarAuthors" style="float:right; margin-top:5px; width:230px;">
-<h3 style="padding-left:25px;">Author Navigator</h3>
-<dl class="bplike" style="padding-left:5px;">#{element}#
-<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
-<dd>#[name]# (#[count]#)</dd>
-#{/element}#</dl>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Author Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
 #(activate)#
 <script type="text/javascript">
 //<![CDATA[
@@ -129,22 +112,16 @@ $(function() { $("#sidebarAuthors").accordion('activate', false); });
 #(/nav-authors)#
 
 #{nav-vocabulary}#
-<div id="sidebar#[navname]#" style="float:right; margin-top:5px; width:230px;">
-<h3 style="padding-left:25px;">#[navname]# Navigator</h3>
-<dl class="bplike" style="padding-left:5px;">#{element}#
-<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
-<dd>#[name]# (#[count]#)</dd>
-#{/element}#</dl>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>#[navname]# Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
 #{/nav-vocabulary}#
 
 #(nav-about)#::
-<div id="sidebarAbout" style="float: right; margin-top:5px; width: 230px;">
-<h3 style="padding-left:25px;">#[headline]#</h3>
-<div style="margin:0px; padding:0px;">
-#[body]#
-</div>
-</div>
+<ul class="nav nav-sidebar menugroup">
+<li><h3>#[headline]#</h3></li>
+<li>#[body]#</li>
+</ul>
 #(/nav-about)#
-
-</div>

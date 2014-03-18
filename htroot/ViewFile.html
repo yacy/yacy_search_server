@@ -61,18 +61,19 @@ function updatepage(str) {
   </head>
   <body>
   
-<div id="api">
-<a href="http://localhost:8090/api/getpageinfo_p.xml?actions=title,robots&url=#[url]#" id="apilink">
-<img src="env/grafics/api.png" width="60" height="40" alt="API"/>
-</a>
-<span>See the page info about the url.</span>
-</div>
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
     #%env/templates/simpleheader.template%#
     #(/topmenu)#
     
+<div id="api">
+<a href="http://localhost:8090/api/getpageinfo_p.xml?actions=title,robots&url=#[url]#" id="apilink">
+<img src="env/grafics/api.png" width="60" height="40" alt="API"/>
+</a>
+<span>See the page info about the url.</span>
+</div>
+
     <h2>View URL Content</h2>
 
     <form method="get" action="ViewFile.html" id="searchform" accept-charset="ascii" onkeyup="xmlhttpPost(); return false;">

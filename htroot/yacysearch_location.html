@@ -154,6 +154,8 @@
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
+    #%env/templates/simpleheader.template%#
+    #(/topmenu)#
 <div id="api">
 <a href="yacysearch_location.rss" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
 <script type="text/javascript">
@@ -165,8 +167,6 @@ document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss
 Click the API icon to see the XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
 </div>
-    #%env/templates/simpleheader.template%#
-    #(/topmenu)#
 
 <form class="search small" onsubmit="return false;" class="search small" accept-charset="UTF-8">
   <h2>#[promoteSearchPageGreeting]#</h2>

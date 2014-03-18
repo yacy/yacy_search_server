@@ -12,13 +12,14 @@
 </head>
 <body id="Crawler" onload="initCrawler();">
 
+#%env/templates/header.template%#
+#%env/templates/submenuCrawlMonitor.template%#
+
 <div id="api">
 <a href="api/status_p.xml" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
 <span>Click on this API button to see an XML with information about the crawler status</span>
 </div>
 
-#%env/templates/header.template%#
-#%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler</h2>
 <noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
 <fieldset id="queues" style="width:180px;float:left;">
@@ -161,13 +162,13 @@
 </fieldset>
 <script>
 if (document.getElementById("progress").clientHeight > document.getElementById("indexsize").clientHeight) {
-	document.getElementById("indexsize").style.height = (document.getElementById("progress").clientHeight-20)+"px";
-	document.getElementById("progress").style.height = (document.getElementById("progress").clientHeight-20)+"px";
+	document.getElementById("indexsize").style.height = (document.getElementById("progress").clientHeight)+"px";
+	document.getElementById("progress").style.height = (document.getElementById("progress").clientHeight)+"px";
 } else {
-	document.getElementById("progress").style.height = (document.getElementById("indexsize").clientHeight-20)+"px";
-	document.getElementById("indexsize").style.height = (document.getElementById("indexsize").clientHeight-20)+"px";
+	document.getElementById("progress").style.height = (document.getElementById("indexsize").clientHeight)+"px";
+	document.getElementById("indexsize").style.height = (document.getElementById("indexsize").clientHeight)+"px";
 }
-document.getElementById("queues").style.height = (document.getElementById("indexsize").clientHeight-20)+"px"; 
+document.getElementById("queues").style.height = (document.getElementById("indexsize").clientHeight)+"px"; 
 </script>
 <p class="watchCrawler" style="clear:both;">
 #(info)#

@@ -1,0 +1,88 @@
+/*
+ * Base bootstrap structure, this should become part of base.css later
+ */
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 59px;
+}
+
+
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+  border: 0;
+}
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+  display: none;
+  margin-top: -12px;
+}
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -21px; /* 20px padding + 1px border */
+  margin-bottom: 10px;
+  margin-left: -20px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.nav-sidebar > li {
+  padding: 0px;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+.nav-sidebar h3 {
+  padding-right: 20px;
+  padding-left: 20px;
+  padding-top: 4px;
+  padding-bottom: 1px;
+  margin: 0px;
+  font-size: 14px;
+}
+.navbar {
+	background-color: #404040;
+}
+.navbar-header a:link, .navbar-collapse a:link {
+  text-decoration:none;
+}
+.navbar-right {
+  padding-right:20px;
+  font-size: 14px;
+}
+legend {
+  width: auto;
+  margin: 0px;
+  line-height: 16px;
+  border: 0;
+} 

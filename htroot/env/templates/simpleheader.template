@@ -1,11 +1,30 @@
-<div class="SubMenu">
-<ul class="SubMenu">
-<li style="width:15%;"><a href="Status.html" class="MenuItemLink">Administration</a></li>
-<li style="width:15%;"><a href="index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value" class="MenuItemLink">Web Search</a></li>
-<li style="width:15%;"><a href="yacyinteractive.html" onclick="this.href='/yacyinteractive.html?handover='+document.searchform.search.value" class="MenuItemLink">File Search</a></li>
-<li style="width:15%;"><a href="HostBrowser.html?hosts=" class="MenuItemLink">HostBrowser</a></li>
-<li style="width:15%;"><a href="ViewProfile.html?hash=localhash" class="MenuItemLink">About Us</a></li>
-<li style="width:9%;"><a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink" target="_blank">Help / YaCy Wiki</a></li>
-</ul>
+<!-- top navigation -->
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="/" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
+        <img id="greeting-icon" class="yacylogo" src="/env/grafics/yacy.png" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;<span id="greeting"></span>
+      </a>
+    </div>
+    <div class="navbar-collapse collapse">
+    <ul class="nav navbar-nav navbar-right">
+      <li id="header_websearch"><a href="index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value">Web Search</a></li>
+      <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='/yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
+      <li id="header_hostbrowser"><a href="HostBrowser.html?hosts=">Host Browser</a></li>
+      <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About Us</a></li>
+      <li id="header_tutorial"><a href="Help.html">Tutorial</a></li>
+      <li id="header_administration"><a href="Status.html">Administration</a></li>
+    </ul>
+    </div>
+  </div>
 </div>
-<div style="clear:left; padding:10px;">
+
+<div class="container-fluid">
+  <div class="starter-template">
+  

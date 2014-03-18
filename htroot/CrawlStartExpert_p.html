@@ -200,13 +200,14 @@
   </head>
   <body id="IndexCreate">
   
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+          
 <div id="api">
 <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API#Managing_crawl_jobs" id="apilink" target="_blank"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
 <span>Click on this API button to see a documentation of the POST request parameter for crawl starts.</span>
 </div>
-  
-    #%env/templates/header.template%#
-    #%env/templates/submenuIndexCreate.template%#
+
     <h2>Expert Crawl Start</h2>
     
     <p id="startCrawling">
@@ -219,12 +220,10 @@
     
     <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
-        <legend>
-          <label>Crawl Job</label>
-        </legend>
+        <legend>Crawl Job</legend>
         <p>A Crawl Job consist of one or more start point, crawl limitations and document freshness rules.</p>
         <fieldset>
-          <legend><label>Start Point</label></legend>
+          <legend>Start Point</legend>
           <dl>
             <dt>One Start URL or a list of URLs:<br/>(must start with http:// https:// ftp:// smb:// file://)</dt>
             <dd>
@@ -259,7 +258,7 @@
 	      </dl>
         </fieldset>
         <fieldset>
-          <legend><label>Crawler Filter</label></legend>
+          <legend>Crawler Filter</legend>
           <p>These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.</p>
           <dl>
           <dt>Crawling Depth</dt>
@@ -338,7 +337,7 @@
 	      </dl>
         </fieldset>
         <fieldset>
-          <legend><label>Document Filter</label></legend>
+          <legend>Document Filter</legend>
           <p>These are limitations on index feeder. The filters will be applied after a web page was loaded.</p>
           <dl>
 	        <dt>Filter on URLs</dt>
@@ -362,7 +361,7 @@
 	      </dl>
         </fieldset>
         <fieldset>
-          <legend><label>Clean-Up before Crawl Start</label></legend>
+          <legend>Clean-Up before Crawl Start</legend>
           <dl>
             <dt>No Deletion</dt>
             <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
@@ -388,7 +387,7 @@
 	      </dl>
         </fieldset>
         <fieldset>
-          <legend><label>Double-Check Rules</label></legend>
+          <legend>Double-Check Rules</legend>
           <dl>
             <dt>No&nbsp;Doubles</dt>
             <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
@@ -412,7 +411,7 @@
 	      </dl>
         </fieldset>
         <fieldset>
-          <legend><label>Document Cache</label></legend>
+          <legend>Document Cache</legend>
           <dl><dt><label for="storeHTCache">Store to Web Cache</label></dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
@@ -439,7 +438,7 @@
         </fieldset>
 	    #(agentSelect)#<input type="hidden" name="agentName" id="agentName" value="#[defaultAgentName]#" />::
         <fieldset>
-          <legend><label>Robot Behaviour</label></legend>
+          <legend>Robot Behaviour</legend>
           <dl>
           <dt><label for="collection">Use Special User Agent and robot identification</label></dt>
           <dd>
@@ -459,7 +458,7 @@
         </fieldset>
 	    #(/agentSelect)#
         <fieldset>
-          <legend><label>Index Administration</label></legend>
+          <legend>Index Administration</legend>
           <dl>
           <dt>Do Local Indexing</dt>
           <dd>

@@ -84,7 +84,6 @@ table {
 
 .TableCellSummary {
   background-color: #FFCCCC;
-  border:1px solid #888888;
 }
 
 .TableCellActive {       
@@ -180,12 +179,6 @@ div#api {
   top:3px;
   right:20px;
   z-index: 100;
-}
-
-div#yacylivesearch {
-  float:right;
-  margin-right: 90px;
-  margin-top: -24px;
 }
 
 /* Searchresults */

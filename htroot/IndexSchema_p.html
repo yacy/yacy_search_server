@@ -5,13 +5,15 @@
     #%env/templates/metas.template%#
   </head>
   <body id="IndexSchema_p">
+
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    
 <div id="api">
 <a href="api/schema.xml?core=#[core]#">
 <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
 <span>The solr schema can also be retrieved as xml here. Click the API icon to see the xml. Just copy this xml to solr/conf/schema.xml to configure solr.</span>
 </div>	
-    #%env/templates/header.template%#
-    #%env/templates/submenuIndexControl.template%#
     <h2>Solr Schema Editor</h2>
     <p>If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name</p>
     

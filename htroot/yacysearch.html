@@ -65,17 +65,7 @@
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
-<div id="api">
-<script type="text/javascript">
-//<![CDATA[
-document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\"\><img src=\"env/grafics/rss.png\" width=\"32\" height=\"32\" alt=\"RSS\" /></a>")
-//]]>
-</script>
-<span>This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.
-The query format is similar to <a href="http://www.loc.gov/standards/sru/" target="_blank">SRU</a>.
-Click the API icon to see an example call to the search rss API.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
-</div>
+
 #(resource-select)#::
 <div id="searchmode">
 <img src="env/grafics/searchmode_p2p_activated_32.png" width="91" height="32"/><br/>
@@ -88,37 +78,33 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 <span>Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.</span>
 </div>#(/resource-select)#
     #%env/templates/simpleheader.template%#
+    <script type="text/javascript">
+      document.getElementById("header_websearch").className += " active";
+      //document.getElementById("greeting").innerHTML="#[promoteSearchPageGreeting]#";
+      document.getElementById("greeting-icon").src="#[promoteSearchPageGreeting.smallImage]#";
+      document.getElementById("navbar-brand").href="#[promoteSearchPageGreeting.homepage]#";
+    </script>
     #(/topmenu)#
+
+<div id="api">
 <script type="text/javascript">
 //<![CDATA[
-$(function() {
-	$.extend($.ui.accordion.defaults, {
-		autoHeight: false,
-		clearStyle: true,
-		collapsible: true,
-		header: "h3"
-	});
-	#{sidebarVocabulary}#
-	$("#sidebar#[vocabulary]#").accordion({});
-	#{/sidebarVocabulary}#
-	$("#sidebarDomains").accordion({});
-	$("#sidebarProtocols").accordion({});
-	$("#sidebarFiletypes").accordion({});
-        $("#sidebarLanguages").accordion({});
-	$("#sidebarAuthors").accordion({});        
-	$("#sidebarNameSpace").accordion({});
-    $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
-    $("#sidebarAbout").accordion({});
-#(focus)#::
-	$("#search").focus();
-#(/focus)#
-});
+document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\"\><img src=\"env/grafics/rss.png\" width=\"32\" height=\"32\" alt=\"RSS\" /></a>")
 //]]>
 </script>
+<span>This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.
+The query format is similar to <a href="http://www.loc.gov/standards/sru/" target="_blank">SRU</a>.
+Click the API icon to see an example call to the search rss API.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+
+<!-- body -->
+</div> <!-- close the starter-template, to open a row -->
+
+  <div class="row">
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
 <form class="search small" action="" method="get" accept-charset="UTF-8">
-  <h2>#[promoteSearchPageGreeting]#</h2>
-  <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
   <fieldset class="yacys">
     <input id="search" class="searchinput" name="query" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" onclick="document.getElementById('Enter').value = 'Search'" />
     <input id="Enter" type="submit" name="Enter" value="Search" />
@@ -192,7 +178,6 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 document.getElementById("search").focus();
 #(/focus)#
 </script>
-<div style="float:left; width:70%;">
 
 <!-- show openstreetmap tiles if geoinfo was found -->
 #(geoinfo)#
@@ -223,16 +208,32 @@ document.getElementById("search").focus();
 #{/results}#
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
-<!-- attach the bottomline -->
+
+<!-- attach the bottomline (customer option) -->
 <!--#(pageNavBottom)#::<div id="pageNavBottom" style="text-align:center">#[resnav]#</div>#(/pageNavBottom)#-->
-</div>
-<!-- div style="width=220px;" -->
+
+</div> <!-- close main -->
+
+<div class="col-sm-3 col-md-2 sidebar" id="sidebar">
+<!-- navigation begin -->
 <!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#" -->
-<!-- /div -->
-</div>
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+    $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
+#(focus)#::
+	$("#search").focus();
+#(/focus)#
+});
+//]]>
+</script>
+<!-- navigation end -->
+
+</div> <!-- close sidebar -->
+</div> <!-- close row -->
+
 <!-- update the search results statistics after the search is finished -->
 <script type="text/javascript">
-
 function latestinfo() {
   if (window.XMLHttpRequest) { // Mozilla/Safari
     self.xmlHttpReq = new XMLHttpRequest(); 

@@ -1,4 +1,4 @@
-<div class="sidebar">
+<div class="rightbar">
 <fieldset style="width: 230px;">
   <legend>System Status</legend>
   <dl>

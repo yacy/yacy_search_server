@@ -12,7 +12,7 @@
     <p>The search index contains #[doccount]# documents. You can delete them here. Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.</p>
     <form id="IndexDeletionPath" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
-      <legend><label>Delete by URL Matching</label></legend>
+      <legend>Delete by URL Matching</legend>
       <p>Delete all documents within a sub-path of the given urls. That means all documents must start with one of the url stubs as given here.</p>
       <dl>
         <dt>One URL stub, a list of URL stubs<br/>or a regular expression</dt>
@@ -33,7 +33,7 @@
     
     <form id="IndexDeletionAge" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
-      <legend><label>Delete by Age</label></legend>
+      <legend>Delete by Age</legend>
       <p>Delete all documents which are older than a given time period.</p>
       <dl>
         <dt>Time Period</dt>
@@ -80,7 +80,7 @@
     
     <form id="IndexDeletionCollection" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
-      <legend><label>Delete Collections</label></legend>
+      <legend>Delete Collections</legend>
       <p>Delete all documents which are inside specific collections.</p>
       <dl>
         <dt>Not Assigned</dt>
@@ -105,7 +105,7 @@
     
     <form id="IndexDeletionQuery" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
-      <legend><label>Delete by Solr Query</label></legend>
+      <legend>Delete by Solr Query</legend>
       <p>This is the most generic option: select a set of documents using a solr query.</p>
       <dl>
         <dt>q=</dt>
