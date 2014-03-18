@@ -3208,9 +3208,9 @@ Pictures==图像
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "\#\[query\]\#" on map==显示 "#[query]#" 的搜索结果
-#>Domain Navigator==>Domain Navigator
->Name Space Navigator==>命名空间导航
->Author Navigator==>作者导航
+#>Domain Facet==>Domain Navigator
+>Name Space Facet==>命名空间导航
+>Author Facet==>作者导航
 #-----------------------------
 
 ### Subdirectory api ###

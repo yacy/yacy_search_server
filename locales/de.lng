@@ -892,13 +892,13 @@ menu.=Menü geändert werden.
 #>Tag<==>Tag<
 >Topics<==>Themen<
 #>Cloud<==>Cloud<
->Protocol Navigator<==>Protokoll Navigator<
->Filetype Navigator<==>Dateityp Navigator<
->Domain Navigator<==>Domänen Navigator<
->Wiki Name Space Navigator<==>Wiki Namespace Navigator<
->Language Navigator<==>Sprache Navigator<
->Author Navigator<==>Autoren Navigator<
->Vocabulary Navigator<==>Vokabellisten Navigator<
+>Protocol Facet<==>Protokoll Navigator<
+>Filetype Facet<==>Dateityp Navigator<
+>Domain Facet<==>Domänen Navigator<
+>Wiki Name Space Facet<==>Wiki Namespace Navigator<
+>Language Facet<==>Sprache Navigator<
+>Author Facet<==>Autoren Navigator<
+>Vocabulary Facet<==>Vokabellisten Navigator<
 >Title of Result<==>Ergebnis Titel<
 Description and text snippet of the search result==Beschreibung und Textauschnitt der Suchergebnisse
 http://url-of-the-search-result.net==http://URL-des-Suchergebnisses.de
@@ -3814,9 +3814,11 @@ Pictures==Bilder
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "\#\[query\]\#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
->Domain Navigator==>Anbieter Navigator
->Name Space Navigator==>Namespace Navigator
->Author Navigator==>Autoren Navigator
+>Protocol Facet==>Netzdienst
+>Filetype Facet==>Dateityp
+>Domain Facet==>Anbieter
+>Name Space Facet==>Namespace Navigator
+>Author Facet==>Autoren Navigator
 #-----------------------------
 
 ### Subdirectory api ###
@@ -3912,7 +3914,7 @@ Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
 #Administration<==Administration<
 >Web Search<==>Web Suche<
 >File Search<==>Datei Suche<
->HostBrowser<==>Host Browser<
+>Host Browser<==>Host Browser<
 >About Us<==>Impressum dieses Peers<
 Help / YaCy Wiki==Hilfe / YaCy Wiki
 #-----------------------------

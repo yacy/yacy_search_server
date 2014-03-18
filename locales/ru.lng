@@ -882,7 +882,7 @@ menu.=.
 >Administration<==>Администрирование<
 >Web Search<==>Вэб-поиск<
 >File Search<==>Поиск файлов<
->HostBrowser<==>Просмотр хостов<
+>Host Browser<==>Просмотр хостов<
 >About Us<==>О пользователе<
 >Help / YaCy Wiki<==>YaCy Wiki<
 "Search"=="Поиск"
@@ -895,13 +895,13 @@ menu.=.
 >Tag<==>Тэг<
 >Topics<==>Топики<
 >Cloud<==>Облако<
->Protocol Navigator<==>Фильтр по протоколу<
->Filetype Navigator<==>Фильтр по типу файла<
->Domain Navigator<==>Фильтр по домену<
->Wiki Name Space Navigator<==>Фильтрам по статьям Wiki<
->Language Navigator<==>Фильтр по языку<
->Author Navigator<==>Фильтр по автору<
->Vocabulary Navigator<==>Фильтр по словарю<
+>Protocol Facet<==>Фильтр по протоколу<
+>Filetype Facet<==>Фильтр по типу файла<
+>Domain Facet<==>Фильтр по домену<
+>Wiki Name Space Facet<==>Фильтрам по статьям Wiki<
+>Language Facet<==>Фильтр по языку<
+>Author Facet<==>Фильтр по автору<
+>Vocabulary Facet<==>Фильтр по словарю<
 >Title of Result<==>Заголовок результата<
 Description and text snippet of the search result==Описание и фрагмент текста результата поиска
 http://url-of-the-search-result.net==http://url-of-the-search-result.net
@@ -3874,9 +3874,9 @@ Pictures==Изображения
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "\#\[query\]\#" on map==Показать результат поиска "#[query]#" на карте
->Domain Navigator==>Навигатор домена
->Name Space Navigator==>Навигатор пространства имен
->Author Navigator==>Автор Навигатор
+>Domain Facet==>Навигатор домена
+>Name Space Facet==>Навигатор пространства имен
+>Author Facet==>Автор Навигатор
 #-----------------------------
 
 ### Subdirectory api ###
@@ -3976,7 +3976,7 @@ Peer Statistics::YaCy Statistics==Статистика узлов::YaCy Стат
 Administration<==Администрирование<
 >Web Search<==>Вэб‐поиск<
 >File Search<==>Поиск файлов<
->HostBrowser<==>Просмотр хостов<
+>Host Browser<==>Просмотр хостов<
 >About Us<==>О пользователе<
 Help / YaCy Wiki==YaCy Wiki
 #-----------------------------
