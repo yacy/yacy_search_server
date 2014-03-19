@@ -59,11 +59,11 @@
         <input type="hidden" name="verify" value="#[search.verify]#" />
         #(searchdomswitches)#::
         <div class="yacysearch">
-	        #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# /><label for="text">Text</label>&nbsp;&nbsp;#(/searchtext)#
-	        #(searchimage)#::<input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# /><label for="image">Images</label>&nbsp;&nbsp;#(/searchimage)#
-	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# /><label for="audio">Audio</label>&nbsp;&nbsp;#(/searchaudio)#
-	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# /><label for="video">Video</label>&nbsp;&nbsp;#(/searchvideo)#
-	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# /><label for="app">Applications</label>#(/searchapp)#
+	        #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;#(/searchtext)#
+	        #(searchimage)#::<input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# />&nbsp;Images&nbsp;&nbsp;#(/searchimage)#
+	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;#(/searchaudio)#
+	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;#(/searchvideo)#
+	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications#(/searchapp)#
 	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='/index.html?searchoptions=1&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#

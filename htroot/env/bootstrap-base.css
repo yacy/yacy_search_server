@@ -82,4 +82,8 @@ legend {
   margin: 0px;
   line-height: 16px;
   border: 0;
-} 
+}
+label {
+  font-weight:normal;
+  padding-left:6px;
+}
