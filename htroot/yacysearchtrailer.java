@@ -49,7 +49,9 @@ import net.yacy.server.serverSwitch;
 
 public class yacysearchtrailer {
 
-    private static final int MAX_TOPWORDS = 16;
+    private static final int TOPWORDS_MAXCOUNT = 16;
+    private static final int TOPWORDS_MINSIZE = 8;
+    private static final int TOPWORDS_MAXSIZE = 20;
     private static final int MAXLIMIT_NAV_LOW = 5;
     private static final int MAXLIMIT_NAV_HIGH = 20;
 
@@ -239,7 +241,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopicNavigator(MAX_TOPWORDS) : null;
+        final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopicNavigator(TOPWORDS_MAXCOUNT) : null;
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             prop.put("nav-topics", "0");
         } else {
@@ -248,12 +250,16 @@ public class yacysearchtrailer {
             int i = 0;
             // first sort the list to a form where the greatest element is in the middle
             LinkedList<Map.Entry<String, Integer>> cloud = new LinkedList<Map.Entry<String, Integer>>();
-            while (i < MAX_TOPWORDS && navigatorIterator.hasNext()) {
+            int mincount = Integer.MAX_VALUE; int maxcount = 0;
+            while (i < TOPWORDS_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = topicNavigator.get(name);
                 if (count == 0) break;
                 if (name == null) continue;
-                Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<String, Integer>(name, (count + MAX_TOPWORDS - i) / 2);
+                int normcount = (count + TOPWORDS_MAXCOUNT - i) / 2;
+                if (normcount > maxcount) maxcount = normcount;
+                if (normcount < mincount) mincount = normcount;
+                Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<String, Integer>(name, normcount);
                 if (cloud.size() % 2 == 0) cloud.addFirst(entry); else cloud.addLast(entry); // alternating add entry to first or last position.
                 i++;
             }
@@ -266,6 +272,9 @@ public class yacysearchtrailer {
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, name).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
+                int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (maxcount / mincount);
+                fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
+                prop.put("nav-topics_element_" + i + "_size", fontsize); // font size in pixel
                 prop.put("nav-topics_element_" + i + "_nl", 1);
                 i++;
             }
