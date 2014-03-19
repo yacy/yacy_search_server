@@ -44,12 +44,13 @@
           <ul class="dropdown-menu">
           <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
           <li id="header_tutorial"><a href="/Help.html">Administration Tutorials</a></li>
-          <li id="header_tutorial"><a href="http://yacy.net" target="_blank"><i>external</i> Download the YaCy Search Software</a></li>
-          <li id="header_tutorial"><a href="http://forum.yacy.de" target="_blank"><i>external</i> Community (Web Forums)</a></li>
-          <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i> Project Wiki</a></li>
-          <li id="header_tutorial"><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank"><i>external</i> Git Repository</a></li>
-          <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i> Bugtracker</a></li>
-          <li id="header_tutorial"><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank"><i>external</i> #(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
+          <li class="divider"></li>
+          <li id="header_tutorial"><a href="http://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
+          <li id="header_tutorial"><a href="http://forum.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
+          <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
+          <li id="header_tutorial"><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
+          <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
+          <li id="header_tutorial"><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;#(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
         </ul>
         </li>
         <li id="header_administration">

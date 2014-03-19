@@ -24,9 +24,13 @@
           <li id="header_urlviewer"><a href="ViewFile.html">URL Viewer</a></li>
           <!--<li><a href="yacysearch_location.html">Location Search</a></li>-->
           <li class="divider"></li>
-          <li><a href="/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core</a></li>
-          <li><a href="/solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core</a></li>
-          <li><a href="/gsa/search?q=www&num=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Google Appliance API</a></li>
+          <li><a href="/yacysearch.json?query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;YaCy JSON</a></li>
+          <li><a href="/yacysearch.rss?query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;YaCy RSS/Opensearch</a></li>
+          <li><a href="/solr/select?hl=false&wt=opensearch&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr RSS/Opensearch</a></li>
+          <li><a href="/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / JSON</a></li>
+          <li><a href="/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / XML</a></li>
+          <li><a href="/solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core / XML</a></li>
+          <li><a href="/gsa/search?q=www&num=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Google Appliance API / XML</a></li>
         </ul>
       </li>
       <li id="header_help" class="dropdown">
@@ -34,12 +38,13 @@
         <ul class="dropdown-menu">
           <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
           <li id="header_tutorial"><a href="/Help.html">Administration Tutorials</a></li>
-          <li id="header_tutorial"><a href="http://yacy.net" target="_blank"><i>external</i> Download the YaCy Search Software</a></li>
-          <li id="header_tutorial"><a href="http://forum.yacy.de" target="_blank"><i>external</i> Community (Web Forums)</a></li>
-          <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i> Project Wiki</a></li>
-          <li id="header_tutorial"><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank"><i>external</i> Git Repository</a></li>
-          <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i> Bugtracker</a></li>
-          <li id="header_tutorial"><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank"><i>external</i> #(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
+          <li class="divider"></li>
+          <li id="header_tutorial"><a href="http://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
+          <li id="header_tutorial"><a href="http://forum.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
+          <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
+          <li id="header_tutorial"><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
+          <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
+          <li id="header_tutorial"><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;#(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
         </ul>
       </li>
       <li id="header_administration">
