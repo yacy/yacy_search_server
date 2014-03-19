@@ -65,7 +65,9 @@ public class InstanceMirror {
     public void disconnectEmbedded() {
         mirrorConnectorCache.clear();
         if (this.embeddedSolrInstance == null) return;
-        for (EmbeddedSolrConnector connector: this.embeddedConnectorCache.values()) connector.close();
+        Set<SolrConnector> connectors = new HashSet<SolrConnector>();
+        connectors.addAll(this.embeddedConnectorCache.values());
+        for (SolrConnector connector: connectors) connector.close();
         this.embeddedConnectorCache.clear();
         this.embeddedSolrInstance.close();
         this.embeddedSolrInstance = null;
