@@ -156,7 +156,7 @@ tt, *.tt {
 }
 
 .hidden {
-  display:hidden;
+  display:none;
 }
 
 .listing {

@@ -29,6 +29,4 @@
   <!--[if lte IE 7.0]>
    <link rel="stylesheet" type="text/css" media="screen" href="/env/ie7.css" />
   <![endif]-->
-  #%env/templates/jqueryheader.template%#
-  #%env/templates/portalheader.template%#
 <!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->

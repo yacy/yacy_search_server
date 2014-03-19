@@ -4,7 +4,7 @@
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
-  padding-top: 59px;
+  padding-top: 57px;
 }
 
 
@@ -23,7 +23,7 @@ body {
 /* Hide for mobile, show later */
 .sidebar {
   display: none;
-  margin-top: -12px;
+  margin-top: -14px;
 }
 @media (min-width: 768px) {
   .sidebar {
@@ -46,15 +46,15 @@ body {
   margin-left: -20px;
 }
 .nav-sidebar > li > a {
-  padding-right: 20px;
-  padding-left: 20px;
+  padding-right: 10px;
+  padding-left: 16px;
   padding-top: 0px;
   padding-bottom: 0px;
 }
 .nav-sidebar > li {
   padding: 0px;
-  margin-left: 8px;
-  margin-right: 8px;
+  margin-left: 6px;
+  margin-right: 6px;
 }
 .nav-sidebar > .active > a,
 .nav-sidebar > .active > a:hover,
@@ -63,8 +63,8 @@ body {
   background-color: #428bca;
 }
 .nav-sidebar h3 {
-  padding-right: 20px;
-  padding-left: 20px;
+  padding-right: 10px;
+  padding-left: 16px;
   padding-top: 4px;
   padding-bottom: 1px;
   margin: 0px;

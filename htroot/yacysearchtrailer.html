@@ -7,17 +7,9 @@
 
 #(nav-topics)#::
 <div id="tagcloud" style="text-align:justify">#{element}#
-<a rel="#[count]#" href="#[url]#" style="text-decoration: none;">#[name]#</a>
+<a rel="#[count]#" href="#[url]#" style="text-decoration: none;font-size:#[size]#px;">#[name]#</a>
 #{/element}#</div>
 <script type="text/javascript" charset="utf-8">
-  $.fn.tagcloud.defaults = {
-    size: {start: 8, end: 16, unit: 'pt'},
-    color: {start: '#c08080', end: '#2200CC'}
-  };
-  $(document).ready(function(){
-    $("#tagcloud a").tagcloud();
-    return false;
-  })
 </script>
 #(/nav-topics)#
 
