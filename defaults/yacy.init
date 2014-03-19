@@ -1165,7 +1165,6 @@ core.service.webgraph.tmp = false
 # Augmentation settings
 parserAugmentation = false
 parserAugmentation.RDFa = false
-proxyAugmentation = false
 
 # Content control settings
 contentcontrol.enabled = false

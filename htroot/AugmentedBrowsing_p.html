@@ -56,35 +56,6 @@
             <input type="submit" name="urlproxySettings" value="Submit"/>
 </fieldset>
 </form>
-
-
-    
-    <form id="parsersettings" action="AugmentedBrowsing_p.html" method="post" enctype="multipart/form-data">
-    
-<fieldset><legend id="augmentation">Augmented Browsing Settings</legend>
-<p>
-  With this settings you can activate or deactivate augmented browsing which happens usually via the URL proxy.
-</p>
-
-
-<dl>
-            
-            <dt><label for="content">Augmented Browsing:</label></dt>
-              <dd>
-                <input type="checkbox" name="augmentationenabled" id="augmentationenabled" #(augmentationenabled_checked)#:: checked="checked"#(/augmentationenabled_checked)# />Enabled<br/>
-                <p class="help">
-                  Enables or disables augmented browsing. If enabled, all websites will be modified during loading.
-                </p>
-              </dd>
-              
-              
-              
-            </dl>
-
-
-            <input type="submit" name="augmentationSettings" value="Submit"/>
-</fieldset>
-</form>
     
     #%env/templates/footer.template%#
   </body>

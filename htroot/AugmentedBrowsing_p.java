@@ -26,13 +26,6 @@ public final class AugmentedBrowsing_p {
 
 			}
 
-			if (post.containsKey("augmentationSettings")) {
-
-				env.setConfig("proxyAugmentation", "on".equals(post
-						.get("augmentationenabled")) ? true : false);
-
-			}
-
 		}
 
 		prop.putHTML("urlproxyfilter",
@@ -46,9 +39,6 @@ public final class AugmentedBrowsing_p {
 
 		prop.put("urlproxyuseforresults_checked",
 				env.getConfigBool("proxyURL.useforresults", false) ? "1" : "0");
-
-		prop.put("augmentationenabled_checked",
-				env.getConfigBool("proxyAugmentation", false) ? "1" : "0");
 
 		// return rewrite properties
 		return prop;
