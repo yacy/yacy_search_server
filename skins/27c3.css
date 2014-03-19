@@ -197,7 +197,6 @@ form.search.small h2 {
 .searchresults h4 a {
   font-size:1.2em;
   font-weight:normal;
-  text-decoration:underline;
   color:#ffffff;
 }
 .searchresults h4 a:link:hover {
