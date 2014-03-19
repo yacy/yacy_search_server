@@ -26,7 +26,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import com.google.common.io.Files;
+
 import java.io.File;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.util.ConcurrentLog;
@@ -35,6 +37,7 @@ import net.yacy.search.Switchboard;
 
 import java.io.IOException;
 import java.util.Iterator;
+
 import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.search.SwitchboardConstants;
@@ -188,6 +191,7 @@ public class ConfigHeuristics_p {
         return prop;
     }
 
+    @SuppressWarnings("unused")
     private static void writeopensearchcfg(final Switchboard sb, final serverObjects post) {
         // read index schema table flags
 

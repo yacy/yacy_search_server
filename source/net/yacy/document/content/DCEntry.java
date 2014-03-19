@@ -269,9 +269,8 @@ public class DCEntry extends MultiMapSolrParams {
         if (t != null) {
             t = stripCDATA(t);
             return t.split(";");
-        } else {
-            tx = this.getParams("dc:subject");
         }
+        tx = this.getParams("dc:subject");
         
         if (tx != null) {
             for (int i = 0; i < tx.length; i++) {

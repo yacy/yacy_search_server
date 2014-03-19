@@ -58,7 +58,6 @@
 package net.yacy.server.http;
 
 import java.io.File;
-import java.util.Date;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.util.ConcurrentLog;

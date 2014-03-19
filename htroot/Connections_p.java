@@ -41,7 +41,7 @@ import net.yacy.server.serverSwitch;
 
 public final class Connections_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -49,19 +49,6 @@ public final class Connections_p {
         // server sessions
         // get the serverCore thread
         final YaCyHttpServer httpd = sb.getHttpServer();
-        
-        // determines if name lookup should be done or not
-        final boolean doNameLookup;
-        if (post != null) {
-            doNameLookup = post.getBoolean("nameLookup");
-            if (post.containsKey("closeServerSession")) {
-                final String sessionName = post.get("closeServerSession", null);
-                prop.put(serverObjects.ACTION_LOCATION,"");
-                return prop;
-            }
-        } else {
-            doNameLookup = false;
-        }
 
         // waiting for all threads to finish
         int idx = 0, numActivePending = 0;

@@ -99,7 +99,6 @@ public final class HTTPDProxyHandler {
     private static Switchboard sb = null;
     private static final HashSet<String> yellowList;
     private static int timeout = 60000;
-    private static boolean yacyTrigger = true;
     private static Process redirectorProcess = null;
     private static boolean redirectorEnabled = false;
     private static PrintWriter redirectorWriter = null;
