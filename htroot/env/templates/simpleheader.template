@@ -14,12 +14,39 @@
     </div>
     <div class="navbar-collapse collapse">
     <ul class="nav navbar-nav navbar-right">
-      <li id="header_websearch"><a href="index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value">Web Search</a></li>
-      <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='/yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
-      <li id="header_hostbrowser"><a href="HostBrowser.html?hosts=">Host Browser</a></li>
-      <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About Us</a></li>
-      <li id="header_tutorial"><a href="Help.html">Tutorial</a></li>
-      <li id="header_administration"><a href="Status.html">Administration</a></li>
+      <li id="header_search" class="dropdown">
+        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li id="header_websearch"><a href="index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value">Web Search</a></li>
+          <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='/yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
+          <li id="header_comparesearch"><a href="/compare_yacy.html?display=0">Compare Search</a></li>
+          <li id="header_hostbrowser"><a href="HostBrowser.html?hosts=">Host Browser</a></li>
+          <li id="header_urlviewer"><a href="ViewFile.html">URL Viewer</a></li>
+          <!--<li><a href="yacysearch_location.html">Location Search</a></li>-->
+          <li class="divider"></li>
+          <li><a href="/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core</a></li>
+          <li><a href="/solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core</a></li>
+          <li><a href="/gsa/search?q=www&num=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Google Appliance API</a></li>
+        </ul>
+      </li>
+      <li id="header_help" class="dropdown">
+        <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
+        <ul class="dropdown-menu">
+          <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
+          <li id="header_tutorial"><a href="/Help.html">Administration Tutorials</a></li>
+          <li id="header_tutorial"><a href="http://yacy.net" target="_blank"><i>external</i> Download the YaCy Search Software</a></li>
+          <li id="header_tutorial"><a href="http://forum.yacy.de" target="_blank"><i>external</i> Community (Web Forums)</a></li>
+          <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i> Project Wiki</a></li>
+          <li id="header_tutorial"><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank"><i>external</i> Git Repository</a></li>
+          <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i> Bugtracker</a></li>
+          <li id="header_tutorial"><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank"><i>external</i> #(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
+        </ul>
+      </li>
+      <li id="header_administration">
+        <form action="/Status.html" method="get" role="form">
+          <button accesskey="s" type="submit" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
+        </form>
+      </li>
     </ul>
     </div>
   </div>

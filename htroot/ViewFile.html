@@ -66,7 +66,13 @@ function updatepage(str) {
     ::
     #%env/templates/simpleheader.template%#
     #(/topmenu)#
-    
+<script type="text/javascript">
+  document.getElementById("header_urlviewer").className += " active";
+  //document.getElementById("greeting").innerHTML="#[promoteSearchPageGreeting]#";
+  //document.getElementById("greeting-icon").src="#[promoteSearchPageGreeting.smallImage]#";
+  //document.getElementById("navbar-brand").href="#[promoteSearchPageGreeting.homepage]#";
+</script>
+
 <div id="api">
 <a href="http://localhost:8090/api/getpageinfo_p.xml?actions=title,robots&url=#[url]#" id="apilink">
 <img src="env/grafics/api.png" width="60" height="40" alt="API"/>

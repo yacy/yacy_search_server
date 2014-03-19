@@ -10,26 +10,54 @@
       </button>
       <a class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="/" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
         <img id="greeting-icon" class="yacylogo" src="/env/grafics/yacy.png" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;Administration
+
       </a>
+      <form class="navbar-form " method="get" accept-charset="UTF-8" action="/yacysearch.html" style="padding-left:200px;">
+        <input name="query" placeholder="Search..." class="form-control" type="text" size="20" maxlength="80" value=""/>
+        <input type="hidden" name="verify" value="cacheonly" />
+        <input type="hidden" name="maximumRecords" value="10" />
+        <input type="hidden" name="resource" value="local" />
+        <input type="hidden" name="urlmaskfilter" value=".*" />
+        <input type="hidden" name="prefermaskfilter" value="" />
+        <input type="hidden" name="nav" value="all" />
+      </form>    
+
     </div>
     <div class="navbar-collapse collapse">
-    <!-- 
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="#">Settings</a></li>
-        <li><a href="#">Profile</a></li>
-        <li><a href="#">Help</a></li>
+        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+        <li id="header_restart">
+          <form action="/Steering.html" method="get" role="form">
+            <input type="hidden" name="restart" value="" />
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="return confirm('Confirm Re-Start')"><span class="glyphicon glyphicon-fire"></span> Re-Start</button>
+          </form>
+        </li>
+        <li>&nbsp;</li>
+        <li id="header_shutdown">
+          <form action="/Steering.html" method="get" role="form">
+            <input type="hidden" name="shutdown" value="" />
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')"><span class="glyphicon glyphicon-off"></span> Shutdown</button>
+          </form>
+        </li>
+        <li id="header_help" class="dropdown">
+          <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
+          <ul class="dropdown-menu">
+          <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
+          <li id="header_tutorial"><a href="/Help.html">Administration Tutorials</a></li>
+          <li id="header_tutorial"><a href="http://yacy.net" target="_blank"><i>external</i> Download the YaCy Search Software</a></li>
+          <li id="header_tutorial"><a href="http://forum.yacy.de" target="_blank"><i>external</i> Community (Web Forums)</a></li>
+          <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i> Project Wiki</a></li>
+          <li id="header_tutorial"><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank"><i>external</i> Git Repository</a></li>
+          <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i> Bugtracker</a></li>
+          <li id="header_tutorial"><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank"><i>external</i> #(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
+        </ul>
+        </li>
+        <li id="header_administration">
+          <form action="/index.html" method="get" role="form">
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary"><span class="glyphicon glyphicon-search"></span> Search Interface &raquo;</button>
+          </form>
+        </li>
       </ul>
-    -->
-    <form class="navbar-form navbar-right" method="get" accept-charset="UTF-8" action="yacysearch.html">
-      <input name="query" placeholder="Search..." class="form-control" type="text" size="20" maxlength="80" value=""/>
-      <input type="hidden" name="verify" value="cacheonly" />
-      <input type="hidden" name="maximumRecords" value="10" />
-      <input type="hidden" name="resource" value="local" />
-      <input type="hidden" name="urlmaskfilter" value=".*" />
-      <input type="hidden" name="prefermaskfilter" value="" />
-      <input type="hidden" name="nav" value="all" />
-    </form>
     </div>
   </div>
 </div>
@@ -40,24 +68,8 @@
     <div class="col-sm-3 col-md-2 sidebar">
     
     <ul class="nav nav-sidebar menugroup">
-      <li><h3>Search&nbsp;Interfaces</h3></li>
-      <li><a href="index.html" accesskey="s" class="MenuItemLink">Web Search</a></li>
-      <li><a href="yacyinteractive.html" class="MenuItemLink">File Search</a></li>
-      <li><a href="HostBrowser.html?hosts=" class="MenuItemLink">Host Browser</a></li>
-      <!--<li><a href="yacysearch_location.html" class="MenuItemLink">Location Search</a></li>-->
-      <li><a href="solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" class="MenuItemLink">Solr Default Core</a></li>
-      <li><a href="solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" class="MenuItemLink">Solr Webgraph Core</a></li>
-      <li><a href="gsa/search?q=www&num=3" class="MenuItemLink">Google Appliance API</a></li>
-      <!--<li><a href="yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
-      <li><a href="compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
-      <li><a href="ViewFile.html" class="MenuItemLink">URL Viewer</a></li>
-      <li><a href="Bookmarks.html" class="MenuItemLink">Bookmarks</a></li>
-    </ul>
-    
-    <ul class="nav nav-sidebar menugroup">
-      <li><h3>Search&nbsp;Design</h3></li>
-      <li><a href="ConfigLiveSearch.html" class="MenuItemLink">Search Integration into External Sites</a></li>
-      <li><a href="ConfigPortal.html" class="MenuItemLink">Integrated Search Configuration</a></li>
+      <li><h3>Peer&nbsp;Control</h3></li>
+      <li><a href="Status.html?noforward=" class="MenuItemLink">Admin Console</a></li>
     </ul>
     
     <ul class="nav nav-sidebar menugroup">
@@ -77,25 +89,13 @@
       <li><a href="WatchWebStructure_p.html?host=auto&amp;depth=3&amp;time=1000" class="MenuItemLink lock">Web Visualization</a></li>
       <li><a href="AccessGrid_p.html" class="MenuItemLink lock">Network Access</a></li>
       <li><a href="ViewLog_p.html" class="MenuItemLink lock">Computation</a></li>
-      <li><a href="terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li>
+      <!-- <li><a href="terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li> -->
     </ul>
     
     <ul class="nav nav-sidebar menugroup">
-      <li><h3>Peer&nbsp;Control</h3></li>
-      <li><a href="Status.html?noforward=" class="MenuItemLink">Admin Console</a></li>
-      <li><a href="Steering.html?restart=" class="MenuItemLink lock" onclick="return confirm('Confirm Restart')">Re-Start</a></li>
-      <li><a href="Steering.html?shutdown=" class="MenuItemLink lock" onclick="return confirm('Confirm Shutdown')">Shutdown</a></li>
-    </ul>
-    
-    <ul class="nav nav-sidebar menugroup">
-      <li><h3>The&nbsp;YaCy&nbsp;Project</h3></li>
-      <li><a href="http://www.yacy.net/" target="_blank" class="MenuItemLink">Project Home</a></li>
-      <li><a href="Help.html" class="MenuItemLink">Tutorials</a></li>
-      <li><a href="http://forum.yacy.de" target="_blank" class="MenuItemLink">Forum/Discussion</a></li>
-      <li><a href="http://wiki.yacy.de" target="_blank" class="MenuItemLink">Project Wiki</a></li>
-      <li><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank" class="MenuItemLink">Git Repository</a></li>
-      <li><a href="http://bugs.yacy.net" target="_blank" class="MenuItemLink">Bugtracker</a></li>      
-      <li><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank" class="MenuItemLink">#(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
+      <li><h3>Search&nbsp;Design</h3></li>
+      <li><a href="ConfigLiveSearch.html" class="MenuItemLink">Search Integration into External Sites</a></li>
+      <li><a href="ConfigPortal.html" class="MenuItemLink">Integrated Search Configuration</a></li>
     </ul>
     </div>
   
