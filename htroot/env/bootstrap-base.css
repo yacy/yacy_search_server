@@ -70,9 +70,6 @@ body {
   margin: 0px;
   font-size: 14px;
 }
-.navbar {
-	background-color: #404040;
-}
 .navbar-header a:link, .navbar-collapse a:link {
   text-decoration:none;
 }
