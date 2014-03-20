@@ -99,7 +99,7 @@ public class yacysearch {
         sb.localSearchLastAccess = System.currentTimeMillis();
 
         final boolean authorized = sb.verifyAuthentication(header);
-        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || authorized;
+        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || authorized;
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         if ( !authenticated ) {

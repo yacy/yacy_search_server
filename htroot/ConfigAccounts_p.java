@@ -54,6 +54,11 @@ public class ConfigAccounts_p {
 
         // admin password
         boolean localhostAccess = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
+
+        if (post != null && post.containsKey("setAccess")) {
+            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, post.getBoolean(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES));
+        }
+        
         if (post != null && post.containsKey("setAdmin")) {
             localhostAccess = post.get("access", "").equals("localhost");
             final String user = post.get("adminuser", "");
@@ -108,6 +113,7 @@ public class ConfigAccounts_p {
             prop.put("passwordNotSetWarning", 1);
         }
 
+        prop.put(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES + ".checked", sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, false) ? 1 : 0);
         prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
         prop.put("account.checked", (localhostAccess) ? 0 : 1);
         prop.put("statusPassword", localhostAccess ? "0" : "1");

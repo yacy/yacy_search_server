@@ -40,6 +40,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryModifier;
@@ -102,7 +103,7 @@ public class GSAsearchServlet extends HttpServlet {
         // --- handled by Servlet securityHandler
         // check if user is allowed to search (can be switched in /ConfigPortal.html)
         boolean authenticated = header.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString()); //sb.adminAuthenticated(header) >= 2;
-        // final boolean searchAllowed = authenticated || sb.getConfigBool("publicSearchpage", true);
+        // final boolean searchAllowed = authenticated || sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true);
         // if (!searchAllowed) return null;
 
         // create post

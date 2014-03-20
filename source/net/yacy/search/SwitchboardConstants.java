@@ -50,6 +50,8 @@ public final class SwitchboardConstants {
     public static final String ADMIN_ACCOUNT_All_PAGES      = "adminAccountAllPages";
     public static final String ADMIN_REALM                  = "adminRealm";
     
+    public static final String PUBLIC_SEARCHPAGE            = "publicSearchpage";
+    
     public static final int   CRAWLJOB_SYNC = 0;
     public static final int   CRAWLJOB_STATUS = 1;
     // 20_dhtdistribution

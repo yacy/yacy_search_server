@@ -84,7 +84,7 @@ public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
         final boolean grantedForLocalhost = adminAccountGrantedForLocalhost && accessFromLocalhost;
         boolean protectedPage = adminAccountNeededForAllPages || (pathInContext.indexOf("_p.") > 0);
         // check "/gsa" and "/solr" if not publicSearchpage
-        if (!protectedPage && !sb.getConfigBool("publicSearchpage", true)) { 
+        if (!protectedPage && !sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true)) { 
             protectedPage = pathInContext.startsWith("/solr/") || pathInContext.startsWith("/gsa/");                        
         }
         //final boolean accountEmpty = adminAccountBase64MD5.length() == 0;

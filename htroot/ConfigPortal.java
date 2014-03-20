@@ -85,7 +85,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
                 sb.setConfig("publicTopmenu", !post.containsKey("publicTopmenu") || post.getBoolean("publicTopmenu"));
-                sb.setConfig("publicSearchpage", !post.containsKey("publicSearchpage") || post.getBoolean("publicSearchpage"));
+                sb.setConfig(SwitchboardConstants.PUBLIC_SEARCHPAGE, !post.containsKey(SwitchboardConstants.PUBLIC_SEARCHPAGE) || post.getBoolean(SwitchboardConstants.PUBLIC_SEARCHPAGE));
                 sb.setConfig("search.options", post.getBoolean("search.options"));
 
                 sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon"));
@@ -135,7 +135,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, config.getProperty(SwitchboardConstants.SEARCH_TARGET_SPECIAL,"_self"));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, config.getProperty(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN,""));
                 sb.setConfig("publicTopmenu", config.getProperty("publicTopmenu","true"));
-                sb.setConfig("publicSearchpage", config.getProperty("publicSearchpage","true"));
+                sb.setConfig(SwitchboardConstants.PUBLIC_SEARCHPAGE, config.getProperty(SwitchboardConstants.PUBLIC_SEARCHPAGE,"true"));
                 sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
                 sb.setConfig("interaction.userlogon.enabled", config.getProperty("interaction.userlogon.enabled","false"));
@@ -155,7 +155,7 @@ public class ConfigPortal {
         prop.putHTML(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
-        prop.put("publicSearchpage", sb.getConfigBool("publicSearchpage", false) ? 1 : 0);
+        prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
 
         prop.put("interaction.userlogon", sb.getConfigBool("interaction.userlogon.enabled", false) ? 1 : 0);

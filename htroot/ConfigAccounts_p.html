@@ -56,6 +56,20 @@
       </form>
     </fieldset>
     
+    <fieldset><legend>Access Rules</legend>
+      <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+            <dl class="userConfig">
+              <dt>Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.</dt>
+              <dd><input type="checkbox" name="adminAccountAllPages" data-size="small"#(adminAccountAllPages.checked)#:: checked="checked"#(/adminAccountAllPages.checked)#></dd>
+              <script>$("[name='adminAccountAllPages']").bootstrapSwitch();
+              $("[name='adminAccountAllPages']").bootstrapSwitch('onText', 'ON');
+              $("[name='adminAccountAllPages']").bootstrapSwitch('offText', 'OFF');</script>
+			  <dt></dt>
+              <dd><input type="submit" name="setAccess" value="Set Access Rules" class="submitready"/></dd>
+            </dl>
+      </form>
+    </fieldset>
+    
     <fieldset><legend>User Accounts</legend>
 	<form action="ConfigAccounts_p.html" accept-charset="UTF-8">
       <fieldset><legend>Select user</legend>

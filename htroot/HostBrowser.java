@@ -81,7 +81,7 @@ public class HostBrowser {
         final boolean autoload = admin && sb.getConfigBool("browser.autoload", true);
         final boolean load4everyone = sb.getConfigBool("browser.load4everyone", false);
         final boolean loadRight = autoload || load4everyone; // add config later
-        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || admin;
+        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || admin;
 
         final serverObjects prop = new serverObjects();
         
