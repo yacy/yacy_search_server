@@ -7,7 +7,13 @@
   
   <!-- Bootstrap core CSS -->
   <link href="/env/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/env/bootstrap/css/bootstrap-switch.min.css" rel="stylesheet">
 
+  <script src="env/bootstrap/js/jquery.min.js"></script>
+  <script src="/env/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/env/bootstrap/js/docs.min.js"></script>
+  <script src="/env/bootstrap/js/bootstrap-switch.min.js"></script>
+  
   <!-- Custom styles for this template, i.e. navigation (move this to base.css) -->
   <link href="/env/bootstrap-base.css" rel="stylesheet">
     
@@ -16,7 +22,7 @@
     <script src="/env/bootstrap/js/html5shiv.js"></script>
     <script src="/env/bootstrap/js/respond.min.js"></script>
   <![endif]-->
-    
+
   <!-- old css styles -->
   <link rel="stylesheet" type="text/css" media="all" href="/env/base.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="/env/style.css" />
