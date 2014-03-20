@@ -835,44 +835,38 @@ public class yacysearch {
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);
+            resnav.append("<ul class=\"pagination\">");
             final int thispage = startRecord / theQuery.itemsPerPage();
-            if ( thispage == 0 ) {
-                resnav
-                    .append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
+            if (thispage == 0) {
+              resnav.append("<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>");
             } else {
-                resnav.append("<a id=\"prevpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null).toString());
-                resnav
-                    .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
+              resnav.append("<li><a id=\"prevpage\" href=\"");
+              resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null).toString());
+              resnav.append("\">&laquo;</a></li>");
             }
-            final int numberofpages = Math.min(10, 1 + ((theSearch.getResultCount() - 1) / theQuery.itemsPerPage()));
 
-            for ( int i = 0; i < numberofpages; i++ ) {
-                if ( i == thispage ) {
-                    resnav.append("<img src=\"env/grafics/navs");
-                    resnav.append(i + 1);
-                    resnav.append(".gif\" alt=\"page");
-                    resnav.append(i + 1);
-                    resnav.append("\" width=\"16\" height=\"16\" />&nbsp;");
+            final int numberofpages = Math.min(10, 1 + ((theSearch.getResultCount() - 1) / theQuery.itemsPerPage()));
+            for (int i = 0; i < numberofpages; i++) {
+                if (i == thispage) {
+                   resnav.append("<li class=\"active\"><a href=\"#\">");
+                   resnav.append(i + 1);
+                   resnav.append("</a></li>");
                 } else {
-                    resnav.append("<a href=\"");
-                    resnav.append(QueryParams.navurl("html", i, theQuery, null).toString());
-                    resnav.append("\"><img src=\"env/grafics/navd");
-                    resnav.append(i + 1);
-                    resnav.append(".gif\" alt=\"page");
-                    resnav.append(i + 1);
-                    resnav.append("\" width=\"16\" height=\"16\" /></a>&nbsp;");
+                   resnav.append("<li><a href=\"");
+                   resnav.append(QueryParams.navurl("html", i, theQuery, null).toString());
+                   resnav.append("\">" + (i + 1) + "</a></li>");
                 }
             }
-            if ( thispage >= numberofpages ) {
-                resnav
-                    .append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
+            if (thispage >= numberofpages) {
+              resnav.append("<li><a href=\"#\">&raquo;</a></li>");
             } else {
-                resnav.append("<a id=\"nextpage\" href=\"");
+                resnav.append("<li><a id=\"nextpage\" href=\"");
                 resnav.append(QueryParams.navurl("html", thispage + 1, theQuery, null).toString());
-                resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+                resnav.append("\">&raquo;</a>");
             }
+            resnav.append("</ul>");
             final String resnavs = resnav.toString();
+            
             prop.put("num-results_resnav", resnavs);
             prop.put("pageNavBottom", (theSearch.getResultCount() - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
             prop.put("pageNavBottom_resnav", resnavs);

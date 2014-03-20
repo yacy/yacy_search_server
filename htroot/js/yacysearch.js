@@ -82,43 +82,37 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   document.getElementById("resNav").firstChild.nodeValue = "X";
   // compose page navigation
 
-  resnav = "";
+  resnav = "<ul class=\"pagination\">";
   thispage = Math.floor(offset / itemsperpage);
   if (thispage == 0) {
-  	resnav += ("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
+  	resnav += "<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>";
   } else {
-  	resnav += ("<a id=\"prevpage\" href=\"");
-      resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
-  	resnav += ("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
+  	resnav += "<li><a id=\"prevpage\" href=\"";
+    resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
+  	resnav += "\">&laquo;</a></li>";
   }
   
   numberofpages = Math.floor(Math.min(10, 1 + ((totalcount.replace(/\./g,'') - 1) / itemsperpage)));
   if (!numberofpages) numberofpages = 10;
   for (i = 0; i < numberofpages; i++) {
       if (i == thispage) {
-         resnav += "<img src=\"env/grafics/navs";
+         resnav += "<li class=\"active\"><a href=\"#\">";
          resnav += (i + 1);
-         resnav += (".gif\" alt=\"page");
-         resnav += (i + 1);
-         resnav += ("\" width=\"16\" height=\"16\" />&nbsp;");
+         resnav += "</a></li>";
       } else {
-         resnav += ("<a href=\"");
+         resnav += "<li><a href=\"";
          resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
-         resnav += ("\"><img src=\"env/grafics/navd");
-         resnav += (i + 1);
-         resnav += (".gif\" alt=\"page");
-         resnav += (i + 1);
-         resnav += ("\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" /></a>&nbsp;");
+         resnav += "\">" + (i + 1) + "</a></li>";
       }
   }
   if (thispage >= numberofpages) {
-  	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" />");
+  	resnav += "<li><a href=\"#\">&raquo;</a></li>";
   } else {
-      resnav += ("<a id=\"nextpage\" href=\"");
+      resnav += "<li><a id=\"nextpage\" href=\"";
       resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
-      resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" /></a>");
+      resnav += "\">&raquo;</a>";
   }
- 
+  resnav += "</ul>";
   document.getElementById("resNav").innerHTML = resnav;
 }
 
