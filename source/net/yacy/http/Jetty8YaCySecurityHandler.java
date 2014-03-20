@@ -65,7 +65,8 @@ public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
     @Override
     protected RoleInfo prepareConstraintInfo(String pathInContext, Request request) {
         final Switchboard sb = Switchboard.getSwitchboard();
-        final boolean adminAccountForLocalhost = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
+        final boolean adminAccountGrantedForLocalhost = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
+        final boolean adminAccountNeededForAllPages = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, false);
         //final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
 
         String refererHost;
@@ -80,8 +81,8 @@ public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
         }                          
         final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         // ! note : accessFromLocalhost compares localhost ip pattern
-        final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
-        boolean protectedPage = (pathInContext.indexOf("_p.") > 0);
+        final boolean grantedForLocalhost = adminAccountGrantedForLocalhost && accessFromLocalhost;
+        boolean protectedPage = adminAccountNeededForAllPages || (pathInContext.indexOf("_p.") > 0);
         // check "/gsa" and "/solr" if not publicSearchpage
         if (!protectedPage && !sb.getConfigBool("publicSearchpage", true)) { 
             protectedPage = pathInContext.startsWith("/solr/") || pathInContext.startsWith("/gsa/");                        

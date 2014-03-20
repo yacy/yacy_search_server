@@ -403,6 +403,13 @@ adminAccountUserName=admin
 # inaccessibility for installations on headless servers.
 adminAccountForLocalhost=true
 
+# adminAccountAllPages: if set to false, then all pages without the extension "_p" are
+# accessible without authorization. Some servlets may individually decide to use or request
+# administration rights. If adminAccountAllPages is set to true, then administration
+# rights are needed to access all pages without any exception. Setting adminAccountAllPages
+# to true therefore closes the YaCy web pages for everyone.
+adminAccountAllPages=false
+
 # adminRealm: a internal name (like a group name) for the login setting of the admin frontend
 # ATTENTION: changing this name will invalidate all currently password hashes
 # - With DIGEST authentication mode is this realm name of generated password hashes

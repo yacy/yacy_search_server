@@ -47,6 +47,7 @@ public final class SwitchboardConstants {
     public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5";
     public static final String ADMIN_ACCOUNT_USER_NAME      = "adminAccountUserName"; // by default 'admin'
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
+    public static final String ADMIN_ACCOUNT_All_PAGES      = "adminAccountAllPages";
     public static final String ADMIN_REALM                  = "adminRealm";
     
     public static final int   CRAWLJOB_SYNC = 0;
