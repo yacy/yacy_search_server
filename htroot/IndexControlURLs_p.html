@@ -81,13 +81,13 @@ function updatepage(str) {
         
         <dt class="TableCellDark">Retrieve by URL:</dt>
         <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />
-            <input type="submit" name="urlstringsearch" value="Show Details for URL" class="submitready" style="width:240px;"/><br />
+            <input type="submit" name="urlstringsearch" value="Show Details for URL" class="btn btn-primary" style="width:240px;"/><br />
             <div id="searchresults"></div>
         </dd>
         
         <dt class="TableCellDark">Retrieve by URL-Hash:</dt>
         <dd><input type="text" name="urlhash" value="#[urlhash]#" size="40" maxlength="12" />
-            <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" class="submitready" style="width:240px;"/>
+            <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -108,7 +108,7 @@ function updatepage(str) {
             <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /> Stop Crawler and delete Crawl Queues<br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /> Delete robots.txt Cache<br/>
             <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" /> Delete cached snippet-fetching failures during search<br/><br/>
-            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="submitready" style="width:240px;"/>
+            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -121,7 +121,7 @@ function updatepage(str) {
       <dl>
         <dt class="TableCellDark">&nbsp;</dt>
         <dd>Show top <input type="text" name="lines" value="#[lines]#" size="6" maxlength="6" /> domains from all URLs.
-            <input type="submit" name="statistics" value="Generate Statistics" class="submitready" style="width:240px;"/>
+            <input type="submit" name="statistics" value="Generate Statistics" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -143,7 +143,7 @@ function updatepage(str) {
             <div>
               <input type="hidden" name="domain" value="#[domain]#" />
               <input type="hidden" name="lines" value="#[lines]#" />
-              <input type="submit" name="deletedomain" value="delete all" class="submitready" style="width:240px;"/>
+              <input type="submit" name="deletedomain" value="delete all" class="btn btn-primary" style="width:240px;"/>
             </div>
           </form>
         </td>
@@ -159,7 +159,7 @@ function updatepage(str) {
     <fieldset><legend>Dump and Restore of Solr Index</legend>
       <dl>
         <dt class="TableCellDark">&nbsp;</dt>
-        <dd><input type="submit" name="indexdump" value="Create Dump" class="submitready" style="width:240px;"/>
+        <dd><input type="submit" name="indexdump" value="Create Dump" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
       <dl>
@@ -167,7 +167,7 @@ function updatepage(str) {
         <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" />
         </dd>
         <dt class="TableCellDark">&nbsp;</dt>
-        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="submitready" style="width:240px;"/>
+        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -177,7 +177,7 @@ function updatepage(str) {
       <dl>
         <dt class="TableCellDark">&nbsp;</dt>
         <dd>merge to max. <input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> segments
-        <input type="submit" name="optimizesolr" value="Optimize Solr" class="submitready" style="width:240px;"/>
+        <input type="submit" name="optimizesolr" value="Optimize Solr" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -186,7 +186,7 @@ function updatepage(str) {
     <fieldset><legend>Reboot Solr Core</legend>
       <dl>
         <dt class="TableCellDark">&nbsp;</dt>
-        <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="submitready" style="width:240px;"/>
+        <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -217,7 +217,7 @@ function updatepage(str) {
             <br />
         </dd>
         <dt class="TableCellDark">&nbsp;</dt>
-        <dd><input type="submit" name="lurlexport" value="Export URLs" class="submitready" style="width:240px;"/>
+        <dd><input type="submit" name="lurlexport" value="Export URLs" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -245,16 +245,16 @@ function updatepage(str) {
 		<input type="hidden" name="viewMode" value="parsed" />
 		<input type="hidden" name="show" value="Show" />
 		<input type="hidden" name="urlHash" value="#[urlhash]#" />
-		<input type="submit" value="Show Content" name="showcontent" class="submitready" style="width:240px;"/><br />
+		<input type="submit" value="Show Content" name="showcontent" class="btn btn-primary" style="width:240px;"/><br />
 	</form>
 	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 		<input type="hidden" name="keystring" value="" />
 		<input type="hidden" name="keyhash" value="" />
 		<input type="hidden" name="urlstring" value="" />
 		<input type="hidden" name="urlhash" value="#[urlhash]#" />
-		<input type="submit" value="Delete URL" name="urlhashdelete" class="submitready" style="width:240px;"/><br />
+		<input type="submit" value="Delete URL" name="urlhashdelete" class="btn btn-primary" style="width:240px;"/><br />
 		<span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
-		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="submitready" style="width:240px;"/><br />
+		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="btn btn-primary" style="width:240px;"/><br />
 		<span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
 	</form>
     #(/genUrlProfile)#

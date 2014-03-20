@@ -112,8 +112,8 @@
         <td><input type="submit" name="addnewosd" value="add"/></td>
       </tr>
       <tr>
-        <td colspan="3" style="padding-top:10px "><input type="submit" name="setopensearch" value="Save" class="submitready"/></td>
-        <td colspan="2" align="center" style="padding-top:10px "><input type="submit" name="resettodefaultosdlist" value="reset to default list" class="submitready"/></td>
+        <td colspan="3" style="padding-top:10px "><input type="submit" name="setopensearch" value="Save" class="btn btn-primary"/></td>
+        <td colspan="2" align="center" style="padding-top:10px "><input type="submit" name="resettodefaultosdlist" value="reset to default list" class="btn btn-primary"/></td>
       </tr>
       </table>
       </div>
@@ -123,13 +123,13 @@
       <br>
       <div>
         <div style="float:right">
-        <input type="submit" name="discoverosd" id="discoverosd" value="discover from index" class="submitready" onclick="return confirm('start background task, depending on index size this may run a long time')"/>
+        <input type="submit" name="discoverosd" id="discoverosd" value="discover from index" class="btn btn-primary" onclick="return confirm('start background task, depending on index size this may run a long time')"/>
         </div>
         With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.
         The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).
         Alternatively you may <a href="?copydefaultosdconfig=">copy &amp; paste a example config file</a> located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.
         For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.
-        #{osdsolrfieldswitch}#<input type="submit" name="switchsolrfieldson" value="switch Solr fields on" class="submitready" onclick="return confirm('modify Solr Schema')"/>#{/osdsolrfieldswitch}#
+        #{osdsolrfieldswitch}#<input type="submit" name="switchsolrfieldson" value="switch Solr fields on" class="btn btn-primary" onclick="return confirm('modify Solr Schema')"/>#{/osdsolrfieldswitch}#
       </div>
     </form>
     </fieldset>

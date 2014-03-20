@@ -17,14 +17,14 @@
       <dl>
         <dt>One URL stub, a list of URL stubs<br/>or a regular expression</dt>
         <dd>
-          <textarea name="urldelete" id="crawlingURL" cols="64" rows="3" size="41" onClick="d=document.getElementById('engage-urldelete');d.disabled=true;d.className='dangerdisarmed';">#[urldelete]#</textarea>
+          <textarea name="urldelete" id="crawlingURL" cols="64" rows="3" size="41" onClick="d=document.getElementById('engage-urldelete');d.disabled=true;d.className='btn btn-default';">#[urldelete]#</textarea>
         </dd>
         <dt>Matching Method</dt>
         <dd>
           <input type="radio" name="urldelete-mm" value="subpath" #(urldelete-mm-subpath-checked)#::checked="checked"#(/urldelete-mm-subpath-checked)# />sub-path of given URLs&nbsp;&nbsp;&nbsp;
           <input type="radio" name="urldelete-mm" value="regexp" #(urldelete-mm-regexp-checked)#::checked="checked"#(/urldelete-mm-regexp-checked)# />matching with regular expression
-        <dt><input type="submit" name="simulate-urldelete" value="Simulate Deletion" class="submitready" title="no actual deletion, generates only a deletion count"/></dt>
-        <dd><input type="submit" name="engage-urldelete" id="engage-urldelete" value="Engage Deletion" #(urldelete-active)#class="dangerdisarmed" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="dangerready"::class="dangerdisarmed" disabled="disabled" title="engaged"#(/urldelete-active)#/>
+        <dt><input type="submit" name="simulate-urldelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-urldelete" id="engage-urldelete" value="Engage Deletion" #(urldelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/urldelete-active)#/>
           #(urldelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/urldelete-active)#
         </dd>
       </dl>
@@ -38,7 +38,7 @@
       <dl>
         <dt>Time Period</dt>
         <dd>All documents older than
-          <select name="timedelete-number" id="timedelete-number" onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='dangerdisarmed';">
+          <select name="timedelete-number" id="timedelete-number" onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';">
             <option value="1" #(timedelete-n-1)#::selected="selected"#(/timedelete-n-1)#>1</option>
             <option value="2" #(timedelete-n-2)#::selected="selected"#(/timedelete-n-2)#>2</option>
             <option value="3" #(timedelete-n-3)#::selected="selected"#(/timedelete-n-3)#>3</option>
@@ -58,7 +58,7 @@
             <option value="60" #(timedelete-n-60)#::selected="selected"#(/timedelete-n-60)#>60</option>
             <option value="90" #(timedelete-n-90)#::selected="selected"#(/timedelete-n-90)#>90</option>
           </select>
-          <select name="timedelete-unit" id="timedelete-unit" onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='dangerdisarmed';">
+          <select name="timedelete-unit" id="timedelete-unit" onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';">
             <option value="year" #(timedelete-u-year)#::selected="selected"#(/timedelete-u-year)#>years</option>
             <option value="month" #(timedelete-u-month)#::selected="selected"#(/timedelete-u-month)#>months</option>
             <option value="day" #(timedelete-u-day)#::selected="selected"#(/timedelete-u-day)#>days</option>
@@ -67,11 +67,11 @@
         </dd>
         <dt>Age Identification</dt>
         <dd>
-          <input type="radio" name="timedelete-source" value="loaddate" #(timedelete-source-loaddate-checked)#::checked="checked"#(/timedelete-source-loaddate-checked)# onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='dangerdisarmed';"/>load date&nbsp;&nbsp;&nbsp;
-          <input type="radio" name="timedelete-source" value="lastmodified" #(timedelete-source-lastmodified-checked)#::checked="checked"#(/timedelete-source-lastmodified-checked)# onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='dangerdisarmed';"/>last-modified
+          <input type="radio" name="timedelete-source" value="loaddate" #(timedelete-source-loaddate-checked)#::checked="checked"#(/timedelete-source-loaddate-checked)# onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';"/>load date&nbsp;&nbsp;&nbsp;
+          <input type="radio" name="timedelete-source" value="lastmodified" #(timedelete-source-lastmodified-checked)#::checked="checked"#(/timedelete-source-lastmodified-checked)# onClick="d=document.getElementById('engage-timedelete');d.disabled=true;d.className='btn btn-default';"/>last-modified
         </dd>
-        <dt><input type="submit" name="simulate-timedelete" value="Simulate Deletion" class="submitready" title="no actual deletion, generates only a deletion count"/></dt>
-        <dd><input type="submit" name="engage-timedelete" id="engage-timedelete" value="Engage Deletion" #(timedelete-active)#class="dangerdisarmed" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="dangerready"::class="dangerdisarmed" disabled="disabled" title="engaged"#(/timedelete-active)#/>
+        <dt><input type="submit" name="simulate-timedelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-timedelete" id="engage-timedelete" value="Engage Deletion" #(timedelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/timedelete-active)#/>
           #(timedelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/timedelete-active)#
         </dd>
       </dl>
@@ -84,19 +84,19 @@
       <p>Delete all documents which are inside specific collections.</p>
       <dl>
         <dt>Not Assigned</dt>
-        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-unassigned" value="unassigned" #(collectiondelete-mode-unassigned-checked)#::checked="checked"#(/collectiondelete-mode-unassigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';"/>Delete all documents which are not assigned to any collection
+        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-unassigned" value="unassigned" #(collectiondelete-mode-unassigned-checked)#::checked="checked"#(/collectiondelete-mode-unassigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';"/>Delete all documents which are not assigned to any collection
         </dd>
         
         <dt>Assigned</dt>
-        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-assigned" value="assigned" #(collectiondelete-mode-assigned-checked)#::checked="checked"#(/collectiondelete-mode-assigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';"/>Delete all documents which are assigned to the following collection(s)
-        #(collectiondelete-select)#, separated by ',' (comma) or '|' (vertical bar); or <a href="IndexDeletion_p.html?collectionlist=">generate the collection list...</a><br/><input type="text" name="collectiondelete" id="collections" value="#[collectiondelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';document.getElementById('collectiondelete-mode-assigned').checked=true;"/>::
+        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-assigned" value="assigned" #(collectiondelete-mode-assigned-checked)#::checked="checked"#(/collectiondelete-mode-assigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';"/>Delete all documents which are assigned to the following collection(s)
+        #(collectiondelete-select)#, separated by ',' (comma) or '|' (vertical bar); or <a href="IndexDeletion_p.html?collectionlist=">generate the collection list...</a><br/><input type="text" name="collectiondelete" id="collections" value="#[collectiondelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';document.getElementById('collectiondelete-mode-assigned').checked=true;"/>::
         <br/><select id="collectiondelete" name="collectiondelete">
-          #{list}#<option value="#[collection-value]#" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';document.getElementById('collectiondelete-mode-assigned').checked=true;">#[collection-name]#</option>#{/list}#
+          #{list}#<option value="#[collection-value]#" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='btn btn-default';document.getElementById('collectiondelete-mode-assigned').checked=true;">#[collection-name]#</option>#{/list}#
         </select>
         #(/collectiondelete-select)#
         </dd>
-        <dt><input type="submit" name="simulate-collectiondelete" value="Simulate Deletion" class="submitready" title="no actual deletion, generates only a deletion count"/></dt>
-        <dd><input type="submit" name="engage-collectiondelete" id="engage-collectiondelete" value="Engage Deletion" #(collectiondelete-active)#class="dangerdisarmed" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="dangerready"::class="dangerdisarmed" disabled="disabled" title="engaged"#(/collectiondelete-active)#/>
+        <dt><input type="submit" name="simulate-collectiondelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-collectiondelete" id="engage-collectiondelete" value="Engage Deletion" #(collectiondelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/collectiondelete-active)#/>
           #(collectiondelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/collectiondelete-active)#
         </dd>
       </dl>
@@ -110,10 +110,10 @@
       <dl>
         <dt>q=</dt>
         <dd>
-        <input type="text" name="querydelete" id="querydelete" value="#[querydelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-querydelete');d.disabled=true;d.className='dangerdisarmed';"/>
+        <input type="text" name="querydelete" id="querydelete" value="#[querydelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-querydelete');d.disabled=true;d.className='btn btn-default';"/>
         </dd>
-        <dt><input type="submit" name="simulate-querydelete" value="Simulate Deletion" class="submitready" title="no actual deletion, generates only a deletion count"/></dt>
-        <dd><input type="submit" name="engage-querydelete" id="engage-querydelete" value="Engage Deletion" #(querydelete-active)#class="dangerdisarmed" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="dangerready"::class="dangerdisarmed" disabled="disabled" title="engaged"#(/querydelete-active)#/>
+        <dt><input type="submit" name="simulate-querydelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
+        <dd><input type="submit" name="engage-querydelete" id="engage-querydelete" value="Engage Deletion" #(querydelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/querydelete-active)#/>
           #(querydelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/querydelete-active)#
         </dd>
       </dl>

@@ -50,7 +50,7 @@
               <dt><label for="adminpw2">Repeat Peer Password:</label></dt>
               <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="1024" onFocus="document.getElementById('access_account').checked = true;"/></dd>
               <dt></dt>
-              <dd><input type="submit" name="setAdmin" value="Define Administrator" class="submitready"/></dd>
+              <dd><input type="submit" name="setAdmin" value="Define Administrator" class="btn btn-primary"/></dd>
             </dl>
           </fieldset>
       </form>
@@ -65,7 +65,7 @@
               $("[name='adminAccountAllPages']").bootstrapSwitch('onText', 'ON');
               $("[name='adminAccountAllPages']").bootstrapSwitch('offText', 'OFF');</script>
 			  <dt></dt>
-              <dd><input type="submit" name="setAccess" value="Set Access Rules" class="submitready"/></dd>
+              <dd><input type="submit" name="setAccess" value="Set Access Rules" class="btn btn-primary"/></dd>
             </dl>
       </form>
     </fieldset>
@@ -83,8 +83,8 @@
           </dd>
           <dt>&nbsp;</dt>
           <dd>
-            <input type="submit" name="change_user" value="Edit User" class="submitready"/>
-            <input type="submit" name="delete_user" value="Delete User" class="submitready"/>
+            <input type="submit" name="change_user" value="Edit User" class="btn btn-primary"/>
+            <input type="submit" name="delete_user" value="Delete User" class="btn btn-primary"/>
           </dd>
         </dl>
       </fieldset>
@@ -118,7 +118,7 @@
           <dt><label for="tused">Time used</label>:</dt>
           <dd><input type="text" id="tused" name="timeused" value="#[timeused]#" /></dd>
           <dt>&nbsp;</dt>
-          <dd><input type="submit" name="change" value="Save User" class="submitready"/></dd>
+          <dd><input type="submit" name="change" value="Save User" class="btn btn-primary"/></dd>
         </dl>
       </fieldset>
     </form>

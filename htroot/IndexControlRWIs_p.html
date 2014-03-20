@@ -14,13 +14,13 @@
       <dl>        
         <dt class="TableCellDark">Retrieve by Word:</dt>
         <dd><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80" />
-            <input type="submit" name="keystringsearch" value="Show URL Entries for Word" class="submitready" style="width:240px;"/>
+            <input type="submit" name="keystringsearch" value="Show URL Entries for Word" class="btn btn-primary" style="width:240px;"/>
         </dd>
           
         <dt class="TableCellDark">Retrieve by Word-Hash:</dt>
         <dd><input type="text" name="keyhash" value="#[keyhash]#" size="40" maxlength="12" />
-            <input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash" class="submitready" style="width:240px;"/>
-            <input type="submit" name="keyhashsimilar" value="Generate List" class="submitready" style="width:240px;"/>
+            <input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash" class="btn btn-primary" style="width:240px;"/>
+            <input type="submit" name="keyhashsimilar" value="Generate List" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -35,7 +35,7 @@
             No reference size limitation (this may cause strong CPU load when words are searched that appear very often)<br/>
             <input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOn" value="on" #(maxReferencesRadioChecked)#::checked="checked"#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=on&maxReferencesLimit=&maxReferences=#[maxReferences]#'"/>
             Limitation of number of references per word: <input type="text" name="maxReferences" value="#[maxReferences]#" size="9" maxlength="12" onfocus="document.getElementById('maxReferencesRadioOff').checked = false;document.getElementById('maxReferencesRadioOn').checked = true"/> (this causes that old references are deleted if that limit is reached)<br/><br/>
-            <input type="submit" name="maxReferencesLimit" id="maxReferencesLimit" value="Set References Limit" class="submitready" style="width:240px;"/>
+            <input type="submit" name="maxReferencesLimit" id="maxReferencesLimit" value="Set References Limit" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -109,7 +109,7 @@
             <input type="radio" name="lines" value="1000" />1000&nbsp;&nbsp;
         </dd>
         <dt class="TableCellLight"></dt>
-        <dd><input type="submit" name="urllist" value="List Selected URLs" class="submitready" style="width:240px;"/>
+        <dd><input type="submit" name="urllist" value="List Selected URLs" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -125,7 +125,7 @@
           </dd>
           <dt class="TableCellLight"></dt>
           <dd>
-            <input type="submit" value="Delete Word" name="keyhashdeleteall" class="submitready" style="width:240px;"/>
+            <input type="submit" value="Delete Word" name="keyhashdeleteall" class="btn btn-primary" style="width:240px;"/>
           </dd>
         </dl>
     </fieldset>
@@ -133,7 +133,7 @@
       <dl>
         <dt class="TableCellDark">Transfer by Word-Hash:</dt>
         <dd><input type="text" name="keyhash" value="#[keyhash]#" size="40" maxlength="12" />
-            <input type="submit" name="keyhashtransfer" value="Transfer to other peer" class="submitready" style="width:240px;"/>
+            <input type="submit" name="keyhashtransfer" value="Transfer to other peer" class="btn btn-primary" style="width:240px;"/>
         </dd>
         <dt class="TableCellDark">to Peer:</dt>
         <dd>select <select name="hostHash">
@@ -243,7 +243,7 @@
           </dd>
           <dt class="TableCellLight"></dt>
           <dd>
-            <input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" class="submitready" style="width:240px;"/><br />
+            <input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" class="btn btn-primary" style="width:240px;"/><br />
           </dd>
         </dl>
       </fieldset>
@@ -255,8 +255,8 @@
             </select>
           </dt>
           <dd>
-            <input type="submit" value="Add selected URLs to blacklist" name="blacklisturls" class="submitready" style="width:240px;"/><br />
-            <input type="submit" value="Add selected domains to blacklist" name="blacklistdomains" class="submitready" style="width:240px; margin-top: 5px;"/>
+            <input type="submit" value="Add selected URLs to blacklist" name="blacklisturls" class="btn btn-primary" style="width:240px;"/><br />
+            <input type="submit" value="Add selected domains to blacklist" name="blacklistdomains" class="btn btn-primary" style="width:240px; margin-top: 5px;"/>
           </dd>
         </dl>
       </fieldset>
