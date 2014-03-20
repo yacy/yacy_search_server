@@ -34,7 +34,7 @@
 #---------------------------
 YaCy Network Access==Доступ к сети YaCy
 Server Access Grid==Доступ к серверу сети
-This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Эти изображения показывают входящие соединения в вашему узлу и исходящие соединения от вашего узла к другим узлам и вэб-серверам.
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Здесь показаны входящие соединения в вашему узлу и исходящие соединения от вашего узла к другим узлам и вэб-серверам.
 #-----------------------------
 
 #File: AccessTracker_p.html
@@ -402,6 +402,7 @@ First name==Имя
 Last name==Фамилия
 Address==Адрес
 Rights==Права
+Download right==Загрузка
 Timelimit==Лимит времени
 Time used==Время использования
 Save User==Сохранить пользователя
@@ -714,31 +715,33 @@ No changes were made!==Изменений не произведено!
 Accepted Changes==Изменения приняты
 Inapplicable Setting Combination==Некорректное сочетание настроек
 #P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
-For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Для P2P-режима должно быть разрешено или отсылка через DHT или прием \(или и то и другое\). Вы указали автономную (Robinson) конфигурацию
-Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Глобальный P2P-поиск доступен только, если у вас включен прием индекса через DHT. У вас P2P-конфигурация, но вам не доступен глобальный поиск.
+For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Для P2P-режима должно быть разрешена или отправка через DHT или приём \(или и то и другое\). Вы указали автономную (Robinson) конфигурацию
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Глобальный P2P-поиск доступен только, если у вас включен приём индекса через DHT. У вас P2P-конфигурация, но вам не доступен глобальный поиск.
 For Robinson Mode, index distribution and receive is switched off==Для автономного (Robinson) режима, отсылка и прием индекса отключены
 #This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 #This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
 Network and Domain Specification==Спецификация сети и домена
-# With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
-# Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
+# With this configuration it is not allowed to authentify automatically from localhost!==Такая конфигурация не разрешает автоматически авторизовать локальный компьютер!
+# Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Пожалуйста, откройте <a href="ConfigAccounts_p.html">учётные записи</a> и установите новый пароль.
 YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==YaCy может работать в режиме кластера узлов или как одиночный узел.
 To control that all participants within a web indexing domain have access to the same domain,==Для контроля того, что все участники домена индексации имеют доступ к одним и тем же данным,
 this network definition must be equal to all members of the same YaCy network.==данное описание сети должно быть одинаково у всех членов этой сети.
-Network Definition==Определение сети
+>Network Definition<==>Сеть<
+Remote Network Definition URL==Ссылка на удалённую сеть
+Enter custom URL...==Введите свою ссылку...
 Network Nick==Название сети
 Long Description==Подробное описание
 Indexing Domain==Индексация домена
 #DHT==DHT
 "Change Network"=="Изменить сеть"
 Distributed Computing Network for Domain==Сеть распределенных вычислений для домена
-You can configure if you want to participate at the global YaCy network or if you want to have your==Sie können einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
-own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
-a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
-peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
-Peer-to-Peer Mode==Peer-to-Peer режим
+You can configure if you want to participate at the global YaCy network or if you want to have your==Эти параметры позволяют настроить поиск в глобальной сети или внутри вашего
+own separate search cluster with or without connection to the global network. You may also define==кластера, с подключением или без подключения к глобальной сети. Вы можете также задать
+a completely independent search engine instance, without any data exchange between your peer and other==совершенно независимый поисковый движок, без обмена любыми данными между вашим узлом и другими
+peers, which we call a 'Robinson' peer.==узлами. Этот режим мы называем 'Robinson'.
+Peer-to-Peer Mode==Режим P2P
 >Index Distribution==>Распределение индекса
-This enables automated, DHT-ruled Index Transmission to other peers==Автоматическая передача индекса в виде DHT на другие узлы
+This enables automated, DHT-ruled Index Transmission to other peers==Автоматическая передача индекса через DHT на другие узлы
 >enabled==>включить
 disabled during crawling==отключить во время сканирования
 disabled during indexing==отключить во время индексации
@@ -746,7 +749,7 @@ disabled during indexing==отключить во время индексаци�
 Accept remote Index Transmissions==Приём удалённых передач индекса
 This works only if you have a senior peer. The DHT-rules do not work without this function==Работает только, если ваш узел находится в senior-режиме. Правила DHT не работают без этой функции.
 >reject==>запретить
-accept transmitted URLs that match your blacklist==приём URL-ссылок, совпадающих с вашим чёрным списком
+accept transmitted URLs that match your blacklist==принимать ссылки, совпадающие с вашим чёрным списком
 >allow==>разрешить
 deny remote search==запретить удалённый поиск
 #>Accept Remote Crawl Requests==>Приём запросов удалённого индексатора
@@ -754,29 +757,29 @@ deny remote search==запретить удалённый поиск
 #This works only if you are a senior peer==Работает только, если ваш узел находится в senior-режиме.
 #Load with a maximum of==Загрузить максимум
 #pages per minute==страниц в минуту (PPM)
->Robinson Mode==>Robinson режим
-If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Falls Ihr Peer im 'Robinson Modus' läuft, so verwenden Sie YaCy als Suchmaschine für Ihr eigenes Suchportal, ohne Datenaustausch mit anderen Peers
-There is no index receive and no index distribution between your peer and any other peer==Es gibt keinen Index-Empfang von und keine Index-Verteilung zu anderen Peers
-In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==Im Fall eines Robinson-Clusters können Remotecrawl-Anfragen von Peers des selben Clusters akzeptiert werden
+>Robinson Mode==>Режим Robinson
+If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Если выши узлы работают в режиме'Robinson', то вы можете запустить YaCy в качестве движка для собственного поискового портала, без обмена данными с другими узлами
+There is no index receive and no index distribution between your peer and any other peer==В случае выбора Robinson-кластеризации, приём и передача индекса между вашим и другими узлами будут отсутствовать
+In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==
 >Private Peer==>Частный узел
-Your search engine will not contact any other peer, and will reject every request==Ihre Suchmaschine wird keine fremden Peers kontaktieren und alle Anfragen anderer Peers ablehnen
+Your search engine will not contact any other peer, and will reject every request==Ваш узел не будет контактировать с любыми другими узлами, и будет возвращать любой запрос
 #>Private Cluster==>Частный кластер
 #Your peer is part of a private cluster without public visibility
 #Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster
 #Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
 #List of ip:port - addresses of the cluster: \(comma-separated\)
 >Public Cluster==>Публичный кластер
-Your peer is part of a public cluster within the YaCy network==Ihr Peer ist Teil eines öffentlichen Clusters innerhalb des YaCy-Netzwerkes
+Your peer is part of a public cluster within the YaCy network==Ваш узел является частью публичного кластера внутри сети YaCy
 Index data is not distributed, but remote crawl requests are distributed and accepted==Индексные данные не распространяются, но удалённые запросы индексирования распространяются и принимаются
-Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Suchanfragen werden über alle Peers des Clusters verteilt und von allen Peers des Clusters beantwortet
+Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Поисковые запросы  распространяются на все узлы кластера, результаты поиска принимаются от всех узлов кластера
 List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Список .yacy или .yacyh - домены кластера: (через запятую)
 >Public Peer==>Публичный узел
 You are visible to other peers and contact them to distribute your presence==Вы видны другим участникам и связываетесь с ними для распространения своего присутствия
-Your peer does not accept any outside index data, but responds on all remote search requests==Ihr Peer akzeptiert keinerlei Indexdaten von außen, aber antwortet auf alle Remote-Suchanfragen
-#>Peer Tags==>Peer Tags
-When you allow access from the YaCy network, your data is recognized using keywords==Falls Sie Zugriff vom YaCy-Netzwerk aus erlauben, so werden Ihre Daten anhand von Schlüsselwörtern erkannt
-Please describe your search portal with some keywords \(comma-separated\)==Bitte beschreiben Sie Ihr Suchportal mit einigen Schlüsselwörtern (kommagetrennt)
-If you leave the field empty, no peer asks your peer. If you fill in a \'\*\', your peer is always asked.==Wenn Sie das Feld leer lassen werden Sie keine Anfragen von anderen Peers bekommen. Wenn Sie ein '*' eintragen, wird Ihr Peer immer abgefragt.
+Your peer does not accept any outside index data, but responds on all remote search requests==Ваш узел не принимает любые сторонние данные индекса, но отвечает на все удалённые поисковые запросы
+>Peer Tags==>Тэги узла
+When you allow access from the YaCy network, your data is recognized using keywords==Когда вы разрешаете доступ из сети YaCy, ваши данные распознаются с помощью ключевых слов
+Please describe your search portal with some keywords \(comma-separated\)==Пожалуйста, опишите ваш поисковый портал несколькими словами (через запятую)
+If you leave the field empty, no peer asks your peer. If you fill in a \'\*\', your peer is always asked.==Если вы оставите поле пустым, то другие узлы не будут опрашивать ваш узел. Если вы укажите в поле '*', то ваш узел всегда будет опрашиваться.</br>
 "Save"=="Сохранить"
 #-----------------------------
 
@@ -3859,7 +3862,7 @@ Error with URL input==Ошибка с указанным URL
 Error with file input==Ошибка с указанным файлом
 started.==запущено.
 Please wait some seconds,==Пожалуйста, подождите несколько секунд,
-it may take some seconds until the first result appears there.==это может занять несколько секунд, пока ожидается первый результат.
+it may take some seconds until the first result appears there.==до получения первого результата.
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.<br />==Если вы проиндексировали нежелательные страницы, то вы можете удалить их <a href="http://IndexCreateQueues_p.html?stack=LOCAL">здесь</a>.<br>
 >Size==>Размер
 >Progress<==>Ход работы<
@@ -3896,7 +3899,6 @@ Running==Выполняется
 "Terminate"=="Прервать"
 Crawled Pages==Проиндексированные страницы
 Title==Заголовок
-"Pause this queue (running)"=="Остановить эту очередь (выполняется)"
 #-----------------------------
 
 #File: WatchWebStructure_p.html
@@ -3917,52 +3919,52 @@ nodes<==Узлы<
 time<==Время<
 size<==Размер<
 >Background<==>Фон<
-#>Text<==>Текст<
+>Text<==>Текст<
 >Line<==>Линия<
->Pivot Dot<==>Achspunkt<
->Other Dot<==>Anderer Punkt<
+>Pivot Dot<==>Начальная точка<
+>Other Dot<==>Другие точки<
 >Dot-end<==>Пунктир<
 >Color <==>Цвет <
 "change"=="Изменить"
-"WebStructurePicture"=="Изображение веб-структуры"
+"WebStructurePicture"=="Изображение вэб-структуры"
 #-----------------------------
 
 #File: Wiki.html
 #---------------------------
-YaCyWiki page:==YaCyWiki Seite:
-last edited by==zuletzt bearbeitet von
-change date==Änderungsdatum
-Edit<==Bearbeiten<
-only granted to admin==nur als Admin erlaubt
-Grant Write Access to==Erlaube es folgenden Benutzern das Wiki zu bearbeiten 
+YaCyWiki page:==Wiki-страница YaCy:
+last edited by==Последнее изменение
+change date==Дата изменения
+Edit<==Изменить<
+only granted to admin==только разрешённые администратором
+Grant Write Access to==Разрешено вести запись 
 # !!! Do not translate the input buttons because that breaks the function to switch rights !!!
-#"all"=="Allen"
-#"admin"=="Administrator"
-Start Page==Startseite
-#Index==Index
-Versions==Versionen
-Author:==Autor:
-#Text:==Text:
-You can use==Sie können hier
-Wiki Code</a> here.==Wiki Befehle</a> benutzen.
-"edit"=="bearbeiten"
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
->Preview==>Vorschau
-No changes have been submitted so far!==Es wurden noch keine Änderungen übertragen!
-Subject==Titel
-Change Date==Änderungsdatum
-Last Author==Letzter Autor
-IO Error reading wiki database:==I0 Fehler beim Lesen der Wiki Datenbank:
-Select versions of page==Wähle Versionen der Seite
-Compare version from==Vergleiche Version vom
-"Show"=="Anzeigen"
-with version from==mit Version vom
-"current"=="aktuelle"
-"Compare"=="Vergleichen"
-Return to==Kehre zurück zu
-Changes will be published as announcement on YaCyNews==Änderungen werden über den YaCy News Service bekannt gegeben.
+#"all"=="всем"
+#"admin"=="администратору"
+Start Page==Стартовая страница
+Index==Индекс
+Versions==Версии
+Author:==Автор:
+#Text:==Текст:
+You can use==Вы можете использовать
+Wiki Code</a> here.==Wiki-код</a> здесь.
+"edit"=="изменить"
+"Submit"=="Сохранить"
+"Preview"=="Предпросмотр"
+"Discard"=="Отменить"
+>Preview==>Предпросмотр
+No changes have been submitted so far!==Изменения не были произведены!
+Subject==Тема
+Change Date==Дата изменения
+Last Author==Последний автор
+IO Error reading wiki database:==Ошибка ввода-вывода при чтении базы данных Wiki:
+Select versions of page==Выберите версию страницы
+Compare version from==Сравнить версию из
+"Show"=="Показать"
+with version from==с версией из
+"current"=="текущей"
+"Compare"=="Сравнить"
+Return to==Вернуться к
+Changes will be published as announcement on YaCyNews==Изменения будут опубликованы в виде сообщений YaCy.
 #-----------------------------
 
 #File: WikiHelp.html
@@ -4117,24 +4119,25 @@ English, Englisch==Русский, Русский
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
+&nbsp;Administration==&nbsp;Управление
+Toggle navigation==Переключение управления
+Administration &raquo;==Управление &raquo;
+Re-Start<==Перезапуск<
+Shutdown<==Выключение<
+>Administration Tutorials<==>Инструкции<
+Download YaCy==Домашняя страница YaCy
+Community \(Web Forums\)==Форум
+Project Wiki==Wiki-сайт проекта
+Search Interface==Интерфейс поиска
+About This Page==Ваш профиль
 YaCy Administration==Управление YaCy
 YaCy - Distributed Search Engine==YaCy - Система распределённого поиска
-### SEARCH INTERFACES ###
-Search&nbsp;Interfaces==Интерфейсы поиска
-Web Search==Вэб-поиск
-File Search==Поиск файлов
-Host Browser==Просмотр хостов
-Solr Default Core==Параметры ядра Solr
-Solr Webgraph Core==Параметры графики Solr
-Google Appliance API==Параметры API Google
 # Location Search is currently commented out
 Location Search==Локальный поиск
 #Embedded Solr API==Embedded Solr API
 #Embedded GSA API==Embedded GSA API
 # Rich Client Search is currently commented out
 Rich Client Search==Rich Client Suche
-Compare Search==Сравнить поиск
-URL Viewer==Просмотр ссылок
 ### SEARCH DESIGN ###
 Search&nbsp;Design==Интеграция поиска
 Search Integration into External Sites==Интеграция поискового интерфейса в другие сайты
@@ -4143,7 +4146,7 @@ Integrated Search Configuration==Настройка интегрируемого
 Index&nbsp;Production==Индексирование
 Crawler / Harvester==Индексирование / Сканер сети
 Creation Monitor==Монитор индексирования
-Index Administration==Администрирование индекса
+Index Administration==Управление индексом
 Filter &amp; Blacklists==Фильтр и чёрный список
 Content Semantic==Семантический контент
 Target Analysis==Анализ цели
@@ -4159,30 +4162,41 @@ Computation==Лог сервера
 ### PEER CONTROL ###
 Peer&nbsp;Control==Управление узлом
 Admin Console==Консоль администратора
-Confirm Restart==Подтвердить перезапуск
+Confirm Re-Start==Подтвердите перезапуск
 Re-Start</a>==Перезапустить</a>
-Confirm Shutdown==Подтвердить выключение
+Confirm Shutdown==Подтвердите выключение
 >Shutdown==>Выключить
-### THE YACY PROJECT ###
-The&nbsp;YaCy&nbsp;Project==Проект YaCy
-Project Home==Домашняя страница проекта
-Tutorials<==Руководства<
-Forum/Discussion<==Форум<
 Project Wiki<==Wiki‐сайт проекта<
 Git Repository==Git-репозиторий
-Bugtracker<==Bugtracker<
-Peer Statistics::YaCy Statistics==Статистика узлов::YaCy Статистика
+Bugtracker==Багтрэкер
+YaCy Statistics==Статистика YaCy
+external==
+Search...==Поиск...
 #-----------------------------
 
 #File: env/templates/simpleheader.template
 #---------------------------
-Administration<==Администрирование<
+Toggle navigation==Переключение управления
+Search Interfaces==Интерфейсы поиска
+Administration &raquo;==Управление &raquo;
 >Web Search<==>Вэб‐поиск<
 >File Search<==>Поиск файлов<
+>Compare Search<==>Сравнить поиск<
 >Host Browser<==>Просмотр хостов<
->Tutorial<==>Помощь<
->About Us<==>О пользователе<
-Help / YaCy Wiki==YaCy Wiki
+>URL Viewer<==>Просмотр ссылок<
+Solr Default Core==Параметры ядра Solr
+Solr Webgraph Core==Параметры графики Solr
+Google Appliance API==Параметры API Google
+>Administration Tutorials<==>Инструкции<
+Download YaCy==Домашняя страница YaCy
+Community \(Web Forums\)==Форум
+Project Wiki==Wiki-сайт проекта
+Search Interface==Интерфейс поиска
+About This Page==Ваш профиль
+external==
+Bugtracker==Багтрэкер
+Git Repository==Git-репозиторий
+YaCy Statistics==Статистика YaCy
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template
@@ -4307,7 +4321,7 @@ User Profile==Профиль пользователя
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-Index Administration==Администрирование индекса
+Index Administration==Управление индексом
 URL Database Administration==Управление базой данных индекса
 Index Deletion==Удаление индекса
 Index Sources &amp; Targets==Индекс источников и целей
