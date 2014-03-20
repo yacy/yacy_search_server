@@ -123,7 +123,7 @@ public class yacysearchtrailer {
             navigatorIterator = hostNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 20 && navigatorIterator.hasNext()) {
+            while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
                 if (count == 0) {
@@ -165,7 +165,7 @@ public class yacysearchtrailer {
             navigatorIterator = languageNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 20 && navigatorIterator.hasNext()) {
+            while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = languageNavigator.get(name);
                 if (count == 0) {
@@ -207,7 +207,7 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.authorNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 20 && navigatorIterator.hasNext()) {
+            while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.authorNavigator.get(name);
                 if (count == 0) {
@@ -292,7 +292,7 @@ public class yacysearchtrailer {
             int i = 0, pos = 0, neg = 0;
             String nav;
             boolean visible = false;
-            while (i < 20 && navigatorIterator.hasNext()) {
+            while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.protocolNavigator.get(name);
                 if (count == 0) {
@@ -335,7 +335,7 @@ public class yacysearchtrailer {
             int i = 0, pos = 0, neg = 0;
             String nav;
             boolean visible = false;
-            while (i < 20 && navigatorIterator.hasNext()) {
+            while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.filetypeNavigator.get(name);
                 if (count == 0) {
