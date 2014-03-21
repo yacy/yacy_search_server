@@ -31,12 +31,15 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   if (document.getElementById("remotePeerCount") != null) document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
   // compose page navigation
 
-  var percent = 100 * (itemscount - offset + 1) / itemsperpage;
-  if (percent == 100) {
-	  window.setTimeout(fadeOutBar, 500);
-      document.getElementById("progressbar").setAttribute('class',"progress-bar progress-bar-success");
+  if (document.getElementById("progressbar").getAttribute('class') != "progress-bar progress-bar-success") {
+	  var percent = 100 * (itemscount - offset + 1) / itemsperpage;
+	  if (percent == 100) {
+		  document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;");
+		  document.getElementById("progressbar").setAttribute('class',"progress-bar progress-bar-success");
+		  window.setTimeout(fadeOutBar, 500);
+	  }
+	  document.getElementById("progressbar").setAttribute('style',"width:" + percent + "%");
   }
-  document.getElementById("progressbar").setAttribute('style',"width:" + percent + "%");
   
   var resnav = "<ul class=\"pagination\">";
   thispage = Math.floor(offset / itemsperpage);

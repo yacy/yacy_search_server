@@ -208,13 +208,11 @@ document.getElementById("Enter").innerHTML = "search again";
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
 
-<!-- attach the bottomline (customer option) -->
-<!--#(pageNavBottom)#::<div id="pageNavBottom" style="text-align:center">#[resnav]#</div>#(/pageNavBottom)#-->
 #(num-results)#
 	::
 	::
 	::
-	<span id="resNav" style="display: inline;">#[resnav]#</span>
+	<span id="resNav" style="display: inline;"></span>
 </div>
 	::
 #(/num-results)#
@@ -254,6 +252,8 @@ function latestinfo() {
   };
   self.xmlHttpReq.send(null);
 }
+window.setTimeout('latestinfo();',500); // we need that to get a correct pagination bar at the end of the page
+window.setTimeout('latestinfo();',1000);
 // TODO: resets statistic on navigating to next page in Jetty implementation
 /*
 window.setTimeout('latestinfo();',500);

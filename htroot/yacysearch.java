@@ -830,44 +830,6 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
 
-            // compose page navigation
-            final StringBuilder resnav = new StringBuilder(200);
-            resnav.append("<ul class=\"pagination\">");
-            final int thispage = startRecord / theQuery.itemsPerPage();
-            if (thispage == 0) {
-              resnav.append("<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>");
-            } else {
-              resnav.append("<li><a id=\"prevpage\" href=\"");
-              resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null).toString());
-              resnav.append("\">&laquo;</a></li>");
-            }
-
-            final int numberofpages = Math.min(10, 1 + ((theSearch.getResultCount() - 1) / theQuery.itemsPerPage()));
-            for (int i = 0; i < numberofpages; i++) {
-                if (i == thispage) {
-                   resnav.append("<li class=\"active\"><a href=\"#\">");
-                   resnav.append(i + 1);
-                   resnav.append("</a></li>");
-                } else {
-                   resnav.append("<li><a href=\"");
-                   resnav.append(QueryParams.navurl("html", i, theQuery, null).toString());
-                   resnav.append("\">" + (i + 1) + "</a></li>");
-                }
-            }
-            if (thispage >= numberofpages) {
-              resnav.append("<li><a href=\"#\">&raquo;</a></li>");
-            } else {
-                resnav.append("<li><a id=\"nextpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage + 1, theQuery, null).toString());
-                resnav.append("\">&raquo;</a>");
-            }
-            resnav.append("</ul>");
-            final String resnavs = resnav.toString();
-            
-            prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (theSearch.getResultCount() - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
-            prop.put("pageNavBottom_resnav", resnavs);
-
             // generate the search result lines; the content will be produced by another servlet
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {
                 prop.put("results_" + i + "_item", startRecord + i);
