@@ -4,6 +4,7 @@
     #(forward)#::<meta http-equiv="REFRESH" content="0; url=#[target]#" />#(/forward)#
     <title>YaCy '#[clientname]#': Search Page</title>
     #%env/templates/metas.template%#
+    <link href="/env/bootstrap/css/jumbotron-narrow.css" rel="stylesheet">
     <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[former]#" />
     <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
     <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
@@ -44,18 +45,14 @@
       document.getElementById("navbar-brand").href="#[promoteSearchPageGreeting.homepage]#";
     </script>
     #(/topmenu)#
-
-    #(pi)#::
-    <div style="position:fixed; bottom: 0; right: 1px;"><a href="Status.html">&pi;</a></div>
-    #(/pi)#
-
+	
 	<h2 class="yacy"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="yacy" style="margin: auto;"/></a></h2>
     <h2 class="yacy">#[promoteSearchPageGreeting]#</h2>
-  
+
     <form class="search" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
       <fieldset class="maininput">
-        <input name="query" class="searchinput" id="search" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" />
-        <input type="submit" name="Enter" value="Search" />
+        <input name="query" class="searchinput" id="search" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" style="position:relative;top:1px;" />
+        <button type="submit" name="query" id="search" class="btn btn-primary">Search</button>
         <input type="hidden" name="verify" value="#[search.verify]#" />
         #(searchdomswitches)#::
         <div class="yacysearch">
@@ -64,11 +61,11 @@
 	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;#(/searchaudio)#
 	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;#(/searchvideo)#
 	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications#(/searchapp)#
-	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='/index.html?searchoptions=1&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a>::#(/searchoptions)#
+	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='/index.html?searchoptions=1&amp;former='+document.getElementById('searchinput').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchinput').contentdom)">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#
         <input type="hidden" name="nav" value="#[search.navigation]#" />
-        <input type="hidden" name="startRecord" value="0" />
+        <input type="hidden" name="startRecord" id="startRecord" value="0" />
         <input type="hidden" name="indexof" value="off" />
         <input type="hidden" name="meanCount" value="5" />
       #(searchoptions)#
