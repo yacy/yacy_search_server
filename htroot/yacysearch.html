@@ -58,19 +58,6 @@
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
-
-#(resource-select)#::
-<div id="searchmode">
-<img src="env/grafics/searchmode_p2p_activated_32.png" width="91" height="32"/><br/>
-<a href="yacysearch.html?resource=local"><img src="env/grafics/searchmode_stealth_deactivated_32.png" width="91" height="32"/></a>
-<span>Your search is done using peers in the YaCy P2P network. You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.</span>
-</div>::
-<div id="searchmode">
-<a href="yacysearch.html?resource=global"><img src="env/grafics/searchmode_p2p_deactivated_32.png" width="91" height="32"/></a><br/>
-<img src="env/grafics/searchmode_stealth_activated_32.png" width="91" height="32"/>
-<span>Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.</span>
-</div>#(/resource-select)#
-
     #%env/templates/simpleheader.template%#
     <script type="text/javascript">
       document.getElementById("header_websearch").className += " active";

@@ -157,9 +157,8 @@ public class yacysearch {
         final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
         final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
         boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
-        boolean global = post == null || (post.get("resource", "local").equals("global") && p2pmode);
+        boolean global = post == null || (post.get("resource-switch", post.get("resource", "local")).equals("global") && p2pmode);
         boolean stealthmode = p2pmode && !global;
-        prop.put("topmenu_resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
         
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
             if (indexSegment == null) ConcurrentLog.info("yacysearch", "indexSegment == null");
@@ -762,7 +761,7 @@ public class yacysearch {
                                     "html",
                                     0,
                                     theQuery,
-                                    suggestion).toString());
+                                    suggestion, true).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (final ConcurrentModificationException e) {

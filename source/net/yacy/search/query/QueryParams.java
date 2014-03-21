@@ -598,9 +598,9 @@ public final class QueryParams {
      * @param addToQuery
      * @return
      */
-    public static StringBuilder navurl(final String ext, final int page, final QueryParams theQuery, final String newQueryString) {
+    public static StringBuilder navurl(final String ext, final int page, final QueryParams theQuery, final String newQueryString, boolean newModifierReplacesOld) {
 
-        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString);
+        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, newModifierReplacesOld);
 
         sb.append("&startRecord=");
         sb.append(page * theQuery.itemsPerPage());
@@ -619,20 +619,27 @@ public final class QueryParams {
      *      - if isEmpty overwrites (clears) existing modifier
      * @return url to new search result page
      */
-    public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newModifier) {
+    public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newModifier, boolean newModifierReplacesOld) {
 
         final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
         sb.append(ext);
         sb.append("?query=");
-        sb.append(theQuery.getQueryGoal().getQueryString(true));
 
         if (newModifier == null) {
+            sb.append(theQuery.getQueryGoal().getQueryString(true));
             if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
         } else {
-            if(!newModifier.isEmpty()) {
-                if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
-                sb.append("+" + newModifier);
+            if (newModifier.isEmpty()) {
+                sb.append(theQuery.getQueryGoal().getQueryString(true));
+            } else {
+                if (newModifierReplacesOld) {
+                    sb.append(newModifier);
+                } else {
+                    sb.append(theQuery.getQueryGoal().getQueryString(true));
+                    if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
+                    sb.append("+" + newModifier);
+                }
             }
         }
 
