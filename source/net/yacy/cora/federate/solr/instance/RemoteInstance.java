@@ -256,6 +256,6 @@ public class RemoteInstance implements SolrInstance {
     }
 
     public static int queueSizeByMemory() {
-        return (int) Math.max(1, MemoryControl.maxMemory() / 1024 / 1024 / 12);
+        return (int) Math.min(500, Math.max(1, MemoryControl.maxMemory() / 1024 / 1024 / 12));
     }
 }
