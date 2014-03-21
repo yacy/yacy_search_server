@@ -960,7 +960,7 @@ div#api {
   position:absolute;
   top:60px;
   right:20px;
-  z-index: 100;
+  z-index: 1600;
 }
 
 div#api span {
