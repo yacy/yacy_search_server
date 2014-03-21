@@ -133,6 +133,24 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <input type="hidden" name="meanCount" value="#[meanCount]#" />
   
 </form>
+
+<!-- type the number of results and navigation bar -->
+#(num-results)#
+	::
+	<p>No Results.</p>
+	::
+	<p>No Results. (length of search words must be at least 2 characters)</p>
+	::
+	<div id="results"></div>
+    <div class="progress">
+      <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" style="width:0%;">
+        <span style="position:absolute;display:block;text-align:left;width:100%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)#</span>
+      </div>
+    </div>
+	::
+	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
+#(/num-results)#
+
 <script>$("input:text:visible:first").focus();</script>
 #(urlmaskerror)#::
 <p><b>Illegal URL mask:</b> <i>#[urlmask]#</i> (not a valid regular expression), mask ignored.</p>
@@ -159,22 +177,6 @@ document.getElementById("Enter").innerHTML = "search again";
 	<p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
 #(/excluded)#
 
-<!-- type the number of results and navigation bar -->
-#(num-results)#
-	::
-	<p>No Results.</p>
-	::
-	<p>No Results. (length of search words must be at least 2 characters)</p>
-	::
-	<div id="results"></div>
-    <div class="progress">
-      <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" style="width:0%;">
-        <strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)#
-      </div>
-    </div>
-	::
-	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
-#(/num-results)#
 
 <!-- show openstreetmap tiles if geoinfo was found -->
 #(geoinfo)#

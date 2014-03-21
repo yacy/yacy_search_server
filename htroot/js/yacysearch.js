@@ -15,9 +15,14 @@ function addHover() {
   }
 }
 
+function fadeOutBar() {
+	document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;backgroundColor:transparent;");
+}
+
 function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase) {
   if (totalcount == 0) return;
-  if (offset >= 0) document.getElementById("startRecord").setAttribute('value', offset);
+  if (offset >= 0) document.getElementById("offset").innerHTML = offset;
+  if (offset >= 0) document.getElementById("startRecord").setAttribute('value', offset - 1);
   if (itemscount >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
   document.getElementById("totalcount").firstChild.nodeValue = totalcount;
   if (document.getElementById("localResourceSize") != null) document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;
@@ -26,10 +31,14 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   if (document.getElementById("remotePeerCount") != null) document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
   // compose page navigation
 
-  percent = 100 * (itemscount - offset + 1) / itemsperpage;
+  var percent = 100 * (itemscount - offset + 1) / itemsperpage;
+  if (percent == 100) {
+	  window.setTimeout(fadeOutBar, 500);
+      document.getElementById("progressbar").setAttribute('class',"progress-bar progress-bar-success");
+  }
   document.getElementById("progressbar").setAttribute('style',"width:" + percent + "%");
   
-  resnav = "<ul class=\"pagination\">";
+  var resnav = "<ul class=\"pagination\">";
   thispage = Math.floor(offset / itemsperpage);
   if (thispage == 0) {
   	resnav += "<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>";
