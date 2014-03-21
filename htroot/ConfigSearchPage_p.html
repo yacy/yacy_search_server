@@ -13,7 +13,6 @@
   <script src="yacy/ui/js/jquery.tinysort.min.js" type="text/javascript"></script>
   <link media="screen" type="text/css" href="yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" />
   <link media="screen" type="text/css" href="yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="yacy/ui/css/autocomplete.css" rel="stylesheet" />  
 </head>
 
 <body id="ConfigSearchPage" >
@@ -53,25 +52,42 @@ $(function() {
     <table>
       <tr>
         <td style="border-width: 1px; border-color: grey; border-style: solid; padding: 5px;">
-          <table width="90%">
+          <table width="100%">
             <tr>
               <td valign="top"><input type="checkbox" name="publicTopmenu" value="true" #(publicTopmenu)#::checked="checked" #(/publicTopmenu)# /></td>
-              <td><div class="SubMenu">
-                  <ul class="SubMenu">
-                    <li style="width: 15%;"><a href="Status.html" target="LayouTest" class="MenuItemLink">Administration</a></li>
-                    <li style="width: 15%;"><a href="index.html" target="LayouTest" class="MenuItemLink">Web Search</a></li>
-                    <li style="width: 15%;"><a href="yacyinteractive.html" target="LayouTest" class="MenuItemLink">File Search</a></li>
-                    <li style="width: 15%;"><a href="HostBrowser.html?hosts=" target="LayouTest" class="MenuItemLink">HostBrowser</a></li>
-                    <li style="width: 15%;"><a href="ViewProfile.html?hash=localhash" target="LayouTest" class="MenuItemLink">About Us</a></li>
-                    <li style="width: 15%;"><a href="http://www.yacy-websearch.net/wiki/" target="LayouTest" class="MenuItemLink">Help / YaCy Wiki</a></li>
-                  </ul>
-                </div></td>
+              <td>
+                  <!-- top navigation (imported from env/templates/simpleheader.template) -->
+                  <div class="navbar navbar-default">
+                      <div class="container-fluid">
+                          <div class="navbar-header">
+                              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                                  <span class="sr-only">Toggle navigation</span>
+                                  <span class="icon-bar"></span>
+                                  <span class="icon-bar"></span>
+                                  <span class="icon-bar"></span>
+                              </button>
+                              <a class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
+                                  <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;<span id="greeting"></span>
+                              </a>
+                          </div>
+                          <div class="navbar-collapse collapse">
+                              <ul class="nav navbar-nav navbar-right">
+                                  <li id="header_search" class="dropdown">
+                                      <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
+                                  </li>
+                                  <li id="header_help" class="dropdown">
+                                      <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
+                                  </li>
+                                  <li id="header_administration">
+                                      <button class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
+                                  </li>
+                              </ul>
+                          </div>
+                      </div>
+                  </div> 
+              </td>
             </tr>
           </table>
-          <h2>#[promoteSearchPageGreeting]#</h2>
-          <div class="yacylogo">
-            <a href="#[promoteSearchPageGreeting.homepage]#" target="LayouTest" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" /></a>
-          </div>
           <div style="width: 550px; float: left;">
             <fieldset class="yacys">
               <input id="search" class="searchinput" name="query" type="text" size="40" maxlength="80" value="search words" />
@@ -109,7 +125,7 @@ $(function() {
                       <script type="text/javascript" charset="utf-8">
   $.fn.tagcloud.defaults = {
     size: {start: 8, end: 16, unit: 'pt'},
-    color: {start: '#c08080', end: '#2200CC'}
+    color: {start: '#682', end: '#20C'}
   };
   $(document).ready(function(){
     $("#tagcloud a").tagcloud();
