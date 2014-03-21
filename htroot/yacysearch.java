@@ -127,9 +127,6 @@ public class yacysearch {
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
 
-        //get focus option
-        prop.put("focus", ((post == null) ? true : post.get("focus", "1").equals("1")) ? 1 : 0);
-
         // produce vocabulary navigation sidebars
         Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
         int j = 0;
@@ -160,9 +157,8 @@ public class yacysearch {
         final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
         final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
         boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
-        boolean global = post == null || (post.get("resource", "local").equals("global") && p2pmode);
+        boolean global = post == null || (post.get("resource-switch", post.get("resource", "local")).equals("global") && p2pmode);
         boolean stealthmode = p2pmode && !global;
-        prop.put("topmenu_resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
         
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
             if (indexSegment == null) ConcurrentLog.info("yacysearch", "indexSegment == null");
@@ -765,7 +761,7 @@ public class yacysearch {
                                     "html",
                                     0,
                                     theQuery,
-                                    suggestion).toString());
+                                    suggestion, true).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (final ConcurrentModificationException e) {
@@ -832,44 +828,6 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
-
-            // compose page navigation
-            final StringBuilder resnav = new StringBuilder(200);
-            resnav.append("<ul class=\"pagination\">");
-            final int thispage = startRecord / theQuery.itemsPerPage();
-            if (thispage == 0) {
-              resnav.append("<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>");
-            } else {
-              resnav.append("<li><a id=\"prevpage\" href=\"");
-              resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null).toString());
-              resnav.append("\">&laquo;</a></li>");
-            }
-
-            final int numberofpages = Math.min(10, 1 + ((theSearch.getResultCount() - 1) / theQuery.itemsPerPage()));
-            for (int i = 0; i < numberofpages; i++) {
-                if (i == thispage) {
-                   resnav.append("<li class=\"active\"><a href=\"#\">");
-                   resnav.append(i + 1);
-                   resnav.append("</a></li>");
-                } else {
-                   resnav.append("<li><a href=\"");
-                   resnav.append(QueryParams.navurl("html", i, theQuery, null).toString());
-                   resnav.append("\">" + (i + 1) + "</a></li>");
-                }
-            }
-            if (thispage >= numberofpages) {
-              resnav.append("<li><a href=\"#\">&raquo;</a></li>");
-            } else {
-                resnav.append("<li><a id=\"nextpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage + 1, theQuery, null).toString());
-                resnav.append("\">&raquo;</a>");
-            }
-            resnav.append("</ul>");
-            final String resnavs = resnav.toString();
-            
-            prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (theSearch.getResultCount() - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
-            prop.put("pageNavBottom_resnav", resnavs);
 
             // generate the search result lines; the content will be produced by another servlet
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {

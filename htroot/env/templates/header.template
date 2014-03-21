@@ -10,22 +10,19 @@
       </button>
       <a class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="/" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
         <img id="greeting-icon" class="yacylogo" src="/env/grafics/yacy.png" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;Administration
-
       </a>
-      <form class="navbar-form " method="get" accept-charset="UTF-8" action="/yacysearch.html" style="padding-left:200px;">
-        <input name="query" placeholder="Search..." class="form-control" type="text" size="20" maxlength="80" value=""/>
+      <form class="navbar-form" method="get" accept-charset="UTF-8" action="/yacysearch.html" style="padding-left:200px;max-width:400px;">
+        <input name="query" placeholder="Search..." class="form-control" type="text" size="36" maxlength="200" value=""/>
         <input type="hidden" name="verify" value="cacheonly" />
         <input type="hidden" name="maximumRecords" value="10" />
         <input type="hidden" name="resource" value="local" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="nav" value="all" />
-      </form>    
-
+      </form>
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
-        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
         <li id="header_restart">
           <form action="/Steering.html" method="get" role="form">
             <input type="hidden" name="restart" value="" />

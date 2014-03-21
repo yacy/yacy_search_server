@@ -58,19 +58,6 @@
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
-
-#(resource-select)#::
-<div id="searchmode">
-<img src="env/grafics/searchmode_p2p_activated_32.png" width="91" height="32"/><br/>
-<a href="yacysearch.html?resource=local"><img src="env/grafics/searchmode_stealth_deactivated_32.png" width="91" height="32"/></a>
-<span>Your search is done using peers in the YaCy P2P network. You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.</span>
-</div>::
-<div id="searchmode">
-<a href="yacysearch.html?resource=global"><img src="env/grafics/searchmode_p2p_deactivated_32.png" width="91" height="32"/></a><br/>
-<img src="env/grafics/searchmode_stealth_activated_32.png" width="91" height="32"/>
-<span>Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.</span>
-</div>#(/resource-select)#
-
     #%env/templates/simpleheader.template%#
     <script type="text/javascript">
       document.getElementById("header_websearch").className += " active";
@@ -98,10 +85,16 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
   <div class="row">
     <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
 
-<form class="search small" action="" method="get" accept-charset="UTF-8">
-  <fieldset class="yacys">
-    <input id="search" class="searchinput" name="query" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" onclick="document.getElementById('Enter').value = 'Search'" />
-    <input id="Enter" type="submit" name="Enter" value="Search" />
+<form class="search small" action="" method="get" accept-charset="UTF-8" style="position:absolute;top:-48px;left:200;z-index:1052;max-width:500px;">
+  
+  <div class="input-group">
+    <input type="text" class="form-control searchinput typeahead" size="40" maxlength="200" placeholder="#(topmenu)##[promoteSearchPageGreeting]#::#[promoteSearchPageGreeting]##(/topmenu)#" name="query" value="#[former]#" onFocus="this.select()" id="search" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
+    <div class="input-group-btn">
+       <button id="Enter" class="btn btn-default" type="submit">search</button>
+    </div>
+  </div>
+        
+    <!-- 
     #(searchdomswitches)#::
     <div class="yacysearch">
 	    #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;#(/searchtext)#
@@ -113,9 +106,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <a href="index.html?searchoptions=2&amp;count=#[count]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#&amp;meanCount=#[meanCount]#">more options</a>
     </div>
     #(/searchdomswitches)#
+    -->
     <input type="hidden" name="former" value="#[former]#" />
     <input type="hidden" name="maximumRecords" value="#[count]#" />
-    <input type="hidden" name="startRecord" value="0" />
+    <input type="hidden" name="startRecord" id="startRecord" value="0" />
     <input type="hidden" name="verify" value="#[search.verify]#" />
     <input type="hidden" name="resource" value="#[resource]#" />
     <input type="hidden" name="nav" value="#[search.navigation]#" />
@@ -124,8 +118,27 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <input type="hidden" name="cat" value="#[cat]#" />
     <input type="hidden" name="constraint" value="#[constraint]#" />
     <input type="hidden" name="meanCount" value="#[meanCount]#" />
-  </fieldset>
+  
 </form>
+
+<!-- type the number of results and navigation bar -->
+#(num-results)#
+	::
+	<p>No Results.</p>
+	::
+	<p>No Results. (length of search words must be at least 2 characters)</p>
+	::
+	<div id="results"></div>
+    <div class="progress">
+      <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" style="width:0%;">
+        <span style="position:absolute;display:block;text-align:left;width:100%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)#</span>
+      </div>
+    </div>
+	::
+	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
+#(/num-results)#
+
+<script>$("input:text:visible:first").focus();</script>
 #(urlmaskerror)#::
 <p><b>Illegal URL mask:</b> <i>#[urlmask]#</i> (not a valid regular expression), mask ignored.</p>
 #(/urlmaskerror)#
@@ -141,7 +154,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 #(searchagain)#
 ::
 <script type="text/javascript">
-document.getElementById("Enter").value = "search again";
+document.getElementById("Enter").innerHTML = "search again";
 </script>
 #(/searchagain)#
 
@@ -151,27 +164,6 @@ document.getElementById("Enter").value = "search again";
 	<p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
 #(/excluded)#
 
-<!-- type the number of results and navigation bar -->
-#(num-results)#
-	::
-	<p>No Results.</p>
-	::
-	<p>No Results. (length of search words must be at least 2 characters)</p>
-	::
-	<div id="results"></div>
-	<span id="resCounter" style="display: inline;"><strong id="resultsOffset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)#</span>
-	<span id="resNav" style="display: inline;">#[resnav]#</span>
-	::
-	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
-#(/num-results)#
-
-<!-- the search results -->
-<script type="text/javascript">
-var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
-#(focus)#::
-document.getElementById("search").focus();
-#(/focus)#
-</script>
 
 <!-- show openstreetmap tiles if geoinfo was found -->
 #(geoinfo)#
@@ -203,8 +195,14 @@ document.getElementById("search").focus();
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
 
-<!-- attach the bottomline (customer option) -->
-<!--#(pageNavBottom)#::<div id="pageNavBottom" style="text-align:center">#[resnav]#</div>#(/pageNavBottom)#-->
+#(num-results)#
+	::
+	::
+	::
+	<span id="resNav" style="display: inline;"></span>
+</div>
+	::
+#(/num-results)#
 
 </div> <!-- close main -->
 
@@ -215,9 +213,6 @@ document.getElementById("search").focus();
 //<![CDATA[
 $(function() {
     $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
-#(focus)#::
-	$("#search").focus();
-#(/focus)#
 });
 //]]>
 </script>
@@ -244,6 +239,8 @@ function latestinfo() {
   };
   self.xmlHttpReq.send(null);
 }
+window.setTimeout('latestinfo();',500); // we need that to get a correct pagination bar at the end of the page
+window.setTimeout('latestinfo();',1000);
 // TODO: resets statistic on navigating to next page in Jetty implementation
 /*
 window.setTimeout('latestinfo();',500);

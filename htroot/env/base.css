@@ -327,7 +327,7 @@ clear:both;
 
 #resNav {
 	/* right part of the progress bar */
-	float:right;
+	float:left;
 }
 
 #resProgFill {
@@ -713,7 +713,7 @@ form.search.small {
 }
 
 .searchinput {
-  font-size:16px;
+  font-size:18px;
 }
 
 /*----------

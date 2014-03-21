@@ -979,11 +979,6 @@ publicSearchpage = true
 # to /Status.html to get the main memu bar back
 publicTopmenu = true
 
-# flag if a small link to the administration sites on the right bottom of the index
-# page should be shown to all users.
-# you might want to enabled this, if publicTopmenu is disabled
-publicAdministratorPi = false
-
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes
 # this can be changed. There are three options:
