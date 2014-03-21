@@ -247,7 +247,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
         
-        if (pathInfo.startsWith("/currentyacypeer/")) pathInfo = pathInfo.substring(16);
         String pathInContext = URIUtil.addPaths(servletPath, pathInfo);
         boolean endsWithSlash = (pathInfo == null ? request.getServletPath() : pathInfo).endsWith(URIUtil.SLASH);
 
