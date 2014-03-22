@@ -199,7 +199,23 @@ public class DCEntry extends MultiMapSolrParams {
     //modified by copperdust; Ukraine, 2012
     public String getLanguage() {//final language computation
         String l = this.get("dc:language");//from document metainfo
-        if (l == null) l = getIdentifier(true).language();//from symbolic frequency table
+        // OAI uses often 3-char languages (ISO639-2) convert to ISO639-1 2-char code)
+        // TODO: implement complete list of ISO639-2/ISO639-3 language codes
+        if (l != null && l.length() == 3) {
+            if (l.startsWith("ger") || l.startsWith("deu")) l = "de";
+            if (l.startsWith("eng")) l = "en";
+            if (l.startsWith("rus")) l = "ru";
+            if (l.startsWith("jpn")) l = "ja";
+            if (l.startsWith("ita")) l = "it";
+            if (l.startsWith("por")) l = "pt";
+            if (l.startsWith("spa")) l = "es";
+            if (l.startsWith("chi") || l.startsWith("zho")) l = "zh";
+            if (l.startsWith("fre") || l.startsWith("fra")) l = "fr";
+            if (l.startsWith("eus") || l.startsWith("baq")) l = "eu";
+            if (l.startsWith("gre") || l.startsWith("ell")) l = "el";
+            return l;
+        }
+        if (l == null) l = getIdentifier(true).language(); // determine from identifier-url.TLD
         if (l == null) return this.get("language");//from TLD
         return l;
     }
