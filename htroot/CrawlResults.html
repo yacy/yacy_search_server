@@ -78,7 +78,7 @@
         <td><strong>URLs</strong></td>
         <td>Blacklist to use 
           <form name="selectblacklistform" action="#[feedbackpage]#">
-              <select name="selectedblacklist" onchange="forms.selectblacklistform.submit();">
+              <select name="selectedblacklist" style="color:black" onchange="forms.selectblacklistform.submit();">
                 #{blacklists}#
                 <option #[selected]# value="#[name]#">#[name]#</option>
                 #{/blacklists}#
