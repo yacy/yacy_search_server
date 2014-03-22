@@ -1,7 +1,7 @@
 <script>
   if (document.getElementById("progressbar").getAttribute('class') != "progress-bar progress-bar-success") {
 	  document.getElementById("progressbar").setAttribute('style',"width:100%");
-      document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;");
+      document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;-webkit-transition:-webkit-transform 0s;");
 	  document.getElementById("progressbar").setAttribute('class',"progress-bar progress-bar-success");
 	  window.setTimeout(fadeOutBar, 500);
   }
@@ -9,20 +9,26 @@
 
 #(resource-select)#::
 <form action="yacysearch.html" method="get" accept-charset="UTF-8">
-<input type="checkbox" name="resource-switch" value="local" data-size="large" style="width:100%" checked="checked" onchange="this.form.submit()">
-<script>$("[name='resource-switch']").bootstrapSwitch();
-$("[name='resource-switch']").bootstrapSwitch('onText', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-$("[name='resource-switch']").bootstrapSwitch('offText', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');</script>
+<input checked="checked"
+  data-label-text="Privacy"
+  data-on-text="<span style='padding:0 20px 0 20px;'>Peer-to-Peer</span>"
+  data-off-text="<span style='padding:0 20px 0 20px;'>Stealth&nbsp;Mode</span>"
+  type="checkbox" name="resource-switch" value="local" data-size="large" style="width:100%"
+  onchange="document.getElementById('resource').value='local';document.searchform.submit();">
+<script>$("[name='resource-switch']").bootstrapSwitch();</script>
 </form>
 <!--
 <span>Your search is done using peers in the YaCy P2P network. You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.</span>
 -->
 ::
 <form action="yacysearch.html" method="get" accept-charset="UTF-8">
-<input type="checkbox" name="resource-switch" value="global" data-size="large" onchange="this.form.submit()">
-<script>$("[name='resource-switch']").bootstrapSwitch();
-$("[name='resource-switch']").bootstrapSwitch('onText', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
-$("[name='resource-switch']").bootstrapSwitch('offText', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');</script>
+<input
+  data-label-text="Privacy"
+  data-on-text="<span style='padding:0 20px 0 20px';>Peer-to-Peer</span>"
+  data-off-text="<span style='padding:0 20px 0 20px;'>Stealth&nbsp;Mode</span>"
+  type="checkbox" name="resource-switch" value="global" data-size="large" style="width:100%"
+  onchange="document.getElementById('resource').value='global';document.searchform.submit();">
+<script>$("[name='resource-switch']").bootstrapSwitch();</script>
 </form>
 <!--
 <span>Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.</span>

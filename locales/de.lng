@@ -3877,7 +3877,7 @@ Integrated Search Configuration==Konfiguration der Integrierten Suche
 ### INDEX CONTROL ###
 Index&nbsp;Production==Indexerzeugung
 #Crawler / Harvester==Crawler / Harvester
-Creation Monitor==Crawler Überwachung
+Crawler Monitor==Crawler Überwachung
 Index Administration==Indexverwaltung
 Filter &amp; Blacklists==Filter &amp; Sperrlisten
 Content Semantic==Inhalt Semantik

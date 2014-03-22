@@ -16,7 +16,7 @@ function addHover() {
 }
 
 function fadeOutBar() {
-	document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;backgroundColor:transparent;");
+	document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;-webkit-transition:-webkit-transform 0s;backgroundColor:transparent;");
 }
 
 function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase) {
@@ -34,45 +34,47 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   if (document.getElementById("progressbar").getAttribute('class') != "progress-bar progress-bar-success") {
 	  var percent = 100 * (itemscount - offset + 1) / itemsperpage;
 	  if (percent == 100) {
-		  document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;");
+		  document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;-webkit-transition:-webkit-transform 0s;");
 		  document.getElementById("progressbar").setAttribute('class',"progress-bar progress-bar-success");
 		  window.setTimeout(fadeOutBar, 500);
 	  }
 	  document.getElementById("progressbar").setAttribute('style',"width:" + percent + "%");
   }
-  
-  var resnav = "<ul class=\"pagination\">";
-  thispage = Math.floor(offset / itemsperpage);
-  if (thispage == 0) {
-  	resnav += "<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>";
-  } else {
-  	resnav += "<li><a id=\"prevpage\" href=\"";
-    resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
-  	resnav += "\">&laquo;</a></li>";
+  var resnavElement = document.getElementById("resNav");
+  if (resnavElement != null) {
+	  var resnav = "<ul class=\"pagination\">";
+	  thispage = Math.floor(offset / itemsperpage);
+	  if (thispage == 0) {
+	  	resnav += "<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>";
+	  } else {
+	  	resnav += "<li><a id=\"prevpage\" href=\"";
+	    resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
+	  	resnav += "\">&laquo;</a></li>";
+	  }
+	  
+	  numberofpages = Math.floor(Math.min(10, 1 + ((totalcount.replace(/\./g,'') - 1) / itemsperpage)));
+	  if (!numberofpages) numberofpages = 10;
+	  for (i = 0; i < numberofpages; i++) {
+	      if (i == thispage) {
+	         resnav += "<li class=\"active\"><a href=\"#\">";
+	         resnav += (i + 1);
+	         resnav += "</a></li>";
+	      } else {
+	         resnav += "<li><a href=\"";
+	         resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
+	         resnav += "\">" + (i + 1) + "</a></li>";
+	      }
+	  }
+	  if (thispage >= numberofpages) {
+	  	resnav += "<li><a href=\"#\">&raquo;</a></li>";
+	  } else {
+	      resnav += "<li><a id=\"nextpage\" href=\"";
+	      resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
+	      resnav += "\">&raquo;</a>";
+	  }
+	  resnav += "</ul>";
+	  resnavElement.innerHTML = resnav;
   }
-  
-  numberofpages = Math.floor(Math.min(10, 1 + ((totalcount.replace(/\./g,'') - 1) / itemsperpage)));
-  if (!numberofpages) numberofpages = 10;
-  for (i = 0; i < numberofpages; i++) {
-      if (i == thispage) {
-         resnav += "<li class=\"active\"><a href=\"#\">";
-         resnav += (i + 1);
-         resnav += "</a></li>";
-      } else {
-         resnav += "<li><a href=\"";
-         resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
-         resnav += "\">" + (i + 1) + "</a></li>";
-      }
-  }
-  if (thispage >= numberofpages) {
-  	resnav += "<li><a href=\"#\">&raquo;</a></li>";
-  } else {
-      resnav += "<li><a id=\"nextpage\" href=\"";
-      resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
-      resnav += "\">&raquo;</a>";
-  }
-  resnav += "</ul>";
-  document.getElementById("resNav").innerHTML = resnav;
 }
 
 

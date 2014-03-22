@@ -61,6 +61,14 @@ public class yacysearchtrailer {
         final Switchboard sb = (Switchboard) env;
         final String eventID = post.get("eventID", "");
 
+        final boolean authorized = sb.verifyAuthentication(header);
+        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
+        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
+        boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
+        boolean stealthmode = p2pmode && !global;
+        prop.put("resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
+        
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
@@ -68,14 +76,6 @@ public class yacysearchtrailer {
             return prop;
         }
         final RequestHeader.FileType fileType = header.fileType();
-
-        final boolean authorized = sb.verifyAuthentication(header);
-        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
-        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
-        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
-        boolean global = post == null || (post.get("resource-switch", post.get("resource", "local")).equals("global") && p2pmode);
-        boolean stealthmode = p2pmode && !global;
-        prop.put("resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
 
         // compose search navigation
         

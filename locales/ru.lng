@@ -4142,7 +4142,7 @@ Integrated Search Configuration==Настройка интегрируемого
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
 Crawler / Harvester==Индексирование / Сканер сети
-Creation Monitor==Монитор индексирования
+Crawler Monitor==Монитор индексирования
 Index Administration==Администрирование индекса
 Filter &amp; Blacklists==Фильтр и чёрный список
 Content Semantic==Семантический контент
