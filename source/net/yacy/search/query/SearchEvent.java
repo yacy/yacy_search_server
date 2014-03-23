@@ -780,6 +780,8 @@ public final class SearchEvent {
                             //Log.logInfo("SearchEvent", "removed unknown extension " + ext + " from navigation.");
                             i.remove();
                         }
+                    } else { // for image and media search also limit to known extension
+                        if (!Classification.isAnyKnownExtension(ext)) i.remove();
                     }
                 }
                 this.filetypeNavigator.inc(fcts);
