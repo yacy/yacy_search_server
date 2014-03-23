@@ -34,7 +34,7 @@
 #---------------------------
 YaCy Network Access==Доступ к сети YaCy
 Server Access Grid==Доступ к серверу сети
-This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Здесь показаны входящие соединения в вашему узлу и исходящие соединения от вашего узла к другим узлам и вэб-серверам.
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Здесь показаны входящие соединения к вашему узлу и исходящие соединения от вашего узла к другим узлам и вэб-серверам.
 #-----------------------------
 
 #File: AccessTracker_p.html
@@ -390,6 +390,9 @@ Peer User:==Пользователь узла:
 New Peer Password:==Новый пароль узла:
 Repeat Peer Password:==Повторите пароль узла:
 "Define Administrator"=="Назначить администратором"
+>Access Rules<==>Правила доступа<
+Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Защита всех страниц: если включено, то для доступа ко всем страницам требуется авторизация; если выключено, то защищены только страницы с префиксом "_p".
+Set Access Rules==Установить
 Select user==Выбрать пользователя
 New user==Новый пользователь
 Edit User==Изменить пользователя
@@ -507,7 +510,7 @@ Heuristics Configuration==Конфигурация эвристики
 A <a href=\"http://en.wikipedia.org/wiki/Heuristic\" target="_blank">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href=\"http://ru.wikipedia.org/wiki/Эвристика\" target="_blank">Эвристика</a> это специальный метод, который помогает в анализе и поиске лучшего результата.
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска за счет предугадывания ссылок и/или запросов к другим поисковым системам. 
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, полученные ссылки не используются в поисковой выдаче напрямую, а используются для индексации новых страниц.
-This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Это дает возможность использовать черные списки и гарантирует что что искомое слово реально есть на странице найденной эвристикой.
+This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Это даёт возможность использовать черные списки и гарантирует, что искомое слово реально есть на странице найденной эвристикой.
 The success of heuristics are marked with an image==Успех эвристики отмечен изображением
 heuristic:&lt;name&gt;==эвристика:&lt;название&gt;
 #\(redundant\)==\(избыточно\)
@@ -517,7 +520,7 @@ The search result was discovered by a heuristic, but the link was already known 
 The search result was discovered by a heuristic, not previously known by YaCy==Результат поиска был обнаружен при помоще эвристики, но ранее не был известен YaCy.
 \'site\'-operator: instant shallow crawl==Оператор 'site': мгновенная неглубокая индексация
 When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Если при поиске используется оператор 'site' (например: 'download site:yacy.net'), то указанный сайт индексируется с глубиной поиска 1.
-That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Это означает, что сразу после поиска главная страница сайта и все страницы сайта на которые есть ссылки с главной - загружены.
+That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Это означает, что сразу после поискового запроса загружается главная страница сайта и все страницы сайта на которые есть ссылки с главной.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Так как эта эвристика должна соблюдать указанные в robots.txt и в конфигурации YaCy ограничения, то она достаточно медленная. Но страницы могут быть доступны при следущем поиске (через несколько секунд). 
 search-result: shallow crawl on all displayed search results==Результат поиска: неглубокая индексация всех отображенных результатов поиска
 When a search is made then all displayed result links are crawled with a depth-1 crawl.==При выполнении поиска все отображённые ссылки индексируются с глубиной 1.
@@ -543,7 +546,7 @@ Url template syntax==шаблон синтаксиса URL
 "Save"=="Сохранить"
 "reset to default list"=="Восстановить список по-умолчанию"
 "discover from index" class=="Открыть из индекса" класс
-start background task, depending on index size this may run a long time==запустить фоновую задачу. В зависимости от размера индекса, это может занять длительное время.
+start background task, depending on index size this may run a long time==Запустить фоновую задачу. В зависимости от размера индекса, это может занять длительное время.
 With the button "discover from index" you can search within the metadata of your local index \(Web Structure Index\) to find systems which support the Opensearch specification.==При нажатии кнопки "Открыть из индекса" вы можете производить поиск в метаданных вашего локального индекса (вэб-индекса) с помощью систем, которые поддерживают спецификации Opensearch.
 The task is started in the background. It may take some minutes before new entries appear \(after refreshing the page\).==Задача будет запущена в фоне. Может пройти несколько минут, прежде чем появятся первые результаты (после обновления страницы).
 Alternatively you may==В качестве альтернативы вы можете скопировать и вставить
@@ -666,23 +669,23 @@ faster connection speed==Быстрая скорость соединения
 possibility for local adaptions==Возможность локальных адаптаций
 Disadvantages:==Недостатки:
 No automatic update to future releases of YaCy Search Widget==Отсутствие обновления будущих релизов виджета
-Ajax/JSONP cross domain requests needed to query remote YaCy Peer==AJAX/JSON Cross Domain Anfragen müssen den remote YaCy Peer abfragen
+Ajax/JSONP cross domain requests needed to query remote YaCy Peer==AJAX/JSON кросс-доменные запросы, необходимые для удалённого запроса узла
 Installing:==Установка:
 download yacy-portalsearch.tar.gz from==Необходимо загрузить файл yacy-portalsearch.tar.gz из
-unpack within your HTTP servers path==распаковать на ваш HTTP-сервер 
-use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==использовать ./yacy/portalsearch/yacy-portalsearch.html как ссылку для интеграции на вашей странице поиска
+unpack within your HTTP servers path==Распаковать на ваш HTTP-сервер 
+use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==Использовать ./yacy/portalsearch/yacy-portalsearch.html как ссылку для интеграции на вашей странице поиска
 #Remote access through selected YaCy Peer==Удалённый доступ через выбранный узел YaCy
 #Advantages:==Преимущества:
 Always latest version of YaCy Search Widget==Всегда последняя версия виджета YaCy
-No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Нет AJAX/JSON перекрестных доменных запросов, так как виджет поиска и узел YaCy размещены на нескольких доменах.
+No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Нет AJAX/JSON кросс-доменных запросов, так как виджет поиска и узел YaCy размещены на нескольких доменах.
 Under certain cirumstances slower than static hosting==В определённых случаях работает медленнее, чем при размещении на постоянном хостинге.
 Just use the code snippet below and paste it any place in your own portal page==Вставьте приведённый ниже фрагмент кода в любое место на вашей странице поиска
 Please check if '\#\[ip\]\#:\#\[port\]\#' is appropriate or replace it with address of the YaCy Peer holding your index==Пожалуйста, проверьте правильность адреса '#[ip]#:#[port]#'. Если необходимо, то вы можете заменить его адресом вашего узла.
-A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
-This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
-#Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
-Just use the code snippet below and paste it any place in your own portal page==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld auf Ihrem eigenen Webportal zu verwenden.
-#Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
+A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Поле "живого" поиска реагирует сразу на вводимый запрос и может просто интегрироваться в вашу вэб-страницу.
+This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Эту функцию можно увидеть на всех страницах интерфейса YaCy (например, окно в верхнем правом углу)
+#Just use the code snippet below to integrate that in your own web pages==Используйте указанный ниже фрагмент кода, для интеграции на свою вэб-страницу
+Just use the code snippet below and paste it any place in your own portal page==Вставьте указанный ниже фрагмент кода в любое место на своей странице поиска 
+#Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Пожалуйста, проверьте правильность адреса указанного в примере '#[ip]#:#[port]#' и, если необходимо, измените на верный.
 #Code Snippet:==Фрагмент кода:
 #YaCy Portal Search==Поисковый портал YaCy
 "Search"=="Поиск"
@@ -692,13 +695,13 @@ url<==URL<
 #is a mandatory property - no default<==является обязательным свойством<
 #YaCy P2P Web Search==YaCy P2P Вэб-поиск
 Size and position \(width \| height \| position\)==Размер и положение \(ширина \| высота \| положение \)
-Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Специально где диалог должен быть показан. Возможные значения для позиционирования: \'центр\', \'слева\', \'справа\', \'сверху\', \'снизу\', или массив содержащий необходимую пару координат \(в пикселях от верхнего левого угла области просмотра\) или возможные строковые значения \(напр. \[\'right\',\'top\'\] для верхнего правого просмотра\)
+Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Указывает место отображения диалогового окна. Возможные значения для позиционирования: \'center\', \'left\', \'right\', \'top\', \'bottom\', или массив содержащий необходимую пару координат \(в пикселях от верхнего левого угла области просмотра\) или возможные строковые значения \(напр. \[\'right\',\'top\'\] для верхнего правого просмотра\)
 Animation effects \(show | hide\)==Анимационные эффекты \(показать | скрыть\)
-The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==Эффект будет использован. Возможные значения: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'размер', 'pulsate'.
+The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==Эффект будет использован. Возможные значения: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
 Interaction \(modal \| resizable\)==Взаимодействие (модальное | изменяемый размер)
-If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
-Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
-If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
+If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==Если модальное значение установлено как "true", то окно будет иметь модальное поведение; другие элементы на странице будут отключены.
+Modal dialogs create an overlay below the dialog but above other page elements.==Модальные окна создают наложение под диалоговом окном, но над другими элементами страницы.
+If resizable is set to true, the dialog will be resizeable.==Если значение изменяемости окна установлено как "true", то диалоговое окно будет изменяться.
 Load JavaScript load_js==Загружать JavaScript load_js
 Load Stylesheets load_css==Загружать таблицы стилей load_css
 This parameter is used for static hosting only.==Этот параметр используется только при постоянном хостинге.
@@ -758,7 +761,7 @@ deny remote search==запретить удалённый поиск
 #Load with a maximum of==Загрузить максимум
 #pages per minute==страниц в минуту (PPM)
 >Robinson Mode==>Режим Robinson
-If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Если выши узлы работают в режиме'Robinson', то вы можете запустить YaCy в качестве движка для собственного поискового портала, без обмена данными с другими узлами
+If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Если ваши узлы работают в режиме'Robinson', то вы можете запустить YaCy в качестве движка для собственного поискового портала, без обмена данными с другими узлами
 There is no index receive and no index distribution between your peer and any other peer==В случае выбора Robinson-кластеризации, приём и передача индекса между вашим и другими узлами будут отсутствовать
 In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==
 >Private Peer==>Частный узел
@@ -806,7 +809,7 @@ The search page may be customized.==Страница поиска может б�
 You can change the \'corporate identity\'-images, the greeting line==Вы можете изменить картинку фирменного логотипа, строку приветствия
 and a link to a home page that is reached when the \'corporate identity\'-images are clicked.==и ссылку на домашную страницу, которая будет доступна при нажатии на картинку фирменного логотипа.
 To change also colours and styles use the <a href=\"ConfigAppearance_p.html\">Appearance Servlet</a> for different skins and languages.==
-Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
+Изменить цвета и стили, языки и скины можно на <a href="ConfigAppearance_p.html">этой</a> странице.
 Greeting Line<==Строка приветствия<
 URL of Home Page<==Адрес домашней страницы<
 URL of a Small Corporate Image<==Адрес маленького логотипа<
@@ -822,7 +825,7 @@ NOCACHE: no use of web cache, load all snippets online==NOCACHE: не испол
 IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFRESH: использовать кэш, если он содержит более свежие данные. Иначе загружать фрагменты из сети
 IFEXIST: use the cache if the cache exist or load online==IFEXIST: использовать кэш или загружать из сети
 If verification fails, delete index reference==Если при проверке возникают ошибки, то удалите индекс ссылок
-CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet==CACHEONLY: не загружать фрагменты из сети, использовать только содержимое кэша. Если кэша нет, то данные загрузятся как есть. Фрагменты могут отсутствовать
+CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet==CACHEONLY: не загружать фрагменты из сети, использовать только содержимое кэша. Если кэша нет, то данные загрузятся как есть. Некоторые фрагменты могут отсутствовать
 FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE: нет проверки ссылок и нет загрузки фрагментов: все результаты поиска не проверяются
 Greedy Learning Mode=="Жадный" режим обучения
 load documents linked in search results, will be deactivated automatically when index size==Отображать в результатах поиска связанные документы. Может быть отключен автоматически при достижении размера индекса
@@ -861,7 +864,7 @@ set a remote user/password==установить пароль и имя удал
 to change this options.==, чтобы изменить эти опции.
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Страница поиска может быть интегрирована в ваш собственный сайт с использованием фрейма. Просто используйте следующий код:
 This would look like:==Это будет выглядить так:
-For a search page with a small header, use this code:==Для поиска страницы с небольшим заголовком используйте этот код:
+For a search page with a small header, use this code:==Для страницы поиска с небольшим заголовком используйте этот код:
 A third option is the interactive search. Use this code:==Третьим вариантом является интерактивный поиск. Используйте этот код:
 #-----------------------------
 
@@ -870,8 +873,8 @@ A third option is the interactive search. Use this code:==Третьим вар�
 Your Personal Profile==Ваш персональный профиль
 You can create a personal profile here, which can be seen by other YaCy-members==Вы можете создать персональный профиль в этом разделе, который может быть доступен другим участникам Yacy
 or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==или будет находиться <a href="ViewProfile.html?hash=localhash">в публичном доступе</a>, используя <a href="ViewProfile.rdf?hash=localhash">файл FOAF RDF</a>.
-Name==Ваше имя
-#Nick Name==Ваш ник
+>Name<==>Ваше имя<
+Nick Name==Ваше прозвище
 Homepage \(appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online\)==Домашная страница (отображается на каждой <a href="Supporter.html">поддерживаемой странице,</a> до тех пор, Ваш узел в онлайне).
 eMail==Электронная почта
 #ICQ==ICQ
@@ -936,12 +939,11 @@ Replace the word \"MySearch\" with your own message==Заменить слово
 Search Page<==Страница поиска<
 >Search Result Page Layout Configuration<==>Конфигурация макета страницы результатов поиска<
 Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Ниже приведён общий макет страницы результатов поиска. Отметьте компоненты, которые должны быть отображены.
-To change colors and styles use the ==Для изменения цветов, стилей используйте и выбора скинов используйте
->Appearance<==>меню<
+To change colors and styles use the ==Изменить цвета, стили и скины вы можете 
+>Appearance<==>здесь<
  menu for different skins.==.
 Other portal settings can be adjusted in==Другие настройки портала могут быть изменены на 
->Generic Search Portal<==>странице общего поиска<
-menu.=.
+>Generic Search Portal<==>странице интеграции поиска<
 >Page Template<==>Макет страницы<
 >Administration<==>Администрирование<
 >Web Search<==>Вэб-поиск<
@@ -963,7 +965,7 @@ menu.=.
 >Protocol Facet<==>Фильтр по протоколу<
 >Filetype Facet<==>Фильтр по типу файла<
 >Domain Facet<==>Фильтр по домену<
->Wiki Name Space Facet<==>Фильтрам по статьям Wiki<
+>Wiki Name Space Facet<==>Фильтр по статьям Wiki<
 >Language Facet<==>Фильтр по языку<
 >Author Facet<==>Фильтр по автору<
 >Vocabulary Facet<==>Фильтр по словарю<
@@ -1233,7 +1235,7 @@ Blacklist to use==Используется чёрный список
 
 #File: CrawlStartExpert_p.html
 #---------------------------
-Expert Crawl Start==Начать расширенное индексирование
+Expert Crawl Start==Расширенное индексирование
 Start Crawling Job:==Запустить индексирование:
 You can define URLs as start points for Web page crawling and start crawling here.==Здесь можете указать начальные ссылки и запустить индексирование.
 \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links.=="Индексирование" означает, что YaCy загрузит данные сайта, извлечёт все ссылки и загрузит содержимое по извлечённым ссылкам. 
@@ -1576,7 +1578,7 @@ from index==из индекса
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Поиск
 #kiosk mode==режим киоска
-"Search"=="Поиск"
+>Search<==>Поиск<
 Text==Текст
 Images==Изображения
 Audio==Аудио
@@ -3904,9 +3906,9 @@ Title==Заголовок
 #File: WatchWebStructure_p.html
 #---------------------------
 Web Structure<==Вэб-структура<
-The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
-With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
-With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
+The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Эти данные, также могут быть получены в виде XML-файла с перекрёстными ссылками между доменами.
+With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Указав параметр "GET" 'about' вы получите только перекрёстные ссылки о хосте, которые указан в поле 'about'.
+With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Указав параметр GET" 'latest'  вы получите список ссылок вычисленных во время текущей работы YaCy, обновляющийся при каждом следующем вызове.
 Click the API icon to see the XML file.==Нажмите на иконку API для просмотра XML-файла.
 To see a list of all APIs, please visit the==Для просмотра списка всех API, пожалуйста, посетите
 API wiki page==страницу API Wiki
@@ -4033,9 +4035,9 @@ Search Page==Страница поиска
 This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\" target=\"_blank\">opensearch</a> output.==Результат поиска может быть отправлен в RSS-ленту/<a href="http://www.opensearch.org">OpenSearch</a>.
 The query format is similar to==Формат запроса аналогичен
 SRU==SRU
-Click the API icon to see an example call to the search rss API.==Нажмите на иконку API для просмотра примера вызова API поиска RSS-ленты.
-To see a list of all APIs, please visit the==Список всех API, смотрите на странице
-API wiki page==Wiki API
+Click the API icon to see an example call to the search rss API.==Нажмите для просмотра примера вызова API поиска RSS-ленты.
+To see a list of all APIs, please visit the==Список всех API, смотрите на
+API wiki page==Wiki-странице API
 "Search"=="Поиск"
 'Search'=='Поиск'
 "search again"=="Искать ещё"
@@ -4046,42 +4048,51 @@ Video==Видео
 Applications==Приложения
 more options==Расширенный поиск...
 Illegal URL mask:==Недопустимый формат URL:
-\(not a valid regular expression\), mask ignored.==(Kein gültiger regulärer Ausdruck), Maske wurde ignoriert.
-Illegal prefer mask:==Ungültige bevorzugte Maske:
+\(not a valid regular expression\), mask ignored.==(неправильное регулярное выражение), фильтр игнорируется.
+Illegal prefer mask:==Недопустимый предпочтительный фильтр:
 Did you mean:==Возможно вы имели ввиду:
 The following words are stop-words and had been excluded from the search:==Следующие слова являются стоп-словами и были исключены из поиска:
 No Results.==Нет результатов.
 length of search words must be at least 2 characters==Длина искомого слова должно быть не менее 2 символов
-Searching the web with this peer is disabled for unauthorized users. Please==Die Websuche auf diesem Peer ist für nicht angemeldete Benutzer deaktiviert. Bitte
->log in<==>loggen Sie sich<
-as administrator to use the search function==als Administrator ein, um die Suchfunktion nutzen zu können.
-Location -- click on map to enlarge==Ort -- Auf die Karte klicken, um zu vergrößern
-Map \(c\) by <==Karte &copy; <
+Searching the web with this peer is disabled for unauthorized users. Please==Поиск с помощью этого узла невозможен для неавторизованных пользователей. Пожалуйста, 
+>log in<==>войдите<
+as administrator to use the search function==под своей учётной записью, для использования поиска.
+Location -- click on map to enlarge==Местоположение -- Нажмите на карту для увеличения
+Map \(c\) by <==Карта (с) <
 #>OpenStreetMap<==>OpenStreetMap<
-and contributors, CC-BY-SA==und Mitwirkenden, CC-BY-SA Lizenz
->Media<==>Medium<
+and contributors, CC-BY-SA==и участники, лицензия CC-BY-SA
+>Media<==>Медиа<
 #>URL<==>URL-адрес<
 > of==> из 
 g> local,==g> локально,
-#g> remote),==g> удалённо),
+#g> remote),==g> удалённо,
 > from==> из
 remote YaCy peers.==удалённых узлов YaCy.
+>search<==>Поиск<
 #-----------------------------
 
 #File: yacysearchitem.html
 #---------------------------
-"bookmark"=="закладка"
-"recommend"=="рекомендовать"
-"delete"=="удалить"
+"bookmark"=="Добавить в закладки"
+"recommend"=="Рекомендовать"
+"delete"=="Удалить"
 Pictures==Изображения
 #-----------------------------
 
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "\#\[query\]\#" on map==Показать результат поиска "#[query]#" на карте
->Domain Facet==>Навигатор по доменам
->Name Space Facet==>Навигатор по имени
->Author Facet==>Навигатор по автору
+>Domain Facet==>Фильтр по доменам
+>Name Space Facet==>Фильтр по имени
+>Author Facet==>Фильтр по автору
+>Protocol Facet==>Фильтр по протоколу
+>Filetype Facet==>Фильтр по типу файла
+Your search is done using peers in the YaCy P2P network. You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.==Ваш поиск выполняется с использованием узлов P2P-сети YaCy. Вы можете перейти в "Скрытый режим", который отключит использование P2P, но обеспечит вашу полную анонимность. В этом случае результатов поиска будет меньше, потому что поиск будет осуществляться только в локальном индексе.
+Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.==Ваш поиск выполняется только в вашем локальном индексе. Вы можете перейти в режим "P2P", который позволит производить поиск с использованием  других узлов сети YaCy.
+>Please support YaCy!<==>Пожалуйста, поддержите YaCy!<
+>Peer-to-Peer<==>P2P<
+>Stealth&nbsp;Mode<==>Режим&nbsp;стелс<
+"Privacy"=="Частный"
 #-----------------------------
 
 ### Subdirectory api ###
@@ -4145,7 +4156,7 @@ Integrated Search Configuration==Настройка интегрируемого
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
 Crawler / Harvester==Индексирование / Сканер сети
-Creation Monitor==Монитор индексирования
+Crawler Monitor==Монитор индексирования
 Index Administration==Управление индексом
 Filter &amp; Blacklists==Фильтр и чёрный список
 Content Semantic==Семантический контент
@@ -4169,9 +4180,9 @@ Confirm Shutdown==Подтвердите выключение
 Project Wiki<==Wiki‐сайт проекта<
 Git Repository==Git-репозиторий
 Bugtracker==Багтрэкер
-YaCy Statistics==Статистика YaCy
+Peer Statistics==Статистика YaCy
 external==
-Search...==Поиск...
+>Search...<==>Поиск...<
 #-----------------------------
 
 #File: env/templates/simpleheader.template
@@ -4196,7 +4207,7 @@ About This Page==Ваш профиль
 external==
 Bugtracker==Багтрэкер
 Git Repository==Git-репозиторий
-YaCy Statistics==Статистика YaCy
+Peer Statistics==Статистика YaCy
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template
@@ -4342,7 +4353,7 @@ Start a Web Crawl==Запуск вэб-индексатора
 Crawl Profile Editor==Изменение профиля индексатора
 Crawler Queues==Очереди индексатора
 Indexing<==Индексирование<
-Full Site Crawl/ Sitemap Loader==Полное индексирование сайта/Загрузка карты сайта
+Full Site Crawl/ Sitemap Loader==Индексирование сайта/Загрузка карты сайта
 Loader<==Загрузчик<
 URLs to be processed==выполняются URL-адреса
 Processing Queues==Состояние очередей
@@ -4357,7 +4368,7 @@ Media Crawl Queues==Очереди индексирования медиа-фа�
 #--- New menu items ---
 Index Creation==Создание индекса
 Crawler/Spider<==Индексатор<
-Crawl Start (Expert)==Запуск расширенного индексирования
+Crawl Start \(Expert\)==Расширенное индексирование
 Network Scanner==Сканер сети
 #>Intranet<br/>Scanner<==>Сканер<br/>Интранет<
 Crawling of MediaWikis==Индексирование MediaWiki
