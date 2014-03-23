@@ -822,7 +822,7 @@ search.result.show.tags = false
 # search navigators: comma-separated list of default values for search navigation.
 # can be temporary different if search string is given with differen navigation values
 # assigning no value(s) means that no navigation is shown
-search.navigation=location,hosts,authors,namespace,topics,filetype,protocol
+search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language
 
 # search result verification and snippet fetch caching rules
 # each search result can be verified byloading the link from the web
