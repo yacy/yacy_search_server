@@ -15,7 +15,7 @@
         <input name="query" placeholder="Search..." class="form-control" type="text" size="36" maxlength="200" value=""/>
         <input type="hidden" name="verify" value="cacheonly" />
         <input type="hidden" name="maximumRecords" value="10" />
-        <input type="hidden" name="resource" value="local" />
+        <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="nav" value="all" />
