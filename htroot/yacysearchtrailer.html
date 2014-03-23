@@ -39,13 +39,29 @@
 
 #(searchdomswitches)#::<p>
 <div class="btn-group btn-group-justified">
-  #(searchtext)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='text';document.searchform.submit();"::#(/check)#>Text</button></div>#(/searchtext)#
-  #(searchimage)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='image';document.searchform.submit();"::#(/check)#>Images</button></div>#(/searchimage)#
-  #(searchaudio)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='audio';document.searchform.submit();"::#(/check)#>Audio</button></div>#(/searchaudio)#
-  #(searchvideo)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='video';document.searchform.submit();"::#(/check)#>Video</button></div>#(/searchvideo)#
-  #(searchapp)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='app';document.searchform.submit();"::#(/check)#>Apps</button></div>#(/searchapp)#
+  #(searchtext)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='text';document.searchform.submit();"::#(/check)#>Documents</button></div>#(/searchtext)#
+  #(searchimage)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='image';document.searchform.submit();"::#(/check)#>Images</button></div>#(/searchimage)#
+  #(searchaudio)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='audio';document.searchform.submit();"::#(/check)#>Audio</button></div>#(/searchaudio)#
+  #(searchvideo)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='video';document.searchform.submit();"::#(/check)#>Video</button></div>#(/searchvideo)#
+  #(searchapp)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='app';document.searchform.submit();"::#(/check)#>Apps</button></div>#(/searchapp)#
 </div>
 </p>#(/searchdomswitches)#
+
+<p>
+<div class="btn-group btn-group-justified">
+  <div class="btn-group btn-group-xs"><button type="button" id="sort_button_context" class="btn btn-default" onclick="document.getElementById('search').value=document.getElementById('search').value.replace(' /date','');document.searchform.submit();">Context Ranking</button></div>
+  <div class="btn-group btn-group-xs"><button type="button" id="sort_button_date" class="btn btn-default" onclick="document.getElementById('search').value=document.getElementById('search').value + ' /date';document.searchform.submit();">Sort by Date</button></div>
+</div>
+<script>
+  if (document.getElementById('search').value.indexOf(" /date") == -1) {
+	document.getElementById("sort_button_context").setAttribute("class","btn btn-default active");
+	document.getElementById("sort_button_context").setAttribute("onclick","");
+  } else {
+	document.getElementById("sort_button_date").setAttribute("class","btn btn-default active");
+	document.getElementById("sort_button_date").setAttribute("onclick","");
+  }
+</script>
+</p>
 
 #(cat-location)#::
 <a href="yacysearch_location.html?query=#[queryenc]#">
