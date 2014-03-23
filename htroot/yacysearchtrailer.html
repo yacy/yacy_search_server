@@ -13,7 +13,8 @@
   data-label-text="Privacy"
   data-on-text="<span style='padding:0 20px 0 20px;'>Peer-to-Peer</span>"
   data-off-text="<span style='padding:0 20px 0 20px;'>Stealth&nbsp;Mode</span>"
-  type="checkbox" name="resource-switch" value="local" data-size="large" style="width:100%"
+  data-on-color="warning" data-off-color="success"
+  type="checkbox" name="resource-switch" value="local" data-size="large"
   onchange="document.getElementById('resource').value='local';document.searchform.submit();">
 <script>$("[name='resource-switch']").bootstrapSwitch();</script>
 </form>
@@ -26,7 +27,8 @@
   data-label-text="Privacy"
   data-on-text="<span style='padding:0 20px 0 20px';>Peer-to-Peer</span>"
   data-off-text="<span style='padding:0 20px 0 20px;'>Stealth&nbsp;Mode</span>"
-  type="checkbox" name="resource-switch" value="global" data-size="large" style="width:100%"
+  data-on-color="warning" data-off-color="success"
+  type="checkbox" name="resource-switch" value="global" data-size="large"
   onchange="document.getElementById('resource').value='global';document.searchform.submit();">
 <script>$("[name='resource-switch']").bootstrapSwitch();</script>
 </form>
@@ -34,6 +36,16 @@
 <span>Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.</span>
 -->
 #(/resource-select)#
+
+#(searchdomswitches)#::<p>
+<div class="btn-group btn-group-justified">
+  #(searchtext)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='text';document.searchform.submit();"::#(/check)#>Text</button></div>#(/searchtext)#
+  #(searchimage)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='image';document.searchform.submit();"::#(/check)#>Images</button></div>#(/searchimage)#
+  #(searchaudio)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='audio';document.searchform.submit();"::#(/check)#>Audio</button></div>#(/searchaudio)#
+  #(searchvideo)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='video';document.searchform.submit();"::#(/check)#>Video</button></div>#(/searchvideo)#
+  #(searchapp)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)#onclick="document.getElementById('contentdom').value='app';document.searchform.submit();"::#(/check)#>Apps</button></div>#(/searchapp)#
+</div>
+</p>#(/searchdomswitches)#
 
 #(cat-location)#::
 <a href="yacysearch_location.html?query=#[queryenc]#">

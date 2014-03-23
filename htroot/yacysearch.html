@@ -93,20 +93,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
        <button id="Enter" class="btn btn-default" type="submit">search</button>
     </div>
   </div>
-        
-    <!-- 
-    #(searchdomswitches)#::
-    <div class="yacysearch">
-	    #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;#(/searchtext)#
-	    #(searchimage)#::<input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# />&nbsp;Images&nbsp;&nbsp;#(/searchimage)#
-	    #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;#(/searchaudio)#
-	    #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;#(/searchvideo)#
-	    #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications#(/searchapp)#
-        &nbsp;
-        <a href="index.html?searchoptions=2&amp;count=#[count]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#&amp;meanCount=#[meanCount]#">more options</a>
-    </div>
-    #(/searchdomswitches)#
-    -->
+    <input type="hidden" name="contentdom" id="contentdom" value="#[contentdom]#" />
     <input type="hidden" name="former" value="#[former]#" />
     <input type="hidden" name="maximumRecords" value="#[count]#" />
     <input type="hidden" name="startRecord" id="startRecord" value="0" />
@@ -118,7 +105,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <input type="hidden" name="cat" value="#[cat]#" />
     <input type="hidden" name="constraint" value="#[constraint]#" />
     <input type="hidden" name="meanCount" value="#[meanCount]#" />
-  
 </form>
 
 <!-- type the number of results and navigation bar -->

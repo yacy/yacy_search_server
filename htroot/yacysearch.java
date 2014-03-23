@@ -264,8 +264,7 @@ public class yacysearch {
         }
 
         // find search domain
-        final Classification.ContentDomain contentdom =
-            ContentDomain.contentdomParser(post == null ? "all" : post.get("contentdom", "all"));
+        final Classification.ContentDomain contentdom = ContentDomain.contentdomParser(post == null ? "all" : post.get("contentdom", "all"));
 
         // patch until better search profiles are available
         if (contentdom == ContentDomain.IMAGE && (itemsPerPage == 10 || itemsPerPage == 100)) {
@@ -835,12 +834,7 @@ public class yacysearch {
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
             }
             prop.put("results", theQuery.itemsPerPage());
-            prop
-                .put(
-                    "resultTable",
-                    (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO)
-                        ? 1
-                        : 0);
+            prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
             prop.put("eventID", theQuery.id(false)); // for bottomline
 
             // process result of search
@@ -881,33 +875,6 @@ public class yacysearch {
             "search.navigation",
             (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
         prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
-        prop.put(
-            "searchdomswitches",
-            sb.getConfigBool("search.text", true)
-                || sb.getConfigBool("search.audio", true)
-                || sb.getConfigBool("search.video", true)
-                || sb.getConfigBool("search.image", true)
-                || sb.getConfigBool("search.app", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT || contentdom == ContentDomain.ALL) ? "1" : "0");
-        prop.put("searchdomswitches_searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
-        prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
-        prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
-        prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
-
-        // copy properties for "more options" link
-        prop.put("searchdomswitches_count", prop.get("count"));
-        prop.put("searchdomswitches_urlmaskfilter", prop.get("urlmaskfilter"));
-        prop.put("searchdomswitches_prefermaskfilter", prop.get("prefermaskfilter"));
-        prop.put("searchdomswitches_cat", prop.get("cat"));
-        prop.put("searchdomswitches_constraint", prop.get("constraint"));
-        prop.put("searchdomswitches_contentdom", prop.get("contentdom"));
-        prop.put("searchdomswitches_former", prop.get("former"));
-        prop.put("searchdomswitches_meanCount", prop.get("meanCount"));
 
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);

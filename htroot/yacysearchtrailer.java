@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
@@ -68,7 +69,6 @@ public class yacysearchtrailer {
         boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
         boolean stealthmode = p2pmode && !global;
         prop.put("resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
-        
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
@@ -78,7 +78,24 @@ public class yacysearchtrailer {
         final RequestHeader.FileType fileType = header.fileType();
 
         // compose search navigation
-        
+        ContentDomain contentdom = theSearch.getQuery().contentdom;
+        prop.put("searchdomswitches",
+            sb.getConfigBool("search.text", true)
+                || sb.getConfigBool("search.audio", true)
+                || sb.getConfigBool("search.video", true)
+                || sb.getConfigBool("search.image", true)
+                || sb.getConfigBool("search.app", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT || contentdom == ContentDomain.ALL) ? "1" : "0");
+        prop.put("searchdomswitches_searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
+        prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
+        prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
+        prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
+
         // namespace navigators
         String name;
         int count;
