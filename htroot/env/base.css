@@ -1031,7 +1031,10 @@ div#info:hover span {
   border: 1px dashed black;
   z-index: 100;
  }
- 
+
+div#tagcloud {
+	line-height:16px;
+}
 
 .info span {
   display: none;

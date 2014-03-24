@@ -247,7 +247,7 @@ p.url a {
 #tagcloud {
 	margin: 10px 10px 10px 7px; /* top right bottom left */
 	text-align: justify;
-	line-height: 1.2em;
+	line-height: 0.9;
 }
 #topwords {
 	max-height: 160px;
