@@ -161,14 +161,18 @@ public class Switchboard {
      * @param propFile
      */
     public static void load(File propFile) {
+        FileInputStream fis = null;
         try {
-            properties.load(new FileInputStream(propFile));
+            fis = new FileInputStream(propFile);
+            properties.load(fis);
         } catch (final FileNotFoundException e1) {
             log.info("error: file dispatcher.properties does not exist. Exit");
             System.exit(-1);
         } catch (final IOException e1) {
             log.info("error: file dispatcher.properties cannot be readed. Exit");
             System.exit(-1);
+        } finally {
+            if (fis != null) try { fis.close(); } catch (IOException ex) { }
         }
     }
     
