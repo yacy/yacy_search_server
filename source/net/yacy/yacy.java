@@ -538,8 +538,9 @@ public final class yacy {
         if (configFile.exists()) {
             Properties p = new Properties();
             try {
-                p.load(new FileInputStream(configFile));
-                
+                FileInputStream fis = new FileInputStream(configFile);
+                p.load(fis);
+                fis.close();
                 // Test for server access restriction (is implemented using Jetty IPaccessHandler which does not support IPv6
                 // try to disavle IPv6 
                 String teststr = p.getProperty("serverClient", "*");

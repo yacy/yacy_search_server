@@ -69,6 +69,8 @@ public class KeyList implements Iterable<String> {
                 }
             } catch (final IOException e) {
                 // finish
+            } finally {
+                reader.close();
             }
         }
 

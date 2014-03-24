@@ -91,6 +91,8 @@ public class WordCache {
                 }
             } catch (final IOException e) {
                 // finish
+            } finally {
+                reader.close();
             }
         }
 
