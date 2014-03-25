@@ -240,22 +240,26 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         // handle international domains
         if (!Punycode.isBasic(this.host)) try {
-            final String[] domainParts = CommonPattern.DOT.split(this.host, 0);
-            final StringBuilder buffer = new StringBuilder(80);
-            // encode each domain-part separately
-            for(int i = 0; i < domainParts.length; i++) {
-                final String part = domainParts[i];
-                if (!Punycode.isBasic(part)) {
-                    buffer.append("xn--").append(Punycode.encode(part));
-                } else {
-                    buffer.append(part);
-                }
-                if (i != domainParts.length-1) {
-                    buffer.append('.');
-                }
-            }
-            this.host = buffer.toString();
+            this.host = toPunycode(this.host);
         } catch (final PunycodeException e) {}
+    }
+
+    public static String toPunycode(final String host) throws PunycodeException {
+        final String[] domainParts = CommonPattern.DOT.split(host, 0);
+        final StringBuilder buffer = new StringBuilder(80);
+        // encode each domain-part separately
+        for(int i = 0; i < domainParts.length; i++) {
+            final String part = domainParts[i];
+            if (!Punycode.isBasic(part)) {
+                buffer.append("xn--").append(Punycode.encode(part));
+            } else {
+                buffer.append(part);
+            }
+            if (i != domainParts.length-1) {
+                buffer.append('.');
+            }
+        }
+        return buffer.toString();
     }
 
     public static final boolean isHTTP(final String s) { return s.startsWith("http://"); }

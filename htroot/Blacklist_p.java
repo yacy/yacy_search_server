@@ -34,6 +34,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jetty.util.log.Log;
+
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -48,13 +51,16 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class Blacklist_p {
+    
+    /** Used for logging. */
+    private static final String APP_NAME = "Blacklist";
+    
     private final static String EDIT             = "edit_";
     private final static String DISABLED         = "disabled_";
     private final static String BLACKLIST        = "blackLists_";
     private final static String BLACKLIST_MOVE   = "blackListsMove_";
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
-
-
+    
     public static serverObjects respond(final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
         // load all blacklist files located in the directory
@@ -134,7 +140,7 @@ public class Blacklist_p {
 
                 final File blackListFile = new File(ListManager.listsPath, blacklistToUse);
                 if(!blackListFile.delete()) {
-                    ConcurrentLog.warn("Blacklist", "file "+ blackListFile +" could not be deleted!");
+                    ConcurrentLog.warn(APP_NAME, "file "+ blackListFile +" could not be deleted!");
                 }
 
                 for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
@@ -551,7 +557,7 @@ public class Blacklist_p {
 
         // ignore empty entries
         if(newEntry == null || newEntry.isEmpty()) {
-            ConcurrentLog.warn("Blacklist", "skipped adding an empty entry");
+            ConcurrentLog.warn(APP_NAME, "skipped adding an empty entry");
             return "";
         }
 
@@ -582,7 +588,11 @@ public class Blacklist_p {
         
         for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
         	if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",blacklistToUse)) {
-            	Switchboard.urlBlacklist.add(supportedBlacklistType, blacklistToUse, host, path);
+            	try {
+                    Switchboard.urlBlacklist.add(supportedBlacklistType, blacklistToUse, host, path);
+                } catch (PunycodeException e) {
+                    ConcurrentLog.warn(APP_NAME, "Unable to add blacklist entry to blacklist " + supportedBlacklistType, e);
+                }
             }
         }
         

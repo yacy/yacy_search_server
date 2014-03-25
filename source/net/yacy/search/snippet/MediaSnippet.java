@@ -27,7 +27,6 @@ package net.yacy.search.snippet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +57,6 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
 
-@SuppressWarnings("unused")
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
     public ContentDomain type;
     public DigestURL href, source;
@@ -249,24 +247,24 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     }
 
     /**
-     * Checks wether given URL is in blacklist for given blacklist type
-     *
-     * @param   url     The URL to check
-     * @param   blacklistType   Type of blacklist (see class Blacklist, BLACKLIST_FOO)
-     * @return  isBlacklisted   Wether the given URL is blacklisted
+     * Checks whether given URL is in blacklist for given blacklist type
+     * 
+     * @param url
+     *            The URL to check
+     * @param blacklistType
+     *            Type of blacklist (see class Blacklist, BLACKLIST_FOO)
+     * @return isBlacklisted Whether the given URL is blacklisted
      */
     private static boolean isUrlBlacklisted (final BlacklistType blacklistType, final DigestURL url) {
-        // Default is not blacklisted
-        boolean isBlacklisted = false;
 
-        // check if url is in blacklist
-        if (Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
+        final boolean isBlacklisted = Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
+
+        if (isBlacklisted) {
+            
             Switchboard.getSwitchboard().crawlQueues.errorURL.push(url, null, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             ConcurrentLog.fine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
-            isBlacklisted = true;
         }
 
-        // Return result
         return isBlacklisted;
     }
 

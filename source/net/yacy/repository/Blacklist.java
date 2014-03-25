@@ -46,6 +46,9 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.document.id.Punycode;
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
@@ -301,11 +304,22 @@ public class Blacklist {
         }
     }
     
-    public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) {
-    	if (contains(blacklistType, host, path)) {
+    /**
+     * 
+     * @param blacklistType
+     * @param blacklistToUse
+     * @param host
+     * @param path
+     * @throws PunycodeException
+     */
+    public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) throws PunycodeException {
+    	
+        final String safeHost = Punycode.isBasic(host) ? host : MultiProtocolURL.toPunycode(host);
+        
+        if (contains(blacklistType, safeHost, path)) {
     		return;
     	}
-        if (host == null) {
+        if (safeHost == null) {
             throw new IllegalArgumentException("host may not be null");
         }
         if (path == null) {
@@ -316,7 +330,7 @@ public class Blacklist {
         final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
         // avoid PatternSyntaxException e
-        final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+        final String h = ((!isMatchable(safeHost) && !safeHost.isEmpty() && safeHost.charAt(0) == '*') ? "." + safeHost : safeHost).toLowerCase();
         if (!p.isEmpty() && p.charAt(0) == '*') {
             p = "." + p;
         }
@@ -356,13 +370,14 @@ public class Blacklist {
     }
 
     /**
-     * appends a entry to the backlist source file
+     * appends aN entry to the backlist source file.
      * 
      * @param blacklistSourcefile name of the blacklist file (LISTS/*.black)
      * @param host host or host pattern
      * @param path path or path pattern
+     * @throws PunycodeException 
      */
-    public final void add (final String blacklistSourcefile, final String host, final String path) {
+    public final void add (final String blacklistSourcefile, final String host, final String path) throws PunycodeException {
         // TODO: check sourcefile synced with cache.ser files ?
         if (host == null) {
             throw new IllegalArgumentException("host may not be null");
@@ -374,7 +389,10 @@ public class Blacklist {
         String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
 
         // avoid PatternSyntaxException e
-        final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+        String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+        
+        h = Punycode.isBasic(h) ? h : MultiProtocolURL.toPunycode(h);
+        
         if (!p.isEmpty() && p.charAt(0) == '*') {
             p = "." + p;
         }

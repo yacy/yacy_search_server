@@ -36,6 +36,7 @@ import java.util.Set;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
@@ -54,6 +55,9 @@ import net.yacy.utils.nxTools;
 
 public class CrawlResults {
 
+    /** Used for logging. */
+    private static final String APP_NAME = "PLASMA";
+    
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -139,7 +143,12 @@ public class CrawlResults {
                     
                     // handle addtoblacklist
                     if (post.containsKey("delandaddtoblacklist")) {
-                       Switchboard.urlBlacklist.add(selectedblacklist, domain, ".*");
+                       try {
+                        Switchboard.urlBlacklist.add(selectedblacklist, domain, ".*");
+                    } catch (PunycodeException e) {
+                        ConcurrentLog.warn(APP_NAME, "Unable to add blacklist entry to blacklist " + selectedblacklist, e);
+                        
+                    }
                     }
                 }
             }
@@ -204,7 +213,7 @@ public class CrawlResults {
                         urle = sb.index.fulltext().getMetadata(urlhash);
                     }
                     if (urle == null) {
-                        ConcurrentLog.warn("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
+                        ConcurrentLog.warn(APP_NAME, "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
                         urltxt = null;
                         continue;
@@ -291,7 +300,7 @@ public class CrawlResults {
                     dark = !dark;
                     cnt++;
                 } catch (final Exception e) {
-                    ConcurrentLog.severe("PLASMA", "genTableProps", e);
+                    ConcurrentLog.severe(APP_NAME, "genTableProps", e);
                 }
             }
             prop.put("table_indexed", cnt);
@@ -331,9 +340,6 @@ public class CrawlResults {
                 prop.put("table_blacklists", blacklistCount);
             }           
         }
-                
-
-        
 
         prop.put("process", tabletype.getCode());
         // return rewrite properties

@@ -35,6 +35,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -70,6 +71,8 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class IndexControlRWIs_p {
+    
+    private static final String APP_NAME = "IndexControlRWIs_p";
 
     private final static String errmsg = "not possible to compute word from hash";
 
@@ -381,11 +384,17 @@ public class IndexControlRWIs_p {
 					            if ( ListManager.listSetContains(
 					                supportedBlacklistType + ".BlackLists",
 					                blacklist) ) {
-					                Switchboard.urlBlacklist.add(
-					                    BlacklistType.valueOf(supportedBlacklistType),
-					                    blacklist,
-					                    url.getHost(),
-					                    url.getFile());
+					                try {
+                                        Switchboard.urlBlacklist.add(
+                                            BlacklistType.valueOf(supportedBlacklistType),
+                                            blacklist,
+                                            url.getHost(),
+                                            url.getFile());
+                                    } catch (PunycodeException e) {
+                                        ConcurrentLog.warn(APP_NAME,
+                                                        "Unable to add blacklist entry to blacklist "
+                                                                        + supportedBlacklistType, e);
+                                    }
 					            }
 					        }
 					        SearchEventCache.cleanupEvents(true);
@@ -408,11 +417,17 @@ public class IndexControlRWIs_p {
 					            if ( ListManager.listSetContains(
 					                supportedBlacklistType + ".BlackLists",
 					                blacklist) ) {
-					                Switchboard.urlBlacklist.add(
-					                    supportedBlacklistType,
-					                    blacklist,
-					                    url.getHost(),
-					                    ".*");
+					                try {
+                                        Switchboard.urlBlacklist.add(
+                                            supportedBlacklistType,
+                                            blacklist,
+                                            url.getHost(),
+                                            ".*");
+                                    } catch (PunycodeException e) {
+                                        ConcurrentLog.warn(APP_NAME,
+                                                        "Unable to add blacklist entry to blacklist "
+                                                                        + supportedBlacklistType, e);
+                                    }
 					            }
 					        }
 					    }
