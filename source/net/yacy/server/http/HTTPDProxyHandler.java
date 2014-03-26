@@ -278,7 +278,7 @@ public final class HTTPDProxyHandler {
             sb.proxyLastAccess = System.currentTimeMillis();
 
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
-            countedRespond = new ByteCountOutputStream(respond,((String) conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE)).length() + 2,"PROXY");
+            countedRespond = new ByteCountOutputStream(respond, "PROXY");
 
             final String ip   = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
 
@@ -990,13 +990,11 @@ public final class HTTPDProxyHandler {
                 }
             } else {
                 if (unknownError) {
-                    log.severe("Unknown Error while processing request '" +
-                            conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE) + "':" +
+                    log.severe("Unknown Error while processing request 'PROXY':" +
                             "\n" + Thread.currentThread().getName() +
                             "\n" + errorMessage,e);
                 } else {
-                    log.warn("Error while processing request '" +
-                            conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE) + "':" +
+                    log.warn("Error while processing request 'PROXY':" +
                             "\n" + Thread.currentThread().getName() +
                             "\n" + errorMessage);
                 }

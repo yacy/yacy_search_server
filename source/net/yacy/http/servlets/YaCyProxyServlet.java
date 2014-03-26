@@ -134,7 +134,6 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
             prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
             prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
-            prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
             prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
             yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
@@ -177,12 +176,11 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                 response.addHeader(HeaderFramework.LOCATION, location);
             }
 
-            //final String mimeType = outgoingHeader.getContentType();
             final String mimeType = outgoingHeader.getContentType();
             if ((mimeType != null) && (mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
                 final StringWriter buffer = new StringWriter();
 
-                if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
+                if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && outgoingHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
                     FileUtils.copy(new ChunkedInputStream(proxyout), buffer, UTF8.charset);
                 } else {
                     FileUtils.copy(proxyout, buffer, UTF8.charset);
@@ -345,10 +343,6 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
     @Override
     protected HttpURI proxyHttpURI(HttpServletRequest request, String uri) throws MalformedURLException {
         String strARGS = request.getQueryString();
-        if (strARGS.startsWith("action=")) {
-            int detectnextargument = strARGS.indexOf("&");
-            strARGS = strARGS.substring(detectnextargument + 1);
-        }
         if (strARGS.startsWith("url=")) {
             final String strUrl = strARGS.substring(4); // strip url=
 

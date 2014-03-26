@@ -458,11 +458,6 @@ public final class HTTPDemon {
                     !responseHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
                     responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0");
 
-                // adding some yacy specific headers
-                responseHeader.put(HeaderFramework.X_YACY_KEEP_ALIVE_REQUEST_COUNT,(String) conProp.get(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT));
-                responseHeader.put(HeaderFramework.X_YACY_ORIGINAL_REQUEST_LINE,(String) conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE));
-                //responseHeader.put(HeaderFramework.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(HeaderFramework.CONNECTION_PROP_PREV_REQUESTLINE));
-
                 //read custom headers
                 final Iterator<ResponseHeader.Entry> it = responseHeader.getAdditionalHeaderProperties().iterator();
                 ResponseHeader.Entry e;
