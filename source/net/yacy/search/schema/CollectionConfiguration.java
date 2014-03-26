@@ -1161,7 +1161,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
-                        if (tagtype == ProcessType.CLICKDEPTH) {
+                        if (tagtype == ProcessType.CLICKDEPTH && collection.contains(CollectionSchema.clickdepth_i)) {
                             if (postprocessing_clickdepth(clickdepthCache, sid, url, CollectionSchema.clickdepth_i, 100)) proccount_clickdepthchange++;
                         }
 

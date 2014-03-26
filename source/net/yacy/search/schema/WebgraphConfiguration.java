@@ -208,9 +208,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
             add(edge, WebgraphSchema.source_path_folders_sxt, paths);
         }
-        if (this.contains(WebgraphSchema.source_clickdepth_i) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+        if ((allAttr || contains(WebgraphSchema.source_clickdepth_i)) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
             add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
-            if (clickdepth_source < 0 || clickdepth_source > 1) processTypes.add(ProcessType.CLICKDEPTH);
+            processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
         }
         
         // add the source attributes about the target
@@ -276,16 +276,14 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             add(edge, WebgraphSchema.target_path_folders_sxt, paths);
         }
 
-        if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
-            if ((allAttr || contains(WebgraphSchema.target_clickdepth_i))) {
-                if (target_url.probablyRootURL()) {
-                    boolean lc = this.lazy; this.lazy = false;
-                    add(edge, WebgraphSchema.target_clickdepth_i, 0);
-                    this.lazy = lc;
-                } else {
-                    add(edge, WebgraphSchema.target_clickdepth_i, 999);
-                    processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
-                }
+        if ((allAttr || contains(WebgraphSchema.target_clickdepth_i)) && this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
+            if (target_url.probablyRootURL()) {
+                boolean lc = this.lazy; this.lazy = false;
+                add(edge, WebgraphSchema.target_clickdepth_i, 0);
+                this.lazy = lc;
+            } else {
+                add(edge, WebgraphSchema.target_clickdepth_i, 999);
+                processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
             }
         }
         
