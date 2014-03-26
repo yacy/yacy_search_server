@@ -1810,7 +1810,7 @@ Dump and Restore of Solr Index==Создание дампа и восстано�
 "Create Dump"=="Создать дамп"
 Dump File==Файл дампа
 "Restore Dump"=="Восстановить дамп"
-Optimize Solr==Оптимизация базы Solr
+>Optimize Solr<==>Оптимизация базы Solr<
 merge to max. <==Объединить максимум в<
 > segments==>сегментов
 "Optimize Solr"=="Оптимизировать"
@@ -2580,7 +2580,7 @@ indexer delay \(milliseconds\) after case occurency==Задержка индек
 Proxy:==Прокси:
 Local Search:==Локальный поиск:
 Remote Search:==Удалённый поиск:
-"Enter New Parameters"=="Введите новые параметры"
+"Enter New Parameters"=="Сохранить"
 #-----------------------------
 
 #File: PerformanceMemory_p.html
