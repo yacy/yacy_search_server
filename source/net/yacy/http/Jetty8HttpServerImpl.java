@@ -52,6 +52,7 @@ import net.yacy.utils.PKCS12Tool;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ConnectHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
@@ -158,16 +159,18 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] 
-           {domainHandler, new ProxyCacheHandler(), new ProxyHandler()}); 
+           {domainHandler, new ProxyCacheHandler(), new ProxyHandler(), new ConnectHandler()}); 
 
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         ContextHandler context = new ContextHandler();
+        context.setServer(server);
         context.setContextPath("/");
         context.setHandler(handlers);
 
         // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
         ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
+        allrequesthandlers.setServer(server);
         allrequesthandlers.addHandler(context);
         allrequesthandlers.addHandler(htrootContext);    
         allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
@@ -183,7 +186,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         htrootContext.setSecurityHandler(securityHandler);
 
         // wrap all handlers
-        Handler crashHandler = new CrashProtectionHandler(allrequesthandlers);
+        Handler crashHandler = new CrashProtectionHandler(server, allrequesthandlers);
         // check server access restriction and add IPAccessHandler if restrictions are needed
         // otherwise don't (to save performance)
         String white = sb.getConfig("serverClient", "*");
@@ -198,6 +201,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
             }          
             if (i > 0) {
                 iphandler.addWhite("127.0.0.1"); // allow localhost (loopback addr)
+                iphandler.setServer(server);
                 iphandler.setHandler(crashHandler);
                 server.setHandler(iphandler);
                 ConcurrentLog.info("SERVER","activated IP access restriction to: [127.0.0.1," + white +"] (this works only correct with start parameter -Djava.net.preferIPv4Stack=true)");

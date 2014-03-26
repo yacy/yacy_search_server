@@ -146,8 +146,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		sb.proxyLastAccess = System.currentTimeMillis();
 
         if (request.getMethod().equalsIgnoreCase(HeaderFramework.METHOD_CONNECT)) {
-            handleConnect(request, response);
-            return;
+            // will be done by the ConnectHandler
+        	return;
         }
         
         RequestHeader proxyHeaders = convertHeaderFromJetty(request);
@@ -299,44 +299,4 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         HTTPDProxyHandler.proxyLog.fine(logMessage.toString());
 
     }
-    
-    public void handleConnect(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // taken from Jetty ProxyServlet                
-        String uri = request.getRequestURI();
-
-        String port = "";
-        String host = "";
-
-        int c = uri.indexOf(':');
-        if (c >= 0) {
-            port = uri.substring(c + 1);
-            host = uri.substring(0, c);
-            if (host.indexOf('/') > 0) {
-                host = host.substring(host.indexOf('/') + 1);
-}
-        }
-
-        // TODO - make this async!
-        InetSocketAddress inetAddress = new InetSocketAddress(host, Integer.parseInt(port));
-
-        // if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
-        // {
-        // sendForbid(request,response,uri);
-        // }
-        // else
-        {
-            InputStream in = request.getInputStream();
-            OutputStream out = response.getOutputStream();
-
-            Socket socket = new Socket(inetAddress.getAddress(), inetAddress.getPort());
-
-            response.setStatus(200);
-            response.setHeader("Connection", "close");
-            response.flushBuffer();
-            // TODO prevent real close!
-
-            IO.copyThread(socket.getInputStream(), out);
-            IO.copy(in, socket.getOutputStream());
-        }
-    } 
 }

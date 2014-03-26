@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HandlerContainer;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
 
 public class CrashProtectionHandler extends HandlerWrapper implements Handler, HandlerContainer {
@@ -18,8 +19,9 @@ public class CrashProtectionHandler extends HandlerWrapper implements Handler, H
 		super();
 	}
 	
-	public CrashProtectionHandler(Handler h) {
+	public CrashProtectionHandler(Server s, Handler h) {
 		super();
+		this.setServer(s);
 		this.setHandler(h);
 	}
 	
