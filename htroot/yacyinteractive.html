@@ -4,31 +4,9 @@
     <title>YaCy Interactive Search</title>
     #%env/templates/metas.template%#
 <script type="text/javascript" src="js/yacyinteractive.js"></script>
-<script type="text/javascript" src="js/sorttable.js"></script>
-<link media="screen" type="text/css" href="yacy/ui/css/autocomplete.css" rel="stylesheet" />  
+<script type="text/javascript" src="js/sorttable.js"></script> 
 </head>
 <body>
-<script type="text/javascript" src="yacy/ui/js/jquery.autocomplete.yacy.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function() {
-        $('#search').autocomplete('suggest.json', {parse: opensearch, delay: 0, selectFirst: false, scroll: false, max: 30});  
-        function opensearch(data) {
-            var parsed = [];
-            data = eval('({"suggest":' + data + '})');
-            for (var i = 0; i < data.suggest[1].length; i++) {  
-                var row = data.suggest[1][i];
-                if (row) {  
-                    parsed[parsed.length] = {  
-                        data: [row],  
-                        value: row,  
-                        result: row  
-                    };  
-                };
-            };
-            return parsed;  
-        };
-      });
-    </script>
 #(topmenu)#
 #%env/templates/embeddedheader.template%#
 ::
