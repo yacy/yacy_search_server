@@ -60,7 +60,7 @@
   </script>
   <style type="text/css">.twitter-typeahead {margin: 0px;padding: 0px;top:2px;}</style> <!-- fix for input window -->
 </head>
-<body id="yacysearch">
+<body id="yacysearch" onLoad="document.searchform.query.focus();">
 
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
@@ -131,7 +131,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
 #(/num-results)#
 
-<script>$("input:text:visible:first").focus();</script>
 #(urlmaskerror)#::
 <p><b>Illegal URL mask:</b> <i>#[urlmask]#</i> (not a valid regular expression), mask ignored.</p>
 #(/urlmaskerror)#
