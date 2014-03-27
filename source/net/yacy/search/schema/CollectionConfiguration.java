@@ -289,6 +289,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
 
         if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, md.limage());
+        if (allAttr || contains(CollectionSchema.linkscount_i)) add(doc, CollectionSchema.linkscount_i, md.llocal() + md.lother());
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, md.llocal());
         if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, md.lother());
         if (allAttr || contains(CollectionSchema.charset_s)) add(doc, CollectionSchema.charset_s, "UTF8");
@@ -842,6 +843,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         // statistics about the links
+        if (allAttr || contains(CollectionSchema.linkscount_i)) add(doc, CollectionSchema.linkscount_i, inboundLinks.size() + outboundLinks.size());
+        if (allAttr || contains(CollectionSchema.linksnofollowcount_i)) add(doc, CollectionSchema.linksnofollowcount_i, document.inboundLinkNofollowCount() + document.outboundLinkNofollowCount());
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, inboundLinks.size());
         if (allAttr || contains(CollectionSchema.inboundlinksnofollowcount_i)) add(doc, CollectionSchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
         if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, outboundLinks.size());
