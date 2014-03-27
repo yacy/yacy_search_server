@@ -54,7 +54,7 @@ public class QueryGoal {
     private static char dq = '"';
     private static String seps = ".:;#'*`,!$%()=?^<>/&_";
     
-    private String query_original;
+    public String query_original;
     private HandleSet include_hashes, exclude_hashes;
     private final NormalizedWords include_words, exclude_words;
     private final ArrayList<String> include_strings, exclude_strings;

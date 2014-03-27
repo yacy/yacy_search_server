@@ -105,7 +105,7 @@ public class yacysearchitem {
         prop.put("remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
-        prop.put("navurlBase", QueryParams.navurlBase("html", theSearch.query, null, false).toString());
+        prop.put("navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
         long timeout = item == 0 ? 10000 : (theSearch.query.isLocal() ? 1000 : 3000);

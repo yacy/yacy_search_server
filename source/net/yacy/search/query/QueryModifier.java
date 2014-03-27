@@ -170,6 +170,14 @@ public class QueryModifier {
         if (m != null) modifier.append(m);
     }
     
+    public void remove(String m) {
+        int p = modifier.indexOf(" " + m);
+        if (p >= 0) modifier.delete(p, p + m.length() + 1);
+        p = modifier.indexOf(m);
+        if (p == 0) modifier.delete(p, p + m.length());
+        if (modifier.length() > 0 && modifier.charAt(0) == ' ') modifier.delete(0, 1);
+    }
+    
     @Override
     public String toString() {
         return this.modifier.toString();

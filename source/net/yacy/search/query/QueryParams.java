@@ -49,6 +49,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
@@ -414,7 +415,7 @@ public final class QueryParams {
             params.setFacetLimit(this.maxfacets);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
             params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
-            for (String field: this.facetfields) params.addFacetField(field);
+            for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field);
         } else {
             params.setFacet(false);
         }
@@ -464,7 +465,7 @@ public final class QueryParams {
         }
         
         if (this.modifier.protocol != null) {
-            fq.append(" AND ").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
+            fq.append(" AND {!tag=").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append("}").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
         }
         
         if (this.tld != null) {
@@ -598,7 +599,7 @@ public final class QueryParams {
      * @param addToQuery
      * @return
      */
-    public static StringBuilder navurl(final String ext, final int page, final QueryParams theQuery, final String newQueryString, boolean newModifierReplacesOld) {
+    public static StringBuilder navurl(final RequestHeader.FileType ext, final int page, final QueryParams theQuery, final String newQueryString, boolean newModifierReplacesOld) {
 
         final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, newModifierReplacesOld);
 
@@ -619,11 +620,11 @@ public final class QueryParams {
      *      - if isEmpty overwrites (clears) existing modifier
      * @return url to new search result page
      */
-    public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newModifier, boolean newModifierReplacesOld) {
+    public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery, final String newModifier, boolean newModifierReplacesOld) {
 
         final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
-        sb.append(ext);
+        sb.append(ext.name().toLowerCase());
         sb.append("?query=");
 
         if (newModifier == null) {
@@ -636,7 +637,7 @@ public final class QueryParams {
                 if (newModifierReplacesOld) {
                     sb.append(newModifier);
                 } else {
-                    sb.append(theQuery.getQueryGoal().getQueryString(true));
+                    sb.append(theQuery.queryGoal.getQueryString(true));
                     if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
                     sb.append("+" + newModifier);
                 }

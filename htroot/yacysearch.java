@@ -757,7 +757,7 @@ public class yacysearch {
                             prop.put(
                                 "didYouMean_suggestions_" + meanCount + "_url",
                                 QueryParams.navurl(
-                                    "html",
+                                    RequestHeader.FileType.HTML,
                                     0,
                                     theQuery,
                                     suggestion, true).toString());

@@ -125,7 +125,7 @@ public class yacysearchtrailer {
                     nav="";
                 }
                 prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
-                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
                 prop.put("nav-namespace_element_" + i + "_count", count);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
                 i++;
@@ -167,7 +167,7 @@ public class yacysearchtrailer {
                     nav="";
                 }
                 prop.put(fileType, "nav-domains_element_" + i + "_name", name);
-                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
                 i++;
@@ -210,7 +210,7 @@ public class yacysearchtrailer {
                 }
                 String longname = ISO639.country(name);
                 prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
-                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
                 prop.put("nav-languages_element_" + i + "_count", count);
                 prop.put("nav-languages_element_" + i + "_nl", 1);
                 i++;
@@ -251,7 +251,7 @@ public class yacysearchtrailer {
                     nav="";
                 }
                 prop.put(fileType, "nav-authors_element_" + i + "_name", name);
-                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
                 prop.put("nav-authors_element_" + i + "_count", count);
                 prop.put("nav-authors_element_" + i + "_nl", 1);
                 i++;
@@ -296,7 +296,7 @@ public class yacysearchtrailer {
                 prop.put("nav-topics_element_" + i + "_on", 1);
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, name, false).toString());
+                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
                 int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (maxcount / mincount);
                 fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
@@ -314,10 +314,18 @@ public class yacysearchtrailer {
             prop.put("nav-protocols", 0);
         } else {
             prop.put("nav-protocols", 1);
+            //int httpCount = theSearch.protocolNavigator.delete("http");
+            //int httpsCount = theSearch.protocolNavigator.delete("https");
+            //theSearch.protocolNavigator.inc("http(s)", httpCount + httpsCount);            
             navigatorIterator = theSearch.protocolNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
             boolean visible = false;
+            String oldQuery = theSearch.query.getQueryGoal().query_original; // prepare hack to make radio-button like navigation
+            String oldProtocolModifier = theSearch.query.modifier.protocol;
+            if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) {theSearch.query.modifier.remove("/" + oldProtocolModifier); theSearch.query.modifier.remove(oldProtocolModifier);}
+            theSearch.query.modifier.protocol = "";
+            theSearch.query.getQueryGoal().query_original = oldQuery.replaceAll(" /https", "").replaceAll(" /http", "").replaceAll(" /ftp", "").replaceAll(" /smb", "").replaceAll(" /file", "");
             while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.protocolNavigator.get(name);
@@ -326,7 +334,7 @@ public class yacysearchtrailer {
                 }
                 visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
-                if (theSearch.query.modifier.protocol == null || !theSearch.query.modifier.protocol.contains(name)) {
+                if (oldProtocolModifier == null || !oldProtocolModifier.equals(name)) {
                     pos++;
                     prop.put("nav-protocols_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
@@ -337,11 +345,15 @@ public class yacysearchtrailer {
                     nav="";
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav, false).toString());
+                String url = QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString();
+                prop.put(fileType, "nav-protocols_element_" + i + "_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
             }
+            theSearch.query.modifier.protocol = oldProtocolModifier;
+            if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) theSearch.query.modifier.add(oldProtocolModifier);
+            theSearch.query.getQueryGoal().query_original = oldQuery;
             prop.put("nav-protocols_element", i);
             prop.put("nav-protocols_activate", neg > 0 || visible ? 1 : 0); // by default off
             i--;
@@ -380,7 +392,7 @@ public class yacysearchtrailer {
                     nav="";
                 }
                 prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
-                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
                 prop.put("nav-filetypes_element_" + i + "_count", count);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
                 i++;
@@ -424,7 +436,7 @@ public class yacysearchtrailer {
                         nav="";
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, nav, false).toString());
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
                     i++;
