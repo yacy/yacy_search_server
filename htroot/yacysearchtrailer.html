@@ -63,6 +63,14 @@
 </div>
 </p>#(/searchdomswitches)#
 
+#(nav-protocols)#::
+<div class="btn-group btn-group-justified">
+#{element}#
+  <div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(on)#:: active#(/on)#"#(on)# onclick="window.location.href='#[url]#';"::#(/on)#>#[name]# (#[count]#)</button></div>
+#{/element}#
+</div>
+#(/nav-protocols)#
+
 #(cat-location)#::
 <a href="yacysearch_location.html?query=#[queryenc]#">
 <img src="env/grafics/earthsearch.png" width="215" height="159" alt="earthsearchlogo" /></a>
@@ -77,20 +85,6 @@
 </script>
 #(/nav-topics)#
 
-#(nav-protocols)#::
-<ul class="nav nav-sidebar menugroup">
-<li><h3>Protocol Facet</h3></li>
-#{element}#
-<li><a href="#[url]#" class="MenuItemLink"><input type="radio" name="protocols" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-#(activate)#
-<script type="text/javascript">
-//<![CDATA[
-$(function() { $("#sidebarProtocols").accordion('activate', false); });
-//]]>
-</script>
-::#(/activate)#
-#(/nav-protocols)#
 
 #(nav-domains)#::
 <ul class="nav nav-sidebar menugroup">

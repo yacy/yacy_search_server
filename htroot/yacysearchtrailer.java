@@ -336,17 +336,17 @@ public class yacysearchtrailer {
                 nav = "%2F" + name;
                 if (oldProtocolModifier == null || !oldProtocolModifier.equals(name)) {
                     pos++;
-                    prop.put("nav-protocols_element_" + i + "_on", 1);
+                    prop.put("nav-protocols_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
                 } else {
                     neg++;                    
-                    prop.put("nav-protocols_element_" + i + "_on", 0);
+                    prop.put("nav-protocols_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
                     nav="";
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
                 String url = QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString();
-                prop.put(fileType, "nav-protocols_element_" + i + "_url", url);
+                prop.put(fileType, "nav-protocols_element_" + i + "_on_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
