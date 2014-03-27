@@ -332,6 +332,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             final Map.Entry<String, Integer> e = removeMax(dumps);
             bufferappend(buffer, plain, "Occurrences: " + e.getValue());
             bufferappend(buffer, plain, e.getKey());
+            bufferappend(buffer, plain, "&nbsp;");
         }
         bufferappend(buffer, plain, "&nbsp;");
     }
