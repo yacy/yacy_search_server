@@ -91,3 +91,33 @@ ul.nav li.dropdown:hover ul.dropdown-menu{
     display: block;
     margin-top:0px
 }
+
+/*
+ * typeahead
+ * sets the following classes: 
+ * twitter-typeahead, tt-dropdown-menu, tt-dataset-%CLASS%, tt-suggestions, tt-suggestion
+ * tt-hint, tt-input, tt-cursor
+ */
+
+.tt-dropdown-menu {
+  width: 396px;
+  margin-top: 4px;
+  padding: 4px 0;
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+}
+
+.tt-suggestion {
+  padding: 3px 10px;
+  font-size: 16px;
+}
+
+.tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #428bca;
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+ 

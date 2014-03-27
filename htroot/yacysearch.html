@@ -4,10 +4,7 @@
   <title>#[former]# - YaCy '#[clientname]#': Search Page</title>
   #%env/templates/metas.template%#
   <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[former]#" />
-  <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="http://#[thisaddress]#/opensearchdescription.xml" />  
-  <script type="text/javascript" src="yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"></script>
-  <script type="text/javascript" src="yacy/ui/js/jquery.autocomplete.yacy.js"></script>
-  <link media="screen" type="text/css" href="yacy/ui/css/autocomplete.css" rel="stylesheet" />
+  <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="http://#[thisaddress]#/opensearchdescription.xml" />
   <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
   <script type="text/javascript" src="js/ajax.js"></script>
   <script type="text/javascript" src="js/xml.js"></script>
@@ -16,7 +13,6 @@
   <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
 
   <script type="text/javascript">
-  //<![CDATA[
   function handleArrowKeys(evt) {
     evt = (evt) ? evt : ((window.event) ? event : null);
     if (evt) {
@@ -33,19 +29,15 @@
     }
   }
   document.onkeydown = handleArrowKeys;
-  //]]>
   </script>
-</head>
-<body id="yacysearch">
-    <script type="text/javascript" src="yacy/ui/js/jquery.autocomplete.yacy.js"></script>
-	<script type="text/javascript">
-      $(document).ready(function() {
-		$('#search').autocomplete('suggest.json', {parse: opensearch, delay: 0, selectFirst: false, scroll: false, max: 30});  
-        function opensearch(data) {
-            var parsed = [];
-            data = eval('({"suggest":' + data + '})');
-            for (var i = 0; i < data.suggest[1].length; i++) {
-                var row = data.suggest[1][i];
+  <script type="text/javascript" src="/env/bootstrap/js/typeahead.jquery.min.js"></script>
+  <script type="text/javascript">
+     var suggestMatcher = function() {
+       return function opensearch(q, cb) {
+       	 $.getJSON("suggest.json?q=" + q, function(data) {
+           	var parsed = [];
+            for (var i = 0; i < data[1].length; i++) {
+                var row = data[1][i];
                 if (row) {
                     parsed[parsed.length] = {
                         data: [row],
@@ -54,10 +46,22 @@
                     };  
                 };
             };
-            return parsed;  
+            cb(parsed); 
+          });
         };
+      };     
+    $(document).ready(function() {
+      $('#search').typeahead({hint:false,highlight:true,minLength:1}, {
+    	name: 'states',
+    	displayKey: 'value',
+    	source: suggestMatcher()
       });
-    </script>
+    });
+  </script>
+  <style type="text/css">.twitter-typeahead {margin: 0px;padding: 0px;top:2px;}</style> <!-- fix for input window -->
+</head>
+<body id="yacysearch">
+
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
