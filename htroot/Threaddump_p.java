@@ -59,13 +59,13 @@ public class Threaddump_p {
     	Runtime runtime = Runtime.getRuntime();
 
     	ThreadDump.bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
-    	ThreadDump.bufferappend(buffer, plain, "");
+    	ThreadDump.bufferappend(buffer, plain, "&nbsp;");
     	ThreadDump.bufferappend(buffer, plain, "YaCy Version: " + versionstring);
     	ThreadDump.bufferappend(buffer, plain, "Assigned&nbsp;&nbsp;&nbsp;Memory = " + (runtime.maxMemory()));
     	ThreadDump.bufferappend(buffer, plain, "Used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Memory = " + (runtime.totalMemory() - runtime.freeMemory()));
     	ThreadDump.bufferappend(buffer, plain, "Available&nbsp;&nbsp;Memory = " + (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()));
-    	ThreadDump.bufferappend(buffer, plain, "");
-    	ThreadDump.bufferappend(buffer, plain, "");
+    	ThreadDump.bufferappend(buffer, plain, "&nbsp;");
+    	ThreadDump.bufferappend(buffer, plain, "&nbsp;");
 
     	int multipleCount = 100;
     	File appPath = sb.getAppPath();
@@ -91,7 +91,7 @@ public class Threaddump_p {
                 }
             } else if (OS.canExecUnix) {
                 ThreadDump.bufferappend(buffer, plain, "this thread dump function can find threads that lock others, to enable this function start YaCy with 'startYACY.sh -l'");
-                ThreadDump.bufferappend(buffer, plain, "");
+                ThreadDump.bufferappend(buffer, plain, "&nbsp;");
             }
 
             // generate a single thread dump

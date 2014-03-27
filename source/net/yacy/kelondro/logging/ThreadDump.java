@@ -270,23 +270,23 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             final boolean plain,
             final Thread.State stateIn) {
         bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
-        bufferappend(buffer, plain, "");
+        bufferappend(buffer, plain, "&nbsp;");
 
         // write dumps
         for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
             final List<String> threads = entry.getValue();
             for (final String t: threads) bufferappend(buffer, plain, t);
             bufferappend(buffer, plain, entry.getKey().text);
-            bufferappend(buffer, plain, "");
+            bufferappend(buffer, plain, "&nbsp;");
         }
-        bufferappend(buffer, plain, "");
+        bufferappend(buffer, plain, "&nbsp;");
     }
 
     public void appendBlockTraces(
             final StringBuilder buffer,
             final boolean plain) {
         bufferappend(buffer, plain, "THREADS WITH STATES: LOCK FOR OTHERS");
-        bufferappend(buffer, plain, "");
+        bufferappend(buffer, plain, "&nbsp;");
 
         final Map<StackTrace, Integer> locks = countLocks();
         for (int i = size() + 10; i > 0; i--) {
@@ -297,11 +297,11 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                     if (list == null) continue;
                     bufferappend(buffer, plain, "Thread= " + entry.getKey());
                     for (final String s: list) bufferappend(buffer, plain, "  " + (plain ? s : s.replaceAll("<", "&lt;").replaceAll(">", "&gt;")));
-                    bufferappend(buffer, plain, "");
+                    bufferappend(buffer, plain, "&nbsp;");
                 }
             }
         }
-        bufferappend(buffer, plain, "");
+        bufferappend(buffer, plain, "&nbsp;");
     }
 
 
@@ -333,7 +333,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             bufferappend(buffer, plain, "Occurrences: " + e.getValue());
             bufferappend(buffer, plain, e.getKey());
         }
-        bufferappend(buffer, plain, "");
+        bufferappend(buffer, plain, "&nbsp;");
     }
 
     private static Map.Entry<String, Integer> removeMax(final Map<String, Integer> result) {
