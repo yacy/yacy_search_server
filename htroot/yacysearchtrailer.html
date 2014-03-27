@@ -37,16 +37,6 @@
 -->
 #(/resource-select)#
 
-#(searchdomswitches)#::<p class="navbutton">
-<div class="btn-group btn-group-justified">
-  #(searchtext)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='text';document.searchform.submit();"::#(/check)#>Documents</button></div>#(/searchtext)#
-  #(searchimage)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='image';document.searchform.submit();"::#(/check)#>Images</button></div>#(/searchimage)#
-  #(searchaudio)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='audio';document.searchform.submit();"::#(/check)#>Audio</button></div>#(/searchaudio)#
-  #(searchvideo)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='video';document.searchform.submit();"::#(/check)#>Video</button></div>#(/searchvideo)#
-  #(searchapp)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='app';document.searchform.submit();"::#(/check)#>Apps</button></div>#(/searchapp)#
-</div>
-</p>#(/searchdomswitches)#
-
 <p class="navbutton">
 <div class="btn-group btn-group-justified">
   <div class="btn-group btn-group-xs"><button type="button" id="sort_button_context" class="btn btn-default" onclick="document.getElementById('search').value=document.getElementById('search').value.replace(' /date','');document.searchform.submit();">Context Ranking</button></div>
@@ -62,6 +52,16 @@
 	document.getElementById("sort_button_date").setAttribute("onclick","");
   }
 </script>
+
+#(searchdomswitches)#::<p class="navbutton">
+<div class="btn-group btn-group-justified">
+  #(searchtext)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='text';document.searchform.submit();"::#(/check)#>Documents</button></div>#(/searchtext)#
+  #(searchimage)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='image';document.searchform.submit();"::#(/check)#>Images</button></div>#(/searchimage)#
+  #(searchaudio)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='audio';document.searchform.submit();"::#(/check)#>Audio</button></div>#(/searchaudio)#
+  #(searchvideo)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='video';document.searchform.submit();"::#(/check)#>Video</button></div>#(/searchvideo)#
+  #(searchapp)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='app';document.searchform.submit();"::#(/check)#>Apps</button></div>#(/searchapp)#
+</div>
+</p>#(/searchdomswitches)#
 
 #(cat-location)#::
 <a href="yacysearch_location.html?query=#[queryenc]#">
@@ -92,21 +92,6 @@ $(function() { $("#sidebarProtocols").accordion('activate', false); });
 ::#(/activate)#
 #(/nav-protocols)#
 
-#(nav-filetypes)#::
-<ul class="nav nav-sidebar menugroup">
-<li><h3>Filetype Facet</h3></li>
-#{element}#
-<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-#(activate)#
-<script type="text/javascript">
-//<![CDATA[
-$(function() { $("#sidebarFiletypes").accordion('activate', false); });
-//]]>
-</script>
-::#(/activate)#
-#(/nav-filetypes)#
-
 #(nav-domains)#::
 <ul class="nav nav-sidebar menugroup">
 <li><h3>Domain Facet</h3></li>
@@ -121,6 +106,21 @@ $(function() { $("#sidebarDomains").accordion('activate', false); });
 </script>
 ::#(/activate)#
 #(/nav-domains)#
+
+#(nav-filetypes)#::
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Filetype Facet</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
+#(activate)#
+<script type="text/javascript">
+//<![CDATA[
+$(function() { $("#sidebarFiletypes").accordion('activate', false); });
+//]]>
+</script>
+::#(/activate)#
+#(/nav-filetypes)#
 
 #(nav-languages)#::
 <ul class="nav nav-sidebar menugroup">
