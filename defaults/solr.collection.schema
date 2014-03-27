@@ -150,13 +150,13 @@ charset_s
 ## number of words in visible area, int
 wordcount_i
 
-## total number of inbound links, int
+## number of outgoing inbound links, int
 inboundlinkscount_i
 
-## number of inbound links with nofollow tag, int
+## number of outgoing inbound links with nofollow tag, int
 inboundlinksnofollowcount_i
 
-## external number of inbound links, int
+## number of outgoing inbound links, int
 outboundlinkscount_i
 
 ## number of external links with nofollow tag, int

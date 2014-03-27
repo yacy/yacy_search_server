@@ -25,7 +25,6 @@
 //if the shell's current path is HTROOT
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -46,15 +45,6 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class PerformanceQueues_p {
-    /**
-     * list of pre-defined settings: filename -> description
-     */
-    private final static Map<String, String> performanceProfiles = new HashMap<String, String>(4, 0.9f);
-    static {
-        // no sorted output!
-        performanceProfiles.put("defaults/yacy.init", "default (crawl)");
-        performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
-    }
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
@@ -129,7 +119,6 @@ public class PerformanceQueues_p {
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
         // save used settings file to config
         if (setProfile && post != null){
-        	sb.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
         	sb.setConfig("performanceSpeed", post.getInt("profileSpeed", 100));
         }
 
@@ -220,17 +209,6 @@ public class PerformanceQueues_p {
         }
         prop.put("table", c);
 
-        // performance profiles
-        c = 0;
-        final String usedfile = sb.getConfig("performanceProfile", "defaults/yacy.init");
-        for(final String filename: performanceProfiles.keySet()) {
-            prop.put("profile_" + c + "_filename", filename);
-            prop.put("profile_" + c + "_description", performanceProfiles.get(filename));
-            prop.put("profile_" + c + "_used", usedfile.equalsIgnoreCase(filename) ? "1" : "0");
-            c++;
-        }
-        prop.put("profile", c);
-
         c = 0;
         final int[] speedValues = {200,150,100,50,25,10};
         final int usedspeed = sb.getConfigInt("performanceSpeed", 100);
@@ -277,10 +255,6 @@ public class PerformanceQueues_p {
 
         }
 
-        if ((post != null) && (post.containsKey("PrioritySubmit"))) {
-        	sb.setConfig("javastart_priority",post.get("YaCyPriority","0"));
-        }
-
         if ((post != null) && (post.containsKey("onlineCautionSubmit"))) {
             sb.setConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
             sb.setConfig(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
@@ -313,11 +287,6 @@ public class PerformanceQueues_p {
         prop.put("pool_1_numActive", httpd.getJobCount());
 
         prop.put("pool", "2");
-
-        final long curr_prio = sb.getConfigLong("javastart_priority",0);
-        prop.put("priority_normal",(curr_prio == 0) ? "1" : "0");
-        prop.put("priority_below",(curr_prio == 10) ? "1" : "0");
-        prop.put("priority_low",(curr_prio == 20) ? "1" : "0");
 
         // parse initialization memory settings
         final String Xmx = sb.getConfig("javastart_Xmx", "Xmx600m").substring(3);

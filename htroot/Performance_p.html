@@ -51,41 +51,6 @@
         </dl>
       </fieldset>
     </form>
-    
-  <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-	<fieldset><legend>Use Default Profile:</legend>
-		<p>
-			<select name="defaultFile">
-			#{profile}#
-			<option value="#[filename]#"#(used)#:: selected="selected"#(/used)#>#[description]#</option>
-			#{/profile}#
-			</select>
-			and use
-			<select name="profileSpeed">
-			#{speed}#
-			<option value="#[value]#"#(used)#:: selected="selected"#(/used)#>#[label]#</option>
-			#{/speed}#
-			</select>
-			of the defined performance.
-		</p>
-		<p><input type="submit" name="submitdefault" value="Save" /> Changes take effect immediately</p>
-	</fieldset>
-	</form>
-	
-    <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-    <fieldset><legend>YaCy Priority Settings</legend>
-      <dl>
-        <dt><label for="priority">YaCy Process Priority</label>:</dt>
-        <dd><select id="priority" name="YaCyPriority">
-          <option value="0"#(priority_normal)#:: selected="selected"#(/priority_normal)#>Normal</option>
-          <option value="10"#(priority_below)#:: selected="selected"#(/priority_below)#>Below normal</option>
-          <option value="20"#(priority_low)#:: selected="selected"#(/priority_low)#>Idle</option>
-        </select></dd>
-        <dt><input type="submit" name="PrioritySubmit" value="Set new Priority" /></dt>
-        <dd>Changes take effect after <strong>restart</strong> of YaCy</dd>
-      </dl>
-    </fieldset>
-  </form>
   
   <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 	  <fieldset><legend>Online Caution Settings:</legend>
