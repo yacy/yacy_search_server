@@ -17,7 +17,7 @@
                     <tr>
                         <td>Documents in current queue</td>
                         <td>#[querysize]#</td>
-                        <td>#(reindexjobrunning)#::<input type="submit" value="refresh page"/>#(/reindexjobrunning)#</td>
+                        <td>#(reindexjobrunning)#::<input type="submit" value="refresh page" class="btn btn-primary"/>#(/reindexjobrunning)#</td>
                     </tr>
                     <tr>
                         <td>Documents processed</td>
@@ -36,8 +36,8 @@
                     </tr>                    
                 </table>
                 #(reindexjobrunning)#                
-                <input type="submit" name="reindexnow" value="start reindex job now"/>
-                ::<input type="submit" name="stopreindex" value="stop reindexing"/>
+                <input type="submit" name="reindexnow" value="start reindex job now" class="btn btn-primary"/>
+                ::<input type="submit" name="stopreindex" value="stop reindexing" class="btn btn-primary"/>
                 #(/reindexjobrunning)# 
                 <p class="info">#[infomessage]#</p>                            
             </fieldset>
