@@ -944,7 +944,7 @@ public final class SeedDB implements AlternativeDomainNames {
             if (targetSeed == null) { return null; }
             address = targetSeed.getClusterAddress();
         }
-        if (address == null) address = "localhost:8090";
+        if (address == null) address = "localhost" + (this.mySeed.getPort() > 0 ? ":" + this.mySeed.getPort() : "");
         return address;
     }
 
