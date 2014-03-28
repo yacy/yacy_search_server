@@ -133,10 +133,11 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             final HashMap<String, Object> prop = new HashMap<String, Object>();
             prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
             prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
-            prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
+            prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
             prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
             yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
+            yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());
 
             final ByteArrayOutputStream tmpproxyout = new ByteArrayOutputStream();
             HTTPDProxyHandler.doGet(prop, yacyRequestHeader, tmpproxyout, ClientIdentification.yacyProxyAgent);
