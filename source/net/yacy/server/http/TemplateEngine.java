@@ -384,8 +384,10 @@ public final class TemplateEngine {
                 } else {
                     // inconsistency, simply finalize this
                     FileUtils.copy(pis, out);
+                    pis.close();
                     final byte[] sb = structure.getBytes();
                     structure.close();
+                    keyStream.close();
                     return sb;
                 }
 

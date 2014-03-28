@@ -104,9 +104,9 @@ public final class HTTPDemon {
     static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in) throws IOException {
 
         final InputStream body = prepareBody(header, in);
-
         final RequestContext request = new yacyContextRequest(header, body);
-
+        body.close();
+        
         // check information
         if (!FileUploadBase.isMultipartContent(request)) {
             throw new IOException("the request is not a multipart-message!");

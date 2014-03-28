@@ -488,7 +488,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         // Get the output stream (or writer)
         OutputStream out;
-       // boolean written;
         try {
             out = response.getOutputStream();
         } catch (IllegalStateException e) {
@@ -514,6 +513,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setHeader(HttpHeaders.CONTENT_RANGE,
                         InclusiveByteRange.to416HeaderRangeString(content_length));
                 resource.writeTo(out, 0, content_length);
+                out.close();
                 return;
             }
 
@@ -528,6 +528,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setHeader(HttpHeaders.CONTENT_RANGE,
                         singleSatisfiableRange.toHeaderRangeString(content_length));
                 resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
+                out.close();
                 return;
             }
 
@@ -814,13 +815,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     final RasterPlotter yp = (RasterPlotter) tmp;
                     // send an image to client
                     result = RasterPlotter.exportImage(yp.getImage(), "png");
-                }
-                if (tmp instanceof EncodedImage) {
+                } else if (tmp instanceof EncodedImage) {
                     final EncodedImage yp = (EncodedImage) tmp;
                     result = yp.getImage();
-                }
-
-                if (tmp instanceof Image) {
+                } else if (tmp instanceof Image) {
                     final Image i = (Image) tmp;
 
                     // generate an byte array from the generated image
@@ -843,7 +841,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setStatus(HttpServletResponse.SC_OK);
 
                 result.writeTo(response.getOutputStream());
-
+                result.close();
                 return;
             }
 
