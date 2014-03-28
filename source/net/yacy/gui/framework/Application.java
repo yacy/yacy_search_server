@@ -74,14 +74,17 @@ public class Application extends JFrame implements DocumentListener {
         }
     }
 
+    @Override
     public void insertUpdate(DocumentEvent e) {
         
     }
 
+    @Override
     public void removeUpdate(DocumentEvent e) {
         
     }
 
+    @Override
     public void changedUpdate(DocumentEvent e) {
         
     }

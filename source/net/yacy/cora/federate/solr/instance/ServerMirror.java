@@ -60,6 +60,7 @@ public class ServerMirror extends SolrServer {
      * @param docs  the collection of documents
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse add(Collection<SolrInputDocument> docs) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.add(docs);
@@ -74,6 +75,7 @@ public class ServerMirror extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse add(Collection<SolrInputDocument> docs, int commitWithinMs) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.add(docs, commitWithinMs);
@@ -86,6 +88,7 @@ public class ServerMirror extends SolrServer {
      * @param beans  the collection of beans
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse addBeans(Collection<?> beans ) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.addBeans(beans);
@@ -100,6 +103,7 @@ public class ServerMirror extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse addBeans(Collection<?> beans, int commitWithinMs) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.addBeans(beans, commitWithinMs);
@@ -112,6 +116,7 @@ public class ServerMirror extends SolrServer {
      * @param doc  the input document
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse add(SolrInputDocument doc) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.add(doc);
@@ -126,6 +131,7 @@ public class ServerMirror extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse add(SolrInputDocument doc, int commitWithinMs) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.add(doc, commitWithinMs);
@@ -138,6 +144,7 @@ public class ServerMirror extends SolrServer {
      * @param obj  the input bean
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse addBean(Object obj) throws IOException, SolrServerException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.addBean(obj);
@@ -152,6 +159,7 @@ public class ServerMirror extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse addBean(Object obj, int commitWithinMs) throws IOException, SolrServerException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.addBean(obj, commitWithinMs);
@@ -165,6 +173,7 @@ public class ServerMirror extends SolrServer {
      * waitFlush=true and waitSearcher=true to be inline with the defaults for plain HTTP access
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse commit() throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.commit();
@@ -180,6 +189,7 @@ public class ServerMirror extends SolrServer {
      * Note: In most cases it is not required to do explicit optimize
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse optimize() throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.optimize();
@@ -193,6 +203,7 @@ public class ServerMirror extends SolrServer {
      * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible 
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse commit(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.commit(waitFlush, waitSearcher);
@@ -207,6 +218,7 @@ public class ServerMirror extends SolrServer {
      * @param softCommit makes index changes visible while neither fsync-ing index files nor writing a new index descriptor
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse commit( boolean waitFlush, boolean waitSearcher, boolean softCommit ) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.commit(waitFlush, waitSearcher, softCommit);
@@ -222,6 +234,7 @@ public class ServerMirror extends SolrServer {
      * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible 
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.optimize(waitFlush, waitSearcher);
@@ -238,6 +251,7 @@ public class ServerMirror extends SolrServer {
      * @param maxSegments  optimizes down to at most this number of segments
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher, int maxSegments ) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.optimize(waitFlush, waitSearcher, maxSegments);
@@ -253,6 +267,7 @@ public class ServerMirror extends SolrServer {
      * a commit etc.
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse rollback() throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.rollback();
@@ -265,6 +280,7 @@ public class ServerMirror extends SolrServer {
      * @param id  the ID of the document to delete
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse deleteById(String id) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.deleteById(id);
@@ -279,6 +295,7 @@ public class ServerMirror extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since 3.6
      */
+    @Override
     public UpdateResponse deleteById(String id, int commitWithinMs) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.deleteById(id, commitWithinMs);
@@ -291,6 +308,7 @@ public class ServerMirror extends SolrServer {
      * @param ids  the list of document IDs to delete 
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse deleteById(List<String> ids) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.deleteById(ids);
@@ -305,6 +323,7 @@ public class ServerMirror extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since 3.6
      */
+    @Override
     public UpdateResponse deleteById(List<String> ids, int commitWithinMs) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.deleteById(ids, commitWithinMs);
@@ -317,6 +336,7 @@ public class ServerMirror extends SolrServer {
      * @param query  the query expressing what documents to delete
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse deleteByQuery(String query) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.deleteByQuery(query);
@@ -331,6 +351,7 @@ public class ServerMirror extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since 3.6
      */
+    @Override
     public UpdateResponse deleteByQuery(String query, int commitWithinMs) throws SolrServerException, IOException {
         UpdateResponse ur = null;
         if (this.solr0 != null) ur = this.solr0.deleteByQuery(query, commitWithinMs);
@@ -342,6 +363,7 @@ public class ServerMirror extends SolrServer {
      * Issues a ping request to check if the server is alive
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public SolrPingResponse ping() throws SolrServerException, IOException {
         if (this.solr0 != null) return this.solr0.ping();
         if (this.solr1 != null) return this.solr1.ping();
@@ -352,6 +374,7 @@ public class ServerMirror extends SolrServer {
      * Performs a query to the Solr server
      * @param params  an object holding all key/value parameters to send along the request
      */
+    @Override
     public QueryResponse query(SolrParams params) throws SolrServerException {
         if (this.solr0 != null) return this.solr0.query(params);
         if (this.solr1 != null) return this.solr1.query(params);
@@ -363,6 +386,7 @@ public class ServerMirror extends SolrServer {
      * @param params  an object holding all key/value parameters to send along the request
      * @param method  specifies the HTTP method to use for the request, such as GET or POST
      */
+    @Override
     public QueryResponse query(SolrParams params, METHOD method) throws SolrServerException {
         if (this.solr0 != null) return this.solr0.query(params, method);
         if (this.solr1 != null) return this.solr1.query(params, method);
@@ -380,6 +404,7 @@ public class ServerMirror extends SolrServer {
      *
      * @since solr 4.0
      */
+    @Override
     public QueryResponse queryAndStreamResponse( SolrParams params, StreamingResponseCallback callback ) throws SolrServerException, IOException {
         if (this.solr0 != null) return this.solr0.queryAndStreamResponse(params, callback);
         if (this.solr1 != null) return this.solr1.queryAndStreamResponse(params, callback);
@@ -389,12 +414,14 @@ public class ServerMirror extends SolrServer {
     /**
      * SolrServer implementations need to implement how a request is actually processed
      */ 
+    @Override
     public NamedList<Object> request( final SolrRequest request ) throws SolrServerException, IOException {
         if (this.solr0 != null) return this.solr0.request(request);
         if (this.solr1 != null) return this.solr1.request(request);
         return null;
     }
 
+    @Override
     public DocumentObjectBinder getBinder() {
         if (this.solr0 != null) return this.solr0.getBinder();
         if (this.solr1 != null) return this.solr1.getBinder();

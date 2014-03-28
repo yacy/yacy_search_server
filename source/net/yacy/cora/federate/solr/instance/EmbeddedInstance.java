@@ -216,6 +216,7 @@ public class EmbeddedInstance implements SolrInstance {
         return c;
     }
     
+    @Override
     protected void finalize() throws Throwable {
         this.close();
     }

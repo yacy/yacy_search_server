@@ -108,6 +108,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
     
+    @Override
     public void run() {
         try {
             this.saxParser.parse(this.inputSource, this);
@@ -131,6 +132,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
     
+    @Override
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
         if (tag == null) return;
         tag = tag.toLowerCase();
@@ -148,6 +150,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
 
+    @Override
     public void endElement(final String uri, final String name, String tag) {
         if (tag == null) return;
         tag = tag.toLowerCase();
@@ -193,6 +196,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
 
+    @Override
     public void characters(final char ch[], final int start, final int length) {
         if (parsingValue) {
             buffer.append(ch, start, length);

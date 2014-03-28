@@ -596,6 +596,7 @@ public final class UserDB {
             //this.nextEntry = null;
         }
         
+        @Override
         public boolean hasNext() {
             try {
                 return this.userIter.hasNext();
@@ -605,6 +606,7 @@ public final class UserDB {
             }
         }
         
+        @Override
         public Entry next() {
             try {
                 return getEntry(UTF8.String(this.userIter.next()));
@@ -614,6 +616,7 @@ public final class UserDB {
             }
         }
         
+        @Override
         public void remove() {
 //            if (this.nextEntry != null) {
 //                try {

@@ -109,10 +109,12 @@ public class enumerateFiles implements Enumeration<File> {
         return f;
     }
     
+    @Override
     public boolean hasMoreElements() {
         return buffer != null;
     }
     
+    @Override
     public File nextElement() {
         final File r = buffer;
         buffer = nextElement0();

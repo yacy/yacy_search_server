@@ -27,10 +27,7 @@ package net.yacy.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -54,7 +51,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.util.IO;
 
 /**
  * jetty http handler
@@ -117,7 +113,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         final Thread t = new Thread() {
         	final Response yacyResponse = response;
         	final byte[] cacheArray = array;
-	        public void run() {
+	        @Override
+            public void run() {
 	           this.setName("ProxyHandler.storeToCache(" + yacyResponse.url() + ")");
 	           if (yacyResponse == null) return;
 	   		

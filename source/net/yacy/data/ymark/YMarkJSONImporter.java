@@ -60,13 +60,16 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		this.isFolder = true;
 	}
 	
-	public void startJSON() throws ParseException, IOException {
+	@Override
+    public void startJSON() throws ParseException, IOException {
 	}
 
-	public void endJSON() throws ParseException, IOException {
+	@Override
+    public void endJSON() throws ParseException, IOException {
 	}
 
-	public boolean startArray() throws ParseException, IOException {
+	@Override
+    public boolean startArray() throws ParseException, IOException {
 		final String key = this.key.toString();
 		if(key.equals(CHILDREN) && this.isFolder) {
 			if(this.depth > 0) {
@@ -80,7 +83,8 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		return true;
 	}
 	
-	public boolean endArray() throws ParseException, IOException {
+	@Override
+    public boolean endArray() throws ParseException, IOException {
 		if(this.isAnnos) {
 			this.isAnnos = false;
 		} else if(this.depth > 0) {
@@ -93,14 +97,16 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		return true;
 	}
 
-	public boolean startObject() throws ParseException, IOException {
+	@Override
+    public boolean startObject() throws ParseException, IOException {
 		if(!this.isAnnos) {
 			this.obj.clear();
 		}
 		return true;
 	}
 	
-	public boolean endObject() throws ParseException, IOException {
+	@Override
+    public boolean endObject() throws ParseException, IOException {
 		if(this.isBookmark) {
 			this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(),obj.get(YMarkEntry.BOOKMARK.TITLE.json_attrb()));
 			this.bmk.put(YMarkEntry.BOOKMARK.URL.key(),obj.get(YMarkEntry.BOOKMARK.URL.json_attrb()));
@@ -127,7 +133,8 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		return true;
 	}
 
-	public boolean startObjectEntry(String key) throws ParseException, IOException {
+	@Override
+    public boolean startObjectEntry(String key) throws ParseException, IOException {
 		if(!this.isAnnos) {
 			this.key.setLength(0);
 			this.key.append(key);	
@@ -135,7 +142,8 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		return true;
 	}
 	
-	public boolean primitive(Object value) throws ParseException, IOException {
+	@Override
+    public boolean primitive(Object value) throws ParseException, IOException {
 		if(!this.isAnnos) {
 			this.value.setLength(0);
 			if(value instanceof java.lang.String) {
@@ -149,7 +157,8 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		return true;
 	}
 
-	public boolean endObjectEntry() throws ParseException, IOException {
+	@Override
+    public boolean endObjectEntry() throws ParseException, IOException {
 		if(!this.isAnnos) {
 			final String key = this.key.toString();
 			final String value = this.value.toString();
@@ -165,7 +174,8 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		return true;
 	}
 
-	public void run() {
+	@Override
+    public void run() {
 		try {
 			ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, "JSON Importer run()");
 			this.parser.parse(this.bmk_file, this, true);

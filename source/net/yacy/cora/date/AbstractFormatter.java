@@ -43,8 +43,11 @@ public abstract class AbstractFormatter implements DateFormatter {
     protected long last_time;
     protected String last_format;
     
+    @Override
     public abstract Date parse(String s) throws ParseException;
+    @Override
     public abstract String format(final Date date);
+    @Override
     public abstract String format();
     
 }

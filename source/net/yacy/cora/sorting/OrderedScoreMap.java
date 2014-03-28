@@ -52,10 +52,12 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         }
     }
 
+    @Override
     public Iterator<E> iterator() {
         return this.map.keySet().iterator();
     }
 
+    @Override
     public synchronized void clear() {
         this.map.clear();
     }
@@ -64,6 +66,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
      * shrink the cluster to a demanded size
      * @param maxsize
      */
+    @Override
     public void shrinkToMaxSize(final int maxsize) {
         if (this.map.size() <= maxsize) return;
         int minScore = getMinScore();
@@ -77,6 +80,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
      * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
      * @param minScore
      */
+    @Override
     public void shrinkToMinScore(final int minScore) {
         synchronized (this.map) {
             final Iterator<Map.Entry<E, AtomicInteger>> i = this.map.entrySet().iterator();
@@ -88,6 +92,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         }
     }
 
+    @Override
     public int size() {
         synchronized (this.map) {
             return this.map.size();
@@ -99,6 +104,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
      * @param size
      * @return
      */
+    @Override
     public boolean sizeSmaller(final int size) {
         if (this.map.size() < size) return true;
         synchronized (this.map) {
@@ -106,6 +112,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         }
     }
 
+    @Override
     public boolean isEmpty() {
         if (this.map.isEmpty()) return true;
         synchronized (this.map) {
@@ -113,6 +120,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         }
     }
 
+    @Override
     public void inc(final E obj) {
         if (obj == null) return;
         AtomicInteger score = this.map.get(obj);
@@ -130,6 +138,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         score.incrementAndGet();
     }
 
+    @Override
     public void dec(final E obj) {
         if (obj == null) return;
         AtomicInteger score;
@@ -143,6 +152,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         score.decrementAndGet();
     }
 
+    @Override
     public void set(final E obj, final int newScore) {
         if (obj == null) return;
         AtomicInteger score;
@@ -156,6 +166,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         score.getAndSet(newScore);
     }
 
+    @Override
     public void inc(final E obj, final int incrementScore) {
         if (obj == null) return;
         AtomicInteger score;
@@ -169,10 +180,12 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         score.addAndGet(incrementScore);
     }
 
+    @Override
     public void dec(final E obj, final int incrementScore) {
         inc(obj, -incrementScore);
     }
 
+    @Override
     public int delete(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
@@ -184,12 +197,14 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         return score.intValue();
     }
 
+    @Override
     public boolean containsKey(final E obj) {
         synchronized (this.map) {
             return this.map.containsKey(obj);
         }
     }
 
+    @Override
     public int get(final E obj) {
         if (obj == null) return 0;
         final AtomicInteger score;
@@ -218,6 +233,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         return minScore;
     }
 
+    @Override
     public Iterator<E> keys(final boolean up) {
         synchronized (this.map) {
             // re-organize entries

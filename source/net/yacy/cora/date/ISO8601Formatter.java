@@ -191,6 +191,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
         }
         return last_format;
     }
+    @Override
     public final String format() {
         long time = System.currentTimeMillis();
         if (Math.abs(time - last_time) < 1000) return last_format;

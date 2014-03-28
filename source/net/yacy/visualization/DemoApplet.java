@@ -31,6 +31,7 @@ public class DemoApplet extends Applet implements Runnable {
         animator.start();
     }
 
+    @Override
     public void run() {
         while (Thread.currentThread() == animator) {
             final long time = System.currentTimeMillis();

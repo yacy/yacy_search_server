@@ -58,6 +58,7 @@ public interface Order<A> extends Comparator<A> {
      */
     public long cardinal(A key);
 
+    @Override
     public int compare(A a, A b);
 
     public boolean equal(A a, A b);

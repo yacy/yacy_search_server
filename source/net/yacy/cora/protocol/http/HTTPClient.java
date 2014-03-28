@@ -690,7 +690,8 @@ public class HTTPClient {
 	            final CloseableHttpResponse[] thr = new CloseableHttpResponse[]{null};
 	            final Throwable[] te = new Throwable[]{null};
 	            Thread t = new Thread() {
-	                public void run() {
+	                @Override
+                    public void run() {
 	                   this.setName("HTTPClient.execute(" + httpUriRequest.getURI() + ")");
 	                   try {
 	                       thr[0] = client.execute(httpUriRequest, context);

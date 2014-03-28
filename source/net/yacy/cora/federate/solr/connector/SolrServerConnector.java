@@ -88,6 +88,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * force an explicit merge of segments
      * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
      */
+    @Override
     public void optimize(int maxSegments) {
         if (this.server == null) return;
         if (getSegmentCount() <= maxSegments) return;
@@ -321,6 +322,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * get the number of segments.
      * @return the number of segments, or 0 if unknown
      */
+    @Override
     public int getSegmentCount() {
         if (this.server == null) return 0;
         try {

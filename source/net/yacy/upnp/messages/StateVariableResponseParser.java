@@ -89,7 +89,8 @@ public class StateVariableResponseParser extends org.xml.sax.helpers.DefaultHand
     return result;
   }
 
-  public void characters( char[] ch, int start, int length ) {
+  @Override
+public void characters( char[] ch, int start, int length ) {
     if ( parseStateVar ) {
       String origChars = result.stateVariableValue;
       String newChars = new String( ch, start, length );
@@ -118,7 +119,8 @@ public class StateVariableResponseParser extends org.xml.sax.helpers.DefaultHand
     }
   }
 
-  public void startElement( String uri, String localName, String qName, Attributes attributes ) {
+  @Override
+public void startElement( String uri, String localName, String qName, Attributes attributes ) {
 
     if ( faultResponse ) {
       if ( localName.equals( "faultcode") ) {
@@ -142,7 +144,8 @@ public class StateVariableResponseParser extends org.xml.sax.helpers.DefaultHand
     }
   }
 
-  public void endElement( String uri, String localName, String qName ) throws SAXException {
+  @Override
+public void endElement( String uri, String localName, String qName ) throws SAXException {
     // some buggy implementations ( intel sample media server )
     // do not use the specs compliant return element name but varName ...
     if ( localName.equals( "return" ) || localName.equals( "varName" ) ) {

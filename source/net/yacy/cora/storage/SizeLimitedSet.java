@@ -37,34 +37,42 @@ public class SizeLimitedSet<E> extends AbstractSet<E> implements Set<E>, Cloneab
         map = new SizeLimitedMap<E,Object>(sizeLimit);
     }
     
+    @Override
     public Iterator<E> iterator() {
         return map.keySet().iterator();
     }
 
+    @Override
     public int size() {
         return map.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @Override
     public boolean contains(Object o) {
         return map.containsKey(o);
     }
 
+    @Override
     public boolean add(E e) {
         return map.put(e, OBJECT) == null;
     }
 
+    @Override
     public boolean remove(Object o) {
         return map.remove(o) == OBJECT;
     }
 
+    @Override
     public void clear() {
         map.clear();
     }
 
+    @Override
     @SuppressWarnings("unchecked")
 	public Object clone() {
         try {

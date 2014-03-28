@@ -37,6 +37,7 @@ public abstract class LookAheadIterator<A> implements Iterator<A>, Iterable<A> {
     public LookAheadIterator() {
     }
 
+    @Override
     public final Iterator<A> iterator() {
         return this;
     }
@@ -54,11 +55,13 @@ public abstract class LookAheadIterator<A> implements Iterator<A>, Iterable<A> {
         }
     }
 
+    @Override
     public final boolean hasNext() {
         checkInit();
         return this.next != null;
     }
 
+    @Override
     public final A next() {
         checkInit();
         final A n = this.next;
@@ -69,6 +72,7 @@ public abstract class LookAheadIterator<A> implements Iterator<A>, Iterable<A> {
     /**
      * a remove is not possible with this implementation
      */
+    @Override
     public final void remove() {
         throw new UnsupportedOperationException();
     }

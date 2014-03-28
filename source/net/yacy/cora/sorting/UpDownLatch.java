@@ -38,10 +38,12 @@ public class UpDownLatch extends AbstractQueuedSynchronizer {
         return getState();
     }
 
+    @Override
     public int tryAcquireShared(final int acquires) {
         return getState() == 0? 1 : -1;
     }
 
+    @Override
     public boolean tryReleaseShared(final int releases) {
         // Decrement count; signal when transition to zero
         for (;;) {

@@ -70,7 +70,8 @@ public class JXPathParser implements XMLParser {
   
   private char buggyChar = (char)0;
   
-  public Object parseXML( InputStream in ){
+  @Override
+public Object parseXML( InputStream in ){
     StringBuilder xml = new StringBuilder();
     try {
       byte[] buffer = new byte[512];

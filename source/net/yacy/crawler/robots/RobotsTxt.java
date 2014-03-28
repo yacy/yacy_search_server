@@ -199,6 +199,7 @@ public class RobotsTxt {
         }
         if (robotsTable == null || robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
         Thread t = new Thread() {
+            @Override
             public void run(){
                 this.setName("Robots.txt:ensureExist(" + theURL.toNormalform(true) + ")");
                 // make or get a synchronization object
@@ -356,6 +357,7 @@ public class RobotsTxt {
         final Thread[] threads = new Thread[concurrency];
         for (int i = 0; i < concurrency; i++) {
             threads[i] = new Thread() {
+                @Override
                 public void run() {
                     DigestURL u;
                     try {

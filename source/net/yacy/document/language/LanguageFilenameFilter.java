@@ -31,6 +31,7 @@ class LanguageFilenameFilter implements FilenameFilter {
     
     private static final String fileExtension = "lng";
 
+    @Override
     public boolean accept(final File dir, final String name) {
         if (name.matches(".+\\."+fileExtension)) {
             return true;

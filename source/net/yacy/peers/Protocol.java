@@ -1059,6 +1059,7 @@ public final class Protocol {
                     final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress();
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
                     Thread remoteRequest = new Thread() {
+                        @Override
                         public void run() {
                             this.setName("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + target.hash + ")");
                             try {

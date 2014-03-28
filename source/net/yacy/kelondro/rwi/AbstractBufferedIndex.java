@@ -40,6 +40,7 @@ public abstract class AbstractBufferedIndex<ReferenceType extends Reference> ext
         super(factory);
     }
 
+    @Override
     public synchronized TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(byte[] startHash, final boolean rot, final boolean excludePrivate, int count, final boolean ram) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache

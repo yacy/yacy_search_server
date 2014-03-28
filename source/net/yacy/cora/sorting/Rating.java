@@ -52,6 +52,7 @@ public class Rating<A> {
 
     public static class ScoreComparator implements Comparator<Rating<?>> {
 
+        @Override
         public int compare(final Rating<?> arg0, final Rating<?> arg1) {
             if (arg0.getScore() < arg1.getScore()) return -1;
             if (arg0.getScore() > arg1.getScore()) return 1;
@@ -61,6 +62,7 @@ public class Rating<A> {
 
     public static class FoldedScoreComparator<B extends Comparable<B>> implements Comparator<Rating<B>> {
 
+        @Override
         public int compare(final Rating<B> arg0, final Rating<B> arg1) {
             final int c = scoreComparator.compare(arg0, arg1);
             if (c != 0) return c;

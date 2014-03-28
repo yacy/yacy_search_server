@@ -152,6 +152,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * save configuration to file and update enum SolrFields
      * @throws IOException
      */
+    @Override
     public void commit() throws IOException {
         try {
             super.commit();
@@ -1046,6 +1047,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     for (final AtomicInteger i = new AtomicInteger(0); i.get() < t.length; i.incrementAndGet()) {
                         t[i.get()] = new Thread() {
                             private String name = "CollectionConfiguration.postprocessing.webgraph-" + i.get();
+                            @Override
                             public void run() {
                                 Thread.currentThread().setName(name);
                                 SolrDocument doc; String protocol, urlstub, id; DigestURL url;
@@ -1238,6 +1240,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         public double cr;
         public int crn, count;
         public CRV(final int count, final double cr, final int crn) {this.count = count; this.cr = cr; this.crn = crn;}
+        @Override
         public String toString() {
             return "count=" + count + ", cr=" + cr + ", crn=" + crn;
         }

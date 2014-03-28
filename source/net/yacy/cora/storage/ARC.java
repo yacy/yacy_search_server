@@ -117,6 +117,7 @@ public interface ARC<K, V> extends Iterable<Map.Entry<K, V>> {
      * iterator implements the Iterable interface
      * the method can easily be implemented using the entrySet method
      */
+    @Override
     public Iterator<Map.Entry<K, V>> iterator();
 
     /**
@@ -132,5 +133,6 @@ public interface ARC<K, V> extends Iterable<Map.Entry<K, V>> {
      * a hash code for this ARC
      * @return a hash code
      */
+    @Override
     int hashCode();
 }

@@ -97,7 +97,8 @@ public class ListDirs {
 		return completeList;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return this.uri;
 	}
 }

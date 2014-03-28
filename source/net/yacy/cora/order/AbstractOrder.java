@@ -33,19 +33,23 @@ public abstract class AbstractOrder<A> implements Order<A> {
     @Override
     abstract public Order<A> clone();
 
+    @Override
     public A zero() {
     	return this.zero;
     }
 
+    @Override
     public void direction(final boolean ascending) {
         this.asc = ascending;
     }
 
+    @Override
     public long partition(final A key, final int forks) {
         final long d = (Long.MAX_VALUE / forks) + ((Long.MAX_VALUE % forks) + 1) / forks;
         return cardinal(key) / d;
     }
 
+    @Override
     public void rotate(final A newzero) {
         this.zero = newzero;
     }

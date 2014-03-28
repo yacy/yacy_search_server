@@ -90,6 +90,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param s
      * @param v
      */
+    @Override
     public final void insert(final K s, final V v) {
         this.arc[getPartition(s)].insert(s, v);
     }
@@ -100,6 +101,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param s
      * @param v
      */
+    @Override
     public void insertIfAbsent(final K s, final V v) {
         this.arc[getPartition(s)].insertIfAbsent(s, v);
     }
@@ -111,6 +113,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param v
      * @return the value before inserting the new value
      */
+    @Override
     public V putIfAbsent(final K s, final V v) {
         return this.arc[getPartition(s)].putIfAbsent(s, v);
     }
@@ -141,6 +144,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param value
      * @return the keys that have the given value
      */
+    @Override
     public Collection<K> getKeys(final V value) {
         final ArrayList<K> keys = new ArrayList<K>();
         for (final ARC<K, V> element : this.arc)
@@ -192,6 +196,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     /**
      * iterator implements the Iterable interface
      */
+    @Override
     public Iterator<java.util.Map.Entry<K, V>> iterator() {
         return entrySet().iterator();
     }

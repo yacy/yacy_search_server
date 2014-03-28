@@ -80,6 +80,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
         return this.solr == null || this.solr.isClosed(); 
     }
     
+    @Override
     protected void finalize() throws Throwable {
         this.close();
     }

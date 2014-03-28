@@ -88,14 +88,17 @@ public abstract class AbstractReference implements Reference {
         return r;
     }
     
+    @Override
     public int maxposition() {
         return max(positions());
     }
     
+    @Override
     public int minposition() {
         return min(positions());
     }
     
+    @Override
     public int distance() {
         if (positions().size() < 2) return 0;
         int d = 0;
@@ -109,6 +112,7 @@ public abstract class AbstractReference implements Reference {
         return d / (positions().size() - 1);
     }
     
+    @Override
     public boolean isOlder(final Reference other) {
         if (other == null) return false;
         if (this.lastModified() < other.lastModified()) return true;

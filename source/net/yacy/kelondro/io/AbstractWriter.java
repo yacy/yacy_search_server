@@ -40,12 +40,15 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
 
     
     // pseudo-native methods:
+    @Override
     abstract public void setLength(long length) throws IOException;
+    @Override
     abstract public void write(byte[] b, int off, int len) throws IOException;
     
     // derived methods:
 
 
+    @Override
     public final void writeShort(final int v) throws IOException {
         byte[] b = new byte[2];
         b[0] = (byte) ((v >>>  8) & 0xFF);
@@ -53,6 +56,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
         this.write(b);
     }
 
+    @Override
     public final void writeInt(final int v) throws IOException {
         this.write(int2array(v));
     }
@@ -66,6 +70,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
         return b;
     }
 
+    @Override
     public final void writeLong(final long v) throws IOException {
         byte[] b = new byte[8];
         b[0] = (byte) ((v >>> 56) & 0xFF);
@@ -79,6 +84,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
         this.write(b);
     }
 
+    @Override
     public final void write(final byte[] b) throws IOException {
         this.write(b, 0, b.length);
     }
@@ -86,6 +92,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
     private final static byte cr = 13;
     private final static byte lf = 10;
     
+    @Override
     public final void writeLine(final String line) throws IOException {
         final byte[] b = new byte[line.length() + 2];
         System.arraycopy(UTF8.getBytes(line), 0, b, 0, line.length());
@@ -102,6 +109,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
         this.write(b);
     }
     
+    @Override
     public final void writeMap(final Map<String, String> map, final String comment) throws IOException {
         this.seek(0);
         final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
@@ -119,6 +127,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
         bb.close();
     }
 
+    @Override
     public final HashMap<String, String> readMap() throws IOException {
         this.seek(0);
         final byte[] b = readFully();
@@ -137,6 +146,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
         return map;
     }
     
+    @Override
     public final void deleteOnExit() {
         if (this.file != null) this.file.deleteOnExit();
     }

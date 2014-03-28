@@ -53,15 +53,18 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
         }
     }
     
+    @Override
     public boolean hasNext() {
         return !a.isEmpty();
     }
 
+    @Override
     public Map.Entry<E, F> next() {
         this.last = a.remove(a.size() - 1);
         return new Entry0(this.last, this.map.get(this.last));
     }
 
+    @Override
     public void remove() {
         this.map.remove(this.last);
     }
@@ -74,14 +77,17 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
             this.f = f;
         }
         
+        @Override
         public E getKey() {
             return this.e;
         }
 
+        @Override
         public F getValue() {
             return this.f;
         }
 
+        @Override
         public F setValue(F value) {
             F f0 = this.f;
             this.f = value;

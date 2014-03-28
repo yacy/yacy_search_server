@@ -62,6 +62,7 @@ public interface ARH<K> extends Iterable<K> {
     /**
      * iterator implements the Iterable interface
      */
+    @Override
     public Iterator<K> iterator();
 
     /**
@@ -77,5 +78,6 @@ public interface ARH<K> extends Iterable<K> {
      * a hash code for this ARH
      * @return a hash code
      */
+    @Override
     int hashCode();
 }

@@ -67,6 +67,7 @@ public interface Index extends Iterable<Row.Entry> {
     public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
     public CloneableIterator<Row.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row using the order of the keys
     public CloneableIterator<Row.Entry> rows() throws IOException; // iterates the whole row without any order
+    @Override
     public Iterator<Row.Entry> iterator();
     public void deleteOnExit();
     public void clear() throws IOException;

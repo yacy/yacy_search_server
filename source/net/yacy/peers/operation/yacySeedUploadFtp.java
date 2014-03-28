@@ -38,6 +38,7 @@ public class yacySeedUploadFtp implements yacySeedUploader {
     public static final String CONFIG_FTP_PASSWORD = "seedFTPPassword";
     public static final String CONFIG_FTP_PATH = "seedFTPPath";
     
+    @Override
     public String uploadSeedFile (final serverSwitch sb, final File seedFile) throws Exception {
         try {        
             if (sb == null) throw new NullPointerException("Reference to serverSwitch must not be null.");
@@ -62,6 +63,7 @@ public class yacySeedUploadFtp implements yacySeedUploader {
         }
     }
 
+    @Override
     public String[] getConfigurationOptions() {
         return new String[] {CONFIG_FTP_SERVER,CONFIG_FTP_ACCOUNT,CONFIG_FTP_PASSWORD,CONFIG_FTP_PATH};
     }

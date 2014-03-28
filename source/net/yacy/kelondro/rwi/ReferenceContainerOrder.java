@@ -39,6 +39,7 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         this.factory = factory;
     }
 
+    @Override
     public boolean wellformed(final ReferenceContainer<ReferenceType> a) {
         return embeddedOrder.wellformed(a.getTermHash());
     }
@@ -52,10 +53,12 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         return this.embeddedOrder.partition(key, forks);
     }
 
+    @Override
     public int compare(final ReferenceContainer<ReferenceType> a, final ReferenceContainer<ReferenceType> b) {
         return this.embeddedOrder.compare(a.getTermHash(), b.getTermHash());
     }
     
+    @Override
     public boolean equal(ReferenceContainer<ReferenceType> a, ReferenceContainer<ReferenceType> b) {
         return this.embeddedOrder.equal(a.getTermHash(), b.getTermHash());
     }
@@ -66,10 +69,12 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         this.zero = new ReferenceContainer<ReferenceType>(this.factory, this.embeddedOrder.zero(), zero);
     }
 
+    @Override
     public Order<ReferenceContainer<ReferenceType>> clone() {
         return new ReferenceContainerOrder<ReferenceType>(this.factory, this.embeddedOrder.clone());
     }
 
+    @Override
     public String signature() {
         return this.embeddedOrder.signature();
     }
@@ -88,7 +93,8 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         return this.embeddedOrder.equals(other.embeddedOrder);
     }
 
-	public long cardinal(final ReferenceContainer<ReferenceType> key) {
+	@Override
+    public long cardinal(final ReferenceContainer<ReferenceType> key) {
 		return this.embeddedOrder.cardinal(key.getTermHash());
 	}
 

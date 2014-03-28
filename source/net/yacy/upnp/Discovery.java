@@ -164,7 +164,8 @@ public class Discovery {
     
     DiscoveryResultsHandler handler = new DiscoveryResultsHandler() {
 
-      public void discoveredDevice( String usn, String udn, String nt, String maxAge, URL location, String firmware ) {
+      @Override
+    public void discoveredDevice( String usn, String udn, String nt, String maxAge, URL location, String firmware ) {
         synchronized( devices ) {
           if ( ! devices.containsKey( usn ) ) {
             try {

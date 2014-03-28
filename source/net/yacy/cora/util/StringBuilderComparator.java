@@ -39,6 +39,7 @@ public class StringBuilderComparator implements Comparator<StringBuilder> {
         this.caseInsensitive = caseInsensitive;
     }
 
+    @Override
     public int compare(final StringBuilder sb0, final StringBuilder sb1) {
         final int l0 = sb0.length();
         final int l1 = sb1.length();

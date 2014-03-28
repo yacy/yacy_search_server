@@ -101,35 +101,43 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         return new NavigationReferenceRow(b);
     }
 
+    @Override
     public String toPropertyForm() {
         return this.entry.toPropertyForm('=', true, true, false, false);
     }
 
+    @Override
     public Entry toKelondroEntry() {
         return this.entry;
     }
 
+    @Override
     public String navigationHash() {
         return this.entry.getColASCII(col_navhash);
     }
 
+    @Override
     public byte[] urlhash() {
         return ASCII.getBytes(navigationHash().substring(12));
     }
 
+    @Override
     public byte[] termHash() {
         return ASCII.getBytes(navigationHash().substring(0, 12));
     }
 
+    @Override
     public int hitcount() {
         return (int) this.entry.getColLong(col_count);
     }
 
+    @Override
     public int position(final int p) {
         assert p == 0 : "p = " + p;
         return (int) this.entry.getColLong(col_pos);
     }
 
+    @Override
     public byte flags() {
         return (byte) this.entry.getColLong(col_flags);
     }
@@ -153,20 +161,24 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         return navigationHash().equals(other.navigationHash());
     }
 
+    @Override
     public boolean isOlder(final Reference other) {
         return false;
     }
     
     // unsupported operations:
 
+    @Override
     public void join(final Reference oe) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public long lastModified() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Collection<Integer> positions() {
         throw new UnsupportedOperationException();
     }

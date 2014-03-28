@@ -45,35 +45,42 @@ public abstract class loaderCore implements loaderProcess {
     protected int completion = 0;
     
     // steering methods
+    @Override
     public abstract void feed(byte[] a); // returns true if process was successful; should be always synchronized
 
+    @Override
     public void terminate() {
         // if terminated before completion, completed() shows x < 100
         run = false;
     }
     
     // feed-back methods
+    @Override
     public Properties result() {
         return result;
     }
 
+    @Override
     public int completed() {
         // guess of completion status. shall be 100 if totally completed.
         return completion;
     }
 
     // error control
+    @Override
     public int status() {
         // -1=idle, 0=ready, 1=running, 2=aborted, 3=failed, 4=completed, 9=finalized
         return status;
     }
 
+    @Override
     public boolean available() {
         // true if it is ok to feed with feed()
         return (status() == STATUS_READY) ||
                (status() == STATUS_COMPLETED && (result == null || result.isEmpty()));
     }
     
+    @Override
     public Exception error() {
         // if in error status: this returnes exception
         return error;

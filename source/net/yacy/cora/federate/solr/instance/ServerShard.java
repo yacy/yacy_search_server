@@ -66,6 +66,7 @@ public class ServerShard extends SolrServer {
      * @param docs  the collection of documents
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse add(Collection<SolrInputDocument> docs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -80,6 +81,7 @@ public class ServerShard extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse add(Collection<SolrInputDocument> docs, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -92,6 +94,7 @@ public class ServerShard extends SolrServer {
      * @param beans  the collection of beans
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse addBeans(Collection<?> beans ) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -106,6 +109,7 @@ public class ServerShard extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse addBeans(Collection<?> beans, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -118,6 +122,7 @@ public class ServerShard extends SolrServer {
      * @param doc  the input document
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse add(SolrInputDocument doc) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         return server.get(this.sharding.select(doc)).add(doc);
@@ -130,6 +135,7 @@ public class ServerShard extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse add(SolrInputDocument doc, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         return server.get(this.sharding.select(doc)).add(doc, commitWithinMs);
@@ -140,6 +146,7 @@ public class ServerShard extends SolrServer {
      * @param obj  the input bean
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse addBean(Object obj) throws IOException, SolrServerException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -154,6 +161,7 @@ public class ServerShard extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since solr 3.5
      */
+    @Override
     public UpdateResponse addBean(Object obj, int commitWithinMs) throws IOException, SolrServerException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -167,6 +175,7 @@ public class ServerShard extends SolrServer {
      * waitFlush=true and waitSearcher=true to be inline with the defaults for plain HTTP access
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse commit() throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -182,6 +191,7 @@ public class ServerShard extends SolrServer {
      * Note: In most cases it is not required to do explicit optimize
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse optimize() throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -195,6 +205,7 @@ public class ServerShard extends SolrServer {
      * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible 
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse commit(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -209,6 +220,7 @@ public class ServerShard extends SolrServer {
      * @param softCommit makes index changes visible while neither fsync-ing index files nor writing a new index descriptor
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse commit(boolean waitFlush, boolean waitSearcher, boolean softCommit) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -224,6 +236,7 @@ public class ServerShard extends SolrServer {
      * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible 
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -240,6 +253,7 @@ public class ServerShard extends SolrServer {
      * @param maxSegments  optimizes down to at most this number of segments
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher, int maxSegments) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -255,6 +269,7 @@ public class ServerShard extends SolrServer {
      * a commit etc.
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse rollback() throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -267,6 +282,7 @@ public class ServerShard extends SolrServer {
      * @param id  the ID of the document to delete
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse deleteById(String id) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -281,6 +297,7 @@ public class ServerShard extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since 3.6
      */
+    @Override
     public UpdateResponse deleteById(String id, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -293,6 +310,7 @@ public class ServerShard extends SolrServer {
      * @param ids  the list of document IDs to delete 
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse deleteById(List<String> ids) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -307,6 +325,7 @@ public class ServerShard extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since 3.6
      */
+    @Override
     public UpdateResponse deleteById(List<String> ids, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -319,6 +338,7 @@ public class ServerShard extends SolrServer {
      * @param query  the query expressing what documents to delete
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public UpdateResponse deleteByQuery(String query) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -333,6 +353,7 @@ public class ServerShard extends SolrServer {
      * @throws IOException If there is a low-level I/O error.
      * @since 3.6
      */
+    @Override
     public UpdateResponse deleteByQuery(String query, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
@@ -344,6 +365,7 @@ public class ServerShard extends SolrServer {
      * Issues a ping request to check if the server is alive
      * @throws IOException If there is a low-level I/O error.
      */
+    @Override
     public SolrPingResponse ping() throws SolrServerException, IOException {
         for (SolrServer s: server) {
             SolrPingResponse spr = s.ping();
@@ -356,6 +378,7 @@ public class ServerShard extends SolrServer {
      * Performs a query to the Solr server
      * @param params  an object holding all key/value parameters to send along the request
      */
+    @Override
     public QueryResponse query(final SolrParams params) throws SolrServerException {
 
         final Collection<QueryResponse> qrl = new ConcurrentLinkedQueue<QueryResponse>();
@@ -389,6 +412,7 @@ public class ServerShard extends SolrServer {
      * @param params  an object holding all key/value parameters to send along the request
      * @param method  specifies the HTTP method to use for the request, such as GET or POST
      */
+    @Override
     public QueryResponse query(final SolrParams params, final METHOD method) throws SolrServerException {
 
         final Collection<QueryResponse> qrl = new ConcurrentLinkedQueue<QueryResponse>();
@@ -429,6 +453,7 @@ public class ServerShard extends SolrServer {
      *
      * @since solr 4.0
      */
+    @Override
     public QueryResponse queryAndStreamResponse( SolrParams params, StreamingResponseCallback callback ) throws SolrServerException, IOException {
         throw new UnsupportedOperationException("stream response not possible with shards");
     }
@@ -436,12 +461,14 @@ public class ServerShard extends SolrServer {
     /**
      * SolrServer implementations need to implement how a request is actually processed
      */ 
+    @Override
     public NamedList<Object> request(final SolrRequest request) throws SolrServerException, IOException {
         ResponseAccumulator acc = new ResponseAccumulator();
         for (SolrServer s: server) acc.addResponse(s.request(request));
         return acc.getAccumulatedResponse();        
     }
 
+    @Override
     public DocumentObjectBinder getBinder() {
         DocumentObjectBinder db;
         for (SolrServer s: server) {

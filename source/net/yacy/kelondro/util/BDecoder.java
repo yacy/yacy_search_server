@@ -72,22 +72,27 @@ public class BDecoder {
     
     private static abstract class BDfltObject implements BObject {
 
+        @Override
         public long getInteger() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public List<BObject> getList() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public Map<String, BObject> getMap() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public byte[] getString() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public BType getType() {
             throw new UnsupportedOperationException();
         }
@@ -116,6 +121,7 @@ public class BDecoder {
         public String toString() {
             return UTF8.String(this.b);
         }
+        @Override
         public void toStream(OutputStream os) throws IOException {
             os.write(ASCII.getBytes(Integer.toString(this.b.length)));
             os.write(_p);
@@ -156,6 +162,7 @@ public class BDecoder {
             s.append("]");
             return s.toString();
         }
+        @Override
         public void toStream(OutputStream os) throws IOException {
             os.write(_l);
             for (final BObject bo: this.l) bo.toStream(os);
@@ -185,6 +192,7 @@ public class BDecoder {
             s.append('}');
             return s.toString();
         }
+        @Override
         public void toStream(OutputStream os) throws IOException {
             os.write(_d);
             for (final Map.Entry<String, BObject> e: this.m.entrySet()) {
@@ -218,6 +226,7 @@ public class BDecoder {
         public String toString() {
             return Long.toString(this.i);
         }
+        @Override
         public void toStream(OutputStream os) throws IOException {
             os.write(_i);
             os.write(ASCII.getBytes(Long.toString(this.i)));

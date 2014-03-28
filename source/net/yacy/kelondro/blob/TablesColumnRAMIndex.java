@@ -44,11 +44,13 @@ public class TablesColumnRAMIndex extends TablesColumnIndex{
     	this.index = new ConcurrentHashMap<String, Map<String, TreeSet<byte[]>>>();
     }
     
+    @Override
     public void deleteIndex(final String columnName) {
     	this.index.remove(columnName);
     }
          
-	protected void insertPK(final String columnName, final String columnValue, final byte[] pk) {
+	@Override
+    protected void insertPK(final String columnName, final String columnValue, final byte[] pk) {
 		Map<String, TreeSet<byte[]>> valueIdxMap;
 		TreeSet<byte[]> PKset;		
 		if(this.index.containsKey(columnName)) {
@@ -68,7 +70,8 @@ public class TablesColumnRAMIndex extends TablesColumnIndex{
 		PKset.add(pk);			
 	}
 	
-	protected synchronized void removePK(final byte[] pk) {
+	@Override
+    protected synchronized void removePK(final byte[] pk) {
 		for(Map.Entry<String, Map<String, TreeSet<byte[]>>> columnName : this.index.entrySet()) {
 			final Iterator<Map.Entry<String, TreeSet<byte[]>>> viter = columnName.getValue().entrySet().iterator();
 			while(viter.hasNext()) {
@@ -80,15 +83,18 @@ public class TablesColumnRAMIndex extends TablesColumnIndex{
 		}
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.index.clear();
 	}
 	
-	public Collection<String> columns() {
+	@Override
+    public Collection<String> columns() {
 		return this.index.keySet();
 	}
 	
-	public Set<String> keySet(final String columnName) {
+	@Override
+    public Set<String> keySet(final String columnName) {
 		// a TreeSet is used to get sorted set of keys (e.g. folders)
 		if(this.index.containsKey(columnName)) {
 			return new TreeSet<String>(this.index.get(columnName).keySet());
@@ -96,29 +102,34 @@ public class TablesColumnRAMIndex extends TablesColumnIndex{
 		return new TreeSet<String>();
 	}
 	
-	public boolean containsKey(final String columnName, final String columnValue) {
+	@Override
+    public boolean containsKey(final String columnName, final String columnValue) {
 		if(this.index.containsKey(columnName)) {
 			return this.index.get(columnName).containsKey(columnValue);
 		}
 		return false;
 	}
 	
-	public boolean hasIndex(final String columnName) {
+	@Override
+    public boolean hasIndex(final String columnName) {
 		return this.index.containsKey(columnName);
 	}
 	
-	public Collection<byte[]> get(final String columnName, final String key) {
+	@Override
+    public Collection<byte[]> get(final String columnName, final String key) {
 		return this.index.get(columnName).get(key);
 	}
 	
-	public int size(final String columnName) {
+	@Override
+    public int size(final String columnName) {
 		if(this.index.containsKey(columnName)) {
 			return this.index.get(columnName).size();
 		}
 		return -1;
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.index.size();
 	}	
 }

@@ -63,18 +63,21 @@ public final class ByteCountOutputStream extends BufferedOutputStream {
     }    
 
     /** @see java.io.OutputStream#write(byte[]) */
+    @Override
     public final void write(final byte[] b) throws IOException {
         super.write(b);
         this.byteCount += b.length;
     }
 
     /** @see java.io.OutputStream#write(byte[], int, int) */
+    @Override
     public final synchronized void write(final byte[] b, final int off, final int len) throws IOException {        
         super.write(b, off, len);
         this.byteCount += len;
     }
 
     /** @see java.io.OutputStream#write(int) */
+    @Override
     public final synchronized void write(final int b) throws IOException {
         super.write(b);
         this.byteCount++;

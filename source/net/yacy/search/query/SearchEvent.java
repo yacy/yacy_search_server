@@ -1234,6 +1234,7 @@ public final class SearchEvent {
                 } else {
                     final URIMetadataNode node1 = node;
                     new Thread() {
+                        @Override
                         public void run() {
                             SearchEvent.this.oneFeederStarted();
                             try {
@@ -1260,6 +1261,7 @@ public final class SearchEvent {
             }
         } else {
             new Thread() {
+                @Override
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
                     try {
@@ -1510,6 +1512,7 @@ public final class SearchEvent {
             this.height = height;
             this.fileSize = fileSize;
         }
+        @Override
         public String toString() {
             return this.imageUrl.toString();
         }

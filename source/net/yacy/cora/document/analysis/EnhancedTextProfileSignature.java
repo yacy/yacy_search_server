@@ -165,6 +165,7 @@ public class EnhancedTextProfileSignature extends Lookup3Signature {
   }
 
   private static class TokenComparator implements Comparator<Token> {
+    @Override
     public int compare(Token t1, Token t2) {
       return t2.cnt - t1.cnt;
     }

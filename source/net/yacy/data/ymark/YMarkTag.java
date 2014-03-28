@@ -32,7 +32,8 @@ public class YMarkTag implements Comparable<YMarkTag>{
 		return this.size;
 	}
 
-	public int compareTo(YMarkTag tag) {
+	@Override
+    public int compareTo(YMarkTag tag) {
 		if(this.name.equals(tag.name()))
 			return 0;
 		if(tag.size() < this.size)

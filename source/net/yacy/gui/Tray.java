@@ -71,7 +71,8 @@ public final class Tray {
 				if(SystemTray.isSupported()) {
 					final String iconPath = sb.getAppPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
 					ActionListener al = new ActionListener() {
-						public void actionPerformed(final ActionEvent e) {
+						@Override
+                        public void actionPerformed(final ActionEvent e) {
 							doubleClickAction();
 						}
 					};
@@ -112,7 +113,7 @@ public final class Tray {
 			if (deutsch)
 				label = "Bitte warten bis YaCy gestartet ist.";
 			else if (french)
-				label = "S'il vous plaît attendre jusqu'à YaCy est démarré.";
+				label = "S'il vous pla��t attendre jusqu'�� YaCy est d��marr��.";
 			else
 				label = "Please wait until YaCy is started.";
 			//ti.displayMessage("YaCy",label);
@@ -147,7 +148,8 @@ public final class Tray {
 			label = "YaCy Search";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent e) {
+			@Override
+            public void actionPerformed(final ActionEvent e) {
 				openBrowserPage("");
 			}
 		});
@@ -180,7 +182,8 @@ public final class Tray {
 			label = "Peer Administration";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent e) {
+			@Override
+            public void actionPerformed(final ActionEvent e) {
 				openBrowserPage("Status.html");
 			}
 		});
@@ -193,12 +196,13 @@ public final class Tray {
 		if(deutsch) 
 			label = "YaCy Beenden";
 		else if(french)
-			label = "Arrêt YaCy";
+			label = "Arr��t YaCy";
 		else
 			label = "Shutdown YaCy";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent e) {
+			@Override
+            public void actionPerformed(final ActionEvent e) {
 				sb.terminate("shutdown from tray");
 			}
 		});

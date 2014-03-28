@@ -33,22 +33,30 @@ public abstract class AbstractReader implements Reader {
 	// logging support
     protected String name = null;
     protected File file = null;
+    @Override
     public String name() {
         return name;
     }
+    @Override
     public File file() {
         return file;
     }
 
     // pseudo-native methods:
+    @Override
     abstract public void readFully(byte[] b, int off, int len) throws IOException;
+    @Override
     abstract public long length() throws IOException;
+    @Override
     abstract public long available() throws IOException;
+    @Override
     abstract public void seek(long pos) throws IOException;
+    @Override
     abstract public void close() throws IOException;
 
     
     // derived methods:
+    @Override
     public final byte[] readFully() throws IOException {
         long a = this.available();
         if (a <= 0) return null;
@@ -58,6 +66,7 @@ public abstract class AbstractReader implements Reader {
         return buffer;
     }
 
+    @Override
     public final short readShort() throws IOException {
         byte[] b = new byte[2];
         this.readFully(b, 0, 2);
@@ -65,6 +74,7 @@ public abstract class AbstractReader implements Reader {
         return (short) (((b[0] & 0xFF) << 8) | (b[1] & 0xFF));
     }
     
+    @Override
     public final int readInt() throws IOException {
         byte[] b = new byte[4];
         this.readFully(b, 0, 4);
@@ -72,6 +82,7 @@ public abstract class AbstractReader implements Reader {
         return (((b[0] & 0xFF) << 24) | ((b[1] & 0xFF) << 16) | ((b[2] & 0xFF) << 8) | (b[3] & 0xFF));
     }
 
+    @Override
     public final long readLong() throws IOException {
         return ((long) (readInt()) << 32) | (readInt() & 0xFFFFFFFFL);
     }

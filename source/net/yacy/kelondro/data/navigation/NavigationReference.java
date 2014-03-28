@@ -31,12 +31,15 @@ import net.yacy.kelondro.rwi.Reference;
 
 public interface NavigationReference extends Reference {
 
+    @Override
     public String toPropertyForm();
     
+    @Override
     public Entry toKelondroEntry();
 
     public String navigationHash();
 
+    @Override
     public byte[] urlhash();
 
     public byte[] termHash();

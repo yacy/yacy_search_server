@@ -158,6 +158,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return this.core == null || this.core.isClosed();
     }
     
+    @Override
     protected void finalize() throws Throwable {
         this.close();
     }
@@ -339,6 +340,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         }
     }
 
+    @Override
     public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
         SolrQueryRequest req = this.request(params);
         SolrQueryResponse response = null;
@@ -382,6 +384,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             this.request = null;
             this.response = null;
         }
+        @Override
         protected void finalize() throws Throwable {
             try {close();} finally {super.finalize();}
         }

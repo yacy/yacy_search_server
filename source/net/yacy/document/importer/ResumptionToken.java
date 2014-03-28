@@ -241,6 +241,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         return get("token");
     }
 
+    @Override
     public String toString() {
         return "source = " +  this.source + ", expirationDate=" + ISO8601Formatter.FORMATTER.format(getExpirationDate()) + ", completeListSize=" + getCompleteListSize() +
         ", cursor=" + getCursor() + ", token=" + getToken();
@@ -306,6 +307,7 @@ public class ResumptionToken extends TreeMap<String, String> {
          cursor="0">1518323588</resumptionToken>
         */
 
+        @Override
         public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
             if ("record".equals(tag)) {
                 ResumptionToken.this.recordCounter++;
@@ -316,6 +318,7 @@ public class ResumptionToken extends TreeMap<String, String> {
             }
         }
 
+        @Override
         public void endElement(final String uri, final String name, final String tag) {
             if (tag == null) return;
             if ("resumptionToken".equals(tag)) {
@@ -328,6 +331,7 @@ public class ResumptionToken extends TreeMap<String, String> {
             }
         }
 
+        @Override
         public void characters(final char ch[], final int start, final int length) {
             if (this.parsingValue) {
                 this.buffer.append(ch, start, length);

@@ -93,6 +93,7 @@ public class ImportDump {
         }
     }
 
+    @Override
     protected void finalize() throws Throwable {
         close();
     }

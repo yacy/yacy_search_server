@@ -49,6 +49,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * memory that is free without increasing of total memory taken from os
      * @return bytes
      */
+    @Override
     protected final long free() {
         return getUsage(eden, false).getCommitted() - getUsage(eden, false).getUsed();
     }
@@ -58,6 +59,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * Smallest of both old and young
      * @return bytes
      */
+    @Override
     protected final long available() {
     	return available(true);
     }
@@ -75,6 +77,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * memory that is currently bound in objects
      * @return used bytes
      */
+    @Override
     protected final long used() {
         return heap.getHeapMemoryUsage().getUsed();
     }
@@ -83,6 +86,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
 	 * currently allocated memory in the Java virtual machine; may vary over time
 	 * @return bytes
 	 */
+    @Override
     protected final long total() {
 		return heap.getHeapMemoryUsage().getCommitted();
 	}
@@ -91,6 +95,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
 	 * maximum memory the Java virtual will allocate machine; may vary over time in some cases
 	 * @return bytes
 	 */
+    @Override
     protected final long maxMemory() {
 		return heap.getHeapMemoryUsage().getMax();
     }
@@ -103,6 +108,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @param force specifies whether ignoring preferred size
      * @return whether enough memory could be freed (or is free) or not
      */
+    @Override
     protected final boolean request(final long size, final boolean force, AtomicBoolean shortStatus) {
     	if (size == 0l) return true; // does not make sense to check - returning true without setting shortStatus (which also doesn't make sense to me)
     	final boolean unknown = size < 0l; // size < 0 indicate an unknown size - maybe from gziped streams
@@ -135,6 +141,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * 
      * @return Memory is in proper state
      */
+    @Override
     protected boolean properState() {
     	return properState(false);
     }

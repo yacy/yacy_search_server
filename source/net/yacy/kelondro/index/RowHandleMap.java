@@ -112,6 +112,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         this.index.optimize();
     }
 
+    @Override
     public long mem() {
         return this.index.mem();
     }

@@ -40,7 +40,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryModifier;

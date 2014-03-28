@@ -273,6 +273,7 @@ public enum CollectionSchema implements SchemaDeclaration {
      * Set a custom Solr field name (and converts it to lower case)
      * @param theValue = the field name
      */
+    @Override
     public final void setSolrFieldName(String theValue) {
         // make sure no empty string is assigned
         if ( (theValue != null) && (!theValue.isEmpty()) ) {
@@ -317,39 +318,46 @@ public enum CollectionSchema implements SchemaDeclaration {
         return this.comment;
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final String value) {
         assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final Date value) {
         assert !this.isMultiValued();
         assert this.type == SolrType.date;
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final int value) {
         assert !this.isMultiValued();
         assert this.type == SolrType.num_integer;
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final long value) {
         assert !this.isMultiValued();
         assert this.type == SolrType.num_long;
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final String[] value) {
         assert this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final Integer[] value) {
         assert this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final List<?> value) {
         assert this.isMultiValued();
         if (value == null || value.size() == 0) {
@@ -375,16 +383,19 @@ public enum CollectionSchema implements SchemaDeclaration {
         }
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final float value) {
         assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final double value) {
         assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
     public final void add(final SolrInputDocument doc, final boolean value) {
         assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);

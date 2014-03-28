@@ -25,27 +25,33 @@ public class RDFaTripleContent implements IRDFaTriple {
 				this.objectURI = objectURI;
 	}
 
-	public String getSubjectURI() {
+	@Override
+    public String getSubjectURI() {
 		return subjectURI;
 	}
 
-	public String getSubjectNodeURI() {
+	@Override
+    public String getSubjectNodeURI() {
 		return subjectNodeURI;
 	}
 
-	public String getPropertyURI() {
+	@Override
+    public String getPropertyURI() {
 		return propertyURI;
 	}
 
-	public String getValue() {
+	@Override
+    public String getValue() {
 		return value;
 	}
 
-	public String getDataType() {
+	@Override
+    public String getDataType() {
 		return dataType;
 	}
 
-	public String getLanguage() {
+	@Override
+    public String getLanguage() {
 		return language;
 	}
 

@@ -242,6 +242,7 @@ public final class yacy {
             final String iframetarget = sb.getConfig("donation.iframetarget", "");
             final File iframefile = new File(htDocsPath, iframetarget);
             if (!iframefile.exists()) new Thread() {
+                @Override
                 public void run() {
                     final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
                     Response response;

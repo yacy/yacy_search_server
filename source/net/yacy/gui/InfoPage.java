@@ -66,6 +66,7 @@ public class InfoPage implements Layout {
 
     private class CommitAction extends AbstractAction {
         private static final long serialVersionUID = 3630229455629476865L;
+        @Override
         public void actionPerformed(ActionEvent ev) {
             //int pos = SearchBox.getSelectionEnd();
             Browser.openBrowser("http://" + host + ":" + port + "/yacysearch.html?display=0&verify=true&contentdom=text&nav=all&maximumRecords=10&startRecord=0&resource=global&urlmaskfilter=.*&prefermaskfilter=&indexof=off&meanCount=5&query=" + SearchBox.getText().replace(' ', '+'));
@@ -75,6 +76,7 @@ public class InfoPage implements Layout {
         }
     }
     
+    @Override
     public LayoutManager getPage(JComponent context, DocumentListener listener) {
         GroupLayout page = new GroupLayout(context);
         

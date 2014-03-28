@@ -51,6 +51,7 @@ public class MemoryTracker extends Thread {
     	this.setName("MemoryTracker");
     }
     
+    @Override
     public void run() {
         try {
         	while (running) {

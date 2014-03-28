@@ -55,18 +55,22 @@ public class NonClosingInputStreamEntity extends AbstractHttpEntity {
         this.length = length;
     }
 
+    @Override
     public boolean isRepeatable() {
         return false;
     }
 
+    @Override
     public long getContentLength() {
         return this.length;
     }
 
+    @Override
     public InputStream getContent() throws IOException {
         return this.content;
     }
 
+    @Override
     public void writeTo(final OutputStream outstream) throws IOException {
         if (outstream == null) {
             throw new IllegalArgumentException("Output stream may not be null");
@@ -93,6 +97,7 @@ public class NonClosingInputStreamEntity extends AbstractHttpEntity {
         }
     }
 
+    @Override
     public boolean isStreaming() {
         return true;
     }
@@ -101,6 +106,7 @@ public class NonClosingInputStreamEntity extends AbstractHttpEntity {
      * @deprecated Either use {@link #getContent()} and call {@link java.io.InputStream#close()} on that;
      * otherwise call {@link #writeTo(OutputStream)} which is required to free the resources.
      */
+    @Override
     @Deprecated
     public void consumeContent() throws IOException {
         // If the input stream is from a connection, closing it will read to

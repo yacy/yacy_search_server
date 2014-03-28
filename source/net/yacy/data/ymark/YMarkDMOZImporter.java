@@ -55,7 +55,8 @@ public class YMarkDMOZImporter extends YMarkImporter {
 		this.depth = Integer.MAX_VALUE;
 	}
 	
-	public void parse() throws Exception {
+	@Override
+    public void parse() throws Exception {
 		xmlReader.parse(new InputSource(bmk_file));
 	}
 	
@@ -78,7 +79,8 @@ public class YMarkDMOZImporter extends YMarkImporter {
 			this.buffer = new StringBuilder(512);
 		}
 		
-		public void startElement(final String uri, String localName, final String qName, final Attributes attributes) throws SAXException {
+		@Override
+        public void startElement(final String uri, String localName, final String qName, final Attributes attributes) throws SAXException {
 			// get rid of namespace prefixes
 			if (localName.isEmpty()) {
 				localName = qName.substring(qName.indexOf(':')+1);
@@ -102,7 +104,8 @@ public class YMarkDMOZImporter extends YMarkImporter {
     		}		    
 		}
 
-		public void endElement(final String uri, String localName, final String qName) throws SAXException {
+		@Override
+        public void endElement(final String uri, String localName, final String qName) throws SAXException {
 			// get rid of namespace prefixes
 			if (localName.isEmpty()) {
 				localName = qName.substring(qName.indexOf(':')+1);
@@ -141,7 +144,8 @@ public class YMarkDMOZImporter extends YMarkImporter {
 			this.buffer.setLength(0);
 		}
 
-		public void characters(final char ch[], final int start, final int length) throws SAXException {
+		@Override
+        public void characters(final char ch[], final int start, final int length) throws SAXException {
 			// no processing here, as the SAX Parser characters method could be called more than once per tag!
 			if(this.tag != null) {				
 				buffer.append(ch, start, length); 

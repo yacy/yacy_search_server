@@ -35,6 +35,7 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
     /**
      * apply all E/int mappings from an external ScoreMap to this ScoreMap
      */
+    @Override
     public void inc(ScoreMap<E> map) {
         if (map == null) return;
         for (E entry: map) {
@@ -48,6 +49,7 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
      * @param score
      * @return the objects of the smaller entries from at least 1/2 of the list
      */
+    @Override
     public List<E> lowerHalf() {
         
         // first calculate the average of the entries
@@ -75,6 +77,7 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
         */
     }
 
+    @Override
     public Collection<E> keyList(final boolean up) {
         List<E> list = new ArrayList<E>(this.size());
         Iterator<E> i = this.keys(up);

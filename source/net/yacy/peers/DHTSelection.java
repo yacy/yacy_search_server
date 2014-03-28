@@ -360,6 +360,7 @@ public class DHTSelection {
             this.se = seedDB.seedsConnected(true, false, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
         }
 
+        @Override
         protected Seed next0() {
             Seed s;
             try {

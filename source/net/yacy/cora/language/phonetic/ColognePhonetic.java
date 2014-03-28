@@ -387,6 +387,7 @@ public class ColognePhonetic implements StringEncoder {
         return output.toString();
     }
 
+    @Override
     public Object encode(Object object) throws EncoderException {
         if (!(object instanceof String)) {
             throw new EncoderException("This method's parameter was expected to be of the type " +
@@ -398,6 +399,7 @@ public class ColognePhonetic implements StringEncoder {
         return encode((String) object);
     }
 
+    @Override
     public String encode(String text) {
         return colognePhonetic(text);
     }

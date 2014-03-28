@@ -1,5 +1,5 @@
 // YMarkHTMLImporter.java
-// (C) 2011 by Stefan Förster, sof@gmx.de, Norderstedt, Germany
+// (C) 2011 by Stefan F��rster, sof@gmx.de, Norderstedt, Germany
 // first published 2010 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
@@ -59,7 +59,8 @@ public class YMarkHTMLImporter extends YMarkImporter {
 		this(bmk_file, queueSize, targetFolder, "");
 	}	
 	
-	public void parse() throws Exception {
+	@Override
+    public void parse() throws Exception {
 		htmlParser.parse(bmk_file, new HTMLParser(), true);
 	}
 	
@@ -78,7 +79,8 @@ public class YMarkHTMLImporter extends YMarkImporter {
 			this.prevTag = null;
 	    }
 		
-		public void handleText(char[] data, int pos) {
+		@Override
+        public void handleText(char[] data, int pos) {
 	    	switch (state) {
 	    		case NOTHING:
 	    			break;
@@ -103,7 +105,8 @@ public class YMarkHTMLImporter extends YMarkImporter {
 	    	}
 		}
 
-		public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
+		@Override
+        public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
 			if (t == HTML.Tag.A) {
 				if (!this.bmk.isEmpty()) {
 					try {
@@ -158,7 +161,8 @@ public class YMarkHTMLImporter extends YMarkImporter {
 		    this.prevTag = t;
 		}
 
-		public void handleEndTag(HTML.Tag t, int pos) {
+		@Override
+        public void handleEndTag(HTML.Tag t, int pos) {
 			// write the last bookmark, as no more <a> tags are following
 			if (t == HTML.Tag.HTML) {
 				if (!this.bmk.isEmpty()) {

@@ -63,6 +63,7 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
         this.stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 64 * 1024));
     }
     
+    @Override
     public byte[] next0() {
         final byte[] chunk = new byte[chunksize];
         int r, s;

@@ -1146,6 +1146,7 @@ public final class Switchboard extends serverSwitch {
         
         // finally start jobs which shall be started after start-up
         new Thread() {
+            @Override
             public void run() {
                 Thread.currentThread().setName("Switchboard.setHttpServer");
                 try {Thread.sleep(10000);} catch (final InterruptedException e) {} // needs httpd up
@@ -2926,6 +2927,7 @@ public final class Switchboard extends serverSwitch {
         for (DigestURL url: rootURLs) {
             final DigestURL turl = url;
             Thread t = new Thread() {
+                @Override
                 public void run() {
                     String failreason;
                     if ((failreason = Switchboard.this.stackUrl(profile, turl)) == null) successurls.add(turl); else failurls.put(turl, failreason);

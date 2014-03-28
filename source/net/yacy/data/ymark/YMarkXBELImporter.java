@@ -101,7 +101,8 @@ public class YMarkXBELImporter extends YMarkImporter {
 		this(bmk_file, queueSize, "", targetFolder);
 	}	
 	
-	public void parse() throws Exception {
+	@Override
+    public void parse() throws Exception {
 		xmlReader.parse(new InputSource(bmk_file));
 	}
 	
@@ -132,7 +133,8 @@ public class YMarkXBELImporter extends YMarkImporter {
 			this.folder.append(targetFolder);
 		}
 	    
-	    public void endDocument() throws SAXException {
+	    @Override
+        public void endDocument() throws SAXException {
 	    	// put alias references in the bookmark queue to ensure that folders get updated
 	    	// we do that at endDocument to ensure all referenced bookmarks already exist
 	    	bookmarks.addAll(this.aliasRef);
@@ -140,7 +142,8 @@ public class YMarkXBELImporter extends YMarkImporter {
 	    	this.bmkRef.clear();
 	    }
 	    
-	    public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
+	    @Override
+        public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
 	        YMarkDate date = new YMarkDate();
 	        if (tag == null) return;
 	        tag = tag.toLowerCase();              
@@ -207,7 +210,8 @@ public class YMarkXBELImporter extends YMarkImporter {
 	        }
 	    }
 
-	    public void endElement(final String uri, final String name, String tag) {
+	    @Override
+        public void endElement(final String uri, final String name, String tag) {
 	        if (tag == null) return;
 	        tag = tag.toLowerCase();
 	        if(XBEL.BOOKMARK.tag().equals(tag)) {
@@ -236,7 +240,8 @@ public class YMarkXBELImporter extends YMarkImporter {
 	        }
 	    }
 
-	    public void characters(final char ch[], final int start, final int length) {
+	    @Override
+        public void characters(final char ch[], final int start, final int length) {
 	        // TODO move string processing to endElement as characters() could be called more than once per tag
 	    	if (parse_value) {
 	        	buffer.append(ch, start, length);      	        	

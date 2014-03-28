@@ -60,6 +60,7 @@ class NamePrefixThreadFactory implements ThreadFactory {
      *
      * @see java.util.concurrent.ThreadFactory#newThread(java.lang.Runnable)
      */
+    @Override
     public Thread newThread(final Runnable r) {
         final Thread t = defaultFactory.newThread(r);
         t.setName(this.prefix + "_" + t.getName());

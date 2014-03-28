@@ -55,68 +55,81 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         this.maxBusySleep = maxBusySleep;
     }
 
+    @Override
     public final void setStartupSleep(final long milliseconds) {
         // sets a sleep time before execution of the job-loop
         startup = milliseconds;
     }
     
+    @Override
     public final long setIdleSleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
         idlePause = Math.min(this.maxIdleSleep, Math.max(this.minIdleSleep, milliseconds));
         return idlePause;
     }
     
+    @Override
     public final long getIdleSleep() {
         return idlePause;
     }
     
+    @Override
     public final long setBusySleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
         busyPause = Math.min(this.maxBusySleep, Math.max(this.minBusySleep, milliseconds));
         return busyPause;
     }
     
+    @Override
     public final long getBusySleep() {
         return busyPause;
     }
     
+    @Override
     public void setMemPreReqisite(final long freeBytes) {
         // sets minimum required amount of memory for the job execution
         memprereq = freeBytes;
     }
     
+    @Override
     public double setLoadPreReqisite(final double load) {
         // sets minimum required amount of memory for the job execution
         loadprereq = load;
         return load;
     }
     
+    @Override
     public void setObeyIntermission(final boolean obey) {
         // defines if the thread should obey the intermission command
         intermissionObedient = obey;
     }
     
+    @Override
     public final long getIdleCycles() {
         // returns the total number of cycles of job execution with idle-result
         return this.idleCycles;
     }
     
+    @Override
     public final long getBusyCycles() {
         // returns the total number of cycles of job execution with busy-result
         return this.busyCycles;
     }
 
+    @Override
     public long getOutOfMemoryCycles() {
         // returns the total number of cycles where
         // a job execution was omitted because of memory shortage
         return this.outofmemoryCycles;
     }
     
+    @Override
     public final long getSleepTime() {
         // returns the total time that this thread has slept so far
         return this.idletime;
     }
     
+    @Override
     public void intermission(final long pause) {
         if (pause == Long.MAX_VALUE)
             this.intermission = Long.MAX_VALUE;

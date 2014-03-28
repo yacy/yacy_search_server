@@ -41,6 +41,7 @@ public class GzipResponseInterceptor implements HttpResponseInterceptor {
 
     private static final String GZIP_CODEC = "gzip";
     
+    @Override
     public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
         if (context == null) {
             throw new IllegalArgumentException("HTTP context may not be null");

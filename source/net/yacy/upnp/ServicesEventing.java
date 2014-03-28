@@ -321,7 +321,8 @@ public class ServicesEventing implements Runnable {
     }
   }
 
-  public void run() {
+  @Override
+public void run() {
     // only the deamon thread is allowed to call such method
     if ( !Thread.currentThread().getName().equals( "ServicesEventing daemon" ) ) return;
     try {
@@ -355,6 +356,7 @@ public class ServicesEventing implements Runnable {
       this.client = client;
     }
     
+    @Override
     public void run() {
       try {
         client.setSoTimeout( 30000 );

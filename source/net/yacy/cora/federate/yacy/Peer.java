@@ -111,6 +111,7 @@ public class Peer extends HashMap<Peer.Schema, String> implements Comparable<Pee
      * get the hash code of the peer.
      * The hash code is a number that has the same order as the peer order.
      */
+    @Override
     public int hashCode() {
         String h = this.get(Schema.hash);
         return (int) (Base64Order.enhancedCoder.cardinal(h) >> 32);
@@ -120,6 +121,7 @@ public class Peer extends HashMap<Peer.Schema, String> implements Comparable<Pee
      * check if two peers are equal:
      * two peers are equal if they have the same hash.
      */
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof Peer)) return false;
         String h0 = this.get(Schema.hash);

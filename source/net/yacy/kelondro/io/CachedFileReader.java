@@ -49,14 +49,17 @@ public final class CachedFileReader extends AbstractReader implements Reader {
         this.cachelen = 0;
     }
     
+    @Override
     public final synchronized long available() throws IOException {
         return this.length() - RAFile.getFilePointer();
     }
 
+    @Override
     public final synchronized long length() throws IOException {
         return this.RAFile.length();
     }
 
+    @Override
     public final synchronized void readFully(final byte[] b, final int off, int len) throws IOException {
         long seek = RAFile.getFilePointer();
         if (cache != null  && cachelen - seek >= len) {
@@ -70,10 +73,12 @@ public final class CachedFileReader extends AbstractReader implements Reader {
         return;
     }
 
+    @Override
     public final synchronized void seek(final long pos) throws IOException {
         RAFile.seek(pos);
     }
     
+    @Override
     public final synchronized void close() {
         if (RAFile != null) try {
             try{RAFile.getChannel().close();} catch (final IOException e) {}

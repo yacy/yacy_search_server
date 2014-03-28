@@ -62,6 +62,7 @@ public class Peers extends TreeMap<byte[], Peer> implements Serializable {
         if (System.currentTimeMillis() - this.lastBootstrap < 60000) return;
         lastBootstrap = System.currentTimeMillis();
         new Thread() {
+            @Override
             public void run() {
                 String[] peers = bootstrapList(select(false, false));
                 bootstrap(peers, 1);
@@ -86,6 +87,7 @@ public class Peers extends TreeMap<byte[], Peer> implements Serializable {
             for (Integer pn: s) {
                 final String bp = peers[pn.intValue()];
                 Thread t0 = new Thread() {
+                    @Override
                     public void run() {
                         Peers ps;
                         try {

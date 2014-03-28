@@ -238,16 +238,19 @@ public class MessageBoard {
             nextKey = null;
         }
         
+        @Override
         public boolean hasNext() {
             return nextKey != null;
         }
         
+        @Override
         public String next() {
             final String next = nextKey;
             findNext();
             return next;
         }
         
+        @Override
         public void remove() {
         }
         

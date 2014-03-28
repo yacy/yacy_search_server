@@ -34,8 +34,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jetty.util.log.Log;
-
 import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;

@@ -46,10 +46,12 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         this.gcount = 0;
     }
 
+    @Override
     public Iterator<E> iterator() {
         return this.map.keySet().iterator();
     }
 
+    @Override
     public synchronized void clear() {
         this.map.clear();
         this.gcount = 0;
@@ -59,6 +61,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
      * shrink the cluster to a demanded size
      * @param maxsize
      */
+    @Override
     public void shrinkToMaxSize(final int maxsize) {
         if (this.map.size() <= maxsize) return;
         int minScore = getMinScore();
@@ -72,6 +75,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
      * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
      * @param minScore
      */
+    @Override
     public void shrinkToMinScore(final int minScore) {
         final Iterator<Map.Entry<E, AtomicLong>> i = this.map.entrySet().iterator();
         Map.Entry<E, AtomicLong> entry;
@@ -85,18 +89,22 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         return this.gcount;
     }
 
+    @Override
     public int size() {
         return this.map.size();
     }
 
+    @Override
     public boolean sizeSmaller(final int size) {
         return this.map.size() < size;
     }
 
+    @Override
     public boolean isEmpty() {
         return this.map.isEmpty();
     }
 
+    @Override
     public void inc(final E obj) {
         if (obj == null) return;
 
@@ -108,6 +116,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         this.gcount++;
     }
 
+    @Override
     public void dec(final E obj) {
         if (obj == null) return;
 
@@ -119,6 +128,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         this.gcount--;
     }
 
+    @Override
     public void set(final E obj, final int newScore) {
         if (obj == null) return;
 
@@ -130,6 +140,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         this.gcount += newScore;
     }
 
+    @Override
     public void inc(final E obj, final int incrementScore) {
         if (obj == null) return;
 
@@ -141,10 +152,12 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         this.gcount += incrementScore;
     }
 
+    @Override
     public void dec(final E obj, final int decrementScore) {
         inc(obj, -decrementScore);
     }
 
+    @Override
     public int delete(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
@@ -156,10 +169,12 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         return score.intValue();
     }
 
+    @Override
     public boolean containsKey(final E obj) {
         return this.map.containsKey(obj);
     }
 
+    @Override
     public int get(final E obj) {
         if (obj == null) return 0;
         final AtomicLong score = this.map.get(obj);
@@ -193,6 +208,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         return this.map.toString();
     }
 
+    @Override
     public Iterator<E> keys(final boolean up) {
         // re-organize entries
         final TreeMap<Integer, Set<E>> m = new TreeMap<Integer, Set<E>>();
