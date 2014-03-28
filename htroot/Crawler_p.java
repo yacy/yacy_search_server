@@ -473,7 +473,7 @@ public class Crawler_p {
                     }
                 } else if ("sitemap".equals(crawlingMode)) {
                     try {
-                        final DigestURL sitemapURL = new DigestURL(sitemapURLStr);
+                        final DigestURL sitemapURL = sitemapURLStr.indexOf("//") > 0 ? new DigestURL(sitemapURLStr) : new DigestURL(rootURLs.iterator().next(), sitemapURLStr); // fix for relative paths which should not exist but are used anyway
                         sb.crawler.putActive(handle, profile);
                         final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, profile);
                         importer.start();
