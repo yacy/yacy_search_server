@@ -116,6 +116,17 @@ public final class Records {
         this.buffer = new byte[buffersize];
         this.buffercount = 0;
     }
+    
+    public void clear() {
+        try {
+            this.raf.setLength(0);
+            int buffersize = Math.max(1, (maxWriteBuffer / recordsize)) * recordsize;
+            this.buffer = new byte[buffersize];
+            this.buffercount = 0;
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+        }
+    }
 
     /**
      * @param tablefile

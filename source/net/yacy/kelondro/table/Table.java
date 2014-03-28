@@ -876,24 +876,7 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized void clear() throws IOException {
-        final File f = this.file.filename();
-        this.file.close();
-        this.file = null;
-        FileUtils.deletedelete(f);
-        tableTracker.remove(f.getName());
-
-        // make new file
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(f);
-        } catch (final FileNotFoundException e) {
-            // should not happen
-            ConcurrentLog.severe("Table", "", e);
-        }
-        if (fos != null) try { fos.close(); } catch (final IOException e) {}
-
-        this.file = new BufferedRecords(new Records(f, this.rowdef.objectsize), this.buffersize);
-
+        this.file.clear();
         // initialize index and copy table
         this.table = (this.table == null) ? null : new RowSet(this.taildef);
         this.index.clear();

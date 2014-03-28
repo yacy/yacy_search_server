@@ -52,6 +52,11 @@ public final class BufferedRecords {
         this.maxEntries = maxEntries;
         this.buffer = new TreeMap<Long, byte[]>();
     }
+    
+    public synchronized void clear() {
+        this.efs.clear();
+        this.buffer.clear();
+    }
 
     /**
      * flush the buffer: this shall be called before any file-based iterations
