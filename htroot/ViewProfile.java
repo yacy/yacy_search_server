@@ -67,9 +67,6 @@ public class ViewProfile {
                     env.getConfig("network.unit.description", "") :
                     env.getConfig(SwitchboardConstants.GREETING, "");
         prop.put("display_promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("display_promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put("display_promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-
         
         prop.put("edit", authenticated ? 1 : 0);
         final String hash = (post == null) ? null : post.get("hash");

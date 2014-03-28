@@ -887,7 +887,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
             templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
             templatePatterns.put("p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
-
+            templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+            templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+            
             if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
                 String mimeType = Classification.ext2mime(targetExt, MimeTypes.TEXT_HTML);
 
@@ -944,6 +946,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             p = buffer.indexOf(inctxt, offset);
         }
         out.write(in, offset, in.length - offset);
+        out.close();
         buffer.close();
     }
 

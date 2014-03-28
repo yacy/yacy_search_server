@@ -102,8 +102,6 @@ public class HostBrowser {
                     env.getConfig("network.unit.description", "") :
                     env.getConfig(SwitchboardConstants.GREETING, "");
         prop.put("topmenu_promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("topmenu_promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put("topmenu_promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
 
         if (!searchAllowed) {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");

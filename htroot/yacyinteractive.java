@@ -47,8 +47,6 @@ public class yacyinteractive {
                     env.getConfig("network.unit.description", "") :
                     env.getConfig(SwitchboardConstants.GREETING, "");
         prop.put("topmenu_promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("topmenu_promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put("topmenu_promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
 
         final String query = (post == null) ? "" : post.get("query", "");
         final String startRecord = (post == null) ? "0" : post.get("startRecord", "");
