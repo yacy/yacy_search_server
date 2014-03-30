@@ -71,7 +71,7 @@ import org.jsoup.select.Elements;
  *
  * Hint: a browser favorite of
  *         javascript: window.location.href = ('http://localhost:9090/proxy.html?url=' + location.href);
- * will start the urlproxy with the current broser address.
+ * will start the urlproxy with the current browser address.
  */
 public class UrlProxyServlet extends ProxyServlet implements Servlet {
 
@@ -267,7 +267,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
                 }
 
                 response.setIntHeader(HeaderFramework.CONTENT_LENGTH, sbb.length);
-                FileUtils.copy (sbb,response.getOutputStream());
+                response.getOutputStream().write(sbb);
 
             } else {
                 if ((response.getHeader(HeaderFramework.CONTENT_LENGTH) == null) && prop.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE)) {
