@@ -101,6 +101,11 @@ a[target="_self"], a[class="forceNoExternalIcon"], a[class="navbar-brand"], a[cl
 /* (fix for IE 10) prevent borders on img within links */
 a img {border: none}
 
+table {
+    border-spacing: 1px;
+    border-collapse: separate;
+}
+
 td {
   padding:1px 2px;
 }
