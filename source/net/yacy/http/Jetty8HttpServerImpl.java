@@ -44,7 +44,6 @@ import net.yacy.http.servlets.GSAsearchServlet;
 import net.yacy.http.servlets.SolrSelectServlet;
 import net.yacy.http.servlets.SolrServlet;
 import net.yacy.http.servlets.YaCyDefaultServlet;
-import net.yacy.http.servlets.YaCyProxyServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
@@ -150,7 +149,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         htrootContext.addServlet(SolrServlet.class, "/solr/webgraph/admin/luke");
 
         // add proxy?url= servlet
-        htrootContext.addServlet(YaCyProxyServlet.class,"/proxy.html");
+        //htrootContext.addServlet(YaCyProxyServlet.class,"/proxy.html");
         
         // add GSA servlet
         htrootContext.addServlet(GSAsearchServlet.class,"/gsa/search");

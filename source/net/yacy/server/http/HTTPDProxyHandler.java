@@ -699,7 +699,6 @@ public final class HTTPDProxyHandler {
         } finally {
             try { respond.flush(); respond.close(); } catch (final Exception e) {}
         }
-        return;
     }
 
     /**
