@@ -1,0 +1,7 @@
+<div class="SubMenu">
+  <h3>Use Case &amp; Accounts</h3>
+  <ul class="SubMenu">
+    <li><a href="ConfigBasic.html" class="MenuItemLink">Basic Configuration</a></li>
+    <li><a href="ConfigAccounts_p.html" class="MenuItemLink lock">Accounts</a></li>
+  </ul>
+</div>

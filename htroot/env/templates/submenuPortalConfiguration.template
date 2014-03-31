@@ -4,5 +4,6 @@
     <li><a href="ConfigSearchBox.html" class="MenuItemLink">Search Box Anywhere</a></li>
     <li><a href="ConfigPortal.html" class="MenuItemLink">Generic Search Portal</a></li>
     <li><a href="ConfigProfile_p.html" class="MenuItemLink lock">User Profile</a></li>
+    <li><a href="ConfigRobotsTxt_p.html" class="MenuItemLink lock">Local robots.txt</a></li>
   </ul>
 </div>
