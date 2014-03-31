@@ -68,7 +68,7 @@
     <ul class="nav nav-sidebar menugroup">
       <li><h3>First Steps</h3></li>
       <li><a href="ConfigBasic.html" class="MenuItemLink">Use Case &amp; Account</a></li>
-      <li><a href="CrawlStartSite_p.html" class="MenuItemLink lock">Load Web Pages (Crawler)</a></li>
+      <li><a href="CrawlStartSite.html" class="MenuItemLink">Load Web Pages (Crawler)</a></li>
       <li><a href="Performance_p.html" class="MenuItemLink lock">RAM/Disk Usage &amp; Updates</a></li>
     </ul>
     
@@ -84,7 +84,7 @@
     
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Production</h3></li>
-      <li><a href="CrawlStartExpert_p.html" class="MenuItemLink lock">Advanced Crawler</a></li>
+      <li><a href="CrawlStartExpert.html" class="MenuItemLink">Advanced Crawler</a></li>
       <li><a href="Load_RSS_p.html" class="MenuItemLink lock">Content Importer</a></li>
       <li><a href="Table_API_p.html" class="MenuItemLink lock">Process Scheduler</a></li>
       <li><a href="Tables_p.html?table=robots&count=100" class="MenuItemLink lock">Target Analysis</a></li>

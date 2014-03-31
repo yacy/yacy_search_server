@@ -28,9 +28,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-public class CrawlStartSite_p {
+public class CrawlStartSite {
     
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        return CrawlStartExpert_p.respond(header, post, env);
+        return CrawlStartExpert.respond(header, post, env);
     }
 }

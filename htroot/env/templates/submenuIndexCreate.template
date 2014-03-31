@@ -5,8 +5,7 @@
   <div class="SubMenugroup">
     <h3>Crawler/Spider</h3>
     <ul class="SubMenu">
-      <li><a href="CrawlStartExpert_p.html" class="MenuItemLink lock">Crawl Start (Expert)</a></li>
-      <li><a href="CrawlStartScanner_p.html" class="MenuItemLink lock">Network Scanner</a></li>
+      <li><a href="CrawlStartExpert.html" class="MenuItemLink">Crawl Start (Expert)</a></li>
       <li><a href="Load_MediawikiWiki.html" class="MenuItemLink">Crawling of MediaWikis</a></li>
       <li><a href="Load_PHPBB3.html" class="MenuItemLink">Crawling of phpBB3 Forums</a></li>
     </ul>
@@ -15,6 +14,7 @@
   <div class="SubMenugroup">
     <h3>Network Harvesting</h3>
     <ul class="SubMenu">
+      <li><a href="CrawlStartScanner_p.html" class="MenuItemLink lock">Network Scanner</a></li>
       <li><a href="RemoteCrawl_p.html" class="MenuItemLink lock">Remote Crawling</a></li>
       <li><a href="ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Scraping Proxy</a></li>
     </ul>

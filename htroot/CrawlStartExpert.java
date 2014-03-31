@@ -35,7 +35,7 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-public class CrawlStartExpert_p {
+public class CrawlStartExpert {
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
@@ -542,27 +542,6 @@ public class CrawlStartExpert_p {
                 prop.put("collection", collectionEnabled ? defaultCollection : "");
             }
         }
-
-        /* problaby unused (no corresponding entry in template)
-        prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
-        
-        final int crawlingDomFilterDepth = env.getConfigInt("crawlingDomFilterDepth", -1);
-        prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
-        prop.put("crawlingDomFilterDepth", (crawlingDomFilterDepth == -1) ? 1 : crawlingDomFilterDepth);
-         
-        prop.put("followFramesChecked", env.getConfigBool("followFrames", true) ? "1" : "0");
-
-        final long LCbusySleep = env.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 100L);
-        final int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
-        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
-        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
-        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
-        prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
-
-        prop.put("xsstopwChecked", env.getConfigBool("xsstopw", true) ? "1" : "0");
-        prop.put("xdstopwChecked", env.getConfigBool("xdstopw", true) ? "1" : "0");
-        prop.put("xpstopwChecked", env.getConfigBool("xpstopw", true) ? "1" : "0");
-        */
 
         // return rewrite properties
         return prop;
