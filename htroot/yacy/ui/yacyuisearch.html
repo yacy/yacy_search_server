@@ -121,7 +121,7 @@
 		           		var query = "&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create";            		
 		           		$.ajax({
 							type: "POST",
-							url: "/xml/bookmarks/posts/add_p.xml?login="+query,			
+							url: "/api/bookmarks/posts/add_p.xml?login="+query,			
 							dataType: "xml",
 							success: function(xml) {
 		           				alert("Debug: posted bookmark for: "+url);            					
