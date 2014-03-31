@@ -1,0 +1,8 @@
+<div class="SubMenu">
+  <h3>Design</h3>
+  <ul class="SubMenu">
+    <li><a href="ConfigAppearance_p.html" class="MenuItemLink lock">Appearance</a></li>
+    <li><a href="ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>
+    <li><a href="ConfigSearchPage_p.html" class="MenuItemLink lock">Search Page Layout</a></li>
+  </ul>
+</div>

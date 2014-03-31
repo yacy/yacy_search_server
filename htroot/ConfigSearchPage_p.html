@@ -17,7 +17,7 @@
 
 <body id="ConfigSearchPage" >
 #%env/templates/header.template%#
-#%env/templates/submenuSearchConfiguration.template%#
+#%env/templates/submenuDesign.template%#
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
@@ -31,7 +31,7 @@ $(function() {
 	$("#sidebarDomains").accordion({});
 	$("#sidebarProtocols").accordion({});
 	$("#sidebarFiletypes").accordion({});
-        $("#sidebarLanguages").accordion({});        
+    $("#sidebarLanguages").accordion({});        
 	$("#sidebarAuthors").accordion({});
 	$("#sidebarNameSpace").accordion({});
     $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();

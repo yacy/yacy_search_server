@@ -3871,9 +3871,10 @@ Rich Client Search==Rich Client Suche
 Compare Search==Vergleichs-Suche
 URL Viewer==URL Betrachter
 ### SEARCH DESIGN ###
-Search Design==Suchmaskendesign
-Search Integration into External Sites==Integration Suche in Externe Seiten
-Integrated Search Configuration==Konfiguration der Integrierten Suche
+Search Integration==Suchmaskenintegration
+Portal Configuration==Portal-Konfiguration
+Design==Design
+Ranking and Heuristics==Ranking und Heuristiken
 ### INDEX CONTROL ###
 Index&nbsp;Production==Indexerzeugung
 #Crawler / Harvester==Crawler / Harvester

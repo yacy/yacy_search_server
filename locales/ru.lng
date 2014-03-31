@@ -4151,8 +4151,8 @@ Location Search==Локальный поиск
 Rich Client Search==Rich Client Suche
 ### SEARCH DESIGN ###
 Search&nbsp;Design==Интеграция поиска
-Search Integration into External Sites==Интеграция поискового интерфейса в другие сайты
-Integrated Search Configuration==Настройка интегрируемого поиска
+Portal Configuration==Интеграция поискового интерфейса в другие сайты
+Design==Настройка интегрируемого поиска
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
 Crawler / Harvester==Индексирование / Сканер сети

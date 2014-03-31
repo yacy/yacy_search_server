@@ -91,9 +91,10 @@
     </ul>
     
     <ul class="nav nav-sidebar menugroup">
-      <li><h3>Search&nbsp;Design</h3></li>
-      <li><a href="ConfigLiveSearch.html" class="MenuItemLink">Search Integration into External Sites</a></li>
-      <li><a href="ConfigPortal.html" class="MenuItemLink">Integrated Search Configuration</a></li>
+      <li><h3>Search Integration</h3></li>
+      <li><a href="ConfigSearchBox.html" class="MenuItemLink">Portal Configuration</a></li>
+      <li><a href="ConfigAppearance_p.html" class="MenuItemLink">Design</a></li>
+      <li><a href="RankingSolr_p.html" class="MenuItemLink">Ranking and Heuristics</a></li>
     </ul>
     </div>
   
