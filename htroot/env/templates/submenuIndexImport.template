@@ -1,0 +1,20 @@
+<div class="SubMenu">
+  <h3>Content Importer</h3>
+</div>
+<div class="SubMenu">
+  <div class="SubMenugroup">
+    <h3>External Datasets</h3>
+    <ul class="SubMenu">
+      <li><a href="Load_RSS_p.html" class="MenuItemLink lock">RSS Feed Importer</a></li>
+      <li><a href="IndexImportOAIPMH_p.html" class="MenuItemLink lock">OAI-PMH Importer</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Database Reader</h3>
+    <ul class="SubMenu">
+      <li><a href="ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">Database Reader for phpBB3 Forums</a></li>
+      <li><a href="IndexImportMediawiki_p.html" class="MenuItemLink lock">Dump Reader for MediaWiki dumps</a></li>
+    </ul>
+  </div>
+</div>
