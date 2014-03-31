@@ -71,21 +71,16 @@ h4 {
 }
 
 a:link {
-  text-decoration:none;
+  text-decoration:underline;
 }
 
 a:visited {
-  text-decoration:none;
-}
-
-a:visited {
-  text-decoration:none;
+  text-decoration:underline;
 }
 
 a:hover {
   text-decoration:underline;
 }
-
 
 /* mark external links */
 a[href^="http://"], a[href^="https://"]  {
