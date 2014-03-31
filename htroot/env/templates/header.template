@@ -76,8 +76,8 @@
       <li><h3>Monitoring</h3></li>
       <li><a href="Status.html" class="MenuItemLink">System Status</a></li>
       <li><a href="Network.html" accesskey="w" class="MenuItemLink">YaCy Peer-to-Peer Network</a></li>
+      <li><a href="HostBrowser.html?admin=true" class="MenuItemLink">Web Visualization</a></li>
       <li><a href="Crawler_p.html" class="MenuItemLink lock">Crawler Monitor</a></li>
-      <li><a href="WatchWebStructure_p.html?host=auto&amp;depth=3&amp;time=1000" class="MenuItemLink lock">Web Visualization</a></li>
       <li><a href="AccessGrid_p.html" class="MenuItemLink lock">Network Access</a></li>
       <!-- <li><a href="terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li> -->
     </ul>

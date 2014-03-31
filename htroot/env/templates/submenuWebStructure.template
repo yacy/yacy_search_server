@@ -1,7 +1,8 @@
 <div class="SubMenu">
   <h3>Web Visualization</h3>
   <ul class="SubMenu">
-    <li><a href="WatchWebStructure_p.html?host=auto&amp;depth=2&amp;time=1000" class="MenuItemLink lock">Web Structure</a></li>
+    <li><a href="HostBrowser.html?admin=true" class="MenuItemLink">Host Browser</a></li>
+    <li><a href="WatchWebStructure_p.html?host=auto&amp;depth=3&amp;time=1000" class="MenuItemLink lock">Web Structure</a></li>
     <li><a href="Collage.html" class="MenuItemLink">Image Collage</a></li>
   </ul>
 </div>

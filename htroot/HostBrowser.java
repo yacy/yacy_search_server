@@ -77,11 +77,11 @@ public class HostBrowser {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         Fulltext fulltext = sb.index.fulltext();
-        final boolean admin = sb.verifyAuthentication(header);
-        final boolean autoload = admin && sb.getConfigBool("browser.autoload", true);
+        final boolean authorized = sb.verifyAuthentication(header);
+        final boolean autoload = authorized && sb.getConfigBool("browser.autoload", true);
         final boolean load4everyone = sb.getConfigBool("browser.load4everyone", false);
         final boolean loadRight = autoload || load4everyone; // add config later
-        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || admin;
+        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || authorized;
 
         final serverObjects prop = new serverObjects();
         
@@ -90,10 +90,17 @@ public class HostBrowser {
         prop.put("result", "");
         prop.put("hosts", 0);
         prop.put("files", 0);
-        prop.put("admin", admin ? 1 : 0);
+        
+        prop.put("admin", "false");
+        boolean admin = false;
 
-        if (admin) { // show top nav to admins
-            prop.put("topmenu",1);
+        String referer = header.get("Referer", "");
+        if ((post != null && post.getBoolean("admin")) || referer.contains("HostBrowser.html?admin=true")) {
+            prop.put("topmenu", 2);
+            prop.put("admin", "true");
+            admin = true;
+        } else if (authorized) { // show top nav to admins
+            prop.put("topmenu", 1);
         } else { // for other respect setting in Search Design Configuration
             prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         }
@@ -110,7 +117,7 @@ public class HostBrowser {
         }
 
         String path = post == null ? "" : post.get("path", "").trim();
-        if (admin) sb.index.fulltext().commit(true);
+        if (authorized) sb.index.fulltext().commit(true);
         if (post == null || env == null) {
             prop.putNum("ucount", fulltext.collectionSize());
             return prop;
@@ -125,7 +132,7 @@ public class HostBrowser {
             !path.startsWith("smb://") &&
             !path.startsWith("file://"))) { path = "http://" + path; }
         prop.putHTML("path", path);
-        prop.put("delete", admin && path.length() > 0 ? 1 : 0);
+        prop.put("delete", authorized && path.length() > 0 ? 1 : 0);
         
         DigestURL pathURI = null;
         try {pathURI = new DigestURL(path);} catch (final MalformedURLException e) {}
@@ -159,7 +166,7 @@ public class HostBrowser {
             }
         }
 
-        if (admin && post.containsKey("deleteLoadErrors")) {
+        if (authorized && post.containsKey("deleteLoadErrors")) {
             try {
                 fulltext.getDefaultConnector().deleteByQuery("-" + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " 
                         + CollectionSchema.httpstatus_i.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM); // make sure field exists
@@ -181,19 +188,19 @@ public class HostBrowser {
                 boolean onlyCrawling = "crawling".equals(post.get("hosts", ""));
                 boolean onlyErrors = "error".equals(post.get("hosts", ""));
                 
-                int maxcount = admin ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
+                int maxcount = authorized ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
                 
                 // collect hosts from index
                 ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_QUERY, maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
                 if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
                 
                 // collect hosts from crawler
-                final Map<String, Integer[]> crawler = (admin) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
+                final Map<String, Integer[]> crawler = (authorized) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
                 
                 // collect the errorurls
-                Map<String, ReversibleScoreMap<String>> exclfacets = admin ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
+                Map<String, ReversibleScoreMap<String>> exclfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
                 ReversibleScoreMap<String> exclscore = exclfacets == null ? new ClusteredScoreMap<String>() : exclfacets.get(CollectionSchema.host_s.getSolrFieldName());
-                Map<String, ReversibleScoreMap<String>> failfacets = admin ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
+                Map<String, ReversibleScoreMap<String>> failfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
                 ReversibleScoreMap<String> failscore = failfacets == null ? new ClusteredScoreMap<String>() : failfacets.get(CollectionSchema.host_s.getSolrFieldName());
                 
                 int c = 0;
@@ -201,6 +208,7 @@ public class HostBrowser {
                 String host;
                 while (i.hasNext() && c < maxcount) {
                     host = i.next();
+                    prop.put("hosts_list_" + c + "_admin", admin ? "true" : "false");
                     prop.putHTML("hosts_list_" + c + "_host", host);
                     boolean inCrawler = crawler.containsKey(host);
                     int exclcount = exclscore.get(host);
@@ -233,11 +241,11 @@ public class HostBrowser {
         if (path.length() > 0) {
             boolean delete = false;
             boolean reload404 = false;
-            if (admin && post.containsKey("delete")) {
+            if (authorized && post.containsKey("delete")) {
                 // delete the complete path!! That includes everything that matches with this prefix.
                 delete = true;
             }
-            if (admin && post.containsKey("reload404")) {
+            if (authorized && post.containsKey("reload404")) {
                 // try to re-load all urls that have load errors and matches with this prefix.
                 reload404 = true;
             }
@@ -248,6 +256,7 @@ public class HostBrowser {
                 if (p > 0) path = path.substring(0, p + 1);
             }
             prop.put("files_complete", complete ? 1 : 0);
+            prop.put("files_complete_admin", admin ? "true" : "false");
             prop.putHTML("files_complete_path", path);
             p = path.substring(0, path.length() - 1).lastIndexOf('/');
             if (p < 8) {
@@ -255,13 +264,14 @@ public class HostBrowser {
             } else {
                 prop.put("files_root", 0);
                 prop.putHTML("files_root_path", path.substring(0, p + 1));
+                prop.put("files_root_admin", admin ? "true" : "false");
             }
             try {
                 // generate file list from path
                 DigestURL uri = new DigestURL(path);
                 String host = uri.getHost();
                 prop.putHTML("outbound_host", host);
-                if (admin) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
+                if (authorized) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
                 prop.putHTML("inbound_host", host);
                 String hosthash = ASCII.String(uri.hash(), 6, 6);
                 String[] pathparts = uri.getPaths();
@@ -324,12 +334,12 @@ public class HostBrowser {
                                     if (collections != null) reloadURLCollection.addAll(collections);
                                     reloadURLs.add(u);
                                 }
-                                if (admin) errorDocs.put(u, error);
+                                if (authorized) errorDocs.put(u, error);
                             }
                         }
                     } else if (complete) {
                         if (error == null) storedDocs.add(u); else {
-                            if (admin) errorDocs.put(u, error);
+                            if (authorized) errorDocs.put(u, error);
                         }
                     }
                     if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u); // add the current link
@@ -369,7 +379,7 @@ public class HostBrowser {
                 }
                 
                 // collect from crawler
-                List<Request> domainStackReferences = (admin) ? sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000) : new ArrayList<Request>(0);
+                List<Request> domainStackReferences = (authorized) ? sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000) : new ArrayList<Request>(0);
                 Set<String> loadingLinks = new HashSet<String>();
                 for (Request crawlEntry: domainStackReferences) loadingLinks.add(crawlEntry.url().toNormalform(true));
                 
@@ -430,6 +440,7 @@ public class HostBrowser {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
                         prop.putHTML("files_list_" + c + "_type_url", entry.getKey());
+                        prop.putHTML("files_list_" + c + "_type_admin", admin ? "true" : "false");
                         int linked = ((int[]) entry.getValue())[0];
                         int stored = ((int[]) entry.getValue())[1];
                         int crawler = ((int[]) entry.getValue())[2];
@@ -452,6 +463,7 @@ public class HostBrowser {
                         // this is a file
                         prop.put("files_list_" + c + "_type", 0);
                         prop.putHTML("files_list_" + c + "_type_url", entry.getKey());
+                        prop.putHTML("files_list_" + c + "_type_admin", admin ? "true" : "false");
                         StoreType type = (StoreType) entry.getValue();
                         try {uri = new DigestURL(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
                         HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash());
@@ -463,7 +475,7 @@ public class HostBrowser {
                             if (type == StoreType.INDEX) {
                                 String ids = ASCII.String(uri.hash());
                                 InfoCacheEntry ice = infoCache.get(ids);
-                                prop.put("files_list_" + c + "_type_stored_comment", ice.toString()); // ice.toString() contains html, therefore do not use putHTML here
+                                prop.put("files_list_" + c + "_type_stored_comment", ice == null ? "" : ice.toString()); // ice.toString() contains html, therefore do not use putHTML here
                             }
                             prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
                             if (error) {
@@ -503,6 +515,7 @@ public class HostBrowser {
                     Iterator<String> i = score.keys(false);
                     while (i.hasNext() && c < maxcount) {
                         host = i.next();
+                        prop.put("inbound_list_" + c + "_admin", admin ? "true" : "false");
                         prop.putHTML("inbound_list_" + c + "_host", sb.webStructure.hostHash2hostName(host));
                         prop.put("inbound_list_" + c + "_count", score.get(host));
                         c++;
@@ -525,6 +538,7 @@ public class HostBrowser {
                         prop.putHTML("outbound_list_" + c + "_host", host);
                         prop.put("outbound_list_" + c + "_count", score.get(host));
                         prop.put("outbound_list_" + c + "_link", outboundHosts.get(host).getMinKey());
+                        prop.put("outbound_list_" + c + "_admin", admin ? "true" : "false");
                         c++;
                     }
                     prop.put("outbound_list", c);
