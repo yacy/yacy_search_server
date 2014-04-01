@@ -54,7 +54,8 @@ import com.ibm.icu.text.CharsetDetector;
 public class htmlParser extends AbstractParser implements Parser {
 
     private static final Pattern patternUnderline = Pattern.compile("_");
-    private static final int maxLinks = 10000;
+    private final int maxLinks = 10000;
+    private Charset detectedcharset;
 
     public htmlParser() {
         super("Streaming HTML Parser");
@@ -97,7 +98,8 @@ public class htmlParser extends AbstractParser implements Parser {
         try {
             // first get a document from the parsed html
             final ContentScraper scraper = parseToScraper(location, documentCharset, sourceStream, maxLinks);
-            final Document document = transformScraper(location, mimeType, documentCharset, scraper);
+            // parseToScraper also detects/corrects/sets charset from html content tag
+            final Document document = transformScraper(location, mimeType, detectedcharset.name(), scraper);
 
             return new Document[]{document};
         } catch (final IOException e) {
@@ -153,7 +155,7 @@ public class htmlParser extends AbstractParser implements Parser {
         return ppd;
     }
 
-    public static ContentScraper parseToScraper(
+    public ContentScraper parseToScraper(
             final DigestURL location,
             final String documentCharset,
             InputStream sourceStream,
@@ -191,23 +193,21 @@ public class htmlParser extends AbstractParser implements Parser {
 
         // wtf? still nothing, just take system-standard
         if (charset == null) {
-            charset = Charset.defaultCharset().name();
+            detectedcharset = Charset.defaultCharset();
+        } else {
+            try {
+                detectedcharset = Charset.forName(charset);
+            } catch (final IllegalCharsetNameException e) {
+                detectedcharset = Charset.defaultCharset();
+            } catch (final UnsupportedCharsetException e) {
+                detectedcharset = Charset.defaultCharset();
+            }
         }
-
-        Charset c;
-        try {
-            c = Charset.forName(charset);
-        } catch (final IllegalCharsetNameException e) {
-            c = Charset.defaultCharset();
-        } catch (final UnsupportedCharsetException e) {
-            c = Charset.defaultCharset();
-        }
-
         // parsing the content
         final ContentScraper scraper = new ContentScraper(location, maxLinks);
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(64, Math.min(4096, sourceStream.available())));
         try {
-            FileUtils.copy(sourceStream, writer, c);
+            FileUtils.copy(sourceStream, writer, detectedcharset);
         } catch (final IOException e) {
             throw new Parser.Failure("IO error:" + e.getMessage(), location);
         } finally {
