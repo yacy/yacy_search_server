@@ -1,7 +1,15 @@
 package net.yacy.document.parser;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import static junit.framework.Assert.assertTrue;
 import junit.framework.TestCase;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
 import org.junit.Test;
 
 public class htmlParserTest extends TestCase {
@@ -39,4 +47,37 @@ public class htmlParserTest extends TestCase {
 		
 	}
 
+    /**
+     * Test of parse method, of class htmlParser.
+     * - test getCharset
+     */
+    @Test
+    public void testParse() throws MalformedURLException, Parser.Failure, InterruptedException, FileNotFoundException {
+        System.out.println("htmlParser.parse");
+
+        String[] testFiles = {
+            "umlaute_html_iso.html",
+            "umlaute_html_utf8.html",
+            "umlaute_html_namedentities.html"};
+
+        final String mimetype = "text/html";
+        //final String resulttxt = "In München steht ein Hofbräuhaus. Dort gibt es Bier aus Maßkrügen.";
+
+        for (String testfile : testFiles) {
+            final String filename = "test/parsertest/" + testfile;
+            final File file = new File(filename);
+
+            final AnchorURL url = new AnchorURL("http://localhost/" + filename);
+            System.out.println("parse file: " + filename);
+
+            htmlParser p = new htmlParser();
+            final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+
+            Document doc = docs[0];
+            String txt = doc.getCharset();
+            assertTrue("get Charset", txt != null);
+            System.out.println("detected charset = " + txt);
+
+        }
+    }
 }
