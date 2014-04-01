@@ -161,14 +161,10 @@
       </form>
 </fieldset>
 <script>
-if (document.getElementById("progress").clientHeight > document.getElementById("indexsize").clientHeight) {
-	document.getElementById("indexsize").style.height = (document.getElementById("progress").clientHeight)+"px";
-	document.getElementById("progress").style.height = (document.getElementById("progress").clientHeight)+"px";
-} else {
-	document.getElementById("progress").style.height = (document.getElementById("indexsize").clientHeight)+"px";
-	document.getElementById("indexsize").style.height = (document.getElementById("indexsize").clientHeight)+"px";
-}
-document.getElementById("queues").style.height = (document.getElementById("indexsize").clientHeight)+"px"; 
+var maxh = Math.max(document.getElementById("progress").clientHeight, document.getElementById("indexsize").clientHeight, document.getElementById("queues").clientHeight);
+document.getElementById("indexsize").style.height = maxh + "px";
+document.getElementById("progress").style.height = maxh + "px";
+document.getElementById("queues").style.height = maxh + "px"; 
 </script>
 <p class="watchCrawler" style="clear:both;">
 #(info)#
