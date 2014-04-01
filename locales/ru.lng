@@ -92,6 +92,9 @@ Service call: ==Вызов сервиса:
 Globally enables or disables URL proxy via ==Глобальное включение или отключение URL-прокси через 
 Show search results via URL proxy:==Показывать результаты поиска через URL-прокси:
 Enables or disables URL proxy for all search results. If enabled, all search results will be tunneled through URL proxy.==Включение или отключение URL-прокси для всех результатов поиска. Если включено, то все результаты поиска будут выводиться через URL-прокси. 
+Alternatively you may add this javascript to your browser favorites/short-cuts, which will reload the current browser address==Альтернативно вы можете добавить этот javascript в избранные страницы/закладки вашего браузера, который будет открывать запрашиваемый адрес 
+via the YaCy proxy servlet.==через прокси-сервлет.
+or right-click this link and add to favorites:==Или нажмите правой кнопкой мыши на эту ссылку и добавьте в закладки: 
 Restrict URL proxy use:==Запретить использование URL-прокси для:
 Define client filter. Default: ==Задать фильтр для клиента. По-умолчанию: 
 URL substitution:==Замена ссылки:
@@ -413,7 +416,7 @@ Save User==Сохранить пользователя
 
 #File: ConfigAppearance_p.html
 #---------------------------
-Appearance and Integration==Внешний вид и интеграция
+Appearance and Integration==Внешний вид
 You can change the appearance of the YaCy interface with skins.==Вы можете изменить внешний вид YaCy используя скины.
 #You can change the appearance of YaCy with skins==Вы можете изменить внешний вид YaCy со скинами
 The selected skin and language also affects the appearance of the search page.==Выбранный скин и язык, также влияют на внешний вид страницы поиска.
@@ -456,7 +459,7 @@ Error saving the skin.==Ошибка сохранения файла скина.
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Конфигурация доступа
-Basic Configuration==Основная конфигурация
+Basic Configuration==Основные настройки
 Your port has changed. Please wait 10 seconds.==Порт вашего узла был изменён. Пожалуйста, подождите 10 секунд.
 The peer port was changed successfully. Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==Порт узла был успешно изменён. Ваш браузер перейдёт на <a href="http://#[host]#:#[port]#/ConfigBasic.html">новую страницу</a> в течение 10 секунд.
 Your YaCy Peer needs some basic information to operate properly==Укажите основную информацию для работы вашего узла
@@ -564,7 +567,7 @@ Index Sources &amp; Targets==Источники индекса и цели
 As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==Используется внутренняя база данных индекса встроеная в мульти-ядро Solr, но также может использоваться и удалённая база Solr.
 Solr Search Index==База данных Solr
 Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="IndexSchema_p.html">Schema Editor</a>.==Solr содержит главный поисковый индекс. База данных состоит из двух ядер: по-умолчанию ядро 'collection1' для документов и ядро 'webgraph' для вэб-контента. База данных Solr может быть подробно настроена через <a href="IndexSchema_p.html">редактор схемы</a>.
-Lazy Value Initialization&nbsp;==Ленивые значения инициализации&nbsp;
+Lazy Value Initialization&nbsp;=="Ленивые" значения инициализации&nbsp;
 If checked, only non-zero values and non-empty strings are written to Solr fields.==Если отмечено, то только не нулевые значения и не пустые строки, будут записаны в поля Solr.
 Use deep-embedded local Solr&nbsp;==Использовать встроенную локальную базу Solr&nbsp;
 This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.==Для записи данных будет использоваться встроенная база Solr, которая хранится в папке DATA.
@@ -593,7 +596,7 @@ use webgraph search index \(rich information in second Solr core\)==Исполь
 "Set"=="Сохранить"
 Peer-to-Peer Operation==P2P-операции
 The 'RWI' \(Reverse Word Index\) is necessary for index transmission in distributed mode. For portal or intranet mode this must be switched off.=='RWI' (Обратный индекс слов) необходим для передачи индекса в распределённом режиме. Для поиска в интранете или на локальном сайте он должен быть отключен.
-support peer-to-peer index transmission \(DHT RWI index\)==Включить поддержку P2P-передачу индекса (DHT RWI индекс)
+support peer-to-peer index transmission \(DHT RWI index\)==Включить поддержку P2P-передачи индекса (DHT RWI индекс)
 "Set"=="Сохранить"
 #-----------------------------
 
@@ -713,7 +716,7 @@ YaCy ships with 'start' and 'smoothness' themes pre-installed.==В YaCy уже �
 
 #File: ConfigNetwork_p.html
 #---------------------------
-Network Configuration==Конфигурация сети
+Network Configuration==Настройка сети
 No changes were made!==Изменений не произведено!
 Accepted Changes==Изменения приняты
 Inapplicable Setting Combination==Некорректное сочетание настроек
@@ -1125,6 +1128,7 @@ List of possible crawl start URLs==Список ссылок для провер
 
 #File: CrawlProfileEditor_p.html
 #---------------------------
+Crawl Profile Editor==Изменение профиля индексирования
 >Crawl Profile Editor<==>Изменение профиля индексирования<
 >Crawler Steering<==>Управление индексатором<
 >Crawl Scheduler<==>Планировщик индексирования<
@@ -1144,6 +1148,7 @@ Must Not Match==Не должно совпадать
 MaxAge</strong>==Макс. возраст</strong>
 #Auto Filter Depth</strong>==Автовыбор глубины</strong>
 #Auto Filter Content</strong>==Автовыбор контента</strong>
+Domain Counter Content==Количество содержимого домена
 Max Page Per Domain</strong>==Максимум страниц на домен</strong>
 Accept==Принять
 Fill Proxy Cache==Заполнение кэша прокси
@@ -1163,7 +1168,30 @@ Select the profile to edit==Выбор профиля для изменения
 An error occurred during editing the crawl profile:==Ошибка во время изменения профиля:
 Edit Profile==Изменить профиль
 "Submit changes"=="Подтвердить изменения"
+Name==Название
+Collections \(comma-separated list\)==Хранилища (список через запятую)
+URL Must-Match Filter
+URL Must-Not-Match Filter
+IP Must-Match Filter
+IP Must-Not-Match Filter
+Country Must-Match Filter
+URL No-Depth-Limit Must-Match Filter
+Indexing URL Must-Match Filter
+Indexing URL Must-Not-Match Filter
+Indexing Content Must-Match Filter
+Indexing Content Must-Not-Match Filter
+Cache Strategy \(NOCACHE,IFFRESH,IFEXIST,CACHEONLY\)==Использование кэша (без кэша, если новее, если сушествует, только кэш)
+Crawl Depth==Глубина индексации
+Recrawl If Older==Переиндексировать, если старше
+Domain Max. Pages==Максимум страниц домена
+CrawlingQ / '?'-URLs==Индексировать Q / '?'-ссылки
+Index Text==Индексировать текст
+Index Media==Индексировать медиафайлы
+Store in HTCache==Сохранять в кэше
+Remote Indexing==Удалённое индексирование
+Put all linked urls into index without parsing==Добавлять все перекрестные ссылки в индекс без анализа
 #-----------------------------
+
 
 #File: CrawlResults.html
 #---------------------------
@@ -1193,7 +1221,7 @@ The index was crawled and contributed by other peers.==Индексация пр
 The url fetch was initiated and executed by other peers.==Полученные ссылки были иницированы и выполнены другими узлами.
 These links here have been transmitted to you because your peer is the most appropriate for storage according to==Эти ссылки были переданы вам, потому что ваш узел более подходит для их хранения,
 the logic of the Global Distributed Hash Table.==в соответствии с логикой глобальной DHT.
-<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==Этот список будет пополняться, если вы включите "Приём индекса" на странице "Конфигурация сети"
+<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==Этот список будет пополняться, если вы включите "Приём индекса" на странице "Настройка сети"
 \(4\) Results for Proxy Indexing==(4) Результаты  индексирования через прокси
 These web pages had been indexed as result of your proxy usage.==Эти вэб-страницы были проиндексированы в результате использования вами прокси.
 No personal or protected page is indexed==Личные или защищённые страницы не индексируются.
@@ -1233,7 +1261,7 @@ Blacklist to use==Используется чёрный список
 "del & blacklist"=="Удалить и блокировать"
 #-----------------------------
 
-#File: CrawlStartExpert_p.html
+#File: CrawlStartExpert.html
 #---------------------------
 Expert Crawl Start==Расширенное индексирование
 Start Crawling Job:==Запустить индексирование:
@@ -1466,7 +1494,7 @@ Sites that do not appear during a scheduled scan period will be excluded from se
 #"Add Selected Servers to Crawler"=="Добавить выбранные серверы в индексатор"
 #-----------------------------
 
-#File: CrawlStartSite_p.html
+#File: CrawlStartSite.html
 #---------------------------
 >Site Crawling<==>Индексирование сайта<
 Site Crawler:==Индексирование сайта:
@@ -1503,7 +1531,7 @@ A second crawl for a different host increases the throughput to a maximum of 240
 >High Speed Crawling<==>Высокая скорость индексирования<
 A \'shallow crawl\' which is not limited to a single host \(or site\)=='Медленное индексирование' не ограничено по одному хосту (или сайту)
 can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==скорость индексирования которого может быть увеличена на неограниченное, когда число удалённых хостов высока.
-This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==Это можно сделать с помощью <a href="CrawlStartExpert_p.html">запуска расширенного индексирования</a>.
+This can be done using the <a href=\"CrawlStartExpert.html\">Expert Crawl Start</a> servlet.==Это можно сделать с помощью <a href="CrawlStartExpert.html">запуска расширенного индексирования</a>.
 >Scheduler Steering<==>Управление планировщиком<
 The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==Расписание индексирования может быть изменено или удалено, используя <a href="Table_API_p.html">управление API</a>.
 #-----------------------------
@@ -1790,7 +1818,7 @@ Retrieve by URL-Hash==Поиск хэша URL-ссылки
 Cleanup==Очистка
 Index Deletion==Удаление индекса
 Delete local search index \(embedded Solr and old Metadata\)==Удалить локальный индекс поиска (включая базу данных Solr и старые метаданные)
-Delete remote solr index==Удалить удалённый индекс базы solr
+Delete remote solr index==Удалить удалённый индекс базы Solr
 Delete RWI Index \(DHT transmission words\)==Удалить индекс RWI (передача слов в виде DHT)
 Delete Citation Index \(linking between URLs\)==Удалить индекс цитат (перекрестные ссылки)
 Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
@@ -1887,6 +1915,18 @@ Fail-Reason==Причина ошибки
 This crawler queue is empty==Очередь этого индекcатора пуста
 \'Local\' Crawl Queue==Локальная очередь индексирования
 Click on this API button to see an XML with information about the crawler latency and other statistics.==Нажмите на эту кнопку для просмотра в виде XML информации о задержке индексатора и другой статистики.
+Delete Entries:==Удалить значения:
+Initiator==Инициатор
+Profile==Профиль
+Depth==Глубина
+Modified Date==Дата изменения
+Anchor Name==Название якоря
+#URL==URL
+Count==Количество
+Delta/ms==Дельта (мс)
+Host==Хост
+"Delete"=="Удалить"
+
 #-----------------------------
 
 
@@ -2856,7 +2896,7 @@ Post-Ranking==Nach-Ranking
 RWI Ranking Configuration<==Конфигурация ранжирования RWI<
 The document ranking influences the order of the search result entities.==Ранжирование документов влияет на результат поиска. 
 A ranking is computed using a number of attributes from the documents that match with the search word.==Ранжирование рассчитывается в использованием целого ряда аттрибутов документов в соответствии с искомым словом.  
- The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.==Аттрибуты сначала объединяют все результаты поиска, а затем объединённый аттрибут умножается на коэффициент ранжирования, вычисленный из этого списка.
+The attributes are first normalized over all search results and then the normalized attribute is multiplied with the ranking coefficient computed from this list.==Аттрибуты сначала объединяют все результаты поиска, а затем объединённый аттрибут умножается на коэффициент ранжирования, вычисленный из этого списка.
 The ranking coefficient grows exponentially with the ranking levels given in the following table. If you increase a single value by one, then the strength of the parameter doubles.==Коэффициент ранжирования растёт экспоненциально с ранжированием уровней, указанных в таблице ниже. Если вы увеличиваете одно значение на другое, то параметр удваивается.
 There are two ranking stages: first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==Есть два уровня ранжирования. Сначала все результаты оцениваются с использованием предварительного ранжирования, а затем из списка результатов документы ранжируются снова с пост-ранжированием.
 The two stages are separated because they need statistical information from the result of the pre-ranking.==Два уровня разделены, так как они нуждаются в статистической информации из результата предварительного ранжирования.
@@ -2871,35 +2911,35 @@ Pre-Ranking==Предварительное ранжирование
 Solr Ranking Configuration<==Конфигурация ранжирования Solr<
 These are ranking attributes for Solr. This ranking applies for internal and remote \(P2P or shard\) Solr access.==Это аттрибуты ранжирования для Solr. Это ранжирование применяется для внутренного и удалённого (P2P или раздельного) доступа к Solr.
 Select a profile:==Выберите профиль:
->Boost Function<==>Boost Funktion<
+>Boost Function<==>Функция Boost<
 A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.==Eine Boost Funktion kann numerische Werte von Ergebnis-Dokumenten kombinieren, um eine Nummer zu erzeugen die mit den Scoring Werten der Suchergebnisse multipliziert wird.
-To see all available fields, see the==Um alle verfügbaren Felder zu sehen, besuchen Sie
-#>YaCy Solr Schema<==>YaCy Solr Schema<
-and look for numeric values \(these are names with suffix '_i'\).==und schauen Sie nach den numerischen Werten (Die Namen mit Suffix '_i').
-To find out which kind of operations are possible, see the==Um herauszufinden welche Operationen möglich sind, nutzen Sie die Dokumentation der
->Solr Function Query<==>Solr Funktionen Abfrage<
+To see all available fields, see the==Все доступные поля смотрите
+>YaCy Solr Schema<==>схему Solr<
+and look for numeric values \(these are names with suffix '_i'\).==и ищите числовые значения (названия с суффиксом '_i').
+To find out which kind of operations are possible, see the==Чтобы узнать доступные операции, смотрите
+>Solr Function Query<==>запрос функций Solr<
 documentation.==.
-Example: to order by date, use==Beispiel: Um nach Datum zu sortieren, verwenden Sie
-, to order by clickdepth, use==, um nach Klicktiefe zu sortieren, verwenden Sie
+Example: to order by date, use==Например: для сортировки по дате, используйте
+, to order by clickdepth, use==, для сортировки по глубине индексации, используйте
 >boost<==>Boost<
-"Set Boost Function"=="Setze Boost Funktion"
-"Re-Set to default"=="Reset auf Standardwerte"
->Boost Query<==>Boost Abfrage<
+"Set Boost Function"=="Установить функцию Boost"
+"Re-Set to default"=="Восстановить значения по-умолчанию"
+>Boost Query<==>Запрос Boost<
 The Boost Query is attached to every query. Use this to statically boost specific content in the index.==Die Boost Abfrage wird an jede Abfrage angehängt. Verwenden sie diese Einstellung, um spezifischen Inhalt im Index zu boosten.
-Example: "fuzzy==Beispiel: "fuzzy
+Example: "fuzzy==Например: "fuzzy
  means that documents, identified as 'double' are ranked very bad and appended to the end of all results \(because the unique are ranked high\).== bedeutet dass Dokumente die als 'double' identifiziert werden sehr schlecht geranked werden und an das Ende der Suchergebnisliste angehängt werden (weil die eindeutigen hoch geranked werden).
-To find appropriate fields for this query, see the ==Um passende Felder für diese Abfrage zu finden, nutzen Sie das
-#>YaCy Solr Schema<==>YaCy Solr Schema<
- and look for boolean values \(with suffix '_b'\) or tags inside string fields \(with suffix '_s' or '_sxt'\).== und suchen Sie nach Werten mit boolschen Werten (mit Suffix '_b') oder Tags in String-Feldern (mit Suffix '_s' oder '_sxt')
+To find appropriate fields for this query, see the ==Чтобы найти соответствующие поля запросов, смотрите
+>YaCy Solr Schema<==>схему Solr<
+ and look for boolean values \(with suffix '_b'\) or tags inside string fields \(with suffix '_s' or '_sxt'\).== и ищите логические значения (с суффиксом '_b') или тэги внутри строк (с суффиксом '_s' или '_sxt')
 
 #>bq<==>bq<
-"Set Boost Query"=="Setze Boost Abfrage"
-#"Re-Set to default"=="Reset auf Standardwerte"
+"Set Boost Query"=="Установить запрос Boost"
+#"Re-Set to default"=="Восстановить значения по-умолчанию"
 #>Solr Boosts<==>Solr Boosts<
 This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
-field not in local index \(boost has no effect\)==Feld ist nicht im lokalen Index (Boost hat keinen Effekt)
-"Set Field Boosts"=="Setze Feld Boosts"
-#"Re-Set to default"=="Reset auf Standardwerte"
+field not in local index \(boost has no effect\)==поля нет в локальном индексе (эффект Boost не применяется)
+"Set Field Boosts"=="Установить поле Boosts"
+#"Re-Set to default"=="Восстановить значения по-умолчанию"
 #-----------------------------
 
 #File: RegexTest.html
@@ -2950,7 +2990,7 @@ URLs for<br/>Remote<br/>Crawl==Ссылки для <br/>удалённых <br/>
 
 #File: Settings_p.html
 #---------------------------
-Advanced Settings==Расширенные настройки
+Advanced Settings==Настройки системы
 If you want to restore all settings to the default values,==Если вы хотите восстановить все значения настроек по-умолчанию,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==но <strong>забыли свой пароль администратора</strong>, то вы должны остановить YaCy,
 delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==удалить файл 'DATA/SETTINGS/yacy.conf' в корневой папке YaCy и перезапустить YaCy.
@@ -3247,23 +3287,23 @@ value="add"==Значение="Добавить"
 #File: Status.html
 #---------------------------
 Console Status==Консоль управления узлом
-Log-in as administrator to see full status==Войдите как администратор. 
+Log-in as administrator to see full status==Войти, как администратор
 Welcome to YaCy!==Добро пожаловать в YaCy!
 Your settings are _not_ protected!</strong>==Ваши настройки не защищены паролем!</strong>
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Пожалуйста перейдите по ссылке <a href="ConfigAccounts_p.html">Настройка аккаунта</a> <strong>немедленно</strong>
 and set an administration password.==и установите пароль администратора.
 You have not published your peer seed yet. This happens automatically, just wait.==Ваш узел еще не активен. Потребуется немного времени, пожалуйста, подождите.
 The peer must go online to get a peer address.==Ваш узел должен быть онлайн для получения адресов других узлов.
-You cannot be reached from outside.==Вы недоступны извне.
+You cannot be reached from outside.==Ваш узел недоступен извне.
 A possible reason is that you are behind a firewall, NAT or Router.==Возможно, вы находитесь за брандмауэром, NAT или роутером.
-But you can <a href="index.html">search the internet</a> using the other peers'==Но Вы можете <a href="index.html">выполнять поиск</a>, используя помощь других узлов
+But you can <a href="index.html">search the internet</a> using the other peers'==Но вы можете <a href="index.html">выполнять поиск</a>, с помощью других узлов
 global index on your own search page.==на главной странице поиска.
 "bad"=="плохой"
 "idea"="идея"
 "good"="хороший"
 "Follow YaCy on Twitter"=="Следуй за YaCy на Twitter"
-We encourage you to open your firewall for the port you configured \(usually: 8090\),==Рекомендуется открыть доступ к порту на Вашем брандмауэре, который Вы настроили (обычно: 8090),
-or to set up a 'virtual server' in your router settings \(often called DMZ\).==или выполните настройку "виртуального сервера" в настройках Вашего роутера (настройка обычно называется DMZ).
+We encourage you to open your firewall for the port you configured \(usually: 8090\),==Рекомендуется открыть доступ к используемому порту (обычно, 8090) на вашем брандмауэре,
+or to set up a 'virtual server' in your router settings \(often called DMZ\).==или настройте "виртуальный сервер" на вашем роутере (настройка обычно называется DMZ).
 Please be fair, contribute your own index to the global index.==Пожалуйста, примите участие в создании глобального поискового индекса.
 Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Свободное место на диске меньше, чем #[minSpace]#. Индексирование сайтов приостановлено. Пожалуйста, освободите место на диске.
 it as soon as possible and restart YaCy.==Потребуется перезапуск YaCy.
@@ -3278,10 +3318,10 @@ You are running a server in senior mode and you support the global internet inde
 which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Ваш узел имеет статус "Principal" и вы можете публиковать свой сид-лист на публично-доступном сервере,
 where it can be retrieved using the URL==где он может быть получен с помощью ссылки:
-Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб-сайтов остановлен. Вы можете начать индексирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite.html">here</a>==Ваш индексатор веб-сайтов остановлен. Вы можете начать индексирование сайта <a href="CrawlStartSite.html">по ссылке</a>
 Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Ваш индексатор веб-сайтов работает. Вы можете посмотреть его работу <a href="Crawler_p.html">по этой ссылке</a>
 If you need professional support, please write to==Если вам нужна профессиональная поддержка, пожалуйста, напишите
-For community support, please visit our==Для поддержки сообществом, пожалуйста, посетите наш
+For community support, please visit our==Для получения поддержки сообщества, пожалуйста, посетите наш
 >forum<==>форум<
 #-----------------------------
 
@@ -3521,6 +3561,7 @@ API wiki page==страницу API в Wiki
 ### This Tables section is removed in current SVN Versions
 #File: Tables_p.html
 #---------------------------
+Table Viewer==Просмотр таблиц
 Table Administration==Управление таблицами базы данных
 Table Selection==Таблицы
 Select Table:==Выбрать таблицу:
@@ -4093,6 +4134,10 @@ Your search is done using only your own peer, locally. You can switch to 'Peer-t
 >Peer-to-Peer<==>P2P<
 >Stealth&nbsp;Mode<==>Режим&nbsp;стелс<
 "Privacy"=="Частный"
+Context Ranking==Фильтр по рейтингу
+Sort by Date==Фильтр по дате
+Documents==Документы
+Images==Изображения
 #-----------------------------
 
 ### Subdirectory api ###
@@ -4151,8 +4196,10 @@ Location Search==Локальный поиск
 Rich Client Search==Rich Client Suche
 ### SEARCH DESIGN ###
 Search&nbsp;Design==Интеграция поиска
-Search Integration into External Sites==Интеграция поискового интерфейса в другие сайты
-Integrated Search Configuration==Настройка интегрируемого поиска
+Search Integration==Интеграция поиска
+Portal Configuration==Конфигурация поискового портала
+Design==Настройка поиска
+Ranking and Heuristics==Ранжирование и эвристика
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
 Crawler / Harvester==Индексирование / Сканер сети
@@ -4183,6 +4230,20 @@ Bugtracker==Багтрэкер
 Peer Statistics==Статистика YaCy
 external==
 >Search...<==>Поиск...<
+"Search..."=="Поиск..."
+First Steps==Первые шаги
+Use Case &amp; Account==Учётные записи и варианты использования YaCy
+Load Web Pages \(Crawler\)==Индексирование сайта
+RAM/Disk Usage &amp; Updates==Настройки производительности
+System Status==Монитор производительности
+YaCy Peer-to-Peer Network==Сеть YaCy
+Advanced Crawler==Расширенная индексация
+Content Importer==Импорт контента
+System Administration==Настройки системы
+Configuration==Конфигурация
+Production==Индексирование
+>Administration<==>Управление узлом<
+Search Portal Integration==Интеграция поиска
 #-----------------------------
 
 #File: env/templates/simpleheader.template
@@ -4224,12 +4285,28 @@ Host Tracker==Хост-трекер
 Remote Search<==Удалённый поиск<
 #-----------------------------
 
+#File: env/templates/submenuIndexImport.template
+#-----------------------------
+RSS Feed Importer==Импорт RSS-лент
+OAI-PMH Importer==Импорт данных OAI-PMH
+Database Reader for phpBB3 Forums==Обозреватель баз данных phpBB3‐форумов
+Dump Reader for MediaWiki dumps==Обозреватель дампов MediaWiki
+#-----------------------------
+
 #File: env/templates/submenuSearchIntegration.template
 #---------------------------
 Search Integration into External Sites==Интеграция поиска во внешние сайты
 Live Search Anywhere=="Живой" поиск везде
 Search Box Anywhere==Поиск везде
 #-----------------------------
+
+#File: env/templates/SubmenuMaintenance.template
+#---------------------------
+Performance==Производительность
+Web Cache==Вэб-кэш
+Download System Update==Обновление системы
+#---------------------------
+
 
 #File: env/templates/submenuBlacklist.template
 #---------------------------
@@ -4243,7 +4320,10 @@ Content Control==Управление контентом
 
 #File: env/templates/submenuComputation.template
 #---------------------------
->Computation Monitor<==>Монитор производительности<
+>Application Status<==>Монитор производительности<
+>Status<==>Состояние<
+System==Система
+Thread Dump==Дамп потока
 ## Processes Submenu
 >Processes<==>Процессы<
 >Server Log<==>Лог сервера<
@@ -4263,22 +4343,61 @@ Content Control==Управление контентом
 >Local Peer Wiki<==>Wiki локального узла<
 #-----------------------------
 
+#File: env/templates/submenuCrawler.template
+#-----------------------------
+Use Case &amp; Accounts==Учётные записи и варианты использования YaCy
+Site Crawling==Индексирование сайта
+Parser Configuration==Конфигурация парсера
+#-----------------------------
+
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==Консоль управления узлом
+System Administration==Настройки системы
 >Status==>Состояние
-Basic Configuration==Основная конфигурация
+Basic Configuration==Основные настройки
 >Accounts==>Учетные записи
-Network Configuration==Конфигурация сети
-Download System Update==Обновление системы
->Performance==>Производительность
-Advanced Settings==Расширенные настройки
+Network Configuration==Настройка сети
+Advanced Settings==Настройки системы
 Local robots.txt==Локальный robots.txt
-Web Cache==Веб‐кэш
-Advanced Properties==Расширенная конфигурация
+Advanced Properties==Расширенные настройки
 >Thread Dump<==>Дамп потока<
 #-----------------------------
+
+#File: env/templates/submenuDesign.template
+#---------------------------
+>Appearance<==>Внешний вид<
+>Language<==>Язык<
+Search Page Layout==Макет страницы поиска
+Design==Настройка поиска
+#-----------------------------
+
+#File: env/templates/submenuPortalConfiguration.template
+#---------------------------
+Search Box Anywhere==Окно поиска
+Generic Search Portal==Страница общего поиска
+User Profile==Профиль пользователя
+Local robots.txt==Локальный robots.txt
+Portal Configuration==Интеграция поиска
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+Use Case &amp; Accounts==Учётные записи и варианты использования YaCy
+Basic Configuration==Основные настройки
+>Accounts<==>Учётные записи<
+#---------------------------
+
+
+
+#File: env/templates/submenuRanking.template
+#---------------------------
+Solr Ranking Config==Конфигурация Solr
+RWI Ranking Config==Конфигурация RWI
+>Heuristics<==>Эвристика<
+Ranking and Heuristics==Ранжирование и эвристика
+#-----------------------------
+
 
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
@@ -4374,23 +4493,12 @@ Network Scanner==Сканер сети
 Crawling of MediaWikis==Индексирование MediaWiki
 >Crawling of phpBB3 Forums<==>Индексирование phpBB3‐форумов<
 Content Import<==Импорт контента<
-RSS Feed Importer==Импорт RSS-лент
-OAI-PMH Importer==Импорт данных OAI-PMH
 Network Harvesting<==Сеть индексирования<
 Remote Crawling==Удалённое индексирование
 Scraping Proxy==Кэширующий прокси
 >Database Reader<==>Обозреватель баз данных<
 #for phpBB3 Forums==для форумов phpBB3
-Database Reader for phpBB3 Forums==Обозреватель баз данных phpBB3‐форумов
-Dump Reader for MediaWiki dumps==Обозреватель дампов MediaWiki
-#-----------------------------
-
-#File: env/templates/submenuPortalIntegration.template
-#---------------------------
-Search Portal Integration==Интеграция поискового портала
-Live Search Anywhere==Живой поиск везде
-Generic Search Portal==Общий поисковый портал
-Search Box Anywhere==Поле поиска везде
+Advanced Crawler==Расширенная индексация
 #-----------------------------
 
 #File: env/templates/submenuSemantic.template
@@ -4426,14 +4534,6 @@ File Hosting==Хостинг файлов
 #File: env/templates/submenuSearchConfiguration.template
 #---------------------------
 Integrated Search Configuration==Конфигурация интегрированного поиска
-Generic Search Portal==Страница общего поиска
-Search Page Layout==Макет страницы поиска
->Appearance<==>Внешний вид<
->Language<==>Язык<
-User Profile==Профиль пользователя
->Heuristics<==>Эвристик<
-Solr Ranking Config==Конфигурация Solr
-RWI Ranking Config==Конфигурация RWI
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
@@ -4447,6 +4547,7 @@ Server Log==Лог сервера
 Web Visualization==Вэб-визуализация
 Web Structure==Вэб-структура
 Image Collage==Коллаж изображений
+Host Browser==Просмотр хостов
 #-----------------------------
 
 #File: proxymsg/authfail.inc
