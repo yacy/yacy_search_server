@@ -945,7 +945,7 @@ Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==显示�
 "delete"=="删除"
 #-----------------------------
 
-#File: CrawlStartExpert_p.html
+#File: CrawlStartExpert.html
 #---------------------------
 Expert Crawl Start==Crawl高级设置
 Start Crawling Job:==开始Crawl任务:
@@ -1119,7 +1119,7 @@ Available server within the given IP range==指定IP范围内的可用服务器
 "Add Selected Servers to Crawler"=="添加选中服务器到crawler"
 #-----------------------------
 
-#File: CrawlStartSite_p.html
+#File: CrawlStartSite.html
 #---------------------------
 >Site Crawling<==>crawl站点<
 Site Crawler:==站点crawler:
@@ -1153,7 +1153,7 @@ A second crawl for a different host increases the throughput to a maximum of 240
 >High Speed Crawling<==>高速crawl<
 A \'shallow crawl\' which is not limited to a single host \(or site\)==当目标主机很多时, 用于多个主机(或站点)的'浅crawl'方式,
 can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==会增加每秒页面数(ppm).
-This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert_p.html">专家模式起始crawl</a>选项.
+This can be done using the <a href=\"CrawlStartExpert.html\">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert.html">专家模式起始crawl</a>选项.
 >Scheduler Steering<==>定时器向导<
 The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==可以使用<a href="Table_API_p.html">API向导</a>改变或删除crawl定时器.
 #-----------------------------
@@ -2668,7 +2668,7 @@ You are running a server in senior mode and you support the global internet inde
 which you can also <a href="index.html">search yourself</a>.==您也能进行<a href="index.html">本地搜索</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==您拥有一个主要peer, 因为您向公共服务器公布了您的seed列表,
 where it can be retrieved using the URL==可使用此URL进行接收:
-Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==网页索引器当前空闲. 可以点击<a href="CrawlStartSite_p.html">这里</a>开始网页crawl
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite.html">here</a>==网页索引器当前空闲. 可以点击<a href="CrawlStartSite.html">这里</a>开始网页crawl
 Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==网页索引器当前忙碌. 点击<a href="Crawler_p.html">这里</a>查看状态.
 #-----------------------------
 
