@@ -859,7 +859,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // create a subgraph
         if (!containsCanonical) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, true, document.getAnchors(), sourceName);
+            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, document.getAnchors(), sourceName);
         }
             
         // list all links

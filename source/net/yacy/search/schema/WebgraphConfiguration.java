@@ -111,14 +111,14 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     public void addEdges(
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
-            final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
+            final List<ImageEntry> images, final Collection<AnchorURL> links,
             final String sourceName) {
         boolean allAttr = this.isEmpty();
         boolean generalNofollow = responseHeader == null ? false : responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
         int target_order = 0;
         for (final AnchorURL target_url: links) {
             SolrInputDocument edge = getEdge(
-                    subgraph, source, responseHeader, collections, clickdepth_source, images, inbound,
+                    subgraph, source, responseHeader, collections, clickdepth_source, images,
                     sourceName, allAttr, generalNofollow, target_order, target_url);
             target_order++;
             // add the edge to the subgraph
@@ -129,13 +129,14 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     public SolrInputDocument getEdge(
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
-            final List<ImageEntry> images, final boolean inbound,
+            final List<ImageEntry> images,
             final String sourceName, boolean allAttr, boolean generalNofollow, int target_order, AnchorURL target_url) {
 
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         final String name = target_url.getNameProperty(); // the name attribute
         final String text = target_url.getTextProperty(); // the text between the <a></a> tag
         String rel = target_url.getRelProperty();         // the rel-attribute
+        boolean inbound = target_url.getHost().equals(source.getHost()); // well, not everybody defines 'outbound' that way but however, thats used here.
         int ioidx = inbound ? 0 : 1;
         if (generalNofollow) {
             // patch the rel attribute since the header makes nofollow valid for all links

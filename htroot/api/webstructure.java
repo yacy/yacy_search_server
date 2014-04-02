@@ -66,7 +66,7 @@ public class webstructure {
             	urlhash = ASCII.getBytes(about);
             	hosthash = about.substring(6);
             	url = authenticated ? sb.getURL(urlhash) : null;
-            } else if (authenticated && about.length() > 0) {
+            } else if (about.length() > 0) {
             	// consider "about" as url or hostname
                 try {
                     url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
