@@ -241,7 +241,9 @@ public final class Fulltext {
     public long collectionSize() {
         long t = System.currentTimeMillis();
         if (t - this.collectionSizeLastAccess < 1000) return this.collectionSizeLastValue;
-        long size = this.solrInstances.getDefaultMirrorConnector().getSize();
+        SolrConnector sc = this.solrInstances.getDefaultMirrorConnector();
+        if (sc == null) return 0;
+        long size = sc.getSize();
         this.collectionSizeLastAccess = t;
         this.collectionSizeLastValue = size;
         return size;

@@ -541,12 +541,15 @@ public final class Switchboard extends serverSwitch {
         // load domainList
         try {
             this.domainList = null;
-            if ( !getConfig("network.unit.domainlist", "").equals("") ) {
-                final Reader r =
-                    getConfigFileFromWebOrLocally(getConfig("network.unit.domainlist", ""), getAppPath()
-                        .getAbsolutePath(), new File(this.networkRoot, "domainlist.txt"));
+            if (!getConfig("network.unit.domainlist", "").equals("")) {
+                final Reader r = getConfigFileFromWebOrLocally(
+                        getConfig("network.unit.domainlist", ""),
+                        getAppPath().getAbsolutePath(),
+                        new File(this.networkRoot, "domainlist.txt"));
                 this.domainList = new FilterEngine();
-                this.domainList.loadList(new BufferedReader(r), null);
+                BufferedReader br = new BufferedReader(r);
+                this.domainList.loadList(br, null);
+                br.close();
             }
         } catch (final FileNotFoundException e ) {
             this.log.severe("CONFIG: domainlist not found: " + e.getMessage());
@@ -1382,11 +1385,14 @@ public final class Switchboard extends serverSwitch {
             try {
                 this.domainList = null;
                 if ( !getConfig("network.unit.domainlist", "").equals("") ) {
-                    final Reader r =
-                        getConfigFileFromWebOrLocally(getConfig("network.unit.domainlist", ""), getAppPath()
-                            .getAbsolutePath(), new File(this.networkRoot, "domainlist.txt"));
+                    final Reader r = getConfigFileFromWebOrLocally(
+                            getConfig("network.unit.domainlist", ""),
+                            getAppPath().getAbsolutePath(),
+                            new File(this.networkRoot, "domainlist.txt"));
                     this.domainList = new FilterEngine();
-                    this.domainList.loadList(new BufferedReader(r), null);
+                    BufferedReader br = new BufferedReader(r);
+                    this.domainList.loadList(br, null);
+                    br.close();
                 }
             } catch (final FileNotFoundException e ) {
                 this.log.severe("CONFIG: domainlist not found: " + e.getMessage());
@@ -1858,8 +1864,9 @@ public final class Switchboard extends serverSwitch {
             }
             return moved;
         }
+        InputStream is = null;
         try {
-            InputStream is = new BufferedInputStream(new FileInputStream(infile));
+            is = new BufferedInputStream(new FileInputStream(infile));
             if ( s.endsWith(".gz") ) {
                 is = new GZIPInputStream(is);
             }
@@ -1877,8 +1884,10 @@ public final class Switchboard extends serverSwitch {
                         try {
                             final OutputStream os =
                                 new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
-                            FileUtils.copy(new BufferedInputStream(new FileInputStream(outfile)), os);
+                            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(outfile)); 
+                            FileUtils.copy(bis, os);
                             os.close();
+                            bis.close();
                             if ( gzfile.exists() ) {
                                 FileUtils.deletedelete(outfile);
                             }
@@ -1890,6 +1899,7 @@ public final class Switchboard extends serverSwitch {
                     }
                 }
             }
+            if (is != null) try {is.close();} catch (IOException e) {}
         }
         return moved;
     }
@@ -2296,7 +2306,9 @@ public final class Switchboard extends serverSwitch {
                 // we optimize first because that is useful for postprocessing
                 int proccount = 0;
                 ReferenceReportCache rrCache = index.getReferenceReportCache();
-                ClickdepthCache clickdepthCache = index.getClickdepthCache(rrCache);
+                int clickdepth_maxtime = this.getConfigInt("postprocessing.clickdepth.maxtime", 100);
+                int clickdepth_maxdepth = this.getConfigInt("postprocessing.clickdepth.maxdepth", 6);
+                ClickdepthCache clickdepthCache = index.getClickdepthCache(rrCache, clickdepth_maxtime, clickdepth_maxdepth);
                 Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
                         this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
                 int cleanupByHarvestkey = deletionCandidates.size();

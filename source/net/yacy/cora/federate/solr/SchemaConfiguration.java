@@ -178,12 +178,12 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return changed;
     }
     
-    public boolean postprocessing_clickdepth(final ClickdepthCache clickdepthCache, final SolrInputDocument sid, final DigestURL url, final SchemaDeclaration clickdepthfield, final int maxtime) {
+    public boolean postprocessing_clickdepth(final ClickdepthCache clickdepthCache, final SolrInputDocument sid, final DigestURL url, final SchemaDeclaration clickdepthfield) {
         // get new click depth and compare with old
         Integer oldclickdepth = (Integer) sid.getFieldValue(clickdepthfield.getSolrFieldName());
         if (oldclickdepth != null && oldclickdepth.intValue() != 999) return false; // we do not want to compute that again
         try {
-            int clickdepth = clickdepthCache.getClickdepth(url, maxtime);
+            int clickdepth = clickdepthCache.getClickdepth(url);
             if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) {
                 sid.setField(clickdepthfield.getSolrFieldName(), clickdepth);
                 return true;

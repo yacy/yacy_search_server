@@ -1085,7 +1085,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                                 id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
                                                 try {
                                                     url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
-                                                    postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.source_clickdepth_i, 100);
+                                                    postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.source_clickdepth_i);
                                                 } catch (MalformedURLException e) {
                                                 }
                                             }
@@ -1095,7 +1095,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                                 id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
                                                 try {
                                                     url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
-                                                    postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.target_clickdepth_i, 100);
+                                                    postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.target_clickdepth_i);
                                                 } catch (MalformedURLException e) {
                                                 }
                                             }
@@ -1167,7 +1167,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
                         if (tagtype == ProcessType.CLICKDEPTH && collection.contains(CollectionSchema.clickdepth_i)) {
-                            if (postprocessing_clickdepth(clickdepthCache, sid, url, CollectionSchema.clickdepth_i, 100)) proccount_clickdepthchange++;
+                            if (postprocessing_clickdepth(clickdepthCache, sid, url, CollectionSchema.clickdepth_i)) proccount_clickdepthchange++;
                         }
 
                         if (tagtype == ProcessType.CITATION &&

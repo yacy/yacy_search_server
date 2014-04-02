@@ -209,20 +209,20 @@ public class Segment {
      * @return the clickdepth level or 999 if the root url cannot be found or a recursion limit is reached
      * @throws IOException
      */
-    private int getClickDepth(ReferenceReportCache rrc, final DigestURL url, int maxtime) throws IOException {
+    private int getClickDepth(final ReferenceReportCache rrc, final DigestURL url, final int maxtime, final int maxdepth) throws IOException {
 
         final byte[] searchhash = url.hash();
         RowHandleSet rootCandidates = getPossibleRootHashes(url);
+        if (rootCandidates.has(searchhash)) return 0; // the url is a root candidate itself
         
-        Set<String> ignore = new HashSet<String>(); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
+        Set<String> ignore = new HashSet<String>(); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent endless loops
         Set<String> levelhashes = new HashSet<String>(); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
         levelhashes.add(ASCII.String(searchhash));
-        int leveldepth = 0; // the recursion depth and therefore the result depth-1. Shall be 0 for the first call
         final byte[] hosthash = new byte[6]; // the host of the url to be checked
         System.arraycopy(searchhash, 6, hosthash, 0, 6);
         
         long timeout = System.currentTimeMillis() + maxtime;
-        mainloop: for (int maxdepth = 0; maxdepth < 6 && System.currentTimeMillis() < timeout; maxdepth++) {
+        mainloop: for (int leveldepth = 0; leveldepth < maxdepth && System.currentTimeMillis() < timeout; leveldepth++) {
             
             Set<String> checknext = new HashSet<String>();
             
@@ -254,15 +254,14 @@ public class Segment {
                 }
                 if (System.currentTimeMillis() > timeout) break mainloop;
             }
-            leveldepth++;
             levelhashes = checknext;
         }
         return 999;
     }
     
-    private static RowHandleSet getPossibleRootHashes(DigestURL url) {
+    private static RowHandleSet getPossibleRootHashes(final DigestURL url) {
         RowHandleSet rootCandidates = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 10);
-        String rootStub = url.getProtocol() + "://" + url.getHost();
+        String rootStub = url.getProtocol() + "://" + url.getHost() + (url.getProtocol().equals("http") && url.getPort() != 80 ? (":" + url.getPort()) : "");
         try {
             rootCandidates.put(new DigestURL(rootStub).hash());
             rootCandidates.put(new DigestURL(rootStub + "/").hash());
@@ -277,6 +276,7 @@ public class Segment {
             rootCandidates.put(new DigestURL(rootStub + "/default.php").hash());
             rootCandidates.optimize();
         } catch (final Throwable e) {}
+        rootCandidates.optimize();
         return rootCandidates;
     }
 
@@ -304,25 +304,29 @@ public class Segment {
         }
     }
     
-    public ClickdepthCache getClickdepthCache(ReferenceReportCache rrc)  {
-        return new ClickdepthCache(rrc);
+    public ClickdepthCache getClickdepthCache(ReferenceReportCache rrc, final int maxtime, final int maxdepth)  {
+        return new ClickdepthCache(rrc, maxtime, maxdepth);
     }
     
     public class ClickdepthCache {
-        final ReferenceReportCache rrc;
-        final Map<String, Integer> cache;
-        public ClickdepthCache(ReferenceReportCache rrc) {
+        private final ReferenceReportCache rrc;
+        private final Map<String, Integer> cache;
+        public final int maxdepth; // maximum clickdepth
+        public final int maxtime; // maximum time to compute clickdepth
+        public ClickdepthCache(final ReferenceReportCache rrc, final int maxtime, final int maxdepth) {
             this.rrc = rrc;
             this.cache = new ConcurrentHashMap<String, Integer>();
+            this.maxdepth = maxdepth;
+            this.maxtime = maxtime;
         }
-        public int getClickdepth(final DigestURL url, int maxtime) throws IOException {
+        public int getClickdepth(final DigestURL url) throws IOException {
             Integer clickdepth = cache.get(ASCII.String(url.hash()));
             if (MemoryControl.shortStatus()) cache.clear();
             if (clickdepth != null) {
                 //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth + " CACHE HIT");
                 return clickdepth.intValue();
             }
-            clickdepth = Segment.this.getClickDepth(this.rrc, url, maxtime);
+            clickdepth = Segment.this.getClickDepth(this.rrc, url, this.maxtime, this.maxdepth);
             //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth);
             this.cache.put(ASCII.String(url.hash()), clickdepth);
             return clickdepth.intValue();
