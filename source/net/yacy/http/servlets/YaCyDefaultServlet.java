@@ -892,7 +892,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                 templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
                 templatePatterns.put("navigation-crawlmonitor", sb.getConfig("server.servlets.submitted", "").indexOf("Crawler_p") >= 0);
-                templatePatterns.put("navigation-advanced", sb.getConfig("server.servlets.submitted", "").indexOf("Config") >= 0  || sb.getConfig("server.servlets.called", "").indexOf("CrawlStart") >= 0);
+                templatePatterns.put("navigation-advanced", sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic") >= 0  || sb.getConfig("server.servlets.submitted", "").indexOf("CrawlStart") >= 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 

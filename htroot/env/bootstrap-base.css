@@ -120,4 +120,7 @@ ul.nav li.dropdown:hover ul.dropdown-menu{
 .tt-suggestion p {
   margin: 0;
 }
+.popover {
+    z-index: 1600;
+}
  

@@ -65,14 +65,23 @@
   <div class="row">
     <div class="col-sm-3 col-md-2 sidebar">
     
-    <ul class="nav nav-sidebar menugroup">
+    <ul class="nav nav-sidebar menugroup" id="first-steps"
+      data-trigger="hover" data-placement="right" data-container="body"
+      data-original-title="You just started a YaCy peer!"
+      data-content="As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options."
+    >
       <li><h3>First Steps</h3></li>
       <li><a href="ConfigBasic.html" class="MenuItemLink">Use Case &amp; Account</a></li>
       <li><a href="CrawlStartSite.html" class="MenuItemLink">Load Web Pages (Crawler)</a></li>
       <li><a href="Performance_p.html" class="MenuItemLink lock">RAM/Disk Usage &amp; Updates</a></li>
     </ul>
-    
-    <ul class="nav nav-sidebar menugroup">
+    #(navigation-advanced)#<script>$("#first-steps").popover();</script>::#(/navigation-advanced)#
+
+    <ul class="nav nav-sidebar menugroup" id="monitoring"
+      data-trigger="hover" data-placement="right" data-container="body"
+      data-original-title="You did not yet start a web crawl!"
+      data-content="You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!"
+    >
       <li><h3>Monitoring</h3></li>
       <li><a href="Status.html" class="MenuItemLink">System Status</a></li>
       #(navigation-p2p)#::<li><a href="Network.html" accesskey="w" class="MenuItemLink">Peer-to-Peer Network</a></li>#(/navigation-p2p)#
@@ -81,6 +90,8 @@
       #(navigation-crawlmonitor)#::<li><a href="Crawler_p.html" class="MenuItemLink lock">Crawler Monitor</a></li>#(/navigation-crawlmonitor)#
       <!-- <li><a href="terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li> -->
     </ul>
+    #(navigation-crawlmonitor)#<script>$("#monitoring").popover();</script>::#(/navigation-crawlmonitor)#
+    
     #(navigation-advanced)#::
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Production</h3></li>

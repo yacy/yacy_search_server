@@ -9,6 +9,10 @@
 
     <title>Dashboard Template for Bootstrap</title>
 
+    <script src="/env/bootstrap/js/jquery.min.js"></script>
+    <script src="/env/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/env/bootstrap/js/docs.min.js"></script>
+    
     <!-- Bootstrap core CSS -->
     <link href="env/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
@@ -111,6 +115,15 @@
               <span class="text-muted">Something else</span>
             </div>
           </div>
+
+<div>
+<a href="#" id="example1" class="btn btn-lg btn-danger" data-content="And here's some amazing content." data-original-title="A title">popover</a>
+<a href="#" id="example2" class="btn btn-lg btn-danger" title="A Title" role="button">tooltip</a>
+<script type="text/javascript">
+$("#example1").popover({'trigger':'hover', offset: 10});
+$("#example2").tooltip();
+</script>
+</div>
 
           <h2 class="sub-header">Section title</h2>
           <div class="table-responsive">
@@ -243,12 +256,5 @@
         </div>
       </div>
     </div>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="env/bootstrap/js/jquery.min.js"></script>
-    <script src="env/bootstrap/js/bootstrap.min.js"></script>
-    <script src="env/bootstrap/js/docs.min.js"></script>
   </body>
 </html>
