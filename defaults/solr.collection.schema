@@ -87,6 +87,9 @@ references_exthosts_i
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url
 clickdepth_i
 
+## crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is the maximum of clickdepth_i
+crawldepth_i
+
 ## needed (post-)processing steps on this metadata set
 process_sxt
 

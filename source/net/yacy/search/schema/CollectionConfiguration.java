@@ -377,8 +377,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             } else {
                 clickdepth = 999;
             }
-            processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+            if (document.getDepth() < 2) clickdepth = Math.min(clickdepth, document.getDepth()); // thats not true if the start url was not a root URL. We need a test for that.
+            if (clickdepth > 2) processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
             CollectionSchema.clickdepth_i.add(doc, clickdepth); // no lazy value checking to get a '0' into the index
+        }
+        
+        if ((allAttr || contains(CollectionSchema.crawldepth_i))) {
+            CollectionSchema.crawldepth_i.add(doc, document.getDepth());
         }
         
         if (allAttr || (contains(CollectionSchema.cr_host_chance_d) && contains(CollectionSchema.cr_host_count_i) && contains(CollectionSchema.cr_host_norm_i))) {

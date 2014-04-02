@@ -95,6 +95,7 @@ public class Document {
     private final Object parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date date;
+    private int crawldepth;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
                     final Object parserObject,
@@ -146,8 +147,9 @@ public class Document {
         this.text = text == null ? "" : text;
         this.generic_facets = new HashMap<String, Set<String>>();
         this.date = date == null ? new Date() : date;
+        this.crawldepth = 999; // unknown yet
     }
-
+    
     /**
      * Get the content domain of a document. This tries to get the content domain from the mime type
      * and if this fails it uses alternatively the content domain from the file extension.
@@ -740,6 +742,14 @@ dc_rights
         return this.indexingDenied;
     }
 
+    public void setDepth(int depth) {
+        this.crawldepth = depth;
+    }
+    
+    public int getDepth() {
+        return this.crawldepth;
+    }
+    
     public void writeXML(final Writer os, final Date date) throws IOException {
         os.write("<record>\n");
         final String title = dc_title();
@@ -819,6 +829,7 @@ dc_rights
         double lon = 0.0d, lat = 0.0d;
         Date date = new Date();
 
+        int mindepth = 999;
         for (final Document doc: docs) {
 
         	if (doc == null) continue;
@@ -857,6 +868,8 @@ dc_rights
             images.putAll(doc.getImages());
             if (doc.lon() != 0.0 && doc.lat() != 0.0) { lon = doc.lon(); lat = doc.lat(); }
             if (doc.date.before(date)) date = doc.date;
+            
+            if (doc.getDepth() < mindepth) mindepth = doc.getDepth();
         }
 
         // clean up parser data
@@ -871,7 +884,7 @@ dc_rights
         // return consolidation
         ArrayList<String> titlesa = new ArrayList<String>();
         titlesa.addAll(titles);
-        return new Document(
+        Document newDoc = new Document(
                 location,
                 globalMime,
                 null,
@@ -890,6 +903,8 @@ dc_rights
                 images,
                 false,
                 date);
+        newDoc.setDepth(mindepth);
+        return newDoc;
     }
 
     public static Map<DigestURL, String> getHyperlinks(final Document[] documents) {

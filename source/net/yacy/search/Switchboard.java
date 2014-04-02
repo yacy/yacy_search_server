@@ -2591,6 +2591,9 @@ public final class Switchboard extends serverSwitch {
                 response.profile().crawlerNoDepthLimitMatchPattern().matcher(response.url().toNormalform(true)).matches()
             )
            ) {
+            
+            for (Document d: documents) d.setDepth(response.depth());
+            
             // get the hyperlinks
             final Map<DigestURL, String> hl = Document.getHyperlinks(documents);
             if (response.profile().indexMedia()) {
