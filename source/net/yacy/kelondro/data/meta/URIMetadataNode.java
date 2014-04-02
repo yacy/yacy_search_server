@@ -267,7 +267,7 @@ public class URIMetadataNode {
 
     public int lapp() {
         if (this.appc == -1) {
-            this.appc = getInt(CollectionSchema.videolinkscount_i);
+            this.appc = getInt(CollectionSchema.applinkscount_i);
         }
         return this.appc;
     }
