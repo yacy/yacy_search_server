@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSMessage;
@@ -38,7 +37,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
@@ -89,8 +88,8 @@ public final class transferURL {
             int doublecheck = 0;
             // read the urls from the other properties and store
             String urls;
-            URIMetadataRow lEntry;
-            Map<String, URIMetadataRow> lEm = new HashMap<String, URIMetadataRow>();
+            URIMetadataNode lEntry;
+            Map<String, URIMetadataNode> lEm = new HashMap<String, URIMetadataNode>();
             for (int i = 0; i < urlc; i++) {
 
                 // read new lurl-entry
@@ -102,7 +101,7 @@ public final class transferURL {
                 }
 
                 // parse new lurl-entry
-                lEntry = URIMetadataRow.importEntry(urls);
+                lEntry = URIMetadataNode.importEntry(urls);
                 if (lEntry == null) {
                 	if (Network.log.isWarn()) Network.log.warn("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;

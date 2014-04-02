@@ -23,12 +23,14 @@
 package net.yacy.kelondro.data.meta;
 
 import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -44,8 +46,12 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
+import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.Bitfield;
+import net.yacy.kelondro.util.MapTools;
+import net.yacy.kelondro.util.kelondroException;
+import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.utils.crypt;
 
@@ -59,17 +65,87 @@ import org.apache.solr.common.SolrDocument;
  */
 public class URIMetadataNode {
     
-    private byte[] hash = null;
-    private String urlRaw = null, keywords = null;
-    private DigestURL url = null;
-    private Bitfield flags = null;
-    private int imagec = -1, audioc = -1, videoc = -1, appc = -1;
-    private double lat = Double.NaN, lon = Double.NaN;
-    private long ranking = 0; // during generation of a search result this value is set
-    private SolrDocument doc = null;
-    private String snippet = null;
-    private WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
-    
+    protected byte[] hash = null;
+    protected String urlRaw = null, keywords = null;
+    protected DigestURL url = null;
+    protected Bitfield flags = null;
+    protected int imagec = -1, audioc = -1, videoc = -1, appc = -1;
+    protected double lat = Double.NaN, lon = Double.NaN;
+    protected long ranking = 0; // during generation of a search result this value is set
+    protected SolrDocument doc = null;
+    protected String snippet = null;
+    protected WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
+
+    public URIMetadataNode(final Properties prop) {
+        // generates an plasmaLURLEntry using the properties from the argument
+        // the property names must correspond to the one from toString
+        //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
+        this.doc = new SolrDocument();
+        urlRaw = crypt.simpleDecode(prop.getProperty("url", ""));
+        try {
+            url = new DigestURL(urlRaw);
+            this.hash = url.hash();
+        } catch (final MalformedURLException e) {
+            ConcurrentLog.logException(e);
+            this.url = null;
+            this.hash = null;
+        }
+        String descr = crypt.simpleDecode(prop.getProperty("descr", "")); if (descr == null) descr = "";
+        String dc_creator = crypt.simpleDecode(prop.getProperty("author", "")); if (dc_creator == null) dc_creator = "";
+        String tags = crypt.simpleDecode(prop.getProperty("tags", "")); if (tags == null) tags = "";
+        this.keywords = Tagging.cleanTagFromAutotagging(tags);
+        String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", "")); if (dc_publisher == null) dc_publisher = "";
+        String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0")); if (lons == null) lons = "0.0";
+        String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0")); if (lats == null) lats = "0.0";
+
+        
+        this.doc.setField(CollectionSchema.title.name(), descr);
+        this.doc.setField(CollectionSchema.author.name(), dc_creator);
+        this.doc.setField(CollectionSchema.publisher_t.name(), dc_publisher);
+        this.lat = Float.parseFloat(lats);
+        this.lon = Float.parseFloat(lons);
+
+        // create new formatters to make concurrency possible
+        final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+
+        try {
+            this.doc.setField(CollectionSchema.last_modified.name(), formatter.parse(prop.getProperty("mod", "20000101")));
+        } catch (final ParseException e) {
+            this.doc.setField(CollectionSchema.last_modified.name(), new Date());
+        }
+        try {
+            this.doc.setField(CollectionSchema.load_date_dt.name(), formatter.parse(prop.getProperty("load", "20000101")));
+        } catch (final ParseException e) {
+            this.doc.setField(CollectionSchema.load_date_dt.name(), new Date());
+        }
+        try {
+            this.doc.setField(CollectionSchema.fresh_date_dt.name(), formatter.parse(prop.getProperty("fresh", "20000101")));
+        } catch (final ParseException e) {
+            this.doc.setField(CollectionSchema.fresh_date_dt.name(), new Date());
+        }
+        this.doc.setField(CollectionSchema.referrer_id_s.name(), prop.getProperty("referrer", ""));
+        this.doc.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", ""));
+        this.doc.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
+        this.doc.setField(CollectionSchema.wordcount_i.name(), Integer.parseInt(prop.getProperty("wc", "0")));
+        final String dt = prop.getProperty("dt", "t");
+        String[] mime = Response.doctype2mime(null,dt.charAt(0));
+        this.doc.setField(CollectionSchema.content_type.name(), mime);
+        final String flagsp = prop.getProperty("flags", "AAAAAA");
+        this.flags = (flagsp.length() > 6) ? QueryParams.empty_constraint : (new Bitfield(4, flagsp));
+        this.doc.setField(CollectionSchema.language_s.name(), prop.getProperty("lang", ""));
+        this.doc.setField(CollectionSchema.inboundlinkscount_i.name(), Integer.parseInt(prop.getProperty("llocal", "0")));
+        this.doc.setField(CollectionSchema.outboundlinkscount_i.name(), Integer.parseInt(prop.getProperty("lother", "0")));
+        this.imagec = Integer.parseInt(prop.getProperty("limage", "0"));
+        this.audioc = Integer.parseInt(prop.getProperty("laudio", "0"));
+        this.videoc = Integer.parseInt(prop.getProperty("lvideo", "0"));
+        this.appc = Integer.parseInt(prop.getProperty("lapp", "0"));
+        this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
+        this.word = null;
+        if (prop.containsKey("wi")) {
+            this.word = new WordReferenceVars(new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""))), false);
+        }
+    }
+
     public URIMetadataNode(final SolrDocument doc) {
         this.doc = doc;
         this.snippet = "";
@@ -340,20 +416,21 @@ public class URIMetadataNode {
         return getStringList(CollectionSchema.description_txt);
     }    
 
-    public boolean isOlder(URIMetadataRow other) {
-        if (other == null) return false;
-        final Date tmoddate = moddate();
-        final Date omoddate = other.moddate();
-        if (tmoddate.before(omoddate)) return true;
-        if (tmoddate.equals(omoddate)) {
-            final Date tloaddate = loaddate();
-            final Date oloaddate = other.loaddate();
-            if (tloaddate.before(oloaddate)) return true;
+    public static URIMetadataNode importEntry(final String propStr) {
+        if (propStr == null || propStr.isEmpty() || propStr.charAt(0) != '{' || !propStr.endsWith("}")) {
+            ConcurrentLog.severe("URIMetadataNode", "importEntry: propStr is not proper: " + propStr);
+            return null;
         }
-        return false;
+        try {
+            return new URIMetadataNode(MapTools.s2p(propStr.substring(1, propStr.length() - 1)));
+        } catch (final kelondroException e) {
+            // wrong format
+            ConcurrentLog.severe("URIMetadataNode", e.getMessage());
+            return null;
+        }
     }
 
-    private static StringBuilder corePropList(URIMetadataNode md) {
+    protected static StringBuilder corePropList(URIMetadataNode md) {
         // generate a parseable string; this is a simple property-list
         final StringBuilder s = new StringBuilder(300);
 
@@ -430,20 +507,6 @@ public class URIMetadataNode {
         core.append('}');
         return core.toString();
     }
-    
-    /*
-    private DigestURI getURL(CollectionSchema field) {
-        assert !field.isMultiValued();
-        assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
-        Object x = this.doc.getFieldValue(field.getSolrFieldName());
-        if (x == null) return null;
-        try {
-            return new DigestURI((String) x);
-        } catch (final MalformedURLException e) {
-            return null;
-        }
-    }
-    */
     
     private int getInt(CollectionSchema field) {
         assert !field.isMultiValued();

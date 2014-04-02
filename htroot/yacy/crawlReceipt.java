@@ -28,14 +28,13 @@
 
 
 import java.io.IOException;
-
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -115,7 +114,7 @@ public final class crawlReceipt {
     	}
 
         // generating a new loaded URL entry
-        final URIMetadataRow entry = URIMetadataRow.importEntry(propStr);
+        final URIMetadataNode entry = URIMetadataNode.importEntry(propStr);
         if (entry == null) {
             if (log.isWarn()) log.warn("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");

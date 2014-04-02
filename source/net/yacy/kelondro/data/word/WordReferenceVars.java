@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
 import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -39,7 +38,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
@@ -72,7 +71,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     private double termFrequency;
     private final boolean local;
 
-    public WordReferenceVars(final URIMetadataRow md, final boolean local) {
+    public WordReferenceVars(final URIMetadataNode md, final boolean local) {
         this.language = md.language();
         this.flags = md.flags();
         this.lastModified = md.moddate().getTime();
