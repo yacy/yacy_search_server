@@ -90,7 +90,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -748,8 +747,8 @@ public final class Protocol {
 
         // insert results to containers
         int term = count;
-        Collection<URIMetadataRow> storeDocs = new ArrayList<URIMetadataRow>(result.links.size());
-        for ( final URIMetadataRow urlEntry : result.links ) {
+        Collection<URIMetadataNode> storeDocs = new ArrayList<URIMetadataNode>(result.links.size());
+        for ( final URIMetadataNode urlEntry : result.links ) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
             }
@@ -822,7 +821,7 @@ public final class Protocol {
             }
         }
         
-        for (URIMetadataRow entry: storeDocs) {
+        for (URIMetadataNode entry: storeDocs) {
             try {
                 event.query.getSegment().fulltext().putMetadata(entry);
             } catch (final IOException e) {
@@ -864,7 +863,7 @@ public final class Protocol {
         public Map<byte[], Integer> indexcount; //
         //public long searchtime; // time that the peer actually spent to create the result
         public String[] references; // search hints, the top-words
-        public List<URIMetadataRow> links; // LURLs of search
+        public List<URIMetadataNode> links; // LURLs of search
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
 
         public SearchResult(
@@ -984,14 +983,14 @@ public final class Protocol {
                 }
             }
             this.references = resultMap.get("references").split(",");
-            this.links = new ArrayList<URIMetadataRow>(this.availableCount);
+            this.links = new ArrayList<URIMetadataNode>(this.availableCount);
             for ( int n = 0; n < this.availableCount; n++ ) {
                 // get one single search result
                 final String resultLine = resultMap.get("resource" + n);
                 if ( resultLine == null ) {
                     continue;
                 }
-                final URIMetadataRow urlEntry = URIMetadataRow.importEntry(resultLine);
+                final URIMetadataNode urlEntry = URIMetadataNode.importEntry(resultLine);
                 if ( urlEntry == null ) {
                     continue;
                 }

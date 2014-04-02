@@ -45,16 +45,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.ProcessType;
+import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -77,7 +76,7 @@ import net.yacy.document.content.DCEntry;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
@@ -88,7 +87,6 @@ import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.WebgraphConfiguration.Subgraph;
-
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -243,7 +241,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return us;
     }
     
-    public SolrInputDocument metadata2solr(final URIMetadataRow md) {
+    public SolrInputDocument metadata2solr(final URIMetadataNode md) {
 
         final SolrInputDocument doc = new SolrInputDocument();
         boolean allAttr = this.isEmpty();

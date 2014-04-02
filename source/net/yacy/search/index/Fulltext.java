@@ -62,7 +62,6 @@ import net.yacy.cora.storage.ZIPWriter;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -330,7 +329,7 @@ public final class Fulltext {
     /**
      * deprecated method to store document metadata, use Solr documents wherever possible
      */
-    public void putMetadata(final URIMetadataRow entry) throws IOException {
+    public void putMetadata(final URIMetadataNode entry) throws IOException {
         byte[] idb = entry.hash();
         String id = ASCII.String(idb);
         try {
