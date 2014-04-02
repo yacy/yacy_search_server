@@ -105,18 +105,22 @@ public final class HTTPDemon {
 
         final InputStream body = prepareBody(header, in);
         final RequestContext request = new yacyContextRequest(header, body);
-        body.close();
         
         // check information
         if (!FileUploadBase.isMultipartContent(request)) {
+            body.close();
             throw new IOException("the request is not a multipart-message!");
         }
 
         // reject too large uploads
-        if (request.getContentLength() > SIZE_FILE_THRESHOLD) throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
+        if (request.getContentLength() > SIZE_FILE_THRESHOLD) {
+            body.close();
+        	throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
+        }
 
         // check if we have enough memory
         if (!MemoryControl.request(request.getContentLength() * 3, false)) {
+            body.close();
         	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
         }
 
@@ -127,6 +131,7 @@ public final class HTTPDemon {
             final FileUpload upload = new FileUpload(DISK_FILE_ITEM_FACTORY);
             items = upload.parseRequest(request);
         } catch (final FileUploadException e) {
+            body.close();
             throw new IOException("FileUploadException " + e.getMessage());
         }
 
@@ -152,7 +157,7 @@ public final class HTTPDemon {
             }
         }
         header.put("ARGC", String.valueOf(items.size())); // store argument count
-
+        body.close();
         return files;
     }
 
@@ -357,9 +362,11 @@ public final class HTTPDemon {
             if (stackTrace != null) {
                 tp.put("printStackTrace", "1");
                 final ByteBuffer errorMsg = new ByteBuffer(100);
-                stackTrace.printStackTrace(new PrintStream(errorMsg));
+                final PrintStream printStream = new PrintStream(errorMsg);
+                stackTrace.printStackTrace(printStream);
                 tp.put("printStackTrace_exception", stackTrace.toString());
                 tp.put("printStackTrace_stacktrace", UTF8.String(errorMsg.getBytes()));
+                printStream.close();
             } else {
                 tp.put("printStackTrace", "0");
             }
