@@ -61,7 +61,7 @@ import org.apache.solr.util.FastWriter;
 /**
  * This is a gsa result formatter for solr search results.
  * The result format is implemented according to
- * https://developers.google.com/search-appliance/documentation/68/xml_reference#results_xml
+ * https://developers.google.com/search-appliance/documentation/614/xml_reference
  */
 public class GSAsearchServlet extends HttpServlet {
 

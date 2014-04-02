@@ -53,7 +53,7 @@ import org.apache.solr.search.SolrIndexSearcher;
 /**
  * implementation of a GSA search result.
  * example: GET /gsa/searchresult?q=chicken+teriyaki&output=xml&client=test&site=test&sort=date:D:S:d1
- * for a xml reference, see https://developers.google.com/search-appliance/documentation/68/xml_reference
+ * for a xml reference, see https://developers.google.com/search-appliance/documentation/614/xml_reference
  */
 public class GSAResponseWriter implements QueryResponseWriter {
 
@@ -77,7 +77,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
 
     private static final char[] XML_START = (
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<GSP VER=\"3.2\">\n<!-- This is a Google Search Appliance API result, provided by YaCy. See https://developers.google.com/search-appliance/documentation/68/xml_reference -->\n").toCharArray();
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<GSP VER=\"3.2\">\n<!-- This is a Google Search Appliance API result, provided by YaCy. See https://developers.google.com/search-appliance/documentation/614/xml_reference -->\n").toCharArray();
     private static final char[] XML_STOP = "</GSP>\n".toCharArray();
 
     // define a list of simple YaCySchema -> RSS Token matchings
@@ -86,7 +86,8 @@ public class GSAResponseWriter implements QueryResponseWriter {
     // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
     private static final CollectionSchema[] extrafields = new CollectionSchema[]{
         CollectionSchema.id, CollectionSchema.sku, CollectionSchema.title, CollectionSchema.description_txt,
-        CollectionSchema.last_modified, CollectionSchema.load_date_dt, CollectionSchema.size_i, CollectionSchema.language_s
+        CollectionSchema.last_modified, CollectionSchema.load_date_dt, CollectionSchema.size_i, 
+        CollectionSchema.language_s, CollectionSchema.collection_sxt
     };
     
     private static final Set<String> SOLR_FIELDS = new HashSet<String>();
@@ -237,6 +238,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"2\"" : "")  + (mime != null && mime.length() > 0 ? " MIME=\"" + mime + "\"" : "") + ">"); writer.write(lb);
             //List<String> texts = new ArrayList<String>();
             List<String> descriptions = new ArrayList<String>();
+            List<String> collections = new ArrayList<String>();
             int size = 0;
             boolean title_written = false; // the solr index may contain several; we take only the first which should be the visible tag in <title></title>
             for (IndexableField value: fields) {
@@ -272,7 +274,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
                 if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
-                    writer.write("<FS NAME=\"date\" VALUE=\"" + HeaderFramework.formatGSAFS(d) + "\"/>");
+                    writer.write("<FS NAME=\"date\" VALUE=\"" + HeaderFramework.formatGSAFS(d) + "\"/>\n");
                     //OpensearchResponseWriter.solitaireTag(writer, GSAToken.CACHE_LAST_MODIFIED.getSolrFieldName(), HeaderFramework.formatRFC1123(d));
                     //texts.add(value.stringValue());
                     continue;
@@ -287,13 +289,19 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     continue;
                 }
+                if (CollectionSchema.collection_sxt.getSolrFieldName().equals(fieldName)) {
+                    collections.add(value.stringValue());
+                    continue;
+                }
                 //System.out.println("superfluous field: " + fieldName + ": " + value.stringValue()); // this can be avoided setting the enableLazyFieldLoading = false in solrconfig.xml
             }
             // compute snippet from texts
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : snippet.get(0));
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), descriptions.size() > 0 ? descriptions.get(0) : "");
-            writer.write("<HAS><L/><C SZ=\""); writer.write(Integer.toString(size / 1024)); writer.write("k\" CID=\""); writer.write(urlhash); writer.write("\" ENC=\"UTF-8\"/></HAS>");
+            String cols = collections.toString();
+            if (collections.size() > 0) OpensearchResponseWriter.solitaireTag(writer, "COLS" /*SPECIAL!*/, collections.size() > 1 ? cols.substring(1, cols.length() - 1).replaceAll(" ", "") : collections.get(0));
+            writer.write("<HAS><L/><C SZ=\""); writer.write(Integer.toString(size / 1024)); writer.write("k\" CID=\""); writer.write(urlhash); writer.write("\" ENC=\"UTF-8\"/></HAS>\n");
             if (YaCyVer == null) YaCyVer = yacyVersion.thisVersion().getName() + "/" + Switchboard.getSwitchboard().peers.mySeed().hash;
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), YaCyVer);
             OpensearchResponseWriter.closeTag(writer, "R");
