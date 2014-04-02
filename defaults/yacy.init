@@ -76,6 +76,7 @@ server.https=false
 # if the used missed configuration steps that should be done, then a help system
 # is possible which leads the used based on the list of servlets that had been used
 # the list distinguishes called and submitted servlets
+server.servlets.called =
 server.servlets.submitted =
 
 # server tracking: maximum time a track entry is hold in the internal cache
@@ -1208,7 +1209,6 @@ interaction.autocrawler.categoryfilter = .*
 browser.autoload = false
 browser.load4everyone = false
 
-
 # greedy learning: fast information acquisition heuristic for new peers 
 # to make greedy learning work, it must be enabled in the network definition
 # the user may switch it off at any time, but if the automatic learning limit is reached
@@ -1218,3 +1218,7 @@ browser.load4everyone = false
 # with some heuristics like: loading linked documents and adding a twitter search.
 # When the learning mode is finished, the user may switch on individual heuristics by himself.
 greedylearning.active = true
+
+# postprocessing parametrization
+postprocessing.clickdepth.maxtime = 100
+postprocessing.clickdepth.maxdepth = 6

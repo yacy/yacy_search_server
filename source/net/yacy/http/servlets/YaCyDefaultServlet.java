@@ -137,8 +137,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /* ------------------------------------------------------------ */
     @Override
     public void init() throws UnavailableException {
-        _htDocsPath = Switchboard.getSwitchboard().htDocsPath;
-        _htLocalePath = Switchboard.getSwitchboard().getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
+        Switchboard sb = Switchboard.getSwitchboard();
+        _htDocsPath = sb.htDocsPath;
+        _htLocalePath = sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
         
         _servletContext = getServletContext();
 
@@ -160,7 +161,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (rb != null) {
                 _resourceBase = Resource.newResource(rb);
             } else {
-                _resourceBase = Resource.newResource(Switchboard.getSwitchboard().getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
+                _resourceBase = Resource.newResource(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
             }
         } catch (IOException e) {
             ConcurrentLog.severe("FILEHANDLER", "YaCyDefaultServlet: resource base (htRootPath) missing");
@@ -601,9 +602,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
 
             }
-            if (in != null) {
-                in.close();
-            }
+            if (in != null) in.close();
             multi.close();
         }
     }
@@ -646,7 +645,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
-
+        Switchboard sb = Switchboard.getSwitchboard();
         if (legacyRequestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(request.getAuthType())) {
             } else {
@@ -654,14 +653,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 if (request.getUserPrincipal() != null) {
                     String userpassEncoded = request.getHeader(RequestHeader.AUTHORIZATION); // e.g. "Basic AdminMD5hash"
                     if (userpassEncoded != null) {
-                        if (request.isUserInRole(AccessRight.ADMIN_RIGHT.toString()) && !Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5,"").isEmpty()) {
+                        if (request.isUserInRole(AccessRight.ADMIN_RIGHT.toString()) && !sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5,"").isEmpty()) {
                             // fake admin authentication for legacyRequestHeader (as e.g. DIGEST is not supported by legacyRequestHeader)
                             legacyRequestHeader.put(RequestHeader.AUTHORIZATION, HttpServletRequest.BASIC_AUTH + " "
-                                    + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+                                    + sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
                         } else {
                             // fake Basic auth header for Digest auth  (Basic username:md5pwdhash)
                             String username = request.getRemoteUser();
-                            Entry user = Switchboard.getSwitchboard().userDB.getEntry(username);
+                            Entry user = sb.userDB.getEntry(username);
                             if (user != null) {
                                 legacyRequestHeader.put(RequestHeader.AUTHORIZATION, HttpServletRequest.BASIC_AUTH + " "
                                         + username + ":" + user.getMD5EncodedUserPwd());
@@ -756,7 +755,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
-        String localeSelection = Switchboard.getSwitchboard().getConfig("locale.language", "default");
+        String localeSelection = sb.getConfig("locale.language", "default");
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(_resourceBase.addPath(target).getFile());
         String targetExt = target.substring(target.lastIndexOf('.') + 1);
@@ -876,21 +875,27 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setStatus(HttpServletResponse.SC_FOUND);
                 return;
             }
-            
-            // add the application version, the uptime and the client name to every rewrite table
-            templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
-            templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() - serverCore.startupTime) / 1000) / 60); // uptime in minutes
-            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
-            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
-            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
-            Seed myPeer = sb.peers.mySeed();
-            templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
-            templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
-            templatePatterns.put("p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
-            templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
-            templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-            
+
             if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
+                
+                sb.setConfig("server.servlets.called", appendPath(sb.getConfig("server.servlets.called", ""), target));
+                if (args != null && args.size() > 0) sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), target));
+
+                // add the application version, the uptime and the client name to every rewrite table
+                templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
+                templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() - serverCore.startupTime) / 1000) / 60); // uptime in minutes
+                templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
+                templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
+                templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
+                Seed myPeer = sb.peers.mySeed();
+                templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
+                templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
+                templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
+                templatePatterns.put("navigation-crawlmonitor", sb.getConfig("server.servlets.submitted", "").indexOf("Crawler_p") >= 0);
+                templatePatterns.put("navigation-advanced", sb.getConfig("server.servlets.submitted", "").indexOf("Config") >= 0  || sb.getConfig("server.servlets.called", "").indexOf("CrawlStart") >= 0);
+                templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+                templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                
                 String mimeType = Classification.ext2mime(targetExt, MimeTypes.TEXT_HTML);
 
                 InputStream fis;
@@ -915,7 +920,13 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
     }
-
+    
+    private static final String appendPath(String proplist, String path) {
+        if (proplist.length() == 0) return path;
+        if (proplist.indexOf(path) >= 0) return proplist;
+        return proplist + "," + path;
+    }
+    
     /**
      * parse SSI line and include resource (<!--#include virtual="file.html" -->)
      */
