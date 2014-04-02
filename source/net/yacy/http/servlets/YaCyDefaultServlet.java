@@ -879,7 +879,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
                 
                 sb.setConfig("server.servlets.called", appendPath(sb.getConfig("server.servlets.called", ""), target));
-                if (args != null && args.size() > 0) sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), target));
+                if (args != null && !args.isEmpty()) {
+                    sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), target));
+                }
 
                 // add the application version, the uptime and the client name to every rewrite table
                 templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
@@ -891,8 +893,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                 templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
-                templatePatterns.put("navigation-crawlmonitor", sb.getConfig("server.servlets.submitted", "").indexOf("Crawler_p") >= 0);
-                templatePatterns.put("navigation-advanced", sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic") >= 0  || sb.getConfig("server.servlets.submitted", "").indexOf("CrawlStart") >= 0);
+                String submitted = sb.getConfig("server.servlets.submitted", "");
+                templatePatterns.put("navigation-crawlmonitor", submitted.indexOf("Crawler_p") >= 0);
+                templatePatterns.put("navigation-advanced", submitted.indexOf("ConfigBasic") >= 0  || submitted.indexOf("CrawlStart") >= 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 

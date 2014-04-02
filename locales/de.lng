@@ -3857,64 +3857,46 @@ English, Englisch==German, Deutsch
 #File: env/templates/header.template
 #---------------------------
 #YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
-### SEARCH INTERFACES ###
-Search Interfaces==Suchschnittstellen
-Web Search==Web-Suche
-File Search==Datei-Suche
-Host Browser==Host-Browser
-# Location Search is currently commented out
-Location Search==Ortssuche
-#Embedded Solr API==Embedded Solr API
-#Embedded GSA API==Embedded GSA API
-# Rich Client Search is currently commented out
-Rich Client Search==Rich Client Suche
-Compare Search==Vergleichs-Suche
-URL Viewer==URL Betrachter
-### SEARCH DESIGN ###
-Search Integration==Suchmaskenintegration
-Portal Configuration==Portal-Konfiguration
-Design==Design
-Ranking and Heuristics==Ranking und Heuristiken
-### INDEX CONTROL ###
-Index&nbsp;Production==Indexerzeugung
-#Crawler / Harvester==Crawler / Harvester
+### FIRST STEPS ###
+First Steps==Erste Schritte
+Use Case &amp; Account==Anwendungsfall &amp; Zugangsdaten
+Load Web Pages, Crawler==Webseiten laden mit Crawler
+RAM\/Disk Usage &amp; Updates="RAM+Disk Belegung &amp; Updates
+You just started a YaCy peer!==Sie haben gerade begonnen YaCy zu nutzen!
+As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==Als Anfänger sehen Sie hier zunächst nur einfache Funktionen. Wählen Sie einen Anwendungsfall, benennen Sie Ihren Peer oder starten Sie einen Webcrawl, dann sehen Sie alle Optionen.
+You did not yet start a web crawl!==Sie haben bislang keinen Webcrawl gestartet!
+You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!==Sie sehen hier nicht alle Monitoring-Optionen weil diese zur Darstellung von Webcrawls dienen. Starten Sie einen!
+### MONITORING ###
+Monitoring==Überwachung
+System Status==Systemstatus
+Peer-to-Peer Network==Peer-to-Peer Netzwerk
+Network Access==Netzwerkzugriff
+Web Visualization==Internet Visualisierung
 Crawler Monitor==Crawler Überwachung
+### PRODUCTION ###
+Production==Produktion
+Advanced Crawler==Experten Crawl Start
+Content Importer==Importfunktionen
+Target Analysis==Ziel Analyse
+Process Scheduler==Prozess Planer
+### ADMINISTRATION ###
+System Admiistration==Systemverwaltung
 Index Administration==Indexverwaltung
 Filter &amp; Blacklists==Filter &amp; Sperrlisten
 Content Semantic==Inhalt Semantik
-Target Analysis==Ziel Analyse
-Process Scheduler==Prozess Planer
-### MONITORING ###
-Monitoring==Überwachung
-YaCy Network==YaCy Netzwerk
-Web Visualization==Internet Visualisierung
-Network Access==Netzwerkzugriff
-Computation==Server Log
-#>Terminal==>Terminal
->Bookmarks==>Lesezeichen
-### PEER CONTROL ###
-Peer Control==Peer Kontrolle
-Admin Console==Admin Konsole
-Confirm Restart==Bestätige Neustart
-Re-Start</a>==Neustarten</a>
-Confirm Shutdown==Bestätige Herunterfahren
->Shutdown==>Herunterfahren
-### THE YACY PROJECT ###
-The YaCy Project==Das YaCy Projekt
-Project Home==Projektseite
-#Tutorials<==Tutorials<
-Forum/Discussion<==Forum/Diskussion<
-#Project Wiki<==Project Wiki<
-#Git Repository==Git Repository
-#Bugtracker<==Bugtracker<
-Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
+### SEARCH PORTAL INTEGRATION ###
+Search Portal Integration==Suchmaskenintegration
+Configuration==Konfiguration
+Design==Design
+Ranking and Heuristics==Ranking und Heuristiken
 #-----------------------------
 
 #File: env/templates/simpleheader.template
 #---------------------------
 #Administration<==Administration<
->Web Search<==>Web Suche<
->File Search<==>Datei Suche<
+>Web Search<==>Web-Suche<
+>File Search<==>Datei-Suche<
+>Compare Search<==>Vergleichssuche<
 >Host Browser<==>Host Browser<
 >About Us<==>Impressum dieses Peers<
 Help / YaCy Wiki==Hilfe / YaCy Wiki
