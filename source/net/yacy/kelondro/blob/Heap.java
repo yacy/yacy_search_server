@@ -166,7 +166,6 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws SpaceExceededException 
      */
     public void flushBuffer() throws IOException {
-        assert this.buffer != null;
         if (this.buffer == null) return;
         
         // check size of buffer

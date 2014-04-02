@@ -150,6 +150,7 @@ public class NewsDB {
     }
 
     public synchronized Record get(final String id) throws IOException {
+        if (this.news == null) return null;
         try {
             return b2r(this.news.get(UTF8.getBytes(id), false));
         } catch (final kelondroException e) {
