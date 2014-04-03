@@ -58,6 +58,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -596,9 +597,7 @@ public class Crawler_p {
                 RowHandleSet urlhashes = sb.crawler.getURLHashes(h);
                 prop.put("crawlProfilesShow_list_" + count + "_debug_count", urlhashes == null ? "unknown" : Integer.toString(urlhashes.size()));
             }
-            if (profile.urlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN) {
-                hosts = hosts + "," + profile.name();
-            }
+            hosts = hosts + "," + profile.name();
             dark = !dark;
             count++;
         }
@@ -607,25 +606,19 @@ public class Crawler_p {
         prop.put("crawlProfilesShow_count", count);
         prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
 
+        prop.put("crawlProfilesShow_linkstructure", 0);
         if (count > 0) {
             // collect the host names for 'wide' crawls which can be visualized
             boolean showLinkstructure = hosts.length() > 0;
-            /*
-            // check if there is actually something to see
             if (showLinkstructure) {
-                showLinkstructure = false;
-                for (String host: hosts.substring(1).split(",")) {
-                    String hash = null;
-                    try {hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {Log.logException(e);}
-                    if (hash != null && sb.webStructure.referencesCount(hash) > 0) {showLinkstructure = true; break;}
+                StringBuilder q = new StringBuilder();
+                hosts = hosts.substring(1);
+                q.append(CollectionSchema.host_s.getSolrFieldName()).append(':').append(hosts).append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(':').append("www.").append(hosts);
+                try {
+                    prop.put("crawlProfilesShow_linkstructure", count == 1 && sb.index.fulltext().getDefaultConnector().getCountByQuery(q.toString()) > 0 ? 1 : 2);
+                    prop.put("crawlProfilesShow_linkstructure_hosts", hosts);
+                } catch (IOException e) {
                 }
-            }
-            */
-            if (showLinkstructure) {
-                prop.put("crawlProfilesShow_linkstructure", 1);
-                prop.put("crawlProfilesShow_linkstructure_hosts", hosts.substring(1));
-            } else {
-                prop.put("crawlProfilesShow_linkstructure", 0);
             }
         }
 

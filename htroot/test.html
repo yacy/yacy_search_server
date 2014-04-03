@@ -24,6 +24,9 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    
+    <!-- style for hypertree -->
+    <link href="env/hypertree.css" rel="stylesheet">
   </head>
 
   <body>
@@ -93,6 +96,11 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">Dashboard</h1>
 
+<script src="/js/d3.v3.min.js"></script>
+<script src="/js/hypertree.js"></script>
+<div id="linkstructure"></div>
+<script>$(document).ready(linkstructure("yacy.net", "#linkstructure", 1280, 720, 1000, 1000));</script>
+
           <div class="row placeholders">
             <div class="col-xs-6 col-sm-3 placeholder">
               <img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
@@ -116,7 +124,7 @@
             </div>
           </div>
 
-<div>
+          <div class="row placeholders">
 <a href="#" id="example1" class="btn btn-lg btn-danger" data-content="And here's some amazing content." data-original-title="A title">popover</a>
 <a href="#" id="example2" class="btn btn-lg btn-danger" title="A Title" role="button">tooltip</a>
 <script type="text/javascript">

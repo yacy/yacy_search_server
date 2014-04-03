@@ -1,0 +1,5 @@
+[
+#{list}#
+{"source":"#[source]#", "target":"#[target]#", "type":"#[type]#"}#(eol)#::,#(/eol)#
+#{/list}#
+]

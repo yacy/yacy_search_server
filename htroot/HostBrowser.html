@@ -56,6 +56,8 @@ function updatepage(str) {
 //]]>
 </script>
 <script type="text/javascript" src="js/sorttable.js"></script>
+<!-- style for hypertree -->
+<link href="env/hypertree.css" rel="stylesheet">
   </head>
   <body id="IndexControl">
     #(topmenu)#
@@ -156,8 +158,17 @@ function updatepage(str) {
       #{/list}#
       </table>
     </fieldset>
+    
+    #(linkgraph)#::
+    <script src="/js/d3.v3.min.js"></script>
+    <script src="/js/hypertree.js"></script>
+    <div id="linkstructure"></div>
+    <script>$(document).ready(linkstructure("#[host]#", "#linkstructure", 1280, 720, 500, 300));</script>
+    #(/linkgraph)#
+    
     #(/files)#
     
+     
     #(outbound)#::
      <fieldset><legend>Outbound Links, outgoing from #[host]# - Host List</legend>
       #{list}#
