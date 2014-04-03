@@ -160,7 +160,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int count = 0;
                 while (System.currentTimeMillis() < endtime && count < maxcount) {
                     try {
-                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, pagesize, fields);
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, Math.min(maxcount, pagesize), fields);
                         for (SolrDocument d: sdl) {
                             try {queue.put(d);} catch (final InterruptedException e) {break;}
                             count++;
@@ -199,7 +199,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {
-                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, Math.min(maxcount, pagesize), CollectionSchema.id.getSolrFieldName());
                         for (SolrDocument d: sdl) {
                             try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
                         }
