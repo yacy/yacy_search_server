@@ -3751,7 +3751,7 @@ public final class Switchboard extends serverSwitch {
                                     }
                                 }
                             }
-                        } catch (final IOException e ) {
+                        } catch (final Throwable e ) {
                             Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
                         }
                     }
