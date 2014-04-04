@@ -128,7 +128,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     
     public SolrInputDocument getEdge(
             final Subgraph subgraph,
-            final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
+            final DigestURL source_url, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
             final List<ImageEntry> images,
             final String sourceName, boolean allAttr, boolean generalNofollow, int target_order, AnchorURL target_url) {
 
@@ -136,7 +136,14 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         final String name = target_url.getNameProperty(); // the name attribute
         final String text = target_url.getTextProperty(); // the text between the <a></a> tag
         String rel = target_url.getRelProperty();         // the rel-attribute
-        boolean inbound = target_url.getHost().equals(source.getHost()); // well, not everybody defines 'outbound' that way but however, thats used here.
+        String source_host = source_url.getHost();
+        String target_host = target_url.getHost();
+        boolean inbound =
+                (source_host == null && target_host == null) || 
+                (source_host != null && target_host != null &&
+                 (target_host.equals(source_host) ||
+                  target_host.equals("www." + source_host) ||
+                  source_host.equals("www." + target_host))); // well, not everybody defines 'outbound' that way but however, thats used here.
         int ioidx = inbound ? 0 : 1;
         if (generalNofollow) {
             // patch the rel attribute since the header makes nofollow valid for all links
@@ -147,7 +154,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         StringBuilder idi = new StringBuilder(8);
         idi.append(Integer.toHexString((name + text + rel).hashCode()).toLowerCase());
         while (idi.length() < 8) idi.insert(0, '0');
-        String source_id = ASCII.String(source.hash());
+        String source_id = ASCII.String(source_url.hash());
         String target_id = ASCII.String(target_url.hash());
         StringBuilder id = new StringBuilder(source_id).append(target_id).append(idi);
         SolrInputDocument edge = new SolrInputDocument();
@@ -160,7 +167,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             add(edge, WebgraphSchema.load_date_dt, loadDate);
         }
         if (allAttr || contains(WebgraphSchema.last_modified)) add(edge, WebgraphSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
-        final String source_url_string = source.toNormalform(false);
+        final String source_url_string = source_url.toNormalform(false);
         if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.size() > 0) {
             List<String> cs = new ArrayList<String>();
             for (Map.Entry<String, Pattern> e: collections.entrySet()) {
@@ -174,7 +181,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         int pr_source = source_url_string.indexOf("://",0);
         if (allAttr || contains(WebgraphSchema.source_protocol_s)) add(edge, WebgraphSchema.source_protocol_s, source_url_string.substring(0, pr_source));
         if (allAttr || contains(WebgraphSchema.source_urlstub_s)) add(edge, WebgraphSchema.source_urlstub_s, source_url_string.substring(pr_source + 3));
-        Map<String, String> source_searchpart = source.getSearchpartMap();
+        Map<String, String> source_searchpart = source_url.getSearchpartMap();
         if (source_searchpart == null) {
             if (allAttr || contains(WebgraphSchema.source_parameter_count_i)) add(edge, WebgraphSchema.source_parameter_count_i, 0);
         } else {
@@ -183,29 +190,28 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             if (allAttr || contains(WebgraphSchema.source_parameter_value_sxt)) add(edge, WebgraphSchema.source_parameter_value_sxt, source_searchpart.values().toArray(new String[source_searchpart.size()]));
         }
         if (allAttr || contains(WebgraphSchema.source_chars_i)) add(edge, WebgraphSchema.source_chars_i, source_url_string.length());
-        String source_host = null;
-        if ((source_host = source.getHost()) != null) {
+        if (source_host != null) {
             String dnc = Domains.getDNC(source_host);
             String subdomOrga = source_host.length() - dnc.length() <= 0 ? "" : source_host.substring(0, source_host.length() - dnc.length() - 1);
             int pp = subdomOrga.lastIndexOf('.');
             String subdom = (pp < 0) ? "" : subdomOrga.substring(0, pp);
             String orga = (pp < 0) ? subdomOrga : subdomOrga.substring(pp + 1);
             if (allAttr || contains(WebgraphSchema.source_host_s)) add(edge, WebgraphSchema.source_host_s, source_host);
-            if (allAttr || contains(WebgraphSchema.source_host_id_s)) add(edge, WebgraphSchema.source_host_id_s, source.hosthash());
+            if (allAttr || contains(WebgraphSchema.source_host_id_s)) add(edge, WebgraphSchema.source_host_id_s, source_url.hosthash());
             if (allAttr || contains(WebgraphSchema.source_host_dnc_s)) add(edge, WebgraphSchema.source_host_dnc_s, dnc);
             if (allAttr || contains(WebgraphSchema.source_host_organization_s)) add(edge, WebgraphSchema.source_host_organization_s, orga);
             if (allAttr || contains(WebgraphSchema.source_host_organizationdnc_s)) add(edge, WebgraphSchema.source_host_organizationdnc_s, orga + '.' + dnc);
             if (allAttr || contains(WebgraphSchema.source_host_subdomain_s)) add(edge, WebgraphSchema.source_host_subdomain_s, subdom);
         }
         if (allAttr || contains(WebgraphSchema.source_file_ext_s) || contains(WebgraphSchema.source_file_name_s)) {
-            String source_file_name = source.getFileName();
+            String source_file_name = source_url.getFileName();
             String source_file_ext = MultiProtocolURL.getFileExtension(source_file_name);
             add(edge, WebgraphSchema.source_file_name_s, source_file_name.toLowerCase().endsWith("." + source_file_ext) ? source_file_name.substring(0, source_file_name.length() - source_file_ext.length() - 1) : source_file_name);
             add(edge, WebgraphSchema.source_file_ext_s, source_file_ext);
         }
-        if (allAttr || contains(WebgraphSchema.source_path_s)) add(edge, WebgraphSchema.source_path_s, source.getPath());
+        if (allAttr || contains(WebgraphSchema.source_path_s)) add(edge, WebgraphSchema.source_path_s, source_url.getPath());
         if (allAttr || contains(WebgraphSchema.source_path_folders_count_i) || contains(WebgraphSchema.source_path_folders_sxt)) {
-            String[] paths = source.getPaths();
+            String[] paths = source_url.getPaths();
             add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
             add(edge, WebgraphSchema.source_path_folders_sxt, paths);
         }
@@ -250,8 +256,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             if (allAttr || contains(WebgraphSchema.target_parameter_value_sxt)) add(edge, WebgraphSchema.target_parameter_value_sxt,  target_searchpart.values().toArray(new String[target_searchpart.size()]));
         }
         if (allAttr || contains(WebgraphSchema.target_chars_i)) add(edge, WebgraphSchema.target_chars_i, target_url_string.length());
-        String target_host = null;
-        if ((target_host = target_url.getHost()) != null) {
+        if (target_host != null) {
             String dnc = Domains.getDNC(target_host);
             String subdomOrga = target_host.length() - dnc.length() <= 0 ? "" : target_host.substring(0, target_host.length() - dnc.length() - 1);
             int pp = subdomOrga.lastIndexOf('.');
