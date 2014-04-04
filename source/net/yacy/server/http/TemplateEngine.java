@@ -277,13 +277,20 @@ public final class TemplateEngine {
                 int whichPattern=0;
                 byte[] patternName = new byte[0];
                 final String patternKey = getPatternKey(prefix, key);
-                if(pattern.containsKey(patternKey) && pattern.get(patternKey) != null){
-                    final String patternId=pattern.get(patternKey);
-                    try{
-                        whichPattern=Integer.parseInt(patternId); //index
-                    }catch(final NumberFormatException e){
-                        whichPattern=0;
-                        byName=true;
+                final String patternId = pattern.get(patternKey);
+                // lazy parsing of pattern value; numeric values, "true", "false" and no value allowed
+                if (patternId == null) {
+                    whichPattern = 0;
+                } else {
+                    if ("true".equals(patternId)) {
+                        whichPattern = 1;
+                    } else if ("false".equals(patternId)) {
+                        whichPattern = 0;
+                    } else try {
+                        whichPattern = Integer.parseInt(patternId); //index
+                    } catch(final NumberFormatException e){
+                        whichPattern = 0;
+                        byName = true;
                         patternName = UTF8.getBytes(patternId);
                     }
                 }
@@ -295,7 +302,7 @@ public final class TemplateEngine {
                 if (byName) {
                     transferUntil(pis, keyStream, appendBytes(PP, patternName, null, null));
                     if(pis.available()==0){
-                        ConcurrentLog.severe("TEMPLATE", "No such Template: \"" + UTF8.String(patternName) + "\" in " + servletname);
+                        ConcurrentLog.severe("TEMPLATE", "Bad Key-Value pair in #()# construct: key=\"" + patternKey + "\", value=\"" + UTF8.String(patternName) + "\" in " + servletname);
                         final byte[] sb = structure.getBytes();
                         structure.close();
                         text.close();
