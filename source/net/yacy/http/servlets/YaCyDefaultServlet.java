@@ -797,13 +797,13 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
             } catch (InvocationTargetException e) {
                 ConcurrentLog.logException(e);
-                throw new ServletException();
+                throw new ServletException(targetFile.getAbsolutePath());
             } catch (IllegalArgumentException e) {
                 ConcurrentLog.logException(e);
-                throw new ServletException();
+                throw new ServletException(targetFile.getAbsolutePath());
             } catch (IllegalAccessException e) {
                 ConcurrentLog.logException(e);
-                throw new ServletException();
+                throw new ServletException(targetFile.getAbsolutePath());
             }
 
             if (tmp instanceof RasterPlotter || tmp instanceof EncodedImage || tmp instanceof Image) {
@@ -894,8 +894,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                 templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
                 String submitted = sb.getConfig("server.servlets.submitted", "");
-                templatePatterns.put("navigation-crawlmonitor", submitted.indexOf("Crawler_p") >= 0);
-                templatePatterns.put("navigation-advanced", submitted.indexOf("ConfigBasic") >= 0  || submitted.indexOf("CrawlStart") >= 0);
+                boolean crawler_enabled = submitted.indexOf("Crawler_p") >= 0;
+                boolean advanced_enabled = crawler_enabled || submitted.indexOf("ConfigBasic") >= 0  || submitted.indexOf("CrawlStart") >= 0;
+                templatePatterns.put("navigation-crawlmonitor", crawler_enabled);
+                templatePatterns.put("navigation-advanced", advanced_enabled);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 
@@ -916,7 +918,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setStatus(HttpServletResponse.SC_OK);
                 ByteArrayOutputStream bas = new ByteArrayOutputStream(4096);
                 // apply templates
-                TemplateEngine.writeTemplate(fis, bas, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));                
+                TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);                
                 fis.close();
                 // handle SSI
                 parseSSI (bas.toByteArray(),request,response);

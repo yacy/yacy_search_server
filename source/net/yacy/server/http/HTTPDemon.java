@@ -380,10 +380,10 @@ public final class HTTPDemon {
             final File htRootPath = new File(switchboard.getAppPath(), switchboard.getConfig(SwitchboardConstants.HTROOT_PATH,SwitchboardConstants.HTROOT_PATH_DEFAULT));
 
             TemplateEngine.writeTemplate(
+                    "/proxymsg/error.html",
                     fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")),
                     o = new ByteArrayOutputStream(512),
-                    tp,
-                    ASCII.getBytes("-UNRESOLVED_PATTERN-")
+                    tp
             );
             final byte[] result = o.toByteArray();
             o.close(); o = null;

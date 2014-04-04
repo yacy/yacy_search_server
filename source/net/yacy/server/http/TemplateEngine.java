@@ -155,6 +155,7 @@ public final class TemplateEngine {
     private final static byte[] hash_brackopen_slash = "#(/".getBytes();
     private final static byte[] brackclose_hash = ")#".getBytes();
 
+    private final static byte[] UNRESOLVED_PATTERN = "-UNRESOLVED_PATTERN-".getBytes();
 
     /**
      * transfer until a specified pattern is found; everything but the pattern is transfered so far
@@ -192,18 +193,18 @@ public final class TemplateEngine {
         return false;
     }
 
-    public final static void writeTemplate(final InputStream in, final OutputStream out, final serverObjects pattern, final byte[] dflt) throws IOException {
+    public final static void writeTemplate(final String servletname, final InputStream in, final OutputStream out, final serverObjects pattern) throws IOException {
         if (pattern == null) {
             FileUtils.copy(in, out);
         } else {
-            writeTemplate(in, out, pattern, dflt, new byte[0]);
+            writeTemplate(servletname, in, out, pattern, new byte[0]);
         }
     }
 
     /**
      * Reads a input stream, and writes the data with replaced templates on a output stream
      */
-    private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final serverObjects pattern, final byte[] dflt, final byte[] prefix) throws IOException {
+    private final static byte[] writeTemplate(final String servletname, final InputStream in, final OutputStream out, final serverObjects pattern, final byte[] prefix) throws IOException {
         final PushbackInputStream pis = new PushbackInputStream(in, 100);
         final ByteArrayOutputStream keyStream = new ByteArrayOutputStream(4048);
         byte[] key;
@@ -254,11 +255,11 @@ public final class TemplateEngine {
                             final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text));
                             //System.out.println("recursing with text(prefix="+ multi_key + "_" + i + "_" +"):"); //DEBUG
                             //System.out.println(text);
-                            structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,multi_key,i)));
+                            structure.append(writeTemplate(servletname, pis2, out, pattern, newPrefix(prefix,multi_key,i)));
                         }//for
                         structure.append(open_endtag).append(multi_key).append(close_tagn);
                     } else {//transferUntil
-                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#"); //prefix here?
+                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#" + " in " + servletname); //prefix here?
                     }
                 }
 
@@ -292,10 +293,9 @@ public final class TemplateEngine {
                 keyStream.reset(); //reset stream
                 PushbackInputStream pis2;
                 if (byName) {
-                    //TODO: better Error Handling
                     transferUntil(pis, keyStream, appendBytes(PP, patternName, null, null));
                     if(pis.available()==0){
-                        ConcurrentLog.severe("TEMPLATE", "No such Template: %%" + UTF8.String(patternName));
+                        ConcurrentLog.severe("TEMPLATE", "No such Template: \"" + UTF8.String(patternName) + "\" in " + servletname);
                         final byte[] sb = structure.getBytes();
                         structure.close();
                         text.close();
@@ -304,10 +304,10 @@ public final class TemplateEngine {
                     keyStream.reset();
                     transferUntil(pis, keyStream, dpdpa);
                     pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toByteArray()));
-                    structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
+                    structure.append(writeTemplate(servletname, pis2, out, pattern, newPrefix(prefix,key)));
                     transferUntil(pis, keyStream, appendBytes(hash_brackopen_slash, key, brackclose_hash, null));
                     if(pis.available()==0){
-                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name)");
+                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name) in " + servletname);
                     }
                 } else {
                     while(!found){
@@ -322,7 +322,7 @@ public final class TemplateEngine {
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                                     //this maybe the wrong, but its the last
                                     structure.append('<').append(key).append(alternative_which).append(ASCII.getBytes(Integer.toString(whichPattern))).append(ASCII.getBytes("\" found=\"0\">\n"));
-                                    structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
+                                    structure.append(writeTemplate(servletname, pis2, out, pattern, newPrefix(prefix,key)));
                                     structure.append(open_endtag).append(key).append(close_tagn);
                                     found=true;
                                 }else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
@@ -344,7 +344,7 @@ public final class TemplateEngine {
                                 if(currentPattern == whichPattern){ //found the pattern
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                                     structure.append('<').append(key).append(alternative_which).append(ASCII.getBytes(Integer.toString(whichPattern))).append(ASCII.getBytes("\" found=\"0\">\n"));
-                                    structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
+                                    structure.append(writeTemplate(servletname, pis2, out, pattern, newPrefix(prefix,key)));
                                     structure.append(open_endtag).append(key).append(close_tagn);
 
                                     transferUntil(pis, keyStream, appendBytes(hash_brackopen_slash, key, brackclose_hash,null));//to #(/key)#.
@@ -373,7 +373,7 @@ public final class TemplateEngine {
                     // pattern detected, write replacement
                     key = keyStream.toByteArray();
                     final String patternKey = getPatternKey(prefix, key);
-                    replacement = replacePattern(patternKey, pattern, dflt); //replace
+                    replacement = replacePattern(patternKey, pattern); //replace
                     structure.append('<').append(key)
                             .append(ASCII.getBytes(" type=\"normal\">\n"));
                     structure.append(replacement);
@@ -401,9 +401,9 @@ public final class TemplateEngine {
                         final byte[] newFilename = new byte[filename.length-2];
                         System.arraycopy(filename, 1, newFilename, 0, newFilename.length);
                         final String patternkey = getPatternKey(prefix, newFilename);
-                        filename= replacePattern(patternkey, pattern, dflt);
+                        filename= replacePattern(patternkey, pattern);
                     }
-                    if (filename.length > 0 && !java.util.Arrays.equals(filename, dflt)) {
+                    if (filename.length > 0 && !java.util.Arrays.equals(filename, UNRESOLVED_PATTERN)) {
                         final ByteBuffer include = new ByteBuffer();
                         BufferedReader br = null;
                         try{
@@ -422,7 +422,7 @@ public final class TemplateEngine {
                         }
                         final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
                         structure.append(ASCII.getBytes("<fileinclude file=\"")).append(filename).append(close_tagn);
-                        structure.append(writeTemplate(pis2, out, pattern, dflt, new byte[0])); //clear pattern prefix for include
+                        structure.append(writeTemplate(servletname, pis2, out, pattern, new byte[0])); //clear pattern prefix for include
                         structure.append(ASCII.getBytes("</fileinclude>\n"));
                         include.close();
                     }
@@ -438,7 +438,7 @@ public final class TemplateEngine {
         return sb;
     }
 
-    private final static byte[] replacePattern(final String key, final serverObjects pattern, final byte dflt[]) {
+    private final static byte[] replacePattern(final String key, final serverObjects pattern) {
         byte[] replacement;
         Object value;
         if (pattern.containsKey(key)) {
@@ -453,7 +453,7 @@ public final class TemplateEngine {
                 replacement = UTF8.getBytes(value.toString());
             }
         } else {
-            replacement = dflt;
+            replacement = UNRESOLVED_PATTERN;
         }
         return replacement;
     }
@@ -515,7 +515,7 @@ public final class TemplateEngine {
             final InputStream i = new ByteArrayInputStream(UTF8.getBytes(args[0]));
             final serverObjects h = new serverObjects();
             h.put("test", args[1]);
-            writeTemplate(new PushbackInputStream(i, 100), System.out, h, UTF8.getBytes(args[2]));
+            writeTemplate("test", new PushbackInputStream(i, 100), System.out, h, UTF8.getBytes(args[2]));
             System.out.flush();
         } catch (final Exception e) {
             ConcurrentLog.logException(e);
