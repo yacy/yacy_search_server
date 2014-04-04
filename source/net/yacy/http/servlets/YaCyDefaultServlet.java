@@ -953,10 +953,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 try {
                     dispatcher.include(request, response);
                 } catch (IOException ex) {
-                    ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: file not found " + path);
+                    if (path.indexOf("yacysearch") < 0) ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: parseSSI dispatcher problem - " + ex.getMessage() + ": " + path);
+                    // this is probably a time-out; it may occur during search requests; for search requests we consider that normal
                 }
             } else {
-                ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: closing quote missing " + buffer.toString(p, end - p) + " in " + request.getPathInfo());
+                ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: parseSSI closing quote missing " + buffer.toString(p, end - p) + " in " + request.getPathInfo());
             }
             offset = end + 3; // after "-->"
             p = buffer.indexOf(inctxt, offset);
