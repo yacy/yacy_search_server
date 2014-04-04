@@ -965,13 +965,13 @@ Other portal settings can be adjusted in==Другие настройки пор
 >Tag<==>Тэг<
 >Topics<==>Топики<
 >Cloud<==>Облако<
->Protocol Facet<==>Фильтр по протоколу<
->Filetype Facet<==>Фильтр по типу файла<
->Domain Facet<==>Фильтр по домену<
->Wiki Name Space Facet<==>Фильтр по статьям Wiki<
->Language Facet<==>Фильтр по языку<
->Author Facet<==>Фильтр по автору<
->Vocabulary Facet<==>Фильтр по словарю<
+>Protocol<==>Фильтр по протоколу<
+>Filetype<==>Фильтр по типу файла<
+>Provider<==>Фильтр по домену<
+>Wiki Name Space<==>Фильтр по статьям Wiki<
+>Language<==>Фильтр по языку<
+>Author<==>Фильтр по автору<
+>Vocabulary<==>Фильтр по словарю<
 >Title of Result<==>Заголовок результата<
 Description and text snippet of the search result==Описание и фрагмент текста результата поиска
 http://url-of-the-search-result.net==http://url-of-the-search-result.net
@@ -4123,11 +4123,11 @@ Pictures==Изображения
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "\#\[query\]\#" on map==Показать результат поиска "#[query]#" на карте
->Domain Facet==>Фильтр по доменам
->Name Space Facet==>Фильтр по имени
->Author Facet==>Фильтр по автору
->Protocol Facet==>Фильтр по протоколу
->Filetype Facet==>Фильтр по типу файла
+>Provider==>Фильтр по доменам
+>Name Space==>Фильтр по имени
+>Author==>Фильтр по автору
+>Protocol==>Фильтр по протоколу
+>Filetype==>Фильтр по типу файла
 Your search is done using peers in the YaCy P2P network. You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.==Ваш поиск выполняется с использованием узлов P2P-сети YaCy. Вы можете перейти в "Скрытый режим", который отключит использование P2P, но обеспечит вашу полную анонимность. В этом случае результатов поиска будет меньше, потому что поиск будет осуществляться только в локальном индексе.
 Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.==Ваш поиск выполняется только в вашем локальном индексе. Вы можете перейти в режим "P2P", который позволит производить поиск с использованием  других узлов сети YaCy.
 >Please support YaCy!<==>Пожалуйста, поддержите YaCy!<

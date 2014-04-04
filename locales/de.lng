@@ -892,13 +892,13 @@ menu.=Menü geändert werden.
 #>Tag<==>Tag<
 >Topics<==>Themen<
 #>Cloud<==>Cloud<
->Protocol Facet<==>Protokoll Navigator<
->Filetype Facet<==>Dateityp Navigator<
->Domain Facet<==>Domänen Navigator<
->Wiki Name Space Facet<==>Wiki Namespace Navigator<
->Language Facet<==>Sprache Navigator<
->Author Facet<==>Autoren Navigator<
->Vocabulary Facet<==>Vokabellisten Navigator<
+>Protocol<==>Protokoll Navigator<
+>Filetype<==>Dateityp Navigator<
+>Provider<==>Anbieter<
+>Wiki Name Space<==>Wiki Namespace Navigator<
+>Language<==>Sprache Navigator<
+>Author<==>Autoren Navigator<
+>Vocabulary<==>Vokabellisten Navigator<
 >Title of Result<==>Ergebnis Titel<
 Description and text snippet of the search result==Beschreibung und Textauschnitt der Suchergebnisse
 http://url-of-the-search-result.net==http://URL-des-Suchergebnisses.de
@@ -3814,11 +3814,11 @@ Pictures==Bilder
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "\#\[query\]\#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
->Protocol Facet==>Netzdienst
->Filetype Facet==>Dateityp
->Domain Facet==>Anbieter
->Name Space Facet==>Namespace Navigator
->Author Facet==>Autoren Navigator
+>Protocol==>Netzdienst
+>Filetype==>Dateityp
+>Provider==>Anbieter
+>Name Space==>Namespace Navigator
+>Author==>Autoren Navigator
 #-----------------------------
 
 ### Subdirectory api ###
