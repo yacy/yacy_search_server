@@ -195,7 +195,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             response.setStatus(httpStatus);
             response.setContentType(mimeType);
             
-            if ((httpStatus) == 200 &&(mimeType != null) && (mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
+            if ((httpStatus == HttpServletResponse.SC_OK) &&(mimeType != null) && (mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
                 if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
                      proxyout = new ChunkedInputStream(proxyout);
                 }
@@ -204,20 +204,10 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
                 final String servletstub = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getServletPath() + "?url=";
                 Document doc;
                 try {            
-                    doc = Jsoup.parse(proxyout, "UTF-8", proxyurl.toString());                    
-                } catch (Exception eio) {
+                    doc = Jsoup.parse(proxyout, UTF8.charset.name(), proxyurl.toString());
+                } catch (IOException eio) {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Proxy: parser error on " + proxyurl.toString());
                     return;
-                }
-                Element hd = doc.head();
-                if (hd != null) {
-                    // add a base url if not exist (to make sure relative links point to original)
-                    Elements basetags = hd.getElementsByTag("base");
-                    if (basetags.isEmpty()) {
-                        Element newbasetag = hd.prependElement("base");
-                        String basestr = proxyurl.getProtocol() + "://" + hostwithport + proxyurl.getPath(); //+directory;
-                        newbasetag.attr("href", basestr);
-                    }
                 }
 
                 Element bde = doc.body(); // start with body element to rewrite href links
@@ -244,6 +234,17 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
                         }
                     }
                 }
+
+                Element hd = doc.head();
+                if (hd != null) {
+                    // add a base url if not exist (to make sure relative links point to original)
+                    Elements basetags = hd.getElementsByTag("base");
+                    if (basetags.isEmpty()) {
+                        Element newbasetag = hd.prependElement("base");
+                        String basestr = proxyurl.getProtocol() + "://" + hostwithport + proxyurl.getPath(); //+directory;
+                        newbasetag.attr("href", basestr);
+                        }
+                    }
 
                 // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
                 // TODO: use a template file for
