@@ -38,25 +38,12 @@ import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.HyperlinkEdge;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 
 public class linkstructure {
-
-    public static enum Edgetype {
-        InboundOk, InboundNofollow, Outbound, Dead;
-    }
-    
-    public static class Edge {
-        public DigestURL source, target;
-        public Edgetype type;
-        public Edge(DigestURL source, DigestURL target, Edgetype type) {
-            this.source = source;
-            this.target = target;
-            this.type = type;
-        }
-    }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
@@ -105,7 +92,7 @@ public class linkstructure {
                 );
         SolrDocument doc;
         Map<String, FailType> errorDocs = new HashMap<String, FailType>();
-        Map<String, Edge> edges = new HashMap<String, Edge>();
+        Map<String, HyperlinkEdge> edges = new HashMap<String, HyperlinkEdge>();
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
@@ -123,7 +110,7 @@ public class linkstructure {
                         try {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
-                            edges.put(edgehash, new Edge(from, linkurl, Edgetype.InboundOk));
+                            edges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.InboundOk));
                         } catch (MalformedURLException e) {}
                     }
                     links = URIMetadataNode.getLinks(doc, false); // outbound
@@ -132,7 +119,7 @@ public class linkstructure {
                         try {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
-                            edges.put(edgehash, new Edge(from, linkurl, Edgetype.Outbound));
+                            edges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Outbound));
                         } catch (MalformedURLException e) {}
                     }
                 }
@@ -142,15 +129,15 @@ public class linkstructure {
         } catch (MalformedURLException e) {
         }
         // we use the errorDocs to mark all edges with endpoint to error documents
-        for (Map.Entry<String, Edge> edge: edges.entrySet()) {
-            if (errorDocs.containsKey(edge.getValue().target)) edge.getValue().type = Edgetype.Dead;
+        for (Map.Entry<String, HyperlinkEdge> edge: edges.entrySet()) {
+            if (errorDocs.containsKey(edge.getValue().target)) edge.getValue().type = HyperlinkEdge.Type.Dead;
         }
 
         // finally just write out the edge array
         int c = 0;
-        for (Map.Entry<String, Edge> edge: edges.entrySet()) {
+        for (Map.Entry<String, HyperlinkEdge> edge: edges.entrySet()) {
             prop.putJSON("list_" + c + "_source", edge.getValue().source.getPath());
-            prop.putJSON("list_" + c + "_target", edge.getValue().type.equals(Edgetype.Outbound) ? edge.getValue().target.toNormalform(true) : edge.getValue().target.getPath());
+            prop.putJSON("list_" + c + "_target", edge.getValue().type.equals(HyperlinkEdge.Type.Outbound) ? edge.getValue().target.toNormalform(true) : edge.getValue().target.getPath());
             prop.putJSON("list_" + c + "_type", edge.getValue().type.name());
             prop.put("list_" + c + "_eol", 1);
             c++;
