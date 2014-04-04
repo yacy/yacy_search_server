@@ -55,15 +55,12 @@ network.unit.inspection.searchverify = true
 network.unit.remotecrawl.speed = 300
 
 # addresses of seed-list bootstrap locations
-network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
+network.unit.bootstrap.seedlist0 = http://www.yacy.de/seed.txt
 network.unit.bootstrap.seedlist1 = http://www.lulabad.de/seed.txt
-network.unit.bootstrap.seedlist2 = http://sixcooler.de/yacy/seed.txt
-network.unit.bootstrap.seedlist3 = http://www.elso.sk/yacy/seed.txt
-network.unit.bootstrap.seedlist4 = http://yacybot.almnet.de/seed.txt
-network.unit.bootstrap.seedlist5 = http://low.audioattack.de/yacy/seed.txt
-network.unit.bootstrap.seedlist6 = http://search.ipredator.se/downloads/yacy.seeds
-network.unit.bootstrap.seedlist7 = https://yacy.adrien-martin.net/seed.txt
-
+network.unit.bootstrap.seedlist2 = http://www.elso.sk/yacy/seed.txt
+network.unit.bootstrap.seedlist3 = http://low.audioattack.de/yacy/seed.txt
+network.unit.bootstrap.seedlist4 = http://img.homepage.bluewin.ch/352348/seed.txt
+network.unit.bootstrap.seedlist5 = http://lingvini.hu/yacy/gshuszrg00/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
