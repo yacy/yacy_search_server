@@ -5,7 +5,7 @@
 #Dead {
   fill: red;
 }
-#InboundOk {
+#Inbound {
   fill: green;
 }
 .hypertree {
@@ -22,7 +22,7 @@
   stroke: red;
   stroke-dasharray: 0,2 1;
 }
-.hypertree-link.InboundOk {
+.hypertree-link.Inbound {
   stroke: green;
 }
 circle {

@@ -21,6 +21,7 @@
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -92,7 +93,9 @@ public class linkstructure {
                 );
         SolrDocument doc;
         Map<String, FailType> errorDocs = new HashMap<String, FailType>();
-        Map<String, HyperlinkEdge> edges = new HashMap<String, HyperlinkEdge>();
+        Map<String, HyperlinkEdge> inboundEdges = new HashMap<String, HyperlinkEdge>();
+        Map<String, HyperlinkEdge> outboundEdges = new HashMap<String, HyperlinkEdge>();
+        Map<String, HyperlinkEdge> errorEdges = new HashMap<String, HyperlinkEdge>();
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
@@ -110,7 +113,7 @@ public class linkstructure {
                         try {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
-                            edges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.InboundOk));
+                            inboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Inbound));
                         } catch (MalformedURLException e) {}
                     }
                     links = URIMetadataNode.getLinks(doc, false); // outbound
@@ -119,26 +122,49 @@ public class linkstructure {
                         try {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
-                            edges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Outbound));
+                            outboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Outbound));
                         } catch (MalformedURLException e) {}
                     }
                 }
-                if (edges.size() > maxnodes) break;
+                if (inboundEdges.size() + outboundEdges.size() > maxnodes) break;
             }
         } catch (InterruptedException e) {
         } catch (MalformedURLException e) {
         }
         // we use the errorDocs to mark all edges with endpoint to error documents
-        for (Map.Entry<String, HyperlinkEdge> edge: edges.entrySet()) {
-            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) edge.getValue().type = HyperlinkEdge.Type.Dead;
+        Iterator<Map.Entry<String, HyperlinkEdge>> i = inboundEdges.entrySet().iterator();
+        Map.Entry<String, HyperlinkEdge> edge;
+        while (i.hasNext()) {
+            edge = i.next();
+            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
+                i.remove();
+                edge.getValue().type = HyperlinkEdge.Type.Dead;
+                errorEdges.put(edge.getKey(), edge.getValue());
+            }
         }
-
+        i = outboundEdges.entrySet().iterator();
+        while (i.hasNext()) {
+            edge = i.next();
+            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
+                i.remove();
+                edge.getValue().type = HyperlinkEdge.Type.Dead;
+                errorEdges.put(edge.getKey(), edge.getValue());
+            }
+        }
+        // we put all edges together in a specific order which is used to create nodes in a svg display:
+        // notes that appear first are possible painted over by nodes coming later.
+        // less important nodes shall appear therefore first
+        Map<String, HyperlinkEdge> edges = new LinkedHashMap<String, HyperlinkEdge>();
+        edges.putAll(outboundEdges);
+        edges.putAll(inboundEdges);
+        edges.putAll(errorEdges);
+        
         // finally just write out the edge array
         int c = 0;
-        for (Map.Entry<String, HyperlinkEdge> edge: edges.entrySet()) {
-            prop.putJSON("list_" + c + "_source", edge.getValue().source.getPath());
-            prop.putJSON("list_" + c + "_target", edge.getValue().type.equals(HyperlinkEdge.Type.Outbound) ? edge.getValue().target.toNormalform(true) : edge.getValue().target.getPath());
-            prop.putJSON("list_" + c + "_type", edge.getValue().type.name());
+        for (Map.Entry<String, HyperlinkEdge> e: edges.entrySet()) {
+            prop.putJSON("list_" + c + "_source", e.getValue().source.getPath());
+            prop.putJSON("list_" + c + "_target", e.getValue().type.equals(HyperlinkEdge.Type.Outbound) ? e.getValue().target.toNormalform(true) : e.getValue().target.getPath());
+            prop.putJSON("list_" + c + "_type", e.getValue().type.name());
             prop.put("list_" + c + "_eol", 1);
             c++;
         }

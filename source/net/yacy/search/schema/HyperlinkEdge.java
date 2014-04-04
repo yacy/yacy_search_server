@@ -25,7 +25,7 @@ import net.yacy.cora.document.id.DigestURL;
 public class HyperlinkEdge {
 
     public static enum Type {
-        InboundOk, InboundNofollow, Outbound, Dead;
+        Inbound, InboundNofollow, Outbound, Dead;
     }
     
     public DigestURL source, target;
