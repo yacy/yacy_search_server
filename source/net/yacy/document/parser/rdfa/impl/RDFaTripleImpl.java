@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -13,10 +12,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
-import net.yacy.yacy;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
+import net.yacy.search.Switchboard;
 
 public class RDFaTripleImpl{
 
@@ -45,7 +43,7 @@ public class RDFaTripleImpl{
 		}
 
 		if (templates == null) {
-            File f = new File (yacy.homedir + File.separatorChar + "defaults" + File.separatorChar + "RDFaParser.xsl");
+                    File f = new File(Switchboard.getSwitchboard().appPath, "defaults" + File.separatorChar + "RDFaParser.xsl");
 			try {
 				StreamSource aSource = new StreamSource(f);
 				TransformerFactory aFactory = TransformerFactory.newInstance();

@@ -59,7 +59,6 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
-import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import com.google.common.io.Files;
@@ -110,7 +109,6 @@ public final class yacy {
 
     // static objects
     public static final String vString = yacyBuildProperties.getVersion();
-    public static float version = 0.1f;
 
     public static final String vDATE   = yacyBuildProperties.getBuildDate();
     public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
@@ -122,8 +120,6 @@ public final class yacy {
      * {@link yacy#startup(String, long, long)} method.
      */
     private static Switchboard sb = null;
-	public static String homedir;
-	public static File dataHome_g;
 
     /**
     * Starts up the whole application. Sets up all datastructures and starts
@@ -148,7 +144,6 @@ public final class yacy {
 
             // ensure that there is a DATA directory, if not, create one and if that fails warn and die
             mkdirsIfNeseccary(dataHome);
-            dataHome_g = dataHome;
             mkdirsIfNeseccary(appHome);
             File f = new File(dataHome, "DATA/");
             mkdirsIfNeseccary(f);
@@ -156,8 +151,6 @@ public final class yacy {
 				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
 				System.exit(-1);
 			}
-
-			homedir = appHome.toString();
 
             // setting up logging
 			f = new File(dataHome, "DATA/LOG/");
@@ -226,7 +219,6 @@ public final class yacy {
             sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
             sb.setConfig("applicationRoot", appHome.toString());
             sb.setConfig("dataRoot", dataHome.toString());
-            yacyVersion.latestRelease = version;
 
             // create some directories
             final File htRootPath = new File(appHome, sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
