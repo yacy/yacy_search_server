@@ -199,24 +199,6 @@ public class NetworkGraph {
 
         Seed seed;
         long lastseen;
-        // start processes that actually draw the peers
-        //final BlockingQueue<drawNetworkPicturePeerJob> drawQueue = new LinkedBlockingDeque<drawNetworkPicturePeerJob>();
-        //final drawNetworkPicturePeerJob poison = new drawNetworkPicturePeerJob();
-        /*
-        final Thread[] drawThreads = new Thread[Runtime.getRuntime().availableProcessors()];
-        for (int i = 0; i < drawThreads.length; i++) {
-            drawThreads[i] = new Thread() {
-                public void run() {
-                    try {
-                        drawNetworkPicturePeerJob job;
-                        while ((job = drawQueue.take()) != poison) job.draw();
-                    } catch (final InterruptedException e) {
-                    }
-                }
-            };
-            drawThreads[i].start();
-        }
-         */
 
         // draw connected senior and principals
         int count = 0;
@@ -379,7 +361,7 @@ public class NetworkGraph {
             }
 
             // draw corona around dot for query activity
-            int qphx = Math.min((int) (this.seed.getQPM() * 30.0f), 8);
+            int qphx = Math.min((int) (this.seed.getQPM() * 15.0f), 8);
             if (this.coronaangle >= 0 && qphx > 0) {
                 drawCorona(this.img, this.centerX, this.centerY, this.innerradius, this.innerradius / 2, angle, dotsize, qphx, this.coronaangle, false, true, 10, 60, 10); // color = 0..63
             }
