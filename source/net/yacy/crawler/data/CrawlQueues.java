@@ -89,17 +89,22 @@ public class CrawlQueues {
         this.noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
         this.errorURL = new ErrorCache(sb.index.fulltext());
         this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
-        
     }
     
+    /**
+     * Relocation is necessary if the user switches the network.
+     * Because this object is part of the scheduler we cannot simply close that object and create a new one.
+     * Instead, the 'living' content of this object is destroyed.
+     * @param newQueuePath
+     */
     public void relocate(final File newQueuePath) {
-        close();
-
+        // removed pending requests
+        this.workerQueue.clear();
+        this.errorURL.clearCache();
         this.remoteCrawlProviderHashes.clear();
-
+        this.noticeURL.close();
         this.noticeURL = new NoticedURL(newQueuePath, this.sb.useTailCache, this.sb.exceed134217727);
-        this.errorURL = new ErrorCache(this.sb.index.fulltext());
-        this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
+        this.delegatedURL.clear();
     }
 
     public synchronized void close() {

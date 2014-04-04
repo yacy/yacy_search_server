@@ -78,8 +78,12 @@ public class ErrorCache {
         }
     }
 
-    public void clear() throws IOException {
+    public void clearCache() {
         if (this.cache != null) synchronized (this.cache) {this.cache.clear();}
+    }
+
+    public void clear() throws IOException {
+        clearCache();
         this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
     }
 
