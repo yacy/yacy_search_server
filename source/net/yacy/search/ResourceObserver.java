@@ -231,7 +231,9 @@ public class ResourceObserver {
     public long getSizeOfDataPath(final boolean cached) {
         if (cached && System.currentTimeMillis() - this.sizeOfDirectory_lastCountTime < 600000) return this.sizeOfDirectory_lastCountValue;
         this.sizeOfDirectory_lastCountTime = System.currentTimeMillis();
-        this.sizeOfDirectory_lastCountValue = FileUtils.sizeOfDirectory(this.path);
+        try {
+            this.sizeOfDirectory_lastCountValue = FileUtils.sizeOfDirectory(this.path);
+        } catch (Throwable e) {} // org.apache.commons.io.FileUtils.sizeOf calls sizes of files which are there temporary and may cause an exception. Thats a bug inside FileUtils
         return this.sizeOfDirectory_lastCountValue;
     }
     
