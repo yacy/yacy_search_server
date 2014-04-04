@@ -130,7 +130,7 @@ public class linkstructure {
         }
         // we use the errorDocs to mark all edges with endpoint to error documents
         for (Map.Entry<String, HyperlinkEdge> edge: edges.entrySet()) {
-            if (errorDocs.containsKey(edge.getValue().target)) edge.getValue().type = HyperlinkEdge.Type.Dead;
+            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) edge.getValue().type = HyperlinkEdge.Type.Dead;
         }
 
         // finally just write out the edge array
