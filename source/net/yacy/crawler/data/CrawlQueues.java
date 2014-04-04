@@ -126,7 +126,7 @@ public class CrawlQueues {
     public void clear() {
         // wait for all workers to finish
         this.workerQueue.clear();
-        for (final Loader w: this.worker) w.interrupt();
+        for (final Loader w: this.worker) if (w != null) w.interrupt();
         this.remoteCrawlProviderHashes.clear();
         this.noticeURL.clear();
         this.delegatedURL.clear();
