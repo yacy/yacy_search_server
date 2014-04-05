@@ -138,7 +138,7 @@
         <!-- Expert: Enabling compound file will use less files for the index,
          using fewer file descriptors on the expense of performance decrease.
          Default in Lucene is "true". Default in Solr is "false" (since 3.6) -->
-        <!-- <useCompoundFile>false</useCompoundFile> -->
+        <!-- <useCompoundFile>true</useCompoundFile> -->
         
         <!-- ramBufferSizeMB sets the amount of RAM that may be used by Lucene
          indexing for buffering added documents and deletions before they are
