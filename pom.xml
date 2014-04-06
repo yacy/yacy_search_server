@@ -4,7 +4,7 @@
 
     <groupId>net.yacy</groupId>
     <artifactId>yacycore</artifactId>
-    <version>1.70</version>
+    <version>1.71</version>
     <packaging>jar</packaging>
     <description>YaCy - a Peer to Peer Web Search Engine</description>
     <name>YaCy</name>
@@ -300,7 +300,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.6</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>

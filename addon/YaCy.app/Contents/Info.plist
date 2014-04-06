@@ -42,7 +42,7 @@
 			<string>$JAVAROOT/lib/bcmail-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bcprov-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/commons-codec-1.7.jar</string>
-			<string>$JAVAROOT/lib/commons-compress-1.4.1.jar</string>
+			<string>$JAVAROOT/lib/commons-compress-1.8.jar</string>
 			<string>$JAVAROOT/lib/commons-fileupload-1.2.2.jar</string>
 			<string>$JAVAROOT/lib/commons-io-2.1.jar</string>
 			<string>$JAVAROOT/lib/commons-jxpath-1.3.jar</string>
