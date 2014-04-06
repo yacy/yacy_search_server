@@ -2301,10 +2301,11 @@ public final class Switchboard extends serverSwitch {
             // execute the (post-) processing steps for all entries that have a process tag assigned
             Fulltext fulltext = index.fulltext();
             CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
+            boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
+            int proccount = 0;
             if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && MemoryControl.available() > 512L * 1024L * 1024L && Memory.load() < 2.5f) {
                 
                 // we optimize first because that is useful for postprocessing
-                int proccount = 0;
                 ReferenceReportCache rrCache = index.getReferenceReportCache();
                 int clickdepth_maxtime = this.getConfigInt("postprocessing.clickdepth.maxtime", 100);
                 int clickdepth_maxdepth = this.getConfigInt("postprocessing.clickdepth.maxdepth", 6);
@@ -2313,7 +2314,6 @@ public final class Switchboard extends serverSwitch {
                         this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
                 int cleanupByHarvestkey = deletionCandidates.size();
                 boolean postprocessing =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.useWebgraph());
-                boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
                 if (postprocessing && (cleanupByHarvestkey > 0 || allCrawlsFinished)) {
                     if (cleanupByHarvestkey > 0) {
                         // run postprocessing on these profiles
@@ -2340,38 +2340,37 @@ public final class Switchboard extends serverSwitch {
                     }
                 }
                 this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
-                if (allCrawlsFinished) {
-                    postprocessingRunning = true;
-                    // flush caches
-                    Domains.clear();
-                    this.crawlQueues.noticeURL.clear();
-                    
-                    // do solr optimization
-                    long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
-                    long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
-                    long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
-                    boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
-                    int opts = Math.max(1, (int) (fulltext.collectionSize() / 5000000));
-                    
-                    log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
-                    if (idleAdmin > 600000) {
-                        // only run optimization if the admin is idle (10 minutes)
-                        if (proccount > 0) {
-                            opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
-                            optimizeRequired = true;
-                        }
-                        if (optimizeRequired) {
-                            if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
-                            log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
-                            fulltext.optimize(opts);
-                            this.optimizeLastRun = System.currentTimeMillis();
-                        }
-                    }
-                }
                 postprocessingStartTime = new long[]{0,0}; // the start time for the processing; not started = 0                
                 postprocessingRunning = false;
             }
 
+            if (allCrawlsFinished) {
+                postprocessingRunning = true;
+                // flush caches
+                Domains.clear();
+                this.crawlQueues.noticeURL.clear();
+                
+                // do solr optimization
+                long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
+                long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
+                long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
+                boolean optimizeRequired = deltaOptimize > 60000 * 60 * 2 && idleAdmin > 600000; // optimize if user is idle for 10 minutes and at most every 2 hours
+                int opts = Math.min(10, Math.max(1, (int) (fulltext.collectionSize() / 5000000)));
+                if (proccount > 0) {
+                    opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
+                    optimizeRequired = true;
+                }
+                
+                log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
+                if (optimizeRequired) {
+                    if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
+                    log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
+                    fulltext.optimize(opts);
+                    this.optimizeLastRun = System.currentTimeMillis();
+                }    
+                postprocessingRunning = false;
+            }
+            
             // execute api actions; this must be done after postprocessing because 
             // these actions may also influence the search index/ call optimize steps
             execAPIActions();
