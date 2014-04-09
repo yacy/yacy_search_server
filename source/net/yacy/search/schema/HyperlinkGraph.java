@@ -36,6 +36,9 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.search.index.Fulltext;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segment.ReferenceReportCache;
 
 import org.apache.solr.common.SolrDocument;
 
@@ -59,7 +62,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         this.hostname = null;
     }
     
-    public void fill(final SolrConnector solrConnector, String hostname, final int maxtime, final int maxnodes) {
+    public void fill(final SolrConnector solrConnector, String hostname, final DigestURL stopURL, final int maxtime, final int maxnodes) {
         this.hostname = hostname;
         if (hostname.startsWith("www.")) hostname = hostname.substring(4);
         StringBuilder q = new StringBuilder();
@@ -80,7 +83,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         Map<String, HyperlinkEdge> outboundEdges = new HashMap<String, HyperlinkEdge>();
         Map<String, HyperlinkEdge> errorEdges = new HashMap<String, HyperlinkEdge>();
         try {
-            while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+            retrieval: while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                 String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
                 DigestURL from = new DigestURL(u, ASCII.getBytes(ids));
@@ -97,6 +100,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
                             inboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Inbound));
+                            if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
                     }
                     links = URIMetadataNode.getLinks(doc, false); // outbound
@@ -106,11 +110,12 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
                             outboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Outbound));
+                            if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
                     }
                 }
                 if (inboundEdges.size() + outboundEdges.size() > maxnodes) {
-                    break;
+                    break retrieval;
                 }
             }
         } catch (InterruptedException e) {
@@ -142,6 +147,16 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         this.edges.putAll(outboundEdges);
         this.edges.putAll(inboundEdges);
         this.edges.putAll(errorEdges);
+    }
+    
+    public void path(final Segment segment, ReferenceReportCache rrc, DigestURL from, DigestURL to, final int maxtime, final int maxnodes) {
+        // two steps to find the graph: (1) create a HyperlinkGraph (to-down) and (2) backtrack backlinks up to an element of the graph (bottom-up)
+        if (this.edges.size() == 0) {
+            fill(segment.fulltext().getDefaultConnector(), from == null ? to.getHost() : from.getHost(), to, maxtime, maxnodes);
+        }
+        if (getDepth(to) >= 0 && (from == null || getDepth(from) >= 0)) return; // nothing to do.
+        // now find the link bottom-up
+        
     }
     
     public int findLinkDepth() {

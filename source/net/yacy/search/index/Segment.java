@@ -328,7 +328,7 @@ public class Segment {
             HyperlinkGraph hlg = hyperlinkGraphCache.get(url.getHost());
             if (hlg == null) {
                 hlg = new HyperlinkGraph();
-                hlg.fill(fulltext.getDefaultConnector(), url.getHost(), 300000, 10000000);
+                hlg.fill(fulltext.getDefaultConnector(), url.getHost(), null, 300000, 10000000);
                 hlg.findLinkDepth();
                 hyperlinkGraphCache.put(url.getHost(), hlg);
             }

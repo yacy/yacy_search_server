@@ -27,6 +27,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
+import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.schema.HyperlinkEdge;
 import net.yacy.search.schema.HyperlinkGraph;
 import net.yacy.server.serverObjects;
@@ -45,33 +46,53 @@ public class linkstructure {
         final Switchboard sb = (Switchboard) env;
         Fulltext fulltext = sb.index.fulltext();
         if (post == null) return prop;
-        String about = post.get("about", null); // may be a URL, a URL hash or a domain hash
-        if (about == null) return prop;
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int maxtime = Math.min(post.getInt("maxtime", 1000), authenticated ? 300000 : 1000);
         int maxnodes = Math.min(post.getInt("maxnodes", 100), authenticated ? 10000000 : 100);
-
-        DigestURL url = null;
-        String hostname = null;
-        if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
-            byte[] urlhash = ASCII.getBytes(about);
-            url = authenticated ? sb.getURL(urlhash) : null;
-        } else if (url == null && about.length() > 0) {
-            // consider "about" as url or hostname
-            try {
+        HyperlinkGraph hlg = new HyperlinkGraph();
+        int maxdepth = 0;
+        
+        if (post.get("about", null) != null) try {
+            // get link structure within a host
+            String about = post.get("about", null); // may be a URL, a URL hash or a domain hash
+            DigestURL url = null;
+            String hostname = null;
+            if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
+                byte[] urlhash = ASCII.getBytes(about);
+                url = authenticated ? sb.getURL(urlhash) : null;
+            } else if (url == null && about.length() > 0) { // consider "about" as url or hostname
                 url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                 hostname = url.getHost();
-            } catch (final MalformedURLException e) {
             }
-        }
-        if (hostname == null) return prop;
-        
-        // now collect _all_ documents inside the domain until a timeout appears
-        HyperlinkGraph hlg = new HyperlinkGraph();
-        hlg.fill(fulltext.getDefaultConnector(), hostname, maxtime, maxnodes);
-        int maxdepth = hlg.findLinkDepth();
+            if (hostname == null) return prop;
+            
+            // now collect _all_ documents inside the domain until a timeout appears
+            hlg.fill(fulltext.getDefaultConnector(), hostname, null, maxtime, maxnodes);
+            maxdepth = hlg.findLinkDepth();
+        } catch (final MalformedURLException e) {}
+        else if (post.get("to", null) != null) try {
+            // get link structure between two links
+            DigestURL to = new DigestURL(post.get("to", null), null); // must be an url
+            DigestURL from = post.get("from", null) == null ? null : new DigestURL(post.get("from", null)); // can be null or must be an url
+            ReferenceReportCache rrc = sb.index.getReferenceReportCache();
+            hlg.path(sb.index, rrc, from, to, maxtime, maxnodes);
+        } catch (final MalformedURLException e) {}
         
         // finally just write out the edge array
+        writeGraph(prop, hlg, maxdepth);
+
+        // Adding CORS Access header for xml output
+        if (xml) {
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
+            outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
+            prop.setOutgoingHeader(outgoingHeader);
+        }
+        
+        // return rewrite properties
+        return prop;
+    }
+    
+    private static void writeGraph(final servletProperties prop, final HyperlinkGraph hlg, final int maxdepth) {
         int c = 0;
         for (HyperlinkEdge e: hlg) {
             prop.putJSON("edges_" + c + "_source", e.source.getPath());
@@ -87,16 +108,6 @@ public class linkstructure {
         prop.put("edges_" + (c-1) + "_eol", 0);
         prop.put("edges", c);
         prop.put("maxdepth", maxdepth);
-
-        // Adding CORS Access header for xml output
-        if (xml) {
-            final ResponseHeader outgoingHeader = new ResponseHeader(200);
-            outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
-            prop.setOutgoingHeader(outgoingHeader);
-        }
-        
-        // return rewrite properties
-        return prop;
     }
 
 }
