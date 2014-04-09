@@ -1492,7 +1492,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             Collection<Object> c = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
             if (c != null) for (Object cn: c) if (cn != null) this.collections.put((String) cn, QueryParams.catchall_pattern);
             this.failReason = (String) doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
-            this.failType = FailType.valueOf((String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName()));
+            String fts = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
+            if (fts == null) ConcurrentLog.warn("CollectionConfiguration", "no fail type given for URL " + this.digestURL.toNormalform(true));
+            this.failType = fts == null ? FailType.fail : FailType.valueOf(fts);
             this.httpstatus = (Integer) doc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName());
             this.failtime = (Date) doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
         }
