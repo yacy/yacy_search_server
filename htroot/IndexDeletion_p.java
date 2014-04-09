@@ -130,7 +130,7 @@ public class IndexDeletion_p {
                     }
                     try {
                         DigestURL u = new DigestURL(urlStub);
-                        BlockingQueue<SolrDocument> dq = defaultConnector.concurrentDocumentsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":\"" + u.getHost() + "\"", 0, 100000000, Long.MAX_VALUE, 100, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+                        BlockingQueue<SolrDocument> dq = defaultConnector.concurrentDocumentsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":\"" + u.getHost() + "\"", null, 0, 100000000, Long.MAX_VALUE, 100, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
                         SolrDocument doc;
                         try {
                             while ((doc = dq.take()) != AbstractSolrConnector.POISON_DOCUMENT) {

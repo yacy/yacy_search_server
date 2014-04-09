@@ -382,7 +382,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
     
     @Override
-    public SolrDocumentList getDocumentListByQuery(String querystring, int offset, int count, String... fields) throws IOException, SolrException {
+    public SolrDocumentList getDocumentListByQuery(String querystring, String sort, int offset, int count, String... fields) throws IOException, SolrException {
         if (offset == 0 && count == 1 && querystring.startsWith("id:") &&
             ((querystring.length() == 17 && querystring.charAt(3) == '"' && querystring.charAt(16) == '"') ||
              querystring.length() == 15)) {
@@ -392,7 +392,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             return list;
         }
         
-        SolrDocumentList sdl = this.connector.getDocumentListByQuery(querystring, offset, count, AbstractSolrConnector.ensureEssentialFieldsIncluded(fields));
+        SolrDocumentList sdl = this.connector.getDocumentListByQuery(querystring, sort, offset, count, AbstractSolrConnector.ensureEssentialFieldsIncluded(fields));
         /*
         Iterator<SolrDocument> i = sdl.iterator();
         while (i.hasNext()) {
@@ -415,13 +415,13 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
-    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(String querystring, int offset, int maxcount, long maxtime, int buffersize, final int concurrency, String... fields) {
-        return this.connector.concurrentDocumentsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency, fields);
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(String querystring, String sort, int offset, int maxcount, long maxtime, int buffersize, final int concurrency, String... fields) {
+        return this.connector.concurrentDocumentsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency, fields);
     }
 
     @Override
-    public BlockingQueue<String> concurrentIDsByQuery(String querystring, int offset, int maxcount, long maxtime, int buffersize, final int concurrency) {
-        return this.connector.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
+    public BlockingQueue<String> concurrentIDsByQuery(String querystring, String sort, int offset, int maxcount, long maxtime, int buffersize, final int concurrency) {
+        return this.connector.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
     }
 
 }

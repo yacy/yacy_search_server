@@ -171,7 +171,7 @@ public class ErrorCache {
         }
         if (failDoc != null) return failDoc;
         try {
-            final SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.id + ":\"" + urlhash + "\" AND " + CollectionSchema.failtype_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM, 0, 1);
+            final SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.id + ":\"" + urlhash + "\" AND " + CollectionSchema.failtype_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM, null, 0, 1);
             if (docs == null || docs.isEmpty()) return null;
             SolrDocument doc = docs.get(0);
             if (doc == null) return null;

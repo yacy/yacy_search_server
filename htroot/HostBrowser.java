@@ -288,7 +288,7 @@ public class HostBrowser {
                         q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(AbstractSolrConnector.CATCHALL_DTERM);
                     }
                 }
-                BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentDocumentsByQuery(q.toString(), 0, 100000, TIMEOUT, 100, 1,
+                BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentDocumentsByQuery(q.toString(), CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000, TIMEOUT, 100, 1,
                         CollectionSchema.id.getSolrFieldName(),
                         CollectionSchema.sku.getSolrFieldName(),
                         CollectionSchema.failreason_s.getSolrFieldName(),

@@ -180,12 +180,18 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * get a query result from solr
      * to get all results set the query String to "*:*"
      * @param querystring the solr query string
+     * @param sort the solr sort string, may be null to be not used
      * @param offset the first result offset
      * @param count number of wanted results
      * @param fields list of fields
      * @throws IOException
      */
-    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException, SolrException;
+    public SolrDocumentList getDocumentListByQuery(
+            final String querystring,
+            final String sort,
+            final int offset,
+            final int count,
+            final String ... fields) throws IOException, SolrException;
     
     /**
      * get the number of results when this query is done.
@@ -210,6 +216,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
      * The method returns immediately and feeds the search results into the queue
      * @param querystring the solr query string
+     * @param sort the solr sort string, may be null to be not used
      * @param offset first result offset
      * @param maxcount the maximum number of results
      * @param maxtime the maximum time in milliseconds
@@ -220,6 +227,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      */
     public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(
             final String querystring,
+            final String sort,
             final int offset,
             final int maxcount,
             final long maxtime,
@@ -232,6 +240,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.
      * The method returns immediately and feeds the search results into the queue
      * @param querystring
+     * @param sort the solr sort string, may be null to be not used
      * @param offset
      * @param maxcount
      * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
@@ -240,6 +249,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      */
     public BlockingQueue<String> concurrentIDsByQuery(
             final String querystring,
+            final String sort,
             final int offset,
             final int maxcount,
             final long maxtime,

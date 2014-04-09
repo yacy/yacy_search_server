@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -80,6 +81,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.HyperlinkGraph;
 import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.search.schema.WebgraphSchema;
 
@@ -259,21 +261,13 @@ public class Segment {
         return 999;
     }
     
+    
     private static RowHandleSet getPossibleRootHashes(final DigestURL url) {
         RowHandleSet rootCandidates = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 10);
         String rootStub = url.getProtocol() + "://" + url.getHost() + (url.getProtocol().equals("http") && url.getPort() != 80 ? (":" + url.getPort()) : "");
         try {
             rootCandidates.put(new DigestURL(rootStub).hash());
-            rootCandidates.put(new DigestURL(rootStub + "/").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/index.htm").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/index.html").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/index.php").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/home.htm").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/home.html").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/home.php").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/default.htm").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/default.html").hash());
-            rootCandidates.put(new DigestURL(rootStub + "/default.php").hash());
+            for (String rootfn: HyperlinkGraph.ROOTFNS) rootCandidates.put(new DigestURL(rootStub + rootfn).hash());
             rootCandidates.optimize();
         } catch (final Throwable e) {}
         rootCandidates.optimize();
@@ -310,22 +304,41 @@ public class Segment {
     
     public class ClickdepthCache {
         private final ReferenceReportCache rrc;
+        private final Map<String, HyperlinkGraph> hyperlinkGraphCache; // map from host name to a HyperlinkGraph for that host name
         private final Map<String, Integer> cache;
         public final int maxdepth; // maximum clickdepth
         public final int maxtime; // maximum time to compute clickdepth
         public ClickdepthCache(final ReferenceReportCache rrc, final int maxtime, final int maxdepth) {
             this.rrc = rrc;
+            this.hyperlinkGraphCache = new HashMap<String, HyperlinkGraph>();
             this.cache = new ConcurrentHashMap<String, Integer>();
             this.maxdepth = maxdepth;
             this.maxtime = maxtime;
         }
         public int getClickdepth(final DigestURL url) throws IOException {
+            // first try: get the clickdepth from the cache
             Integer clickdepth = cache.get(ASCII.String(url.hash()));
             if (MemoryControl.shortStatus()) cache.clear();
             if (clickdepth != null) {
                 //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth + " CACHE HIT");
                 return clickdepth.intValue();
             }
+            
+            // second try: get the clickdepth from a hyperlinGraphCache (forward clickdepth)
+            HyperlinkGraph hlg = hyperlinkGraphCache.get(url.getHost());
+            if (hlg == null) {
+                hlg = new HyperlinkGraph();
+                hlg.fill(fulltext.getDefaultConnector(), url.getHost(), 300000, 10000000);
+                hlg.findLinkDepth();
+                hyperlinkGraphCache.put(url.getHost(), hlg);
+            }
+            clickdepth = hlg.getDepth(url);
+            if (clickdepth != null) {
+                return clickdepth.intValue();
+            }
+                    
+            
+            // third try: get the clickdepth from a reverse link graph
             clickdepth = Segment.this.getClickDepth(this.rrc, url, this.maxtime, this.maxdepth);
             //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth);
             this.cache.put(ASCII.String(url.hash()), clickdepth);
@@ -375,7 +388,7 @@ public class Segment {
             if ((internalIDs.size() == 0 || !connectedCitation()) && Segment.this.fulltext.useWebgraph()) {
                 // reqd the references from the webgraph
                 SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
-                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), 0, 10000000, 1000, 100, 1, WebgraphSchema.source_id_s.getSolrFieldName());
+                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 10000000, 1000, 100, 1, WebgraphSchema.source_id_s.getSolrFieldName());
                 SolrDocument doc;
                 try {
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -478,12 +491,12 @@ public class Segment {
         final BlockingQueue<SolrDocument> docQueue;
         final String urlstub;
         if (stub == null) {
-            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(AbstractSolrConnector.CATCHALL_QUERY, 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(AbstractSolrConnector.CATCHALL_QUERY, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = null;
         } else {
             final String host = stub.getHost();
             String hh = DigestURL.hosthash(host);
-            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = stub.toNormalform(true);
         }
 

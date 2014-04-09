@@ -360,16 +360,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         private SolrQueryRequest request;
         private DocList response;
 
-        public DocListSearcher(final String querystring, final int offset, final int count, final String ... fields) {
+        public DocListSearcher(final String querystring, String sort, final int offset, final int count, final String ... fields) {
             // construct query
-            final SolrQuery params = new SolrQuery();
-            params.setQuery(querystring);
-            params.setRows(count);
-            params.setStart(offset);
-            params.setFacet(false);
-            params.clearSorts();
-            if (fields.length > 0) params.setFields(fields);
-            params.setIncludeScore(false);
+            final SolrQuery params = AbstractSolrConnector.getSolrQuery(querystring, sort, offset, count, fields);
             
             // query the server
             this.request = EmbeddedSolrConnector.this.request(params);
@@ -395,7 +388,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     	int numFound = 0;
     	DocListSearcher docListSearcher = null;
         try {
-        	docListSearcher = new DocListSearcher(querystring, 0, 0, CollectionSchema.id.getSolrFieldName());
+        	docListSearcher = new DocListSearcher(querystring, null, 0, 0, CollectionSchema.id.getSolrFieldName());
         	numFound = docListSearcher.response.matches();
         } finally { 
         	if (docListSearcher != null) docListSearcher.close();
@@ -414,7 +407,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         int responseCount = 0;
         DocListSearcher docListSearcher = null;
         try {
-            docListSearcher = new DocListSearcher("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, 0, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
+            docListSearcher = new DocListSearcher("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, null, 0, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
             responseCount = docListSearcher.response.size();
             if (responseCount == 0) return null;
             SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
@@ -431,7 +424,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     @Override
-    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final int concurrency) {
+    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final String sort, final int offset, final int maxcount, final long maxtime, final int buffersize, final int concurrency) {
         final BlockingQueue<String> queue = buffersize <= 0 ? new LinkedBlockingQueue<String>() : new ArrayBlockingQueue<String>(buffersize);
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final Thread t = new Thread() {
@@ -443,7 +436,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                 while (System.currentTimeMillis() < endtime) {
                     try {
                     	responseCount = 0;
-                        docListSearcher = new DocListSearcher(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
+                        docListSearcher = new DocListSearcher(querystring, sort, o, pagesize, CollectionSchema.id.getSolrFieldName());
                         responseCount = docListSearcher.response.size();
                         SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
                         DocIterator iterator = docListSearcher.response.iterator();

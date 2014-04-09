@@ -134,6 +134,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
      * The method returns immediately and feeds the search results into the queue
      * @param querystring the solr query string
+     * @param sort the solr sort string, may be null to be not used
      * @param offset first result offset
      * @param maxcount the maximum number of results
      * @param maxtime the maximum time in milliseconds
@@ -144,6 +145,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     @Override
     public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(
             final String querystring,
+            final String sort,
             final int offset,
             final int maxcount,
             final long maxtime,
@@ -160,7 +162,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int count = 0;
                 while (System.currentTimeMillis() < endtime && count < maxcount) {
                     try {
-                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, Math.min(maxcount, pagesize), fields);
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, pagesize), fields);
                         for (SolrDocument d: sdl) {
                             try {queue.put(d);} catch (final InterruptedException e) {break;}
                             count++;
@@ -185,6 +187,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     @Override
     public BlockingQueue<String> concurrentIDsByQuery(
             final String querystring,
+            final String sort,
             final int offset,
             final int maxcount,
             final long maxtime,
@@ -199,7 +202,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {
-                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, Math.min(maxcount, pagesize), CollectionSchema.id.getSolrFieldName());
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, pagesize), CollectionSchema.id.getSolrFieldName());
                         for (SolrDocument d: sdl) {
                             try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
                         }
@@ -222,7 +225,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
     @Override
     public Iterator<String> iterator() {
-        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_QUERY, 0, Integer.MAX_VALUE, 60000, 2 * pagesize, 1);
+        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_QUERY, null, 0, Integer.MAX_VALUE, 60000, 2 * pagesize, 1);
         return new LookAheadIterator<String>() {
             @Override
             protected String next0() {
@@ -245,22 +248,43 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+    public SolrDocumentList getDocumentListByQuery(
+            final String querystring,
+            final String sort,
+            final int offset,
+            final int count,
+            final String ... fields) throws IOException {
         // construct query
-        final SolrQuery params = new SolrQuery();
-        params.setQuery(querystring);
-        params.setRows(count);
-        params.setStart(offset);
-        params.setFacet(false);
-        params.clearSorts();
-        if (fields.length > 0) params.setFields(fields);
-        params.setIncludeScore(false);
+        final SolrQuery params = getSolrQuery(querystring, sort, offset, count, fields);
         
         // query the server
         final SolrDocumentList docs = getDocumentListByParams(params);
         return docs;
     }
 
+    public static SolrQuery getSolrQuery(
+            final String querystring,
+            final String sort,
+            final int offset,
+            final int count,
+            final String ... fields) {
+        // construct query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(querystring);
+        params.clearSorts();
+        if (sort != null) {
+            params.set("sort", sort);
+        }
+        params.setRows(count);
+        params.setStart(offset);
+        params.setFacet(false);
+        if (fields.length > 0) params.setFields(fields);
+        params.setIncludeScore(false);
+        
+        return params;
+    }
+    
+    
     @Override
     public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
         final SolrDocumentList sdl = getDocumentListByParams(params);

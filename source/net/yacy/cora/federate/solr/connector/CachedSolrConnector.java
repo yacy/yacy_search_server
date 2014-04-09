@@ -211,7 +211,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+    public SolrDocumentList getDocumentListByQuery(final String querystring, final String sort, final int offset, final int count, final String ... fields) throws IOException {
         if (offset == 0 && count == 1 && querystring.startsWith("id:") &&
             ((querystring.length() == 17 && querystring.charAt(3) == '"' && querystring.charAt(16) == '"') ||
              querystring.length() == 15)) {
@@ -222,14 +222,14 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
             return list;
         }
         if (this.solr != null) {
-            SolrDocumentList list = this.solr.getDocumentListByQuery(querystring, offset, count, fields);
+            SolrDocumentList list = this.solr.getDocumentListByQuery(querystring, sort, offset, count, fields);
             addToCache(list, fields.length == 0);
             return list;
         }
         
         // combine both lists
         SolrDocumentList list;
-        list = this.solr.getDocumentListByQuery(querystring, offset, count, fields);
+        list = this.solr.getDocumentListByQuery(querystring, sort, offset, count, fields);
 
         // add caching
         addToCache(list, fields.length == 0);

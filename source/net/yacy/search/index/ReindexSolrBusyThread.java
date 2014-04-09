@@ -113,7 +113,7 @@ import org.apache.solr.common.SolrInputDocument;
                 if (sem.tryAcquire()) {
                     try {
                         String query = querylist.get(0);
-                        SolrDocumentList xdocs = esc.getDocumentListByQuery(query, start, chunksize);
+                        SolrDocumentList xdocs = esc.getDocumentListByQuery(query, null, start, chunksize);
                         docstoreindex = (int) xdocs.getNumFound();
                         
                         if (xdocs.size() == 0) { // no documents returned = all of current query reindexed (or eventual start to large)                                                       

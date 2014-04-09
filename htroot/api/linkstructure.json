@@ -1,5 +1,7 @@
-[
-#{list}#
-{"source":"#[source]#", "target":"#[target]#", "type":"#[type]#"}#(eol)#::,#(/eol)#
-#{/list}#
-]
+{
+"edges" : "#[edges]#",
+"maxdepth" : "#[maxdepth]#",
+"graph" : [#{edges}#
+{"source":"#[source]#", "target":"#[target]#", "type":"#[type]#", "depthSource":"#[depthSource]#", "depthTarget":"#[depthTarget]#"}#(eol)#::,#(/eol)#
+#{/edges}#]
+}

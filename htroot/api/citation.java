@@ -127,7 +127,7 @@ public class citation {
             }
             try {
                 sentence = sentence.replace('"', '\'');
-                SolrDocumentList doclist = connector.getDocumentListByQuery("text_t:\"" + sentence + "\"", 0, 100, CollectionSchema.sku.getSolrFieldName());
+                SolrDocumentList doclist = connector.getDocumentListByQuery("text_t:\"" + sentence + "\"", CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100, CollectionSchema.sku.getSolrFieldName());
                 int count = (int) doclist.getNumFound();
                 if (count > 0) {
                     Set<DigestURL> list = new TreeSet<DigestURL>();

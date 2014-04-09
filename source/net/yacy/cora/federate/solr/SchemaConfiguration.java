@@ -158,7 +158,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                         continue uniquecheck;
                     }
                     try {
-                        final SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"", 0, 1);
+                        final SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"", null, 0, 1);
                         if (docs != null && !docs.isEmpty()) {
                             SolrDocument doc = docs.get(0);
                             // switch unique attribute in new document

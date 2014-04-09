@@ -218,7 +218,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+    public SolrDocumentList getDocumentListByQuery(final String querystring, final String sort, final int offset, final int count, final String ... fields) throws IOException {
         if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
         if (offset == 0 && count == 1 && querystring.startsWith("id:") &&
             ((querystring.length() == 17 && querystring.charAt(3) == '"' && querystring.charAt(16) == '"') ||
@@ -230,31 +230,31 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             return list;
         }
         if (this.solr0 != null && this.solr1 == null) {
-            SolrDocumentList list = this.solr0.getDocumentListByQuery(querystring, offset, count, fields);
+            SolrDocumentList list = this.solr0.getDocumentListByQuery(querystring, sort, offset, count, fields);
             return list;
         }
         if (this.solr1 != null && this.solr0 == null) {
-            SolrDocumentList list = this.solr1.getDocumentListByQuery(querystring, offset, count, fields);
+            SolrDocumentList list = this.solr1.getDocumentListByQuery(querystring, sort, offset, count, fields);
             return list;
         }
 
         // combine both lists
         SolrDocumentList l;
-        l = this.solr0.getDocumentListByQuery(querystring, offset, count, fields);
+        l = this.solr0.getDocumentListByQuery(querystring, sort, offset, count, fields);
         if (l.size() >= count) return l;
 
         // at this point we need to know how many results are in solr0
         // compute this with a very bad hack; replace with better method later
         int size0 = 0;
         { //bad hack - TODO: replace
-            SolrDocumentList lHack = this.solr0.getDocumentListByQuery(querystring, 0, Integer.MAX_VALUE, fields);
+            SolrDocumentList lHack = this.solr0.getDocumentListByQuery(querystring, sort, 0, Integer.MAX_VALUE, fields);
             size0 = lHack.size();
         }
 
         // now use the size of the first query to do a second query
         final SolrDocumentList list = new SolrDocumentList();
         for (final SolrDocument d: l) list.add(d);
-        l = this.solr1.getDocumentListByQuery(querystring, offset + l.size() - size0, count - l.size(), fields);
+        l = this.solr1.getDocumentListByQuery(querystring, sort, offset + l.size() - size0, count - l.size(), fields);
         for (final SolrDocument d: l) list.add(d);
 
         return list;
@@ -427,10 +427,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final int concurrency) {
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
-        return super.concurrentIDsByQuery(querystring, offset, maxcount, maxtime, buffersize, concurrency);
+    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final String sort, final int offset, final int maxcount, final long maxtime, final int buffersize, final int concurrency) {
+        if (this.solr0 != null && this.solr1 == null) return this.solr0.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
+        if (this.solr0 == null && this.solr1 != null) return this.solr1.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
+        return super.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
     }
     
 }

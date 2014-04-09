@@ -17,29 +17,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-
-import org.apache.solr.common.SolrDocument;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.federate.solr.FailType;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
-import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.HyperlinkEdge;
+import net.yacy.search.schema.HyperlinkGraph;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -59,8 +48,8 @@ public class linkstructure {
         String about = post.get("about", null); // may be a URL, a URL hash or a domain hash
         if (about == null) return prop;
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int maxtime = Math.min(post.getInt("maxtime", 1000), authenticated ? 60000 : 1000);
-        int maxnodes = Math.min(post.getInt("maxnodes", 100), authenticated ? 1000 : 100);
+        int maxtime = Math.min(post.getInt("maxtime", 1000), authenticated ? 300000 : 1000);
+        int maxnodes = Math.min(post.getInt("maxnodes", 100), authenticated ? 10000000 : 100);
 
         DigestURL url = null;
         String hostname = null;
@@ -72,104 +61,32 @@ public class linkstructure {
             try {
                 url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                 hostname = url.getHost();
-                if (hostname.startsWith("www.")) hostname = hostname.substring(4);
             } catch (final MalformedURLException e) {
             }
         }
         if (hostname == null) return prop;
         
         // now collect _all_ documents inside the domain until a timeout appears
-        StringBuilder q = new StringBuilder();
-        q.append(CollectionSchema.host_s.getSolrFieldName()).append(':').append(hostname).append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(':').append("www.").append(hostname);
-        BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentDocumentsByQuery(q.toString(), 0, maxnodes, maxtime, 100, 1,
-                CollectionSchema.id.getSolrFieldName(),
-                CollectionSchema.sku.getSolrFieldName(),
-                CollectionSchema.failreason_s.getSolrFieldName(),
-                CollectionSchema.failtype_s.getSolrFieldName(),
-                CollectionSchema.inboundlinks_protocol_sxt.getSolrFieldName(),
-                CollectionSchema.inboundlinks_urlstub_sxt.getSolrFieldName(),
-                CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(),
-                CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()
-                );
-        SolrDocument doc;
-        Map<String, FailType> errorDocs = new HashMap<String, FailType>();
-        Map<String, HyperlinkEdge> inboundEdges = new HashMap<String, HyperlinkEdge>();
-        Map<String, HyperlinkEdge> outboundEdges = new HashMap<String, HyperlinkEdge>();
-        Map<String, HyperlinkEdge> errorEdges = new HashMap<String, HyperlinkEdge>();
-        try {
-            while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                DigestURL from = new DigestURL(u, ASCII.getBytes(ids));
-                String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
-                FailType error = errortype == null ? null : FailType.valueOf(errortype);
-                if (error != null) {
-                    errorDocs.put(u, error);
-                } else {
-                    Iterator<String> links = URIMetadataNode.getLinks(doc, true); // inbound
-                    String link;
-                    while (links.hasNext()) {
-                        link = links.next();
-                        try {
-                            DigestURL linkurl = new DigestURL(link, null);
-                            String edgehash = ids + ASCII.String(linkurl.hash());
-                            inboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Inbound));
-                        } catch (MalformedURLException e) {}
-                    }
-                    links = URIMetadataNode.getLinks(doc, false); // outbound
-                    while (links.hasNext()) {
-                        link = links.next();
-                        try {
-                            DigestURL linkurl = new DigestURL(link, null);
-                            String edgehash = ids + ASCII.String(linkurl.hash());
-                            outboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Outbound));
-                        } catch (MalformedURLException e) {}
-                    }
-                }
-                if (inboundEdges.size() + outboundEdges.size() > maxnodes) break;
-            }
-        } catch (InterruptedException e) {
-        } catch (MalformedURLException e) {
-        }
-        // we use the errorDocs to mark all edges with endpoint to error documents
-        Iterator<Map.Entry<String, HyperlinkEdge>> i = inboundEdges.entrySet().iterator();
-        Map.Entry<String, HyperlinkEdge> edge;
-        while (i.hasNext()) {
-            edge = i.next();
-            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
-                i.remove();
-                edge.getValue().type = HyperlinkEdge.Type.Dead;
-                errorEdges.put(edge.getKey(), edge.getValue());
-            }
-        }
-        i = outboundEdges.entrySet().iterator();
-        while (i.hasNext()) {
-            edge = i.next();
-            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
-                i.remove();
-                edge.getValue().type = HyperlinkEdge.Type.Dead;
-                errorEdges.put(edge.getKey(), edge.getValue());
-            }
-        }
-        // we put all edges together in a specific order which is used to create nodes in a svg display:
-        // notes that appear first are possible painted over by nodes coming later.
-        // less important nodes shall appear therefore first
-        Map<String, HyperlinkEdge> edges = new LinkedHashMap<String, HyperlinkEdge>();
-        edges.putAll(outboundEdges);
-        edges.putAll(inboundEdges);
-        edges.putAll(errorEdges);
+        HyperlinkGraph hlg = new HyperlinkGraph();
+        hlg.fill(fulltext.getDefaultConnector(), hostname, maxtime, maxnodes);
+        int maxdepth = hlg.findLinkDepth();
         
         // finally just write out the edge array
         int c = 0;
-        for (Map.Entry<String, HyperlinkEdge> e: edges.entrySet()) {
-            prop.putJSON("list_" + c + "_source", e.getValue().source.getPath());
-            prop.putJSON("list_" + c + "_target", e.getValue().type.equals(HyperlinkEdge.Type.Outbound) ? e.getValue().target.toNormalform(true) : e.getValue().target.getPath());
-            prop.putJSON("list_" + c + "_type", e.getValue().type.name());
-            prop.put("list_" + c + "_eol", 1);
+        for (HyperlinkEdge e: hlg) {
+            prop.putJSON("edges_" + c + "_source", e.source.getPath());
+            prop.putJSON("edges_" + c + "_target", e.type.equals(HyperlinkEdge.Type.Outbound) ? e.target.toNormalform(true) : e.target.getPath());
+            prop.putJSON("edges_" + c + "_type", e.type.name());
+            Integer depth_source = hlg.getDepth(e.source);
+            Integer depth_target = hlg.getDepth(e.target);
+            prop.put("edges_" + c + "_depthSource", depth_source == null ? -1 : depth_source.intValue());
+            prop.put("edges_" + c + "_depthTarget", depth_target == null ? -1 : depth_target.intValue());
+            prop.put("edges_" + c + "_eol", 1);
             c++;
         }
-        prop.put("list_" + (c-1) + "_eol", 0);
-        prop.put("list", c);
+        prop.put("edges_" + (c-1) + "_eol", 0);
+        prop.put("edges", c);
+        prop.put("maxdepth", maxdepth);
 
         // Adding CORS Access header for xml output
         if (xml) {

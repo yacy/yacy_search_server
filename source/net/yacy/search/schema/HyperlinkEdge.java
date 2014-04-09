@@ -37,4 +37,16 @@ public class HyperlinkEdge {
         this.type = type;
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(120);
+        sb.append(this.source.toNormalform(true));
+        sb.append(" -> ");
+        sb.append(this.target.toNormalform(true));
+        sb.append(" (");
+        sb.append(type.name());
+        sb.append(")");
+        return sb.toString();
+    }
+    
 }
