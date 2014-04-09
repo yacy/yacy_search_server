@@ -185,7 +185,24 @@ public class RobotsTxt {
 
         return robotsTxt4Host;
     }
-
+    
+    public void delete(final MultiProtocolURL theURL) {
+        final String urlHostPort = getHostPort(theURL);
+        if (urlHostPort == null) return;
+        final BEncodedHeap robotsTable;
+        try {
+            robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+        } catch (final IOException e1) {
+            log.severe("tables not available", e1);
+            return;
+        }
+        if (robotsTable == null) return;
+        try {
+            robotsTable.delete(robotsTable.encodedKey(urlHostPort));
+        } catch (IOException e) {
+        }
+    }
+    
     public void ensureExist(final MultiProtocolURL theURL, final ClientIdentification.Agent agent, boolean concurrent) {
         if (theURL.isLocal()) return;
         final String urlHostPort = getHostPort(theURL);

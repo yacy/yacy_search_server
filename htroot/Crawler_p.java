@@ -217,6 +217,9 @@ public class Crawler_p {
                 if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
                 if (crawlName.length() == 0 && sitemapURLStr.length() > 0) crawlName = "sitemap loader for " + sitemapURLStr;
                 
+                // delete old robots entries
+                for (DigestURL ru: rootURLs) sb.robots.delete(ru);
+                
                 // set the crawl filter
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
