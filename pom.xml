@@ -34,7 +34,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>4.6.1</solr.version> 
+        <solr.version>4.7.1</solr.version> 
         
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
