@@ -51,6 +51,8 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.parser.htmlParser;
+import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
@@ -219,26 +221,31 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
             processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
         }
+
+        // parse text to find images and clear text
+        ContentScraper textContent = null;
+        try {textContent = htmlParser.parseToScraper(source_url, null, text, 10);} catch (IOException e) {}
+        String extractedText = textContent.getText();
         
         // add the source attributes about the target
         if (allAttr || contains(WebgraphSchema.target_inbound_b)) add(edge, WebgraphSchema.target_inbound_b, inbound);
         if (allAttr || contains(WebgraphSchema.target_name_t)) add(edge, WebgraphSchema.target_name_t, name.length() > 0 ? name : "");
         if (allAttr || contains(WebgraphSchema.target_rel_s)) add(edge, WebgraphSchema.target_rel_s, rel.length() > 0 ? rel : "");
         if (allAttr || contains(WebgraphSchema.target_relflags_i)) add(edge, WebgraphSchema.target_relflags_i, relEval(rel.length() > 0 ? rel : ""));
-        if (allAttr || contains(WebgraphSchema.target_linktext_t)) add(edge, WebgraphSchema.target_linktext_t, text.length() > 0 ? text : "");
-        if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, text.length());
-        if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
+        if (allAttr || contains(WebgraphSchema.target_linktext_t)) add(edge, WebgraphSchema.target_linktext_t, extractedText.length() > 0 ? extractedText : "");
+        if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, extractedText.length());
+        if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, extractedText.length() > 0 ? CommonPattern.SPACE.split(extractedText).length : 0);
         
-        ImageEntry ientry = null;
-        for (ImageEntry ie: images) {
-            if (ie.linkurl() != null && ie.linkurl().equals(target_url)) {ientry = ie; break;}
+        StringBuilder alttext = new StringBuilder(textContent == null ? 0 : textContent.getImages().size() * 30);
+        if (textContent != null) for (ImageEntry ie: textContent.getImages()) {
+            if (ie.alt().length() > 0) alttext.append(ie.alt()).append(' ');
         }
-        String alttext = ientry == null ? "" : ientry.alt();
-        if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, alttext);
+        while (alttext.length() > 0 && alttext.charAt(alttext.length() - 1) == ' ') alttext.setLength(alttext.length() - 1);
+        if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, alttext.toString());
         if (allAttr || contains(WebgraphSchema.target_alt_charcount_i)) add(edge, WebgraphSchema.target_alt_charcount_i, alttext.length());
         if (allAttr || contains(WebgraphSchema.target_alt_wordcount_i)) add(edge, WebgraphSchema.target_alt_wordcount_i, alttext.length() > 0 ? CommonPattern.SPACE.split(alttext).length : 0);
         
-        // add the target attributes            
+        // add the target attributes
         add(edge, WebgraphSchema.target_id_s, target_id);
         final String target_url_string = target_url.toNormalform(false);
         int pr_target = target_url_string.indexOf("://",0);

@@ -78,7 +78,7 @@ public final class HTTPLoader {
 
         if (retryCount < 0) {
             this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
-            throw new IOException("retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
+            throw new IOException("retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.$");
         }
 
         DigestURL url = request.url();
@@ -94,7 +94,7 @@ public final class HTTPLoader {
         final String hostlow = host.toLowerCase();
         if (blacklistType != null && Switchboard.urlBlacklist.isListed(blacklistType, hostlow, path)) {
             this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
-            throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
+            throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
 
         // resolve yacy and yacyh domains
@@ -141,7 +141,7 @@ public final class HTTPLoader {
 
             if (redirectionUrlString.isEmpty()) {
                 this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
-                throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
+                throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
             }
 
             // normalize URL
@@ -161,7 +161,7 @@ public final class HTTPLoader {
                 // if we are already doing a shutdown we don't need to retry crawling
                 if (Thread.currentThread().isInterrupted()) {
                     this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
-                    throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.");
+                    throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.$");
                 }
 
                 // retry crawling with new url
@@ -170,11 +170,11 @@ public final class HTTPLoader {
     	    }
             // we don't want to follow redirects
             this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
-            throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
+            throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
         } else if (responseBody == null) {
     	    // no response, reject file
             this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);
-            throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
+            throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
     	} else if (statusCode == 200 || statusCode == 203) {
             // the transfer is ok
 
@@ -185,7 +185,7 @@ public final class HTTPLoader {
             // check length again in case it was not possible to get the length before loading
             if (maxFileSize >= 0 && contentLength > maxFileSize) {
             	this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
-            	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
+            	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)$");
             }
 
             // create a new cache entry
@@ -202,7 +202,7 @@ public final class HTTPLoader {
     	} else {
             // if the response has not the right response type then reject file
         	this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
-            throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
+            throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
         }
     }
 

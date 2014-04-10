@@ -24,8 +24,6 @@
 
 package net.yacy.document.parser.html;
 
-import java.util.Properties;
-
 public interface Transformer {
 
     // the init method is used to initialize the transformer with some values
@@ -52,10 +50,10 @@ public interface Transformer {
     public char[] transformText(char[] text);
 
     // method that is called when a body-less tag occurs
-    public char[] transformTag0(String tagname, Properties tagopts, char quotechar);
+    public char[] transformTag0(ContentScraper.Tag tag, char quotechar);
 
     // method that is called when a body-containing text occurs
-    public char[] transformTag1(String tagname, Properties tagopts, char[] text, char quotechar);
+    public char[] transformTag1(ContentScraper.Tag tag, char quotechar);
 
     public void close();
 }

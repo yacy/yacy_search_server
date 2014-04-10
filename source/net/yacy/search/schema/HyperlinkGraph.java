@@ -176,7 +176,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                 remaining--;
             }
         }
-        if (nodes.size() == 0) ConcurrentLog.warn("HyperlinkGraph", "could not find a root node for " + hostname + " in " + this.edges.size() + " edges");
+        if (nodes.size() == 0 && this.edges.size() > 0) ConcurrentLog.warn("HyperlinkGraph", "could not find a root node for " + hostname + " in " + this.edges.size() + " edges");
 
         // recusively step into depth and find next level
         int depth = 1;

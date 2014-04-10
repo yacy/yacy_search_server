@@ -24,8 +24,6 @@
 
 package net.yacy.document.parser.html;
 
-import java.util.Properties;
-
 public interface Scraper {
 
     public boolean isTag0(String tag);
@@ -34,9 +32,9 @@ public interface Scraper {
 
     public void scrapeText(char[] text, String insideTag);
 
-    public void scrapeTag0(String tagname, Properties tagopts);
+    public void scrapeTag0(ContentScraper.Tag tag);
 
-    public void scrapeTag1(String tagname, Properties tagopts, char[] text);
+    public void scrapeTag1(ContentScraper.Tag tag);
 
     public void scrapeComment(final char[] comment);
 

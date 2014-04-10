@@ -24,7 +24,6 @@
 
 package net.yacy.document.parser.html;
 
-import java.util.Properties;
 import java.util.TreeSet;
 
 public abstract class AbstractTransformer implements Transformer {
@@ -58,13 +57,13 @@ public abstract class AbstractTransformer implements Transformer {
 
     // the other methods must take into account to construct the return value correctly
     @Override
-    public char[] transformTag0(final String tagname, final Properties tagopts, final char quotechar) {
-        return TransformerWriter.genTag0(tagname, tagopts, quotechar);
+    public char[] transformTag0(final ContentScraper.Tag tag, final char quotechar) {
+        return TransformerWriter.genTag0(tag.name, tag.opts, quotechar);
     }
 
     @Override
-    public char[] transformTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
-        return TransformerWriter.genTag1(tagname, tagopts, text, quotechar);
+    public char[] transformTag1(final ContentScraper.Tag tag, final char quotechar) {
+        return TransformerWriter.genTag1(tag.name, tag.opts, tag.content.getChars(), quotechar);
     }
 
     @Override

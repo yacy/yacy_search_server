@@ -164,11 +164,12 @@ public final class LoaderDispatcher {
             if (check != null) check.release(1000);
             return response;
         } catch (final IOException e) {
+            throw new IOException(e);
+        } finally {
             // release the semaphore anyway
             check = this.loaderSteering.remove(request.url());
             if (check != null) check.release(1000);
-            // Very noisy: ConcurrentLog.logException(e);
-            throw new IOException(e);
+            // Very noisy: ConcurrentLog.logException(e);            
         }
     }
 
@@ -190,7 +191,7 @@ public final class LoaderDispatcher {
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
-            throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
+            throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
 
         // check if we have the page in the cache
@@ -244,13 +245,13 @@ public final class LoaderDispatcher {
             }
         }
 
-        // check case where we want results from the cache exclusively, and never from the internet (offline mode)
+        // check case where we want results from the cache exclusively, and never from the Internet (offline mode)
         if (cacheStrategy == CacheStrategy.CACHEONLY) {
             // we had a chance to get the content from the cache .. its over. We don't have it.
             throw new IOException("cache only strategy");
         }
 
-        // now forget about the cache, nothing there. Try to load the content from the internet
+        // now forget about the cache, nothing there. Try to load the content from the Internet
 
         // check access time: this is a double-check (we checked possibly already in the balancer)
         // to make sure that we don't DoS the target by mistake
@@ -302,7 +303,7 @@ public final class LoaderDispatcher {
             // no caching wanted. Thats ok, do not write any message
             return response;
         }
-        // second check tells us if the protocoll tells us something about caching
+        // second check tells us if the protocol tells us something about caching
         final String storeError = response.shallStoreCacheForCrawler();
         if (storeError == null) {
             try {

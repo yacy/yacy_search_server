@@ -155,13 +155,7 @@ public class RobotsTxt {
                 }
 
                 // generating the proper url to download the robots txt
-                DigestURL robotsURL = null;
-                try {
-                    robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
-                } catch (final MalformedURLException e) {
-                    log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
-                    robotsURL = null;
-                }
+                DigestURL robotsURL = robotsURL(urlHostPort);
 
                 Response response = null;
                 if (robotsURL != null) {
@@ -230,14 +224,8 @@ public class RobotsTxt {
                     if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
 
                     // generating the proper url to download the robots txt
-                    DigestURL robotsURL = null;
-                    try {
-                        robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
-                    } catch (final MalformedURLException e) {
-                        log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
-                        robotsURL = null;
-                    }
-
+                    DigestURL robotsURL = robotsURL(urlHostPort);
+                    
                     Response response = null;
                     if (robotsURL != null) {
                         if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
@@ -332,7 +320,7 @@ public class RobotsTxt {
         }
     }
 
-    static final String getHostPort(final MultiProtocolURL theURL) {
+    public static final String getHostPort(final MultiProtocolURL theURL) {
         int port = theURL.getPort();
         if (port == -1) {
             if (theURL.getProtocol().equalsIgnoreCase("http")) {
@@ -349,7 +337,18 @@ public class RobotsTxt {
         sb.append(host).append(':').append(Integer.toString(port));
         return sb.toString();
     }
-
+    
+    public static DigestURL robotsURL(final String urlHostPort) {
+        DigestURL robotsURL = null;
+        try {
+            robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
+        } catch (final MalformedURLException e) {
+            log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
+            robotsURL = null;
+        }
+        return robotsURL;
+    }
+    
     public static class CheckEntry {
         public final DigestURL digestURL;
         public final RobotsTxtEntry robotsTxtEntry;

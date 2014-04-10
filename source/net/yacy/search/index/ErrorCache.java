@@ -114,8 +114,14 @@ public class ErrorCache {
         if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
             // send the error to solr
             try {
-                SolrInputDocument errorDoc = failDoc.toSolr(this.fulltext.getDefaultConfiguration());
-                this.fulltext.getDefaultConnector().add(errorDoc);
+                // do not overwrite error reports with error reports
+                SolrDocument olddoc = this.fulltext.getDefaultConnector().getDocumentById(ASCII.String(failDoc.getDigestURL().hash()), CollectionSchema.httpstatus_i.getSolrFieldName());
+                if (olddoc == null ||
+                    olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) == null ||
+                    ((Integer) olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName())) == 200) {
+                    SolrInputDocument errorDoc = failDoc.toSolr(this.fulltext.getDefaultConfiguration());
+                    this.fulltext.getDefaultConnector().add(errorDoc);
+                }
             } catch (final IOException e) {
                 ConcurrentLog.warn("SOLR", "failed to send error " + url.toNormalform(true) + " to solr: " + e.getMessage());
             }

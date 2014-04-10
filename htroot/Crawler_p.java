@@ -43,8 +43,10 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.SitemapImporter;
+import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
@@ -218,7 +220,11 @@ public class Crawler_p {
                 if (crawlName.length() == 0 && sitemapURLStr.length() > 0) crawlName = "sitemap loader for " + sitemapURLStr;
                 
                 // delete old robots entries
-                for (DigestURL ru: rootURLs) sb.robots.delete(ru);
+                for (DigestURL ru: rootURLs) {
+                    sb.robots.delete(ru);
+                    try {Cache.delete(RobotsTxt.robotsURL(RobotsTxt.getHostPort(ru)).hash());} catch (IOException e) {}
+                }
+                try {sb.robots.clear();} catch (IOException e) {} // to be safe: clear all.
                 
                 // set the crawl filter
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);

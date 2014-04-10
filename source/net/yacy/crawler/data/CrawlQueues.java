@@ -639,7 +639,7 @@ public class CrawlQueues {
                         } else {
                             // starting a load from the internet
                             request.setStatus("worker-loading", WorkflowJob.STATUS_RUNNING);
-                            String result = null;
+                            String error = null;
    
                             // load a resource and push queue entry to switchboard queue
                             // returns null if everything went fine, a fail reason string if a problem occurred
@@ -651,23 +651,29 @@ public class CrawlQueues {
                                     if (CrawlQueues.log.isFine()) {
                                         CrawlQueues.log.fine("problem loading " + request.url().toString() + ": no content (possibly caused by cache policy)");
                                     }
-                                    result = "no content (possibly caused by cache policy)";
+                                    error = "no content (possibly caused by cache policy)";
                                 } else {
                                     request.setStatus("loaded", WorkflowJob.STATUS_RUNNING);
                                     final String storedFailMessage = CrawlQueues.this.sb.toIndexer(response);
                                     request.setStatus("enqueued-" + ((storedFailMessage == null) ? "ok" : "fail"), WorkflowJob.STATUS_FINISHED);
-                                    result = (storedFailMessage == null) ? null : "not enqueued to indexer: " + storedFailMessage;
+                                    error = (storedFailMessage == null) ? null : "not enqueued to indexer: " + storedFailMessage;
                                 }
                             } catch (final IOException e) {
                                 request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                                 if (CrawlQueues.log.isFine()) {
                                     CrawlQueues.log.fine("problem loading " + request.url().toString() + ": " + e.getMessage());
                                 }
-                                result = "load error - " + e.getMessage();
+                                error = "load error - " + e.getMessage();
                             }
    
-                            if (result != null) {
-                                CrawlQueues.this.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "cannot load: " + result, -1);
+                            if (error != null) {
+                                if (error.endsWith("$")) {
+                                    // the "$" mark at the end of the error message means, that the error was already pushed to the error-db by the reporting method
+                                    // thus we only push this message if we don't have that mark
+                                    error = error.substring(0, error.length() - 1).trim();
+                                } else {
+                                    CrawlQueues.this.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "cannot load: " + error, -1);
+                                }
                                 request.setStatus("worker-error", WorkflowJob.STATUS_FINISHED);
                             } else {
                                 request.setStatus("worker-processed", WorkflowJob.STATUS_FINISHED);
