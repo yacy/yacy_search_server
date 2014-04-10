@@ -81,6 +81,8 @@ public class genericImageParser extends AbstractParser implements Parser {
         SUPPORTED_EXTENSIONS.add("jpeg");
         SUPPORTED_EXTENSIONS.add("jpe");
         SUPPORTED_EXTENSIONS.add("bmp");
+        SUPPORTED_EXTENSIONS.add("tif");
+        SUPPORTED_EXTENSIONS.add("tiff");
         SUPPORTED_MIME_TYPES.add("image/png");
         SUPPORTED_MIME_TYPES.add("image/gif");
         SUPPORTED_MIME_TYPES.add("image/jpeg");

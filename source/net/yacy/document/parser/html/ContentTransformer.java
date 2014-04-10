@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.encoding.ASCII;
@@ -115,27 +114,27 @@ public class ContentTransformer extends AbstractTransformer implements Transform
     }
 
     @Override
-    public char[] transformTag0(final String tagname, final Properties tagopts, final char quotechar) {
-        if (tagname.equals("img")) {
+    public char[] transformTag0(final ContentScraper.Tag tag, final char quotechar) {
+        if (tag.name.equals("img")) {
             // check bluelist
-            if (bluelistHit(tagopts.getProperty("src", "").toCharArray())) return genBlueLetters(5);
-            if (bluelistHit(tagopts.getProperty("alt", "").toCharArray())) return genBlueLetters(5);
+            if (bluelistHit(tag.opts.getProperty("src", "").toCharArray())) return genBlueLetters(5);
+            if (bluelistHit(tag.opts.getProperty("alt", "").toCharArray())) return genBlueLetters(5);
 
             // replace image alternative name
-            tagopts.setProperty("alt", new String(transformText(tagopts.getProperty("alt", "").toCharArray())));
+            tag.opts.setProperty("alt", new String(transformText(tag.opts.getProperty("alt", "").toCharArray())));
         }
-        if (tagname.equals("input") && (tagopts.getProperty("type") != null && tagopts.getProperty("type").equals("submit"))) {
+        if (tag.name.equals("input") && (tag.opts.getProperty("type") != null && tag.opts.getProperty("type").equals("submit"))) {
             // rewrite button name
-            tagopts.setProperty("value", new String(transformText(tagopts.getProperty("value", "").toCharArray())));
+            tag.opts.setProperty("value", new String(transformText(tag.opts.getProperty("value", "").toCharArray())));
         }
-        return TransformerWriter.genTag0(tagname, tagopts, quotechar);
+        return TransformerWriter.genTag0(tag.name, tag.opts, quotechar);
     }
 
     @Override
-    public char[] transformTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
-        if (bluelistHit(tagopts.getProperty("href","").toCharArray())) return genBlueLetters(text.length);
-        if (bluelistHit(text)) return genBlueLetters(text.length);
-        return TransformerWriter.genTag1(tagname, tagopts, text, quotechar);
+    public char[] transformTag1(final ContentScraper.Tag tag, final char quotechar) {
+        if (bluelistHit(tag.opts.getProperty("href","").toCharArray())) return genBlueLetters(tag.content.length());
+        if (bluelistHit(tag.content.getChars())) return genBlueLetters(tag.content.length());
+        return TransformerWriter.genTag1(tag.name, tag.opts, tag.content.getChars(), quotechar);
     }
 
     @Override

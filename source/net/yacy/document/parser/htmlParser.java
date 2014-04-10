@@ -28,16 +28,18 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedHashMap;
-import java.util.regex.Pattern;
 
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -53,9 +55,7 @@ import com.ibm.icu.text.CharsetDetector;
 
 public class htmlParser extends AbstractParser implements Parser {
 
-    private static final Pattern patternUnderline = Pattern.compile("_");
-    private final int maxLinks = 10000;
-    private Charset detectedcharset;
+    private static final int maxLinks = 10000;
 
     public htmlParser() {
         super("Streaming HTML Parser");
@@ -97,9 +97,10 @@ public class htmlParser extends AbstractParser implements Parser {
 
         try {
             // first get a document from the parsed html
-            final ContentScraper scraper = parseToScraper(location, documentCharset, sourceStream, maxLinks);
+            Charset[] detectedcharsetcontainer = new Charset[]{null};
+            final ContentScraper scraper = parseToScraper(location, documentCharset, detectedcharsetcontainer, sourceStream, maxLinks);
             // parseToScraper also detects/corrects/sets charset from html content tag
-            final Document document = transformScraper(location, mimeType, detectedcharset.name(), scraper);
+            final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
 
             return new Document[]{document};
         } catch (final IOException e) {
@@ -155,9 +156,27 @@ public class htmlParser extends AbstractParser implements Parser {
         return ppd;
     }
 
-    public ContentScraper parseToScraper(
+    public static ContentScraper parseToScraper(final DigestURL location, final String documentCharset, String input, int maxLinks) throws IOException {
+        Charset[] detectedcharsetcontainer = new Charset[]{null};
+        InputStream sourceStream;
+        try {
+            sourceStream = new ByteArrayInputStream(documentCharset == null ? UTF8.getBytes(input) : input.getBytes(documentCharset));
+        } catch (UnsupportedEncodingException e) {
+            sourceStream = new ByteArrayInputStream(UTF8.getBytes(input));
+        }
+        ContentScraper scraper;
+        try {
+            scraper = parseToScraper(location, documentCharset, detectedcharsetcontainer, sourceStream, maxLinks);
+        } catch (Failure e) {
+            throw new IOException(e.getMessage());
+        }
+        return scraper;
+    }
+    
+    public static ContentScraper parseToScraper(
             final DigestURL location,
             final String documentCharset,
+            Charset[] detectedcharsetcontainer,
             InputStream sourceStream,
             final int maxLinks) throws Parser.Failure, IOException {
 
@@ -171,13 +190,15 @@ public class htmlParser extends AbstractParser implements Parser {
 
         // nothing found: try to find a meta-tag
         if (charset == null) {
+            ScraperInputStream htmlFilter = null;
             try {
-                final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream, documentCharset, location, null, false, maxLinks);
+                htmlFilter = new ScraperInputStream(sourceStream, documentCharset, location, null, false, maxLinks);
                 sourceStream = htmlFilter;
                 charset = htmlFilter.detectCharset();
-                htmlFilter.close();
             } catch (final IOException e1) {
                 throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
+            } finally {
+                if (htmlFilter != null) htmlFilter.close();
             }
         }
 
@@ -193,21 +214,22 @@ public class htmlParser extends AbstractParser implements Parser {
 
         // wtf? still nothing, just take system-standard
         if (charset == null) {
-            detectedcharset = Charset.defaultCharset();
+            detectedcharsetcontainer[0] = Charset.defaultCharset();
         } else {
             try {
-                detectedcharset = Charset.forName(charset);
+                detectedcharsetcontainer[0] = Charset.forName(charset);
             } catch (final IllegalCharsetNameException e) {
-                detectedcharset = Charset.defaultCharset();
+                detectedcharsetcontainer[0] = Charset.defaultCharset();
             } catch (final UnsupportedCharsetException e) {
-                detectedcharset = Charset.defaultCharset();
+                detectedcharsetcontainer[0] = Charset.defaultCharset();
             }
         }
+        
         // parsing the content
         final ContentScraper scraper = new ContentScraper(location, maxLinks);
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(64, Math.min(4096, sourceStream.available())));
         try {
-            FileUtils.copy(sourceStream, writer, detectedcharset);
+            FileUtils.copy(sourceStream, writer, detectedcharsetcontainer[0]);
         } catch (final IOException e) {
             throw new Parser.Failure("IO error:" + e.getMessage(), location);
         } finally {
@@ -250,7 +272,7 @@ public class htmlParser extends AbstractParser implements Parser {
         if (encoding.startsWith("MACINTOSH")) encoding = "MacRoman";
 
         // fix wrong fill characters
-        encoding = patternUnderline.matcher(encoding).replaceAll("-");
+        encoding = CommonPattern.UNDERSCORE.matcher(encoding).replaceAll("-");
 
         if (encoding.matches("GB[_-]?2312([-_]80)?")) return "GB2312";
         if (encoding.matches(".*UTF[-_]?8.*")) return "UTF-8";
@@ -306,10 +328,9 @@ public class htmlParser extends AbstractParser implements Parser {
         try {
             url = new AnchorURL(args[0]);
             final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent, null, null);
-            final Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
+            final Document[] document = new htmlParser().parse(url, "text/html", "utf-8", new ByteArrayInputStream(content));
             final String title = document[0].dc_title();
             System.out.println(title);
-            System.out.println(CharacterCoding.unicode2html(title, false));
         } catch (final MalformedURLException e) {
             e.printStackTrace();
         } catch (final IOException e) {
@@ -319,6 +340,7 @@ public class htmlParser extends AbstractParser implements Parser {
         } catch (final InterruptedException e) {
             e.printStackTrace();
         }
+        System.exit(0);
     }
 
 }

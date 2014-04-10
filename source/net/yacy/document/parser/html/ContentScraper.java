@@ -59,6 +59,7 @@ import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
+import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
@@ -80,7 +81,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         singleton, pair;
     }
 
-    public enum Tag {
+    public enum TagName {
         html(TagType.singleton), // scraped as singleton to get attached properties like 'lang'
         body(TagType.singleton), // scraped as singleton to get attached properties like 'class'
         div(TagType.singleton),  // scraped as singleton to get attached properties like 'id'
@@ -111,14 +112,49 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         style(TagType.pair);
 
         public TagType type;
-        private Tag(final TagType type) {
+        private TagName(final TagType type) {
             this.type = type;
+        }
+    }
+
+    public static class Tag {
+        public String name;
+        public Properties opts;
+        public CharBuffer content;
+        public Tag(final String name) {
+            this.name = name;
+            this.opts = new Properties();
+            this.content = new CharBuffer(100);
+        }
+        public Tag(final String name, final Properties opts) {
+            this.name = name;
+            this.opts = opts;
+            this.content = new CharBuffer(100);
+        }
+        public Tag(final String name, final Properties opts, final CharBuffer content) {
+            this.name = name;
+            this.opts = opts;
+            this.content = content;
+        }
+        public void close() {
+            this.name = null;
+            this.opts = null;
+            if (this.content != null) this.content.close();
+            this.content = null;
+        }
+        @Override
+        public void finalize() {
+            this.close();
+        }
+        @Override
+        public String toString() {
+            return "<" + name + " " + opts + ">" + content + "</" + name + ">";
         }
     }
 
     // all these tags must be given in lowercase, because the tags from the files are compared in lowercase
     static {
-        for (final Tag tag: Tag.values()) {
+        for (final TagName tag: TagName.values()) {
             if (tag.type == TagType.singleton) linkTags0.add(tag.name());
             if (tag.type == TagType.pair) linkTags1.add(tag.name());
         }
@@ -321,88 +357,88 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     @Override
-    public void scrapeTag0(final String tagname, final Properties tagopts) {
-        if (tagname.equalsIgnoreCase("img")) {
-            final String src = tagopts.getProperty("src", EMPTY_STRING);
+    public void scrapeTag0(Tag tag) {
+        if (tag.name.equalsIgnoreCase("img")) {
+            final String src = tag.opts.getProperty("src", EMPTY_STRING);
             try {
                 if (src.length() > 0) {
                     final AnchorURL url = absolutePath(src);
                     if (url != null) {
-                        final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
-                        final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
-                        final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", EMPTY_STRING), width, height, -1);
+                        final int width = Integer.parseInt(tag.opts.getProperty("width", "-1"));
+                        final int height = Integer.parseInt(tag.opts.getProperty("height", "-1"));
+                        final ImageEntry ie = new ImageEntry(url, tag.opts.getProperty("alt", EMPTY_STRING), width, height, -1);
                         this.images.add(ie);
                     }
                 }
             } catch (final NumberFormatException e) {}
             this.evaluationScores.match(Element.imgpath, src);
-        } else if(tagname.equalsIgnoreCase("base")) {
+        } else if(tag.name.equalsIgnoreCase("base")) {
             try {
-                this.root = new DigestURL(tagopts.getProperty("href", EMPTY_STRING));
+                this.root = new DigestURL(tag.opts.getProperty("href", EMPTY_STRING));
             } catch (final MalformedURLException e) {}
-        } else if (tagname.equalsIgnoreCase("frame")) {
-            final AnchorURL src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
-            tagopts.put("src", src.toNormalform(true));
-            src.setAll(tagopts);
+        } else if (tag.name.equalsIgnoreCase("frame")) {
+            final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
+            tag.opts.put("src", src.toNormalform(true));
+            src.setAll(tag.opts);
             this.anchors.add(src);
             this.frames.add(src);
             this.evaluationScores.match(Element.framepath, src.toNormalform(true));
-        } else if (tagname.equalsIgnoreCase("body")) {
-            final String c = tagopts.getProperty("class", EMPTY_STRING);
+        } else if (tag.name.equalsIgnoreCase("body")) {
+            final String c = tag.opts.getProperty("class", EMPTY_STRING);
             this.evaluationScores.match(Element.bodyclass, c);
-        } else if (tagname.equalsIgnoreCase("div")) {
-            final String id = tagopts.getProperty("id", EMPTY_STRING);
+        } else if (tag.name.equalsIgnoreCase("div")) {
+            final String id = tag.opts.getProperty("id", EMPTY_STRING);
             this.evaluationScores.match(Element.divid, id);
-            final String itemtype = tagopts.getProperty("itemtype", EMPTY_STRING);
+            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
             if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
                 breadcrumbs++;
             }
-        } else if (tagname.equalsIgnoreCase("meta")) {
-            final String content = tagopts.getProperty("content", EMPTY_STRING);
-            String name = tagopts.getProperty("name", EMPTY_STRING);
+        } else if (tag.name.equalsIgnoreCase("meta")) {
+            final String content = tag.opts.getProperty("content", EMPTY_STRING);
+            String name = tag.opts.getProperty("name", EMPTY_STRING);
             if (name.length() > 0) {
                 this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
                 if (name.toLowerCase().equals("generator")) {
                     this.evaluationScores.match(Element.metagenerator, content);
                 }
             }
-            name = tagopts.getProperty("http-equiv", EMPTY_STRING);
+            name = tag.opts.getProperty("http-equiv", EMPTY_STRING);
             if (name.length() > 0) {
                 this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
             }
-            name = tagopts.getProperty("property", EMPTY_STRING);
+            name = tag.opts.getProperty("property", EMPTY_STRING);
             if (name.length() > 0) {
                 this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
             }
-        } else if (tagname.equalsIgnoreCase("area")) {
-            final String areatitle = cleanLine(tagopts.getProperty("title", EMPTY_STRING));
-            //String alt   = tagopts.getProperty("alt",EMPTY_STRING);
-            final String href  = tagopts.getProperty("href", EMPTY_STRING);
+        } else if (tag.name.equalsIgnoreCase("area")) {
+            final String areatitle = cleanLine(tag.opts.getProperty("title", EMPTY_STRING));
+            //String alt   = tag.opts.getProperty("alt",EMPTY_STRING);
+            final String href  = tag.opts.getProperty("href", EMPTY_STRING);
             if (href.length() > 0) {
-                tagopts.put("name", areatitle);
+                tag.opts.put("name", areatitle);
                 AnchorURL url = absolutePath(href);
-                tagopts.put("href", url.toNormalform(true));
-                url.setAll(tagopts);
+                tag.opts.put("href", url.toNormalform(true));
+                url.setAll(tag.opts);
                 this.anchors.add(url);
             }
-        } else if (tagname.equalsIgnoreCase("link")) {
-            final String href = tagopts.getProperty("href", EMPTY_STRING);
+        } else if (tag.name.equalsIgnoreCase("link")) {
+            final String href = tag.opts.getProperty("href", EMPTY_STRING);
             final AnchorURL newLink = absolutePath(href);
 
             if (newLink != null) {
-                tagopts.put("href", newLink.toNormalform(true));
-                String rel = tagopts.getProperty("rel", EMPTY_STRING);
-                final String linktitle = tagopts.getProperty("title", EMPTY_STRING);
-                final String type = tagopts.getProperty("type", EMPTY_STRING);
-                final String hreflang = tagopts.getProperty("hreflang", EMPTY_STRING);
+                tag.opts.put("href", newLink.toNormalform(true));
+                String rel = tag.opts.getProperty("rel", EMPTY_STRING);
+                final String linktitle = tag.opts.getProperty("title", EMPTY_STRING);
+                final String type = tag.opts.getProperty("type", EMPTY_STRING);
+                final String hreflang = tag.opts.getProperty("hreflang", EMPTY_STRING);
 
                 if (rel.equalsIgnoreCase("shortcut icon")) {
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
                     this.images.add(ie);
                     this.favicon = newLink;
                 } else if (rel.equalsIgnoreCase("canonical")) {
-                    tagopts.put("name", this.titles.size() == 0 ? "" : this.titles.iterator().next());
-                    newLink.setAll(tagopts);
+                    tag.opts.put("name", this.titles.size() == 0 ? "" : this.titles.iterator().next());
+                    newLink.setAll(tag.opts);
                     this.anchors.add(newLink);
                     this.canonical = newLink;
                 } else if (rel.equalsIgnoreCase("publisher")) {
@@ -417,130 +453,130 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.css.put(newLink, rel);
                     this.evaluationScores.match(Element.csspath, href);
                 } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
-                    tagopts.put("name", linktitle);
-                    newLink.setAll(tagopts);
+                    tag.opts.put("name", linktitle);
+                    newLink.setAll(tag.opts);
                     this.anchors.add(newLink);
                 }
             }
-        } else if(tagname.equalsIgnoreCase("embed")) {
-            final String src = tagopts.getProperty("src", EMPTY_STRING);
+        } else if(tag.name.equalsIgnoreCase("embed")) {
+            final String src = tag.opts.getProperty("src", EMPTY_STRING);
             try {
                 if (src.length() > 0) {
                     final AnchorURL url = absolutePath(src);
                     if (url != null) {
-                        final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
-                        final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
-                        tagopts.put("src", url.toNormalform(true));
-                        final EmbedEntry ie = new EmbedEntry(url, width, height, tagopts.getProperty("type", EMPTY_STRING), tagopts.getProperty("pluginspage", EMPTY_STRING));
+                        final int width = Integer.parseInt(tag.opts.getProperty("width", "-1"));
+                        final int height = Integer.parseInt(tag.opts.getProperty("height", "-1"));
+                        tag.opts.put("src", url.toNormalform(true));
+                        final EmbedEntry ie = new EmbedEntry(url, width, height, tag.opts.getProperty("type", EMPTY_STRING), tag.opts.getProperty("pluginspage", EMPTY_STRING));
                         this.embeds.put(url, ie);
-                        url.setAll(tagopts);
+                        url.setAll(tag.opts);
                         this.anchors.add(url);
                     }
                 }
             } catch (final NumberFormatException e) {}
-        } else if(tagname.equalsIgnoreCase("param")) {
-            final String name = tagopts.getProperty("name", EMPTY_STRING);
+        } else if(tag.name.equalsIgnoreCase("param")) {
+            final String name = tag.opts.getProperty("name", EMPTY_STRING);
             if (name.equalsIgnoreCase("movie")) {
-                AnchorURL url = absolutePath(tagopts.getProperty("value", EMPTY_STRING));
-                tagopts.put("value", url.toNormalform(true));
-                url.setAll(tagopts);
+                AnchorURL url = absolutePath(tag.opts.getProperty("value", EMPTY_STRING));
+                tag.opts.put("value", url.toNormalform(true));
+                url.setAll(tag.opts);
                 this.anchors.add(url);
             }
-        } else if (tagname.equalsIgnoreCase("iframe")) {
-            final AnchorURL src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
-            tagopts.put("src", src.toNormalform(true));
-            src.setAll(tagopts);
+        } else if (tag.name.equalsIgnoreCase("iframe")) {
+            final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
+            tag.opts.put("src", src.toNormalform(true));
+            src.setAll(tag.opts);
             this.anchors.add(src);
             this.iframes.add(src);
             this.evaluationScores.match(Element.iframepath, src.toNormalform(true));
-        } else if (tagname.equalsIgnoreCase("html")) {
-            final String lang = tagopts.getProperty("lang", EMPTY_STRING);
+        } else if (tag.name.equalsIgnoreCase("html")) {
+            final String lang = tag.opts.getProperty("lang", EMPTY_STRING);
             if (!lang.isEmpty()) // fake a language meta to preserv detection from <html lang="xx" />
                 this.metas.put("dc.language",lang.substring(0,2)); // fix found entries like "hu-hu"
         }
 
         // fire event
-        fireScrapeTag0(tagname, tagopts);
+        fireScrapeTag0(tag.name, tag.opts);
     }
 
     @Override
-    public void scrapeTag1(final String tagname, final Properties tagopts, char[] text) {
-        // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + UTF8.String(text));
-        if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
-            String href = tagopts.getProperty("href", EMPTY_STRING);
+    public void scrapeTag1(Tag tag) {
+        // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
+        if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
+            String href = tag.opts.getProperty("href", EMPTY_STRING);
             href = CharacterCoding.html2unicode(href);
             AnchorURL url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
-                if (ext.equals("png") || ext.equals("gif") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("tiff") || ext.equals("tif")) {
+                if (genericImageParser.SUPPORTED_EXTENSIONS.contains(ext)) {
                     // special handling of such urls: put them to the image urls
-                    final ImageEntry ie = new ImageEntry(url, recursiveParse(url, text), -1, -1, -1);
+                    final ImageEntry ie = new ImageEntry(url, recursiveParse(url, tag.content.getChars()), -1, -1, -1);
                     this.images.add(ie);
                 } else {
                     if (followDenied()) {
-                        String rel = tagopts.getProperty("rel", EMPTY_STRING);
+                        String rel = tag.opts.getProperty("rel", EMPTY_STRING);
                         if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
-                        tagopts.put("rel", rel);
+                        tag.opts.put("rel", rel);
                     }
-                    tagopts.put("text", new String(text));
-                    tagopts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
-                    url.setAll(tagopts);
-                    recursiveParse(url, text);
+                    tag.opts.put("text", new String(tag.content.getChars()));
+                    tag.opts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
+                    url.setAll(tag.opts);
+                    recursiveParse(url, tag.content.getChars());
                     this.anchors.add(url);
                 }
             }
             this.evaluationScores.match(Element.apath, href);
         }
         final String h;
-        if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[0].add(h);
-        } else if((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if((tag.name.equalsIgnoreCase("h2")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[1].add(h);
-        } else if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("h3")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[2].add(h);
-        } else if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("h4")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[3].add(h);
-        } else if ((tagname.equalsIgnoreCase("h5")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("h5")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[4].add(h);
-        } else if ((tagname.equalsIgnoreCase("h6")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("h6")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[5].add(h);
-        } else if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
-            String t = recursiveParse(null, text);
-            this.titles.add(t);
-            this.evaluationScores.match(Element.title, t);
-        } else if ((tagname.equalsIgnoreCase("b")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("title")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
+            this.titles.add(h);
+            this.evaluationScores.match(Element.title, h);
+        } else if ((tag.name.equalsIgnoreCase("b")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.bold.inc(h);
-        } else if ((tagname.equalsIgnoreCase("strong")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("strong")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.bold.inc(h);
-        } else if ((tagname.equalsIgnoreCase("i")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("i")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.italic.inc(h);
-        } else if ((tagname.equalsIgnoreCase("u")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("u")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.underline.inc(h);
-        } else if ((tagname.equalsIgnoreCase("li")) && (text.length < 1024)) {
-            h = recursiveParse(null, text);
+        } else if ((tag.name.equalsIgnoreCase("li")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.li.add(h);
-        } else if (tagname.equalsIgnoreCase("script")) {
-            final String src = tagopts.getProperty("src", EMPTY_STRING);
+        } else if (tag.name.equalsIgnoreCase("script")) {
+            final String src = tag.opts.getProperty("src", EMPTY_STRING);
             if (src.length() > 0) {
                 this.script.add(absolutePath(src));
                 this.evaluationScores.match(Element.scriptpath, src);
             } else {
-                this.evaluationScores.match(Element.scriptcode, LB.matcher(new String(text)).replaceAll(" "));
+                this.evaluationScores.match(Element.scriptcode, LB.matcher(new String(tag.content.getChars())).replaceAll(" "));
             }
         }
 
         // fire event
-        fireScrapeTag1(tagname, tagopts, text);
+        fireScrapeTag1(tag.name, tag.opts, tag.content.getChars());
     }
 
 
@@ -570,15 +606,20 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         for (final AnchorURL entry: scraper.getAnchors()) {
             this.anchors.add(entry);
         }
+        String line = cleanLine(CharacterCoding.html2unicode(stripAllTags(scraper.content.getChars())));
         for (ImageEntry ie: scraper.images) {
             if (linkurl != null) {
                 ie.setLinkurl(linkurl);
-                ie.setAnchortext(new String(inlineHtml));
+                ie.setAnchortext(line);
+            }
+            // this image may have been added recently from the same location (as this is a recursive parse)
+            // we want to keep only one of them, check if they are equal
+            if (this.images.size() > 0 && this.images.get(this.images.size() - 1).url().equals(ie.url())) {
+                this.images.remove(this.images.size() - 1);
             }
             this.images.add(ie);
         }
 
-        String line = cleanLine(CharacterCoding.html2unicode(stripAllTags(scraper.content.getChars())));
         scraper.close();
         return line;
     }
@@ -681,6 +722,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public String getText() {
+        this.content.trim();
         try {
             return this.content.toString();
         } catch (final OutOfMemoryError e) {

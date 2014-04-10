@@ -29,7 +29,6 @@
 
 package net.yacy.document.parser.html;
 
-import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.kelondro.util.MemoryControl;
@@ -72,10 +71,10 @@ public abstract class AbstractScraper implements Scraper {
 
     // the other methods must take into account to construct the return value correctly
     @Override
-    public abstract void scrapeTag0(String tagname, Properties tagopts);
+    public abstract void scrapeTag0(ContentScraper.Tag tag);
 
     @Override
-    public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
+    public abstract void scrapeTag1(ContentScraper.Tag tag);
 
     public static String stripAllTags(final char[] s) {
         if (s.length > 80 && !MemoryControl.request(s.length * 2, false)) return "";
