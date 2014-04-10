@@ -99,7 +99,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                         try {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
-                            inboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Inbound));
+                            inboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkType.Inbound));
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
                     }
@@ -109,7 +109,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                         try {
                             DigestURL linkurl = new DigestURL(link, null);
                             String edgehash = ids + ASCII.String(linkurl.hash());
-                            outboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkEdge.Type.Outbound));
+                            outboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkType.Outbound));
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
                     }
@@ -128,7 +128,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
             edge = i.next();
             if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
                 i.remove();
-                edge.getValue().type = HyperlinkEdge.Type.Dead;
+                edge.getValue().type = HyperlinkType.Dead;
                 errorEdges.put(edge.getKey(), edge.getValue());
             }
         }
@@ -137,7 +137,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
             edge = i.next();
             if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
                 i.remove();
-                edge.getValue().type = HyperlinkEdge.Type.Dead;
+                edge.getValue().type = HyperlinkType.Dead;
                 errorEdges.put(edge.getKey(), edge.getValue());
             }
         }
@@ -170,7 +170,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
             String path = edge.source.getPath();
             if (ROOTFNS.contains(path)) {
                 if (!this.depths.containsKey(edge.source)) this.depths.put(edge.source, 0);
-                if (edge.type == HyperlinkEdge.Type.Inbound && !this.depths.containsKey(edge.target)) this.depths.put(edge.target, 1);
+                if (edge.type == HyperlinkType.Inbound && !this.depths.containsKey(edge.target)) this.depths.put(edge.target, 1);
                 nodes.add(edge.source);
                 nextnodes.add(edge.target);
                 remaining--;
@@ -187,7 +187,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
             for (HyperlinkEdge edge: this.edges.values()) {
                 if (nodes.contains(edge.source)) {
                     if (!this.depths.containsKey(edge.source)) this.depths.put(edge.source, depth);
-                    if (edge.type == HyperlinkEdge.Type.Inbound && !this.depths.containsKey(edge.target)) this.depths.put(edge.target, depth + 1);
+                    if (edge.type == HyperlinkType.Inbound && !this.depths.containsKey(edge.target)) this.depths.put(edge.target, depth + 1);
                     nextnodes.add(edge.target);
                     remaining--;
                     found = true;

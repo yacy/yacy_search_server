@@ -30,6 +30,7 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.schema.HyperlinkEdge;
 import net.yacy.search.schema.HyperlinkGraph;
+import net.yacy.search.schema.HyperlinkType;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -96,7 +97,7 @@ public class linkstructure {
         int c = 0;
         for (HyperlinkEdge e: hlg) {
             prop.putJSON("edges_" + c + "_source", e.source.getPath());
-            prop.putJSON("edges_" + c + "_target", e.type.equals(HyperlinkEdge.Type.Outbound) ? e.target.toNormalform(true) : e.target.getPath());
+            prop.putJSON("edges_" + c + "_target", e.type.equals(HyperlinkType.Outbound) ? e.target.toNormalform(true) : e.target.getPath());
             prop.putJSON("edges_" + c + "_type", e.type.name());
             Integer depth_source = hlg.getDepth(e.source);
             Integer depth_target = hlg.getDepth(e.target);
