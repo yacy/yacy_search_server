@@ -224,6 +224,7 @@ public class Crawler_p {
                     sb.robots.delete(ru);
                     try {Cache.delete(RobotsTxt.robotsURL(RobotsTxt.getHostPort(ru)).hash());} catch (IOException e) {}
                 }
+                try {sb.robots.clear();} catch (IOException e) {} // to be safe: clear all.
                 
                 // set the crawl filter
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
