@@ -66,6 +66,8 @@ import net.yacy.kelondro.util.ISO639;
 
 
 public class ContentScraper extends AbstractScraper implements Scraper {
+
+    private final static int MAX_TAGSIZE = 1024 * 1024;
 	public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
 
     private final char degree = '\u00B0';
@@ -124,12 +126,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         public Tag(final String name) {
             this.name = name;
             this.opts = new Properties();
-            this.content = new CharBuffer(100);
+            this.content = new CharBuffer(MAX_TAGSIZE);
         }
         public Tag(final String name, final Properties opts) {
             this.name = name;
             this.opts = opts;
-            this.content = new CharBuffer(100);
+            this.content = new CharBuffer(MAX_TAGSIZE);
         }
         public Tag(final String name, final Properties opts, final CharBuffer content) {
             this.name = name;
