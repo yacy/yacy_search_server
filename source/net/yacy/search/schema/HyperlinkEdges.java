@@ -37,6 +37,10 @@ public class HyperlinkEdges implements Iterable<HyperlinkEdge> {
         Targets targets = this.edges.get(source);
         Integer d = this.singletonDepth.get(source);
         if (d == null) d = -1; else this.singletonDepth.remove(source);
+        if (target.type == HyperlinkType.Inbound) {
+            Integer e = this.singletonDepth.remove(target);
+            if (e != null && d.intValue() == -1) d = e.intValue() - 1;
+        }
         if (targets == null) {
             targets = new Targets(d.intValue());
             this.edges.put(source, targets);
@@ -71,11 +75,21 @@ public class HyperlinkEdges implements Iterable<HyperlinkEdge> {
         }
     }
     
-    public Integer getDepth(final MultiProtocolURL url) {
+    public int getDepth(final MultiProtocolURL url) {
         Targets targets = this.edges.get(url);
         if (targets != null) return targets.depth;
         Integer d = this.singletonDepth.get(url);
-        return d == null ? -1 : d.intValue();
+        if (d != null) return d.intValue();
+        // now search in targets
+        String targetHost = url.getHost();
+        for (Map.Entry<MultiProtocolURL, Targets> e: this.edges.entrySet()) {
+            if (e.getValue().targets.contains(url)) {
+                String sourceHost = e.getKey().getHost();
+                // check if this is an inbound match
+                if ((sourceHost == null && targetHost == null) || (sourceHost != null && targetHost != null && sourceHost.equals(targetHost))) return e.getValue().depth + 1;
+            }
+        }
+        return -1;
     }
 
     @Override
