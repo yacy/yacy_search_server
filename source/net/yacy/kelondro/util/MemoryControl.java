@@ -178,14 +178,6 @@ public class MemoryControl {
     public static void setProperMbyte(final long mbyte) {
     	getStrategy().setProperMbyte(mbyte);
     }
-    
-    /**
-     * get the system load within the last minute
-     * @return the system load or a negative number if the load is not available
-     */
-    public static double load() {
-        return ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
-    }
 
     /**
      * main

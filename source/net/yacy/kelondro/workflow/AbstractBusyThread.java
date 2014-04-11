@@ -26,8 +26,8 @@ package net.yacy.kelondro.workflow;
 
 import java.net.SocketException;
 
-
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -178,8 +178,8 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
             //} else if ((memnow = serverMemory.available()) > memprereq) try {
-            } else if (MemoryControl.load() > loadprereq) {
-            	logSystem("Thread '" + this.getName() + "' runs high load cycle. current: " + MemoryControl.load() + " max.: " + loadprereq);
+            } else if (Memory.load() > loadprereq) {
+            	logSystem("Thread '" + this.getName() + "' runs high load cycle. current: " + Memory.load() + " max.: " + loadprereq);
                 timestamp = System.currentTimeMillis();
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
