@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailType;
@@ -82,7 +81,6 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         try {
             retrieval: while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
                 MultiProtocolURL from = new MultiProtocolURL(u);
                 String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
                 FailType error = errortype == null ? null : FailType.valueOf(errortype);
@@ -95,7 +93,6 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                         link = links.next();
                         try {
                             HyperlinkEdge.Target linkurl = new HyperlinkEdge.Target(link, HyperlinkType.Inbound);
-                            String edgehash = ids + ASCII.String(new DigestURL(link, null).hash());
                             inboundEdges.addEdge(from, linkurl);
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
@@ -105,7 +102,6 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                         link = links.next();
                         try {
                             HyperlinkEdge.Target linkurl = new HyperlinkEdge.Target(link, HyperlinkType.Outbound);
-                            String edgehash = ids + ASCII.String(new DigestURL(link, null).hash());
                             outboundEdges.addEdge(from, linkurl);
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
@@ -175,12 +171,12 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         }
         if (nodes.size() == 0 && this.edges.size() > 0) {
             ConcurrentLog.warn("HyperlinkGraph", "could not find a root node for " + hostname + " in " + this.edges.size() + " edges");
-            // add virtual nodes to have any kind of root
-            for (String rootpath: ROOTFNS) {
-                try {
-                    nodes.add(new DigestURL("http://" + hostname + rootpath));
-                } catch (MalformedURLException e) {}
-            }
+        }
+        // add virtual nodes
+        for (String rootpath: ROOTFNS) {
+            try {
+                this.edges.updateDepth(new DigestURL("http://" + hostname + rootpath), 0);
+            } catch (MalformedURLException e) {}
         }
         
         // recursively step into depth and find next level
@@ -202,7 +198,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
             if (!found) break; // terminating in case that not all edges are linked together
         }
         if (remaining > 0) ConcurrentLog.warn("HyperlinkGraph", "could not find all edges for " + hostname + ", " + remaining + " remaining.");
-        return depth - 1;
+        return depth;
     }
     
     public Integer getDepth(MultiProtocolURL url) {
