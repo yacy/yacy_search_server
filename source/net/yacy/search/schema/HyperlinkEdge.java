@@ -20,14 +20,14 @@
 
 package net.yacy.search.schema;
 
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 public class HyperlinkEdge {
     
-    public DigestURL source, target;
+    public MultiProtocolURL source, target;
     public HyperlinkType type;
     
-    public HyperlinkEdge(DigestURL source, DigestURL target, HyperlinkType type) {
+    public HyperlinkEdge(MultiProtocolURL source, MultiProtocolURL target, HyperlinkType type) {
         this.source = source;
         this.target = target;
         this.type = type;

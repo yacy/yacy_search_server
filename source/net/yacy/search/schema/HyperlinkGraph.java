@@ -31,12 +31,12 @@ import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 
@@ -53,12 +53,12 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
     }
     
     Map<String, HyperlinkEdge> edges;
-    Map<DigestURL, Integer> depths;
+    Map<MultiProtocolURL, Integer> depths;
     String hostname;
     
     public HyperlinkGraph() {
         this.edges = new LinkedHashMap<String, HyperlinkEdge>();
-        this.depths = new HashMap<DigestURL, Integer>();
+        this.depths = new HashMap<MultiProtocolURL, Integer>();
         this.hostname = null;
     }
     
@@ -164,8 +164,8 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         int remaining = this.edges.size();
         
         // first find root nodes
-        Set<DigestURL> nodes = new HashSet<DigestURL>();
-        Set<DigestURL> nextnodes = new HashSet<DigestURL>();
+        Set<MultiProtocolURL> nodes = new HashSet<MultiProtocolURL>();
+        Set<MultiProtocolURL> nextnodes = new HashSet<MultiProtocolURL>();
         for (HyperlinkEdge edge: this.edges.values()) {
             String path = edge.source.getPath();
             if (ROOTFNS.contains(path)) {
@@ -176,14 +176,22 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                 remaining--;
             }
         }
-        if (nodes.size() == 0 && this.edges.size() > 0) ConcurrentLog.warn("HyperlinkGraph", "could not find a root node for " + hostname + " in " + this.edges.size() + " edges");
-
-        // recusively step into depth and find next level
+        if (nodes.size() == 0 && this.edges.size() > 0) {
+            ConcurrentLog.warn("HyperlinkGraph", "could not find a root node for " + hostname + " in " + this.edges.size() + " edges");
+            // add virtual nodes to have any kind of root
+            for (String rootpath: ROOTFNS) {
+                try {
+                    nodes.add(new DigestURL("http://" + hostname + rootpath));
+                } catch (MalformedURLException e) {}
+            }
+        }
+        
+        // recursively step into depth and find next level
         int depth = 1;
         while (remaining > 0) {
             boolean found = false;
             nodes = nextnodes;
-            nextnodes = new HashSet<DigestURL>();
+            nextnodes = new HashSet<MultiProtocolURL>();
             for (HyperlinkEdge edge: this.edges.values()) {
                 if (nodes.contains(edge.source)) {
                     if (!this.depths.containsKey(edge.source)) this.depths.put(edge.source, depth);
@@ -200,7 +208,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         return depth - 1;
     }
     
-    public Integer getDepth(DigestURL url) {
+    public Integer getDepth(MultiProtocolURL url) {
         return this.depths.get(url);
     }
 
