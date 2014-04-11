@@ -950,7 +950,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     @Override
     public int hashCode() {
-        return this.toNormalform(true).hashCode();
+        return
+            (this.protocol == null ? 0 : this.protocol.hashCode() >> 2) +
+            (this.host == null ? 0 : this.host.hashCode() >> 2) +
+            (this.userInfo == null ? 0 : this.userInfo.hashCode() >> 2) +
+            (this.path == null ? 0 : this.path.hashCode() >> 2) +
+            (this.searchpart == null ? 0 : this.searchpart.hashCode() >> 2) +
+            this.port;
+        //return this.toNormalform(true).hashCode();
     }
 
     /* (non-Javadoc)
