@@ -20,17 +20,33 @@
 
 package net.yacy.search.schema;
 
+import java.net.MalformedURLException;
+
 import net.yacy.cora.document.id.MultiProtocolURL;
 
 public class HyperlinkEdge {
-    
-    public MultiProtocolURL source, target;
-    public HyperlinkType type;
-    
-    public HyperlinkEdge(MultiProtocolURL source, MultiProtocolURL target, HyperlinkType type) {
+
+    public static class Target extends MultiProtocolURL {
+        private static final long serialVersionUID = 5746600160371492930L;
+        public HyperlinkType type;
+
+        public Target(final String url, final HyperlinkType type) throws MalformedURLException {
+            super(url);
+            this.type = type;
+        }
+        
+        public Target(final MultiProtocolURL url, final HyperlinkType type) {
+            super(url);
+            this.type = type;
+        }
+    }
+
+    public MultiProtocolURL source;
+    public Target target;    
+
+    public HyperlinkEdge(MultiProtocolURL source, Target target) {
         this.source = source;
         this.target = target;
-        this.type = type;
     }
     
     @Override
@@ -40,7 +56,7 @@ public class HyperlinkEdge {
         sb.append(" -> ");
         sb.append(this.target.toNormalform(true));
         sb.append(" (");
-        sb.append(type.name());
+        sb.append(this.target.type.name());
         sb.append(")");
         return sb.toString();
     }

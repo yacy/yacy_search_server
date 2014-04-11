@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -52,13 +51,11 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         }
     }
     
-    Map<String, HyperlinkEdge> edges;
-    Map<MultiProtocolURL, Integer> depths;
+    HyperlinkEdges edges;
     String hostname;
     
     public HyperlinkGraph() {
-        this.edges = new LinkedHashMap<String, HyperlinkEdge>();
-        this.depths = new HashMap<MultiProtocolURL, Integer>();
+        this.edges = new HyperlinkEdges();
         this.hostname = null;
     }
     
@@ -79,14 +76,14 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                 );
         SolrDocument doc;
         Map<String, FailType> errorDocs = new HashMap<String, FailType>();
-        Map<String, HyperlinkEdge> inboundEdges = new HashMap<String, HyperlinkEdge>();
-        Map<String, HyperlinkEdge> outboundEdges = new HashMap<String, HyperlinkEdge>();
-        Map<String, HyperlinkEdge> errorEdges = new HashMap<String, HyperlinkEdge>();
+        HyperlinkEdges inboundEdges = new HyperlinkEdges();
+        HyperlinkEdges outboundEdges = new HyperlinkEdges();
+        HyperlinkEdges errorEdges = new HyperlinkEdges();
         try {
             retrieval: while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                 String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                DigestURL from = new DigestURL(u, ASCII.getBytes(ids));
+                MultiProtocolURL from = new MultiProtocolURL(u);
                 String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
                 FailType error = errortype == null ? null : FailType.valueOf(errortype);
                 if (error != null) {
@@ -97,9 +94,9 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                     while (links.hasNext()) {
                         link = links.next();
                         try {
-                            DigestURL linkurl = new DigestURL(link, null);
-                            String edgehash = ids + ASCII.String(linkurl.hash());
-                            inboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkType.Inbound));
+                            HyperlinkEdge.Target linkurl = new HyperlinkEdge.Target(link, HyperlinkType.Inbound);
+                            String edgehash = ids + ASCII.String(new DigestURL(link, null).hash());
+                            inboundEdges.addEdge(from, linkurl);
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
                     }
@@ -107,9 +104,9 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                     while (links.hasNext()) {
                         link = links.next();
                         try {
-                            DigestURL linkurl = new DigestURL(link, null);
-                            String edgehash = ids + ASCII.String(linkurl.hash());
-                            outboundEdges.put(edgehash, new HyperlinkEdge(from, linkurl, HyperlinkType.Outbound));
+                            HyperlinkEdge.Target linkurl = new HyperlinkEdge.Target(link, HyperlinkType.Outbound);
+                            String edgehash = ids + ASCII.String(new DigestURL(link, null).hash());
+                            outboundEdges.addEdge(from, linkurl);
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
                         } catch (MalformedURLException e) {}
                     }
@@ -122,31 +119,31 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         } catch (MalformedURLException e) {
         }
         // we use the errorDocs to mark all edges with endpoint to error documents
-        Iterator<Map.Entry<String, HyperlinkEdge>> i = inboundEdges.entrySet().iterator();
-        Map.Entry<String, HyperlinkEdge> edge;
+        Iterator<HyperlinkEdge> i = inboundEdges.iterator();
+        HyperlinkEdge edge;
         while (i.hasNext()) {
             edge = i.next();
-            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
+            if (errorDocs.containsKey(edge.target.toNormalform(true))) {
                 i.remove();
-                edge.getValue().type = HyperlinkType.Dead;
-                errorEdges.put(edge.getKey(), edge.getValue());
+                edge.target.type = HyperlinkType.Dead;
+                errorEdges.add(edge);
             }
         }
-        i = outboundEdges.entrySet().iterator();
+        i = outboundEdges.iterator();
         while (i.hasNext()) {
             edge = i.next();
-            if (errorDocs.containsKey(edge.getValue().target.toNormalform(true))) {
+            if (errorDocs.containsKey(edge.target.toNormalform(true))) {
                 i.remove();
-                edge.getValue().type = HyperlinkType.Dead;
-                errorEdges.put(edge.getKey(), edge.getValue());
+                edge.target.type = HyperlinkType.Dead;
+                errorEdges.add(edge);
             }
         }
         // we put all edges together in a specific order which is used to create nodes in a svg display:
         // notes that appear first are possible painted over by nodes coming later.
         // less important nodes shall appear therefore first
-        this.edges.putAll(outboundEdges);
-        this.edges.putAll(inboundEdges);
-        this.edges.putAll(errorEdges);
+        this.edges.addAll(outboundEdges);
+        this.edges.addAll(inboundEdges);
+        this.edges.addAll(errorEdges);
     }
     
     public void path(final Segment segment, ReferenceReportCache rrc, DigestURL from, DigestURL to, final int maxtime, final int maxnodes) {
@@ -166,11 +163,11 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         // first find root nodes
         Set<MultiProtocolURL> nodes = new HashSet<MultiProtocolURL>();
         Set<MultiProtocolURL> nextnodes = new HashSet<MultiProtocolURL>();
-        for (HyperlinkEdge edge: this.edges.values()) {
+        for (HyperlinkEdge edge: this.edges) {
             String path = edge.source.getPath();
             if (ROOTFNS.contains(path)) {
-                if (!this.depths.containsKey(edge.source)) this.depths.put(edge.source, 0);
-                if (edge.type == HyperlinkType.Inbound && !this.depths.containsKey(edge.target)) this.depths.put(edge.target, 1);
+                this.edges.updateDepth(edge.source, 0);
+                if (edge.target.type == HyperlinkType.Inbound) this.edges.updateDepth(edge.target, 1);
                 nodes.add(edge.source);
                 nextnodes.add(edge.target);
                 remaining--;
@@ -192,10 +189,10 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
             boolean found = false;
             nodes = nextnodes;
             nextnodes = new HashSet<MultiProtocolURL>();
-            for (HyperlinkEdge edge: this.edges.values()) {
+            for (HyperlinkEdge edge: this.edges) {
                 if (nodes.contains(edge.source)) {
-                    if (!this.depths.containsKey(edge.source)) this.depths.put(edge.source, depth);
-                    if (edge.type == HyperlinkType.Inbound && !this.depths.containsKey(edge.target)) this.depths.put(edge.target, depth + 1);
+                    this.edges.updateDepth(edge.source, depth);
+                    if (edge.target.type == HyperlinkType.Inbound) this.edges.updateDepth(edge.target, depth + 1);
                     nextnodes.add(edge.target);
                     remaining--;
                     found = true;
@@ -209,12 +206,12 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
     }
     
     public Integer getDepth(MultiProtocolURL url) {
-        return this.depths.get(url);
+        return this.edges.getDepth(url);
     }
 
     @Override
     public Iterator<HyperlinkEdge> iterator() {
-        return this.edges.values().iterator();
+        return this.edges.iterator();
     }
     
 }

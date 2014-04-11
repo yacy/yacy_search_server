@@ -48,8 +48,8 @@ public class linkstructure {
         Fulltext fulltext = sb.index.fulltext();
         if (post == null) return prop;
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int maxtime = Math.min(post.getInt("maxtime", 1000), authenticated ? 300000 : 1000);
-        int maxnodes = Math.min(post.getInt("maxnodes", 100), authenticated ? 10000000 : 100);
+        int maxtime = Math.min(post.getInt("maxtime", 60000), authenticated ? 300000 : 1000);
+        int maxnodes = Math.min(post.getInt("maxnodes", 10000), authenticated ? 10000000 : 100);
         HyperlinkGraph hlg = new HyperlinkGraph();
         int maxdepth = 0;
         
@@ -97,8 +97,8 @@ public class linkstructure {
         int c = 0;
         for (HyperlinkEdge e: hlg) {
             prop.putJSON("edges_" + c + "_source", e.source.getPath());
-            prop.putJSON("edges_" + c + "_target", e.type.equals(HyperlinkType.Outbound) ? e.target.toNormalform(true) : e.target.getPath());
-            prop.putJSON("edges_" + c + "_type", e.type.name());
+            prop.putJSON("edges_" + c + "_target", e.target.type.equals(HyperlinkType.Outbound) ? e.target.toNormalform(true) : e.target.getPath());
+            prop.putJSON("edges_" + c + "_type", e.target.type.name());
             Integer depth_source = hlg.getDepth(e.source);
             Integer depth_target = hlg.getDepth(e.target);
             prop.put("edges_" + c + "_depthSource", depth_source == null ? -1 : depth_source.intValue());
