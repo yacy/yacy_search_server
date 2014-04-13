@@ -277,6 +277,12 @@ public class migration {
             sb.setConfig("crawler.http.acceptLanguage", sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
             sb.setConfig("crawler.http.acceptCharset",  sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));
         }
+
+        // patch the blacklist because of a release strategy change from 0.7 and up
+        if ((value = sb.getConfig("update.blacklist","")).equals("....[123]")) {
+            value = ""; // no default (remove prev. setting "...[123]" as it hits "1.71" release, added 2014-04-13)
+            sb.setConfig("update.blacklist", value);
+        }
     }
     
     /**
