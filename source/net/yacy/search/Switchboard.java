@@ -1710,7 +1710,7 @@ public final class Switchboard extends serverSwitch {
             this.crawlQueues.remoteTriggeredCrawlJobSize() > 0 ||
             this.crawlQueues.noloadCrawlJobSize() > 0 ||
             (this.crawlStacker != null && !this.crawlStacker.isEmpty()) ||
-            this.crawlQueues.noticeURL.notEmpty()) {
+            !this.crawlQueues.noticeURL.isEmpty()) {
             return false;
         }
         return this.crawler.clear();
@@ -3364,7 +3364,7 @@ public final class Switchboard extends serverSwitch {
             return "no DHT distribution: not enough words - wordIndex.size() = "
                 + indexSegment.RWICount();
         }
-        if ( (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (this.crawlQueues.noticeURL.notEmptyLocal()) ) {
+        if ( (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (!this.crawlQueues.noticeURL.isEmptyLocal()) ) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = "
                 + this.crawlQueues.noticeURL.size()
                 + ", sbQueue.size() = "

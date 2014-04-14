@@ -40,6 +40,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.Balancer;
 import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.LegacyBalancer;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.kelondro.data.word.Word;
@@ -61,11 +62,11 @@ public class NoticedURL {
             final boolean useTailCache,
             final boolean exceed134217727) {
         ConcurrentLog.info("NoticedURL", "CREATING STACKS at " + cachePath.toString());
-        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", useTailCache, exceed134217727);
-        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", useTailCache, exceed134217727);
+        this.coreStack = new LegacyBalancer(cachePath, "urlNoticeCoreStack", useTailCache, exceed134217727);
+        this.limitStack = new LegacyBalancer(cachePath, "urlNoticeLimitStack", useTailCache, exceed134217727);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", useTailCache, exceed134217727);
-        this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", useTailCache, exceed134217727);
+        this.remoteStack = new LegacyBalancer(cachePath, "urlNoticeRemoteStack", useTailCache, exceed134217727);
+        this.noloadStack = new LegacyBalancer(cachePath, "urlNoticeNoLoadStack", useTailCache, exceed134217727);
     }
 
     public void clear() {
@@ -106,25 +107,22 @@ public class NoticedURL {
         super.finalize();
     }
 
-    public boolean notEmpty() {
-        return this.coreStack.notEmpty() || this.limitStack.notEmpty() || this.remoteStack.notEmpty() || this.noloadStack.notEmpty();
-    }
-
-    public boolean notEmptyLocal() {
-        return this.coreStack.notEmpty() || this.limitStack.notEmpty() || this.noloadStack.notEmpty();
-    }
-
     public int size() {
         // this does not count the overhang stack size
         return ((this.coreStack == null) ? 0 : this.coreStack.size()) + ((this.limitStack == null) ? 0 : this.limitStack.size()) + ((this.remoteStack == null) ? 0 : this.remoteStack.size());
     }
-    
-    public boolean isEmpty() {
+
+    public boolean isEmptyLocal() {
         if (this.coreStack == null) return true;
         if (!this.coreStack.isEmpty()) return false;
         if (!this.limitStack.isEmpty()) return false;
-        if (!this.remoteStack.isEmpty()) return false;
         if (!this.noloadStack.isEmpty()) return false;
+        return true;
+    }
+    
+    public boolean isEmpty() {
+        if (!isEmptyLocal()) return false;
+        if (!this.remoteStack.isEmpty()) return false;
         return true;
     }
 
