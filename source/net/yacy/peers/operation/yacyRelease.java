@@ -132,12 +132,7 @@ public final class yacyRelease extends yacyVersion {
         final yacyRelease latestmain = (releases.main.isEmpty()) ? null : releases.main.last();
         final yacyRelease latestdev  = (releases.dev.isEmpty()) ? null : releases.dev.last();
         final String concept = sb.getConfig("update.concept", "any");
-        String blacklist = sb.getConfig("update.blacklist", "...[123]");
-        if (blacklist.equals("....[123]")) {
-            // patch the blacklist because of a release strategy change from 0.7 and up
-            blacklist = "...[123]";
-            sb.setConfig("update.blacklist", blacklist);
-        }
+        String blacklist = sb.getConfig("update.blacklist", "");
 
         if ((manual) || (concept.equals("any"))) {
             // return a dev-release or a main-release
@@ -151,7 +146,7 @@ public final class yacyRelease extends yacyVersion {
                             " is not more recent than installed release " + thisVersion().getName());
                     return null;
                 }
-                return latestdev;
+               return latestdev;
             }
             if (latestmain != null) {
                 // consider a main release
