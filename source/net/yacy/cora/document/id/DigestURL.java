@@ -290,10 +290,6 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     }
 
     public final static Pattern rootPattern = Pattern.compile("/|/\\?|/index.htm(l?)|/index.php|/home.htm(l?)|/home.php|/default.htm(l?)|/default.php");
-    
-    public final boolean probablyRootURL() {
-        return this.path.length() <= 1 || rootPattern.matcher(this.path).matches();
-    }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {
         if (host == null) {

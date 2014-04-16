@@ -24,7 +24,7 @@ last_modified
 ## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
 collection_sxt
 
-## needed (post-)processing steps on this metadata set, used i.e. for clickdepth-computation.
+## needed (post-)processing steps on this metadata set
 #process_sxt
 
 ## key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.
@@ -72,7 +72,7 @@ source_id_s
 #source_parameter_value_sxt
 
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (source)
-#source_clickdepth_i
+#source_crawldepth_i
 
 ## copy of the citation rank norm value from the source link
 #source_cr_host_norm_i
@@ -173,7 +173,7 @@ target_path_folders_sxt
 #target_parameter_value_sxt
 
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)
-#target_clickdepth_i
+#target_crawldepth_i
 
 ## copy of the citation rank norm value from the target link; this is only filled if the target host is identical to the source host
 #target_cr_host_norm_i

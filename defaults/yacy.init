@@ -1218,7 +1218,3 @@ browser.load4everyone = false
 # with some heuristics like: loading linked documents and adding a twitter search.
 # When the learning mode is finished, the user may switch on individual heuristics by himself.
 greedylearning.active = true
-
-# postprocessing parametrization
-postprocessing.clickdepth.maxtime = 100
-postprocessing.clickdepth.maxdepth = 6

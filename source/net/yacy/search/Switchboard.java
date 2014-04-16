@@ -190,7 +190,6 @@ import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segment.ClickdepthCache;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SearchEvent;
@@ -484,9 +483,9 @@ public final class Switchboard extends serverSwitch {
             String bq = this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + i, "");
             String bf = this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + i, "");
             // apply some hard-coded patches for earlier experiments we do not want any more
-            if (bf.equals("product(recip(rord(last_modified),1,1000,1000),div(product(log(product(references_external_i,references_exthosts_i)),div(references_internal_i,host_extent_i)),add(clickdepth_i,1)))") ||
+            if (bf.equals("product(recip(rord(last_modified),1,1000,1000),div(product(log(product(references_external_i,references_exthosts_i)),div(references_internal_i,host_extent_i)),add(crawldepth_i,1)))") ||
                 bf.equals("scale(cr_host_norm_i,1,20)")) bf = "";
-            if (i == 0 && bq.equals("fuzzy_signature_unique_b:true^100000.0")) bq = "clickdepth_i:0^0.8 clickdepth_i:1^0.4";
+            if (i == 0 && bq.equals("fuzzy_signature_unique_b:true^100000.0")) bq = "crawldepth_i:0^0.8 crawldepth_i:1^0.4";
             if (boosts.equals("url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0")) boosts = "url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^2.0";
             r.setName(name);
             r.updateBoosts(boosts);
@@ -2307,9 +2306,6 @@ public final class Switchboard extends serverSwitch {
                 
                 // we optimize first because that is useful for postprocessing
                 ReferenceReportCache rrCache = index.getReferenceReportCache();
-                int clickdepth_maxtime = this.getConfigInt("postprocessing.clickdepth.maxtime", 100);
-                int clickdepth_maxdepth = this.getConfigInt("postprocessing.clickdepth.maxdepth", 6);
-                ClickdepthCache clickdepthCache = index.getClickdepthCache(rrCache, clickdepth_maxtime, clickdepth_maxdepth);
                 Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
                         this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
                 int cleanupByHarvestkey = deletionCandidates.size();
@@ -2320,7 +2316,7 @@ public final class Switchboard extends serverSwitch {
                         postprocessingRunning = true;
                         postprocessingStartTime[0] = System.currentTimeMillis();
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-                        for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, clickdepthCache, profileHash);
+                        for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash);
                         postprocessingStartTime[0] = 0;
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
                         
@@ -2331,7 +2327,7 @@ public final class Switchboard extends serverSwitch {
                         postprocessingRunning = true;
                         postprocessingStartTime[0] = System.currentTimeMillis();
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-                        proccount += collection1Configuration.postprocessing(index, rrCache, clickdepthCache, null);
+                        proccount += collection1Configuration.postprocessing(index, rrCache, null);
                         postprocessingStartTime[0] = 0;
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
 

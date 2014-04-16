@@ -81,7 +81,7 @@ public class RankingSolr_p {
             }
         }
         if (post != null && post.containsKey("ResetBQ")) {
-            String bq = "clickdepth_i:0^0.8 clickdepth_i:1^0.4";
+            String bq = "crawldepth_i:0^0.8 crawldepth_i:1^0.4";
             if (bq != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + profileNr, bq);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostQuery(bq);

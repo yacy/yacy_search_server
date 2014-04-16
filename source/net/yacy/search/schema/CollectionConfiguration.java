@@ -82,7 +82,6 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segment.ClickdepthCache;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
@@ -367,22 +366,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         
         String us = digestURL.toNormalform(true);
-
-        int clickdepth = 999;
-        if ((allAttr || contains(CollectionSchema.clickdepth_i))) {
-            if (digestURL.probablyRootURL()) {
-                clickdepth = 0;
-            } else {
-                clickdepth = 999;
-            }
-            if (document.getDepth() < 2) clickdepth = Math.min(clickdepth, document.getDepth()); // thats not true if the start url was not a root URL. We need a test for that.
-            if (clickdepth > 2) processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
-            CollectionSchema.clickdepth_i.add(doc, clickdepth); // no lazy value checking to get a '0' into the index
-        }
         
+        int crawldepth = document.getDepth();
         if ((allAttr || contains(CollectionSchema.crawldepth_i))) {
-            int depth = document.getDepth();
-            CollectionSchema.crawldepth_i.add(doc, depth);
+            CollectionSchema.crawldepth_i.add(doc, crawldepth);
         }
         
         if (allAttr || (contains(CollectionSchema.cr_host_chance_d) && contains(CollectionSchema.cr_host_count_i) && contains(CollectionSchema.cr_host_norm_i))) {
@@ -670,7 +657,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 add(doc, CollectionSchema.framesscount_i, frames.length);
                 if (frames.length > 0) {
                     add(doc, CollectionSchema.frames_sxt, frames);
-                    //webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, framess, citations); // add here because links have been removed from remaining inbound/outbound
+                    //webgraph.addEdges(subgraph, digestURI, responseHeader, collections, crawldepth, alllinks, images, true, framess, citations); // add here because links have been removed from remaining inbound/outbound
                 }
             }
 
@@ -687,7 +674,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 add(doc, CollectionSchema.iframesscount_i, iframes.length);
                 if (iframes.length > 0) {
                     add(doc, CollectionSchema.iframes_sxt, iframes);
-                    //webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, iframess, citations); // add here because links have been removed from remaining inbound/outbound
+                    //webgraph.addEdges(subgraph, digestURI, responseHeader, collections, crawldepth, alllinks, images, true, iframess, citations); // add here because links have been removed from remaining inbound/outbound
                 }
             }
 
@@ -856,9 +843,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
         
         // create a subgraph
-        if (!containsCanonical) {
+        if (!containsCanonical && webgraph != null) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, document.getAnchors(), sourceName);
+            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, crawldepth, images, document.getAnchors(), sourceName);
         }
             
         // list all links
@@ -923,7 +910,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param urlCitation
      * @return
      */
-    public int postprocessing(final Segment segment, final ReferenceReportCache rrCache, final ClickdepthCache clickdepthCache, final String harvestkey) {
+    public int postprocessing(final Segment segment, final ReferenceReportCache rrCache, final String harvestkey) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
         if (!segment.connectedCitation() && !segment.fulltext().useWebgraph()) return 0;
         final SolrConnector collectionConnector = segment.fulltext().getDefaultConnector();
@@ -1054,7 +1041,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             @Override
                             public void run() {
                                 Thread.currentThread().setName(name);
-                                SolrDocument doc; String protocol, urlstub, id; DigestURL url;
+                                SolrDocument doc; String id;
                                 try {
                                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                                         SolrInputDocument sid = webgraph.toSolrInputDocument(doc, omitFields);
@@ -1078,30 +1065,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                             CRV crv = rankings.get(id);
                                             if (crv != null) {
                                                 sid.setField(WebgraphSchema.target_cr_host_norm_i.getSolrFieldName(), crv.crn);
-                                            }
-                                        }
-                                        
-                                        // set clickdepth
-                                        if (process.contains(ProcessType.CLICKDEPTH)) {
-                                            if (webgraph.contains(WebgraphSchema.source_clickdepth_i) && webgraph.contains(WebgraphSchema.source_protocol_s) && webgraph.contains(WebgraphSchema.source_urlstub_s) && webgraph.contains(WebgraphSchema.source_id_s)) {
-                                                protocol = (String) doc.getFieldValue(WebgraphSchema.source_protocol_s.getSolrFieldName());
-                                                urlstub = (String) doc.getFieldValue(WebgraphSchema.source_urlstub_s.getSolrFieldName());
-                                                id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
-                                                try {
-                                                    url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
-                                                    postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.source_clickdepth_i);
-                                                } catch (MalformedURLException e) {
-                                                }
-                                            }
-                                            if (webgraph.contains(WebgraphSchema.target_clickdepth_i) && webgraph.contains(WebgraphSchema.target_protocol_s) && webgraph.contains(WebgraphSchema.target_urlstub_s) && webgraph.contains(WebgraphSchema.target_id_s)) {
-                                                protocol = (String) doc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName());
-                                                urlstub = (String) doc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
-                                                id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
-                                                try {
-                                                    url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
-                                                    postprocessing_clickdepth(clickdepthCache, sid, url, WebgraphSchema.target_clickdepth_i);
-                                                } catch (MalformedURLException e) {
-                                                }
                                             }
                                         }
                                         
@@ -1148,7 +1111,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             Set<String> omitFields = new HashSet<String>();
             omitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
             omitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
-            int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
+            int proccount = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
             long count = collectionConnector.getCountByQuery(query);
             long start = System.currentTimeMillis();
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
@@ -1170,9 +1133,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
-                        if (tagtype == ProcessType.CLICKDEPTH && collection.contains(CollectionSchema.clickdepth_i)) {
-                            if (postprocessing_clickdepth(clickdepthCache, sid, url, CollectionSchema.clickdepth_i)) proccount_clickdepthchange++;
-                        }
 
                         if (tagtype == ProcessType.CITATION &&
                             collection.contains(CollectionSchema.cr_host_count_i) &&
@@ -1228,7 +1188,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             if (count != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck); // big gap for harvestkey = null
             ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
-                        proccount_clickdepthchange + " clickdepth changes, " +
                         proccount_referencechange + " reference-count changes, " +
                         proccount_uniquechange + " unique field changes, " +
                         proccount_citationchange + " citation ranking changes.");
@@ -1534,12 +1493,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 configuration.add(doc, CollectionSchema.collection_sxt, cs);
             }
 
-            // clickdepth, cr and postprocessing
+            // cr and postprocessing
             Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
-            if ((allAttr || configuration.contains(CollectionSchema.clickdepth_i))) {
-                processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
-                CollectionSchema.clickdepth_i.add(doc, digestURL.probablyRootURL() ? 0 : 999); // no lazy value checking to get a '0' into the index
-            }
             if (allAttr || (configuration.contains(CollectionSchema.cr_host_chance_d) && configuration.contains(CollectionSchema.cr_host_count_i) && configuration.contains(CollectionSchema.cr_host_norm_i))) {
                 processTypes.add(ProcessType.CITATION); // postprocessing needed
             }

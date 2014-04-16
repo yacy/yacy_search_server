@@ -57,8 +57,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host to referenced url"),
     references_external_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from external hosts"),
     references_exthosts_i(SolrType.num_integer, true, true, false, false, false, "number of external hosts which provide http references"),
-    clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url"),
-    crawldepth_i(SolrType.num_integer, true, true, false, false, false, "crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is the maximum of clickdepth_i"),
+    crawldepth_i(SolrType.num_integer, true, true, false, false, false, "crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is equal to the clickdepth"),
     process_sxt(SolrType.string, true, true, true, false, false, "needed (post-)processing steps on this metadata set"),
     harvestkey_s(SolrType.string, true, true, false, false, false, "key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated."),
     

@@ -41,7 +41,6 @@ import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segment.ClickdepthCache;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.schema.CollectionSchema;
@@ -176,21 +175,6 @@ public class SchemaConfiguration extends Configuration implements Serializable {
             }
         }
         return changed;
-    }
-    
-    public boolean postprocessing_clickdepth(final ClickdepthCache clickdepthCache, final SolrInputDocument sid, final DigestURL url, final SchemaDeclaration clickdepthfield) {
-        // get new click depth and compare with old
-        Integer oldclickdepth = (Integer) sid.getFieldValue(clickdepthfield.getSolrFieldName());
-        if (oldclickdepth != null && oldclickdepth.intValue() != 999) return false; // we do not want to compute that again
-        try {
-            int clickdepth = clickdepthCache.getClickdepth(url);
-            if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) {
-                sid.setField(clickdepthfield.getSolrFieldName(), clickdepth);
-                return true;
-            }
-        } catch (final IOException e) {
-        }
-        return false;
     }
 
     public boolean postprocessing_references(final ReferenceReportCache rrCache, final SolrInputDocument sid, final DigestURL url, final Map<String, Long> hostExtentCount) {

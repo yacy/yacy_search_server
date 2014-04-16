@@ -26,6 +26,6 @@ package net.yacy.cora.federate.solr;
  */
 public enum ProcessType {
 
-    CLICKDEPTH, CITATION, UNIQUE;
+    CITATION, UNIQUE;
     
 }

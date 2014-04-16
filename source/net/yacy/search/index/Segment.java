@@ -30,8 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +80,6 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
-import net.yacy.search.schema.HyperlinkGraph;
 import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.search.schema.WebgraphSchema;
 
@@ -204,77 +201,7 @@ public class Segment {
     public IndexCell<CitationReference> urlCitation() {
         return this.urlCitationIndex;
     }
-
-    /**
-     * compute the click level using the citation reference database
-     * @param citations the citation database
-     * @param searchhash the hash of the url to be checked
-     * @return the clickdepth level or 999 if the root url cannot be found or a recursion limit is reached
-     * @throws IOException
-     */
-    private int getClickDepth(final ReferenceReportCache rrc, final DigestURL url, final int maxtime, final int maxdepth) throws IOException {
-
-        final byte[] searchhash = url.hash();
-        RowHandleSet rootCandidates = getPossibleRootHashes(url);
-        if (rootCandidates.has(searchhash)) return 0; // the url is a root candidate itself
-        
-        Set<String> ignore = new HashSet<String>(); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent endless loops
-        Set<String> levelhashes = new HashSet<String>(); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
-        levelhashes.add(ASCII.String(searchhash));
-        final byte[] hosthash = new byte[6]; // the host of the url to be checked
-        System.arraycopy(searchhash, 6, hosthash, 0, 6);
-        
-        long timeout = System.currentTimeMillis() + maxtime;
-        mainloop: for (int leveldepth = 0; leveldepth < maxdepth && System.currentTimeMillis() < timeout; leveldepth++) {
-            
-            Set<String> checknext = new HashSet<String>();
-            
-            // loop over all hashes at this clickdepth; the first call to this loop should contain only one hash and a leveldepth = 0
-            checkloop: for (String urlhashs: levelhashes) {
     
-                // get all the citations for this url and iterate
-                ReferenceReport rr = rrc.getReferenceReport(urlhashs, false);
-                //ReferenceContainer<CitationReference> references = this.urlCitationIndex.get(urlhash, null);
-                if (rr == null || rr.getInternalCount() == 0) continue checkloop; // don't know
-                Iterator<byte[]> i = rr.getInternallIDs().iterator();
-                nextloop: while (i.hasNext()) {
-                    byte[] u = i.next();
-                    if (u == null) continue nextloop;
-                    
-                    // check if this is from the same host
-                    assert (ByteBuffer.equals(u, 6, hosthash, 0, 6));
-                    String us = ASCII.String(u);
-                    // check ignore
-                    if (ignore.contains(us)) continue nextloop;
-                    
-                    // check if the url is a root url
-                    if (rootCandidates.has(u)) {
-                        return leveldepth + 1;
-                    }
-                    
-                    checknext.add(us);
-                    ignore.add(us);
-                }
-                if (System.currentTimeMillis() > timeout) break mainloop;
-            }
-            levelhashes = checknext;
-        }
-        return 999;
-    }
-    
-    
-    private static RowHandleSet getPossibleRootHashes(final DigestURL url) {
-        RowHandleSet rootCandidates = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 10);
-        String rootStub = url.getProtocol() + "://" + url.getHost() + (url.getProtocol().equals("http") && url.getPort() != 80 ? (":" + url.getPort()) : "");
-        try {
-            rootCandidates.put(new DigestURL(rootStub).hash());
-            for (String rootfn: HyperlinkGraph.ROOTFNS) rootCandidates.put(new DigestURL(rootStub + rootfn).hash());
-            rootCandidates.optimize();
-        } catch (final Throwable e) {}
-        rootCandidates.optimize();
-        return rootCandidates;
-    }
-
     public ReferenceReportCache getReferenceReportCache()  {
         return new ReferenceReportCache();
     }
@@ -296,54 +223,6 @@ public class Segment {
                 ConcurrentLog.logException(e);
                 throw new IOException(e.getMessage());
             }
-        }
-    }
-    
-    public ClickdepthCache getClickdepthCache(ReferenceReportCache rrc, final int maxtime, final int maxdepth)  {
-        return new ClickdepthCache(rrc, maxtime, maxdepth);
-    }
-    
-    public class ClickdepthCache {
-        private final ReferenceReportCache rrc;
-        private final Map<String, HyperlinkGraph> hyperlinkGraphCache; // map from host name to a HyperlinkGraph for that host name
-        private final Map<String, Integer> cache;
-        public final int maxdepth; // maximum clickdepth
-        public final int maxtime; // maximum time to compute clickdepth
-        public ClickdepthCache(final ReferenceReportCache rrc, final int maxtime, final int maxdepth) {
-            this.rrc = rrc;
-            this.hyperlinkGraphCache = new HashMap<String, HyperlinkGraph>();
-            this.cache = new ConcurrentHashMap<String, Integer>();
-            this.maxdepth = maxdepth;
-            this.maxtime = maxtime;
-        }
-        public int getClickdepth(final DigestURL url) throws IOException {
-            // first try: get the clickdepth from the cache
-            Integer clickdepth = cache.get(ASCII.String(url.hash()));
-            if (MemoryControl.shortStatus()) cache.clear();
-            if (clickdepth != null) {
-                //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth + " CACHE HIT");
-                return clickdepth.intValue();
-            }
-            
-            // second try: get the clickdepth from a hyperlinGraphCache (forward clickdepth)
-            HyperlinkGraph hlg = hyperlinkGraphCache.get(url.getHost());
-            if (hlg == null) {
-                hlg = new HyperlinkGraph();
-                hlg.fill(fulltext.getDefaultConnector(), url.getHost(), null, 300000, 10000000);
-                hlg.findLinkDepth();
-                hyperlinkGraphCache.put(url.getHost(), hlg);
-            }
-            clickdepth = hlg.getDepth(url);
-            if (clickdepth != null) {
-                return clickdepth.intValue();
-            }
-                    
-            
-            // third try: get the clickdepth from a reverse link graph
-            clickdepth = Segment.this.getClickDepth(this.rrc, url, this.maxtime, this.maxdepth);
-            //ConcurrentLog.info("Segment", "get clickdepth of url " + url.toNormalform(true) + ": " + clickdepth);
-            this.cache.put(ASCII.String(url.hash()), clickdepth);
-            return clickdepth.intValue();
         }
     }
     
@@ -654,7 +533,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, this.fulltext.getWebgraphConfiguration(), sourceName);
+        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);

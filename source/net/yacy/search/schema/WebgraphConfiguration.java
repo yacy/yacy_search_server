@@ -112,7 +112,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     
     public void addEdges(
             final Subgraph subgraph,
-            final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
+            final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int crawldepth_source,
             final List<ImageEntry> images, final Collection<AnchorURL> links,
             final String sourceName) {
         boolean allAttr = this.isEmpty();
@@ -120,7 +120,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         int target_order = 0;
         for (final AnchorURL target_url: links) {
             SolrInputDocument edge = getEdge(
-                    subgraph, source, responseHeader, collections, clickdepth_source, images,
+                    subgraph, source, responseHeader, collections, crawldepth_source, images,
                     sourceName, allAttr, generalNofollow, target_order, target_url);
             target_order++;
             // add the edge to the subgraph
@@ -130,7 +130,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     
     public SolrInputDocument getEdge(
             final Subgraph subgraph,
-            final DigestURL source_url, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
+            final DigestURL source_url, final ResponseHeader responseHeader, Map<String, Pattern> collections, int crawldepth_source,
             final List<ImageEntry> images,
             final String sourceName, boolean allAttr, boolean generalNofollow, int target_order, AnchorURL target_url) {
 
@@ -217,9 +217,8 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
             add(edge, WebgraphSchema.source_path_folders_sxt, paths);
         }
-        if ((allAttr || contains(WebgraphSchema.source_clickdepth_i)) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
-            add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
-            processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+        if ((allAttr || contains(WebgraphSchema.source_crawldepth_i)) && this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+            add(edge, WebgraphSchema.source_crawldepth_i, crawldepth_source);
         }
 
         // parse text to find images and clear text
@@ -289,15 +288,8 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             add(edge, WebgraphSchema.target_path_folders_sxt, paths);
         }
 
-        if ((allAttr || contains(WebgraphSchema.target_clickdepth_i)) && this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
-            if (target_url.probablyRootURL()) {
-                boolean lc = this.lazy; this.lazy = false;
-                add(edge, WebgraphSchema.target_clickdepth_i, 0);
-                this.lazy = lc;
-            } else {
-                add(edge, WebgraphSchema.target_clickdepth_i, 999);
-                processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
-            }
+        if ((allAttr || contains(WebgraphSchema.target_crawldepth_i)) && this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
+            add(edge, WebgraphSchema.target_crawldepth_i, 999);
         }
         
         if (allAttr || contains(WebgraphSchema.process_sxt)) {

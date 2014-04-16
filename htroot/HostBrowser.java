@@ -297,7 +297,6 @@ public class HostBrowser {
                         CollectionSchema.inboundlinks_urlstub_sxt.getSolrFieldName(),
                         CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(),
                         CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName(),
-                        CollectionSchema.clickdepth_i.getSolrFieldName(),
                         CollectionSchema.crawldepth_i.getSolrFieldName(),
                         CollectionSchema.references_i.getSolrFieldName(),
                         CollectionSchema.references_internal_i.getSolrFieldName(),
@@ -564,18 +563,16 @@ public class HostBrowser {
     public static final class InfoCacheEntry {
         public Integer cr_n;
         public Double  cr_c;
-        public int clickdepth, crawldepth, references, references_internal, references_external, references_exthosts;
+        public int crawldepth, references, references_internal, references_external, references_exthosts;
         public List<String> references_internal_urls, references_external_urls;
         public InfoCacheEntry(final Fulltext fulltext, final ReferenceReportCache rrCache, final SolrDocument doc, final String urlhash, boolean fetchReferences) {
             this.cr_c = (Double) doc.getFieldValue(CollectionSchema.cr_host_chance_d.getSolrFieldName());
             this.cr_n = (Integer) doc.getFieldValue(CollectionSchema.cr_host_norm_i.getSolrFieldName());
-            Integer cd = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
             Integer cr = (Integer) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
             Integer rc = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
             Integer rc_internal = (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
             Integer rc_external = (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
             Integer rc_exthosts = (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
-            this.clickdepth = (cd == null || cd.intValue() < 0) ? 999 : cd.intValue();
             this.crawldepth = (cr == null || cr.intValue() < 0) ? 999 : cr.intValue();
             this.references = (rc == null || rc.intValue() <= 0) ? 0 : rc.intValue();
             this.references_internal = (rc_internal == null || rc_internal.intValue() <= 0) ? 0 : rc_internal.intValue();
@@ -628,7 +625,6 @@ public class HostBrowser {
             }
             if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:</br>");
             return
-                    (this.clickdepth >= 0 ? "clickdepth: " + this.clickdepth : "") +
                     (this.crawldepth >= 0 ? ", crawldepth: " + this.crawldepth : "") +
                     (this.cr_c != null ? ", cr=" + (Math.round(this.cr_c * 1000.0d) / 1000.0d) : "") +
                     (this.cr_n != null ? ", crn=" + this.cr_n : "") +
