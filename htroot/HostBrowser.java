@@ -625,7 +625,7 @@ public class HostBrowser {
             }
             if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:</br>");
             return
-                    (this.crawldepth >= 0 ? ", crawldepth: " + this.crawldepth : "") +
+                    (this.crawldepth >= 0 ? "crawldepth: " + this.crawldepth : "") +
                     (this.cr_c != null ? ", cr=" + (Math.round(this.cr_c * 1000.0d) / 1000.0d) : "") +
                     (this.cr_n != null ? ", crn=" + this.cr_n : "") +
                     (this.references >= 0 ? ", refs: " + this.references_exthosts + " hosts, " + this.references_external + " ext, " + this.references_internal + " int" + sbi.toString() + sbe.toString() : "");
