@@ -381,7 +381,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         if ((allAttr || contains(CollectionSchema.crawldepth_i))) {
-            CollectionSchema.crawldepth_i.add(doc, document.getDepth());
+            int depth = document.getDepth();
+            CollectionSchema.crawldepth_i.add(doc, depth);
         }
         
         if (allAttr || (contains(CollectionSchema.cr_host_chance_d) && contains(CollectionSchema.cr_host_count_i) && contains(CollectionSchema.cr_host_norm_i))) {

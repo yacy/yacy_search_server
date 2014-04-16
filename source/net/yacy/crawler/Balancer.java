@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
@@ -62,6 +63,13 @@ public interface Balancer {
      */
     public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException, SpaceExceededException;
 
+    /**
+     * delete all urls which are stored for given host hashes
+     * @param hosthashes
+     * @return number of deleted urls
+     */
+    public int removeAllByHostHashes(final Set<String> hosthashes);
+    
     /**
      * @param urlHashes, a list of hashes that shall be removed
      * @return number of entries that had been removed

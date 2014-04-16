@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -495,8 +496,13 @@ public class Segment {
             urlstub = null;
         } else {
             final String host = stub.getHost();
-            String hh = DigestURL.hosthash(host);
-            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            String hh = null;
+            try {
+                hh = DigestURL.hosthash(host, stub.getPort());
+            } catch (MalformedURLException e) {
+                ConcurrentLog.logException(e);
+            }
+            docQueue = hh == null ? new ArrayBlockingQueue<SolrDocument>(0) : this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = stub.toNormalform(true);
         }
 

@@ -835,7 +835,7 @@ public class Response {
         final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(new AnchorURL(url()), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content);
+            return TextParser.parseSource(new AnchorURL(url()), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.request.depth(), this.content);
         } catch (final Exception e) {
             return null;
         }

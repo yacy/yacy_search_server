@@ -1,15 +1,19 @@
 
+import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -75,30 +79,45 @@ public class IndexCreateQueues_p {
                                 }
                             }
                         } else {
-                            // iterating through the list of URLs
-                            final Iterator<Request> iter = sb.crawlQueues.noticeURL.iterator(stackType);
-                            Request entry;
-                            final List<byte[]> removehashes = new ArrayList<byte[]>();
-                            while (iter.hasNext()) {
-                                if ((entry = iter.next()) == null) continue;
-                                String value = null;
-
-                                location: switch (option) {
-                                    case URL:       value = (entry.url() == null) ? null : entry.url().toString(); break location;
-                                    case ANCHOR:    value = entry.name(); break location;
-                                    case DEPTH:     value = Integer.toString(entry.depth()); break location;
-                                    case INITIATOR:
-                                        value = (entry.initiator() == null || entry.initiator().length == 0) ? "proxy" : ASCII.String(entry.initiator());
-                                        break location;
-                                    case MODIFIED:  value = daydate(entry.appdate()); break location;
-                                    default: value = null; break location;
+                            int removedByHosts = 0;
+                            if (option == URL && deletepattern.startsWith(".*") && deletepattern.endsWith(".*")) {
+                                // try to delete that using the host name
+                                Set<String> hosthashes = new HashSet<String>();
+                                String hn = deletepattern.substring(2, deletepattern.length() - 2);
+                                try {
+                                    hosthashes.add(DigestURL.hosthash(hn, hn.startsWith("ftp") ? 21 : 80));
+                                    hosthashes.add(DigestURL.hosthash(hn, 443));
+                                    removedByHosts = sb.crawlQueues.removeHosts(hosthashes);
+                                } catch (MalformedURLException e) {
                                 }
-
-                                if (value != null && compiledPattern.matcher(value).matches()) removehashes.add(entry.url().hash());
                             }
-                            ConcurrentLog.info("IndexCreateQueues_p", "created a remove list with " + removehashes.size() + " entries for pattern '" + deletepattern + "'");
-                            for (final byte[] b: removehashes) {
-                                sb.crawlQueues.noticeURL.removeByURLHash(b);
+                            
+                            if (removedByHosts == 0) {
+                                // iterating through the list of URLs
+                                final Iterator<Request> iter = sb.crawlQueues.noticeURL.iterator(stackType);
+                                Request entry;
+                                final List<byte[]> removehashes = new ArrayList<byte[]>();
+                                while (iter.hasNext()) {
+                                    if ((entry = iter.next()) == null) continue;
+                                    String value = null;
+    
+                                    location: switch (option) {
+                                        case URL:       value = (entry.url() == null) ? null : entry.url().toString(); break location;
+                                        case ANCHOR:    value = entry.name(); break location;
+                                        case DEPTH:     value = Integer.toString(entry.depth()); break location;
+                                        case INITIATOR:
+                                            value = (entry.initiator() == null || entry.initiator().length == 0) ? "proxy" : ASCII.String(entry.initiator());
+                                            break location;
+                                        case MODIFIED:  value = daydate(entry.appdate()); break location;
+                                        default: value = null; break location;
+                                    }
+    
+                                    if (value != null && compiledPattern.matcher(value).matches()) removehashes.add(entry.url().hash());
+                                }
+                                ConcurrentLog.info("IndexCreateQueues_p", "created a remove list with " + removehashes.size() + " entries for pattern '" + deletepattern + "'");
+                                for (final byte[] b: removehashes) {
+                                    sb.crawlQueues.noticeURL.removeByURLHash(b);
+                                }
                             }
                         }
                     } catch (final PatternSyntaxException e) {
@@ -121,13 +140,17 @@ public class IndexCreateQueues_p {
 
             int hc = 0;
             for (Map.Entry<String, Integer[]> host: hosts.entrySet()) {
-                prop.putHTML("crawler_host_" + hc + "_hostname", host.getKey());
+                String hostnameport = host.getKey();
+                int p = hostnameport.lastIndexOf(':');
+                String hostname = p < 0 ? hostnameport : hostnameport.substring(0, p);
+                prop.putHTML("crawler_host_" + hc + "_hostnameport", hostnameport);
+                prop.putHTML("crawler_host_" + hc + "_hostname", hostname);
                 prop.put("crawler_host_" + hc + "_embed", embed ? 1 : 0);
                 prop.put("crawler_host_" + hc + "_urlsPerHost", urlsPerHost);
                 prop.putHTML("crawler_host_" + hc + "_queuename", stackType.name());
                 prop.put("crawler_host_" + hc + "_hostcount", host.getValue()[0]);
                 prop.put("crawler_host_" + hc + "_hostdelta", host.getValue()[1] == Integer.MIN_VALUE ? "not accessed" : Integer.toString(host.getValue()[1]));
-                List<Request> domainStackReferences = sb.crawlQueues.noticeURL.getDomainStackReferences(stackType, host.getKey(), urlsPerHost, 10000);
+                List<Request> domainStackReferences = sb.crawlQueues.noticeURL.getDomainStackReferences(stackType, hostname, urlsPerHost, 10000);
 
                 Seed initiator;
                 String profileHandle;
@@ -138,9 +161,11 @@ public class IndexCreateQueues_p {
                     initiator = sb.peers.getConnected(request.initiator() == null ? "" : ASCII.String(request.initiator()));
                     profileHandle = request.profileHandle();
                     profileEntry = profileHandle == null ? null : sb.crawler.getActive(profileHandle.getBytes());
+                    String depthString = Integer.toString(request.depth());
+                    while (depthString.length() < 4) depthString = "0" + depthString;
                     prop.putHTML("crawler_host_" + hc + "_list_" + count + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler_host_" + hc + "_list_" + count + "_profile", ((profileEntry == null) ? "unknown" : profileEntry.collectionName()));
-                    prop.put("crawler_host_" + hc + "_list_" + count + "_depth", request.depth());
+                    prop.putHTML("crawler_host_" + hc + "_list_" + count + "_depth", depthString);
                     prop.put("crawler_host_" + hc + "_list_" + count + "_modified", daydate(request.appdate()) );
                     prop.putHTML("crawler_host_" + hc + "_list_" + count + "_anchor", request.name());
                     prop.putHTML("crawler_host_" + hc + "_list_" + count + "_url", request.url().toNormalform(true));

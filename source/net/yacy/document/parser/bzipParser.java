@@ -94,7 +94,7 @@ public class bzipParser extends AbstractParser implements Parser {
             out.close();
 
             // creating a new parser class to parse the unzipped content
-            docs = TextParser.parseSource(location, null, null, tempFile);
+            docs = TextParser.parseSource(location, null, null, 999, tempFile);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;

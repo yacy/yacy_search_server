@@ -171,7 +171,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      // below for reversion of the effects
                      final AnchorURL url = AnchorURL.newAnchor(this.doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
-                     theDocs = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
+                     theDocs = TextParser.parseSource(url, mime, null, this.doc.getDepth() + 1, this.cfos.toByteArray());
 
                      this.doc.addSubDocuments(theDocs);
                  }

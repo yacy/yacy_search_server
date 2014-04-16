@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -624,6 +625,11 @@ public class LegacyBalancer implements Balancer {
             if (this.rowIterator != null) this.rowIterator.remove();
         }
 
+    }
+
+    @Override
+    public int removeAllByHostHashes(Set<String> hosthashes) {
+        return 0;
     }
 
 }

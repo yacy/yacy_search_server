@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
@@ -40,7 +41,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.Balancer;
 import net.yacy.crawler.CrawlSwitchboard;
-import net.yacy.crawler.LegacyBalancer;
+import net.yacy.crawler.HostBalancer;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.kelondro.data.word.Word;
@@ -59,14 +60,13 @@ public class NoticedURL {
 
     protected NoticedURL(
             final File cachePath,
-            final boolean useTailCache,
+            @SuppressWarnings("unused") final boolean useTailCache,
             final boolean exceed134217727) {
         ConcurrentLog.info("NoticedURL", "CREATING STACKS at " + cachePath.toString());
-        this.coreStack = new LegacyBalancer(cachePath, "urlNoticeCoreStack", useTailCache, exceed134217727);
-        this.limitStack = new LegacyBalancer(cachePath, "urlNoticeLimitStack", useTailCache, exceed134217727);
-        //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        this.remoteStack = new LegacyBalancer(cachePath, "urlNoticeRemoteStack", useTailCache, exceed134217727);
-        this.noloadStack = new LegacyBalancer(cachePath, "urlNoticeNoLoadStack", useTailCache, exceed134217727);
+        this.coreStack = new HostBalancer(new File(cachePath, "CrawlerCoreStacks"), exceed134217727);
+        this.limitStack = new HostBalancer(new File(cachePath, "CrawlerLimitStacks"), exceed134217727);
+        this.remoteStack = new HostBalancer(new File(cachePath, "CrawlerRemoteStacks"), exceed134217727);
+        this.noloadStack = new HostBalancer(new File(cachePath, "CrawlerNoLoadStacks"), exceed134217727);
     }
 
     public void clear() {
@@ -203,6 +203,15 @@ public class NoticedURL {
         try {removed += this.coreStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         try {removed += this.limitStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         try {removed += this.remoteStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        return removed;
+    }
+
+    public int removeByHostHash(final Set<String> hosthashes) {
+        int removed = 0;
+        removed += this.noloadStack.removeAllByHostHashes(hosthashes);
+        removed += this.coreStack.removeAllByHostHashes(hosthashes);
+        removed += this.limitStack.removeAllByHostHashes(hosthashes);
+        removed += this.remoteStack.removeAllByHostHashes(hosthashes);
         return removed;
     }
 

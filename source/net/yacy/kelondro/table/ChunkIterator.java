@@ -56,6 +56,7 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
     private final int recordsize;
     
     public ChunkIterator(final File file, final int recordsize, final int chunksize) throws FileNotFoundException {
+        if (!file.exists()) throw new FileNotFoundException(file.getAbsolutePath());
         assert (file.exists());
         assert file.length() % recordsize == 0;
         this.recordsize = recordsize;

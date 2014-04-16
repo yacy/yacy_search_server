@@ -164,7 +164,7 @@ public class Latency {
         waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f)));
 
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
-        if (Switchboard.getSwitchboard().crawlQueues.hostcount(hostname) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 5000;
+        if (Switchboard.getSwitchboard().crawlQueues.hostcount(hostname) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 3000;
         
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -207,7 +207,7 @@ public class Latency {
         waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f)));
         
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
-        if (Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost()) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 5000;
+        if (Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost()) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 3000;
 
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());

@@ -90,7 +90,7 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(url, "#" + name), mime, null, tmp);
+                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(url, "#" + name), mime, null, 999, tmp);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {

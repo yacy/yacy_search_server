@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -181,7 +182,12 @@ public class CrawlQueues {
         this.noticeURL.removeByURLHash(hash);
         this.delegatedURL.remove(hash);
     }
-
+    
+    public int removeHosts(final Set<String> hosthashes) {
+        return this.noticeURL.removeByHostHash(hosthashes);
+        //this.delegatedURL.remove(hash);
+    }
+    
     public DigestURL getURL(final byte[] urlhash) {
         assert urlhash != null;
         if (urlhash == null || urlhash.length == 0) {
@@ -304,7 +310,7 @@ public class CrawlQueues {
                 return true;
             } catch (final IOException e) {
                 CrawlQueues.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-                if (e.getMessage().indexOf("hash is null",0) > 0) {
+                if (e.getMessage() != null && e.getMessage().indexOf("hash is null",0) > 0) {
                     this.noticeURL.clear(NoticedURL.StackType.LOCAL);
                 }
             }

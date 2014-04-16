@@ -2546,6 +2546,7 @@ public final class Switchboard extends serverSwitch {
                     new AnchorURL(response.url()),
                     response.getMimeType(),
                     response.getCharacterEncoding(),
+                    response.depth(),
                     response.getContent());
             if ( documents == null ) {
                 throw new Parser.Failure("Parser returned null.", response.url());

@@ -159,6 +159,7 @@ public final class TextParser {
             final AnchorURL location,
             final String mimeType,
             final String charset,
+            final int depth,
             final File sourceFile
         ) throws InterruptedException, Parser.Failure {
 
@@ -172,7 +173,7 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            docs = parseSource(location, mimeType, charset, sourceFile.length(), sourceStream);
+            docs = parseSource(location, mimeType, charset, depth, sourceFile.length(), sourceStream);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -189,6 +190,7 @@ public final class TextParser {
             final AnchorURL location,
             String mimeType,
             final String charset,
+            final int depth,
             final byte[] content
         ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from byte-array");
@@ -203,7 +205,7 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
-        Document[] docs = parseSource(location, mimeType, idioms, charset, content);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, depth, content);
 
         return docs;
     }
@@ -212,6 +214,7 @@ public final class TextParser {
             final AnchorURL location,
             String mimeType,
             final String charset,
+            final int depth,
             final long contentLength,
             final InputStream sourceStream
         ) throws Parser.Failure {
@@ -242,7 +245,7 @@ public final class TextParser {
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        Document[] docs = parseSource(location, mimeType, idioms, charset, b);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, depth, b);
 
         return docs;
     }
@@ -273,6 +276,7 @@ public final class TextParser {
             final String mimeType,
             final Set<Parser> parsers,
             final String charset,
+            final int depth,
             final byte[] sourceArray
         ) throws Parser.Failure {
         final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
@@ -326,7 +330,10 @@ public final class TextParser {
             }
             throw new Parser.Failure("All parser failed: " + failedParsers, location);
         }
-        for (final Document d: docs) { assert d.getTextStream() != null : "mimeType = " + mimeType; } // verify docs
+        for (final Document d: docs) {
+            assert d.getTextStream() != null : "mimeType = " + mimeType;
+            d.setDepth(depth);
+        } // verify docs
 
         return docs;
     }

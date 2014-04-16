@@ -29,6 +29,7 @@ sun.net.www.protocol.http.HttpURLConnection.level = INFO
 # Tray
 sun.awt.level = OFF
 java.awt.level = OFF
+TABLE.level = INFO
 
 # List of global handlers
 handlers = java.util.logging.FileHandler,\

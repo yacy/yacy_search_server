@@ -20,6 +20,7 @@
 
 package net.yacy.search.query;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import org.apache.solr.common.params.CommonParams;
@@ -27,6 +28,7 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
@@ -97,7 +99,12 @@ public class QueryModifier {
             while ( sitehost.endsWith(".") ) {
                 sitehost = sitehost.substring(0, sitehost.length() - 1);
             }
-            sitehash = DigestURL.hosthash(sitehost);
+            try {
+                sitehash = DigestURL.hosthash(sitehost, sitehost.startsWith("ftp.") ? 21 : 80);
+            } catch (MalformedURLException e) {
+                sitehash = "";
+                ConcurrentLog.logException(e);
+            }
             add("site:" + sitehost);
         }
         

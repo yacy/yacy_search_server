@@ -515,7 +515,7 @@ dc_rights
             this.emaillinks = new LinkedHashMap<String, String>();
             final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
             for (final Map.Entry<AnchorURL, ImageEntry> entry: this.images.entrySet()) {
-                if (entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
+                if (entry.getKey() != null && entry.getKey().getHost() != null && entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
             for (final AnchorURL url: this.anchors) {
                 if (url == null) continue;

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -99,7 +100,12 @@ public class ConfigPortal {
 
                 String excludehosts = post.get("search.excludehosts", "");
                 sb.setConfig("search.excludehosts", excludehosts);
-                sb.setConfig("search.excludehosth", DigestURL.hosthashes(excludehosts));
+                try {
+                    sb.setConfig("search.excludehosth", DigestURL.hosthashes(excludehosts));
+                } catch (MalformedURLException e) {
+                    ConcurrentLog.logException(e);
+                    sb.setConfig("search.excludehosth", "");
+                }
             }
             if (post.containsKey("searchpage_default")) {
                 // load defaults from defaults/yacy.init file

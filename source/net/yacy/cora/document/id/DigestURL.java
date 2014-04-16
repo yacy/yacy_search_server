@@ -36,7 +36,6 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.cora.util.ConcurrentLog;
 
 /**
  * URI-object providing YaCy-hash computation
@@ -57,18 +56,19 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     /**
      * Shortcut, calculate hash for shorted url/hostname
      * @param host
+     * @param port
      * @return
      */
-    public static String hosthash(final String host) {
+    public static String hosthash(final String host, final int port) throws MalformedURLException {
         String h = host;
-        if (!h.startsWith("http://")) h = "http://" + h;
-        DigestURL url = null;
-        try {
-            url = new DigestURL(h);
-        } catch (final MalformedURLException e) {
-            ConcurrentLog.logException(e);
-            return null;
+        if (h.indexOf("//") < 0) {
+            if (port == 80 || port == 8080 || port == 8090) h = "http://" + h;
+            else if (port == 443) h = "https://" + h;
+            else if (port == 21 || port == 2121) h = "ftp://" + h;
+            else if (port > 999) h = "http://" + h + ":" + port;
+            else h = "http://" + h;
         }
+        DigestURL url = new DigestURL(h);
         return (url == null) ? null : ASCII.String(url.hash(), 6, 6);
     }
 
@@ -77,15 +77,16 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
      * the list is separated by comma
      * @param hostlist
      * @return list of host hashes without separation
+     * @throws MalformedURLException 
      */
-    public static String hosthashes(final String hostlist) {
+    public static String hosthashes(final String hostlist) throws MalformedURLException {
         String[] hs = CommonPattern.COMMA.split(hostlist);
         StringBuilder sb = new StringBuilder(hostlist.length());
         for (String h: hs) {
             if (h == null) continue;
             h = h.trim();
             if (h.isEmpty()) continue;
-            h = hosthash(h);
+            h = hosthash(h, h.startsWith("ftp.") ? 21 : 80);
             if (h == null || h.length() != 6) continue;
             sb.append(h);
         }
