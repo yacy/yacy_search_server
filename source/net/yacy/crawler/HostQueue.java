@@ -382,7 +382,6 @@ public class HostQueue implements Balancer {
             assert s < depthStack.size() : "hash = " + ASCII.String(hash) + ", s = " + s + ", size = " + depthStack.size();
             assert depthStack.has(hash) : "hash = " + ASCII.String(hash);
         }
-        robots.ensureExist(entry.url(), profile.getAgent(), true); // concurrently load all robots.txt
         return null;
     }
 

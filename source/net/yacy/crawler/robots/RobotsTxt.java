@@ -208,7 +208,7 @@ public class RobotsTxt {
             log.severe("tables not available", e1);
             return;
         }
-        if (robotsTable == null || robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+        if (robotsTable != null && robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
         Thread t = new Thread() {
             @Override
             public void run(){
