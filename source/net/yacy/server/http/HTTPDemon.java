@@ -28,7 +28,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
@@ -36,12 +35,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.zip.GZIPInputStream;
-
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.Domains;
@@ -52,18 +46,9 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUpload;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.RequestContext;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-
 
 
 /**
@@ -78,151 +63,11 @@ public final class HTTPDemon {
 
     private static final int ERRORCASE_MESSAGE = 4;
     private static final int ERRORCASE_FILE = 5;
-    private static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
-    private static final int SIZE_FILE_THRESHOLD = 20 * 1024 * 1024;
-    private static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
 
     // static objects
     private static volatile Switchboard switchboard = Switchboard.getSwitchboard();
 
     public static boolean keepAliveSupport = false;
-
-    /**
-     * parses the message accordingly to RFC 1867 using "Commons FileUpload" (http://commons.apache.org/fileupload/)
-     *
-     * @author danielr
-     * @since 07.08.2008
-     * @param header
-     *            hier muss ARGC gesetzt werden!
-     * @param args
-     * @param in the raw body
-     * @return
-     * @throws IOException
-     */
-    @SuppressWarnings("unchecked")
-    public
-    static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in) throws IOException {
-
-        final InputStream body = prepareBody(header, in);
-        final RequestContext request = new yacyContextRequest(header, body);
-        
-        // check information
-        if (!FileUploadBase.isMultipartContent(request)) {
-            body.close();
-            throw new IOException("the request is not a multipart-message!");
-        }
-
-        // reject too large uploads
-        if (request.getContentLength() > SIZE_FILE_THRESHOLD) {
-            body.close();
-        	throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
-        }
-
-        // check if we have enough memory
-        if (!MemoryControl.request(request.getContentLength() * 3, false)) {
-            body.close();
-        	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
-        }
-
-        // parse data in memory
-        final List<FileItem> items;
-
-        try {
-            final FileUpload upload = new FileUpload(DISK_FILE_ITEM_FACTORY);
-            items = upload.parseRequest(request);
-        } catch (final FileUploadException e) {
-            body.close();
-            throw new IOException("FileUploadException " + e.getMessage());
-        }
-
-        // format information for further usage
-        final Map<String, byte[]> files = new HashMap<String, byte[]>();
-        byte[] fileContent;
-        for (final FileItem item : items) {
-            if (item.isFormField()) {
-                // simple text
-                if (item.getContentType() == null || !item.getContentType().contains("charset")) {
-                    // old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
-                    args.add(item.getFieldName(), item.getString("UTF-8"));
-                } else {
-                    // use default encoding (given as header or ISO-8859-1)
-                    args.add(item.getFieldName(), item.getString());
-                }
-            } else {
-                // file
-                args.add(item.getFieldName(), item.getName());
-                fileContent = FileUtils.read(item.getInputStream(), (int) item.getSize());
-                item.getInputStream().close();
-                files.put(item.getFieldName(), fileContent);
-            }
-        }
-        header.put("ARGC", String.valueOf(items.size())); // store argument count
-        body.close();
-        return files;
-    }
-
-    /**
-     * prepares the body so that it can be read as whole plain text
-     * (uncompress if necessary and ensure correct ending)
-     *
-     * @param header
-     * @param in
-     * @return
-     * @throws IOException
-     */
-    private static InputStream prepareBody(final RequestHeader header, final InputStream in) throws IOException {
-        InputStream body = in;
-        // data may be compressed
-        final String bodyEncoding = header.get(HeaderFramework.CONTENT_ENCODING);
-        if(HeaderFramework.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding) && !(body instanceof GZIPInputStream)) {
-            body = new GZIPInputStream(body);
-            // length of uncompressed data is unknown
-            header.remove(HeaderFramework.CONTENT_LENGTH);
-        } else {
-            // ensure the end of data (if client keeps alive the connection)
-            final long clength = header.getContentLength();
-            if (clength > 0) {
-                body = new ContentLengthInputStream(body, clength);
-            }
-        }
-        return body;
-    }
-
-    /**
-     * wraps the request into a org.apache.commons.fileupload.RequestContext
-     *
-     * @author danielr
-     * @since 07.08.2008
-     */
-    private static class yacyContextRequest extends RequestHeader implements RequestContext {
-
-        private static final long serialVersionUID = -8936741958551376593L;
-
-        private final InputStream inStream;
-
-        /**
-         * creates a new yacyContextRequest
-         *
-         * @param header
-         * @param in
-         */
-        public yacyContextRequest(final Map<String, String> requestHeader, final InputStream in) {
-            super(null, requestHeader);
-            this.inStream = in;
-        }
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see org.apache.commons.fileupload.RequestContext#getInputStream()
-         */
-        // @Override
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return this.inStream;
-        }
-
-    }
 
     static final void sendRespondError(
             final HashMap<String, Object> conProp,

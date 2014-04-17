@@ -37,13 +37,16 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -63,7 +66,6 @@ import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.http.HTTPDFileHandler;
-import net.yacy.server.http.HTTPDemon;
 import net.yacy.server.http.TemplateEngine;
 import net.yacy.server.serverClassLoader;
 import net.yacy.server.serverCore;
@@ -777,11 +779,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
             if (ServletFileUpload.isMultipartContent(request)) {
-                //TODO:   added quickfix to support gzip encoded content
-                //        using existing HTTPDemon.parseMultipart()
                 final String bodyEncoding = request.getHeader(HeaderFramework.CONTENT_ENCODING);
                 if (HeaderFramework.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding)) {
-                    HTTPDemon.parseMultipart(legacyRequestHeader, args, request.getInputStream());
+                    parseMultipart(new GZIPRequestWrapper(request),args);
                 } else {
                     parseMultipart(request, args);
                 }
@@ -986,6 +986,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
         }                
         ServletFileUpload upload = new ServletFileUpload(DISK_FILE_ITEM_FACTORY);
+        upload.setFileSizeMax(SIZE_FILE_THRESHOLD);
         try {
             // Parse the request to get form field items
             @SuppressWarnings("unchecked")             
@@ -1007,6 +1008,54 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         } catch (Exception ex) {
             ConcurrentLog.logException(ex);
+        }
+    }
+
+    /**
+     * wraps request to uncompress gzip'ed input stream
+     */
+    private class GZIPRequestWrapper extends HttpServletRequestWrapper {
+
+        private final ServletInputStream is;
+
+        public GZIPRequestWrapper(HttpServletRequest request) throws IOException {
+            super(request);
+            this.is = new GZIPRequestStream(request);
+        }
+
+        @Override
+        public ServletInputStream getInputStream() throws IOException {
+            return is;
+        }
+
+    }
+
+    private class GZIPRequestStream extends ServletInputStream {
+
+        private final GZIPInputStream in;
+
+        public GZIPRequestStream(HttpServletRequest request) throws IOException {
+            this.in = new GZIPInputStream(request.getInputStream());
+        }
+
+        @Override
+        public int read() throws IOException {
+            return in.read();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            return in.read(b);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            return in.read(b, off, len);
+        }
+
+        @Override
+        public void close() throws IOException {
+            in.close();
         }
     }
  }
