@@ -45,9 +45,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailType;
@@ -85,7 +87,7 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
-import net.yacy.search.schema.WebgraphConfiguration.Subgraph;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -330,6 +332,35 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     	if (sb.length() != 0) sb.append(' ');
     	text = text.trim();
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
+    }
+    
+    public static class Subgraph {
+        public final ArrayList<String>[] urlProtocols, urlStubs, urlAnchorTexts;
+        @SuppressWarnings("unchecked")
+        public Subgraph(int inboundSize, int outboundSize) {
+            this.urlProtocols = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
+            this.urlStubs = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
+            this.urlAnchorTexts = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
+        }
+    }
+    
+    public static boolean enrichSubgraph(final Subgraph subgraph, final DigestURL source_url, AnchorURL target_url) {
+        final String text = target_url.getTextProperty(); // the text between the <a></a> tag
+        String source_host = source_url.getHost();
+        String target_host = target_url.getHost();
+        boolean inbound =
+                (source_host == null && target_host == null) || 
+                (source_host != null && target_host != null &&
+                 (target_host.equals(source_host) ||
+                  target_host.equals("www." + source_host) ||
+                  source_host.equals("www." + target_host))); // well, not everybody defines 'outbound' that way but however, thats used here.
+        final String target_url_string = target_url.toNormalform(false);
+        int pr_target = target_url_string.indexOf("://",0);
+        int ioidx = inbound ? 0 : 1;
+        subgraph.urlProtocols[ioidx].add(target_url_string.substring(0, pr_target));
+        subgraph.urlStubs[ioidx].add(target_url_string.substring(pr_target + 3));
+        subgraph.urlAnchorTexts[ioidx].add(text);
+        return inbound;
     }
     
     /**
@@ -845,11 +876,24 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // create a subgraph
         if (!containsCanonical && webgraph != null) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, crawldepth, images, document.getAnchors(), sourceName);
+            List<SolrInputDocument> edges = webgraph.getEdges(subgraph, digestURL, responseHeader, collections, crawldepth, images, document.getAnchors(), sourceName);
+            // this also enriched the subgraph
+            doc.webgraphDocuments.addAll(edges);
+        } else {
+            if (allAttr ||
+                contains(CollectionSchema.inboundlinks_protocol_sxt) ||
+                contains(CollectionSchema.inboundlinks_urlstub_sxt) ||
+                contains(CollectionSchema.inboundlinks_anchortext_txt) ||
+                contains(CollectionSchema.outboundlinks_protocol_sxt) ||
+                contains(CollectionSchema.outboundlinks_urlstub_sxt) ||
+                contains(CollectionSchema.outboundlinks_anchortext_txt)) {
+                for (final AnchorURL target_url: document.getAnchors()) {
+                    enrichSubgraph(subgraph, digestURL, target_url);
+                }
+            }
         }
             
-        // list all links
-        doc.webgraphDocuments.addAll(subgraph.edges);
+        // attach the subgraph content
         if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[0]));
         if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_sxt)) add(doc, CollectionSchema.inboundlinks_urlstub_sxt, subgraph.urlStubs[0]);
         if (allAttr || contains(CollectionSchema.inboundlinks_anchortext_txt)) add(doc, CollectionSchema.inboundlinks_anchortext_txt, subgraph.urlAnchorTexts[0]);

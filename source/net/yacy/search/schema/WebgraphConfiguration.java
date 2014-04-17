@@ -51,9 +51,11 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.HostBalancer;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.search.schema.CollectionConfiguration.Subgraph;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
 
@@ -98,19 +100,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         }
     }
     
-    public static class Subgraph {
-        public final ArrayList<String>[] urlProtocols, urlStubs, urlAnchorTexts;
-        public final ArrayList<SolrInputDocument> edges;
-        @SuppressWarnings("unchecked")
-        public Subgraph(int inboundSize, int outboundSize) {
-            this.urlProtocols = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
-            this.urlStubs = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
-            this.urlAnchorTexts = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
-            this.edges = new ArrayList<SolrInputDocument>(inboundSize + outboundSize);
-        }
-    }
-    
-    public void addEdges(
+    public List<SolrInputDocument> getEdges(
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int crawldepth_source,
             final List<ImageEntry> images, final Collection<AnchorURL> links,
@@ -118,14 +108,16 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         boolean allAttr = this.isEmpty();
         boolean generalNofollow = responseHeader == null ? false : responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
         int target_order = 0;
+        List<SolrInputDocument> edges = new ArrayList<SolrInputDocument>();
         for (final AnchorURL target_url: links) {
             SolrInputDocument edge = getEdge(
                     subgraph, source, responseHeader, collections, crawldepth_source, images,
                     sourceName, allAttr, generalNofollow, target_order, target_url);
             target_order++;
             // add the edge to the subgraph
-            subgraph.edges.add(edge);
+            edges.add(edge);
         }
+        return edges;
     }
     
     public SolrInputDocument getEdge(
@@ -140,13 +132,6 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         String rel = target_url.getRelProperty();         // the rel-attribute
         String source_host = source_url.getHost();
         String target_host = target_url.getHost();
-        boolean inbound =
-                (source_host == null && target_host == null) || 
-                (source_host != null && target_host != null &&
-                 (target_host.equals(source_host) ||
-                  target_host.equals("www." + source_host) ||
-                  source_host.equals("www." + target_host))); // well, not everybody defines 'outbound' that way but however, thats used here.
-        int ioidx = inbound ? 0 : 1;
         if (generalNofollow) {
             // patch the rel attribute since the header makes nofollow valid for all links
             if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
@@ -223,10 +208,11 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
 
         // parse text to find images and clear text
         ContentScraper textContent = null;
-        try {textContent = htmlParser.parseToScraper(source_url, null, text, 10);} catch (IOException e) {}
+        try {textContent = htmlParser.parseToScraper(source_url, responseHeader.getCharacterEncoding(), text, 10);} catch (IOException e) {}
         String extractedText = textContent.getText();
         
         // add the source attributes about the target
+        boolean inbound = CollectionConfiguration.enrichSubgraph(subgraph, source_url, target_url);
         if (allAttr || contains(WebgraphSchema.target_inbound_b)) add(edge, WebgraphSchema.target_inbound_b, inbound);
         if (allAttr || contains(WebgraphSchema.target_name_t)) add(edge, WebgraphSchema.target_name_t, name.length() > 0 ? name : "");
         if (allAttr || contains(WebgraphSchema.target_rel_s)) add(edge, WebgraphSchema.target_rel_s, rel.length() > 0 ? rel : "");
@@ -248,9 +234,6 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         add(edge, WebgraphSchema.target_id_s, target_id);
         final String target_url_string = target_url.toNormalform(false);
         int pr_target = target_url_string.indexOf("://",0);
-        subgraph.urlProtocols[ioidx].add(target_url_string.substring(0, pr_target));
-        subgraph.urlStubs[ioidx].add(target_url_string.substring(pr_target + 3));
-        subgraph.urlAnchorTexts[ioidx].add(text);
         if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
         if (allAttr || contains(WebgraphSchema.target_urlstub_s)) add(edge, WebgraphSchema.target_urlstub_s, target_url_string.substring(pr_target + 3));
         Map<String, String> target_searchpart = target_url.getSearchpartMap();
@@ -289,7 +272,16 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         }
 
         if ((allAttr || contains(WebgraphSchema.target_crawldepth_i)) && this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
-            add(edge, WebgraphSchema.target_crawldepth_i, 999);
+            if (target_host.equals(source_host)) {
+                // get the crawl depth from the crawler directly
+                Long targetdepth = HostBalancer.depthCache.get(target_url.hash());
+                // if the depth is not known yet then this link configuration implies that it is on the next crawl level
+                add(edge, WebgraphSchema.target_crawldepth_i, targetdepth == null ? crawldepth_source + 1 : targetdepth.intValue());
+            } else {
+                // if the target host is not the same as the source host, the interpretation of the crawl depth as the click depth fails
+                // in this case we mark the target depth with a special value for that case, 1111
+                add(edge, WebgraphSchema.target_crawldepth_i, 1111);
+            }
         }
         
         if (allAttr || contains(WebgraphSchema.process_sxt)) {
