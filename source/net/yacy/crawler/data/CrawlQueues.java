@@ -393,7 +393,7 @@ public class CrawlQueues {
      */
     private String loadIsPossible(final StackType stackType) {
         //System.out.println("stacksize = " + noticeURL.stackSize(stackType));
-        if (this.noticeURL.stackSize(stackType) == 0) {
+        if (this.noticeURL.isEmpty(stackType)) {
             //log.logDebug("GlobalCrawl: queue is empty");
             return "stack is empty";
         }

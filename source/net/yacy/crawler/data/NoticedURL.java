@@ -126,6 +126,16 @@ public class NoticedURL {
         return true;
     }
 
+    public boolean isEmpty(final StackType stackType) {
+        switch (stackType) {
+            case NOLOAD:    return (this.noloadStack == null) ? true : this.noloadStack.isEmpty();
+            case LOCAL:     return (this.coreStack == null) ? true : this.coreStack.isEmpty();
+            case GLOBAL:    return (this.limitStack == null) ? true : this.limitStack.isEmpty();
+            case REMOTE:   return (this.remoteStack == null) ? true : this.remoteStack.isEmpty();
+            default: return true;
+        }
+    }
+    
     public int stackSize(final StackType stackType) {
         switch (stackType) {
             case NOLOAD:    return (this.noloadStack == null) ? 0 : this.noloadStack.size();

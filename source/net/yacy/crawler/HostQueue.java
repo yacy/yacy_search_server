@@ -253,7 +253,7 @@ public class HostQueue implements Balancer {
         }
         this.depthStacks.clear();
         String[] l = this.hostPath.list();
-        for (String s: l) {
+        if (l != null) for (String s: l) {
             new File(this.hostPath, s).delete();
         }
         this.hostPath.delete();

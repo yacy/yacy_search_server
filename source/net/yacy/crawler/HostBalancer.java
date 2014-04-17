@@ -201,17 +201,19 @@ public class HostBalancer implements Balancer {
      * @throws SpaceExceededException
      */
     @Override
-    public synchronized String push(final Request entry, CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
+    public String push(final Request entry, CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
         if (this.has(entry.url().hash())) return "double occurrence";
         depthCache.put(entry.url().hash(), entry.depth());
         String hosthash = ASCII.String(entry.url().hash(), 6, 6);
-        HostQueue queue = this.queues.get(hosthash);
-        if (queue == null) {
-            queue = new HostQueue(this.hostsPath, entry.url().getHost(), entry.url().getPort(), this.queues.size() > 100, this.exceed134217727);
-            this.queues.put(hosthash, queue);
-            robots.ensureExist(entry.url(), profile.getAgent(), true); // concurrently load all robots.txt
+        synchronized (this) {
+            HostQueue queue = this.queues.get(hosthash);
+            if (queue == null) {
+                queue = new HostQueue(this.hostsPath, entry.url().getHost(), entry.url().getPort(), this.queues.size() > 100, this.exceed134217727);
+                this.queues.put(hosthash, queue);
+                robots.ensureExist(entry.url(), profile.getAgent(), true); // concurrently load all robots.txt
+            }
+            return queue.push(entry, profile, robots);
         }
-        return queue.push(entry, profile, robots);
     }
 
     /**
@@ -227,80 +229,93 @@ public class HostBalancer implements Balancer {
      * @throws SpaceExceededException
      */
     @Override
-    public synchronized Request pop(boolean delay, CrawlSwitchboard cs, RobotsTxt robots) throws IOException {
+    public Request pop(boolean delay, CrawlSwitchboard cs, RobotsTxt robots) throws IOException {
         tryagain: while (true) try {
-            if (this.roundRobinHostHashes.size() == 0) {
-                // refresh the round-robin cache
-                this.roundRobinHostHashes.addAll(this.queues.keySet());
-                // quickly get rid of small stacks to reduce number of files:
-                if (this.roundRobinHostHashes.size() > 100) {
-                    // if there are stacks with less than 10 entries, remove all stacks with more than 10 entries
-                    // this shall kick out small stacks to prevent that too many files are opened for very wide crawls
-                    boolean smallStacksExist = false;
-                    boolean singletonStacksExist = false;
-                    smallsearch: for (String s: this.roundRobinHostHashes) {
-                        HostQueue hq = this.queues.get(s);
-                        if (hq != null) {
-                            int size = hq.size();
-                            if (size ==  1) {singletonStacksExist = true; break smallsearch;}
-                            if (size <= 10) {smallStacksExist = true; break smallsearch;}
-                        }
-                    }
-                    if (singletonStacksExist) {
-                        Iterator<String> i = this.roundRobinHostHashes.iterator();
-                        while (i.hasNext()) {
-                            String s = i.next();
+            HostQueue rhq = null;
+            String rhh = null;
+        
+            synchronized (this) {
+                if (this.roundRobinHostHashes.size() == 0) {
+                    // refresh the round-robin cache
+                    this.roundRobinHostHashes.addAll(this.queues.keySet());
+                    // quickly get rid of small stacks to reduce number of files:
+                    if (this.roundRobinHostHashes.size() > 100) {
+                        // if there are stacks with less than 10 entries, remove all stacks with more than 10 entries
+                        // this shall kick out small stacks to prevent that too many files are opened for very wide crawls
+                        boolean smallStacksExist = false;
+                        boolean singletonStacksExist = false;
+                        smallsearch: for (String s: this.roundRobinHostHashes) {
                             HostQueue hq = this.queues.get(s);
-                            if (hq == null || hq.size() != 1) {i.remove();}
+                            if (hq != null) {
+                                int size = hq.size();
+                                if (size ==  1) {singletonStacksExist = true; break smallsearch;}
+                                if (size <= 10) {smallStacksExist = true; break smallsearch;}
+                            }
                         }
-                    } else if (smallStacksExist) {
-                        Iterator<String> i = this.roundRobinHostHashes.iterator();
-                        while (i.hasNext()) {
-                            String s = i.next();
-                            HostQueue hq = this.queues.get(s);
-                            if (hq == null || hq.size() > 10) {i.remove();}
+                        if (singletonStacksExist) {
+                            Iterator<String> i = this.roundRobinHostHashes.iterator();
+                            while (i.hasNext()) {
+                                String s = i.next();
+                                HostQueue hq = this.queues.get(s);
+                                if (hq == null || hq.size() != 1) {i.remove();}
+                            }
+                        } else if (smallStacksExist) {
+                            Iterator<String> i = this.roundRobinHostHashes.iterator();
+                            while (i.hasNext()) {
+                                String s = i.next();
+                                HostQueue hq = this.queues.get(s);
+                                if (hq == null || hq.size() > 10) {i.remove();}
+                            }
                         }
                     }
                 }
-            }
-            if (this.roundRobinHostHashes.size() == 0) return null;
-    
-            // first strategy: get one entry which does not need sleep time
-            for (String nextHH: this.roundRobinHostHashes) {
-                HostQueue hq = this.queues.get(nextHH);
-                int delta = Latency.waitingRemainingGuessed(hq.getHost(), DigestURL.hosthash(hq.getHost(), hq.getPort()), robots, ClientIdentification.yacyInternetCrawlerAgent);
-                if (delta <= 10 || this.roundRobinHostHashes.size() == 1) {
-                    this.roundRobinHostHashes.remove(nextHH);
-                    Request request = hq == null ? null : hq.pop(delay, cs, robots);
-                    int size = hq == null ? 0 : hq.size();
-                    if (size == 0) {
-                        hq.close();
-                        this.queues.remove(nextHH);
+                if (this.roundRobinHostHashes.size() == 0) return null;
+                
+                // first strategy: get one entry which does not need sleep time
+                Iterator<String> nhhi = this.roundRobinHostHashes.iterator();
+                nosleep: while (nhhi.hasNext()) {
+                    rhh = nhhi.next();
+                    rhq = this.queues.get(rhh);
+                    if (rhq == null) {
+                        nhhi.remove();
+                        continue nosleep;
                     }
-                    if (request != null) return request;
+                    int delta = Latency.waitingRemainingGuessed(rhq.getHost(), DigestURL.hosthash(rhq.getHost(), rhq.getPort()), robots, ClientIdentification.yacyInternetCrawlerAgent);
+                    if (delta <= 10 || this.roundRobinHostHashes.size() == 1) {
+                        nhhi.remove();
+                        break nosleep;
+                    }
+                }
+                
+                if (rhq == null) {
+                    // second strategy: take from the largest stack and clean round robin cache
+                    int largest = Integer.MIN_VALUE;
+                    for (String h: this.roundRobinHostHashes) {
+                        HostQueue hq = this.queues.get(h);
+                        if (hq != null) {
+                            int s = hq.size();
+                            if (s > largest) {
+                                largest = s;
+                                rhh = h;
+                            }
+                        }
+                    }
+                    this.roundRobinHostHashes.clear(); // start from the beginning next time
+                    rhq = this.queues.get(rhh);
                 }
             }
             
-            // second strategy: take from the largest stack and clean round robin cache
-            int largest = Integer.MIN_VALUE;
-            String nextHH = null;
-            for (String h: this.roundRobinHostHashes) {
-                HostQueue hq = this.queues.get(h);
-                if (hq != null) {
-                    int s = hq.size();
-                    if (s > largest) {
-                        largest = s;
-                        nextHH = h;
-                    }
+            if (rhq == null) continue tryagain;
+            Request request = rhq.pop(delay, cs, robots); // this pop is outside of synchronization to prevent blocking of pushes
+
+            int size = rhq.size();
+            if (size == 0) {
+                synchronized (this) {
+                    this.queues.remove(rhh);
                 }
+                rhq.close();
             }
-            this.roundRobinHostHashes.clear(); // start from the beginning next time
-            HostQueue hq = this.queues.get(nextHH);
-            Request request = hq == null ? null : hq.pop(delay, cs, robots);
-            if (hq != null && hq.size() == 0) {
-                hq.close();
-                this.queues.remove(nextHH);
-            }
+            if (request == null) continue tryagain;
             return request;
         } catch (ConcurrentModificationException e) {
             continue tryagain;
