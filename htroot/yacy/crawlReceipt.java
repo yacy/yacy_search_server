@@ -160,7 +160,7 @@ public final class crawlReceipt {
         }
 
         sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        sb.crawlQueues.errorURL.push(entry.url(), null, FailCategory.FINAL_LOAD_CONTEXT, result + ":" + reason, -1);
+        sb.crawlQueues.errorURL.push(entry.url(), 997, null, FailCategory.FINAL_LOAD_CONTEXT, result + ":" + reason, -1);
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");
         return prop;

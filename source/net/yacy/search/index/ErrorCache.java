@@ -99,7 +99,7 @@ public class ErrorCache {
         }
     }
 
-    public void push(final DigestURL url, final CrawlProfile profile, final FailCategory failCategory, String anycause, final int httpcode) {
+    public void push(final DigestURL url, final int crawldepth, final CrawlProfile profile, final FailCategory failCategory, String anycause, final int httpcode) {
         // assert executor != null; // null == proxy !
         assert failCategory.store || httpcode == -1 : "failCategory=" + failCategory.name();
         if (exists(url.hash()))
@@ -110,7 +110,7 @@ public class ErrorCache {
         CollectionConfiguration.FailDoc failDoc = new CollectionConfiguration.FailDoc(
                 url, profile == null ? null : profile.collections(),
                 failCategory.name() + " " + reason, failCategory.failType,
-                httpcode);
+                httpcode, crawldepth);
         if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
             // send the error to solr
             try {

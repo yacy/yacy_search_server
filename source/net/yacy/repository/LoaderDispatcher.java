@@ -190,7 +190,7 @@ public final class LoaderDispatcher {
         
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
-            this.sb.crawlQueues.errorURL.push(request.url(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
 

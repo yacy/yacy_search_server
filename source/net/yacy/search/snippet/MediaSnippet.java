@@ -261,7 +261,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         if (isBlacklisted) {
             
-            Switchboard.getSwitchboard().crawlQueues.errorURL.push(url, null, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            Switchboard.getSwitchboard().crawlQueues.errorURL.push(url, 996, null, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             ConcurrentLog.fine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
         }
 

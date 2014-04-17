@@ -475,7 +475,7 @@ public class Crawler_p {
                         } else {
                             StringBuilder fr = new StringBuilder();
                             for (Map.Entry<DigestURL, String> failure: failurls.entrySet()) {
-                                sb.crawlQueues.errorURL.push(failure.getKey(), null, FailCategory.FINAL_LOAD_CONTEXT, failure.getValue(), -1);
+                                sb.crawlQueues.errorURL.push(failure.getKey(), 0, null, FailCategory.FINAL_LOAD_CONTEXT, failure.getValue(), -1);
                                 fr.append(failure.getValue()).append('/');
                             }
     

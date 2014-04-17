@@ -1816,7 +1816,7 @@ public final class Switchboard extends serverSwitch {
             // log cause and close queue
             //if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
             // create a new errorURL DB entry
-            this.crawlQueues.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, noIndexReason, -1);
+            this.crawlQueues.errorURL.push(response.url(), response.depth(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, noIndexReason, -1);
             // finish this entry
             return "not allowed: " + noIndexReason;
         }
@@ -2530,7 +2530,7 @@ public final class Switchboard extends serverSwitch {
             if ( response.getContent() == null ) {
                 this.log.warn("the resource '" + response.url() + "' is missing in the cache.");
                 // create a new errorURL DB entry
-                this.crawlQueues.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_LOAD_CONTEXT, "missing in cache", -1);
+                this.crawlQueues.errorURL.push(response.url(), response.depth(), response.profile(), FailCategory.FINAL_LOAD_CONTEXT, "missing in cache", -1);
                 return null;
             }
         }
@@ -2550,7 +2550,7 @@ public final class Switchboard extends serverSwitch {
         } catch (final Parser.Failure e ) {
             this.log.warn("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
             // create a new errorURL DB entry
-            this.crawlQueues.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, e.getMessage(), -1);
+            this.crawlQueues.errorURL.push(response.url(), response.depth(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, e.getMessage(), -1);
             return null;
         }
         final long parsingEndTime = System.currentTimeMillis();
@@ -2570,7 +2570,7 @@ public final class Switchboard extends serverSwitch {
                 } else {
                     // we consider this as fail urls to have a tracking of the problem
                     if (rejectReason != null && !rejectReason.startsWith("double in")) {
-                        this.crawlStacker.nextQueue.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
+                        this.crawlStacker.nextQueue.errorURL.push(response.url(), response.depth(), response.profile(), FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
                     }
                 }
             }
@@ -2678,7 +2678,7 @@ public final class Switchboard extends serverSwitch {
              (profile.indexUrlMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexUrlMustNotMatchPattern().matcher(urls).matches())) {
             if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
             // create a new errorURL DB entry
-            this.crawlQueues.errorURL.push(in.queueEntry.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern(), -1);
+            this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern(), -1);
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
         
@@ -2688,14 +2688,14 @@ public final class Switchboard extends serverSwitch {
             if (document.indexingDenied() && profile.obeyHtmlRobotsNoindex()) {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 // create a new errorURL DB entry
-                this.crawlQueues.errorURL.push(in.queueEntry.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by document-attached noindexing rule", -1);
+                this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by document-attached noindexing rule", -1);
                 continue docloop;
             }
             if (!(profile.indexContentMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexContentMustMatchPattern().matcher(document.getTextString()).matches()) ||
                  (profile.indexContentMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexContentMustNotMatchPattern().matcher(document.getTextString()).matches())) {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
                 // create a new errorURL DB entry
-                this.crawlQueues.errorURL.push(in.queueEntry.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern(), -1);
+                this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern(), -1);
                 continue docloop;
             }
             doclist.add(document);
@@ -2783,14 +2783,14 @@ public final class Switchboard extends serverSwitch {
         if (condenser == null || (document.indexingDenied() && profile.obeyHtmlRobotsNoindex())) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
             // create a new errorURL DB entry
-            this.crawlQueues.errorURL.push(url, profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by rule in document, process case=" + processCase, -1);
+            this.crawlQueues.errorURL.push(url, queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by rule in document, process case=" + processCase, -1);
             return;
         }
 
         if ( profile != null && !profile.indexText() && !profile.indexMedia() ) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             // create a new errorURL DB entry
-            this.crawlQueues.errorURL.push(url, profile, FailCategory.FINAL_LOAD_CONTEXT, "denied by profile rule, process case="
+            this.crawlQueues.errorURL.push(url, queueEntry.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, "denied by profile rule, process case="
                                 + processCase
                                 + ", profile name = "
                                 + profile.collectionName(), -1);

@@ -640,7 +640,7 @@ public class CrawlQueues {
                             (robotsEntry = CrawlQueues.this.sb.robots.getEntry(request.url(), profile.getAgent())) != null &&
                             robotsEntry.isDisallowed(request.url())) {
                             //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
-                            CrawlQueues.this.errorURL.push(request.url(), profile, FailCategory.FINAL_ROBOTS_RULE, "denied by robots.txt", -1);
+                            CrawlQueues.this.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_ROBOTS_RULE, "denied by robots.txt", -1);
                             request.setStatus("worker-disallowed", WorkflowJob.STATUS_FINISHED);
                         } else {
                             // starting a load from the internet
@@ -678,7 +678,7 @@ public class CrawlQueues {
                                     // thus we only push this message if we don't have that mark
                                     error = error.substring(0, error.length() - 1).trim();
                                 } else {
-                                    CrawlQueues.this.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "cannot load: " + error, -1);
+                                    CrawlQueues.this.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "cannot load: " + error, -1);
                                 }
                                 request.setStatus("worker-error", WorkflowJob.STATUS_FINISHED);
                             } else {
@@ -686,7 +686,7 @@ public class CrawlQueues {
                             }
                         }
                     } catch (final Exception e) {
-                        CrawlQueues.this.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, e.getMessage() + " - in worker", -1);
+                        CrawlQueues.this.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, e.getMessage() + " - in worker", -1);
                         ConcurrentLog.logException(e);
                         request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
                     } finally {

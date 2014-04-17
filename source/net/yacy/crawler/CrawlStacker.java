@@ -150,7 +150,7 @@ public final class CrawlStacker {
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null && !rejectReason.startsWith("double in")) {
                 final CrawlProfile profile = this.crawler.get(UTF8.getBytes(entry.profileHandle()));
-                this.nextQueue.errorURL.push(entry.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
+                this.nextQueue.errorURL.push(entry.url(), entry.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
         } catch (final Exception e) {
             CrawlStacker.log.warn("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);

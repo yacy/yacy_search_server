@@ -573,7 +573,7 @@ public class HostBrowser {
             Integer rc_internal = (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
             Integer rc_external = (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
             Integer rc_exthosts = (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
-            this.crawldepth = (cr == null || cr.intValue() < 0) ? 999 : cr.intValue();
+            this.crawldepth = (cr == null || cr.intValue() < 0) ? 998 : cr.intValue();
             this.references = (rc == null || rc.intValue() <= 0) ? 0 : rc.intValue();
             this.references_internal = (rc_internal == null || rc_internal.intValue() <= 0) ? 0 : rc_internal.intValue();
             // calculate the url reference list
@@ -625,7 +625,7 @@ public class HostBrowser {
             }
             if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:</br>");
             return
-                    (this.crawldepth >= 0 ? "crawldepth: " + this.crawldepth : "") +
+                    (this.crawldepth == 998 ? "unknown crawldepth" : this.crawldepth >= 0 ? "crawldepth: " + this.crawldepth : "") +
                     (this.cr_c != null ? ", cr=" + (Math.round(this.cr_c * 1000.0d) / 1000.0d) : "") +
                     (this.cr_n != null ? ", crn=" + this.cr_n : "") +
                     (this.references >= 0 ? ", refs: " + this.references_exthosts + " hosts, " + this.references_external + " ext, " + this.references_internal + " int" + sbi.toString() + sbe.toString() : "");
