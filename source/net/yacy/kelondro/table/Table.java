@@ -109,6 +109,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             // make new file
             freshFile = true;
             FileOutputStream fos = null;
+            tablefile.getParentFile().mkdirs();
             try {
                 fos = new FileOutputStream(tablefile);
             } catch (final FileNotFoundException e) {
@@ -365,7 +366,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         try {
             return this.file.size() == this.index.size();
         } catch (final IOException e) {
-            log.logException(e);
+            ConcurrentLog.logException(e);
             return false;
         }
     }
@@ -761,7 +762,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 try {
                     this.index.put(k, i);
                 } catch (final SpaceExceededException e) {
-                    log.logException(e);
+                    ConcurrentLog.logException(e);
                     throw new IOException("RowSpaceExceededException: " + e.getMessage());
                 }
             }
@@ -791,7 +792,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 try {
                     this.table.set(i, te);
                 } catch (final SpaceExceededException e) {
-                    log.logException(e);
+                    ConcurrentLog.logException(e);
                     this.table = null;
                 }
 
@@ -1118,7 +1119,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             }
             System.out.println("FINISHED test after " + ((System.currentTimeMillis() - start) / 1000) + " seconds.");
         } catch (final Exception e) {
-            log.logException(e);
+            ConcurrentLog.logException(e);
             System.out.println("TERMINATED");
         }
     }
