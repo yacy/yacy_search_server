@@ -1072,10 +1072,10 @@ resource.disk.free.min.steadystate=4096
 resource.disk.free.min.undershot=2048
 
 # the target steady-state of maximum disk space for YaCy (MB)
-resource.disk.used.max.steadystate=524288
+resource.disk.used.max.steadystate=2097152
 
 # the overshot above the steady-state of disk space for YaCy (absolute) (MB)
-resource.disk.used.max.overshot=1048576
+resource.disk.used.max.overshot=4194304
 
 # minimum memory to accept dht-in (MiB)
 memory.acceptDHTabove = 50
