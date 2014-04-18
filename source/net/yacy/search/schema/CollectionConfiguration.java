@@ -994,7 +994,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
                 String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
                 long patchquerycount = collectionConnector.getCountByQuery(patchquery);
-                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 10000000, 600000, 200, 1,
+                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, 1,
                         CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
                 SolrDocument doc_B;
                 int patchquerycountcheck = 0;
@@ -1076,7 +1076,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     final long count = segment.fulltext().getWebgraphConnector().getCountByQuery(query);
                     int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph, concurrency = " + concurrency);
-                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(query, WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 10000000, 1800000, 200, concurrency);
+                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(query, WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, concurrency);
                     final AtomicInteger proccount = new AtomicInteger(0);
                     Thread[] t = new Thread[concurrency];
                     for (final AtomicInteger i = new AtomicInteger(0); i.get() < t.length; i.incrementAndGet()) {
@@ -1159,7 +1159,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             long count = collectionConnector.getCountByQuery(query);
             long start = System.currentTimeMillis();
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
-            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 10000000, 1800000, 200, 1);
+            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, 1);
             int countcheck = 0;
             Collection<String> failids = new ArrayList<String>();
             SolrDocument doc;
@@ -1278,7 +1278,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             this.crt = new ConcurrentHashMap<String, double[]>();
             try {
                 // select all documents for each host
-                BlockingQueue<String> ids = connector.concurrentIDsByQuery("{!raw f=" + CollectionSchema.host_s.getSolrFieldName() + "}" + host, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 10000000, 600000, 200, 1);
+                BlockingQueue<String> ids = connector.concurrentIDsByQuery("{!raw f=" + CollectionSchema.host_s.getSolrFieldName() + "}" + host, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, 1);
                 String id;
                 while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
                     this.crt.put(id, new double[]{0.0d,0.0d}); //{old value, new value}
