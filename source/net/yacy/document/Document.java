@@ -907,6 +907,8 @@ dc_rights
         return newDoc;
     }
 
+    public final static String CANONICAL_MARKER = "canonical";
+    
     public static Map<DigestURL, String> getHyperlinks(final Document[] documents) {
         final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
@@ -917,7 +919,9 @@ dc_rights
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) try {result.put(new DigestURL(refresh), "refresh");} catch (final MalformedURLException e) {}
                 DigestURL canonical = html.getCanonical();
-                if (canonical != null) result.put(canonical, "canonical");
+                if (canonical != null) {
+                    result.put(canonical, CANONICAL_MARKER);
+                }
             }
         }
         return result;

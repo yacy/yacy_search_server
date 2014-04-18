@@ -2634,6 +2634,7 @@ public final class Switchboard extends serverSwitch {
                 //if (m.matches()) u = m.replaceAll("");
                 
                 // enqueue the hyperlink into the pre-notice-url db
+                int nextdepth = nextEntry.getValue() != null && nextEntry.getValue().equals(Document.CANONICAL_MARKER) ? response.depth() : response.depth() + 1; // canonical documents are on the same depth
                 try {
                     this.crawlStacker.enqueueEntry(new Request(
                         response.initiator(),
@@ -2642,7 +2643,7 @@ public final class Switchboard extends serverSwitch {
                         nextEntry.getValue(),
                         new Date(),
                         response.profile().handle(),
-                        response.depth() + 1,
+                        nextdepth,
                         0,
                         0));
                 } catch (final MalformedURLException e ) {
