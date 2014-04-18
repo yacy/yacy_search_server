@@ -62,8 +62,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     private static final long serialVersionUID = 18L;
 
-    static final String DEFAULT_CHARSET = "ISO-8859-1";
-
     /* =============================================================
      * Constants defining http versions
      * ============================================================= */
@@ -144,10 +142,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /* =============================================================
      * defining default http status messages
      * ============================================================= */
-    public static final Map<String, String> http0_9 = new ConcurrentHashMap<String, String>();
     public static final Map<String, String> http1_0 = new ConcurrentHashMap<String, String>();
     static {
-        http1_0.putAll(http0_9);
         http1_0.put("200","OK");
         http1_0.put("201","Created");
         http1_0.put("202","Accepted");
@@ -538,9 +534,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
         // setting the status text if it was not already set
         if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-            if (httpVersion.equals("HTTP/1.0") && HeaderFramework.http1_0.containsKey(Integer.toString(httpStatusCode)))
-                httpStatusText = HeaderFramework.http1_0.get(Integer.toString(httpStatusCode));
-            else if (httpVersion.equals("HTTP/1.1") && HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
+            // http1_1 contains all status code text
+            if (HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
                 httpStatusText = HeaderFramework.http1_1.get(Integer.toString(httpStatusCode));
             else httpStatusText = "Unknown";
         }

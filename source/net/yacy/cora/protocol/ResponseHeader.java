@@ -20,14 +20,9 @@
 
 package net.yacy.cora.protocol;
 
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import net.yacy.cora.util.ConcurrentLog;
 
 import org.apache.http.Header;
 
@@ -36,7 +31,6 @@ public class ResponseHeader extends HeaderFramework {
     // response header properties
 
     private static final long serialVersionUID = 0L;
-    private static final ConcurrentLog log = new ConcurrentLog(ResponseHeader.class.getName());
 
     private Date date_cache_Date = null;
     private Date date_cache_Expires = null;
@@ -106,69 +100,6 @@ public class ResponseHeader extends HeaderFramework {
     public boolean gzip() {
         return ((containsKey(HeaderFramework.CONTENT_ENCODING)) &&
         ((get(HeaderFramework.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
-    }
-
-    public static Object[] parseResponseLine(final String respLine) {
-
-        if ((respLine == null) || (respLine.isEmpty())) {
-            return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
-        }
-
-        int p = respLine.indexOf(' ',0);
-        if (p < 0) {
-            return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
-        }
-
-        String httpVer, status, statusText;
-        Integer statusCode;
-
-        // the http version reported by the server
-        httpVer = respLine.substring(0,p);
-
-        // Status of the request, e.g. "200 OK"
-        status = respLine.substring(p + 1).trim(); // the status code plus reason-phrase
-
-        // splitting the status into statuscode and statustext
-        p = status.indexOf(' ',0);
-        try {
-            statusCode = Integer.valueOf((p < 0) ? status.trim() : status.substring(0,p).trim());
-            statusText = (p < 0) ? "" : status.substring(p+1).trim();
-        } catch (final Exception e) {
-            statusCode = Integer.valueOf(500);
-            statusText = status;
-        }
-
-        return new Object[]{httpVer,statusCode,statusText};
-    }
-
-
-    /**
-     * @param header
-     * @return a supported Charset, so data can be encoded (may not be correct)
-     */
-    public Charset getCharSet() {
-        String charSetName = getCharacterEncoding();
-        if (charSetName == null) {
-            // no character encoding is sent by the server
-            charSetName = DEFAULT_CHARSET;
-        }
-        // maybe the charset is valid but not installed on this computer
-        try {
-            if(!Charset.isSupported(charSetName)) {
-                log.warn("charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
-                // use system default
-                return Charset.defaultCharset();
-            }
-        } catch(final IllegalCharsetNameException e) {
-            log.warn("Charset in header is illegal: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
-            // use system default
-            return Charset.defaultCharset();
-        } catch (final UnsupportedCharsetException e) {
-            log.warn("Charset in header is unsupported: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
-            // use system default
-            return Charset.defaultCharset();
-        }
-        return Charset.forName(charSetName);
     }
 
     public String getXRobotsTag() {

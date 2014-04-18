@@ -132,9 +132,8 @@ public final class HTTPDemon {
             // setting the proper http status message
             String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = "HTTP/1.1";
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-                if (httpVersion.equals("HTTP/1.0") && HeaderFramework.http1_0.containsKey(Integer.toString(httpStatusCode)))
-                    httpStatusText = HeaderFramework.http1_0.get(Integer.toString(httpStatusCode));
-                else if (httpVersion.equals("HTTP/1.1") && HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                //http1_1 includes http1_0 messages
+                if (HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
                     httpStatusText = HeaderFramework.http1_1.get(Integer.toString(httpStatusCode));
                 else httpStatusText = "Unknown";
             }
@@ -276,9 +275,8 @@ public final class HTTPDemon {
 
         try {
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-                if (httpVersion.equals(HeaderFramework.HTTP_VERSION_1_0) && HeaderFramework.http1_0.containsKey(Integer.toString(httpStatusCode)))
-                    httpStatusText = HeaderFramework.http1_0.get(Integer.toString(httpStatusCode));
-                else if (httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1) && HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                if (HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                    //http1_1 includes http1_0 messages
                     httpStatusText = HeaderFramework.http1_1.get(Integer.toString(httpStatusCode));
                 else httpStatusText = "Unknown";
             }
