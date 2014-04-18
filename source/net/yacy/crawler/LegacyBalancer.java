@@ -387,7 +387,7 @@ public class LegacyBalancer implements Balancer {
                 // if not: return null. A calling method must handle the null value and try again
                 profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
                 if (profileEntry == null) {
-                    ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+                    ConcurrentLog.fine("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
                     continue;
                 }
                 // depending on the caching policy we need sleep time to avoid DoS-like situations

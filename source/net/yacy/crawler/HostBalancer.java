@@ -257,14 +257,18 @@ public class HostBalancer implements Balancer {
                             while (i.hasNext()) {
                                 String s = i.next();
                                 HostQueue hq = this.queues.get(s);
-                                if (hq == null || hq.size() != 1) {i.remove();}
+                                if (hq == null) {i.remove(); continue;}
+                                int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                                if (hq.size() != 1 && delta > 10) {i.remove();}
                             }
                         } else if (smallStacksExist) {
                             Iterator<String> i = this.roundRobinHostHashes.iterator();
                             while (i.hasNext()) {
                                 String s = i.next();
                                 HostQueue hq = this.queues.get(s);
-                                if (hq == null || hq.size() > 10) {i.remove();}
+                                if (hq == null) {i.remove(); continue;}
+                                int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                                if (hq.size() > 10 && delta > 10) {i.remove();}
                             }
                         }
                     }
@@ -280,8 +284,8 @@ public class HostBalancer implements Balancer {
                         nhhi.remove();
                         continue nosleep;
                     }
-                    int delta = Latency.waitingRemainingGuessed(rhq.getHost(), DigestURL.hosthash(rhq.getHost(), rhq.getPort()), robots, ClientIdentification.yacyInternetCrawlerAgent);
-                    if (delta <= 10 || this.roundRobinHostHashes.size() == 1) {
+                    int delta = Latency.waitingRemainingGuessed(rhq.getHost(), rhh, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                    if (delta <= 10 || this.roundRobinHostHashes.size() == 1 || rhq.size() == 1) {
                         nhhi.remove();
                         break nosleep;
                     }
@@ -289,6 +293,8 @@ public class HostBalancer implements Balancer {
                 
                 if (rhq == null) {
                     // second strategy: take from the largest stack and clean round robin cache
+                    // if we would not clear the round robin cache afterwards
+                    // then all targets would be accessed equally which makes this strategy useless
                     int largest = Integer.MIN_VALUE;
                     for (String h: this.roundRobinHostHashes) {
                         HostQueue hq = this.queues.get(h);
