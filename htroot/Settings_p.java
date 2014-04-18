@@ -86,7 +86,6 @@ public final class Settings_p {
         
         // http networking settings
         prop.put("isTransparentProxy", env.getConfigBool("isTransparentProxy", false) ? "1" : "0");
-        prop.put("connectionKeepAliveSupport", env.getConfigBool("connectionKeepAliveSupport", false) ? "1" : "0");
         prop.put("proxy.sendViaHeader", env.getConfigBool("proxy.sendViaHeader", false) ? "1" : "0");
         prop.put("proxy.sendXForwardedForHeader", env.getConfigBool("proxy.sendXForwardedForHeader", true) ? "1" : "0");
         

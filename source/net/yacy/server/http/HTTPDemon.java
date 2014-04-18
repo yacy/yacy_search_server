@@ -67,8 +67,6 @@ public final class HTTPDemon {
     // static objects
     private static volatile Switchboard switchboard = Switchboard.getSwitchboard();
 
-    public static boolean keepAliveSupport = false;
-
     static final void sendRespondError(
             final HashMap<String, Object> conProp,
             final OutputStream respond,

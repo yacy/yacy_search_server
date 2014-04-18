@@ -11,11 +11,6 @@
     </td>
   </tr>  
   <tr valign="top">
-    <td><label for="conn_keep_alive">Connection Keep-Alive</label>:</td>
-    <td><input type="checkbox" name="connectionKeepAliveSupport" id="conn_keep_alive" #(connectionKeepAliveSupport)#::checked="checked" #(/connectionKeepAliveSupport)#/></td>
-    <td>With this you can specify if YaCy should support the HTTP connection keep-alive feature.</td>
-  </tr>  
-  <tr valign="top">
     <td><label for="via_header">Send "Via" Header</label>:</td>
     <td><input type="checkbox" name="proxy.sendViaHeader" id="via_header" #(proxy.sendViaHeader)#::checked="checked" #(/proxy.sendViaHeader)#/></td>
     <td>
@@ -40,6 +35,10 @@
   <tr>
     <td>HTTP Server Version:</td>
     <td><b>#[httpservername]#</b></td>
+  </tr>
+  <tr>
+    <td>HTTP Server Port:</td>
+    <td><b>#[port]#</b></td>
   </tr>
 </table>
 </fieldset>

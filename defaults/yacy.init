@@ -719,9 +719,6 @@ wordCacheMaxCount = 50000
 # by the firewall to yacy running on port 8090 (192.168.0.1:8090)
 isTransparentProxy=false
 
-# Specifies if yacy should use the http connection keep-alive feature
-connectionKeepAliveSupport=true
-
 # Specifies the timeout the proxy sould use
 proxy.clientTimeout = 60000
 

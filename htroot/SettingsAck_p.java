@@ -49,7 +49,6 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-import net.yacy.server.http.HTTPDemon;
 
 public class SettingsAck_p {
 
@@ -179,11 +178,6 @@ public class SettingsAck_p {
             boolean isTransparentProxy = post.containsKey("isTransparentProxy");
             env.setConfig("isTransparentProxy", isTransparentProxy);
             prop.put("info_isTransparentProxy", isTransparentProxy ? "on" : "off");
-
-            // setting the keep alive property
-            HTTPDemon.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
-            env.setConfig("connectionKeepAliveSupport", HTTPDemon.keepAliveSupport);
-            prop.put("info_connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "on" : "off");
 
             // setting via header property
             env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader"));
