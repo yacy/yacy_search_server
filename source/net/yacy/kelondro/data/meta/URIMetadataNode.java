@@ -38,7 +38,6 @@ import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -63,7 +62,7 @@ import org.apache.solr.common.SolrDocument;
  * The purpose of this object is the migration from the old metadata structure to solr document.
  * Future implementations should try to replace URIMetadata objects completely by SolrDocument objects
  */
-public class URIMetadataNode {
+public class URIMetadataNode extends SolrDocument {
     
     protected byte[] hash = null;
     protected String urlRaw = null, keywords = null;
@@ -72,7 +71,6 @@ public class URIMetadataNode {
     protected int imagec = -1, audioc = -1, videoc = -1, appc = -1;
     protected double lat = Double.NaN, lon = Double.NaN;
     protected long ranking = 0; // during generation of a search result this value is set
-    protected SolrDocument doc = null;
     protected String snippet = null;
     protected WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
 
@@ -80,7 +78,7 @@ public class URIMetadataNode {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
-        this.doc = new SolrDocument();
+        super();
         urlRaw = crypt.simpleDecode(prop.getProperty("url", ""));
         try {
             url = new DigestURL(urlRaw);
@@ -98,10 +96,9 @@ public class URIMetadataNode {
         String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0")); if (lons == null) lons = "0.0";
         String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0")); if (lats == null) lats = "0.0";
 
-        
-        this.doc.setField(CollectionSchema.title.name(), descr);
-        this.doc.setField(CollectionSchema.author.name(), dc_creator);
-        this.doc.setField(CollectionSchema.publisher_t.name(), dc_publisher);
+        this.setField(CollectionSchema.title.name(), descr);
+        this.setField(CollectionSchema.author.name(), dc_creator);
+        this.setField(CollectionSchema.publisher_t.name(), dc_publisher);
         this.lat = Float.parseFloat(lats);
         this.lon = Float.parseFloat(lons);
 
@@ -109,32 +106,32 @@ public class URIMetadataNode {
         final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
 
         try {
-            this.doc.setField(CollectionSchema.last_modified.name(), formatter.parse(prop.getProperty("mod", "20000101")));
+            this.setField(CollectionSchema.last_modified.name(), formatter.parse(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
-            this.doc.setField(CollectionSchema.last_modified.name(), new Date());
+            this.setField(CollectionSchema.last_modified.name(), new Date());
         }
         try {
-            this.doc.setField(CollectionSchema.load_date_dt.name(), formatter.parse(prop.getProperty("load", "20000101")));
+            this.setField(CollectionSchema.load_date_dt.name(), formatter.parse(prop.getProperty("load", "20000101")));
         } catch (final ParseException e) {
-            this.doc.setField(CollectionSchema.load_date_dt.name(), new Date());
+            this.setField(CollectionSchema.load_date_dt.name(), new Date());
         }
         try {
-            this.doc.setField(CollectionSchema.fresh_date_dt.name(), formatter.parse(prop.getProperty("fresh", "20000101")));
+            this.setField(CollectionSchema.fresh_date_dt.name(), formatter.parse(prop.getProperty("fresh", "20000101")));
         } catch (final ParseException e) {
-            this.doc.setField(CollectionSchema.fresh_date_dt.name(), new Date());
+            this.setField(CollectionSchema.fresh_date_dt.name(), new Date());
         }
-        this.doc.setField(CollectionSchema.referrer_id_s.name(), prop.getProperty("referrer", ""));
-        this.doc.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", ""));
-        this.doc.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
-        this.doc.setField(CollectionSchema.wordcount_i.name(), Integer.parseInt(prop.getProperty("wc", "0")));
+        this.setField(CollectionSchema.referrer_id_s.name(), prop.getProperty("referrer", ""));
+        this.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", ""));
+        this.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
+        this.setField(CollectionSchema.wordcount_i.name(), Integer.parseInt(prop.getProperty("wc", "0")));
         final String dt = prop.getProperty("dt", "t");
         String[] mime = Response.doctype2mime(null,dt.charAt(0));
-        this.doc.setField(CollectionSchema.content_type.name(), mime);
+        this.setField(CollectionSchema.content_type.name(), mime);
         final String flagsp = prop.getProperty("flags", "AAAAAA");
         this.flags = (flagsp.length() > 6) ? QueryParams.empty_constraint : (new Bitfield(4, flagsp));
-        this.doc.setField(CollectionSchema.language_s.name(), prop.getProperty("lang", ""));
-        this.doc.setField(CollectionSchema.inboundlinkscount_i.name(), Integer.parseInt(prop.getProperty("llocal", "0")));
-        this.doc.setField(CollectionSchema.outboundlinkscount_i.name(), Integer.parseInt(prop.getProperty("lother", "0")));
+        this.setField(CollectionSchema.language_s.name(), prop.getProperty("lang", ""));
+        this.setField(CollectionSchema.inboundlinkscount_i.name(), Integer.parseInt(prop.getProperty("llocal", "0")));
+        this.setField(CollectionSchema.outboundlinkscount_i.name(), Integer.parseInt(prop.getProperty("lother", "0")));
         this.imagec = Integer.parseInt(prop.getProperty("limage", "0"));
         this.audioc = Integer.parseInt(prop.getProperty("laudio", "0"));
         this.videoc = Integer.parseInt(prop.getProperty("lvideo", "0"));
@@ -147,9 +144,11 @@ public class URIMetadataNode {
     }
 
     public URIMetadataNode(final SolrDocument doc) {
-        this.doc = doc;
+        super();
+        for (String name : doc.getFieldNames()) {
+            this.addField(name, doc.getFieldValue(name));
+        }
         this.snippet = "";
-        this.word = null;
         Float score = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
         this.ranking = score == null ? 0 : (long) (1000000.0f * score.floatValue()); // solr score values are sometimes very low
         this.hash = ASCII.getBytes(getString(CollectionSchema.id));
@@ -174,16 +173,11 @@ public class URIMetadataNode {
      * @return the content domain which classifies the content type
      */
     public ContentDomain getContentDomain() {
-        if (this.doc == null) return this.url.getContentDomainFromExt();
         String mime = mime();
         if (mime == null) return this.url.getContentDomainFromExt();
         ContentDomain contentDomain = Classification.getContentDomainFromMime(mime);
         if (contentDomain != ContentDomain.ALL) return contentDomain;
         return this.url.getContentDomainFromExt();
-    }
-    
-    public SolrDocument getDocument() {
-        return this.doc;
     }
 
     public byte[] hash() {
@@ -191,7 +185,7 @@ public class URIMetadataNode {
     }
 
     public String hosthash() {
-        String hosthash = (String) this.doc.getFieldValue(CollectionSchema.host_id_s.getSolrFieldName());
+        String hosthash = (String) this.getFieldValue(CollectionSchema.host_id_s.getSolrFieldName());
         if (hosthash == null) hosthash = ASCII.String(this.hash, 6, 6);
         return hosthash;
     }
@@ -233,7 +227,7 @@ public class URIMetadataNode {
         if (Double.isNaN(this.lat)) {
             this.lon = 0.0d;
             this.lat = 0.0d;
-            String latlon = (String) this.doc.getFieldValue(CollectionSchema.coordinate_p.getSolrFieldName());
+            String latlon = (String) this.getFieldValue(CollectionSchema.coordinate_p.getSolrFieldName());
             if (latlon != null) {
                 int p = latlon.indexOf(',');
                 if (p > 0) {
@@ -277,10 +271,10 @@ public class URIMetadataNode {
         return mime == null || mime.size() == 0 ? null : mime.get(0);
     }
 
-    public byte[] language() {
+    public String language() {
         String language = getString(CollectionSchema.language_s);
-        if (language == null || language.length() == 0) return ASCII.getBytes("en");
-        return UTF8.getBytes(language);
+        if (language == null || language.length() == 0) return "en";
+        return language;
     }
 
     public byte[] referrerHash() {
@@ -401,7 +395,7 @@ public class URIMetadataNode {
         }
         return list.iterator();
     }
-    
+
     public static Date getDate(SolrDocument doc, final CollectionSchema key) {
         Date x = doc == null ? null : (Date) doc.getFieldValue(key.getSolrFieldName());
         Date now = new Date();
@@ -430,7 +424,7 @@ public class URIMetadataNode {
         }
     }
 
-    protected static StringBuilder corePropList(URIMetadataNode md) {
+    protected StringBuilder corePropList() {
         // generate a parseable string; this is a simple property-list
         final StringBuilder s = new StringBuilder(300);
 
@@ -438,33 +432,33 @@ public class URIMetadataNode {
         final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
 
         try {
-            s.append("hash=").append(ASCII.String(md.hash()));
-            s.append(",url=").append(crypt.simpleEncode(md.url().toNormalform(true)));
-            s.append(",descr=").append(crypt.simpleEncode(md.dc_title()));
-            s.append(",author=").append(crypt.simpleEncode(md.dc_creator()));
-            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(md.dc_subject())));
-            s.append(",publisher=").append(crypt.simpleEncode(md.dc_publisher()));
-            s.append(",lat=").append(md.lat());
-            s.append(",lon=").append(md.lon());
-            s.append(",mod=").append(formatter.format(md.moddate()));
-            s.append(",load=").append(formatter.format(md.loaddate()));
-            s.append(",fresh=").append(formatter.format(md.freshdate()));
-            s.append(",referrer=").append(md.referrerHash() == null ? "" : ASCII.String(md.referrerHash()));
-            s.append(",md5=").append(md.md5());
-            s.append(",size=").append(md.size());
-            s.append(",wc=").append(md.wordCount());
-            s.append(",dt=").append(md.doctype());
-            s.append(",flags=").append(md.flags().exportB64());
-            s.append(",lang=").append(md.language() == null ? "EN" : UTF8.String(md.language()));
-            s.append(",llocal=").append(md.llocal());
-            s.append(",lother=").append(md.lother());
-            s.append(",limage=").append(md.limage());
-            s.append(",laudio=").append(md.laudio());
-            s.append(",lvideo=").append(md.lvideo());
-            s.append(",lapp=").append(md.lapp());
-            if (md.word() != null) {
+            s.append("hash=").append(ASCII.String(this.hash()));
+            s.append(",url=").append(crypt.simpleEncode(this.url().toNormalform(true)));
+            s.append(",descr=").append(crypt.simpleEncode(this.dc_title()));
+            s.append(",author=").append(crypt.simpleEncode(this.dc_creator()));
+            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(this.dc_subject())));
+            s.append(",publisher=").append(crypt.simpleEncode(this.dc_publisher()));
+            s.append(",lat=").append(this.lat());
+            s.append(",lon=").append(this.lon());
+            s.append(",mod=").append(formatter.format(this.moddate()));
+            s.append(",load=").append(formatter.format(this.loaddate()));
+            s.append(",fresh=").append(formatter.format(this.freshdate()));
+            s.append(",referrer=").append(this.referrerHash() == null ? "" : ASCII.String(this.referrerHash()));
+            s.append(",md5=").append(this.md5());
+            s.append(",size=").append(this.size());
+            s.append(",wc=").append(this.wordCount());
+            s.append(",dt=").append(this.doctype());
+            s.append(",flags=").append(this.flags().exportB64());
+            s.append(",lang=").append(this.language());
+            s.append(",llocal=").append(this.llocal());
+            s.append(",lother=").append(this.lother());
+            s.append(",limage=").append(this.limage());
+            s.append(",laudio=").append(this.laudio());
+            s.append(",lvideo=").append(this.lvideo());
+            s.append(",lapp=").append(this.lapp());
+            if (this.word() != null) {
                 // append also word properties
-                final String wprop = md.word().toPropertyForm();
+                final String wprop = this.word().toPropertyForm();
                 s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(wprop));
             }
             return s;
@@ -480,7 +474,7 @@ public class URIMetadataNode {
      */
     public String toString(String snippet) {
         // add information needed for remote transport
-        final StringBuilder core = corePropList(this);
+        final StringBuilder core = corePropList();
         if (core == null)
             return null;
 
@@ -501,7 +495,7 @@ public class URIMetadataNode {
      */
     @Override
     public String toString() {
-        final StringBuilder core = corePropList(this);
+        final StringBuilder core = corePropList();
         if (core == null) return null;
         core.insert(0, '{');
         core.append('}');
@@ -511,7 +505,7 @@ public class URIMetadataNode {
     private int getInt(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.num_integer;
-        Object x = this.doc.getFieldValue(field.getSolrFieldName());
+        Object x = this.getFieldValue(field.getSolrFieldName());
         if (x == null) return 0;
         if (x instanceof Integer) return ((Integer) x).intValue();
         if (x instanceof Long) return ((Long) x).intValue();
@@ -521,7 +515,7 @@ public class URIMetadataNode {
     private Date getDate(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.date;
-        Date x = (Date) this.doc.getFieldValue(field.getSolrFieldName());
+        Date x = (Date) this.getFieldValue(field.getSolrFieldName());
         if (x == null) return new Date(0);
         Date now = new Date();
         return x.after(now) ? now : x;
@@ -530,7 +524,7 @@ public class URIMetadataNode {
     private String getString(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
-        Object x = this.doc.getFieldValue(field.getSolrFieldName());
+        Object x = this.getFieldValue(field.getSolrFieldName());
         if (x == null) return "";
         if (x instanceof ArrayList) {
             @SuppressWarnings("unchecked")
@@ -544,7 +538,7 @@ public class URIMetadataNode {
     private ArrayList<String> getStringList(CollectionSchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general;
-        Object r = this.doc.getFieldValue(field.getSolrFieldName());
+        Object r = this.getFieldValue(field.getSolrFieldName());
         if (r == null) return new ArrayList<String>(0);
         if (r instanceof ArrayList) {
             return (ArrayList<String>) r;
@@ -558,7 +552,7 @@ public class URIMetadataNode {
     private ArrayList<Integer> getIntList(CollectionSchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.num_integer;
-        Object r = this.doc.getFieldValue(field.getSolrFieldName());
+        Object r = this.getFieldValue(field.getSolrFieldName());
         if (r == null) return new ArrayList<Integer>(0);
         if (r instanceof ArrayList) {
             return (ArrayList<Integer>) r;

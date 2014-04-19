@@ -32,7 +32,6 @@ import java.util.EnumMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -117,7 +116,7 @@ public class YMarkMetadata {
         	metadata.put(METADATA.SNIPPET, String.valueOf(urlEntry.snippet()));
         	metadata.put(METADATA.WORDCOUNT, String.valueOf(urlEntry.wordCount()));
         	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.doctype()));
-        	metadata.put(METADATA.LANGUAGE, UTF8.String(urlEntry.language()));
+        	metadata.put(METADATA.LANGUAGE, urlEntry.language());
         	metadata.put(METADATA.TITLE, urlEntry.dc_title());
         	metadata.put(METADATA.CREATOR, urlEntry.dc_creator());
 	        metadata.put(METADATA.KEYWORDS, urlEntry.dc_subject());

@@ -136,7 +136,7 @@ public final class crawlReceipt {
         }
 
         // Check URL against DHT blacklist
-        if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, entry)) {
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, entry.url())) {
             // URL is blacklisted
             log.warn("crawlReceipt: RECEIVED wrong RECEIPT (URL is blacklisted) for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false) + " from peer " + iam);
             prop.put("delay", "9999");

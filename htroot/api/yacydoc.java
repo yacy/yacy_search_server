@@ -108,7 +108,7 @@ public class yacydoc {
         prop.putXML("dc_date", ISO8601Formatter.FORMATTER.format(entry.moddate()));
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
         prop.putXML("dc_identifier", entry.url().toNormalform(true));
-        prop.putXML("dc_language", ASCII.String(entry.language()));
+        prop.putXML("dc_language", entry.language());
         prop.putXML("collection", Arrays.toString(entry.collections()));
         prop.put("geo_lat", entry.lat());
         prop.put("geo_long", entry.lon());

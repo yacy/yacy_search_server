@@ -123,7 +123,7 @@ public final class transferURL {
                 }
 
                 // check if the entry is blacklisted
-                if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, lEntry))) {
+                if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, lEntry.url()))) {
                 	if (Network.log.isFine()) Network.log.fine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;

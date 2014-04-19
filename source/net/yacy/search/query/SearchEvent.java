@@ -47,7 +47,6 @@ import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -279,7 +278,7 @@ public final class SearchEvent {
         this.snippetFetchAlive = new AtomicInteger(0);
         this.addRunning = true;
         this.receivedRemoteReferences = new AtomicInteger(0);
-        this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
+        this.order = new ReferenceOrder(this.query.ranking, this.query.targetlang);
         this.urlhashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 100);
         this.taggingPredicates = new HashMap<String, String>();
         for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
@@ -897,7 +896,7 @@ public final class SearchEvent {
                 }
 
                 if (this.query.modifier.language != null) {
-                    if (!this.query.modifier.language.equals(UTF8.String(iEntry.language()))) {
+                    if (!this.query.modifier.language.equals(iEntry.language())) {
                         if (log.isFine()) log.fine("dropped Node: language");
                         continue pollloop;
                     }
@@ -1083,7 +1082,7 @@ public final class SearchEvent {
 
             // check modifier constraint (language)
             // TODO: : page.language() never null but defaults to "en" (may cause false drop of result)
-            if (this.query.modifier.language != null && !this.query.modifier.language.equals(ASCII.String(page.language()))) {
+            if (this.query.modifier.language != null && !this.query.modifier.language.equals(page.language())) {
                 if (log.isFine()) log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
@@ -1165,7 +1164,7 @@ public final class SearchEvent {
             // TODO: vocabulary is only valid and available in local Solr index (considere to auto-switch to Searchdom.LOCAL)
             if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
                 tagloop: for (Tagging.Metatag tag : this.query.metatags) {
-                    SolrDocument sdoc = page.getDocument();
+                    SolrDocument sdoc = page;
                     if (sdoc != null) {
                         Collection<Object> tagvalues = sdoc.getFieldValues(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName() + CollectionSchema.VOCABULARY_SUFFIX);
                         if (tagvalues != null && tagvalues.contains(tag.getObject())) {
@@ -1462,7 +1461,7 @@ public final class SearchEvent {
         ResultEntry ms = oneResult(item, timeout);
         // check if the match was made in the url or in the image links
         if (ms != null) {
-            SolrDocument doc = ms.getNode().getDocument();
+            SolrDocument doc = ms.getNode();
             Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
             Collection<Object> prt = doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName());

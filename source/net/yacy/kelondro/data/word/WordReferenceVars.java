@@ -58,7 +58,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     private final Bitfield flags;
     private long lastModified;
-    private final byte[] language;
+    private final String language;
     public final byte[] urlHash;
     private String hostHash = null;
     private final char type;
@@ -108,7 +108,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
-                  byte[]   language,      // (guessed) language of document
+                  String   language,      // (guessed) language of document
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
@@ -143,7 +143,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.flags = e.flags();
         //this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
-        this.language = e.getLanguage();
+        this.language = ASCII.String(e.getLanguage());
         this.urlHash = e.urlhash();
         this.type = e.getType();
         this.hitcount = e.hitcount();
@@ -229,7 +229,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     @Override
     public byte[] getLanguage() {
-        return this.language;
+        return ASCII.getBytes(this.language);
     }
 
     @Override
@@ -291,7 +291,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.posofphrase,   // number of the phrase where word appears
                 this.lastModified,  // last-modified time of the document where word appears
                 System.currentTimeMillis(),    // update time;
-                this.language,      // (guessed) language of document
+                ASCII.getBytes(this.language), // (guessed) language of document
                 this.type,          // type of document
                 this.llocal,        // outlinks to same domain
                 this.lother,        // outlinks to other domain

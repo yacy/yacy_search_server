@@ -48,7 +48,6 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -306,7 +305,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if ((allAttr || contains(CollectionSchema.referrer_id_s)) && md.referrerHash() != null) add(doc, CollectionSchema.referrer_id_s, ASCII.String(md.referrerHash()));
         if (allAttr || contains(CollectionSchema.md5_s)) add(doc, CollectionSchema.md5_s, md.md5());
         if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, md.dc_publisher());
-        if ((allAttr || contains(CollectionSchema.language_s)) && md.language() != null) add(doc, CollectionSchema.language_s, UTF8.String(md.language()));
+        if (allAttr || contains(CollectionSchema.language_s)) add(doc, CollectionSchema.language_s, md.language());
         if (allAttr || contains(CollectionSchema.size_i)) add(doc, CollectionSchema.size_i, md.size());
         if (allAttr || contains(CollectionSchema.audiolinkscount_i)) add(doc, CollectionSchema.audiolinkscount_i, md.laudio());
         if (allAttr || contains(CollectionSchema.videolinkscount_i)) add(doc, CollectionSchema.videolinkscount_i, md.lvideo());

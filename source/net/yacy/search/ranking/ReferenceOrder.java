@@ -33,6 +33,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.util.ByteBuffer;
@@ -55,9 +56,9 @@ public class ReferenceOrder {
     private       WordReferenceVars min, max;
     private final ConcurrentScoreMap<String> doms; // collected for "authority" heuristic
     private final RankingProfile ranking;
-    private final byte[] language;
+    private final String language;
 
-    public ReferenceOrder(final RankingProfile profile, final byte[] language) {
+    public ReferenceOrder(final RankingProfile profile, final String language) {
         this.min = null;
         this.max = null;
         this.ranking = profile;
@@ -256,7 +257,7 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
-           + ((ByteBuffer.equals(t.getLanguage(), this.language)) ? 255 << this.ranking.coeff_language    : 0);
+           + ((ByteBuffer.equals(t.getLanguage(), ASCII.getBytes(this.language))) ? 255 << this.ranking.coeff_language    : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
@@ -289,7 +290,7 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
-           + ((ByteBuffer.equals(t.language(), this.language)) ? 255 << this.ranking.coeff_language    : 0);
+           + ((this.language.equals(t.language())) ? 255 << this.ranking.coeff_language    : 0);
         return r; // the higher the number the better the ranking.
     }
 

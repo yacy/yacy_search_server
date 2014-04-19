@@ -70,7 +70,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                        final List<MediaSnippet> mediaSnippets,
                        final long snippetComputationTime) {
         this.urlentry = urlentry;
-        this.urlentry.getDocument().setField(CollectionSchema.text_t.getSolrFieldName(), ""); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
+        this.urlentry.setField(CollectionSchema.text_t.getSolrFieldName(), ""); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
         this.indexSegment = indexSegment;
         this.alternative_urlstring = null;
         this.alternative_urlname = null;

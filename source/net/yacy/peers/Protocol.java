@@ -1362,22 +1362,22 @@ public final class Protocol {
         final int timeout) {
 
         // check if we got all necessary urls in the urlCache (only for debugging)
-        Iterator<WordReference> eenum;
-        Reference entry;
-        for ( final ReferenceContainer<WordReference> ic : indexes ) {
-            eenum = ic.entries();
-            while ( eenum.hasNext() ) {
-                entry = eenum.next();
-                if ( !urlRefs.has(entry.urlhash()) ) {
-                    if ( Network.log.isFine() ) {
+        if (Network.log.isFine()) {
+            Iterator<WordReference> eenum;
+            Reference entry;
+            for ( final ReferenceContainer<WordReference> ic : indexes ) {
+                eenum = ic.entries();
+                while ( eenum.hasNext() ) {
+                    entry = eenum.next();
+                    if ( !urlRefs.has(entry.urlhash()) ) {
                         Network.log.fine("DEBUG transferIndex: to-send url hash '"
-                            + ASCII.String(entry.urlhash())
-                            + "' is not contained in urlCache");
+                                + ASCII.String(entry.urlhash())
+                                + "' is not contained in urlCache");
                     }
                 }
             }
         }
-
+        
         // transfer the RWI without the URLs
         Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
 

@@ -53,7 +53,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
@@ -455,10 +454,6 @@ public class Blacklist {
             }
         }
         return ret;
-    }
-
-    public final boolean isListed(final BlacklistType blacklistType, final URIMetadataNode entry) {
-        return isListed(blacklistType, entry.url());
     }
 
     /**
