@@ -1134,12 +1134,11 @@ public final class Protocol {
         }
         
         // evaluate result
-        List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
-		if (docList == null || docList[0].size() == 0) {
-		    Network.log.info("SEARCH (solr), returned 0 out of 0 documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
-		    return 0;
-		}
-		
+        if (docList == null || docList[0].size() == 0) {
+            Network.log.info("SEARCH (solr), returned 0 out of 0 documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
+            return 0;
+        }
+	List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
         Network.log.info("SEARCH (solr), returned " + docList[0].size() + " out of " + docList[0].getNumFound() + " documents and " + facets.size() + " facets " + facets.keySet().toString() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
         Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList[0].size());
