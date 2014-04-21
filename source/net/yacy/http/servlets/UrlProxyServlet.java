@@ -195,7 +195,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             response.setStatus(httpStatus);
             response.setContentType(mimeType);
             
-            if ((httpStatus == HttpServletResponse.SC_OK) &&(mimeType != null) && (mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
+            if ((httpStatus == HttpServletResponse.SC_OK) && (mimeType != null) && mimeType.startsWith("text")) {
                 if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
                      proxyout = new ChunkedInputStream(proxyout);
                 }

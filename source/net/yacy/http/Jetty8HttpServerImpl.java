@@ -108,6 +108,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         WebAppContext htrootContext = new WebAppContext();
         htrootContext.setContextPath("/");
         String htrootpath = sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+        htrootContext.setErrorHandler(new YaCyErrorHandler()); // handler for custom error page
         try {
             htrootContext.setBaseResource(Resource.newResource(htrootpath));
 
