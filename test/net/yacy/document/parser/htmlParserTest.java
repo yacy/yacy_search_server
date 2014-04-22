@@ -5,11 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.util.List;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.parser.html.ContentScraper;
+import static net.yacy.document.parser.htmlParser.parseToScraper;
 import org.junit.Test;
 
 public class htmlParserTest extends TestCase {
@@ -79,5 +83,36 @@ public class htmlParserTest extends TestCase {
             System.out.println("detected charset = " + txt);
 
         }
+    }
+
+    /**
+     * Test of parseToScraper method, of class htmlParser.
+     */
+    @Test
+    public void testParseToScraper_4args() throws Exception {
+        // test link with inline html in text
+        // expectation to deliver pure text as it is possibly indexed in outboundlinks_anchortext_txt/inboundlinks_anchortext_txt
+        final AnchorURL url = new AnchorURL("http://localhost/");
+        final String mimetype = "text/html";
+        final String testhtml = "<html><bod>"
+                + "<a href='x1.html'><span>testtext</span></a>" // "testtext"
+                + "<a href=\"http://localhost/x2.html\">   <i id=\"home-icon\" class=\"img-sprite\"></i>Start</a>" // "Start"
+                + "<a href='x1.html'><span class='button'><img src='pic.gif'/></span></a>" // ""  + image
+                + "</body></html>";
+
+        ContentScraper scraper = parseToScraper(url, mimetype, testhtml, 10);
+        List<AnchorURL> anchorlist = scraper.getAnchors();
+
+        String linktxt = anchorlist.get(0).getTextProperty();
+        assertEquals("testtext", linktxt);
+
+        linktxt = anchorlist.get(1).getTextProperty();
+        assertEquals("Start", linktxt);
+
+        linktxt = anchorlist.get(2).getTextProperty();
+        assertEquals("", linktxt);
+
+        int cnt = scraper.getImages().size();
+        assertEquals(1,cnt);
     }
 }
