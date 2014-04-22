@@ -1502,7 +1502,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             this.failType = fts == null ? FailType.fail : FailType.valueOf(fts);
             this.httpstatus = (Integer) doc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName());
             this.failtime = (Date) doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-            this.crawldepth = (Integer) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
+            Integer cd = (Integer) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
+            this.crawldepth = cd == null ? 0 : cd.intValue();
         }
         public DigestURL getDigestURL() {
             return digestURL;

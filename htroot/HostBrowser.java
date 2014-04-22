@@ -573,7 +573,7 @@ public class HostBrowser {
             Integer rc_internal = (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
             Integer rc_external = (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
             Integer rc_exthosts = (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
-            this.crawldepth = (cr == null || cr.intValue() < 0) ? 998 : cr.intValue();
+            this.crawldepth = (cr == null || cr.intValue() < 0) ? 0 : cr.intValue(); // for lazy value storage; non-existent means: stored as '0'
             this.references = (rc == null || rc.intValue() <= 0) ? 0 : rc.intValue();
             this.references_internal = (rc_internal == null || rc_internal.intValue() <= 0) ? 0 : rc_internal.intValue();
             // calculate the url reference list
