@@ -1172,7 +1172,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     byte[] id = url.hash();
                     SolrInputDocument sid = collection.toSolrInputDocument(doc, omitFields);
                     
-                    for (Object tag: proctags) {
+                    for (Object tag: proctags) try {
                         
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
@@ -1194,7 +1194,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             if (postprocessing_doublecontent(segment, uniqueURLs, sid, url)) proccount_uniquechange++;
                         }
                         
-                    }
+                    } catch (IllegalArgumentException e) {}
                     
                     // refresh the link count; it's 'cheap' to do this here
                     String hosthash = url.hosthash();
