@@ -64,6 +64,8 @@ import org.apache.solr.common.SolrDocument;
  */
 public class URIMetadataNode extends SolrDocument {
     
+    private static final long serialVersionUID = -256046934741561968L;
+    
     protected byte[] hash = null;
     protected String urlRaw = null, keywords = null;
     protected DigestURL url = null;
@@ -283,6 +285,7 @@ public class URIMetadataNode extends SolrDocument {
         return ASCII.getBytes(referrer);
     }
 
+    @Override
     public int size() {
         return getInt(CollectionSchema.size_i);
     }
