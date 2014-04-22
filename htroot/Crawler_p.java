@@ -45,6 +45,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.SitemapImporter;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.data.WorkTables;
@@ -96,14 +97,22 @@ public class Crawler_p {
         prop.put("loaderSize", 0);
         prop.put("loaderMax", 0);
         prop.put("list-loader", 0);
-        prop.put("localCrawlSize", sb.crawlQueues.coreCrawlJobSize());
+        
+        int coreCrawlJobSize = sb.crawlQueues.coreCrawlJobSize();
+        int limitCrawlJobSize = sb.crawlQueues.limitCrawlJobSize();
+        int remoteTriggeredCrawlJobSize = sb.crawlQueues.remoteTriggeredCrawlJobSize();
+        int noloadCrawlJobSize = sb.crawlQueues.noloadCrawlJobSize();
+        int allsize = coreCrawlJobSize + limitCrawlJobSize + remoteTriggeredCrawlJobSize + noloadCrawlJobSize;
+        
+        prop.put("localCrawlSize", coreCrawlJobSize);
         prop.put("localCrawlState", "");
-        prop.put("limitCrawlSize", sb.crawlQueues.limitCrawlJobSize());
+        prop.put("limitCrawlSize", limitCrawlJobSize);
         prop.put("limitCrawlState", "");
-        prop.put("remoteCrawlSize", sb.crawlQueues.remoteTriggeredCrawlJobSize());
+        prop.put("remoteCrawlSize", remoteTriggeredCrawlJobSize);
         prop.put("remoteCrawlState", "");
-        prop.put("noloadCrawlSize", sb.crawlQueues.noloadCrawlJobSize());
+        prop.put("noloadCrawlSize", noloadCrawlJobSize);
         prop.put("noloadCrawlState", "");
+        prop.put("terminate-button", allsize == 0 ? 0 : 1);
         prop.put("list-remote", 0);
         prop.put("forwardToCrawlStart", "0");
 
@@ -113,6 +122,19 @@ public class Crawler_p {
         if (post != null) {
             String c = post.toString();
             if (c.length() < 1000) ConcurrentLog.info("Crawl Start", c);
+        }
+
+        if (post != null && post.containsKey("queues_terminate_all")) {
+            // clear stacks
+            for (StackType stackType: StackType.values()) sb.crawlQueues.noticeURL.clear(stackType);
+            try { sb.cleanProfiles(); } catch (final InterruptedException e) {/* ignore this */}
+
+            // remove pause
+            sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+            sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
+            sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused_cause", "");
+            prop.put("terminate-button", 0);
         }
 
         if (post != null && post.containsKey("continue")) {
@@ -137,7 +159,12 @@ public class Crawler_p {
             }
         }
         String queuemessage = sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
-        prop.putHTML("queuemessage", queuemessage.length() == 0 ? "" : "pause reason: " + queuemessage);
+        if (queuemessage.length() == 0) {
+            prop.put("info-queue", 0);
+        } else {
+            prop.put("info-queue", 1);
+            prop.putHTML("info-queue_message", "pause reason: " + queuemessage);
+        }
         
     	if (post != null && post.containsKey("terminate")) try {
             final String handle = post.get("handle", "");
