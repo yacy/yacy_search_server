@@ -257,17 +257,17 @@ public class SchemaConfiguration extends Configuration implements Serializable {
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final int value) {
         assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
+        if (isEmpty() || contains(key)) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final long value) {
         assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
+        if (isEmpty() || contains(key)) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final boolean value) {
         assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value)) key.add(doc, value);
+        if (isEmpty() || contains(key)) key.add(doc, value);
     }
 
     public static Date getDate(SolrInputDocument doc, final SchemaDeclaration key) {
