@@ -159,7 +159,7 @@ public class RemoteSearch extends Thread {
         if (indexingQueueSize > 0) robinsoncount = Math.max(1, robinsoncount / 2);
         if (indexingQueueSize > 10) robinsoncount = Math.max(1, robinsoncount / 2);
         if (indexingQueueSize > 50) robinsoncount = Math.max(1, robinsoncount / 2);
-        if (shortmem) {redundancy = 1; robinsoncount = 1; healthMessage.append(", shortmem");}
+        if (shortmem) {redundancy = 1; robinsoncount = Math.max(1, robinsoncount / 2); healthMessage.append(", shortmem");}
         
         
         // prepare seed targets and threads
