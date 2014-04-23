@@ -2296,46 +2296,55 @@ public final class Switchboard extends serverSwitch {
             // clean up profiles
             checkInterruption();
 
-            // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
             Fulltext fulltext = index.fulltext();
             CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
             boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
             int proccount = 0;
-            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && MemoryControl.available() > 512L * 1024L * 1024L && Memory.load() < 2.5f) {
-                
-                // we optimize first because that is useful for postprocessing
-                ReferenceReportCache rrCache = index.getReferenceReportCache();
-                Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
-                        this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
-                int cleanupByHarvestkey = deletionCandidates.size();
-                boolean postprocessing =  collection1Configuration.contains(CollectionSchema.process_sxt) && (index.connectedCitation() || fulltext.useWebgraph());
-                if (postprocessing && (cleanupByHarvestkey > 0 || allCrawlsFinished)) {
-                    if (cleanupByHarvestkey > 0) {
-                        // run postprocessing on these profiles
-                        postprocessingRunning = true;
-                        postprocessingStartTime[0] = System.currentTimeMillis();
-                        try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-                        for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash);
-                        postprocessingStartTime[0] = 0;
-                        try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
+    
+            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+
+                boolean postprocessing =
+                        collection1Configuration.contains(CollectionSchema.process_sxt) &&
+                        (index.connectedCitation() || fulltext.useWebgraph()) &&
+                        MemoryControl.available() > 512L * 1024L * 1024L &&
+                        Memory.load() < 2.5f;
                         
-                        this.crawler.cleanProfiles(deletionCandidates);
-                        log.info("cleanup removed " + cleanupByHarvestkey + " crawl profiles, post-processed " + proccount + " documents");
-                    } else if (allCrawlsFinished) {
+                if (allCrawlsFinished) {
+                    if (postprocessing) {
                         // run postprocessing on all profiles
                         postprocessingRunning = true;
                         postprocessingStartTime[0] = System.currentTimeMillis();
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
+                        ReferenceReportCache rrCache = index.getReferenceReportCache();
                         proccount += collection1Configuration.postprocessing(index, rrCache, null);
                         postprocessingStartTime[0] = 0;
                         try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
-
-                        this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
-                        log.info("cleanup post-processed " + proccount + " documents");
+                        this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                     }
+                    this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
+                    log.info("cleanup post-processed " + proccount + " documents");
+                } else {
+                    Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
+                            this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
+                    int cleanupByHarvestkey = deletionCandidates.size();
+                    if (cleanupByHarvestkey > 0) {
+                        if (postprocessing) {
+                            // run postprocessing on these profiles
+                            postprocessingRunning = true;
+                            postprocessingStartTime[0] = System.currentTimeMillis();
+                            try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
+                            ReferenceReportCache rrCache = index.getReferenceReportCache();
+                            for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash);
+                            postprocessingStartTime[0] = 0;
+                            try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
+                            this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
+                        }
+                        this.crawler.cleanProfiles(deletionCandidates);
+                        log.info("cleanup removed " + cleanupByHarvestkey + " crawl profiles, post-processed " + proccount + " documents");
+                    } 
                 }
-                this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
+                
                 postprocessingStartTime = new long[]{0,0}; // the start time for the processing; not started = 0                
                 postprocessingRunning = false;
             }
