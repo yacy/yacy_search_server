@@ -239,37 +239,34 @@ public class HostBalancer implements Balancer {
                     // refresh the round-robin cache
                     this.roundRobinHostHashes.addAll(this.queues.keySet());
                     // quickly get rid of small stacks to reduce number of files:
-                    if (this.roundRobinHostHashes.size() > 100) {
-                        // if there are stacks with less than 10 entries, remove all stacks with more than 10 entries
-                        // this shall kick out small stacks to prevent that too many files are opened for very wide crawls
-                        boolean smallStacksExist = false;
-                        boolean singletonStacksExist = false;
-                        smallsearch: for (String s: this.roundRobinHostHashes) {
-                            HostQueue hq = this.queues.get(s);
-                            if (hq != null) {
-                                int size = hq.size();
-                                if (size ==  1) {singletonStacksExist = true; break smallsearch;}
-                                if (size <= 10) {smallStacksExist = true; break smallsearch;}
-                            }
+                    // remove all stacks with more than 10 entries
+                    // this shall kick out small stacks to prevent that too many files are opened for very wide crawls
+                    boolean smallStacksExist = false;
+                    boolean singletonStacksExist = false;
+                    smallsearch: for (String s: this.roundRobinHostHashes) {
+                        HostQueue hq = this.queues.get(s);
+                        if (hq != null) {
+                            int size = hq.size();
+                            if (size ==  1) {singletonStacksExist = true; break smallsearch;}
+                            if (size <= 10) {smallStacksExist = true; break smallsearch;}
                         }
-                        if (singletonStacksExist) {
-                            Iterator<String> i = this.roundRobinHostHashes.iterator();
-                            while (i.hasNext()) {
-                                String s = i.next();
-                                HostQueue hq = this.queues.get(s);
-                                if (hq == null) {i.remove(); continue;}
-                                int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
-                                if (hq.size() != 1 && delta > 10) {i.remove();}
+                    }
+                    if (singletonStacksExist || smallStacksExist) {
+                        Iterator<String> i = this.roundRobinHostHashes.iterator();
+                        smallstacks: while (i.hasNext()) {
+                            if (this.roundRobinHostHashes.size() <= 10) break smallstacks; // don't shrink the hosts until nothing is left
+                            String s = i.next();
+                            HostQueue hq = this.queues.get(s);
+                            if (hq == null) {i.remove(); continue smallstacks;}
+                            int size = hq.size();
+                            if (singletonStacksExist) {
+                                if (size != 1) {i.remove(); continue smallstacks;}  
+                            } else {
+                                if (size > 10) {i.remove(); continue smallstacks;}
                             }
-                        } else if (smallStacksExist) {
-                            Iterator<String> i = this.roundRobinHostHashes.iterator();
-                            while (i.hasNext()) {
-                                String s = i.next();
-                                HostQueue hq = this.queues.get(s);
-                                if (hq == null) {i.remove(); continue;}
-                                int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
-                                if (hq.size() > 10 && delta > 10) {i.remove();}
-                            }
+                            // to protect all small stacks which have a fast throughput, remove all with long wainting time
+                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                            if (delta >= 1000) {i.remove();}
                         }
                     }
                 }
@@ -292,9 +289,7 @@ public class HostBalancer implements Balancer {
                 }
                 
                 if (rhq == null) {
-                    // second strategy: take from the largest stack and clean round robin cache
-                    // if we would not clear the round robin cache afterwards
-                    // then all targets would be accessed equally which makes this strategy useless
+                    // second strategy: take from the largest stack
                     int largest = Integer.MIN_VALUE;
                     for (String h: this.roundRobinHostHashes) {
                         HostQueue hq = this.queues.get(h);
@@ -306,14 +301,30 @@ public class HostBalancer implements Balancer {
                             }
                         }
                     }
-                    this.roundRobinHostHashes.clear(); // start from the beginning next time
                     rhq = this.queues.get(rhh);
                 }
             }
             
             if (rhq == null) continue tryagain;
+            long timestamp = System.currentTimeMillis();
             Request request = rhq.pop(delay, cs, robots); // this pop is outside of synchronization to prevent blocking of pushes
-
+            long actualwaiting = System.currentTimeMillis() - timestamp;
+            
+            if (actualwaiting > 1000) {
+                synchronized (this) {
+                    // to prevent that this occurs again, remove all stacks with positive delay times (which may be less after that waiting)
+                    Iterator<String> i = this.roundRobinHostHashes.iterator();
+                    protectcheck: while (i.hasNext()) {
+                        if (this.roundRobinHostHashes.size() <= 3) break protectcheck; // don't shrink the hosts until nothing is left
+                        String s = i.next();
+                        HostQueue hq = this.queues.get(s);
+                        if (hq == null) {i.remove(); continue protectcheck;}
+                        int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                        if (delta >= 0) {i.remove();}
+                    }
+                }
+            }
+            
             int size = rhq.size();
             if (size == 0) {
                 synchronized (this) {
