@@ -356,6 +356,16 @@ public class Crawler_p {
                     crawlingMode = "url";
                     if ((fullDomain || subPath) && newcrawlingdepth > 0) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // to prevent that there is a restriction on the original urls
                 }
+
+                // delete all error urls for that domain
+                // and all urls for that host from the crawl queue
+                Set<String> hosthashes = new HashSet<String>();
+                for (DigestURL u : rootURLs) {
+                    sb.index.fulltext().remove(u.hash());
+                    hosthashes.add(u.hosthash());
+                }
+                sb.crawlQueues.removeHosts(hosthashes);
+                sb.index.fulltext().commit(true);
                 
                 // compute mustmatch filter according to rootURLs
                 if ((fullDomain || subPath) && newcrawlingdepth > 0) {
@@ -363,23 +373,17 @@ public class Crawler_p {
                     if (fullDomain) {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
-                            Set<String> hosthashes = new HashSet<String>();
-                            for (DigestURL u: rootURLs) hosthashes.add(u.hosthash());
                             sb.index.fulltext().deleteStaleDomainHashes(hosthashes, deleteageDate);
-                            sb.crawlQueues.removeHosts(hosthashes);
                         }
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
                         if (deleteold) {
-                            Set<String> hosthashes = new HashSet<String>();
                             for (DigestURL u: rootURLs) {
-                                hosthashes.add(u.hosthash());
                                 String basepath = u.toNormalform(true);
                                 if (!basepath.endsWith("/")) {int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
                                 int count = sb.index.fulltext().remove(basepath, deleteageDate);
                                 if (count > 0) ConcurrentLog.info("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
-                            sb.crawlQueues.removeHosts(hosthashes);
                         }
                     }
                     if (CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch)) {
@@ -449,15 +453,6 @@ public class Crawler_p {
                     try {
                         sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);
                     } catch (final SpaceExceededException e1) { }
-
-                    // delete all error urls for that domain
-                    Set<String> hosthashes = new HashSet<String>();
-                    for (DigestURL u : rootURLs) {
-                        sb.index.fulltext().remove(u.hash());
-                        hosthashes.add(u.hosthash());
-                    }
-                    sb.crawlQueues.errorURL.removeHosts(hosthashes);
-                    sb.index.fulltext().commit(true);
                 } else {
                     profile = null;
                     handle = null;
