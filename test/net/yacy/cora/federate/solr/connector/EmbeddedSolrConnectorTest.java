@@ -5,8 +5,6 @@ import java.io.IOException;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
 import org.junit.Before;
@@ -57,12 +55,8 @@ public class EmbeddedSolrConnectorTest {
 
         System.out.println("query solr");
         long expResult = 1;
-        SolrDocumentList result;
-        try {
-            result = solr.getDocumentListByQuery(CollectionSchema.text_t.name() + ":tempor", 0, 10,"");
-            assertEquals(expResult, result.getNumFound());
-        } catch (final IOException ex) {
-            fail("Solr query no result");
-        }
+        long result = solr.getCountByQuery(CollectionSchema.text_t.name() + ":tempor");
+        System.out.println("found = " + result + " (expected = 1 )");
+        assertEquals(expResult, result);
     }
 }

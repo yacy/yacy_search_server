@@ -520,7 +520,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                         if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
                         tag.opts.put("rel", rel);
                     }
-                    tag.opts.put("text", new String(tag.content.getChars()));
+                    tag.opts.put("text", stripAllTags(tag.content.getChars())); // strip any inline html in tag text like  "<a ...> <span>test</span> </a>"
                     tag.opts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
                     url.setAll(tag.opts);
                     recursiveParse(url, tag.content.getChars());
