@@ -83,7 +83,7 @@ public class OAIListFriendsLoader implements Serializable {
     }
 
 
-    public static Map<String, String> getListFriends(final LoaderDispatcher loader, final ClientIdentification.Agent agent) {
+    public Map<String, String> getListFriends(final LoaderDispatcher loader, final ClientIdentification.Agent agent) {
         final Map<String, String> map = new TreeMap<String, String>();
         Map<String, String> m;
         for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
@@ -105,7 +105,7 @@ public class OAIListFriendsLoader implements Serializable {
     }
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
-    private static SAXParser getParser() throws SAXException {
+    private SAXParser getParser() throws SAXException {
     	SAXParser parser = tlSax.get();
     	if (parser == null) {
     		try {
@@ -119,7 +119,7 @@ public class OAIListFriendsLoader implements Serializable {
     }
 
     // get a resumption token using a SAX xml parser from am input stream
-    public static class Parser extends DefaultHandler {
+    private class Parser extends DefaultHandler {
 
         // class variables
         private final StringBuilder buffer;

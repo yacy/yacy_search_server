@@ -55,7 +55,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
 
-    int recordCounter;
+    private int recordCounter;
 
     private final DigestURL source;
 
@@ -65,40 +65,6 @@ public class ResumptionToken extends TreeMap<String, String> {
         this.recordCounter = 0;
         new Parser(b);
     }
-
-    /*
-    public ResumptionToken(
-            DigestURI source,
-            Date expirationDate,
-            int completeListSize,
-            int cursor,
-            String token
-            ) {
-        super((Collator) insensitiveCollator.clone());
-        this.source = source;
-        this.recordCounter = 0;
-        this.put("expirationDate", DateFormatter.formatISO8601(expirationDate));
-        this.put("completeListSize", Integer.toString(completeListSize));
-        this.put("cursor", Integer.toString(cursor));
-        this.put("token", token);
-    }
-
-    public ResumptionToken(
-            DigestURI source,
-            String expirationDate,
-            int completeListSize,
-            int cursor,
-            String token
-            ) {
-        super((Collator) insensitiveCollator.clone());
-        this.source = source;
-        this.recordCounter = 0;
-        this.put("expirationDate", expirationDate);
-        this.put("completeListSize", Integer.toString(completeListSize));
-        this.put("cursor", Integer.toString(cursor));
-        this.put("token", token);
-    }
-    */
 
     /**
      * truncate the given url at the '?'
@@ -150,7 +116,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         return new DigestURL(u);
     }
 
-    public static StringBuilder escape(final String s) {
+    private StringBuilder escape(final String s) {
         final int len = s.length();
         final StringBuilder sbuf = new StringBuilder(len + 10);
         for (int i = 0; i < len; i++) {
@@ -260,7 +226,7 @@ public class ResumptionToken extends TreeMap<String, String> {
     	}
     	return parser;
     }
-    
+
     // get a resumption token using a SAX xml parser from am input stream
     private class Parser extends DefaultHandler {
 
@@ -268,27 +234,49 @@ public class ResumptionToken extends TreeMap<String, String> {
         private final StringBuilder buffer;
         private boolean parsingValue;
         private SAXParser saxParser;
-        private final InputStream stream;
         private Attributes atts;
         
         public Parser(final byte[] b) throws IOException {
             this.buffer = new StringBuilder();
             this.parsingValue = false;
             this.atts = null;
-            this.stream = new ByteArrayInputStream(b);
+            InputStream stream = new ByteArrayInputStream(b);
             try {
                 this.saxParser = getParser();
-                this.saxParser.parse(this.stream, this);
+                this.saxParser.parse(stream, this);
             } catch (final SAXException e) {
-                ConcurrentLog.logException(e);
-                ConcurrentLog.warn("ResumptionToken", "token was not parsed (1):\n" + UTF8.String(b));
+                // some received xml are not valid, common error is '&' sign in xml text
+                // causing a fatal sax error before <resumptionToken> entry is reached
+                // this patch tries to extract the <resumptionToken> only to allow loading
+                // the next oai-pmh xml.
+
+                // extract and parse only resumptionToken line
+                String in = UTF8.String(b);
+                final int istart = in.lastIndexOf("<resumptionToken");
+                if (istart >= 0) {
+                    final int iend = in.indexOf("</resumptionToken",istart);
+                    if (iend >= 0) {
+                        in = in.substring(istart, iend) + "</resumptionToken>";                        
+                        stream = new ByteArrayInputStream(UTF8.getBytes(in));
+                        try {
+                            this.saxParser.parse(stream, this);
+                            ResumptionToken.this.recordCounter++;
+                        } catch (final SAXException e2) {
+                            ConcurrentLog.warn("ResumptionToken", "token was not parsed (invalid resumption token): " + in);
+                        }
+                        ConcurrentLog.warn("ResumptionToken", "input file with error: " + e.getMessage());
+                    } 
+                } else {
+                    ConcurrentLog.logException(e);
+                    ConcurrentLog.warn("ResumptionToken", "token was not parsed (parser error):\n" + UTF8.String(b));
+                }
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
-                ConcurrentLog.warn("ResumptionToken", "token was not parsed (2):\n" + UTF8.String(b));
+                ConcurrentLog.warn("ResumptionToken", "token was not parsed (IO error)");
                 throw new IOException(e.getMessage());
             } finally {
                 try {
-                    this.stream.close();
+                    stream.close();
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
