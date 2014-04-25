@@ -190,6 +190,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if (this.host.indexOf('&') >= 0) throw new MalformedURLException("invalid '&' in host");
             this.path = resolveBackpath(this.path); // adds "/" if missing
             identPort(url, (isHTTP() ? 80 : (isHTTPS() ? 443 : (isFTP() ? 21 : (isSMB() ? 445 : -1)))));
+            if (this.port < 0) { // none of known protocols (above) = unknown
+                throw new MalformedURLException("unknown protocol: " + url);
+            }
             identAnchor();
             identSearchpart();
             escape();
@@ -615,7 +618,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             try {
                 final String portStr = this.host.substring(r + 1);
                 if (portStr.trim().length() > 0) this.port = Integer.parseInt(portStr);
-                else this.port =  -1;
+                else this.port =  dflt;
                 this.host = this.host.substring(0, r);
             } catch (final NumberFormatException e) {
                 throw new MalformedURLException("wrong port in host fragment '" + this.host + "' of input url '" + inputURL + "'");
