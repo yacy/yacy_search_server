@@ -164,7 +164,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
         if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
-            final int q = url.indexOf('/', p + 3);
+            int q = url.indexOf('/', p + 3);
+            if (q < 0) q = url.indexOf("?", p + 3); // check for www.test.com?searchpart
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
@@ -183,11 +184,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     this.userInfo = this.host.substring(0, r);
                     this.host = this.host.substring(r + 1).intern();
                 }
-                this.path = url.substring(q);
+                this.path = url.substring(q); // may result in "?searchpart" (resolveBackpath prepends a "/" )
             }
             if (this.host.length() < 4 && !this.protocol.equals("file")) throw new MalformedURLException("host too short: '" + this.host + "', url = " + url);
             if (this.host.indexOf('&') >= 0) throw new MalformedURLException("invalid '&' in host");
-            this.path = resolveBackpath(this.path);
+            this.path = resolveBackpath(this.path); // adds "/" if missing
             identPort(url, (isHTTP() ? 80 : (isHTTPS() ? 443 : (isFTP() ? 21 : (isSMB() ? 445 : -1)))));
             identAnchor();
             identSearchpart();

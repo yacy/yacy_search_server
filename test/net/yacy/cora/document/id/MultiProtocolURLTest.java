@@ -113,6 +113,34 @@ public class MultiProtocolURLTest {
 
         }
     }
+
+    @Test
+    public void testGetHost() throws MalformedURLException {
+        String[][] testStrings = new String[][]{
+            // teststring , expectedresult
+            new String[]{"http://www.yacy.net", "www.yacy.net"},
+            new String[]{"http://www.yacy.net:8090", "www.yacy.net"},
+            new String[]{"http://www.yacy.net/test?query=test", "www.yacy.net"},
+            new String[]{"http://www.yacy.net/?query=test", "www.yacy.net"},
+            new String[]{"http://www.yacy.net?query=test", "www.yacy.net"},
+            new String[]{"http://www.yacy.net:?query=test", "www.yacy.net"},
+            new String[]{"//www.yacy.net:?query=test", "www.yacy.net"},
+        };
+
+        for (int i = 0; i < testStrings.length; i++) {
+            // desired conversion result
+            System.out.print("testGetHost: " + testStrings[i][0]);
+            String shouldBe = testStrings[i][1];
+
+            // conversion result
+            String resolvedHost = new MultiProtocolURL(testStrings[i][0]).getHost();
+
+            // test if equal
+            assertEquals(shouldBe, resolvedHost);
+            System.out.println(" -> " + resolvedHost);
+
+        }
+    }
 }
 
 
