@@ -761,6 +761,7 @@ public class HeapReader {
 
         @Override
         public Map.Entry<byte[], byte[]> next0() {
+            if (this.is == null) return null;
             try {
                 byte b;
                 int len;
