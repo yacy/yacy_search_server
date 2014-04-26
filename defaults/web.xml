@@ -47,6 +47,11 @@
         <servlet-class>net.yacy.http.servlets.YaCyProxyServlet</servlet-class>
         -->
         <servlet-class>net.yacy.http.servlets.UrlProxyServlet</servlet-class>
+        <init-param> 
+            <description>Link text on top of proxied page to stop use of proxy</description> 
+            <param-name>stopProxyText</param-name> 
+            <param-value>YaCy stop proxy</param-value> 
+        </init-param>
     </servlet>
 
     <!-- mappings activated by the application - hardcoded (added here for completness) -->

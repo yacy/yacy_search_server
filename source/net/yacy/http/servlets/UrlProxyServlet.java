@@ -75,12 +75,18 @@ import org.jsoup.select.Elements;
  */
 public class UrlProxyServlet extends ProxyServlet implements Servlet {
 
+    private String _stopProxyText = null;
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
         // must be lower case (header names are internally converted to lower)
         _DontProxyHeaders.add("host"); // to prevent Host header setting from original servletrequest (which is localhost)
+        String tmps = config.getInitParameter("stopProxyText");
+        if (tmps != null) {
+            _stopProxyText = tmps;
+        }
 
     }
     /* ------------------------------------------------------------ */
@@ -248,8 +254,11 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
 
                 // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
                 // TODO: use a template file for
-                //de.prepend("<div><form action='" + proxyurl + "'><input type='submit' value='YaCy stop proxy' /></form></div>");
-                
+                if (_stopProxyText != null) {
+                    bde.prepend("<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
+                        + "<div align='center' style='font-size:11px; color:darkgrey;'><a href='" + proxyurl + "'>" + _stopProxyText + "</a></div></div>");
+                }
+
                 // 9 - deliver to client
                 byte[] sbb = UTF8.getBytes(doc.toString());
 
