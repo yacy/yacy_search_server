@@ -56,7 +56,7 @@
     <form class="search" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
       <fieldset class="maininput">
         <input name="query" class="searchinput" id="search" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" style="position:relative;top:1px;" />
-        <button type="submit" name="query" id="search" class="btn btn-primary">Search</button>
+        <button type="submit" name="query" id="Enter" class="btn btn-primary">Search</button>
         <input type="hidden" name="verify" value="#[search.verify]#" />
         #(searchdomswitches)#::
         <div class="yacysearch">
@@ -204,11 +204,6 @@
       </dl>
       #(/searchoptions)#
     </form>
-    <script type="text/javascript">
-    #(focus)#::
-      document.getElementById("search").focus();
-    #(/focus)#
-    </script>
     
     #(topmenu)#
     #%env/templates/embeddedfooter.template%#
