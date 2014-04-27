@@ -95,14 +95,14 @@ public class URIMetadataNode extends SolrDocument {
         String tags = crypt.simpleDecode(prop.getProperty("tags", "")); if (tags == null) tags = "";
         this.keywords = Tagging.cleanTagFromAutotagging(tags);
         String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", "")); if (dc_publisher == null) dc_publisher = "";
-        String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0")); if (lons == null) lons = "0.0";
-        String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0")); if (lats == null) lats = "0.0";
-
+        String lons = crypt.simpleDecode(prop.getProperty("lon"));
+        String lats = crypt.simpleDecode(prop.getProperty("lat"));
+        
         this.setField(CollectionSchema.title.name(), descr);
         this.setField(CollectionSchema.author.name(), dc_creator);
         this.setField(CollectionSchema.publisher_t.name(), dc_publisher);
-        this.lat = Float.parseFloat(lats);
-        this.lon = Float.parseFloat(lons);
+        this.lon = (lons == null) ? 0.0d : Double.parseDouble(lons);
+        this.lat = (lats == null) ? 0.0d : Double.parseDouble(lats);
 
         // create new formatters to make concurrency possible
         final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
@@ -233,14 +233,15 @@ public class URIMetadataNode extends SolrDocument {
             if (latlon != null) {
                 int p = latlon.indexOf(',');
                 if (p > 0) {
+                    // only needed if not already checked by solr coordinate
                     if (latlon.charAt(0) <= '9') { // prevent alpha's
                         this.lat = Double.parseDouble(latlon.substring(0, p));
-                        if (this.lat >= -90.0d && this.lat <= 90.0d) this.lat = 0.0d;
+                        if (this.lat < -90.0d || this.lat > 90.0d) this.lat = 0.0d;
                     }
 
                     if ( (p < latlon.length()-1) && (latlon.charAt(p+1) <= '9') ) { 
                         this.lon=Double.parseDouble(latlon.substring(p + 1));
-                        if (this.lon >= -180.0d && this.lon <= 180.0d) this.lon = 0.0d;
+                        if (this.lon < -180.0d || this.lon > 180.0d) this.lon = 0.0d;
                     }
                 }
             }
