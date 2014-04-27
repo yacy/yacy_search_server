@@ -233,8 +233,15 @@ public class URIMetadataNode extends SolrDocument {
             if (latlon != null) {
                 int p = latlon.indexOf(',');
                 if (p > 0) {
-                    this.lat = Double.parseDouble(latlon.substring(0, p));
-                    this.lon = Double.parseDouble(latlon.substring(p + 1));
+                    if (latlon.charAt(0) <= '9') { // prevent alpha's
+                        this.lat = Double.parseDouble(latlon.substring(0, p));
+                        if (this.lat >= -90.0d && this.lat <= 90.0d) this.lat = 0.0d;
+                    }
+
+                    if ( (p < latlon.length()-1) && (latlon.charAt(p+1) <= '9') ) { 
+                        this.lon=Double.parseDouble(latlon.substring(p + 1));
+                        if (this.lon >= -180.0d && this.lon <= 180.0d) this.lon = 0.0d;
+                    }
                 }
             }
         }
