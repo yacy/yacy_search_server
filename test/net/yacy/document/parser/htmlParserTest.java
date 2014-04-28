@@ -13,6 +13,7 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.ImageEntry;
 import static net.yacy.document.parser.htmlParser.parseToScraper;
 import org.junit.Test;
 
@@ -94,10 +95,11 @@ public class htmlParserTest extends TestCase {
         // expectation to deliver pure text as it is possibly indexed in outboundlinks_anchortext_txt/inboundlinks_anchortext_txt
         final AnchorURL url = new AnchorURL("http://localhost/");
         final String mimetype = "text/html";
-        final String testhtml = "<html><bod>"
+        final String testhtml = "<html><body>"
                 + "<a href='x1.html'><span>testtext</span></a>" // "testtext"
                 + "<a href=\"http://localhost/x2.html\">   <i id=\"home-icon\" class=\"img-sprite\"></i>Start</a>" // "Start"
                 + "<a href='x1.html'><span class='button'><img src='pic.gif'/></span></a>" // ""  + image
+                + "<figure><img width=\"550px\" title=\"image as exemple\" alt=\"image as exemple\" src=\"./img/my_image.png\"></figrue>" // + img width 550 (+html5 figure)
                 + "</body></html>";
 
         ContentScraper scraper = parseToScraper(url, mimetype, testhtml, 10);
@@ -113,6 +115,8 @@ public class htmlParserTest extends TestCase {
         assertEquals("", linktxt);
 
         int cnt = scraper.getImages().size();
-        assertEquals(1,cnt);
+        assertEquals(2,cnt);
+        ImageEntry img = scraper.getImages().get(1);
+        assertEquals(550,img.width());
     }
 }

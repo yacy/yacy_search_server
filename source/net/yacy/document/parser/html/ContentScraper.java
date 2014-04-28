@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -366,13 +367,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 if (src.length() > 0) {
                     final AnchorURL url = absolutePath(src);
                     if (url != null) {
-                        final int width = Integer.parseInt(tag.opts.getProperty("width", "-1"));
-                        final int height = Integer.parseInt(tag.opts.getProperty("height", "-1"));
+                        // use Numberformat.parse to allow parse of "550px"
+                        NumberFormat intnum = NumberFormat.getIntegerInstance ();
+                        final int width = intnum.parse(tag.opts.getProperty("width", "-1")).intValue(); // Integer.parseInt fails on "200px"
+                        final int height = intnum.parse(tag.opts.getProperty("height", "-1")).intValue();
                         final ImageEntry ie = new ImageEntry(url, tag.opts.getProperty("alt", EMPTY_STRING), width, height, -1);
                         this.images.add(ie);
                     }
                 }
-            } catch (final NumberFormatException e) {}
+            } catch (final ParseException e) {}
             this.evaluationScores.match(Element.imgpath, src);
         } else if(tag.name.equalsIgnoreCase("base")) {
             try {
