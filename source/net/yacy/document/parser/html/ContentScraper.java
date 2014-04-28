@@ -97,6 +97,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         embed(TagType.singleton), //added by [MN]
         param(TagType.singleton), //added by [MN]
         iframe(TagType.singleton), // scraped as singleton to get such iframes that have no closing tag
+        source(TagType.singleton), // html5 (part of <video> <audio>) - scaped like embed
 
         a(TagType.pair),
         h1(TagType.pair),
@@ -463,7 +464,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.anchors.add(newLink);
                 }
             }
-        } else if(tag.name.equalsIgnoreCase("embed")) {
+        } else if(tag.name.equalsIgnoreCase("embed") || tag.name.equalsIgnoreCase("source")) { //html5 tag
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
             try {
                 if (src.length() > 0) {
