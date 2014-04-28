@@ -134,7 +134,7 @@ With this settings you can activate or deactivate augmented parsing which combin
 Augmented Parser:==Расширенный анализ:
 >Enabled<==>Включить<
 Globally enables or disables the augmented parser. This setting requires a restart.==Глобальное включение или отключение расширенного анализа. Изменение этой настройки потребует перезапуск программы.
-Augmented Parser - RDFa:==Расширенный анализ - RDFa:
+Augmented Parser - RDFa:==Расширенный анализ RDFa:
 Globally enables or disables the RDFa parser. This setting requires a restart.==Глобальное включение или отключение анализа RDFa. Изменение этой настройки потребует перезапуск программы.
 "Submit"=="Сохранить"
 #-----------------------------
@@ -458,10 +458,11 @@ Error saving the skin.==Ошибка сохранения файла скина.
 
 #File: ConfigBasic.html
 #---------------------------
-Access Configuration==Конфигурация доступа
+Access Configuration==Основные настройки
 Basic Configuration==Основные настройки
 Your port has changed. Please wait 10 seconds.==Порт вашего узла был изменён. Пожалуйста, подождите 10 секунд.
-The peer port was changed successfully. Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==Порт узла был успешно изменён. Ваш браузер перейдёт на <a href="http://#[host]#:#[port]#/ConfigBasic.html">новую страницу</a> в течение 10 секунд.
+Your browser will be redirected to the new <a href="http://\#\[host\]\#:\#\[port\]\#/ConfigBasic.html">location</a> in 5 seconds.==Ваш браузер перейдёт на <a href="http://#[host]#:#[port]#/ConfigBasic.html">новую страницу</a> в течение 10 секунд.
+The peer port was changed successfully.==Порт узла был успешно изменён.
 Your YaCy Peer needs some basic information to operate properly==Укажите основную информацию для работы вашего узла
 Select a language for the interface==Выберите язык интерфейса
 Use Case: what do you want to do with YaCy:==Выберите цель использования YaCy:
@@ -564,7 +565,7 @@ For the discover function the <i>web graph</i> option of the web structure index
 #-----------------------------
 Index Sources &amp; Targets==Источники индекса и цели
  YaCy supports multiple index storage locations.==YaCy поддерживает несколько путей к хранилищам индекса.
-As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==Используется внутренняя база данных индекса встроеная в мульти-ядро Solr, но также может использоваться и удалённая база Solr.
+As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==Используется внутренняя база данных индекса встроенная в мульти-ядро Solr, но также может использоваться и удалённая база Solr.
 Solr Search Index==База данных Solr
 Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="IndexSchema_p.html">Schema Editor</a>.==Solr содержит главный поисковый индекс. База данных состоит из двух ядер: по-умолчанию ядро 'collection1' для документов и ядро 'webgraph' для вэб-контента. База данных Solr может быть подробно настроена через <a href="IndexSchema_p.html">редактор схемы</a>.
 Lazy Value Initialization&nbsp;=="Ленивые" значения инициализации&nbsp;
@@ -584,7 +585,7 @@ Index Size==Документов в индексе
 It's easy to <a href="http://www.yacy-websearch.net/wiki/index.php/Dev:Solr" target="_blank">attach an external Solr to YaCy</a>.==Присоединить внешнюю базу Solr <a href="http://www.yacy-websearch.net/wiki/index.php/Dev:Solr" target="_blank">просто</a>.
 This external Solr can be used instead the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored.==Внешняя база данных Solr будет использоваться вместо встроенной. Вы также можете использовать дополнительно встроенную базу, но тогда индексы будут сохраняться в обе базы.
 Solr URL\(s\)==Ссылки на базу Solr
-You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' \(comma\) as separator.==Вы можете установить одну или более баз Solr, которые будут доступны распределённо. Для перечисления нескольких баз, используйте ',' (запятую) в качестве разделителя.
+You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' \(comma\) as separator.==Вы можете установить одну или более баз Solr, которые будут доступны распределённо. Адреса нескольких баз указывайте через запятую.
 The set of remote targets are used as shard of a complete index. The host part of the url is used as key for a hash function which selects one of the shards \(one of your remote servers\).==Установленные удалённые цели используются как единое целое. Часть ссылок на хосте используется как ключ для хэш-функции, который выбирается одним из сегментов (один из ваших удалённых серверов).
 When a search request is made, all servers are accessed synchronously and the result is combined.==Когда выполнятся поисковый запрос, результат суммируется, так как  все серверы доступны синхронно.
 Sharding Method<br/>==Метод сегментирования<br/>
@@ -730,7 +731,7 @@ Network and Domain Specification==Спецификация сети и доме�
 # With this configuration it is not allowed to authentify automatically from localhost!==Такая конфигурация не разрешает автоматически авторизовать локальный компьютер!
 # Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Пожалуйста, откройте <a href="ConfigAccounts_p.html">учётные записи</a> и установите новый пароль.
 YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==YaCy может работать в режиме кластера узлов или как одиночный узел.
-To control that all participants within a web indexing domain have access to the same domain,==Для контроля того, что все участники домена индексации имеют доступ к одним и тем же данным,
+To control that all participants within a web indexing domain have access to the same domain,==Для того, чтобы все участники домена индексации имели доступ к одним и тем же данным,
 this network definition must be equal to all members of the same YaCy network.==данное описание сети должно быть одинаково у всех членов этой сети.
 >Network Definition<==>Сеть<
 Remote Network Definition URL==Ссылка на удалённую сеть
@@ -780,7 +781,7 @@ Index data is not distributed, but remote crawl requests are distributed and acc
 Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Поисковые запросы  распространяются на все узлы кластера, результаты поиска принимаются от всех узлов кластера
 List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Список .yacy или .yacyh - домены кластера: (через запятую)
 >Public Peer==>Публичный узел
-You are visible to other peers and contact them to distribute your presence==Вы видны другим участникам и связываетесь с ними для распространения своего присутствия
+You are visible to other peers and contact them to distribute your presence==Ваш узел виден другим участникам и вы связываетесь с ними для распространения своего присутствия
 Your peer does not accept any outside index data, but responds on all remote search requests==Ваш узел не принимает любые сторонние данные индекса, но отвечает на все удалённые поисковые запросы
 >Peer Tags==>Тэги узла
 When you allow access from the YaCy network, your data is recognized using keywords==Когда вы разрешаете доступ из сети YaCy, ваши данные распознаются с помощью ключевых слов
@@ -1496,6 +1497,7 @@ Sites that do not appear during a scheduled scan period will be excluded from se
 
 #File: CrawlStartSite.html
 #---------------------------
+YaCy '#\[clientname\]#': Crawl Start==YaCy '#[clientname]#': Индексирование сайта
 >Site Crawling<==>Индексирование сайта<
 Site Crawler:==Индексирование сайта:
 Download all web pages from a given domain or base URL.==Загрузить все вэб-страницы из указанного домена или по ссылке.
@@ -2108,7 +2110,7 @@ Delete Collections<==Удаление хранилищ<
 Delete all documents which are inside specific collections.==Удалить все документы внутри специальных хранилищ.
 Not Assigned<==Не закреплено<
 Delete all documents which are not assigned to any collection==Удалить все документы незакреплённые ни за одним хранилищем
-, separated by \',\' \(comma\) or \'\|\' \(vertical bar\); or==, разделённые ',' (запятой) или '|' (вертикальной чертой (пайп)); или
+, separated by \',\' \(comma\) or \'\|\' \(vertical bar\); or==, разделённые запятой или '|' (вертикальной чертой (пайп)); или
 >generate the collection list...==>показать список хранилищ...
 Assigned<==Закреплено<
 Delete all documents which are assigned to the following collection\(s\)==Удалить все документы закреплённые за указанной ниже коллекцией
@@ -2446,7 +2448,8 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 
 #File: Network.html
 #---------------------------
-YaCy Search Network==Мониторинг сети YaCy
+YaCy '#\[clientname]\#': YaCy Search Network==YaCy '#[clientname]#': Мониторинг сети
+YaCy Search Network \'\#\[networkName\]\#\'==Мониторинг сети YaCy
 YaCy Network<==Сеть YaCy<
 The information that is presented on this page can also be retrieved as XML==Информация, указанная на этой странице, также может быть получена как XML
 Click the API icon to see the XML.==Нажмите на иконку API, чтобы увидеть XML.
@@ -2797,11 +2800,11 @@ Comment<==Комментарий<
 Time<==Время<
 Duration \(ms\)==Длительность (мс)
 Result-Count==Число результатов
-The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zuständigen Peers im DHT gelöst wurde.
-red -&gt; request list alive==rot -&gt; Request Liste aktiv
-green -&gt; request has terminated==grün -&gt; Request wurde beendet
-grey -&gt; the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -&gt; Das Suchergebnis hash order position(s) (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
-"Search event picture"=="Such Ereignis Bild"
+The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Изображение сети показывает, какие последние поисковые запросы были получены от узлов по DHT и решены.
+red -&gt; request list alive==Красный -&gt; активный запрос
+green -&gt; request has terminated==Зелёный -&gt; завершённый запрос
+grey -&gt; the search target hash order position\(s\) \(more targets if a dht partition is used\)<==Серый -&gt; хэш цели поиска (больше целей, если используется DHT)<
+"Search event picture"=="Изображение поиска"
 #-----------------------------
 
 #File: ProxyIndexingMonitor_p.html
@@ -3010,7 +3013,7 @@ URLs for<br/>Remote<br/>Crawl==Ссылки для <br/>удалённых <br/>
 Advanced Settings==Настройки системы
 If you want to restore all settings to the default values,==Если вы хотите восстановить все значения настроек по-умолчанию,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==но <strong>забыли свой пароль администратора</strong>, то вы должны остановить YaCy,
-delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==удалить файл 'DATA/SETTINGS/yacy.conf' в корневой папке YaCy и перезапустить YaCy.
+delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==удалить файл 'DATA/SETTINGS/yacy.conf' в корневой папке программы и перезапустить YaCy.
 Performance Settings of Busy Queues==Настройки производительности очередей и процессов
 Viewer and administration for database tables==Просмотр и управление таблицами базы данных
 Viewer for Cookies in Proxy==Просмотр сведений о куки (при использовании прокси-сервера)
@@ -3859,6 +3862,7 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Вы може
 
 #File: Vocabulary_p.html
 #---------------------------
+YaCy '#\[clientname\]#': Federated Index==YaCy '#[clientname]#': Управление словарём
 The information that is presented on this page can also be retrieved as XML==Информация представленная на этой странице, также может быть получена в виде XML.
 Click the API icon to see the RDF Ontology definition for this vocabulary.==Нажмите на иконку API для просмотра определения онтологии RDF для этого словаря.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">страницу API Wiki</a>.
@@ -3923,7 +3927,8 @@ Error with file input==Ошибка с указанным файлом
 started.==запущено.
 Please wait some seconds,==Пожалуйста, подождите несколько секунд,
 it may take some seconds until the first result appears there.==до получения первого результата.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.<br />==Если вы проиндексировали нежелательные страницы, то вы можете удалить их <a href="http://IndexCreateQueues_p.html?stack=LOCAL">здесь</a>.<br>
+If you crawl any un-wanted pages,==Если вы проиндексировали нежелательные страницы,
+you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.<br />== то вы можете удалить их <a href="http://IndexCreateQueues_p.html?stack=LOCAL">здесь</a>.<br>
 >Size==>Размер
 >Progress<==>Ход работы<
 #Max==Максимально
@@ -3956,6 +3961,8 @@ idle==Ожидание
 Name==Название
 Status==Состояние
 Running==Выполняется
+Terminate All==Прервать всё
+Confirm Termination of All Crawls==Подтвердите прерывание всех индексаторов
 "Terminate"=="Прервать"
 Crawled Pages==Проиндексированные страницы
 Title==Заголовок
@@ -4251,7 +4258,7 @@ external==
 "You did not yet start a web crawl!"=="Вы не запустили вэб-индексацию!"
 "You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!"=="Вы не видите всех функций мониторинга здесь, потому что нет результатов индексирования. Запустите вэб-индексацию!"
 First Steps==Первые шаги
-Use Case &amp; Account==Учётные записи и варианты использования YaCy
+Use Case &amp; Account==Учётные записи и варианты использования
 Load Web Pages, Crawler==Индексирование сайта
 RAM/Disk Usage &amp; Updates==Использование памяти и обновление системы
 System Status==Монитор производительности
@@ -4306,6 +4313,9 @@ Remote Search<==Удалённый поиск<
 
 #File: env/templates/submenuIndexImport.template
 #-----------------------------
+Content Importer==Импорт контента
+External Datasets==Импорт из внешних источников
+Database Reader==Обозреватель баз данных
 RSS Feed Importer==Импорт RSS-лент
 OAI-PMH Importer==Импорт данных OAI-PMH
 Database Reader for phpBB3 Forums==Обозреватель баз данных phpBB3‐форумов
@@ -4605,7 +4615,7 @@ Did you mean:==Вы имели ввиду:
 
 #File: www/welcome.html
 #---------------------------
-YaCy: Default Page for Individual Peer Content==YaCy: Страница по умолчанию для контента узла
+YaCy: Default Page for Individual Peer Content==YaCy: Страница по-умолчанию для контента узла
 Individual&nbsp;Web&nbsp;Page==Личная вэб-страница
 Welcome to your own web page<br />in the <strong>YaCy Network==Добро пожаловать на вашу вэб-страницу<br />im <strong>в сети YaCy
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==Это демонстрационная страница для вашего личного вэб-сервера!
