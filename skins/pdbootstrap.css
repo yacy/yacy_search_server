@@ -43,12 +43,6 @@ a:link:hover {
 
 a.MenuItemLink, ul.SubMenu em {
   background-color: #eeeeee;
-  color:#18294A;
-}
-
-a:hover.MenuItemLink {
-  background-color:transparent;
-  color:#18294A;
 }
 
 /* Head */
