@@ -201,11 +201,14 @@ form.search.small h2 {
 
 .searchresults h4 a {
   font-size:1.2em;
-  font-weight:normal;
-  color:#2200CC;
+  font-weight:bold;
+  text-decoration:none; 
+  color:#1c65ba;
 }
 .searchresults h4 a:link:hover {
-  color:#2200CC;
+  font-weight:bold;
+  text-decoration:underline; 
+  color:#1c65ba;
 }
 
 .snippetLoaded strong {
@@ -213,9 +216,11 @@ form.search.small h2 {
 }
 
 .searchresults .url a {
+  text-decoration:none; 
   color:#3c7a3c;
 }
 .searchresults .url a:link:hover {
+  text-decoration:underline; 
   color:#3c7a3c;
 }
 

@@ -1135,11 +1135,13 @@ color_borderline = #888888
 color_signbad = #990000
 color_signgood = #009900
 color_signother = #000099
-color_searchheadline = #2200CC
 
-# green / success /3*2
-color_searchurl = #3c7a3c
-color_searchurlhover = #3c7a3c
+# dark blue
+color_searchheadline = #2145ca
+
+# green / success/3*2
+color_searchurl = #1c65ba
+color_searchurlhover = #1c65ba
 
 
 # federated index storage and federated search functionality
