@@ -17,7 +17,7 @@ public class blacklists_p {
         final serverObjects prop = new serverObjects();
 
         final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
-        int blacklistCount=0;
+        int blacklistCount = 0;
 
         final String blackListName = (post == null) ? "" : post.get("listname", "");
         final String attrOnly = (post == null) ? "" : post.get("attrOnly", "");

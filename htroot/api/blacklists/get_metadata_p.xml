@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding="UTF-8" standalone='yes'?>
+<blacklists>
+#{lists}#<list name="#[name]#" shared="#[shared]#" #{types}# 
+	      #[name]#="#[value]#"#{/types}# />
+#{/lists}#
+</blacklists>

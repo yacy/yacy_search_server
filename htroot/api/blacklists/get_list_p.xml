@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<list name="#[name]#" shared="#[shared]#" #{types}# 
+      #[name]#="#[value]#"#{/types}#>
+	<items>    
+#{items}#
+		<item>#[item]#</item>
+#{/items}#
+	</items>
+</list>
