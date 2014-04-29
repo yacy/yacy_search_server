@@ -965,7 +965,7 @@ externalRedirector=
 
 svnRevision=0
 
-currentSkin=pdblue
+currentSkin=pdbootstrap
 
 # flag to show if pages shall be usable for non-admin users
 # this can be applied to the Surftips.html and yacysearch.html page
@@ -1112,20 +1112,34 @@ heuristic.searchresults.crawlglobal = false
 heuristic.opensearch = false
 
 # colours for generic design
+# white
 color_background = #FFFFFF
+
+# dark blue/grey
 color_text = #18294A
-color_legend = #65AC2A
-color_tableheader = #5090D0
-color_tableitem = #DEE6F3
-color_tableitem2 = #ECF1F8
-color_tablebottom = #FFCCCC
+
+# success/green
+color_legend = #5cb85c
+
+# brand/blue
+color_tableheader = #84B3DE
+
+# dark/light grey (for tables)
+color_tableitem = #dddddd
+color_tableitem2 = #eeeeee
+
+# light red
+color_tablebottom = #F2DEDE
+
 color_borderline = #888888
 color_signbad = #990000
 color_signgood = #009900
 color_signother = #000099
 color_searchheadline = #2200CC
-color_searchurl = #008000
-color_searchurlhover = #008000
+
+# green / success /3*2
+color_searchurl = #3c7a3c
+color_searchurlhover = #3c7a3c
 
 
 # federated index storage and federated search functionality
