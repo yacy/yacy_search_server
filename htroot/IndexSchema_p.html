@@ -36,7 +36,11 @@
         <td>Active</td>
         <td>Attribute</td>
         <td>Custom Solr Field Name</td>
-        <td>Comment</td>
+        <td>Comment <div style="float: right" class="btn-group btn-group-xs">
+           <button type="submit" class="btn btn-default #(activeonly)#::active#(/activeonly)#" name="filter" value="active">show active</button>
+           <button type="submit" class="btn btn-default #(viewall)#::active#(/viewall)#">show all available</button>
+           <button type="submit" class="btn btn-default #(disabledonly)#::active#(/disabledonly)#" name="filter" value="disabled">show disabled</button></div>
+        </td>
       </tr>
       #{schema}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">

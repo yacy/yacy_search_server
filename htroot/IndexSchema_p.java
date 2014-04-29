@@ -51,21 +51,24 @@ public class IndexSchema_p {
             boolean modified = false; // flag to remember changes
             while (i.hasNext()) {
                 entry = i.next();
-                final String v = post.get("schema_" + entry.key());
-                final String sfn = post.get("schema_solrfieldname_" + entry.key());
-                if (sfn != null ) {
-                    // set custom solr field name
-                    if (!sfn.equals(entry.getValue())) {
-                        entry.setValue(sfn);
+                if (post.containsKey("schema_solrfieldname_" + entry.key()) ) { // can't use schem_... checkbox only contained if checked
+                    // only handle displayed (contained) fields
+                    final String v = post.get("schema_" + entry.key());
+                    final String sfn = post.get("schema_solrfieldname_" + entry.key());
+                    if (sfn != null) {
+                        // set custom solr field name
+                        if (!sfn.equals(entry.getValue())) {
+                            entry.setValue(sfn);
+                            modified = true;
+                        }
+                    }
+                    // set enable flag
+                    final boolean c = v != null && v.equals("checked");
+                    if (entry.enabled() != c) {
+                        entry.setEnable(c);
                         modified = true;
                     }
-                }
-                // set enable flag
-                final boolean c = v != null && v.equals("checked");
-                if (entry.enabled() != c) {
-                    entry.setEnable(c);
-                    modified = true;
-                }
+                } 
             }
             if (modified) { // save settings to config file if modified
                 try {
@@ -102,13 +105,25 @@ public class IndexSchema_p {
         boolean dark = false;
         // use enum SolrField to keep defined order
         SchemaDeclaration[] cc = schemaName.equals(CollectionSchema.CORE_NAME) ? CollectionSchema.values() : WebgraphSchema.values();
+        String filterstr = null;
+        // set active filter button property
+        boolean viewall = (post == null) || (filterstr = post.get("filter")) == null;
+        boolean viewactiveonly = !viewall && "active".equals(filterstr);
+        boolean viewdisabledonly = !viewall && "disabled".equals(filterstr);
+        prop.put("viewall",viewall);
+        prop.put("activeonly", viewactiveonly);
+        prop.put("disabledonly", viewdisabledonly);
+        
         for(SchemaDeclaration field : cc) {
-            prop.put("schema_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("schema_" + c + "_checked", cs.contains(field.name()) ? 1 : 0);
-            prop.putHTML("schema_" + c + "_key", field.name());
-            prop.putHTML("schema_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
-            if (field.getComment() != null) prop.putHTML("schema_" + c + "_comment",field.getComment());
-            c++;
+            boolean showline = viewactiveonly ? cs.contains(field.name()) : (viewdisabledonly ? cs.containsDisabled(field.name()): true);
+            if (showline) {
+                prop.put("schema_" + c + "_dark", dark ? 1 : 0); dark = !dark;
+                prop.put("schema_" + c + "_checked", cs.contains(field.name()) ? 1 : 0);
+                prop.putHTML("schema_" + c + "_key", field.name());
+                prop.putHTML("schema_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
+                if (field.getComment() != null) prop.putHTML("schema_" + c + "_comment",field.getComment());
+                c++;
+            }
         }
         prop.put("schema", c);
 
