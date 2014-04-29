@@ -60,6 +60,7 @@ import net.yacy.kelondro.index.RowHandleSet;
  */
 public class HostBalancer implements Balancer {
 
+    private final static ConcurrentLog log = new ConcurrentLog("HostBalancer");
     public final static HandleMap depthCache = new RowHandleMap(Word.commonHashLength, Word.commonHashOrder, 2, 8 * 1024 * 1024, "HostBalancer.DepthCache");
     
     private final File hostsPath;
@@ -258,16 +259,22 @@ public class HostBalancer implements Balancer {
                             String s = i.next();
                             HostQueue hq = this.queues.get(s);
                             if (hq == null) {i.remove(); continue smallstacks;}
+                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                            if (delta < 0) continue; // keep all non-waiting stacks; they are useful to speed up things
+                            // to protect all small stacks which have a fast throughput, remove all with long waiting time
+                            if (delta >= 1000) {i.remove(); continue smallstacks;}
                             int size = hq.size();
                             if (singletonStacksExist) {
-                                if (size != 1) {i.remove(); continue smallstacks;}  
-                            } else {
-                                if (size > 10) {i.remove(); continue smallstacks;}
+                                if (size != 1) {i.remove(); continue smallstacks;} // remove all non-singletons
+                            } else /*smallStacksExist*/ {
+                                if (size > 10) {i.remove(); continue smallstacks;} // remove all large stacks
                             }
-                            // to protect all small stacks which have a fast throughput, remove all with long wainting time
-                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
-                            if (delta >= 1000) {i.remove();}
                         }
+                    }
+                    if (this.roundRobinHostHashes.size() == 1) {
+                        if (log.isFine()) log.fine("(re-)initialized the round-robin queue with one host");
+                    } else {
+                        log.info("(re-)initialized the round-robin queue; " + this.roundRobinHostHashes.size() + " hosts.");
                     }
                 }
                 if (this.roundRobinHostHashes.size() == 0) return null;
