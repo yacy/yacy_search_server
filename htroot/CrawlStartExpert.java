@@ -479,8 +479,7 @@ public class CrawlStartExpert {
             prop.put("cachePolicy_iffresh", 1);
         }
 
-
-        // ---------- Agent name (untested & untouched)
+        // ---------- Agent name
         if (sb.isP2PMode()) {
             prop.put("agentSelect", 0);
         } else {
@@ -496,10 +495,17 @@ public class CrawlStartExpert {
             if (sb.isAllIPMode()) {
                 agentNames.add(ClientIdentification.browserAgentName);
             }
+            String defaultAgentName = agentNames.get(0);
+            if (post != null && post.containsKey("agentName")) {
+                String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
+                if (agentNames.contains(agentName)) defaultAgentName = agentName;
+            }
             for (int i = 0; i < agentNames.size(); i++) {
                 prop.put("agentSelect_list_" + i + "_name", agentNames.get(i));
+                prop.put("agentSelect_list_" + i + "_default", agentNames.get(i).equals(defaultAgentName) ? 1 : 0);
             }
             prop.put("agentSelect_list", agentNames.size());
+
         }
         prop.put("agentSelect_defaultAgentName",
                 ClientIdentification.yacyInternetCrawlerAgentName);

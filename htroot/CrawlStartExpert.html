@@ -450,7 +450,7 @@
             </span></span>
 			<select name="agentName" id="agentName">
 			#{list}#
-              <option value="#[name]#">#[name]#</option>
+              <option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>
 			#{/list}#
 			</select>
 	      </dd>
