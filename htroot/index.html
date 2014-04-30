@@ -35,7 +35,7 @@
       });
     });
     </script>
-    <style type="text/css">.twitter-typeahead {margin: 0px;padding: 0px;top:-8px;}</style> <!-- fix for input window -->
+    <style type="text/css">.twitter-typeahead {margin: 0px;padding: 0px;top:3px;}</style> <!-- fix for input window -->
   </head>
   <body id="index" onload="#(focus)#::document.getElementById('search').focus()#(/focus)#">
     #(topmenu)#
@@ -55,8 +55,12 @@
 
     <form class="search" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
       <fieldset class="maininput">
-        <input name="query" class="searchinput" id="search" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" style="position:relative;top:1px;" />
-        <button type="submit" name="query" id="Enter" class="btn btn-primary">Search</button>
+        <div class="input-group">
+          <input name="query" id="search" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" class="form-control searchinput typeahead" />
+          <div class="input-group-btn">
+            <button name="query" id="Enter" class="btn btn-primary">Search</button>
+          </div>
+        </div>
         <input type="hidden" name="verify" value="#[search.verify]#" />
         #(searchdomswitches)#::
         <div class="yacysearch">
