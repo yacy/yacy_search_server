@@ -84,8 +84,35 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("      xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n");
         writer.write("<head profile=\"http://www.w3.org/2003/g/data-view\">\n");
         //writer.write("<link rel=\"transformation\" href=\"http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl\"/>\n");
+
+        writer.write("<!-- Bootstrap core CSS -->\n");
+        writer.write("<link href=\"/env/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
+        writer.write("<link href=\"/env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
+        //writer.write("<script src=\"/env/bootstrap/js/jquery.min.js\"></script>\n");
+        //writer.write("<script src=\"/env/bootstrap/js/bootstrap.min.js\"></script>\n");
+        //writer.write("<script src=\"/env/bootstrap/js/docs.min.js\"></script>\n");
+        //writer.write("<script src=\"/env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
+        writer.write("<!-- Custom styles for this template, i.e. navigation (move this to base.css) -->\n");
+        writer.write("<link href=\"/env/bootstrap-base.css\" rel=\"stylesheet\">\n");
+        //writer.write("<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->\n");
+        //writer.write("<!--[if lt IE 9]>\n");
+        //writer.write("  <script src=\"/env/bootstrap/js/html5shiv.js\"></script>\n");
+        //writer.write("  <script src=\"/env/bootstrap/js/respond.min.js\"></script>\n");
+        //writer.write("<![endif]-->\n");
+        writer.write("<!-- old css styles -->\n");
         writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/env/base.css\" />\n");
         writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/style.css\" />\n");
+        writer.write("<!--[if lt IE 6]>\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/oldie.css\" />\n");
+        writer.write("<![endif]-->\n");
+        writer.write("<!--[if lte IE 6.0]>\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/ie6.css\" />\n");
+        writer.write("<![endif]-->\n");
+        writer.write("<!--[if lte IE 7.0]>\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/ie7.css\" />\n");
+        writer.write("<![endif]-->\n");
+        writer.write("<!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->\n");
+
         NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
         paramsList.remove("wt");
         String xmlquery = dqp.matcher("/solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");

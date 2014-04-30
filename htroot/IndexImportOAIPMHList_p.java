@@ -47,7 +47,7 @@ public class IndexImportOAIPMHList_p {
 
         if (post != null && post.containsKey("source")) {
             ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-            final Set<String> oaiRoots = OAIListFriendsLoader.getListFriends(sb.loader, agent).keySet();
+            final Set<String> oaiRoots = new OAIListFriendsLoader().getListFriends(sb.loader, agent).keySet();
 
             boolean dark = false;
             int count = 0;

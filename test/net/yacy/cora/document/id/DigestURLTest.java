@@ -10,7 +10,7 @@ public class DigestURLTest extends TestCase {
     public void testIdentPort() throws MalformedURLException {
         String[][] testStrings = new String[][]{
             new String[]{"http://www.yacy.net:", "http://www.yacy.net/"},
-            new String[]{"http://www.yacy.net:-1", "http://www.yacy.net/"},
+            new String[]{"http://www.yacy.net:80", "http://www.yacy.net/"},
             new String[]{"http://www.yacy.net:/", "http://www.yacy.net/"},
             new String[]{"http://www.yacy.net: /", "http://www.yacy.net/"}
         };

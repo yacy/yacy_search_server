@@ -81,7 +81,7 @@
       #(terminate-button)#::
       <form action="/Crawler_p.html" method="get" role="form">
             <input type="hidden" name="queues_terminate_all" value="" />
-            <button type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Termination of All Crawls')"><span class="glyphicon glyphicon-remove-circle"></span> Terminate All</button>
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Confirm Termination of All Crawls')"><span class="glyphicon glyphicon-remove-circle"></span> Terminate All</button>
       </form>
       #(/terminate-button)#
 </fieldset>
@@ -231,7 +231,7 @@ document.getElementById("queues").style.height = maxh + "px";
         <div style="text-decoration:blink;float:left;">Running</div>
         <form style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
-        <input type="submit" name="terminate" value="Terminate" />
+        <input type="submit" name="terminate" value="Terminate" class="btn btn-danger btn-xs"/>
         </div></form>
         #(/terminateButton)#
 	</td>

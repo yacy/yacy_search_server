@@ -55,6 +55,8 @@ import net.yacy.search.Switchboard;
 
 public class HostQueue implements Balancer {
 
+    private final static ConcurrentLog log = new ConcurrentLog("HostQueue");
+    
     public  static final String indexSuffix           = ".stack";
     private static final int    EcoFSBufferSize       = 1000;
     private static final int    objectIndexBufferSize = 1000;
@@ -105,7 +107,7 @@ public class HostQueue implements Balancer {
         if (!(this.hostPath.exists())) this.hostPath.mkdirs();
         this.depthStacks = new TreeMap<Integer, Index>();
         int size = openAllStacks();
-        ConcurrentLog.info("Balancer", "opened HostQueue " + this.hostPath.getAbsolutePath() + " with " + size + " urls.");
+        if (log.isInfo()) log.info("opened HostQueue " + this.hostPath.getAbsolutePath() + " with " + size + " urls.");
     }
     
     public String getHost() {
@@ -406,7 +408,7 @@ public class HostQueue implements Balancer {
 
                 // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
                 if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, crawlEntry.url())) {
-                    ConcurrentLog.fine("CRAWLER", "URL '" + crawlEntry.url() + "' is in blacklist.");
+                    if (log.isFine()) log.fine("URL '" + crawlEntry.url() + "' is in blacklist.");
                     continue mainloop;
                 }
 
@@ -414,7 +416,7 @@ public class HostQueue implements Balancer {
                 // if not: return null. A calling method must handle the null value and try again
                 profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
                 if (profileEntry == null) {
-                    ConcurrentLog.fine("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+                    if (log.isFine()) log.fine("no profile entry for handle " + crawlEntry.profileHandle());
                     continue mainloop;
                 }
                 
@@ -432,7 +434,7 @@ public class HostQueue implements Balancer {
             // in best case, this should never happen if the balancer works properly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            ConcurrentLog.info("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, agent));
+            if (log.isInfo()) log.info("forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, agent));
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
             if (loops < 3) {
@@ -444,7 +446,7 @@ public class HostQueue implements Balancer {
                 // must be synchronized here to avoid 'takeover' moves from other threads which then idle the same time which would not be enough
                 if (rest > 0) {try {this.wait(rest);} catch (final InterruptedException e) {}}
                 for (int i = 0; i < loops; i++) {
-                    ConcurrentLog.info("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
+                    if (log.isInfo()) log.info("waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
                     try {this.wait(1000); } catch (final InterruptedException e) {}
                 }
             }

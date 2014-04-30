@@ -586,6 +586,7 @@ public final class CrawlSwitchboard {
                 Request r;
                 while (sei.hasNext()) {
                     r = sei.next();
+                    if (r == null) continue;
                     String handle = r.profileHandle();
                     RowHandleSet us = this.profilesActiveCrawlsCounter.get(handle);
                     if (us == null) {us =  new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0); this.profilesActiveCrawlsCounter.put(handle, us);}

@@ -1,0 +1,303 @@
+/* Skin */
+
+body {
+  background-color:#FFFFFF;
+  color:#18294A;
+}
+
+a:link {
+  color:#18294A;
+  background-color:transparent;
+}
+
+a:link:hover {
+  color: #5cb85c;
+  background-color:transparent;
+}
+
+/* Menu */
+
+.menugroup h3 {
+  -webkit-border-top-left-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  -khtml-border-top-left-radius: 5px;
+  -khtml-border-top-right-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+ 
+  background-color: #84B3DE;
+  color:white;
+}
+
+.SubMenugroup h3, .SubMenu h3 {
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+
+  background-color: #84B3DE;
+  color:white;
+}
+
+a.MenuItemLink, ul.SubMenu em {
+  background-color: #eeeeee;
+}
+
+/* Head */
+
+div.head h1 {
+  background-color:transparent;
+  text-align:left;
+  padding-left:70px;
+  color:#18294A;
+}
+
+/* Tables */
+
+table {
+}
+
+.TableHeader {
+  background-color: #5cb85c;
+  color:white;
+}
+
+.TableCellDark {
+  background-color: #dddddd;
+}
+
+.TableCellLight {
+  background-color: #f8f8f8;
+}
+
+.TableCellDark:target, .TableCellLight:target {
+  background-color: #F2DEDE;
+}
+
+.TableCellSummary {
+  background-color: #F2DEDE;
+}
+
+.TableCellActive {       
+  background-color: #ffbbaa;     
+}
+
+/* Blog and Wiki*/
+
+.Post {
+  background-color:#eee;
+}
+
+.PostSubject {
+  background-color:#8aa;
+}
+
+.PostSubject a {
+  color:#18294A;
+}
+
+.PostInfo {
+  background-color:#bdcdd4;
+}
+
+/* Wiki */
+
+.WikiTOCBox {
+  border: 1px solid #aaa;
+  background-color: #FFFFFF;
+}
+
+a.unknown {
+  color:#990000;
+}
+
+a.known {
+  color:#009900;
+}
+
+a.extern {
+  color:#000099;
+}
+
+/* in Bookmarks */
+
+.bookmark {
+  border-bottom:1px #000 dashed;
+}
+
+a.bookmarkTitle {
+  color: #84B3DE;
+}
+
+a:hover.bookmarkTitle {
+  color: #84B3DE;
+}
+
+a.bookmarkTags {
+  color: #007050;
+}
+
+a:hover.bookmarkTags {
+  color: #84B3DE;
+}
+
+a.bookmarkAction {
+  color: #84B3DE;
+}
+
+.Tags {
+  border-left: 2px solid #18294A;
+}
+
+.diff               { background-color: #E8E8EE; }
+.diff .unchanged    { color: #333; }
+.diff .added        { color: #090; background-color: #B5F0B5; }
+.diff .deleted      { color: #B00; background-color: #F9B5B5; }
+
+/* in Status.html */
+
+.ProgressBar {
+  border: #FFFFFF solid 1px;
+}
+div.ProgressBarFill {
+  background-color:#eeeeee;
+}
+
+
+/* Copyright info */
+
+div#api {
+  position:absolute;
+  top:3px;
+  right:20px;
+  z-index: 100;
+}
+
+/* Searchresults */
+
+fieldset.maininput, fieldset.yacys { 
+  background-color:#eeeeee;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+form.search.small h2 {
+  border-bottom:1px solid #CAD5E3;
+}
+
+.searchresults {
+  /*border-top:1px #000 dashed;*/
+}
+
+.searchresults h4 a {
+  font-size:1.2em;
+  font-weight:bold;
+  text-decoration:none; 
+  color:#1c65ba;
+}
+.searchresults h4 a:link:hover {
+  font-weight:bold;
+  text-decoration:underline; 
+  color:#1c65ba;
+}
+
+.snippetLoaded strong {
+  color:black;
+}
+
+.searchresults .url a {
+  text-decoration:none; 
+  color:#3c7a3c;
+}
+.searchresults .url a:link:hover {
+  text-decoration:underline; 
+  color:#3c7a3c;
+}
+
+
+/* other */
+
+.settingsValue {
+  color:#556699;
+}
+
+.Headline {
+  background-color: #84B3DE;
+  color: white;
+}
+
+.Heading {
+  background-color: #84B3DE;
+}
+
+.error, .warning {
+  color:red;
+}
+
+.success {
+  color:green;
+}
+
+.Message {
+  background-color: #eeeeee;
+}
+
+.example {
+  background-color:#D3D3D3;
+}
+
+.hides:hover .hoverShow { background-color: #FFFFFF; }
+
+/* Log */
+
+body#ViewLog pre {
+  background-color:white;
+}
+
+/* Forms */
+
+fieldset {
+  background-color:#eeeeee;
+  color:#18294A;
+  border:0px solid #eeeeee;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+/* input, select, textarea, button {
+  color: black;
+  background-color: white;
+} */
+
+legend {
+  background-color:#5cb85c;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  text-align:left;
+  color:white;
+}
+
+legend a:link {
+  color:white;
+}
+
+legend a:link:hover {
+  color:white;
+}
+
+form dt, dl.pairs dt {
+  background-color:#eeeeee;
+  font-weight:bold;
+}
+
+form dd, dl.pairs dd {
+  background-color:#eeeeee;
+}

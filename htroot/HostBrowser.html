@@ -81,15 +81,18 @@ function updatepage(str) {
     <form action="HostBrowser.html" id="searchform" method="get" onkeyup="xmlhttpPost(); return false;">
     <fieldset class="yacys">
       <input type="hidden" name="admin" id="admin" value="#[admin]#" />
-      Host/URL: 
-      <input id="search" type="text" name="path" value="#[path]#" size="80" maxlength="250" />
-      <input type="submit" name="list" value="Browse Host" class="btn btn-primary" style="width:160px;"/>
+      <div class="input-group" style="width:600px;float:left;">
+        <span class="input-group-addon">Host/URL</span>
+        <input id="search" type="text" name="path" value="#[path]#" maxlength="250" class="form-control"/>
+        <div class="input-group-btn">
+          <button id="list" name="list" class="btn btn-primary">Browse Host</button>
+        </div>
+      </div>
       #(delete)#::
-      <input type="submit" name="delete" value="Delete Subpath" class="btn btn-primary" style="width:160px;" onclick="return confirm('Confirm Deletion')"/>
-      <input type="submit" name="reload404" value="Re-Load 404" class="btn btn-primary" style="width:160px;"/>
+      &nbsp;<input type="submit" name="delete" value="Delete Subpath" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>
+      <input type="submit" name="reload404" value="Re-load load-failure docs (404s etc)" class="btn btn-warning" />
       #(/delete)#
-      <br />
-      <div id="searchresults"></div>
+      <div id="searchresults" style="clear:both;"></div>
     </fieldset>
     </form>
     #[result]#

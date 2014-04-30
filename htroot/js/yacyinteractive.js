@@ -220,7 +220,7 @@ function resultLine(type, item, linenumber) {
   // make table row
   var html = "";
   if (type == "row") {
-    html += "<tr class=\"TableCellDark\">";
+    html += "<tr class=\"TableCellLight\">";
     html += "<td align=\"left\">" + linenumber + "</td>"; // Count
     html += "<td align=\"left\">" + protocol + "</td>"; // Protocol
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>"; // Host

@@ -29,7 +29,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -46,7 +45,7 @@ import net.yacy.search.Switchboard;
 public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPMHImporter> {
 
     private static int importerCounter = Integer.MAX_VALUE;
-    private static Object N = new Object();
+    private static final Object N = new Object();
 
     public static ConcurrentHashMap<OAIPMHImporter, Object> startedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
     public static ConcurrentHashMap<OAIPMHImporter, Object> runningJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
@@ -137,16 +136,16 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         this.message = "loading first part of records";
         while (true) {
             try {
-                OAIPMHLoader loader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, this.agent);
-                this.completeListSize = Math.max(this.completeListSize, loader.getResumptionToken().getCompleteListSize());
+                OAIPMHLoader oailoader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, this.agent);
+                this.completeListSize = Math.max(this.completeListSize, oailoader.getResumptionToken().getCompleteListSize());
                 this.chunkCount++;
-                this.recordsCount += loader.getResumptionToken().getRecordCounter();
-                this.source = loader.getResumptionToken().resumptionURL();
+                this.recordsCount += oailoader.getResumptionToken().getRecordCounter();
+                this.source = oailoader.getResumptionToken().resumptionURL();
                 if (this.source == null) {
                     this.message = "import terminated with source = null";
                     break;
                 }
-                this.message = "loading next resumption fragment, cursor = " + loader.getResumptionToken().getCursor();
+                this.message = "loading next resumption fragment, cursor = " + oailoader.getResumptionToken().getCursor();
             } catch (final IOException e) {
                 this.message = e.getMessage();
                 break;
@@ -180,21 +179,6 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         if (this.serialNumber > o.serialNumber) return 1;
         if (this.serialNumber < o.serialNumber) return -1;
         return 0;
-    }
-
-    public static Set<String> getUnloadedOAIServer(
-            LoaderDispatcher loader,
-            File surrogatesIn,
-            File surrogatesOut,
-            long staleLimit,
-            ClientIdentification.Agent agent) {
-        Set<String> plainList = OAIListFriendsLoader.getListFriends(loader, agent).keySet();
-        Map<String, Date> loaded = getLoadedOAIServer(surrogatesIn, surrogatesOut);
-        long limit = System.currentTimeMillis() - staleLimit;
-        for (Map.Entry<String, Date> a: loaded.entrySet()) {
-            if (a.getValue().getTime() > limit) plainList.remove(a.getKey());
-        }
-        return plainList;
     }
 
     /**
