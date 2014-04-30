@@ -85,7 +85,10 @@ public class IndexCreateParserErrors_p {
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false));
                 
                 String cause = entry.getFailReason();
-                if (cause.startsWith(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER)) {
+                if (cause == null) {
+                    // well that should not really happen but occurs in a specific combination of running crawls for same domains with different url filters
+                    prop.put("rejected_list_"+j+"_failreason", "no fail reason given");
+                } else if (cause.startsWith(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER)) {
                     prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false) +
                             "&regex=" + cause.substring(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER.length()) + "\">test</a>) " + cause);
                 } else if (cause.startsWith(CrawlStacker.ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER)) {
