@@ -2307,8 +2307,8 @@ public final class Switchboard extends serverSwitch {
                 boolean postprocessing =
                         collection1Configuration.contains(CollectionSchema.process_sxt) &&
                         (index.connectedCitation() || fulltext.useWebgraph()) &&
-                        MemoryControl.available() > 512L * 1024L * 1024L &&
-                        Memory.load() < 2.5f;
+                        MemoryControl.available() > getConfigLong("postprocessing.minimum_ram", 0) &&
+                        Memory.load() < getConfigFloat("postprocessing.maximum_load", 0);
                         
                 if (allCrawlsFinished) {
                     if (postprocessing) {

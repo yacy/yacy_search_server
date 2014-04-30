@@ -1231,3 +1231,7 @@ browser.load4everyone = false
 # with some heuristics like: loading linked documents and adding a twitter search.
 # When the learning mode is finished, the user may switch on individual heuristics by himself.
 greedylearning.active = true
+
+# postprocessing steering
+postprocessing.maximum_load = 2.5
+postprocessing.minimum_ram = 536870912
