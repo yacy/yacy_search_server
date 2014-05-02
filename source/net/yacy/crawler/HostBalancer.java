@@ -211,7 +211,8 @@ public class HostBalancer implements Balancer {
             if (queue == null) {
                 queue = new HostQueue(this.hostsPath, entry.url().getHost(), entry.url().getPort(), this.queues.size() > 100, this.exceed134217727);
                 this.queues.put(hosthash, queue);
-                robots.ensureExist(entry.url(), profile.getAgent(), true); // concurrently load all robots.txt
+                // profile might be null when continue crawls after YaCy restart
+                robots.ensureExist(entry.url(), profile == null ? ClientIdentification.yacyInternetCrawlerAgent : profile.getAgent(), true); // concurrently load all robots.txt
             }
             return queue.push(entry, profile, robots);
         }
