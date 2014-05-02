@@ -90,8 +90,12 @@ $(function() {
           </table>
           <div style="width: 550px; float: left;">
             <fieldset class="yacys">
-              <input id="search" class="searchinput" name="query" type="text" size="40" maxlength="80" value="search words" />
-              <input id="Enter" type="button" name="Enter" value="Search" onclick="var w = window.open('yacysearch.html','LayoutTest'); w.focus();" />
+              <div class="input-group">
+                <input type="text" class="form-control searchinput typeahead" size="40" maxlength="80" placeholder="Web Search by the People, for the People" name="query"  />
+                <div class="input-group-btn">
+                  <button id="Enter" class="btn btn-default" type="submit">search</button>
+                </div>
+              </div>
               <div class="yacysearch">
                 <input type="checkbox" id="text" name="search.text" value="true" #(search.text)#::checked="checked" #(/search.text)# /><label for="text">Text</label>
                 &nbsp;&nbsp;<input type="checkbox" id="image" name="search.image" value="true" #(search.image)#::checked="checked" #(/search.image)# /><label for="image">Images</label>
