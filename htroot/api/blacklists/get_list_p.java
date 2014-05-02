@@ -13,6 +13,7 @@ import net.yacy.server.serverSwitch;
 
 public class get_list_p {
 
+    private static final String KEY_CURRENT_BLACKLIST = "list";
     private static final String ITEMS = "items";
     private static final String POSTFIX_ITEM = "_item";
     private static final String PREFIX_ITEMS = "items_";
@@ -31,7 +32,7 @@ public class get_list_p {
 
         final Collection<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
 
-        final String blackListName = (post == null) ? "" : post.get("name", "");
+        final String blackListName = (post == null) ? "" : post.get(KEY_CURRENT_BLACKLIST, "");
 
         int count;
         if (dirlist != null) {

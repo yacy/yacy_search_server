@@ -92,17 +92,18 @@
 						<label for="feed">Bookmark is a newsfeed</label>
 					</dt>
 				</dl>
+                                <p style="text-align: center">
 				#(edit)#
-				<p><input type="submit" name="add" value="create" /></p>
+				<input type="submit" class="btn btn-primary" name="add" value="create" />
 				::
-				<p><input type="submit" name="add" value="edit" /></p>
+				<input type="submit" class="btn btn-primary" name="add" value="Save" />
 				#(/edit)#
+                                </p>
 				<img src="env/grafics/empty.gif" name="ajax" />
 			</fieldset>
 		</form>
 		:: <!-- import XML Bookmarks (mode=3) -->		
 		<form action="Bookmarks.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-			<div class="BookmarksFieldset">
 			<fieldset>
 				<legend>Import XML Bookmarks</legend>
 				<dl>
@@ -122,9 +123,8 @@
 						</select>
 					</dd>
 				</dl>
-				<input type="submit" name="importxml" value="import" />
+				<input type="submit" class="btn btn-primary" name="importxml" value="import" />
 			</fieldset>
-			</div>
 		</form>
 		<!-- import Netscape Bookmarks -->
 		<form action="Bookmarks.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
@@ -153,7 +153,7 @@
 						</select>
 					</dd>
 				</dl>
-				<input type="submit" name="importbookmarks" value="import" />
+				<input type="submit" class="btn btn-primary" name="importbookmarks" value="import" />
 			</fieldset>
 		</form>
 		:: 

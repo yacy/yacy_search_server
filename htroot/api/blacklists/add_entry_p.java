@@ -14,7 +14,7 @@ public class add_entry_p {
     private static final String RESULT_SUCCESS = "1";
     private static final String XML_ITEM_STATUS = "status";
     private static final String KEY_NEW_ENTRY = "entry";
-    private static final String KEY_CURRENT_BLACKLIST = "blacklist";
+    private static final String KEY_CURRENT_BLACKLIST = "list";
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
