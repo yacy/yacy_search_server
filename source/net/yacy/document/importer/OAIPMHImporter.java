@@ -22,13 +22,8 @@
 
 package net.yacy.document.importer;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -181,43 +176,12 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         return 0;
     }
 
-    /**
-     * get a map for already loaded oai-pmh servers and their latest access date
-     * @param surrogatesIn
-     * @param surrogatesOut
-     * @return a map where the key is the hostID of the servers and the value is the last access date
-     */
-    @SuppressWarnings("unchecked")
-    public static Map<String, Date> getLoadedOAIServer(File surrogatesIn, File surrogatesOut) {
-        Map<String, Date> map = getLoadedOAIServer(surrogatesOut);
-        map.putAll((Map<? extends String, ? extends Date>) getLoadedOAIServer(surrogatesIn).entrySet());
-        return map;
-    }
-
-    private static Map<String, Date> getLoadedOAIServer(File surrogates) {
-        HashMap<String, Date> map = new HashMap<String, Date>();
-        //oaipmh_opus.bsz-bw.de_20091102113118728.xml
-        for (String s: surrogates.list()) {
-            if (s.startsWith(filenamePrefix) && s.endsWith(".xml") && s.charAt(s.length() - 22) == filenameSeparationChar) {
-                try {
-                    Date fd = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(s.substring(s.length() - 21, s.length() - 4));
-                    String hostID = s.substring(7, s.length() - 22);
-                    Date md = map.get(hostID);
-                    if (md == null || fd.after(md)) map.put(hostID, fd);
-                } catch (final ParseException e) {
-                    ConcurrentLog.logException(e);
-                }
-            }
-        }
-        return map;
-    }
-
     public static final char hostReplacementChar = '_';
     public static final char filenameSeparationChar = '.';
     public static final String filenamePrefix = "oaipmh";
 
     /**
-     * compute a host id that is also used in the getLoadedOAIServer method for the map key
+     * compute a host id
      * @param source
      * @return a string that is a key for the given host
      */
