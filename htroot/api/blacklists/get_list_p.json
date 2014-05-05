@@ -1,0 +1,9 @@
+{
+  "name": "#[name]#",
+  "shared": "#[shared]#",
+  "types": [#{types}#{"#[name]#": "#[value]#"}#[comma]# #{/types}#]
+  "items":
+    [
+    #{items}#"#[item]#"#[comma]#
+    #{/items}#]
+}
