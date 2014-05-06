@@ -91,7 +91,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void optimize(int maxSegments) {
         if (this.server == null) return;
-        if (getSegmentCount() <= maxSegments) return;
         synchronized (this.server) {
             try {
                 //this.server.optimize(true, true, maxSegments);

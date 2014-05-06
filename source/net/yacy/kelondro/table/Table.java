@@ -474,12 +474,17 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     @Override
     public void close() {
-        if (this.file != null) this.file.close();
+    	String tablefile = null;
+        if (this.file != null) {
+        	tablefile = this.file.filename().toString();
+        	this.file.close();
+        }
         this.file = null;
         if (this.table != null) this.table.close();
         this.table = null;
         if (this.index != null) this.index.close();
         this.index = null;
+		if (tablefile != null) tableTracker.remove(tablefile);
     }
 
     @Override
