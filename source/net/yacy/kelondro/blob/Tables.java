@@ -555,6 +555,7 @@ public class Tables implements Iterable<String> {
 
         @Override
         protected Row next0() {
+            if (this.i == null) return null;
         	Row r;
             while (this.i.hasNext()) {
                 r = new Row(this.i.next());

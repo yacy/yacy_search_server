@@ -387,8 +387,8 @@ public final class SwitchboardConstants {
 
     public static final String SURROGATES_IN_PATH          = "surrogates.in";
     public static final String SURROGATES_IN_PATH_DEFAULT  = "DATA/SURROGATES/in";
-    public static final String SURROGATES_OUT_PATH         = "surrogates.out";
-    public static final String SURROGATES_OUT_PATH_DEFAULT = "DATA/SURROGATES/out";
+    //public static final String SURROGATES_OUT_PATH         = "surrogates.out";
+    //public static final String SURROGATES_OUT_PATH_DEFAULT = "DATA/SURROGATES/out";
 
     public static final String DICTIONARY_SOURCE_PATH         = "dictionaries";
     public static final String DICTIONARY_SOURCE_PATH_DEFAULT = "DATA/DICTIONARIES";

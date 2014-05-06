@@ -15,8 +15,8 @@
     <h3>Queues</h3>
     <ul class="SubMenu">
       <li><a href="IndexCreateQueues_p.html?stack=LOCAL" class="MenuItemLink lock">Local</a></li>
-      #(p2p)#::<li><a href="IndexCreateQueues_p.html?stack=GLOBAL" class="MenuItemLink lock">Global</a></li>#(/p2p)#
-      #(p2p)#::<li><a href="IndexCreateQueues_p.html?stack=REMOTE" class="MenuItemLink lock">Remote</a></li>#(/p2p)#
+      #(navigation-p2p)#::<li><a href="IndexCreateQueues_p.html?stack=GLOBAL" class="MenuItemLink lock">Global</a></li>#(/navigation-p2p)#
+      #(navigation-p2p)#::<li><a href="IndexCreateQueues_p.html?stack=REMOTE" class="MenuItemLink lock">Remote</a></li>#(/navigation-p2p)#
       <li><a href="IndexCreateQueues_p.html?stack=NOLOAD" class="MenuItemLink lock">No-Load</a></li>
     </ul>
   </div>
@@ -39,12 +39,12 @@
   <div class="SubMenugroup">
       <ul class="SubMenu">
         <li><a href="CrawlResults.html" class="MenuItemLink">Overview</a></li>
-        #(p2p)#::<li><a href="CrawlResults.html?process=1" class="MenuItemLink lock">(1) Receipts</a></li>#(/p2p)#
+        #(navigation-p2p)#::<li><a href="CrawlResults.html?process=1" class="MenuItemLink lock">(1) Receipts</a></li>#(/navigation-p2p)#
         <li><a href="CrawlResults.html?process=2" class="MenuItemLink lock">(2) Queries</a></li>
-        #(p2p)#::<li><a href="CrawlResults.html?process=3" class="MenuItemLink lock">(3) DHT Transfer</a></li>#(/p2p)#
+        #(navigation-p2p)#::<li><a href="CrawlResults.html?process=3" class="MenuItemLink lock">(3) DHT Transfer</a></li>#(/navigation-p2p)#
         <li><a href="CrawlResults.html?process=4" class="MenuItemLink lock">(4) Proxy Use</a></li>
         <li><a href="CrawlResults.html?process=5" class="MenuItemLink lock">(5) Local Crawling</a></li>
-        #(p2p)#::<li><a href="CrawlResults.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>#(/p2p)#
+        #(navigation-p2p)#::<li><a href="CrawlResults.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>#(/navigation-p2p)#
         <li><a href="CrawlResults.html?process=7" class="MenuItemLink lock">(7) Surrogate Import</a></li>
       </ul>
   </div>
