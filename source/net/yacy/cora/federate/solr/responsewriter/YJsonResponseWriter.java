@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +99,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
         SimpleOrderedMap<Object> facetFields = facetCounts == null || facetCounts.size() == 0 ? null : (SimpleOrderedMap<Object>) facetCounts.get("facet_fields");
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
-        Map<String, List<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
+        Map<String, LinkedHashSet<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
 
         // parse response header
         ResHead resHead = new ResHead();
@@ -213,8 +214,9 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             // compute snippet from texts            
             solitaireTag(writer, "path", path.toString());
             solitaireTag(writer, "title", title.length() == 0 ? (texts.size() == 0 ? path.toString() : texts.get(0)) : title);
-            List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
-            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : snippet.get(0))); writer.write("\"\n}\n");
+            LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+            OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
+            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet))); writer.write("\"\n}\n");
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }

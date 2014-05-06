@@ -27,9 +27,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -114,7 +117,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         SimpleOrderedMap<Object> facetFields = facetCounts == null || facetCounts.size() == 0 ? null : (SimpleOrderedMap<Object>) facetCounts.get("facet_fields");
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
-        Map<String, List<String>> snippets = highlighting(highlighting);
+        Map<String, LinkedHashSet<String>> snippets = highlighting(highlighting);
 
         // parse response header
         ResHead resHead = new ResHead();
@@ -233,17 +236,18 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             
             // compute snippet from texts
             solitaireTag(writer, RSSMessage.Token.title.name(), title.length() == 0 ? (texts.size() == 0 ? "" : texts.get(0)) : title);
-            List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+            LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             String tagname = RSSMessage.Token.description.name();
             if (snippet == null || snippet.size() == 0) {
                 for (String d: descriptions) {
                     writer.write("<"); writer.write(tagname); writer.write('>');
-                    XML.escapeCharData(snippet == null || snippet.size() == 0 ? d : snippet.get(0), writer);
+                    XML.escapeCharData(d, writer);
                     writer.write("</"); writer.write(tagname); writer.write(">\n");
                 }
             } else {
+                OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
                 writer.write("<"); writer.write(tagname); writer.write('>');
-                XML.escapeCharData(snippet.get(0), writer);
+                XML.escapeCharData(OpensearchResponseWriter.getLargestSnippet(snippet), writer);
                 writer.write("</"); writer.write(tagname); writer.write(">\n");
             }
             // open: where do we get the subject?
@@ -296,8 +300,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
      * @return a map from urlhashes to a list of snippets for that url
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, List<String>> highlighting(final SimpleOrderedMap<Object> val) {
-        Map<String, List<String>> snippets = new HashMap<String, List<String>>();
+    public static Map<String, LinkedHashSet<String>> highlighting(final SimpleOrderedMap<Object> val) {
+        Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>();
         if (val == null) return snippets;
         int sz = val.size();
         Object v, vv;
@@ -306,7 +310,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             v = val.getVal(i);
             if (v instanceof SimpleOrderedMap) {
                 int sz1 = ((SimpleOrderedMap<Object>) v).size();
-                List<String> t = new ArrayList<String>(sz1);
+                LinkedHashSet<String> t = new LinkedHashSet<String>();
                 for (int j = 0; j < sz1; j++) {
                     vv = ((SimpleOrderedMap<Object>) v).getVal(j);
                     if (vv instanceof String[]) {
@@ -319,6 +323,30 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         return snippets;
     }
 
+    final static Pattern keymarks = Pattern.compile("<b>|</b>");
+    
+    public static void removeSubsumedTitle(LinkedHashSet<String> snippets, String title) {
+        if (title == null || title.length() == 0 || snippets == null || snippets.size() == 0) return;
+        snippets.remove(title);
+        String tlc = title.toLowerCase();
+        Iterator<String> i = snippets.iterator();
+        while (i.hasNext()) {
+            String s = i.next().toLowerCase();
+            s = keymarks.matcher(s).replaceAll("");
+            if (tlc.toLowerCase().indexOf(s) >= 0 || s.toLowerCase().indexOf(tlc) >= 0) i.remove();
+        }
+        return;
+    }
+
+    public static String getLargestSnippet(LinkedHashSet<String> snippets) {
+        if (snippets == null || snippets.size() == 0) return null;
+        String l = null;
+        for (String s: snippets) {
+            if ((l == null || s.length() > l.length()) && s.indexOf(' ') > 0) l = s;
+        }
+        return l;
+    }
+    
     public static void openTag(final Writer writer, final String tag) throws IOException {
         writer.write('<'); writer.write(tag); writer.write(">\n");
     }

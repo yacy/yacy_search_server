@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -147,7 +148,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
-        Map<String, List<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
+        Map<String, LinkedHashSet<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
         Map<Object,Object> context = request.getContext();
 
         // parse response header
@@ -241,6 +242,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             List<String> collections = new ArrayList<String>();
             int size = 0;
             boolean title_written = false; // the solr index may contain several; we take only the first which should be the visible tag in <title></title>
+            String title = null;
             for (IndexableField value: fields) {
                 String fieldName = value.name();
 
@@ -262,7 +264,8 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     continue;
                 }
                 if (CollectionSchema.title.getSolrFieldName().equals(fieldName) && !title_written) {
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), highlight(value.stringValue(), query));
+                    title = value.stringValue();
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), highlight(title, query));
                     //texts.add(value.stringValue());
                     title_written = true;
                     continue;
@@ -296,8 +299,9 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 //System.out.println("superfluous field: " + fieldName + ": " + value.stringValue()); // this can be avoided setting the enableLazyFieldLoading = false in solrconfig.xml
             }
             // compute snippet from texts
-            List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
-            OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : snippet.get(0));
+            LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+            OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
+            OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet));
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), descriptions.size() > 0 ? descriptions.get(0) : "");
             String cols = collections.toString();
             if (collections.size() > 0) OpensearchResponseWriter.solitaireTag(writer, "COLS" /*SPECIAL!*/, collections.size() > 1 ? cols.substring(1, cols.length() - 1).replaceAll(" ", "") : collections.get(0));

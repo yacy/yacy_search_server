@@ -33,6 +33,7 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -49,6 +50,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -150,7 +152,7 @@ public final class SearchEvent {
     private final boolean                                 deleteIfSnippetFail;
     private long                                          urlRetrievalAllTime;
     private long                                          snippetComputationAllTime;
-    private ConcurrentHashMap<String, String> snippets;
+    private ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
     private final boolean remote;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
@@ -234,7 +236,7 @@ public final class SearchEvent {
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
-        this.snippets = new ConcurrentHashMap<String, String>(); 
+        this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
         this.secondarySearchThreads = null;
@@ -701,7 +703,7 @@ public final class SearchEvent {
     public void addNodes(
         final List<URIMetadataNode> nodeList,
         final Map<String, ReversibleScoreMap<String>> facets, // a map from a field name to scored values
-        final Map<String, String> solrsnippets, // a map from urlhash to snippet text
+        final Map<String, LinkedHashSet<String>> solrsnippets, // a map from urlhash to snippet text
         final boolean local,
         final String resourceName,
         final int fullResource) {
@@ -1218,9 +1220,10 @@ public final class SearchEvent {
         Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
         URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
         if (node != null) {
-            String solrsnippet = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
-            if (solrsnippet != null && solrsnippet.length() > 0) {
-                final TextSnippet snippet = new TextSnippet(node.hash(), solrsnippet, true, ResultClass.SOURCE_CACHE, "");
+            LinkedHashSet<String> solrsnippet = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
+            if (solrsnippet != null && solrsnippet.size() > 0) {
+                OpensearchResponseWriter.removeSubsumedTitle(solrsnippet, node.dc_title());
+                final TextSnippet snippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippet), true, ResultClass.SOURCE_CACHE, "");
                 ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, snippet, null, 0);
                 addResult(re);
                 success = true;

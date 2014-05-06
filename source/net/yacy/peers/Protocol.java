@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -71,6 +72,7 @@ import net.yacy.cora.federate.opensearch.SRURSSConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
+import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -999,7 +1001,7 @@ public final class Protocol {
         }
     }
 
-    private final static CollectionSchema[] snippetFields = new CollectionSchema[]{CollectionSchema.h1_txt, CollectionSchema.h2_txt, CollectionSchema.text_t};
+    private final static CollectionSchema[] snippetFields = new CollectionSchema[]{CollectionSchema.description_txt, CollectionSchema.h4_txt, CollectionSchema.h3_txt, CollectionSchema.h2_txt, CollectionSchema.h1_txt, CollectionSchema.text_t};
     
     protected static int solrQuery(
             final SearchEvent event,
@@ -1025,14 +1027,14 @@ public final class Protocol {
             //solrQuery.setHighlightRequireFieldMatch();
             solrQuery.setHighlightSimplePost("</b>");
             solrQuery.setHighlightSimplePre("<b>");
-            solrQuery.setHighlightSnippets(1);
+            solrQuery.setHighlightSnippets(5);
             for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
         } else {
             solrQuery.setHighlight(false);
         }
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.size());
-        Map<String, String> snippets = new HashMap<String, String>(); // this will be a list of urlhash-snippet entries
+        Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // this will be a list of urlhash-snippet entries
         final QueryResponse[] rsp = new QueryResponse[]{null};
         final SolrDocumentList[] docList = new SolrDocumentList[]{null};
         {// encapsulate expensive solr QueryResponse object
@@ -1122,7 +1124,9 @@ public final class Protocol {
                         if (rs.containsKey(field.getSolrFieldName())) {
                             List<String> s = rs.get(field.getSolrFieldName());
                             if (s.size() > 0) {
-                                snippets.put(re.getKey(), s.get(0));
+                                LinkedHashSet<String> ls = new LinkedHashSet<String>();
+                                ls.addAll(s);
+                                snippets.put(re.getKey(), ls);
                                 continue nextsnippet;
                             }
                         }

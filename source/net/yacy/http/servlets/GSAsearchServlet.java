@@ -181,7 +181,7 @@ public class GSAsearchServlet extends HttpServlet {
                 CollectionSchema.size_i.getSolrFieldName());
         post.put("hl", "true");
         post.put("hl.q", originalQuery);
-        post.put("hl.fl", CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName());
+        post.put("hl.fl", CollectionSchema.description_txt + "," + CollectionSchema.h4_txt.getSolrFieldName() + "," + CollectionSchema.h3_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName());
         post.put("hl.alternateField", CollectionSchema.description_txt.getSolrFieldName());
         post.put("hl.simple.pre", "<b>");
         post.put("hl.simple.post", "</b>");
