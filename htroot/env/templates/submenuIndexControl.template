@@ -6,7 +6,7 @@
     <li><a href="IndexFederated_p.html" class="MenuItemLink lock">Index Sources &amp; Targets</a></li>
     <li><a href="IndexSchema_p.html" class="MenuItemLink lock">Solr Schema Editor</a></li>
     <li><a href="IndexReIndexMonitor_p.html" class="MenuItemLink lock">Field Re-Indexing</a></li>
-    #(p2p)#::<li><a href="IndexControlRWIs_p.html" class="MenuItemLink lock">Reverse Word Index</a></li>#(/p2p)#
+    #(navigation-p2p)#::<li><a href="IndexControlRWIs_p.html" class="MenuItemLink lock">Reverse Word Index</a></li>#(/navigation-p2p)#
     <li><a href="ContentAnalysis_p.html" class="MenuItemLink lock">Content Analysis</a></li>
   </ul>
 </div>

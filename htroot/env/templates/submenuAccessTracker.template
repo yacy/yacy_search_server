@@ -17,7 +17,7 @@
         <li><a href="AccessTracker_p.html?page=3" class="MenuItemLink lock">Host Tracker</a></li>
       </ul>
     </div>
-    #(p2p)#::
+    #(navigation-p2p)#::
     <div class="SubMenugroup">
       <h3>Remote Search</h3>
       <ul class="SubMenu">
@@ -25,5 +25,5 @@
         <li><a href="AccessTracker_p.html?page=5" class="MenuItemLink lock">Host Tracker</a></li>
       </ul>
     </div>
-    #(/p2p)#
+    #(/navigation-p2p)#
 </div>
