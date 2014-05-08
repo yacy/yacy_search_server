@@ -82,9 +82,9 @@ public class Domains {
     private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() * 2;
 
     // a dns cache
-    private static final ARC<String, InetAddress> NAME_CACHE_HIT = new ConcurrentARC<String, InetAddress>(MAX_NAME_CACHE_HIT_SIZE, CONCURRENCY_LEVEL);
-    private static final ARC<String, String> NAME_CACHE_MISS = new ConcurrentARC<String, String>(MAX_NAME_CACHE_MISS_SIZE, CONCURRENCY_LEVEL);
-    private static final ConcurrentHashMap<String, Object> LOOKUP_SYNC = new ConcurrentHashMap<String, Object>(100, 0.75f, Runtime.getRuntime().availableProcessors() * 2);
+    private static final ARC<String, InetAddress> NAME_CACHE_HIT = new ConcurrentARC<>(MAX_NAME_CACHE_HIT_SIZE, CONCURRENCY_LEVEL);
+    private static final ARC<String, String> NAME_CACHE_MISS = new ConcurrentARC<>(MAX_NAME_CACHE_MISS_SIZE, CONCURRENCY_LEVEL);
+    private static final ConcurrentHashMap<String, Object> LOOKUP_SYNC = new ConcurrentHashMap<>(100, 0.75f, Runtime.getRuntime().availableProcessors() * 2);
     private static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
     public static long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
     public static long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write

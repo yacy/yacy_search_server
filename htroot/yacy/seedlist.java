@@ -50,6 +50,7 @@ public final class seedlist {
         boolean nodeonly = post == null || !post.containsKey("node") ? false : post.getBoolean("node");
         boolean includeme = post == null || !post.containsKey("me") ? true : post.getBoolean("me");
         boolean addressonly = post == null || !post.containsKey("address") ? false : post.getBoolean("address");
+        String peername = post == null ? null : post.get("peername");
         final ArrayList<Seed> v = sb.peers.getSeedlist(maxcount, includeme, nodeonly, minversion);
         final serverObjects prop = new serverObjects();
         
@@ -67,28 +68,33 @@ public final class seedlist {
                 prop.put("jsonp-end", "");
             }
             // construct json property lists
+            int count = 0;
             for (int i = 0; i < v.size(); i++) {
-                prop.putJSON("peers_" + i + "_map_0_k", Seed.HASH);
-                prop.putJSON("peers_" + i + "_map_0_v", v.get(i).hash);
-                prop.put("peers_" + i + "_map_0_c", 1);
                 Seed seed = v.get(i);
+                if (peername != null && !peername.equals(seed.getName())) continue;
+                prop.putJSON("peers_" + count + "_map_0_k", Seed.HASH);
+                prop.putJSON("peers_" + count + "_map_0_v", seed.hash);
+                prop.put("peers_" + count + "_map_0_c", 1);
                 Map<String, String> map = seed.getMap();
                 int c = 1;
                 if (!addressonly) {
                     for (Map.Entry<String, String> m: map.entrySet()) {
-                        prop.putJSON("peers_" + i + "_map_" + c + "_k", m.getKey());
-                        prop.putJSON("peers_" + i + "_map_" + c + "_v", m.getValue());
-                        prop.put("peers_" + i + "_map_" + c + "_c", 1);
+                        prop.putJSON("peers_" + count + "_map_" + c + "_k", m.getKey());
+                        prop.putJSON("peers_" + count + "_map_" + c + "_v", m.getValue());
+                        prop.put("peers_" + count + "_map_" + c + "_c", 1);
                         c++;
                     }
                 }
-                prop.putJSON("peers_" + i + "_map_" + c + "_k", "Address");
-                prop.putJSON("peers_" + i + "_map_" + c + "_v", seed.getPublicAddress());
-                prop.put("peers_" + i + "_map_" + c + "_c", 0);
-                prop.put("peers_" + i + "_map", c + 1);
-                prop.put("peers_" + i + "_c", i < v.size() - 1 ? 1 : 0);
+                prop.putJSON("peers_" + count + "_map_" + c + "_k", "Address");
+                prop.putJSON("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress());
+                prop.put("peers_" + count + "_map_" + c + "_c", 0);
+                prop.put("peers_" + count + "_map", c + 1);
+                prop.put("peers_" + count + "_c", 1);
+                count++;
             }
-            prop.put("peers", v.size());
+
+            prop.put("peers_" + (count - 1) + "_c", 0);
+            prop.put("peers", count);
         } else {
             final StringBuilder encoded = new StringBuilder(1024);
             for (Seed seed: v) {
