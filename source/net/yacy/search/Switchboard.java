@@ -2655,6 +2655,19 @@ public final class Switchboard extends serverSwitch {
         if (!profile.indexText() && !profile.indexMedia()) {
             if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing of this media type not wanted by crawl profile");
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
+        } else if (!profile.indexMedia()) { // check for media excluded for indexing
+            // check media by file extension
+            if ( Classification.isMediaExtension(MultiProtocolURL.getFileExtension(in.queueEntry.url().getFileName()))) {
+                this.log.info("Not Condensed Resource '" + urls + "': indexing of media files not wanted by crawl profile");
+                return new IndexingQueueEntry(in.queueEntry, in.documents, null);
+            }
+            // double check media by mime in case of no file extension
+            Classification.ContentDomain cd = Classification.getContentDomainFromMime(in.queueEntry.getMimeType());
+            // don't exclude contentdomain.app (from mime) to keep pdf word etc.
+            if (cd == Classification.ContentDomain.IMAGE || cd == Classification.ContentDomain.VIDEO || cd == Classification.ContentDomain.AUDIO ) {
+                this.log.info("Not Condensed Resource '" + urls + "': indexing of media not wanted by crawl profile");
+                return new IndexingQueueEntry(in.queueEntry, in.documents, null);
+            }
         }
         if (!(profile.indexUrlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexUrlMustMatchPattern().matcher(urls).matches()) ||
              (profile.indexUrlMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexUrlMustNotMatchPattern().matcher(urls).matches())) {
