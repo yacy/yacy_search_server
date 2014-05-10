@@ -38,9 +38,8 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.Properties;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.ExecutionException;
-
+import java.util.concurrent.Semaphore;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -51,8 +50,8 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
+import net.yacy.http.Jetty9HttpServerImpl;
 import net.yacy.http.YaCyHttpServer;
-import net.yacy.http.Jetty8HttpServerImpl;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -286,7 +285,7 @@ public final class yacy {
             try {
                 // start http server
             	YaCyHttpServer httpServer;
-                httpServer = new Jetty8HttpServerImpl(port);
+                httpServer = new Jetty9HttpServerImpl(port);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
                 ConcurrentLog.info("STARTUP",httpServer.getVersion());

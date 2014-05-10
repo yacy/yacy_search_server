@@ -32,7 +32,7 @@ import net.yacy.server.http.HTTPDProxyHandler;
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.http.HttpURI;
-import org.eclipse.jetty.servlets.ProxyServlet;
+import org.eclipse.jetty.proxy.ProxyServlet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -82,7 +82,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         super.init(config);
 
         // must be lower case (header names are internally converted to lower)
-        _DontProxyHeaders.add("host"); // to prevent Host header setting from original servletrequest (which is localhost)
+        //_DontProxyHeaders.add("host"); // to prevent Host header setting from original servletrequest (which is localhost)
         String tmps = config.getInitParameter("stopProxyText");
         if (tmps != null) {
             _stopProxyText = tmps;
@@ -112,9 +112,9 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             }
         }
 
-        if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
+ /*       if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
             handleConnect(request, response);
-        } else {
+        } else */{
 
             final Continuation continuation = ContinuationSupport.getContinuation(request);
 
@@ -201,7 +201,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             response.setStatus(httpStatus);
             response.setContentType(mimeType);
             
-            if ((httpStatus == HttpServletResponse.SC_OK) && (mimeType != null) && mimeType.startsWith("text")) {
+            if ((httpStatus < HttpServletResponse.SC_BAD_REQUEST) && (mimeType != null) && mimeType.startsWith("text")) {
                 if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
                      proxyout = new ChunkedInputStream(proxyout);
                 }
@@ -280,6 +280,10 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
                 response.getOutputStream().write(sbb);
 
             } else {
+                if (httpStatus >= HttpServletResponse.SC_BAD_REQUEST) {
+                    response.sendError(httpStatus,"Site " + proxyurl + " returned with status");
+                    return;
+                }
                 if ((response.getHeader(HeaderFramework.CONTENT_LENGTH) == null) && prop.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE)) {
                     response.setHeader(HeaderFramework.CONTENT_LENGTH, (String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
                 }
@@ -334,7 +338,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
      * @return destination url from query parameter &url=_destinationurl_
      * @throws MalformedURLException 
      */
-    @Override
+/*    @Override
     protected HttpURI proxyHttpURI(HttpServletRequest request, String uri) throws MalformedURLException {
         String strARGS = request.getQueryString();
         if (strARGS.startsWith("url=")) {
@@ -353,7 +357,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         }
         return null;
     }
-
+*/
     @Override
     public String getServletInfo() {
         return "YaCy Proxy Servlet";

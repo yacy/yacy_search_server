@@ -25,14 +25,12 @@
 package net.yacy.http;
 
 import java.net.MalformedURLException;
-
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverAccessTracker;
-
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.RoleInfo;
 import org.eclipse.jetty.server.Request;
@@ -42,16 +40,8 @@ import org.eclipse.jetty.server.Request;
  * demands authentication for pages with _p. inside
  * and updates AccessTracker
  */
-public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
+public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
    
-    public Jetty8YaCySecurityHandler() {
-        super();
-
-        for (AccessRight right : AccessRight.values()) {
-            addRole(right.toString()); // add default YaCy roles
-        }
-    }
-
      /**
      * create the constraint for the given path
      * for urls containing *_p. (like info_p.html) admin access is required,
@@ -67,7 +57,6 @@ public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
         final Switchboard sb = Switchboard.getSwitchboard();
         final boolean adminAccountGrantedForLocalhost = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
         final boolean adminAccountNeededForAllPages = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, false);
-        //final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
 
         String refererHost;
         // update AccessTracker
@@ -87,7 +76,6 @@ public class Jetty8YaCySecurityHandler extends ConstraintSecurityHandler {
         if (!protectedPage && !sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true)) { 
             protectedPage = pathInContext.startsWith("/solr/") || pathInContext.startsWith("/gsa/");                        
         }
-        //final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
 
         if (protectedPage) {
             if (grantedForLocalhost) {

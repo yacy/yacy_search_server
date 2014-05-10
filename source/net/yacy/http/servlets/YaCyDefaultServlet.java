@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
-
+import javax.servlet.ReadListener;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -48,7 +48,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -73,15 +72,18 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 import net.yacy.visualization.RasterPlotter;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.eclipse.jetty.http.HttpHeaders;
-import org.eclipse.jetty.http.HttpMethods;
+import static org.eclipse.jetty.http.HttpHeader.CONTENT_RANGE;
+import static org.eclipse.jetty.http.HttpHeader.IF_MODIFIED_SINCE;
+import static org.eclipse.jetty.http.HttpHeader.IF_UNMODIFIED_SINCE;
+import static org.eclipse.jetty.http.HttpHeader.REQUEST_RANGE;
+import static org.eclipse.jetty.http.HttpMethod.HEAD;
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.io.Buffer;
+import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML;
+import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML_UTF_8;
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.util.MultiPartOutputStream;
@@ -357,7 +359,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -409,12 +411,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
             throws IOException {
         try {
-            if (!request.getMethod().equals(HttpMethods.HEAD)) {
+            if (!request.getMethod().equals(HEAD.asString())) {
 
-                String ifms = request.getHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                String ifms = request.getHeader(IF_MODIFIED_SINCE.asString());
                 if (ifms != null) {
 
-                    long ifmsl = request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+                    long ifmsl = request.getDateHeader(IF_MODIFIED_SINCE.asString());
                     if (ifmsl != -1) {
                         if (resource.lastModified() / 1000 <= ifmsl / 1000) {
                             response.reset();
@@ -426,7 +428,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
 
                 // Parse the if[un]modified dates and compare to resource
-                long date = request.getDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
+                long date = request.getDateHeader(IF_UNMODIFIED_SINCE.asString());
 
                 if (date != -1) {
                     if (resource.lastModified() / 1000 > date / 1000) {
@@ -464,7 +466,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
 
         byte[] data = dir.getBytes("UTF-8");
-        response.setContentType(MimeTypes.TEXT_HTML_UTF_8);
+        response.setContentType(TEXT_HTML_UTF_8.asString());
         response.setContentLength(data.length);
         response.getOutputStream().write(data);
     }
@@ -510,10 +512,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
             List<?> ranges = InclusiveByteRange.satisfiableRanges(reqRanges, content_length);
 
             //  if there are no satisfiable ranges, send 416 response
-            if (ranges == null || ranges.size() == 0) {
+            if (ranges == null || ranges.isEmpty()) {
                 writeHeaders(response, resource, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                response.setHeader(HttpHeaders.CONTENT_RANGE,
+                response.setHeader(CONTENT_RANGE.asString(),
                         InclusiveByteRange.to416HeaderRangeString(content_length));
                 resource.writeTo(out, 0, content_length);
                 out.close();
@@ -528,7 +530,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 long singleLength = singleSatisfiableRange.getSize(content_length);
                 writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                response.setHeader(HttpHeaders.CONTENT_RANGE,
+                response.setHeader(CONTENT_RANGE.asString(),
                         singleSatisfiableRange.toHeaderRangeString(content_length));
                 resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
                 out.close();
@@ -551,7 +553,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             // send an old style multipart/x-byteranges Content-Type. This
             // keeps Netscape and acrobat happy. This is what Apache does.
             String ctp;
-            if (request.getHeader(HttpHeaders.REQUEST_RANGE) != null) {
+            if (request.getHeader(REQUEST_RANGE.asString()) != null) {
                 ctp = "multipart/x-byteranges; boundary=";
             } else {
                 ctp = "multipart/byteranges; boundary=";
@@ -612,9 +614,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /* ------------------------------------------------------------ */
     protected void writeHeaders(HttpServletResponse response, Resource resource, long count) {
         if (response.getContentType() == null) {
-            Buffer extensionmime;
+            final String extensionmime;
             if ((extensionmime = _mimeTypes.getMimeByExtension(resource.getName())) != null) {
-                response.setContentType(extensionmime.toString());
+                response.setContentType(extensionmime);
             }
         }
 
@@ -795,13 +797,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else {
                     tmp = invokeServlet(targetClass, legacyRequestHeader, args);
                 }
-            } catch (InvocationTargetException e) {
-                ConcurrentLog.logException(e);
-                throw new ServletException(targetFile.getAbsolutePath());
-            } catch (IllegalArgumentException e) {
-                ConcurrentLog.logException(e);
-                throw new ServletException(targetFile.getAbsolutePath());
-            } catch (IllegalAccessException e) {
+            } catch (InvocationTargetException | IllegalArgumentException | IllegalAccessException e) {
                 ConcurrentLog.logException(e);
                 throw new ServletException(targetFile.getAbsolutePath());
             }
@@ -834,7 +830,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
-                final String mimeType = Classification.ext2mime(targetExt, MimeTypes.TEXT_HTML);
+                final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -894,14 +890,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                 templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
                 String submitted = sb.getConfig("server.servlets.submitted", "");
-                boolean crawler_enabled = submitted.indexOf("Crawler_p") >= 0;
-                boolean advanced_enabled = crawler_enabled || submitted.indexOf("ConfigBasic") >= 0  || submitted.indexOf("CrawlStart") >= 0;
+                boolean crawler_enabled = submitted.contains("Crawler_p");
+                boolean advanced_enabled = crawler_enabled || submitted.contains("ConfigBasic")  || submitted.contains("CrawlStart");
                 templatePatterns.put("navigation-crawlmonitor", crawler_enabled);
                 templatePatterns.put("navigation-advanced", advanced_enabled);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 
-                String mimeType = Classification.ext2mime(targetExt, MimeTypes.TEXT_HTML);
+                String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
 
                 InputStream fis;
                 long fileSize = targetFile.length();
@@ -926,9 +922,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
     }
     
-    private static final String appendPath(String proplist, String path) {
+    private static String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;
-        if (proplist.indexOf(path) >= 0) return proplist;
+        if (proplist.contains(path)) return proplist;
         return proplist + "," + path;
     }
     
@@ -1056,6 +1052,29 @@ public class YaCyDefaultServlet extends HttpServlet  {
         @Override
         public void close() throws IOException {
             in.close();
+        }
+
+        @Override
+        public boolean isFinished() {
+            try {
+                return (in.available() < 1);
+            } catch (IOException ex) {
+                return true;
+            }
+        }
+
+        @Override
+        public boolean isReady() {
+            try {
+                return in.available() > 0;
+            } catch (IOException ex) {
+                return false;
+            }
+        }
+
+        @Override
+        public void setReadListener(ReadListener rl) {
+            // TODO: implement
         }
     }
  }

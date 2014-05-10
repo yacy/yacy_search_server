@@ -38,7 +38,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
-import net.yacy.http.Jetty8HttpServerImpl;
+import net.yacy.http.Jetty9HttpServerImpl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -74,7 +74,7 @@ public class ConfigAccounts_p {
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // make sure server accepts new credentials
-                Jetty8HttpServerImpl jhttpserver = (Jetty8HttpServerImpl)sb.getHttpServer();
+                Jetty9HttpServerImpl jhttpserver = (Jetty9HttpServerImpl)sb.getHttpServer();
                 if (!user.equals(oldusername)) jhttpserver.removeUser(oldusername);
                 jhttpserver.resetUser(user);
             } else {

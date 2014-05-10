@@ -1,5 +1,5 @@
 //
-//  Jetty8HttpServerImpl
+//  Jetty9HttpServerImpl
 //  Copyright 2011 by Florian Richter
 //  First released 13.04.2011 at http://yacy.net
 //  
@@ -35,68 +35,75 @@ import java.net.SocketException;
 import java.security.KeyStore;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
-
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.http.servlets.GSAsearchServlet;
-import net.yacy.http.servlets.SolrSelectServlet;
-import net.yacy.http.servlets.SolrServlet;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
-
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.proxy.ConnectHandler;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ConnectHandler;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.IPAccessHandler;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
- * class to embedded Jetty 8 http server into YaCy
+ * class to embedded Jetty 9 http server into YaCy
  */
-public class Jetty8HttpServerImpl implements YaCyHttpServer {
+public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
     private final Server server;
 
     /**
      * @param port TCP Port to listen for http requests
      */
-    public Jetty8HttpServerImpl(int port) {
+    public Jetty9HttpServerImpl(int port) {
         Switchboard sb = Switchboard.getSwitchboard();
         
         server = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
+        ServerConnector connector = new ServerConnector(server);
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
         server.addConnector(connector);
         
         // add ssl/https connector
         boolean useSSL = sb.getConfigBool("server.https", false);
+      
         if (useSSL) {
             final SslContextFactory sslContextFactory = new SslContextFactory();
             final SSLContext sslContext = initSslContext(sb);
             if (sslContext != null) {
+
                 int sslport = sb.getConfigInt("port.ssl", 8443);
                 sslContextFactory.setSslContext(sslContext);
 
-                SslSelectChannelConnector sslconnector = new SslSelectChannelConnector(sslContextFactory);
-                sslconnector.setPort(sslport);
-                sslconnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
+                // SSL HTTP Configuration
+                HttpConfiguration https_config = new HttpConfiguration();
+                https_config.addCustomizer(new SecureRequestCustomizer());
 
-                server.addConnector(sslconnector);
+                // SSL Connector
+                ServerConnector sslConnector = new ServerConnector(server,
+                        new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+                        new HttpConnectionFactory(https_config));
+                sslConnector.setPort(sslport);
+                sslConnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
+
+                server.addConnector(sslConnector);
                 ConcurrentLog.info("SERVER", "SSL support initialized successfully on port " + sslport);
             }
         }
@@ -141,19 +148,21 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         // to make sure they are available even if removed in individual web.xml
         // additional, optional or individual servlets or servlet mappings can be set in web.xml
 
+        // in Jetty 9 servlet should be set only once
+        // therefore only the settings in web.xml is used
         //add SolrSelectServlet
-        htrootContext.addServlet(SolrSelectServlet.class, "/solr/select"); // uses the default core, collection1
-        htrootContext.addServlet(SolrSelectServlet.class, "/solr/collection1/select"); // the same servlet, identifies the collection1 core using the path
-        htrootContext.addServlet(SolrSelectServlet.class, "/solr/webgraph/select"); // the same servlet, identifies the webgraph core using the path
+        //htrootContext.addServlet(SolrSelectServlet.class, "/solr/select"); // uses the default core, collection1
+        //htrootContext.addServlet(SolrSelectServlet.class, "/solr/collection1/select"); // the same servlet, identifies the collection1 core using the path
+        //htrootContext.addServlet(SolrSelectServlet.class, "/solr/webgraph/select"); // the same servlet, identifies the webgraph core using the path
         
-        htrootContext.addServlet(SolrServlet.class, "/solr/collection1/admin/luke");
-        htrootContext.addServlet(SolrServlet.class, "/solr/webgraph/admin/luke");
+        //htrootContext.addServlet(SolrServlet.class, "/solr/collection1/admin/luke");
+        //htrootContext.addServlet(SolrServlet.class, "/solr/webgraph/admin/luke");
 
         // add proxy?url= servlet
         //htrootContext.addServlet(YaCyProxyServlet.class,"/proxy.html");
         
         // add GSA servlet
-        htrootContext.addServlet(GSAsearchServlet.class,"/gsa/search");
+        //htrootContext.addServlet(GSAsearchServlet.class,"/gsa/search");
         // --- eof default servlet mappings --------------------------------------------
 
         // define list of YaCy specific general handlers
@@ -180,7 +189,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         // changes will ivalidate all current existing user-password-hashes (from userDB)
         loginService.setName(sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy"));
 
-        Jetty8YaCySecurityHandler securityHandler = new Jetty8YaCySecurityHandler();
+        Jetty9YaCySecurityHandler securityHandler = new Jetty9YaCySecurityHandler();
         securityHandler.setLoginService(loginService);
 
         htrootContext.setSecurityHandler(securityHandler);
@@ -219,7 +228,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
     @Override
     public void startupServer() throws Exception {
         // option to finish running requests on shutdown
-        server.setGracefulShutdown(3000);
+//        server.setGracefulShutdown(3000);
         server.setStopAtShutdown(true);
         server.start();
     }
@@ -258,7 +267,10 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
     public int getSslPort() {
         Connector[] clist = server.getConnectors();
         for (Connector c:clist) {
-            if (c.getName().startsWith("ssl")) return c.getPort();
+            if (c.getName().startsWith("ssl")) {
+                int port =((ServerConnector)c).getLocalPort();
+                return port;
+            }
         }
         return -1;
     }
@@ -290,25 +302,25 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
                     final int sslport = Switchboard.getSwitchboard().getConfigInt("port.ssl", 8443);
                     for (Connector con : cons) {
                         // check http connector
-                        if (con.getName().startsWith("httpd") && con.getPort() != port) {
-                            con.close();
+                        if (con.getName().startsWith("httpd") && ((ServerConnector)con).getPort() != port) {
+                            ((ServerConnector)con).close();
                             con.stop();
                             if (!con.isStopped()) {
                                 ConcurrentLog.warn("SERVER", "Reconnect: Jetty Connector failed to stop");
                             }
-                            con.setPort(port);
+                            ((ServerConnector)con).setPort(port);
                             con.start();
                             ConcurrentLog.info("SERVER", "set new port for Jetty connector " + con.getName());
                             continue;
                         }
                         // check https connector
-                        if (con.getName().startsWith("ssl") && con.getPort() != sslport) {
-                            con.close();
+                        if (con.getName().startsWith("ssl") && ((ServerConnector)con).getPort() != sslport) {
+                            ((ServerConnector)con).close();
                             con.stop();
                             if (!con.isStopped()) {
                                 ConcurrentLog.warn("SERVER", "Reconnect: Jetty Connector failed to stop");
                             }
-                            con.setPort(sslport);
+                            ((ServerConnector)con).setPort(sslport);
                             con.start();
                             ConcurrentLog.info("SERVER", "set new port for Jetty connector " + con.getName());
                         }
@@ -326,7 +338,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
      * @param username
      */
     public void resetUser(String username) {
-        Jetty8YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty8YaCySecurityHandler.class);
+        Jetty9YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty9YaCySecurityHandler.class);
         if (hx != null) {
             YaCyLoginService loginservice = (YaCyLoginService) hx.getLoginService();
             loginservice.loadUser(username);
@@ -338,7 +350,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
      * @param username
      */
     public void removeUser(String username) {
-        Jetty8YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty8YaCySecurityHandler.class);
+        Jetty9YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty9YaCySecurityHandler.class);
         if (hx != null) {
             YaCyLoginService loginservice = (YaCyLoginService) hx.getLoginService();
             loginservice.removeUser(username);
