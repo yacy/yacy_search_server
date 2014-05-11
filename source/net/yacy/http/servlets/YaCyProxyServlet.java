@@ -14,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -58,7 +57,8 @@ import org.eclipse.jetty.proxy.ProxyServlet;
  * 
  */
 public class YaCyProxyServlet extends ProxyServlet implements Servlet {
-
+    private static final long serialVersionUID = 4900000000000001120L;
+    
     @Override
     public void service (ServletRequest req, ServletResponse res) throws ServletException, IOException {
 
