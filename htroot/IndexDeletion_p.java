@@ -108,6 +108,8 @@ public class IndexDeletion_p {
         // Delete by Solr Query
         prop.put("querydelete", "");
         String querydelete = post == null ? "" : post.get("querydelete", "");
+        // simulate default search field if no field is given by adding text_t: as target field
+        if (!querydelete.isEmpty() && !querydelete.contains(":")) querydelete = CollectionSchema.text_t.getSolrFieldName() + ":" + querydelete;
         prop.put("querydelete", querydelete);
         prop.put("querydelete-active", 0);
 
