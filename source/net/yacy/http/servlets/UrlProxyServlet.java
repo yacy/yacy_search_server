@@ -31,7 +31,6 @@ import net.yacy.server.http.ChunkedInputStream;
 import net.yacy.server.http.HTTPDProxyHandler;
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
-import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.proxy.ProxyServlet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -74,15 +73,13 @@ import org.jsoup.select.Elements;
  * will start the urlproxy with the current browser address.
  */
 public class UrlProxyServlet extends ProxyServlet implements Servlet {
-
+    private static final long serialVersionUID = 4900000000000001121L;
     private String _stopProxyText = null;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        // must be lower case (header names are internally converted to lower)
-        //_DontProxyHeaders.add("host"); // to prevent Host header setting from original servletrequest (which is localhost)
         String tmps = config.getInitParameter("stopProxyText");
         if (tmps != null) {
             _stopProxyText = tmps;
@@ -112,9 +109,9 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             }
         }
 
- /*       if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
-            handleConnect(request, response);
-        } else */{
+        if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
+            return;
+        } else {
 
             final Continuation continuation = ContinuationSupport.getContinuation(request);
 
@@ -329,35 +326,6 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         return false;
     }    
 
-    /**
-     * get destination url (from query parameter &url=http://....)
-     * override to prevent calculating destination url from request
-     * 
-     * @param request 
-     * @param uri not used
-     * @return destination url from query parameter &url=_destinationurl_
-     * @throws MalformedURLException 
-     */
-/*    @Override
-    protected HttpURI proxyHttpURI(HttpServletRequest request, String uri) throws MalformedURLException {
-        String strARGS = request.getQueryString();
-        if (strARGS.startsWith("url=")) {
-            final String strUrl = strARGS.substring(4); // strip url=
-
-            try {
-                URL newurl = new URL(strUrl);
-                int port = newurl.getPort();
-                if (port < 1) {
-                    port = newurl.getDefaultPort();
-                }
-                return proxyHttpURI(newurl.getProtocol(), newurl.getHost(), port, newurl.getPath());
-            } catch (final MalformedURLException e) {
-                ConcurrentLog.fine("PROXY", "url parameter missing");
-            }
-        }
-        return null;
-    }
-*/
     @Override
     public String getServletInfo() {
         return "YaCy Proxy Servlet";
