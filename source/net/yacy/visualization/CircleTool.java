@@ -34,84 +34,71 @@ import java.util.Set;
 
 public class CircleTool {
 
-    private static short[][] circles = new short[0][];
+    private static List<int[]> circles = new ArrayList<>();
 
-    private static short[] getCircleCoords(final short radius) {
-        if ((radius - 1) < circles.length) return circles[radius - 1];
+    private static int[] getCircleCoords(final short radius) {
+        if (radius - 1 < circles.size()) return circles.get(radius - 1);
 
         // read some lines from known circles
-        Set<String> crds = new HashSet<String>();
-        //crds.add("0|0");
-        String co;
-        for (short i = (short) Math.max(0, circles.length - 2); i < circles.length; i++) {
-            for (short j = 0; j < circles[i].length; j = (short) (j + 2)) {
-                co = circles[i][j] + "|" + circles[i][j + 1];
-                if (!(crds.contains(co))) crds.add(co);
-            }
+        Set<Integer> crds = new HashSet<>();
+        Integer co;
+        for (short i = (short) Math.max(0, circles.size() - 1); i < circles.size(); i++) {
+            int[] circle = circles.get(i);
+            for (int c: circle) crds.add(c);
         }
-
-        // copy old circles into new array
-        short[][] newCircles = new short[radius][];
-        System.arraycopy(circles, 0, newCircles, 0, circles.length);
 
         // compute more lines in new circles
         short x, y;
-        List<short[]> crc;
+        List<Integer> crc;
         short r1;
-        for (short r = (short) circles.length; r < newCircles.length; r++) {
+        for (short r = (short) circles.size(); r < radius; r++) {
             r1 = (short) (r + 1);
-            crc = new ArrayList<short[]>();
+            crc = new ArrayList<>();
             for (short a = 0; a < 2 * (r + 1); a++) {
                 x = (short) (r1 * Math.cos(RasterPlotter.PI4 * a / r1));
                 y = (short) (r1 * Math.sin(RasterPlotter.PI4 * a / r1));
-                co = x + "|" + y;
+                co = x << 16 | y;
                 if (!(crds.contains(co))) {
-                    crc.add(new short[]{x, y});
+                    crc.add(co);
                     crds.add(co);
                 }
                 x = (short) ((r + 0.5) * Math.cos(RasterPlotter.PI4 * a / r1));
                 y = (short) ((r + 0.5) * Math.sin(RasterPlotter.PI4 * a / r1));
-                co = x + "|" + y;
+                co = x << 16 | y;
                 if (!(crds.contains(co))) {
-                    crc.add(new short[]{x, y});
+                    crc.add(co);
                     crds.add(co);
                 }
             }
             // put coordinates into array
             //System.out.print("Radius " + r + " => " + crc.size() + " points: ");
-            newCircles[r] = new short[2 * (crc.size() - 1)];
-            short[] coords;
-            short i2 = 0;
+            int[] newCircle = new int[crc.size() - 1];
+            int coords;
             for (short i = 0; i < crc.size() - 1; i++) {
                 coords = crc.get(i);
-                newCircles[r][i2++] = coords[0];
-                newCircles[r][i2++] = coords[1];
-                //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; ");
+                newCircle[i] = coords;
             }
-            //System.out.println();
+            circles.add(newCircle);
         }
         crc = null;
         crds = null;
 
-        // move newCircles to circles array
-        circles = newCircles;
-        newCircles = null;
-
         // finally return wanted slice
-        return circles[radius - 1];
+        return circles.get(radius - 1);
     }
 
     public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, final int intensity) {
         if (radius == 0) {
             //matrix.plot(xc, yc, 100);
         } else {
-            final short[] c = getCircleCoords((short) radius);
+            final int[] c = getCircleCoords((short) radius);
             short x, y;
-            short limit = (short) (c.length / 2);
-            short i2 = 0;
+            short limit = (short) c.length;
+            int co;
             for (short i = 0; i < limit; i++) {
-                x = c[i2++];
-                y = c[i2++];
+                co = c[i];
+                x = (short) (0xffff & (co >> 16));
+                y = (short) (0xffff & co);
                 matrix.plot(xc + x    , yc - y - 1, intensity); // quadrant 1
                 matrix.plot(xc - x + 1, yc - y - 1, intensity); // quadrant 2
                 matrix.plot(xc + x    , yc + y    , intensity); // quadrant 4
@@ -130,21 +117,24 @@ public class CircleTool {
         if (radius == 0) {
             //matrix.plot(xc, yc, 100);
         } else {
-            final short[] c = getCircleCoords((short) radius);
-            final short q = (short) (c.length / 2);
+            final int[] c = getCircleCoords((short) radius);
+            final short q = (short) c.length;
             final short q2 = (short) (q * 2);
             final short q3 = (short) (q * 3);
             final short q4 = (short) (q * 4);
             final short[] c4x = new short[q4];
             final short[] c4y = new short[q4];
             short a0, a1, a2, a3, b0, b1;
+            int co;
             for (short i = 0; i < q; i++) {
-                b0 = (short) (2 * (i        ));
-                b1 = (short) (2 * (q - 1 - i));
-                a0 = c[b0    ];
-                a1 = c[b0 + 1];
-                a2 = c[b1    ];
-                a3 = c[b1 + 1];
+                b0 = i;
+                b1 = (short) (q - 1 - i);
+                co = c[b0];
+                a0 = (short) (0xffff & (co >> 16));
+                a1 = (short) (0xffff & co);
+                co = c[b1];
+                a2 = (short) (0xffff & (co >> 16));
+                a3 = (short) (0xffff & co);
                 c4x[i     ] =     a0    ; // quadrant 1
                 c4y[i     ] = (short) (-a1 - 1);  // quadrant 1
                 c4x[i + q ] = (short) (  1 - a2); // quadrant 2
