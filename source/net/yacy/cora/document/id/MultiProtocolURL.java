@@ -495,8 +495,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      * <li>The ASCII characters 'a' through 'z', 'A' through 'Z',
      *     and '0' through '9' remain the same.
      *
-     * <li>The unreserved characters - _ . ! ~ * ' ( ) remain the same.
-     *
+     * <li>The unreserved characters & : - _ . ! ~ * ' ( ) ; , remain the same.
+     *     see RFC 1738 2.2  and  RFC 3986 2.2
+     * 
      * <li>All other ASCII characters are converted into the
      *     3-character string "%xy", where xy is
      *     the two-digit hexadecimal representation of the character
@@ -529,7 +530,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     || ch == '.' || ch == '!'
                     || ch == '~' || ch == '*'
                     || ch == '\'' || ch == '('
-                    || ch == ')' || ch == ';') {
+                    || ch == ')' || ch == ';' 
+                    || ch == ',') { // RFC 1738 2.2 special char (may be used unencoded)
                 sbuf.append((char)ch);
             } else if (ch == '/') {                 // reserved, but may appear in post part where it should not be replaced
                 sbuf.append((char)ch);
