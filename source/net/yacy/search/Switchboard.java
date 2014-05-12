@@ -176,6 +176,7 @@ import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
+import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
@@ -200,6 +201,7 @@ import net.yacy.server.http.RobotsTxtConfig;
 import net.yacy.utils.CryptoLib;
 import net.yacy.utils.UPnP;
 import net.yacy.utils.crypt;
+import net.yacy.visualization.CircleTool;
 
 import com.google.common.io.Files;
 
@@ -1999,6 +2001,9 @@ public final class Switchboard extends serverSwitch {
         Cache.commit();
         Digest.cleanup(); // don't let caches become permanent memory leaks
 
+        // clear graphics caches
+        CircleTool.clearcache();
+        NetworkGraph.clearcache();
     }
     
     public int cleanupJobSize() {

@@ -53,6 +53,8 @@ import net.yacy.visualization.RasterPlotter;
 public class NetworkGraph {
 
     private final static double DOUBLE_LONG_MAX_VALUE = Long.MAX_VALUE;
+    
+    public static EncodedImage buffer = null;
 
     private static int shortestName = 10;
     private static int longestName = 30;
@@ -81,6 +83,10 @@ public class NetworkGraph {
 
     /** Private constructor to avoid instantiation of utility class. */
     private NetworkGraph() { }
+    
+    public static void clearcache() {
+        buffer = null;
+    }
 
     public static class CircleThreadPiece {
         private final String pieceName;

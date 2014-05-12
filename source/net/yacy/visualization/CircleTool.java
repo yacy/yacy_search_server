@@ -35,6 +35,10 @@ import java.util.Set;
 public class CircleTool {
 
     private static List<int[]> circles = new ArrayList<>();
+    
+    public static void clearcache() {
+        circles.clear();
+    }
 
     private static int[] getCircleCoords(final short radius) {
         if (radius - 1 < circles.size()) return circles.get(radius - 1);

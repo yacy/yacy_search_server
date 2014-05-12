@@ -36,14 +36,12 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 /** draw a picture of the yacy network */
-public class NetworkPicture
-{
+public class NetworkPicture {
 
     private static final ConcurrentLog log = new ConcurrentLog("NetworkPicture");
     private static final Semaphore sync = new Semaphore(1, true);
-    private static EncodedImage buffer = null;
     private static long lastAccessSeconds = 0;
-
+    
     public static EncodedImage respond(
         final RequestHeader header,
         final serverObjects post,
@@ -52,26 +50,26 @@ public class NetworkPicture
         final boolean authorized = sb.adminAuthenticated(header) >= 2;
 
         final long timeSeconds = System.currentTimeMillis() / 1000;
-        if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
+        if (NetworkGraph.buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
             if (log.isFine()) log.fine("cache hit (1); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));
-            return buffer;
+            return NetworkGraph.buffer;
         }
 
-        if ( buffer != null && sync.availablePermits() == 0 ) {
-            return buffer;
+        if ( NetworkGraph.buffer != null && sync.availablePermits() == 0 ) {
+            return NetworkGraph.buffer;
         }
         sync.acquireUninterruptibly();
 
-        if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
+        if (NetworkGraph.buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
             if (log.isFine()) log.fine("cache hit (2); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));
             sync.release();
-            return buffer;
+            return NetworkGraph.buffer;
         }
 
         int width = 1280; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
@@ -124,7 +122,7 @@ public class NetworkPicture
         if ( maxCount > 10000 ) {
             maxCount = 10000;
         }
-        buffer =
+        NetworkGraph.buffer =
             new EncodedImage(NetworkGraph.getNetworkPicture(
                 sb.peers,
                 width,
@@ -141,7 +139,7 @@ public class NetworkPicture
         lastAccessSeconds = System.currentTimeMillis() / 1000;
 
         sync.release();
-        return buffer;
+        return NetworkGraph.buffer;
     }
 
 }
