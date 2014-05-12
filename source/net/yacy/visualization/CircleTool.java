@@ -55,7 +55,8 @@ public class CircleTool {
         short x, y;
         List<Integer> crc;
         short r1;
-        for (short r = (short) circles.size(); r < radius; r++) {
+        int rc = radius < 200 ? (radius < 100 ? 100 : radius + 9) : radius;
+        for (short r = (short) circles.size(); r < rc; r++) {
             r1 = (short) (r + 1);
             crc = new ArrayList<>();
             for (short a = 0; a < 2 * (r + 1); a++) {
@@ -121,7 +122,8 @@ public class CircleTool {
         if (radius == 0) {
             //matrix.plot(xc, yc, 100);
         } else {
-            final int[] c = getCircleCoords((short) radius);
+            int[] c = getCircleCoords((short) radius);
+            if (c == null) c = getCircleCoords((short) radius);
             final short q = (short) c.length;
             final short q2 = (short) (q * 2);
             final short q3 = (short) (q * 3);
