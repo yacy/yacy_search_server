@@ -25,7 +25,6 @@
 
 package net.yacy.kelondro.util;
 
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**

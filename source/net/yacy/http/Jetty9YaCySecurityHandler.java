@@ -86,6 +86,6 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
             roleinfo.addRole(AccessRight.ADMIN_RIGHT.toString()); // use AccessRights as role
             return roleinfo; 
         }
-        return (RoleInfo)super.prepareConstraintInfo(pathInContext, request);
+        return super.prepareConstraintInfo(pathInContext, request);
     }
 }
