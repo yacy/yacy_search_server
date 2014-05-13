@@ -36,7 +36,6 @@ import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segment.ReferenceReportCache;
 
 import org.apache.solr.common.SolrDocument;
 
@@ -142,7 +141,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         this.edges.addAll(errorEdges);
     }
     
-    public void path(final Segment segment, ReferenceReportCache rrc, DigestURL from, DigestURL to, final int maxtime, final int maxnodes) {
+    public void path(final Segment segment, DigestURL from, DigestURL to, final int maxtime, final int maxnodes) {
         // two steps to find the graph: (1) create a HyperlinkGraph (to-down) and (2) backtrack backlinks up to an element of the graph (bottom-up)
         if (this.edges.size() == 0) {
             fill(segment.fulltext().getDefaultConnector(), from == null ? to.getHost() : from.getHost(), to, maxtime, maxnodes);

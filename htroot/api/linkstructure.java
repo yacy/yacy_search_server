@@ -75,8 +75,7 @@ public class linkstructure {
             // get link structure between two links
             DigestURL to = new DigestURL(post.get("to", null), null); // must be an url
             DigestURL from = post.get("from", null) == null ? null : new DigestURL(post.get("from", null)); // can be null or must be an url
-            ReferenceReportCache rrc = sb.index.getReferenceReportCache();
-            hlg.path(sb.index, rrc, from, to, maxtime, maxnodes);
+            hlg.path(sb.index, from, to, maxtime, maxnodes);
         } catch (final MalformedURLException e) {}
         
         // finally just write out the edge array
