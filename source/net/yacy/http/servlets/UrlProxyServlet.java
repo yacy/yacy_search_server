@@ -111,181 +111,178 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
 
         if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
             return;
-        } else {
+        }
+        final Continuation continuation = ContinuationSupport.getContinuation(request);
 
-            final Continuation continuation = ContinuationSupport.getContinuation(request);
+        if (!continuation.isInitial()) {
+            response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT); // Need better test that isInitial
+            return;
+        }
+        // 2 -  get target url
+        URL proxyurl = null;
+        String strARGS = request.getQueryString();
+        if (strARGS == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
+            return;
+        }
 
-            if (!continuation.isInitial()) {
-                response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT); // Need better test that isInitial
-                return;
+        if (strARGS.startsWith("url=")) {
+            final String strUrl = strARGS.substring(4); // strip "url="
+
+            try {
+                proxyurl = new URL(strUrl);
+            } catch (final MalformedURLException e) {
+                proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
+
             }
-            // 2 -  get target url
-            URL proxyurl = null;
-            String strARGS = request.getQueryString();
-            if (strARGS == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
-                return;
+        }
+        if (proxyurl == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
+            return;
+        }
+
+        String hostwithport = proxyurl.getHost();
+        if (proxyurl.getPort() != -1) {
+            hostwithport += ":" + proxyurl.getPort();
+        }
+        // 4 - get target url
+        RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
+        yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
+        yacyRequestHeader.remove(HeaderFramework.CONTENT_LENGTH);
+        
+        final HashMap<String, Object> prop = new HashMap<String, Object>();
+        prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
+        prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
+        prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
+        if (proxyurl.getQuery() != null) prop.put(HeaderFramework.CONNECTION_PROP_ARGS, proxyurl.getQuery());
+        prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
+
+        yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
+        yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());
+
+        // 4 & 5 get & index target url
+        final ByteArrayOutputStream tmpproxyout = new ByteArrayOutputStream();
+        HTTPDProxyHandler.doGet(prop, yacyRequestHeader, tmpproxyout, ClientIdentification.yacyProxyAgent);
+
+        // reparse header to extract content-length and mimetype
+        final ResponseHeader proxyResponseHeader = new ResponseHeader(200); //
+        InputStream proxyout = new ByteArrayInputStream(tmpproxyout.toByteArray());
+        String line = readLine(proxyout);
+        while (line != null && !line.equals("")) {
+            int p;
+            if ((p = line.indexOf(':')) >= 0) {
+                // store a property
+                proxyResponseHeader.put(line.substring(0, p).trim(), line.substring(p + 1).trim());
             }
-
-            if (strARGS.startsWith("url=")) {
-                final String strUrl = strARGS.substring(4); // strip "url="
-
-                try {
-                    proxyurl = new URL(strUrl);
-                } catch (final MalformedURLException e) {
-                    proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
-
-                }
-            }
-            if (proxyurl == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
-                return;
-            }
-
-            String hostwithport = proxyurl.getHost();
-            if (proxyurl.getPort() != -1) {
-                hostwithport += ":" + proxyurl.getPort();
-            }
-            // 4 - get target url
-            RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
-            yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
-            yacyRequestHeader.remove(HeaderFramework.CONTENT_LENGTH);
-            
-            final HashMap<String, Object> prop = new HashMap<String, Object>();
-            prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-            prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
-            prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
-            if (proxyurl.getQuery() != null) prop.put(HeaderFramework.CONNECTION_PROP_ARGS, proxyurl.getQuery());
-            prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
-
-            yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
-            yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());
-
-            // 4 & 5 get & index target url
-            final ByteArrayOutputStream tmpproxyout = new ByteArrayOutputStream();
-            HTTPDProxyHandler.doGet(prop, yacyRequestHeader, tmpproxyout, ClientIdentification.yacyProxyAgent);
-
-            // reparse header to extract content-length and mimetype
-            final ResponseHeader proxyResponseHeader = new ResponseHeader(200); //
-            InputStream proxyout = new ByteArrayInputStream(tmpproxyout.toByteArray());
-            String line = readLine(proxyout);
-            while (line != null && !line.equals("")) {
-                int p;
-                if ((p = line.indexOf(':')) >= 0) {
-                    // store a property
-                    proxyResponseHeader.put(line.substring(0, p).trim(), line.substring(p + 1).trim());
-                }
-                line = readLine(proxyout);
-            }
-            if (line == null) {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Proxy Header missing");
-                return;
-            }
+            line = readLine(proxyout);
+        }
+        if (line == null) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Proxy Header missing");
+            return;
+        }
   
-            if (proxyResponseHeader.containsKey(HeaderFramework.LOCATION)) {
-                // rewrite location header
-                String location = proxyResponseHeader.get(HeaderFramework.LOCATION);
-                if (location.startsWith("http")) {
-                    location = request.getServletPath() + "?url=" + location;
-                } else {
-                    location = request.getServletPath() + "?url=http://" + hostwithport + "/" + location;
-                }
-                response.addHeader(HeaderFramework.LOCATION, location);
-            } 
-
-            final int httpStatus = proxyResponseHeader.getStatusCode();
-            final String mimeType = proxyResponseHeader.getContentType();
-            response.setStatus(httpStatus);
-            response.setContentType(mimeType);
-            
-            if ((httpStatus < HttpServletResponse.SC_BAD_REQUEST) && (mimeType != null) && mimeType.startsWith("text")) {
-                if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
-                     proxyout = new ChunkedInputStream(proxyout);
-                }
-
-                // 7 - modify target content
-                final String servletstub = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getServletPath() + "?url=";
-                Document doc;
-                try {            
-                    doc = Jsoup.parse(proxyout, UTF8.charset.name(), proxyurl.toString());
-                } catch (IOException eio) {
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Proxy: parser error on " + proxyurl.toString());
-                    return;
-                }
-
-                Element bde = doc.body(); // start with body element to rewrite href links
-                // rewrite all href with abs proxy url (must be abs because of <base> head tag
-                Elements taglist = bde.getElementsByAttribute("href");
-                final Switchboard sb = Switchboard.getSwitchboard();
-                for (Element e : taglist) {
-                    if (e.tagName().equals("a")) { // get <a> tag
-                        String absurl = e.absUrl("href"); // get href attribut as abs url
-                        if (absurl.startsWith("data:") || absurl.startsWith("#") || absurl.startsWith("mailto:") || absurl.startsWith("javascript:")) {
-                            continue;
-                        } else {
-                            if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
-                                try {
-                                    if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(absurl)) != null) {
-                                        continue;
-                                    }
-                                } catch (MalformedURLException ex) {
-                                    ConcurrentLog.fine("PROXY", "ProxyServlet: malformed url for url-rewirte " + absurl);
-                                    continue;
-                                }
-                            }
-                            e.attr("href", servletstub + absurl); // rewrite with abs proxy-url
-                        }
-                    }
-                }
-
-                Element hd = doc.head();
-                if (hd != null) {
-                    // add a base url if not exist (to make sure relative links point to original)
-                    Elements basetags = hd.getElementsByTag("base");
-                    if (basetags.isEmpty()) {
-                        Element newbasetag = hd.prependElement("base");
-                        String basestr = proxyurl.getProtocol() + "://" + hostwithport + proxyurl.getPath(); //+directory;
-                        newbasetag.attr("href", basestr);
-                        }
-                    }
-
-                // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
-                // TODO: use a template file for
-                if (_stopProxyText != null) {
-                    bde.prepend("<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
-                        + "<div align='center' style='font-size:11px; color:darkgrey;'><a href='" + proxyurl + "'>" + _stopProxyText + "</a></div></div>");
-                }
-
-                // 9 - deliver to client
-                byte[] sbb = UTF8.getBytes(doc.toString());
-
-                // add some proxy-headers to response header
-                if (proxyResponseHeader.containsKey(HeaderFramework.SERVER)) {
-                    response.setHeader(HeaderFramework.SERVER, proxyResponseHeader.get(HeaderFramework.SERVER));
-                }
-                if (proxyResponseHeader.containsKey(HeaderFramework.DATE)) {
-                    response.setHeader(HeaderFramework.DATE, proxyResponseHeader.get(HeaderFramework.DATE));
-                }
-                if (proxyResponseHeader.containsKey(HeaderFramework.LAST_MODIFIED)) {
-                    response.setHeader(HeaderFramework.LAST_MODIFIED, proxyResponseHeader.get(HeaderFramework.LAST_MODIFIED));
-                }
-                if (proxyResponseHeader.containsKey(HeaderFramework.EXPIRES)) {
-                    response.setHeader(HeaderFramework.EXPIRES, proxyResponseHeader.get(HeaderFramework.EXPIRES));
-                }
-
-                response.setIntHeader(HeaderFramework.CONTENT_LENGTH, sbb.length);
-                response.getOutputStream().write(sbb);
-
+        if (proxyResponseHeader.containsKey(HeaderFramework.LOCATION)) {
+            // rewrite location header
+            String location = proxyResponseHeader.get(HeaderFramework.LOCATION);
+            if (location.startsWith("http")) {
+                location = request.getServletPath() + "?url=" + location;
             } else {
-                if (httpStatus >= HttpServletResponse.SC_BAD_REQUEST) {
-                    response.sendError(httpStatus,"Site " + proxyurl + " returned with status");
-                    return;
-                }
-                if ((response.getHeader(HeaderFramework.CONTENT_LENGTH) == null) && prop.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE)) {
-                    response.setHeader(HeaderFramework.CONTENT_LENGTH, (String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
-                }
-                FileUtils.copy(proxyout, response.getOutputStream());
+                location = request.getServletPath() + "?url=http://" + hostwithport + "/" + location;
             }
+            response.addHeader(HeaderFramework.LOCATION, location);
+        } 
+
+        final int httpStatus = proxyResponseHeader.getStatusCode();
+        final String mimeType = proxyResponseHeader.getContentType();
+        response.setStatus(httpStatus);
+        response.setContentType(mimeType);
+        
+        if ((httpStatus < HttpServletResponse.SC_BAD_REQUEST) && (mimeType != null) && mimeType.startsWith("text")) {
+            if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
+                 proxyout = new ChunkedInputStream(proxyout);
+            }
+
+            // 7 - modify target content
+            final String servletstub = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getServletPath() + "?url=";
+            Document doc;
+            try {            
+                doc = Jsoup.parse(proxyout, UTF8.charset.name(), proxyurl.toString());
+            } catch (IOException eio) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Proxy: parser error on " + proxyurl.toString());
+                return;
+            }
+
+            Element bde = doc.body(); // start with body element to rewrite href links
+            // rewrite all href with abs proxy url (must be abs because of <base> head tag
+            Elements taglist = bde.getElementsByAttribute("href");
+            final Switchboard sb = Switchboard.getSwitchboard();
+            for (Element e : taglist) {
+                if (e.tagName().equals("a")) { // get <a> tag
+                    String absurl = e.absUrl("href"); // get href attribut as abs url
+                    if (absurl.startsWith("data:") || absurl.startsWith("#") || absurl.startsWith("mailto:") || absurl.startsWith("javascript:")) {
+                        continue;
+                    }
+                    if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
+                        try {
+                            if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(absurl)) != null) {
+                                continue;
+                            }
+                        } catch (MalformedURLException ex) {
+                            ConcurrentLog.fine("PROXY", "ProxyServlet: malformed url for url-rewirte " + absurl);
+                            continue;
+                        }
+                    }
+                    e.attr("href", servletstub + absurl); // rewrite with abs proxy-url
+                }
+            }
+
+            Element hd = doc.head();
+            if (hd != null) {
+                // add a base url if not exist (to make sure relative links point to original)
+                Elements basetags = hd.getElementsByTag("base");
+                if (basetags.isEmpty()) {
+                    Element newbasetag = hd.prependElement("base");
+                    String basestr = proxyurl.getProtocol() + "://" + hostwithport + proxyurl.getPath(); //+directory;
+                    newbasetag.attr("href", basestr);
+                    }
+                }
+
+            // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
+            // TODO: use a template file for
+            if (_stopProxyText != null) {
+                bde.prepend("<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
+                    + "<div align='center' style='font-size:11px; color:darkgrey;'><a href='" + proxyurl + "'>" + _stopProxyText + "</a></div></div>");
+            }
+
+            // 9 - deliver to client
+            byte[] sbb = UTF8.getBytes(doc.toString());
+
+            // add some proxy-headers to response header
+            if (proxyResponseHeader.containsKey(HeaderFramework.SERVER)) {
+                response.setHeader(HeaderFramework.SERVER, proxyResponseHeader.get(HeaderFramework.SERVER));
+            }
+            if (proxyResponseHeader.containsKey(HeaderFramework.DATE)) {
+                response.setHeader(HeaderFramework.DATE, proxyResponseHeader.get(HeaderFramework.DATE));
+            }
+            if (proxyResponseHeader.containsKey(HeaderFramework.LAST_MODIFIED)) {
+                response.setHeader(HeaderFramework.LAST_MODIFIED, proxyResponseHeader.get(HeaderFramework.LAST_MODIFIED));
+            }
+            if (proxyResponseHeader.containsKey(HeaderFramework.EXPIRES)) {
+                response.setHeader(HeaderFramework.EXPIRES, proxyResponseHeader.get(HeaderFramework.EXPIRES));
+            }
+
+            response.setIntHeader(HeaderFramework.CONTENT_LENGTH, sbb.length);
+            response.getOutputStream().write(sbb);
+
+        } else {
+            if (httpStatus >= HttpServletResponse.SC_BAD_REQUEST) {
+                response.sendError(httpStatus,"Site " + proxyurl + " returned with status");
+                return;
+            }
+            if ((response.getHeader(HeaderFramework.CONTENT_LENGTH) == null) && prop.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE)) {
+                response.setHeader(HeaderFramework.CONTENT_LENGTH, (String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
+            }
+            FileUtils.copy(proxyout, response.getOutputStream());
         }
     }
 
