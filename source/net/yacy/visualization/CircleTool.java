@@ -59,16 +59,19 @@ public class CircleTool {
         for (short r = (short) circles.size(); r < rc; r++) {
             r1 = (short) (r + 1);
             crc = new ArrayList<>();
-            for (short a = 0; a < 2 * (r + 1); a++) {
-                x = (short) (r1 * Math.cos(RasterPlotter.PI4 * a / r1));
-                y = (short) (r1 * Math.sin(RasterPlotter.PI4 * a / r1));
+            for (short a = 0; a < 2 * r1; a++) {
+                double h = RasterPlotter.PI4 * a / r1;
+                double cosh = Math.cos(h);
+                double sinh = Math.sin(h);
+                x = (short) (r1 * cosh);
+                y = (short) (r1 * sinh);
                 co = x << 16 | y;
                 if (!(crds.contains(co))) {
                     crc.add(co);
                     crds.add(co);
                 }
-                x = (short) ((r + 0.5) * Math.cos(RasterPlotter.PI4 * a / r1));
-                y = (short) ((r + 0.5) * Math.sin(RasterPlotter.PI4 * a / r1));
+                x = (short) ((r + 0.5) * cosh);
+                y = (short) ((r + 0.5) * sinh);
                 co = x << 16 | y;
                 if (!(crds.contains(co))) {
                     crc.add(co);
