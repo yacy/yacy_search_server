@@ -109,7 +109,7 @@
     </ul>
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Search Portal Integration</h3></li>
-      <li><a href="ConfigSearchBox.html" class="MenuItemLink">Configuration</a></li>
+      <li><a href="ConfigPortal.html" class="MenuItemLink">Configuration</a></li>
       <li><a href="ConfigAppearance_p.html" class="MenuItemLink lock">Design</a></li>
       <li><a href="RankingSolr_p.html" class="MenuItemLink lock">Ranking and Heuristics</a></li>
     </ul>
