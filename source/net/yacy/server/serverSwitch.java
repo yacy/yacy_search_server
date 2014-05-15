@@ -65,7 +65,6 @@ public class serverSwitch
     protected int serverJobs;
     private ConcurrentMap<String, String> configProps;
     private final ConcurrentMap<String, String> configRemoved;
-    private final ConcurrentMap<InetAddress, String> authorization;
     private final NavigableMap<String, BusyThread> workerThreads;
     private YaCyHttpServer httpserver; // implemented HttpServer
     
@@ -125,14 +124,11 @@ public class serverSwitch
             saveConfig();
         }
 
-        // other settings
-        this.authorization = new ConcurrentHashMap<InetAddress, String>();
-
         // init thread control
         this.workerThreads = new TreeMap<String, BusyThread>();
 
         // init busy state control
-        this.serverJobs = 0;
+        //this.serverJobs = 0;
 
         // init server tracking
         serverAccessTracker.init(
@@ -456,64 +452,6 @@ public class serverSwitch
 
     public Iterator<String> /*of serverThread-Names (String)*/threadNames() {
         return this.workerThreads.keySet().iterator();
-    }
-
-    // authentication routines:
-
-    public void setAuthentify(final InetAddress host, final String user, final String rights) {
-        // sets access attributes according to host addresses
-        this.authorization.put(host, user + "@" + rights);
-    }
-
-    public void removeAuthentify(final InetAddress host) {
-        // remove access attributes according to host addresses
-        this.authorization.remove(host);
-    }
-
-    public String getAuthentifyUser(final InetAddress host) {
-        // read user name according to host addresses
-        final String a = this.authorization.get(host);
-        if ( a == null ) {
-            return null;
-        }
-        final int p = a.indexOf('@');
-        if ( p < 0 ) {
-            return null;
-        }
-        return a.substring(0, p);
-    }
-
-    public String getAuthentifyRights(final InetAddress host) {
-        // read access rigths according to host addresses
-        final String a = this.authorization.get(host);
-        if ( a == null ) {
-            return null;
-        }
-        final int p = a.indexOf('@');
-        if ( p < 0 ) {
-            return null;
-        }
-        return a.substring(p + 1);
-    }
-
-    public void addAuthentifyRight(final InetAddress host, final String right) {
-        final String rights = getAuthentifyRights(host);
-        if ( rights == null ) {
-            // create new authentication
-            setAuthentify(host, "unknown", right);
-        } else {
-            // add more authentication
-            final String user = getAuthentifyUser(host);
-            setAuthentify(host, user, rights + right);
-        }
-    }
-
-    public boolean hasAuthentifyRight(final InetAddress host, final String right) {
-        final String rights = getAuthentifyRights(host);
-        if ( rights == null ) {
-            return false;
-        }
-        return rights.indexOf(right) >= 0;
     }
 
     public File getDataPath() {
