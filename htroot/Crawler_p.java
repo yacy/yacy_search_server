@@ -413,10 +413,11 @@ public class Crawler_p {
                     prop.putHTML("info_error", e.getMessage());
                 } 
                 
-                boolean hasCrawlstartDataOK = true;
-                // check crawlurl was given in sitecrawl
-                if ("url".equals(crawlingMode) && rootURLs.size() == 0) hasCrawlstartDataOK = false;
-
+                boolean hasCrawlstartDataOK = !crawlName.isEmpty();
+                if (hasCrawlstartDataOK) {
+                    // check crawlurl was given in sitecrawl
+                    if ("url".equals(crawlingMode) && rootURLs.size() == 0) hasCrawlstartDataOK = false;
+                }
                 // prepare a new crawling profile
                 final CrawlProfile profile;
                 byte[] handle;
@@ -522,7 +523,7 @@ public class Crawler_p {
                         ConcurrentLog.logException(e);
                     }
                 } else if ("file".equals(crawlingMode)) {
-                    if (post.containsKey("crawlingFile")) {
+                    if (post.containsKey("crawlingFile") && crawlingFile != null) {
                         final String crawlingFileContent = post.get("crawlingFile$file", "");
                         try {
                             // check if the crawl filter works correctly
