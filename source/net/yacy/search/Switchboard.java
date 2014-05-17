@@ -3788,7 +3788,6 @@ public final class Switchboard extends serverSwitch {
         ProxySettings.port = port;
         ProxySettings.host = host;
         ProxySettings.setProxyUse4HTTP(ProxySettings.host != null && ProxySettings.host.length() > 0 && getConfigBool("remoteProxyUse", false));
-        ProxySettings.setProxyUse4YaCy(getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true"));
         ProxySettings.setProxyUse4HTTPS(getConfig("remoteProxyUse4SSL", "true").equalsIgnoreCase("true"));
         ProxySettings.user = getConfig("remoteProxyUser", "").trim();
         ProxySettings.password = getConfig("remoteProxyPwd", "").trim();

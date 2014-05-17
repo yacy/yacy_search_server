@@ -268,7 +268,6 @@ public class SettingsAck_p {
              * Reading out the remote proxy settings
              * ==================================================================== */
             final boolean useRemoteProxy = post.containsKey("remoteProxyUse");
-            final boolean useRemoteProxy4Yacy = post.containsKey("remoteProxyUse4Yacy");
             final boolean useRemoteProxy4SSL = post.containsKey("remoteProxyUse4SSL");
 
             final String remoteProxyHost = post.get("remoteProxyHost", "");
@@ -289,7 +288,6 @@ public class SettingsAck_p {
             env.setConfig("remoteProxyPwd", remoteProxyPwd);
             env.setConfig("remoteProxyNoProxy", remoteProxyNoProxyStr);
             env.setConfig("remoteProxyUse", useRemoteProxy);
-            env.setConfig("remoteProxyUse4Yacy", useRemoteProxy4Yacy);
             env.setConfig("remoteProxyUse4SSL", useRemoteProxy4SSL);
 
             /* ====================================================================

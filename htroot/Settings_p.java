@@ -91,7 +91,6 @@ public final class Settings_p {
         
         // remote proxy
         prop.put("remoteProxyUseChecked", env.getConfigBool("remoteProxyUse", false) ? 1 : 0);
-        prop.put("remoteProxyUse4Yacy", env.getConfigBool("remoteProxyUse4Yacy", true) ? 1 : 0);
         prop.put("remoteProxyUse4SSL", env.getConfigBool("remoteProxyUse4SSL", true) ? 1 : 0);
         
         prop.putHTML("remoteProxyHost", env.getConfig("remoteProxyHost", ""));
