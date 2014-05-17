@@ -133,9 +133,9 @@
                     });
                 };
 
-                /** Check DOM & properties if element is checkeds. */
+                /** Check DOM & properties if element is checked. */
                 $.fn.isChecked = function() {
-                    return $(this).attr("checked") || $(this).prop("checked");
+                    return $(this).prop("checked");
                 };
 
                 /** Set checked state for checkoxes/radio buttons. */
