@@ -335,7 +335,6 @@ plasmaBlueList=yacy.blue
 # if you want to switch on the proxy use, set remoteProxyUse=true
 # remoteProxyNoProxy is a no-proxy pattern list for the remote proxy
 remoteProxyUse=false
-remoteProxyUse4Yacy=true
 remoteProxyUse4SSL=true
 
 remoteProxyHost=192.168.2.2

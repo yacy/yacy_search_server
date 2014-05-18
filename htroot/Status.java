@@ -200,7 +200,6 @@ public class Status
             prop.put("remoteProxy", "1");
             prop.putXML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));
             prop.putXML("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"));
-            prop.put("remoteProxy_4Yacy", sb.getConfigBool("remoteProxyUse4Yacy", true) ? "0" : "1");
         } else {
             prop.put("remoteProxy", "0"); // not used
         }

@@ -11,14 +11,6 @@
     <td>Enables the usage of the remote proxy by yacy</td>
   </tr>
   <tr valign="top">
-    <td colspan="2"><label for="prxy4yacy">Use remote proxy for yacy &lt;-&gt; yacy communication</label></td>
-    <td><input type="checkbox" name="remoteProxyUse4Yacy" id="prxy4yacy"#(remoteProxyUse4Yacy)#:: checked="checked"#(/remoteProxyUse4Yacy)# /></td>
-  	<td>
-  	  Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.<br />
-  	  <em>Hint:</em> Enabling this option could cause this peer to remain in junior status.
-  	</td>
-  </tr>
-  <tr valign="top">
     <td colspan="2"><label for="prxy4ssl">Use remote proxy for HTTPS</label></td>
     <td><input type="checkbox" name="remoteProxyUse4SSL" id="prxy4ssl"#(remoteProxyUse4SSL)#:: checked="checked"#(/remoteProxyUse4SSL)# /></td>
   	<td>Specifies if YaCy should forward ssl connections to the remote proxy.</td>  
