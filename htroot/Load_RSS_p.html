@@ -65,7 +65,7 @@
     </form>
 
 	#(showscheduledfeeds)#::
-	<form id="scheduledfeeds" action="Load_RSS_p.html"><fieldset>
+    <form id="scheduledfeeds" action="Load_RSS_p.html" method="post" enctype="multipart/form-data"><fieldset>
 	  <legend>List of Scheduled RSS Feed Load Targets</legend>
       <table class="sortable" border="0">
         <tr class="TableHeader" valign="bottom">
@@ -102,7 +102,7 @@
 	#(/showscheduledfeeds)#
 	
 	#(shownewfeeds)#::
-	<form id="newfeeds" action="Load_RSS_p.html"><fieldset>
+    <form id="newfeeds" action="Load_RSS_p.html" method="post" enctype="multipart/form-data"><fieldset>
 	  <legend>Available RSS Feed List</legend>
       <table class="sortable" border="0">
         <tr class="TableHeader" valign="bottom">
