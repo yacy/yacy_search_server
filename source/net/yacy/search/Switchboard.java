@@ -2337,7 +2337,7 @@ public final class Switchboard extends serverSwitch {
                 long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
                 long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
                 boolean optimizeRequired = deltaOptimize > 60000 * 60 * 2 && idleAdmin > 600000; // optimize if user is idle for 10 minutes and at most every 2 hours
-                int opts = Math.min(10, Math.max(1, (int) (fulltext.collectionSize() / 5000000)));
+                int opts = Math.min(10, Math.max(1, (int) (fulltext.collectionSize() / 1000000)));
                 if (proccount > 0) {
                     opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
                     optimizeRequired = true;
