@@ -26,8 +26,6 @@ public class get_metadata_p {
     private static final String BLACK_LISTS_SHARED = "BlackLists.Shared";
 
     private static final int lastTypeIndex = BLACKLIST_TYPE_VALUES.length - 1;
-    private static final String EMPTY_STRING = "";
-    private static final String COMMA_STRING = ",";
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
@@ -49,22 +47,14 @@ public class get_metadata_p {
                     prop.put(PREFIX_LISTS + blacklistCount + INFIX_TYPES + j + POSTFIX_VALUE,
                             ListManager.listSetContains(type + TYPES_EXT, element));
 
-                    if (j < lastTypeIndex) {
-                        prop.put(PREFIX_LISTS + blacklistCount + INFIX_TYPES + j + POSTFIX_COMMA, COMMA_STRING);
-                    } else {
-                        prop.put(PREFIX_LISTS + blacklistCount + INFIX_TYPES + j + POSTFIX_COMMA, EMPTY_STRING);
-                    }
+                    prop.put(PREFIX_LISTS + blacklistCount + INFIX_TYPES + j + POSTFIX_COMMA, j < lastTypeIndex);
                     
                     j++;
                 }
                 prop.put(PREFIX_LISTS + blacklistCount + POSTFIX_TYPES, BLACKLIST_TYPE_VALUES.length);
 
-                if (blacklistCount < lastBlacklistCount) {
-                    prop.put(PREFIX_LISTS + blacklistCount + POSTFIX_COMMA, COMMA_STRING);
-                } else {
-                    prop.put(PREFIX_LISTS + blacklistCount + POSTFIX_COMMA, EMPTY_STRING);
-                }
-
+                prop.put(PREFIX_LISTS + blacklistCount + POSTFIX_COMMA, blacklistCount < lastBlacklistCount);
+                    
                 blacklistCount++;
             }
         }

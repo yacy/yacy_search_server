@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<list name="#[name]#" shared="#[shared]#" #{types}# 
-      #[name]#="#[value]#"#{/types}#>
+<list name="#[name]#" shared="#(shared)#false::true#(/shared)#" #{types}# 
+      #[name]#="#(value)#false::true#(/value)#"#{/types}#>
 	<items>    
 #{items}#
 		<item>#[item]#</item>

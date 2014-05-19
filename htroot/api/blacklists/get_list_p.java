@@ -30,8 +30,6 @@ public class get_list_p {
     private static final String BLACK_LISTS_SHARED = "BlackLists.Shared";
 
     private static final int lastTypeIndex = BLACKLIST_TYPE_VALUES.length - 1;
-    private static final String EMPTY_STRING = "";
-    private static final String COMMA_STRING = ",";
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
        
@@ -55,11 +53,7 @@ public class get_list_p {
                         prop.put(PREFIX_TYPES + j + POSTFIX_VALUE,
                                 ListManager.listSetContains(type + TYPES_EXT, element));
                         
-                        if (j < lastTypeIndex) {
-                            prop.put(PREFIX_TYPES + j + POSTFIX_COMMA, COMMA_STRING);
-                        } else {
-                            prop.put(PREFIX_TYPES + j + POSTFIX_COMMA, EMPTY_STRING);
-                        }
+                        prop.put(PREFIX_TYPES + j + POSTFIX_COMMA, j < lastTypeIndex);
                         
                         j++;
                     }
@@ -77,11 +71,7 @@ public class get_list_p {
 
                         prop.putXML(PREFIX_ITEMS + count + POSTFIX_ITEM, entry);
                         
-                        if (count < lastItemCount) {
-                            prop.put(PREFIX_ITEMS + count + POSTFIX_COMMA, COMMA_STRING);
-                        } else {
-                            prop.put(PREFIX_ITEMS + count + POSTFIX_COMMA, EMPTY_STRING);
-                        }
+                        prop.put(PREFIX_ITEMS + count + POSTFIX_COMMA, count < lastItemCount);
                         
                         count++;
                     }
