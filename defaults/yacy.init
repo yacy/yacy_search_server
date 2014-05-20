@@ -177,11 +177,8 @@ cluster.peers.ipport=localhost:8090
 
 # bootstrapLoadTimeout
 # this is the time-out for loading of the seedlist files during bootstraping
-# the time should not be too long, since loading of the seedlist is not parallelized
-# and a not successful loading of a seed file may prevent a peer from becoming
-# a (at least) junior status. If the time-out is too short, there is the danger
-# that the peer stays in virgin mode
-bootstrapLoadTimeout = 6000
+# If the time-out is too short, there is the danger that the peer stays in virgin mode
+bootstrapLoadTimeout = 20000
 
 # time-out of client control socket in milliseconds
 # since this applies only to the client-proxy connection,

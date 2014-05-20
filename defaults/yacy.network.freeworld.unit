@@ -56,11 +56,15 @@ network.unit.remotecrawl.speed = 300
 
 # addresses of seed-list bootstrap locations
 network.unit.bootstrap.seedlist0 = http://www.yacy.de/seed.txt
-network.unit.bootstrap.seedlist1 = http://www.lulabad.de/seed.txt
-network.unit.bootstrap.seedlist2 = http://www.elso.sk/yacy/seed.txt
-network.unit.bootstrap.seedlist3 = http://low.audioattack.de/yacy/seed.txt
-network.unit.bootstrap.seedlist4 = http://img.homepage.bluewin.ch/352348/seed.txt
-network.unit.bootstrap.seedlist5 = http://lingvini.hu/yacy/gshuszrg00/seed.txt
+network.unit.bootstrap.seedlist1 = http://www.elso.sk/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
+network.unit.bootstrap.seedlist3 = http://fennec.cx/yacy/seed.txt
+network.unit.bootstrap.seedlist4 = http://5.45.105.16/yacyseed
+network.unit.bootstrap.seedlist5 = http://freenode.homeunix.org/yacy/seed.txt
+network.unit.bootstrap.seedlist6 = http://ns2.haunold.co.at:8090/www/seed.txt
+network.unit.bootstrap.seedlist7 = http://5.135.162.2/yacy/seed.txt
+network.unit.bootstrap.seedlist8 = http://yacy.tinuviel.ru/seed.txt
+network.unit.bootstrap.seedlist9 = http://www.eggers-blog.info/yacy/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
