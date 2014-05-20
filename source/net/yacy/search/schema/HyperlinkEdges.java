@@ -1,5 +1,6 @@
 package net.yacy.search.schema;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -96,7 +97,7 @@ public class HyperlinkEdges implements Iterable<HyperlinkEdge> {
     public Iterator<HyperlinkEdge> iterator() {
         final Iterator<Map.Entry<MultiProtocolURL, Targets>> i = this.edges.entrySet().iterator();
         @SuppressWarnings("unchecked")
-        final Iterator<HyperlinkEdge.Target>[] tc = new Iterator[1];
+        final Iterator<HyperlinkEdge.Target>[] tc = (Iterator<HyperlinkEdge.Target>[]) Array.newInstance(Iterator.class, 1);
         tc[0] = null;
         final MultiProtocolURL[] su = new MultiProtocolURL[1];
         su[0] = null;

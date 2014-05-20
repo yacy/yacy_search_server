@@ -22,6 +22,7 @@ package net.yacy.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -459,7 +460,7 @@ public class HostQueue implements Balancer {
     public Iterator<Request> iterator() throws IOException {
         final Iterator<Map.Entry<Integer, Index>> depthIterator = this.depthStacks.entrySet().iterator();
         @SuppressWarnings("unchecked")
-        final Iterator<Row.Entry>[] rowIterator = new Iterator[1];
+        final Iterator<Row.Entry>[] rowIterator = (Iterator<Row.Entry>[]) Array.newInstance(Iterator.class, 1);
         rowIterator[0] = null;
         return new Iterator<Request>() {
             @Override

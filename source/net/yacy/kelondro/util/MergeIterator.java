@@ -22,6 +22,7 @@
 
 package net.yacy.kelondro.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -204,7 +205,10 @@ public class MergeIterator<E> implements CloneableIterator<E> {
         Method meth = null;
         try {
             final Class<?> c = net.yacy.kelondro.util.MergeIterator.class;
-            meth = c.getMethod("mergeEqualByReplace", new Class[]{Object.class, Object.class});
+            final Class<?>[] args = (Class<?>[]) Array.newInstance(Class.class, 2);
+            args[0] = Object.class;
+            args[1] = Object.class;
+            meth = c.getMethod("mergeEqualByReplace", args);
         } catch (final SecurityException e) {
             System.out.println("Error while initializing simpleMerge (1): " + e.getMessage());
             meth = null;

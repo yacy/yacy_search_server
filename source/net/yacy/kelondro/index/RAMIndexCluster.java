@@ -25,6 +25,7 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -326,7 +327,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
                     col.add(element.rows(up, firstKey));
                 }
             }
-            return StackIterator.stack(col.toArray(new CloneableIterator[col.size()]));
+            return StackIterator.stack(col.toArray((CloneableIterator<Entry>[]) Array.newInstance(CloneableIterator.class, col.size())));
         }
     }
 

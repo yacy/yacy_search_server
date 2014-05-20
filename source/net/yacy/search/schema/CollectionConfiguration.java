@@ -27,6 +27,7 @@ package net.yacy.search.schema;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -337,9 +338,15 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         public final ArrayList<String>[] urlProtocols, urlStubs, urlAnchorTexts;
         @SuppressWarnings("unchecked")
         public Subgraph(int inboundSize, int outboundSize) {
-            this.urlProtocols = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
-            this.urlStubs = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
-            this.urlAnchorTexts = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
+            this.urlProtocols = (ArrayList<String>[]) Array.newInstance(ArrayList.class, 2);
+            this.urlProtocols[0] = new ArrayList<String>(inboundSize);
+            this.urlProtocols[1] = new ArrayList<String>(outboundSize);
+            this.urlStubs = (ArrayList<String>[]) Array.newInstance(ArrayList.class, 2);
+            this.urlStubs[0] = new ArrayList<String>(inboundSize);
+            this.urlStubs[1] = new ArrayList<String>(outboundSize);
+            this.urlAnchorTexts = (ArrayList<String>[]) Array.newInstance(ArrayList.class, 2);
+            this.urlAnchorTexts[0] = new ArrayList<String>(inboundSize);
+            this.urlAnchorTexts[1] = new ArrayList<String>(outboundSize);
         }
     }
     

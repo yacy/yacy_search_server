@@ -24,6 +24,7 @@
 
 package net.yacy.cora.storage;
 
+import java.lang.reflect.Array;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,7 +62,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     	while (m < partitions) m = m * 2;
         int partitionSize = cacheSize / m;
         if (partitionSize < 4) partitionSize = 4;
-    	this.arc = new HashARC[m];
+    	this.arc = (ARC<K, V>[]) Array.newInstance(HashARC.class, m);
     	for (int i = 0; i < this.arc.length; i++) this.arc[i] = new HashARC<K, V>(partitionSize);
     	m -= 1;
     	this.mask = m;
@@ -79,7 +80,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
         while (m < partitions) m = m * 2;
         int partitionSize = cacheSize / m;
         if (partitionSize < 4) partitionSize = 4;
-        this.arc = new ComparableARC[m];
+        this.arc = (ARC<K, V>[]) Array.newInstance(ComparableARC.class, m);
         for (int i = 0; i < this.arc.length; i++) this.arc[i] = new ComparableARC<K, V>(partitionSize, comparator);
         m -= 1;
         this.mask = m;

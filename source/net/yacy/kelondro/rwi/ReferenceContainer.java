@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.rwi;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -291,7 +292,10 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         Method meth = null;
         try {
             final Class<?> c = net.yacy.kelondro.rwi.ReferenceContainer.class;
-            meth = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
+            final Class<?>[] args = (Class<?>[]) Array.newInstance(Class.class, 2);
+            args[0] = Object.class;
+            args[1] = Object.class;
+            meth = c.getMethod("mergeUnique", args);
         } catch (final SecurityException e) {
             System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());
             meth = null;

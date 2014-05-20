@@ -28,6 +28,7 @@ package net.yacy.kelondro.table;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -566,7 +567,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     @Override
     @SuppressWarnings("unchecked")
     public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
-        final CloneableIterator<Row.Entry>[] c = new CloneableIterator[this.tables.size()];
+        final CloneableIterator<Row.Entry>[] c = (CloneableIterator<Row.Entry>[]) Array.newInstance(CloneableIterator.class, this.tables.size());
         final Iterator<Index> i = this.tables.values().iterator();
         int d = 0;
         while (i.hasNext()) {

@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -386,7 +387,7 @@ public final class Fulltext {
         int subsetscount = 1 + (hosthashes.size() / 255); // if the list is too large, we get a "too many boolean clauses" exception
         int c = 0;
         @SuppressWarnings("unchecked")
-        List<String>[] subsets = new ArrayList[subsetscount];
+        List<String>[] subsets = (List<String>[]) Array.newInstance(ArrayList.class, subsetscount);
         for (int i = 0; i < subsetscount; i++) subsets[i] = new ArrayList<String>();
         for (String hosthash: hosthashes) subsets[c++ % subsetscount].add(hosthash);
         for (List<String> subset: subsets) {

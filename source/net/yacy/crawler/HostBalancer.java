@@ -22,6 +22,7 @@ package net.yacy.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -353,7 +354,7 @@ public class HostBalancer implements Balancer {
     public Iterator<Request> iterator() throws IOException {
         final Iterator<HostQueue> hostsIterator = this.queues.values().iterator();
         @SuppressWarnings("unchecked")
-        final Iterator<Request>[] hostIterator = new Iterator[1];
+        final Iterator<Request>[] hostIterator = (Iterator<Request>[]) Array.newInstance(Iterator.class, 1);
         hostIterator[0] = null;
         return new Iterator<Request>() {
             @Override

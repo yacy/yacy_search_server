@@ -22,6 +22,7 @@
 
 package net.yacy.kelondro.util;
 
+import java.lang.reflect.Array;
 import java.util.ConcurrentModificationException;
 
 import net.yacy.cora.order.CloneableIterator;
@@ -124,7 +125,7 @@ public class StackIterator<E> implements CloneableIterator<E> {
             return new StackIterator<A>(iterators[0], iterators[1]);
         }
         CloneableIterator<A> a = iterators[0];
-        final CloneableIterator<A>[] iterators0 = new CloneableIterator[iterators.length - 1];
+        final CloneableIterator<A>[] iterators0 = (CloneableIterator<A>[]) Array.newInstance(CloneableIterator.class, iterators.length - 1);
         System.arraycopy(iterators, 1, iterators0, 0, iterators.length - 1);
         if (a == null) return stack(iterators0);
         return new StackIterator<A>(a, stack(iterators0));

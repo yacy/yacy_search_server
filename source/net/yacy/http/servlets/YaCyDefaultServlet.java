@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -732,11 +733,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
             }
 
-            final Class<?> c = provider.loadClass(classFile);           
-            final Class<?>[] params = new Class[]{
-                RequestHeader.class,
-                serverObjects.class,
-                serverSwitch.class};
+            final Class<?> c = provider.loadClass(classFile);
+            
+            final Class<?>[] params = (Class<?>[]) Array.newInstance(Class.class, 3);
+            params[0]=  RequestHeader.class;
+            params[1] = serverObjects.class;
+            params[2] = serverSwitch.class;
             m = c.getMethod("respond", params);
 
             if (MemoryControl.shortStatus()) {

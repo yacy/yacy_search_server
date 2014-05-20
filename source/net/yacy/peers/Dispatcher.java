@@ -26,6 +26,7 @@
 package net.yacy.peers;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -235,7 +236,7 @@ public class Dispatcher {
 
         // init the result vector
         final int partitionCount = this.seeds.scheme.verticalPartitions();
-        final List<ReferenceContainer<WordReference>>[] partitions = new ArrayList[partitionCount];
+        final List<ReferenceContainer<WordReference>>[] partitions = (List<ReferenceContainer<WordReference>>[]) Array.newInstance(ReferenceContainer.class, partitionCount);
         for (int i = 0; i < partitions.length; i++) partitions[i] = new ArrayList<ReferenceContainer<WordReference>>();
 
         // check all entries and split them to the partitions
@@ -258,7 +259,7 @@ public class Dispatcher {
 
         // check all entries and split them to the partitions
         @SuppressWarnings("unchecked")
-        final ReferenceContainer<WordReference>[] partitionBuffer = new ReferenceContainer[partitionCount];
+        final ReferenceContainer<WordReference>[] partitionBuffer = (ReferenceContainer<WordReference>[]) Array.newInstance(ReferenceContainer.class, partitionCount);
         
         // init the new partitions
         for (int j = 0; j < partitionBuffer.length; j++) {

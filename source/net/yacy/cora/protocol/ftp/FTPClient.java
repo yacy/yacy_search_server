@@ -41,6 +41,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -162,7 +163,7 @@ public class FTPClient {
             }
             this.cmd = line2args(com);
             try {
-                ret = (((Boolean) getClass().getMethod(this.cmd[0].toUpperCase(), new Class[0]).invoke(this, new Object[0]))
+                ret = (((Boolean) getClass().getMethod(this.cmd[0].toUpperCase(), (Class<?>[]) Array.newInstance(Class.class, 0)).invoke(this, (Object[]) Array.newInstance(Object.class, 0)))
                         .booleanValue());
             } catch (final InvocationTargetException e) {
                 if (e.getMessage() != null) {
@@ -296,7 +297,7 @@ public class FTPClient {
             // Class c = this.getClass().getClassLoader().loadClass(obj);
 
             // locate public static main(String[]) method
-            final Class<?>[] parameterType = new Class[1];
+            final Class<?>[] parameterType = (Class<?>[]) Array.newInstance(Class.class, 1);
             parameterType[0] = Class.forName("[Ljava.lang.String;");
             Method m = c.getMethod("main", parameterType);
 

@@ -37,6 +37,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -176,7 +177,7 @@ public class MediawikiImporter extends Thread implements Importer {
             final BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
             final ExecutorService service = Executors.newFixedThreadPool(threads + 1);
             final convertConsumer[] consumers = new convertConsumer[threads];
-            final Future<?>[] consumerResults = new Future[threads];
+            final Future<?>[] consumerResults = (Future<?>[]) Array.newInstance(Future.class, threads);
             for (int i = 0; i < threads; i++) {
                 consumers[i] = new convertConsumer(in, out, poison);
                 consumerResults[i] = service.submit(consumers[i]);

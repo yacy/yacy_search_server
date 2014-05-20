@@ -28,6 +28,7 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -852,7 +853,7 @@ public class ArrayStack implements BLOB {
             bi.blob.delete(key);
         } else {
             @SuppressWarnings("unchecked")
-            final FutureTask<Boolean>[] t = new FutureTask[this.blobs.size() - 1];
+            final FutureTask<Boolean>[] t = (FutureTask<Boolean>[]) Array.newInstance(FutureTask.class, this.blobs.size() - 1);
             int i = 0;
             for (final blobItem bi: this.blobs) {
                 if (i < t.length) {

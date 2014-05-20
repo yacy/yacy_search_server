@@ -26,6 +26,7 @@ package net.yacy.cora.protocol;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -550,9 +551,11 @@ public class Domains {
 
      static {
          // using http://javainetlocator.sourceforge.net/ if library is present
-         // we use this class using reflection to be able to remove it because that class is old and without maintenancy
+         // we use this class using reflection to be able to remove it because that class is old and without maintenance
          InetAddressLocatorClass = ClassProvider.load("net.sf.javainetlocator.InetAddressLocator", new File("lib/InetAddressLocator.jar"));
-         InetAddressLocatorGetLocaleInetAddressMethod = ClassProvider.getStaticMethod(InetAddressLocatorClass, "getLocale", new Class[]{InetAddress.class});
+         final Class<?>[] args = (Class<?>[]) Array.newInstance(Class.class, 1);
+         args[0] = InetAddress.class;
+         InetAddressLocatorGetLocaleInetAddressMethod = ClassProvider.getStaticMethod(InetAddressLocatorClass, "getLocale", args);
          ccSLD_TLD.addAll(Arrays.asList(ccSLD_TLD_list));
      }
 

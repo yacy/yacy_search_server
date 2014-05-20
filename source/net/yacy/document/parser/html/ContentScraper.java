@@ -29,6 +29,7 @@ import java.io.CharArrayReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
@@ -222,7 +223,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.navigation = new SizeLimitedMap<String, DigestURL>(maxLinks);
         this.script = new SizeLimitedSet<DigestURL>(maxLinks);
         this.titles = new LinkedHashSet<String>();
-        this.headlines = new ArrayList[6];
+        this.headlines = (List<String>[]) Array.newInstance(ArrayList.class, 6);
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
         this.bold = new ClusteredScoreMap<String>();
         this.italic = new ClusteredScoreMap<String>();

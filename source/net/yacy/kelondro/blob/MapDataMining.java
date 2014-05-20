@@ -29,6 +29,7 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -81,7 +82,7 @@ public class MapDataMining extends MapHeap {
         ScoreMap<String>[] cluster = null;
         if (sortfields == null) this.sortClusterMap = null; else {
             this.sortClusterMap = new ConcurrentHashMap<String, ScoreMap<String>>();
-            cluster = new ScoreMap[sortfields.length];
+            cluster = (ScoreMap<String>[]) Array.newInstance(ScoreMap.class, sortfields.length);
             for (int i = 0; i < sortfields.length; i++) {
                 cluster[i] = new ConcurrentScoreMap<String>();
             }

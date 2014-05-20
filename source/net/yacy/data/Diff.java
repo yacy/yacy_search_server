@@ -28,6 +28,7 @@
 
 package net.yacy.data;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import net.yacy.document.parser.html.CharacterCoding;
@@ -62,10 +63,10 @@ public class Diff {
      */
     public Diff(final String original, final String changed, final int minConsecutive) {
         if (original == null || changed == null) throw new NullPointerException("input Strings must be null");
-        this.original = new Comparable[original.length()];
+        this.original = (Object[]) Array.newInstance(Comparable.class, original.length());
         for (int i=0; i<original.length(); i++)
             this.original[i] = Character.valueOf(original.charAt(i));
-        this.changed = new Comparable[changed.length()];
+        this.changed = (Object[]) Array.newInstance(Comparable.class, changed.length());
         for (int i=0; i<changed.length(); i++)
             this.changed[i] = Character.valueOf(changed.charAt(i));
         parse((minConsecutive > 0) ? minConsecutive : 1);
