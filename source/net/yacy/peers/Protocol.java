@@ -1401,14 +1401,6 @@ public final class Protocol {
         if ( uhss == null ) {
             return "no unknownURL tag in response";
         }
-        EventChannel
-            .channels(EventChannel.DHTSEND)
-            .addMessage(
-                new RSSMessage(
-                    "Sent " + indexes.size() + " RWIs to " + targetSeed.getName(),
-                    "",
-                    targetSeed.hash));
-
         uhss = uhss.trim();
         if ( uhss.isEmpty() || uhss.equals(",") ) {
             return null;
@@ -1418,6 +1410,14 @@ public final class Protocol {
         if ( uhs.length == 0 ) {
             return null;
         } // all url's known
+
+        EventChannel
+            .channels(EventChannel.DHTSEND)
+            .addMessage(
+                new RSSMessage(
+                    "Sent " + indexes.size() + " RWIs " + indexes.toString() + " to " + targetSeed.getName() + "/[" + targetSeed.hash + "], " + uhs.length + " URLs there unknown", 
+                    "",
+                    targetSeed.hash));
 
         in = transferURL(targetSeed, uhs, urlRefs, segment, gzipBody, timeout);
 
@@ -1435,7 +1435,7 @@ public final class Protocol {
         }
         EventChannel.channels(EventChannel.DHTSEND).addMessage(
             new RSSMessage(
-                "Sent " + uhs.length + " URLs to peer " + targetSeed.getName(),
+                "Sent " + uhs.length + " URLs to peer " + targetSeed.getName()+ "/[" + targetSeed.hash + "]",
                 "",
                 targetSeed.hash));
 

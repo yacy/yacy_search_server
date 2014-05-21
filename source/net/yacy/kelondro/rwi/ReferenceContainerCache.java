@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
@@ -66,6 +67,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     private final ContainerOrder<ReferenceType> containerOrder;
     private ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>> cache;
 
+    
     /**
      * open an existing heap file in undefined mode
      * after this a initialization should be made to use the heap:
@@ -630,4 +632,17 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
     }
 
+    /**
+     * return a string with the key as a list
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(cache.size() * 13 + 2);
+        sb.append('[');
+        for (ByteArray k: cache.keySet()) {
+            sb.append(ASCII.String(k.asBytes())).append(',');
+        }
+        if (sb.length() == 1) sb.append(']'); else sb.setCharAt(sb.length() - 1, ']');
+        return sb.toString();
+    }
 }

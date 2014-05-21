@@ -1204,7 +1204,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     @Override
     public int hashCode() {
-        return (int) (Base64Order.enhancedCoder.cardinal(this.hash) & (Integer.MAX_VALUE));
+        return (int) ((Base64Order.enhancedCoder.cardinal(this.hash) & (Integer.MAX_VALUE)));
     }
 
     @Override

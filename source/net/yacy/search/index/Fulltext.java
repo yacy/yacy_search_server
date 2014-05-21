@@ -494,7 +494,7 @@ public final class Fulltext {
         if (urlHash == null) return -1l;
         try {
             SolrConnector.Metadata md = this.getDefaultConnector().getMetadata(urlHash);
-            if (md == null) return -1;
+            if (md == null) return -1l;
             return md.date;
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);

@@ -283,7 +283,8 @@ public class IndexControlRWIs_p {
                         Reference iEntry;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            if (segment.fulltext().getLoadTime(ASCII.String(iEntry.urlhash())) >= 0) {
+                            long loadTime = segment.fulltext().getLoadTime(ASCII.String(iEntry.urlhash()));
+                            if (loadTime < 0) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
                                 } catch (final SpaceExceededException e) {
