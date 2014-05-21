@@ -33,26 +33,28 @@ import java.util.StringTokenizer;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.yacy.cora.protocol.Domains;
 
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
+import org.eclipse.jetty.proxy.ConnectHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 
 /**
  * abstract jetty http handler
  * only request to remote hosts (proxy requests) are processed by derived classes 
  */
-abstract public class AbstractRemoteHandler extends AbstractHandler implements Handler {
+abstract public class AbstractRemoteHandler extends ConnectHandler implements Handler {
 	
 	protected Switchboard sb = null;
     private List<String> localVirtualHostNames; // list for quick check for req to local peer
     
     @Override
-    protected void doStart() {
+    protected void doStart() throws Exception {
+    	super.doStart();
         sb = Switchboard.getSwitchboard();
 
         localVirtualHostNames = new LinkedList<String>();
@@ -129,6 +131,12 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
         			"URL '" + hostOnly + "' blocked by yacy proxy (blacklisted)");
             baseRequest.setHandled(true);
             return;
+        }
+
+        if (request.getMethod().equalsIgnoreCase(HeaderFramework.METHOD_CONNECT)) {
+            // will be done by the ConnectHandler
+        	super.handle(target, baseRequest, request, response);
+        	return;
         }
         
         handleRemote(target, baseRequest, request, response);
