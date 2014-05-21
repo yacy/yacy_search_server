@@ -468,6 +468,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
         if (allAttr || contains(CollectionSchema.last_modified)) {
             Date lastModified = responseHeader == null ? new Date() : responseHeader.lastModified();
+            if (lastModified == null) lastModified = new Date();
             if (document.getDate().before(lastModified)) lastModified = document.getDate();
             add(doc, CollectionSchema.last_modified, lastModified);
         }

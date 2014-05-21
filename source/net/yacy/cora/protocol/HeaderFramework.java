@@ -492,7 +492,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     protected Date headerDate(final String kind) {
         if (containsKey(kind)) {
             Date parsedDate = parseHTTPDate(get(kind));
-            if (parsedDate == null) parsedDate = new Date();
+            if (parsedDate == null) return null;
             return parsedDate;
         }
         return null;
