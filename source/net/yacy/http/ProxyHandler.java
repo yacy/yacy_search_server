@@ -31,9 +31,11 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.Date;
 import java.util.Enumeration;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -47,6 +49,7 @@ import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.server.http.HTTPDProxyHandler;
 import net.yacy.server.http.MultiOutputStream;
+
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.eclipse.jetty.server.Handler;
@@ -61,7 +64,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
     protected int timeout = 10000;
 
     @Override
-    protected void doStart() {
+    protected void doStart() throws Exception {
         super.doStart();
         timeout = sb.getConfigInt("proxy.clientTimeout", 10000);
     }
@@ -141,11 +144,6 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		HttpServletResponse response) throws IOException, ServletException {
 		
 		sb.proxyLastAccess = System.currentTimeMillis();
-
-        if (request.getMethod().equalsIgnoreCase(HeaderFramework.METHOD_CONNECT)) {
-            // will be done by the ConnectHandler
-        	return;
-        }
         
         RequestHeader proxyHeaders = convertHeaderFromJetty(request);
         setProxyHeaderForClient(request, proxyHeaders);

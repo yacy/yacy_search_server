@@ -43,7 +43,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.proxy.ConnectHandler;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -168,7 +167,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] 
-           {domainHandler, new ProxyCacheHandler(), new ProxyHandler(), new ConnectHandler()}); 
+           {domainHandler, new ProxyCacheHandler(), new ProxyHandler()}); 
 
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         ContextHandler context = new ContextHandler();
