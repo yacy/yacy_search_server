@@ -27,7 +27,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
-import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.schema.HyperlinkEdge;
 import net.yacy.search.schema.HyperlinkGraph;
 import net.yacy.search.schema.HyperlinkType;
