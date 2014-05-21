@@ -92,7 +92,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CACHE_CONTROL = "Cache-Control";
 
     public static final String DATE = "Date";
-    public static final String LAST_MODIFIED = "Last-modified";
+    public static final String LAST_MODIFIED = "Last-Modified";
     public static final String SERVER = "Server";
 
     public static final String ACCEPT_RANGES = "Accept-Ranges";
