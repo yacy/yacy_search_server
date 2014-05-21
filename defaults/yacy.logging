@@ -115,6 +115,8 @@ org.apache.solr.update.DefaultSolrCoreState.level = SEVERE
 org.apache.solr.update.SolrCoreState.level = SEVERE
 org.apache.solr.update.SolrIndexWriter.level = INFO
 org.apache.solr.update.UpdateHandler.level = SEVERE
+org.apache.solr.update.UpdateLog = INFO
+org.apache.solr.update.LoggingInfoStream = OFF
 
 # Properties for jena
 com.hp.hpl.jena.util.FileManager.level = SEVERE
