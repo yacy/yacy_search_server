@@ -35,7 +35,6 @@
 	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/zookeeper-3.4.5.jar"/>
 	<classpathentry kind="lib" path="lib/wstx-asl-3.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.2.jar"/>
@@ -49,24 +48,26 @@
 	<classpathentry kind="lib" path="lib/jempbox-1.8.4.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.4.jar"/>
 	<classpathentry kind="lib" path="lib/guava-16.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-classification-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-codecs-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-core-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-facet-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-grouping-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-highlighter-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-join-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-memory-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-misc-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queries-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queryparser-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-spatial-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-suggest-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/solr-core-4.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-4.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/solr-core-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/solr-solrj-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/zookeeper-3.4.6.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-classification-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-codecs-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-facet-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-grouping-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-highlighter-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-join-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-memory-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-misc-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queries-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queryparser-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-spatial-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-suggest-4.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/org.restlet.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>

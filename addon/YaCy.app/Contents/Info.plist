@@ -61,56 +61,57 @@
 			<string>$JAVAROOT/lib/jaudiotagger-2.0.4-20111207.115108-15.jar</string>
 			<string>$JAVAROOT/lib/jcifs-1.3.17.jar</string>
 			<string>$JAVAROOT/lib/jcl-over-slf4j-1.7.2.jar</string>
-                        <string>$JAVAROOT/lib/jempbox-1.8.4.jar</string>
-                        <string>$JAVAROOT/lib/javax.servlet-api-3.1.0.jar</string>
-                        <string>$JAVAROOT/lib/jetty-client-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-continuation-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-deploy-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-http-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-io-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-jmx-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-proxy-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-security-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-server-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-servlet-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-servlets-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-util-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-webapp-9.1.4.v20140401.jar</string>
-                        <string>$JAVAROOT/lib/jetty-xml-9.1.4.v20140401.jar</string>                                              
-                        <string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
+			<string>$JAVAROOT/lib/jempbox-1.8.4.jar</string>
+			<string>$JAVAROOT/lib/javax.servlet-api-3.1.0.jar</string>
+			<string>$JAVAROOT/lib/jetty-client-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-continuation-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-deploy-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-http-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-io-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-jmx-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-proxy-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-security-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-server-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-servlet-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-servlets-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-util-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-webapp-9.1.4.v20140401.jar</string>
+			<string>$JAVAROOT/lib/jetty-xml-9.1.4.v20140401.jar</string>			                      
+			<string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.1.jar</string>
 			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.2.jar</string>
-			<string>$JAVAROOT/lib/lucene-analyzers-common-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-analyzers-phonetic-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-classification-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-codecs-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-core-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-facet-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-grouping-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-highlighter-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-join-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-memory-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-misc-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-queries-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-queryparser-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-spatial-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-suggest-4.7.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-analyzers-common-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-analyzers-phonetic-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-classification-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-codecs-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-core-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-facet-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-grouping-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-highlighter-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-join-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-memory-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-misc-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-queries-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-queryparser-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-spatial-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-suggest-4.8.1.jar</string>
 			<string>$JAVAROOT/lib/metadata-extractor-2.6.2.jar</string>
 			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
+			<string>$JAVAROOT/lib/org.restlet.jar</string>
 			<string>$JAVAROOT/lib/pdfbox-1.8.4.jar</string>
 			<string>$JAVAROOT/lib/poi-3.9-20121203.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.9-20121203.jar</string>
 			<string>$JAVAROOT/lib/slf4j-api-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.2.jar</string>
-			<string>$JAVAROOT/lib/solr-core-4.7.1.jar</string>
-			<string>$JAVAROOT/lib/solr-solrj-4.7.1.jar</string>
+			<string>$JAVAROOT/lib/solr-core-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/solr-solrj-4.8.1.jar</string>
 			<string>$JAVAROOT/lib/spatial4j-0.4.1.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>
 			<string>$JAVAROOT/lib/wstx-asl-3.2.9.jar</string>
 			<string>$JAVAROOT/lib/xercesImpl.jar</string>
 			<string>$JAVAROOT/lib/xml-apis.jar</string>
 			<string>$JAVAROOT/lib/yacycore.jar</string>
-			<string>$JAVAROOT/lib/zookeeper-3.4.5.jar</string>
+			<string>$JAVAROOT/lib/zookeeper-3.4.6.jar</string>
 			</array>
 		<key>Properties</key>
 		<dict>
