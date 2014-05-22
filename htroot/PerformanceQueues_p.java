@@ -28,9 +28,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
@@ -241,14 +241,13 @@ public class PerformanceQueues_p {
             /*
              * configuring the http pool
              */
-            final YaCyHttpServer httpd = sb.getHttpServer();
             try {
                 maxBusy = post.getInt("httpd Session Pool_maxActive", 8);
             } catch (final NumberFormatException e) {
                 maxBusy = 8;
             }
 
-            (httpd).setMaxSessionCount(maxBusy);
+            ConnectionInfo.setServerMaxcount(maxBusy);
 
             // storing the new values into configfile
             sb.setConfig("httpdMaxBusySessions",maxBusy);
@@ -281,10 +280,9 @@ public class PerformanceQueues_p {
         prop.put("pool_0_maxActive", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 0));
         prop.put("pool_0_numActive", sb.crawlQueues.activeWorkerEntries().size());
 
-        final YaCyHttpServer httpd = sb.getHttpServer(); 
         prop.put("pool_1_name", "httpd Session Pool");
-        prop.put("pool_1_maxActive", httpd.getMaxSessionCount());
-        prop.put("pool_1_numActive", httpd.getJobCount());
+        prop.put("pool_1_maxActive", ConnectionInfo.getServerMaxcount());
+        prop.put("pool_1_numActive", ConnectionInfo.getServerCount());
 
         prop.put("pool", "2");
 

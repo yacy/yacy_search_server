@@ -11,26 +11,22 @@
     <script type="text/javascript" src="js/sorttable.js"></script>
     <h2>Server Connection Tracking</h2>
     <h3>Incoming Connections</h3>
-    <p>Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.</p>
+    <p>Showing #[numActiveRunning]# active connections from a max. of #[numMax]# allowed incoming connections.</p>
     <table class="sortable" border="0">
       <tr class="TableHeader" valign="bottom">
         <td>Protocol</td>
         <td>Duration</td>
         <td>Source IP[:Port]</td>
-        <td>Dest. IP[:Port]</td>
         <td>Command</td>
-        <td>Used</td>
-        <td>Close</td>
+        <td>ID</td>
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" title="#[sessionName]#">
         <td>#[proto]#</td>
-        <td>#(ms)##[duration]#::#[duration]# ms#(/ms)#</td>
+        <td>#[duration]#</td>
         <td>#[source]#</td>
-        <td>#[dest]#</td>
-        <td>#(running)#Waiting for new request nr. # #[reqNr]#::#[command]##(/running)#</td>
-        <td>#[used]#</td>
-        <td><a href="Connections_p.html?closeServerSession=#[serverSessionID]#">[Close]</a></td>
+        <td>#[command]#</td>
+        <td>#[id]#</td>
       </tr>
       #{/list}#
     </table>

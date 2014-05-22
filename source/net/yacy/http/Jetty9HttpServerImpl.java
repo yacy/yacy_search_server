@@ -167,7 +167,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] 
-           {domainHandler, new ProxyCacheHandler(), new ProxyHandler()}); 
+           {new MonitorHandler(), domainHandler, new ProxyCacheHandler(), new ProxyHandler()}); 
 
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         ContextHandler context = new ContextHandler();
@@ -239,11 +239,6 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
     public void stop() throws Exception {
         server.stop();  
         server.join();
-    }
-
-    @Override
-    public void setMaxSessionCount(int maxBusy) {
-        // TODO:
     }
 
     /**
@@ -405,16 +400,6 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                 ? new InetSocketAddress(bindPort)
                 : new InetSocketAddress(bindIP, bindPort);
 
-    }
-
-    @Override
-    public int getMaxSessionCount() {
-        return server.getThreadPool().getThreads();
-    }
-
-    @Override
-    public int getJobCount() {
-        return getMaxSessionCount() - server.getThreadPool().getIdleThreads(); // TODO:
     }
 
     @Override
