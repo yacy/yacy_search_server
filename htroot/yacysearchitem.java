@@ -35,7 +35,6 @@ import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
@@ -62,7 +61,6 @@ import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
 import net.yacy.utils.nxTools;
 
-
 public class yacysearchitem {
 
     private static final String SHORTEN_SUFFIX = "...";
@@ -79,7 +77,6 @@ public class yacysearchitem {
         final String eventID = post.get("eventID", "");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
-        final boolean auth = Domains.isLocalhost(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")) || sb.verifyAuthentication(header);
         final RequestHeader.FileType fileType = header.fileType();
 
         // default settings for blank item
@@ -195,7 +192,7 @@ public class yacysearchitem {
             if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
             prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
-            prop.put("content_ranking", result.ranking());
+            prop.put("content_ranking", Float.toString(result.score()));
             prop.put("content_showMetadata_urlhash", resulthashString);
             prop.put("content_showCache_link", resultUrlstring);
             prop.put("content_showProxy_link", resultUrlstring);
@@ -279,7 +276,7 @@ public class yacysearchitem {
 
                 final String license = URLLicense.aquireLicense(image.imageUrl);
                 sb.loader.loadIfNotExistBackground(image.imageUrl, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
-                prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + imageUrlstring : imageUrlstring);
+                prop.putHTML("content_item_hrefCache", "/ViewImage.png?maxwidth=128&maxheight=128&quadratic=&url=" + imageUrlstring);
                 prop.putHTML("content_item_href", imageUrlstring);
                 prop.putHTML("content_item_target", target);
                 prop.put("content_item_code", license);

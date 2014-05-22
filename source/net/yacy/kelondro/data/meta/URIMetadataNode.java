@@ -72,7 +72,7 @@ public class URIMetadataNode extends SolrDocument {
     protected Bitfield flags = null;
     protected int imagec = -1, audioc = -1, videoc = -1, appc = -1;
     protected double lat = Double.NaN, lon = Double.NaN;
-    protected long ranking = 0; // during generation of a search result this value is set
+    protected float score = 0; // during generation of a search result this value is set
     protected String snippet = null;
     protected WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
 
@@ -139,6 +139,7 @@ public class URIMetadataNode extends SolrDocument {
         this.videoc = Integer.parseInt(prop.getProperty("lvideo", "0"));
         this.appc = Integer.parseInt(prop.getProperty("lapp", "0"));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
+        this.score = Float.parseFloat(prop.getProperty("score", "0.0"));
         this.word = null;
         if (prop.containsKey("wi")) {
             this.word = new WordReferenceVars(new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""))), false);
@@ -151,8 +152,8 @@ public class URIMetadataNode extends SolrDocument {
             this.addField(name, doc.getFieldValue(name));
         }
         this.snippet = "";
-        Float score = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
-        this.ranking = score == null ? 0 : (long) (1000000.0f * score.floatValue()); // solr score values are sometimes very low
+        Float scorex = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
+        this.score = scorex == null ? 0.0f : scorex.floatValue();
         this.hash = ASCII.getBytes(getString(CollectionSchema.id));
         this.urlRaw = getString(CollectionSchema.sku);
         try {
@@ -163,10 +164,10 @@ public class URIMetadataNode extends SolrDocument {
         }
     }
 
-    public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final long ranking) {
+    public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final float scorex) {
         this(doc);
         this.word = searchedWord;
-        this.ranking = ranking;
+        this.score = scorex;
     }
 
     /**
@@ -254,8 +255,8 @@ public class URIMetadataNode extends SolrDocument {
         return this.lon;
     }
 
-    public long ranking() {
-        return this.ranking;
+    public float score() {
+        return this.score;
     }
 
     public Date loaddate() {
@@ -467,6 +468,7 @@ public class URIMetadataNode extends SolrDocument {
             s.append(",laudio=").append(this.laudio());
             s.append(",lvideo=").append(this.lvideo());
             s.append(",lapp=").append(this.lapp());
+            s.append(",score=").append(Float.toString(this.score()));
             if (this.word() != null) {
                 // append also word properties
                 final String wprop = this.word().toPropertyForm();

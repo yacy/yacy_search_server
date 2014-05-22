@@ -529,6 +529,7 @@ public class Segment {
 
         // STORE URL TO LOADED-URL-DB
         Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
+        if (modDate == null) modDate = new Date();
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         char docType = Response.docType(document.dc_format());
         

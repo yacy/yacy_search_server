@@ -276,24 +276,24 @@ public final class Fulltext {
         if (element == null) return null;
         WordReferenceVars wre = element.getElement();        
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        long weight = element.getWeight();
-        URIMetadataNode node = getMetadata(wre.urlhash(), wre, weight);
+        float score = element.getWeight();
+        URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
         return node;
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
         if (urlHash == null) return null;
-        return getMetadata(urlHash, null, 0);
+        return getMetadata(urlHash, null, 0.0f);
     }
     
-    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long weight) {
+    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final float score) {
         String u = ASCII.String(urlHash);
         
         // get the metadata from Solr
         try {
             SolrDocument doc = this.getDefaultConnector().getDocumentById(u);
             if (doc != null) {
-            	return new URIMetadataNode(doc, wre, weight);
+            	return new URIMetadataNode(doc, wre, score);
             }
         } catch (final IOException e) {
             ConcurrentLog.logException(e);

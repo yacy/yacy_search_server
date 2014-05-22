@@ -21,6 +21,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.awt.Container;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.image.BufferedImage;
@@ -72,6 +73,7 @@ public class ViewImage {
 
         String urlString = post.get("url", "");
         final String urlLicense = post.get("code", "");
+        final boolean quadratic = post.containsKey("quadratic");
         final boolean auth = Domains.isLocalhost(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")) || sb.verifyAuthentication(header); // handle access rights
 
         DigestURL url = null;
@@ -146,6 +148,23 @@ public class ViewImage {
             // find original size
             final int h = image.getHeight(null);
             final int w = image.getWidth(null);
+            
+            // if a quadratic flag is set, we cut the image out to be in quadratic shape
+            if (quadratic && w != h) {
+                if (w > h) {
+                    final BufferedImage dst = new BufferedImage(h, h, BufferedImage.TYPE_INT_RGB);    
+                    Graphics2D g = dst.createGraphics();
+                    g.drawImage(image, 0, 0, h - 1, h - 1, (w - h) / 2, 0, h + (w - h) / 2, h - 1, null);
+                    g.dispose();
+                    image = dst;
+                } else {
+                    final BufferedImage dst = new BufferedImage(w, w, BufferedImage.TYPE_INT_RGB);    
+                    Graphics2D g = dst.createGraphics();
+                    g.drawImage(image, 0, 0, w - 1, w - 1, 0, (h - w) / 2, w - 1, w + (h - w) / 2, null);
+                    g.dispose();
+                    image = dst;
+                }
+            }
 
             // in case of not-authorized access shrink the image to prevent
             // copyright problems, so that images are not larger than thumbnails

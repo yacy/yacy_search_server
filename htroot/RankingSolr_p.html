@@ -25,7 +25,7 @@
         A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.
         To see all available fields, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for numeric values (these are names with suffix '_i').
         To find out which kind of operations are possible, see the <a href="http://wiki.apache.org/solr/FunctionQuery" target="_blank">Solr Function Query</a> documentation.
-        Example: to order by date, use "recip(rord(last_modified),1,1000,1000)", to order by clickdepth, use "div(100,add(clickdepth_i,1))".
+        Example: to order by date, use "recip(ms(NOW,last_modified),3.16e-11,1,1)", to order by crawldepth, use "div(100,add(crawldepth_i,1))".
         <dl>
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bf" id="bf_label">boost</label></dt>
           <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="bf_dd">

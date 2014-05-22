@@ -177,6 +177,7 @@ public class ConfigBasic {
         if (post != null && post.containsKey("usecase")) {
             if ("freeworld".equals(post.get("usecase", "")) && !"freeworld".equals(networkName)) {
                 // switch to freeworld network
+                sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, true);
                 sb.switchNetwork("defaults/yacy.network.freeworld.unit");
                 // switch to p2p mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
@@ -188,6 +189,7 @@ public class ConfigBasic {
             }
             if ("portal".equals(post.get("usecase", "")) && !"webportal".equals(networkName)) {
                 // switch to webportal network
+                sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
                 sb.switchNetwork("defaults/yacy.network.webportal.unit");
                 // switch to robinson mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
@@ -199,6 +201,7 @@ public class ConfigBasic {
             }
             if ("intranet".equals(post.get("usecase", "")) && !"intranet".equals(networkName)) {
                 // switch to intranet network
+                sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
                 sb.switchNetwork("defaults/yacy.network.intranet.unit");
                 // switch to p2p mode: enable ad-hoc networks between intranet users
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);

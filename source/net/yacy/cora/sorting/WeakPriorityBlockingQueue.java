@@ -287,7 +287,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         return this.drained.iterator();
     }
 
-    public interface Element<E> extends Serializable {
+    public interface Element<E> extends Serializable, Comparable<Element<E>>, Comparator<Element<E>> {
         public long getWeight();
         public E getElement();
         public boolean equals(Element<E> o);
@@ -295,6 +295,10 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         public int hashCode();
         @Override
         public String toString();
+        @Override
+        public int compare(Element<E> o1, Element<E> o2);
+        @Override
+        public int compareTo(Element<E> o);
     }
 
     private abstract static class AbstractElement<E> implements Element<E>, Serializable {
@@ -334,7 +338,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      * natural ordering elements, can be used as container of objects <E> in the priority queue
      * the elements with smallest ordering weights are first in the queue when elements are taken
      */
-    public static class NaturalElement<E> extends AbstractElement<E> implements Element<E>, Comparable<NaturalElement<E>>, Comparator<NaturalElement<E>> {
+    public static class NaturalElement<E> extends AbstractElement<E> implements Element<E>, Comparable<Element<E>>, Comparator<Element<E>> {
 
 		private static final long serialVersionUID = 6816543012966928794L;
 
@@ -344,12 +348,12 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         }
 
         @Override
-        public int compare(NaturalElement<E> o1, NaturalElement<E> o2) {
+        public int compare(Element<E> o1, Element<E> o2) {
             return o1.compareTo(o2);
         }
 
         @Override
-        public int compareTo(NaturalElement<E> o) {
+        public int compareTo(Element<E> o) {
             if (this.element == o.getElement()) return 0;
             if (this.element.equals(o.getElement())) return 0;
             if (this.weight > o.getWeight()) return 1;
@@ -367,7 +371,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      * reverse ordering elements, can be used as container of objects <E> in the priority queue
      * the elements with highest ordering weights are first in the queue when elements are taken
      */
-    public static class ReverseElement<E> extends AbstractElement<E> implements Element<E>, Comparable<ReverseElement<E>>, Comparator<ReverseElement<E>> {
+    public static class ReverseElement<E> extends AbstractElement<E> implements Element<E>, Comparable<Element<E>>, Comparator<Element<E>> {
 
 		private static final long serialVersionUID = -8166724491837508921L;
 
@@ -377,12 +381,12 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         }
 
         @Override
-        public int compare(ReverseElement<E> o1, ReverseElement<E> o2) {
+        public int compare(Element<E> o1, Element<E> o2) {
             return o1.compareTo(o2);
         }
 
         @Override
-        public int compareTo(ReverseElement<E> o) {
+        public int compareTo(Element<E> o) {
             if (this.element == o.getElement()) return 0;
             if (this.element.equals(o.getElement())) return 0;
             if (this.weight > o.getWeight()) return -1;
