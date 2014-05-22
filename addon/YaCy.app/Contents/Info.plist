@@ -98,8 +98,8 @@
 			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
 			<string>$JAVAROOT/lib/org.restlet.jar</string>
 			<string>$JAVAROOT/lib/pdfbox-1.8.5.jar</string>
-			<string>$JAVAROOT/lib/poi-3.9-20121203.jar</string>
-			<string>$JAVAROOT/lib/poi-scratchpad-3.9-20121203.jar</string>
+			<string>$JAVAROOT/lib/poi-3.10-FINAL-20140208.jar</string>
+			<string>$JAVAROOT/lib/poi-scratchpad-3.10-FINAL-20140208.jar</string>
 			<string>$JAVAROOT/lib/slf4j-api-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/solr-core-4.8.1.jar</string>
