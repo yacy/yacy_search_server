@@ -19,10 +19,7 @@ public interface YaCyHttpServer {
     
     abstract void startupServer() throws Exception;
     abstract void stop() throws Exception;
-    abstract void setMaxSessionCount(int cnt);
     abstract InetSocketAddress generateSocketAddress(String port) throws SocketException;
-    abstract int getMaxSessionCount();
-    abstract int getJobCount();
     abstract int getSslPort();
     abstract boolean withSSL();
     abstract void reconnect(int milsec);

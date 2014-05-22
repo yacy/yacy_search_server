@@ -43,10 +43,13 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      */
     private final static Set<ConnectionInfo> allConnections = Collections
             .synchronizedSet(new HashSet<ConnectionInfo>());
+    private final static Set<ConnectionInfo> serverConnections = Collections
+            .synchronizedSet(new HashSet<ConnectionInfo>());
     // this is only for statistics, so it can be bigger to see lost connectionInfos
     private final static int staleAfterMillis = 30 * 60000; // 30 minutes
     
     private static int maxcount = 20;
+    private static int serverMaxCount = 20;
 
     private final String protocol;
     private final String targetHost;
@@ -126,6 +129,17 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     public static Set<ConnectionInfo> getAllConnections() {
         return allConnections;
     }
+
+    /**
+     * gets a {@link Set} of all collected server ConnectionInfos
+     * 
+     * Important: iterations must be synchronized!
+     * 
+     * @return the allConnections
+     */
+    public static Set<ConnectionInfo> getServerConnections() {
+        return serverConnections;
+    }
     
     /**
      * gets the number of active client connections
@@ -137,12 +151,28 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
     
     /**
+     * gets the number of active server connections
+     * 
+     * @return count of active connections
+     */
+    public static int getServerCount() {
+    	return getServerConnections().size();
+    }
+    
+    /**
      * gets the usage of the Client connection manager by active connections
      * 
      * @return load in percent
      */
     public static int getLoadPercent() {
     	return getCount() * 100 / getMaxcount();
+    }
+    
+    /**
+     * @return wether the server max connection-count is reached
+     */
+    public static boolean isServerCountReached() {
+    	return getServerCount() >= getServerMaxcount();
     }
     
     /**
@@ -179,6 +209,26 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     public static void setMaxcount(final int max) {
     	if (max > 0) maxcount = max;
     }
+    
+    /**
+     * gets the max connection count of the Server connection manager
+     * 
+     * @return max connections
+     */
+    public static int getServerMaxcount() {
+    	return serverMaxCount;
+    }
+    
+    /**
+     * gets the max connection count of the Sever connection manager
+     * to be used in statistics
+     * 
+     * @param max connections
+     * @TODO Is it correct to only set if max > 0? What if maxcount is > 0 and max = 0 ?
+     */
+    public static void setServerMaxcount(final int max) {
+    	if (max > 0) serverMaxCount = max;
+    }
 
     /**
      * add a connection to the list of all current connections
@@ -187,6 +237,15 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      */
     public static void addConnection(final ConnectionInfo conInfo) {
     	getAllConnections().add(conInfo);
+    }
+
+    /**
+     * add a Server connection to the list of all current connections
+     * 
+     * @param conInfo
+     */
+    public static void addServerConnection(final ConnectionInfo conInfo) {
+    	getServerConnections().add(conInfo);
     }
 
     /**
@@ -199,6 +258,15 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     }
 
     /**
+     * remove a Server connection from the list of all current connections
+     * 
+     * @param conInfo
+     */
+    public static void removeServerConnection(final ConnectionInfo conInfo) {
+    	getServerConnections().remove(conInfo);
+    }
+
+    /**
      * connections with same id {@link equals()} another
      * 
      * @param id
@@ -206,13 +274,26 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     public static void removeConnection(final int id) {
         removeConnection(new ConnectionInfo(null, null, null, id, 0, 0));
     }
+
+    /**
+     * connections with same id {@link equals()} another
+     * 
+     * @param id
+     */
+    public static void removeServerConnection(final int id) {
+        removeServerConnection(new ConnectionInfo(null, null, null, id, 0, 0));
+    }
     
     /**
      * removes stale connections
      */
     public static void cleanUp() {
-        Iterator<ConnectionInfo> iter = getAllConnections().iterator();
-        synchronized (iter) { 
+    	cleanup(getAllConnections().iterator());
+    	cleanup(getServerConnections().iterator());
+    }
+    
+    private static void cleanup(final Iterator<ConnectionInfo> iter) {
+    	synchronized (iter) { 
             while (iter.hasNext()) {
                 ConnectionInfo con = iter.next();
                 if(con.getLifetime() > staleAfterMillis) {
