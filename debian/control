@@ -2,7 +2,7 @@ Source: yacy
 Section: network
 Priority: extra
 Maintainer: Michael Peter Christen <mc@yacy.net>
-Build-Depends: ant, sun-java6-jdk | openjdk-6-jdk, debhelper (>= 5), m4
+Build-Depends: ant, openjdk-7-jdk, debhelper (>= 5), m4
 Standards-Version: 3.7.2
 
 Package: yacy
