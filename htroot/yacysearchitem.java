@@ -195,7 +195,7 @@ public class yacysearchitem {
             if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
             prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
-            prop.put("content_ranking", result.ranking());
+            prop.put("content_ranking", Float.toString(result.score()));
             prop.put("content_showMetadata_urlhash", resulthashString);
             prop.put("content_showCache_link", resultUrlstring);
             prop.put("content_showProxy_link", resultUrlstring);

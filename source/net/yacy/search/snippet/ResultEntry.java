@@ -229,7 +229,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public int compare(ResultEntry o1, ResultEntry o2) {
         return Base64Order.enhancedCoder.compare(o1.urlentry.hash(), o2.urlentry.hash());
     }
-    public long ranking() {
-        return this.urlentry.ranking();
+    public float score() {
+        return this.urlentry.score();
     }
 }

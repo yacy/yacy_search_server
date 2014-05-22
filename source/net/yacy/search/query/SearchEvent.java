@@ -907,7 +907,7 @@ public final class SearchEvent {
                 this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {
                     try {
-                        long score = iEntry.ranking();
+                        long score = (long) (1000000.0f * iEntry.score());
                         this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score == 0 ? this.order.cardinal(iEntry) : score)); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch (final ArithmeticException e ) {
@@ -1291,8 +1291,8 @@ public final class SearchEvent {
      */
     public void addResult(ResultEntry resultEntry) {
         if (resultEntry == null) return;
-        long ranking = resultEntry.ranking();
-        ranking += postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
+        float score = resultEntry.score();
+        final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
         this.resultList.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
         if (pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
         this.addTopics(resultEntry);
