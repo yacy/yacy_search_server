@@ -161,10 +161,9 @@
     <path id="project.class.path">
         <pathelement location="${build}" />
         <pathelement location="${htroot}" />
-    	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
-    	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
-    	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
+    	<pathelement location="${lib}/bcmail-jdk15-1.46.jar" />
+    	<pathelement location="${lib}/bcprov-jdk15-1.46.jar" />
     	<pathelement location="${lib}/commons-codec-1.7.jar" />
     	<pathelement location="${lib}/commons-compress-1.8.jar" />
     	<pathelement location="${lib}/commons-fileupload-1.2.2.jar" />

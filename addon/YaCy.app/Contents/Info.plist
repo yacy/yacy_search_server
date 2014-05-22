@@ -37,10 +37,9 @@
 		<key>ClassPath</key>
 			<array>
 			<string>$JAVAROOT/htroot</string>
-			<string>$JAVAROOT/lib/activation.jar</string>
 			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
-			<string>$JAVAROOT/lib/bcmail-jdk15-145.jar</string>
-			<string>$JAVAROOT/lib/bcprov-jdk15-145.jar</string>
+			<string>$JAVAROOT/lib/bcmail-jdk15-1.46.jar</string>
+			<string>$JAVAROOT/lib/bcprov-jdk15-1.46.jar</string>
 			<string>$JAVAROOT/lib/commons-codec-1.7.jar</string>
 			<string>$JAVAROOT/lib/commons-compress-1.8.jar</string>
 			<string>$JAVAROOT/lib/commons-fileupload-1.2.2.jar</string>
