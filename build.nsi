@@ -60,14 +60,14 @@ SetCompressor /SOLID LZMA
 ; http://www.java.com/de/download/manual.jsp BundleId +1 / +2
 ; User-Agent to see the 64bit link: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Win64; x64; Trident/4.0)
 
-; at least we need Java 6
-!define JRE_VERSION6 "1.6"
+; at least we need Java 7
+!define JRE_VERSION7 "1.7"
 
-; download link Oracle Java 7 Update 25
-; 32 bit / jre-7u25-windows-i586.exe
-!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=79063"
-; 64 bit / jre-7u25-windows-x64.exe
-!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=79065"
+; download link Oracle Java 7 Update 55
+; 32 bit / jre-7u55-windows-i586.exe
+!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=86895"
+; 64 bit / jre-7u55-windows-x64.exe
+!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=87443"
 
 ;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
 ;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
@@ -269,7 +269,7 @@ Function .onInit
 	${EndIf}
 	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
 	; if right JRE already installed hide and deselect JRE section
-	${If} $InstalledJREVersion = ${JRE_VERSION6}
+	${If} $InstalledJREVersion = ${JRE_VERSION7}
 		SectionSetText ${Sec_Java_id} ""
 		SectionSetFlags ${Sec_Java_id} 0
 	${EndIf}
