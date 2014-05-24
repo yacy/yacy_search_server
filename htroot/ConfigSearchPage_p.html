@@ -6,39 +6,12 @@
   <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
   <script type="text/javascript" src="js/yacysearch.js"></script>
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
-  <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
-  <script src="yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"></script>
-  <script src="yacy/ui/js/jquery-ui-1.7.2.min.js" type="text/javascript"></script>
   <script src="yacy/ui/js/jquery.tagcloud.js" type="text/javascript"></script>
-  <script src="yacy/ui/js/jquery.tinysort.min.js" type="text/javascript"></script>
-  <link media="screen" type="text/css" href="yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" />
-  <link media="screen" type="text/css" href="yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
 </head>
 
 <body id="ConfigSearchPage" >
 #%env/templates/header.template%#
 #%env/templates/submenuDesign.template%#
-<script type="text/javascript">
-//<![CDATA[
-$(function() {
-	$.extend($.ui.accordion.defaults, {
-		autoHeight: false,
-		clearStyle: true,
-		collapsible: true,
-		header: "h3"
-	});
-	$("#sidebar#[vocabulary]#").accordion({});
-	$("#sidebarDomains").accordion({});
-	$("#sidebarProtocols").accordion({});
-	$("#sidebarFiletypes").accordion({});
-    $("#sidebarLanguages").accordion({});        
-	$("#sidebarAuthors").accordion({});
-	$("#sidebarNameSpace").accordion({});
-    $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
-    $("#sidebarAbout").accordion({});
-});
-//]]>
-</script>
 
   <h2>Search Result Page Layout Configuration</h2>
   <p>
@@ -54,215 +27,210 @@ $(function() {
         <td style="border-width: 1px; border-color: grey; border-style: solid; padding: 5px;">
           <table width="100%">
             <tr>
-              <td valign="top"><input type="checkbox" name="publicTopmenu" value="true" #(publicTopmenu)#::checked="checked" #(/publicTopmenu)# /></td>
+              <td valign="middle"><input type="checkbox" name="publicTopmenu" value="true" #(publicTopmenu)#::checked="checked" #(/publicTopmenu)# /></td>
               <td>
-                  <!-- top navigation (imported from env/templates/simpleheader.template) -->
-                  <div class="navbar navbar-default">
-                      <div class="container-fluid">
-                          <div class="navbar-header">
-                              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                                  <span class="sr-only">Toggle navigation</span>
-                                  <span class="icon-bar"></span>
-                                  <span class="icon-bar"></span>
-                                  <span class="icon-bar"></span>
-                              </button>
-                              <a class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
+                <!-- top navigation (imported from env/templates/simpleheader.template) -->
+                <div class="navbar navbar-default">
+                  <div class="container-fluid">
+                    <div class="navbar-header">
+                      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                      </button>
+                      <div class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
                                   <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;<span id="greeting"></span>
-                              </a>
-                          </div>
-                          <div class="navbar-collapse collapse">
-                              <ul class="nav navbar-nav navbar-right">
-                                  <li id="header_search" class="dropdown">
-                                      <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
-                                  </li>
-                                  <li id="header_help" class="dropdown">
-                                      <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
-                                  </li>
-                                  <li id="header_administration">
-                                      <button class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
-                                  </li>
-                              </ul>
-                          </div>
                       </div>
-                  </div> 
+                    </div>
+                    <div class="navbar-collapse collapse">
+                      <ul class="nav navbar-nav navbar-right">
+                        <li id="header_search" class="dropdown">
+                          <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
+                        </li>
+                        <li id="header_help" class="dropdown">
+                                      <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
+                        </li>
+                        <li id="header_administration">
+                          <button class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div> 
               </td>
             </tr>
           </table>
-          <div style="width: 550px; float: left;">
-            <fieldset class="yacys">
-              <div class="input-group">
-                <input type="text" class="form-control searchinput typeahead" size="40" maxlength="80" placeholder="Web Search by the People, for the People" name="query"  />
-                <div class="input-group-btn">
-                  <button id="Enter" class="btn btn-default" type="submit">search</button>
-                </div>
-              </div>
-              <div class="yacysearch">
-                <input type="checkbox" id="text" name="search.text" value="true" #(search.text)#::checked="checked" #(/search.text)# /><label for="text">Text</label>
-                &nbsp;&nbsp;<input type="checkbox" id="image" name="search.image" value="true" #(search.image)#::checked="checked" #(/search.image)# /><label for="image">Images</label>
-                &nbsp;&nbsp;<input type="checkbox" id="audio" name="search.audio" value="true" #(search.audio)#::checked="checked" #(/search.audio)# /><label for="audio">Audio</label>
-                &nbsp;&nbsp;<input type="checkbox" id="video" name="search.video" value="true" #(search.video)#::checked="checked" #(/search.video)# /><label for="video">Video</label>
-                &nbsp;&nbsp;<input type="checkbox" id="app" name="search.app" value="true" #(search.app)#::checked="checked" #(/search.app)# /><label for="app">Applications</label>
-                &nbsp;<input type="checkbox" id="options" name="search.options" value="true" #(search.options)#::checked="checked" #(/search.options)# /><a href="" target="LayouTest">more options</a>
-              </div>
-            </fieldset>
-          </div>
-          <!-- the sidebar navigation -->
-          <div style="float: right; width: 280px;">
-            <fieldset>
-              <table>
-                <tr>
-                  <td><input type="checkbox" name="search.navigation.topics" value="true" #(search.navigation.topics)#::checked="checked" #(/search.navigation.topics)# /></td>
-                  <td>
-                    <div style="float: right; margin-top: 0px; width: 100%; height: 80px">
-                      <div id="tagcloud" style="text-align:justify">
-                          <a href="yacysearch.html" target="LayouTest" rel="1" style="text-decoration: none;">Tag</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="2" style="text-decoration: none;">Topics</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="3" style="text-decoration: none;">Cloud</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="4" style="text-decoration: none;">Topics</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="6" style="text-decoration: none;">Cloud</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="5" style="text-decoration: none;">Tag</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="4" style="text-decoration: none;">Cloud</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="3" style="text-decoration: none;">Topics</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="2" style="text-decoration: none;">Tag</a>
-                          <a href="yacysearch.html" target="LayouTest" rel="1" style="text-decoration: none;">Cloud</a>
-                      </div>
-                      <script type="text/javascript" charset="utf-8">
-  $.fn.tagcloud.defaults = {
-    size: {start: 8, end: 16, unit: 'pt'},
-    color: {start: '#682', end: '#20C'}
-  };
-  $(document).ready(function(){
-    $("#tagcloud a").tagcloud();
-    return false;
-  })
-</script>
+          <table>
+            <tr>
+              <td>
+                <!-- the sidebar navigation -->
+                <div>
+                  <fieldset>
+                      <table>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.topics" value="true" #(search.navigation.topics)#::checked="checked" #(/search.navigation.topics)# /></td>
+                        <td>
+                          <div style="padding-left:15px;  padding-bottom:10px; width: 100%;">
+                            <div id="tagcloud" style="text-align:justify">
+                              <a href="#" target="LayouTest" rel="1" style="text-decoration: none;">Tag</a>
+                              <a href="#" target="LayouTest" rel="2" style="text-decoration: none;">Topics</a>
+                              <a href="#" target="LayouTest" rel="3" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" rel="4" style="text-decoration: none;">Topics</a>
+                              <a href="#" target="LayouTest" rel="6" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" rel="5" style="text-decoration: none;">Tag</a>
+                              <a href="#" target="LayouTest" rel="4" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" rel="3" style="text-decoration: none;">Topics</a>
+                              <a href="#" target="LayouTest" rel="2" style="text-decoration: none;">Tag</a>
+                              <a href="#" target="LayouTest" rel="1" style="text-decoration: none;">Cloud</a>
+                            </div>
+                            <script type="text/javascript" charset="utf-8">
+          $.fn.tagcloud.defaults = {
+            size: {start: 8, end: 16, unit: 'pt'},
+          };
+          $(document).ready(function(){
+            $("#tagcloud a").tagcloud();
+            return false;
+          })
+                            </script>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="sidebarProtocols" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Protocol</h3></li>
+                          </ul></td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.filetype" value="true" #(search.navigation.filetype)#::checked="checked" #(/search.navigation.filetype)# /></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="sidebarFiletypes" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Filetype</h3></li>
+                          </ul></td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.hosts" value="true" #(search.navigation.hosts)#::checked="checked" #(/search.navigation.hosts)# /></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="sidebarDomains" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Provider</h3></li>
+                          </ul></td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.namespace" value="true" #(search.navigation.namespace)#::checked="checked" #(/search.navigation.namespace)# /></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="sidebarNameSpace" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Wiki Name Space</h3></li>
+                          </ul></td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.language" value="true" #(search.navigation.language)#::checked="checked" #(/search.navigation.language)# /></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="sidebarLanguages" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Language</h3></li>
+                          </ul></td>
+                      </tr>                  
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.authors" value="true" #(search.navigation.authors)#::checked="checked" #(/search.navigation.authors)# /></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="sidebarAuthors" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Author</h3></li>
+                          </ul></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td><ul class="nav nav-sidebar menugroup" id="vocabulary" style="padding-left:15px; padding-right:10px;">
+                          <li><h3>Vocabulary</h3></li>
+                          </ul></td>
+                      </tr>
+                      <tr>    
+                        <td></td>
+                        <td><div id="sidebarAbout" style="padding-left:15px; padding-right:10px; margin-top: 5px;">
+                          <h3>about#[about.headline]#</h3>
+                          <div>#[about.body]#</div>
+                          </div></td>
+                      </tr>
+                    </table>
+                  </fieldset>
+                </div>                        
+              </td>
+              <td valign="top">
+                <div style="float: left;">
+                  <fieldset class="yacys">
+                    <div class="input-group">
+                      <input type="text" class="form-control searchinput typeahead" size="40" maxlength="80" placeholder="Web Search by the People, for the People" name="query"  />
+                        <div class="input-group-btn">
+                          <button id="Enter" class="btn btn-default" type="submit">search</button>
+                        </div>
                     </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
-                  <td><div id="sidebarProtocols" style="float: right; margin-top: 0px; width: 230px;">
-                      <h3 style="padding-left: 25px;">Protocol</h3>
-                    </div></td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" name="search.navigation.filetype" value="true" #(search.navigation.filetype)#::checked="checked" #(/search.navigation.filetype)# /></td>
-                  <td><div id="sidebarFiletypes" style="float: right; margin-top: 0px; width: 230px;">
-                      <h3 style="padding-left: 25px;">Filetype</h3>
-                    </div></td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" name="search.navigation.hosts" value="true" #(search.navigation.hosts)#::checked="checked" #(/search.navigation.hosts)# /></td>
-                  <td><div id="sidebarDomains" style="float: right; margin-top: 0px; width: 230px;">
-                      <h3 style="padding-left: 25px;">Provider</h3>
-                    </div></td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" name="search.navigation.namespace" value="true" #(search.navigation.namespace)#::checked="checked" #(/search.navigation.namespace)# /></td>
-                  <td><div id="sidebarNameSpace" style="float: right; margin-top: 0px; width: 230px;">
-                      <h3 style="padding-left: 25px;">Wiki Name Space</h3>
-                    </div></td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" name="search.navigation.language" value="true" #(search.navigation.language)#::checked="checked" #(/search.navigation.language)# /></td>
-                  <td><div id="sidebarLanguages" style="float: right; margin-top: 0px; width: 230px;">
-                      <h3 style="padding-left: 25px;">Language</h3>
-                    </div></td>
-                </tr>                  
-                <tr>
-                  <td><input type="checkbox" name="search.navigation.authors" value="true" #(search.navigation.authors)#::checked="checked" #(/search.navigation.authors)# /></td>
-                  <td><div id="sidebarAuthors" style="float: right; margin-top: 0px; width: 230px;">
-                      <h3 style="padding-left: 25px;">Author</h3>
-                    </div></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td><div id="vocabulary" style="float: right; margin-top: 0px; width: 230px;">
-                      <h3 style="padding-left: 25px;">Vocabulary</h3>
-                    </div></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td><div id="sidebarAbout" style="float: right; margin-top: 5px; width: 230px;">
-                      <h3 style="padding-left: 25px;">about#[about.headline]#</h3>
-                      <div>#[about.body]#</div>
-                    </div></td>
-                </tr>
-              </table>
-            </fieldset>
-          </div>
-          <!-- the search result -->
-          <div style="float: left; width: 70%;">
-            <fieldset>
-              <div class="searchresults">
-                <h4 class="linktitle">
-                  <img width="16" height="16" src="env/grafics/dfltfvcn.ico" class="favicon" alt="" />
-                  <a href="yacysearch.html" target="LayouTest">Title of Result</a>
-                </h4>
-                <p class="snippet">
-                  <span class="snippetLoaded" id="hhash">Description and text snippet of the search result</span>
-                </p>
-                <p class="url">
-                  <a href="yacysearch.html" id="urlhash" target="LayouTest">http://url-of-the-search-result.net</a>
-                </p>
-                <p class="urlinfo">
-                  <table border="0">
-                    <tr>
-                      <td width="15px"></td>
-                      <td>#[content_showDate_date]#</td>
-                      <td>&nbsp;|&nbsp;42 kbyte</td>
-                      <td>&nbsp;|&nbsp;<a href="solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a></td>
-                      <td>&nbsp;|&nbsp;<a href="ViewFile.html" target="LayouTest">Parser</a></td>
-                      <td>&nbsp;|&nbsp;<a href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
-                      <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Pictures</a></td>
-                      <td>&nbsp;|&nbsp;<a href="CacheResource_p.html" target="LayouTest">Cache</a></td>
-                      <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">Augmented Browsing</a></td>
-                      <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" /></a></td>
-                    </tr>
-                    <tr>
-                      <td></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.date" value="true" #(search.result.show.date)#::checked="checked" #(/search.result.show.date)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.size" value="true" #(search.result.show.size)#::checked="checked" #(/search.result.show.size)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.metadata" value="true" #(search.result.show.metadata)#::checked="checked" #(/search.result.show.metadata)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.parser" value="true" #(search.result.show.parser)#::checked="checked" #(/search.result.show.parser)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.citation" value="true" #(search.result.show.citation)#::checked="checked" #(/search.result.show.citation)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.pictures" value="true" #(search.result.show.pictures)#::checked="checked" #(/search.result.show.pictures)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.cache" value="true" #(search.result.show.cache)#::checked="checked" #(/search.result.show.cache)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.proxy" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# /></td>
-                      <td align="center"><input type="checkbox" name="search.result.show.hostbrowser" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
-                    </tr>
-                  </table>
-                </p>
-              </div>
-            </fieldset>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <fieldset>
-            <dt>&nbsp;</dt>
-            <dd>
-              <input type="submit" name="searchpage_set" value="Save Settings" class="btn btn-primary" />&nbsp;&nbsp;
-              <input type="submit" name="searchpage_default" value="Set Default Values" class="btn btn-primary" />
-            </dd>
-          </fieldset>
-        </td>
-      </tr>
-    </table>
-  </form>
-    
-<script type="text/javascript">
-//<![CDATA[
-$(function() { $("#sidebarProtocols").accordion('activate', false); });
-$(function() { $("#sidebarFiletypes").accordion('activate', false); });
-$(function() { $("#sidebarDomains").accordion('activate', false); });
-$(function() { $("#sidebarNameSpace").accordion('activate', false); });
-$(function() { $("#sidebarLanguages").accordion('activate', false); });
-$(function() { $("#sidebarAuthors").accordion('activate', false); });
-$(function() { $("#vocabulary").accordion('activate', false); });
-$(function() { $("#sidebarAbout").accordion('activate', false); });
-//]]>
-</script>
+                    <div class="yacysearch">
+                      <input type="checkbox" id="text" name="search.text" value="true" #(search.text)#::checked="checked" #(/search.text)# /><label for="text">Text</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="image" name="search.image" value="true" #(search.image)#::checked="checked" #(/search.image)# /><label for="image">Images</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="audio" name="search.audio" value="true" #(search.audio)#::checked="checked" #(/search.audio)# /><label for="audio">Audio</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="video" name="search.video" value="true" #(search.video)#::checked="checked" #(/search.video)# /><label for="video">Video</label>
+                        &nbsp;&nbsp;<input type="checkbox" id="app" name="search.app" value="true" #(search.app)#::checked="checked" #(/search.app)# /><label for="app">Applications</label>
+                        &nbsp;<input type="checkbox" id="options" name="search.options" value="true" #(search.options)#::checked="checked" #(/search.options)# /><a href="" target="LayouTest">more options</a>
+                    </div>
+                  </fieldset>
+                </div>
+
+                <!-- the search result -->
+                <div style="float: left;">
+                  <fieldset>
+                    <div class="searchresults">
+                      <h4 class="linktitle">
+                        <img width="16" height="16" src="env/grafics/dfltfvcn.ico" class="favicon" alt="" />
+                        <a href="yacysearch.html" target="LayouTest">Title of Result</a>
+                      </h4>
+                    <p class="snippet">
+                    <span class="snippetLoaded" id="hhash">Description and text snippet of the search result</span>
+                    </p>
+                    <p class="url">
+                      <a href="yacysearch.html" id="urlhash" target="LayouTest">http://url-of-the-search-result.net</a>
+                    </p>
+                    <p class="urlinfo">
+                      <table border="0">
+                        <tr>
+                          <td width="15px"></td>
+                          <td>#[content_showDate_date]#</td>
+                          <td>&nbsp;|&nbsp;42 kbyte</td>
+                          <td>&nbsp;|&nbsp;<a href="solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a></td>
+                          <td>&nbsp;|&nbsp;<a href="ViewFile.html" target="LayouTest">Parser</a></td>
+                          <td>&nbsp;|&nbsp;<a href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
+                          <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Pictures</a></td>
+                          <td>&nbsp;|&nbsp;<a href="CacheResource_p.html" target="LayouTest">Cache</a></td>
+                          <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">Augmented Browsing</a></td>
+                          <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" /></a></td>
+                        </tr>
+                        <tr>
+                          <td></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.date" value="true" #(search.result.show.date)#::checked="checked" #(/search.result.show.date)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.size" value="true" #(search.result.show.size)#::checked="checked" #(/search.result.show.size)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.metadata" value="true" #(search.result.show.metadata)#::checked="checked" #(/search.result.show.metadata)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.parser" value="true" #(search.result.show.parser)#::checked="checked" #(/search.result.show.parser)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.citation" value="true" #(search.result.show.citation)#::checked="checked" #(/search.result.show.citation)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.pictures" value="true" #(search.result.show.pictures)#::checked="checked" #(/search.result.show.pictures)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.cache" value="true" #(search.result.show.cache)#::checked="checked" #(/search.result.show.cache)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.proxy" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.hostbrowser" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
+                        </tr>
+                      </table>
+                    </p>
+                  </div>
+                </fieldset>
+              </div>                        
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <fieldset>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="searchpage_set" value="Save Settings" class="btn btn-primary" />&nbsp;&nbsp;
+            <input type="submit" name="searchpage_default" value="Set Default Values" class="btn btn-primary" />
+          </dd>
+        </fieldset>
+      </td>
+    </tr>
+  </table>
+</form>
 </body>
 </html>
