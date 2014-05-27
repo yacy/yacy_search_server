@@ -107,6 +107,40 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return sd;
     }
     
+    public boolean postprocessing_http_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+        if (!this.contains(CollectionSchema.http_unique_b)) return false;
+        if (!url.isHTTPS() && !url.isHTTP()) return false;
+        try {
+            DigestURL u = new DigestURL((url.isHTTP() ? "https://" : "http://") + url.urlstub(true, true));
+            SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.http_unique_b.getSolrFieldName());
+            return set_unique_flag(CollectionSchema.http_unique_b, sid, d);
+        } catch (final IOException e) {}
+        return false;
+    }
+    
+    public boolean postprocessing_www_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+        if (!this.contains(CollectionSchema.www_unique_b)) return false;
+        final String us = url.urlstub(true, true);
+        try {
+            DigestURL u = new DigestURL(url.getProtocol() + (us.startsWith("www.") ? "://" + us.substring(4) : "://www." + us));
+            SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.www_unique_b.getSolrFieldName());
+            return set_unique_flag(CollectionSchema.www_unique_b, sid, d);
+        } catch (final IOException e) {}
+        return false;
+    }
+    
+    private boolean set_unique_flag(CollectionSchema field, SolrInputDocument sid, SolrDocument d) {
+        Object sb = sid.getFieldValue(field.getSolrFieldName());
+        boolean sbb = sb != null && ((Boolean) sb).booleanValue();
+        Object ob = d == null ? null : d.getFieldValue(field.getSolrFieldName());
+        boolean obb = ob != null && ((Boolean) ob).booleanValue();
+        if (sbb == obb) {
+            sid.setField(field.getSolrFieldName(), !sbb);
+            return true;
+        }
+        return false;
+    }
+    
     public boolean postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURL url) {
         boolean changed = false;
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT

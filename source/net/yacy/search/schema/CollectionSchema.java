@@ -36,6 +36,8 @@ public enum CollectionSchema implements SchemaDeclaration {
     //sku(SolrType.text_en_splitting_tight, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
     last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"),
     content_type(SolrType.string, true, true, true, false, false, "mime-type of document"),
+    http_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false"),
+    www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false"),
     title(SolrType.text_general, true, true, true, false, true, "content of title tag"),
     title_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b"),
     title_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if title is unique in the whole index; if yes and another document appears with same title, the unique-flag is set to false"),

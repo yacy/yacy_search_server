@@ -21,6 +21,12 @@ last_modified
 ## mime-type of document, string (mandatory field)
 content_type
 
+## unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false
+http_unique_b
+
+## unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false
+www_unique_b
+
 ## content of title tag, text (mandatory field)
 title
 

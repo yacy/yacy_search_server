@@ -911,7 +911,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (c >= '0' && c <= '9') return CharType.number;
         return CharType.high;
     }
-
+    
     public String toNormalform(final boolean excludeAnchor) {
         return toNormalform(excludeAnchor, false);
     }
@@ -937,6 +937,42 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         final StringBuilder u = new StringBuilder(20 + urlPath.length() + ((h == null) ? 0 : h.length()));
         u.append(this.protocol);
         u.append("://");
+        if (h != null) {
+            if (this.userInfo != null && !(this.isFTP() && this.userInfo.startsWith(FTPClient.ANONYMOUS))) {
+                u.append(this.userInfo);
+                u.append("@");
+            }
+            u.append(h.toLowerCase());
+        }
+        if (!defaultPort) {
+            u.append(":");
+            u.append(this.port);
+        }
+        u.append(urlPath);
+        String result = u.toString();
+        
+        return result;
+    }
+
+    public String urlstub(final boolean excludeAnchor, final boolean removeSessionID) {
+        // generates a normal form of the URL
+        boolean defaultPort = false;
+        if (this.protocol.equals("mailto")) {
+            return this.protocol + ":" + this.userInfo + "@" + this.host;
+        } else if (isHTTP()) {
+            if (this.port < 0 || this.port == 80)  { defaultPort = true; }
+        } else if (isHTTPS()) {
+            if (this.port < 0 || this.port == 443) { defaultPort = true; }
+        } else if (isFTP()) {
+            if (this.port < 0 || this.port == 21)  { defaultPort = true; }
+        } else if (isSMB()) {
+            if (this.port < 0 || this.port == 445)  { defaultPort = true; }
+        } else if (isFile()) {
+            defaultPort = true;
+        }
+        String urlPath = this.getFile(excludeAnchor, removeSessionID);
+        String h = getHost();
+        final StringBuilder u = new StringBuilder(20 + urlPath.length() + ((h == null) ? 0 : h.length()));
         if (h != null) {
             if (this.userInfo != null && !(this.isFTP() && this.userInfo.startsWith(FTPClient.ANONYMOUS))) {
                 u.append(this.userInfo);

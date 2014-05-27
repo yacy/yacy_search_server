@@ -360,11 +360,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                  (target_host.equals(source_host) ||
                   target_host.equals("www." + source_host) ||
                   source_host.equals("www." + target_host))); // well, not everybody defines 'outbound' that way but however, thats used here.
-        final String target_url_string = target_url.toNormalform(false);
-        int pr_target = target_url_string.indexOf("://",0);
         int ioidx = inbound ? 0 : 1;
-        subgraph.urlProtocols[ioidx].add(target_url_string.substring(0, pr_target));
-        subgraph.urlStubs[ioidx].add(target_url_string.substring(pr_target + 3));
+        subgraph.urlProtocols[ioidx].add(target_url.getProtocol());
+        subgraph.urlStubs[ioidx].add(target_url.urlstub(true, true));
         subgraph.urlAnchorTexts[ioidx].add(text);
         return inbound;
     }
@@ -401,7 +399,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String url = addURIAttributes(doc, allAttr, digestURL, Response.docType(digestURL));
         
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
-        
+        String host = digestURL.getHost();
         String us = digestURL.toNormalform(true);
         
         int crawldepth = document.getDepth();
@@ -477,6 +475,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             List<String> synonyms = condenser.synonyms();
             add(doc, CollectionSchema.synonyms_sxt, synonyms);
         }
+
+        // unique-fields; these values must be corrected during postprocessing.
+        add(doc, CollectionSchema.http_unique_b, digestURL.isHTTPS()); // this must be corrected afterwards during storage!
+        add(doc, CollectionSchema.www_unique_b, host != null && host.startsWith("www.")); // this must be corrected afterwards during storage!
+        
         add(doc, CollectionSchema.exact_signature_l, condenser.exactSignature());
         add(doc, CollectionSchema.exact_signature_unique_b, true); // this must be corrected afterwards during storage!
         add(doc, CollectionSchema.exact_signature_copycount_i, 0); // this must be corrected afterwards during postprocessing!
@@ -485,7 +488,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         add(doc, CollectionSchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards during storage!
         add(doc, CollectionSchema.fuzzy_signature_copycount_i, 0); // this must be corrected afterwards during postprocessing!
         if (this.contains(CollectionSchema.exact_signature_unique_b) || this.contains(CollectionSchema.exact_signature_copycount_i) ||
-            this.contains(CollectionSchema.fuzzy_signature_l) || this.contains(CollectionSchema.fuzzy_signature_copycount_i)) {
+            this.contains(CollectionSchema.fuzzy_signature_l) || this.contains(CollectionSchema.fuzzy_signature_copycount_i) ||
+            this.contains(CollectionSchema.http_unique_b) || this.contains(CollectionSchema.www_unique_b)) {
             processTypes.add(ProcessType.UNIQUE); 
         }
         
@@ -1166,7 +1170,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             long count = collectionConnector.getCountByQuery(query);
             long start = System.currentTimeMillis();
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
-            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(query, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, 1);
+            BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(
+                    query,
+                    CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
+                    CollectionSchema.url_protocol_s.getSolrFieldName() + " asc," + // sort on protocol to get http before htts; that gives an opportunity to set http_unique_b flag to false
+                    CollectionSchema.url_chars_i.getSolrFieldName() + " asc",
+                    0, 100000000, 86400000, 200, 1);
             int countcheck = 0;
             Collection<String> failids = new ArrayList<String>();
             SolrDocument doc;
@@ -1199,7 +1208,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         }
 
                         if (tagtype == ProcessType.UNIQUE) {
-                            if (postprocessing_doublecontent(segment, uniqueURLs, sid, url)) proccount_uniquechange++;
+                            boolean uniquechange = false;
+                            uniquechange |= postprocessing_http_unique(segment, sid, url);
+                            uniquechange |= postprocessing_www_unique(segment, sid, url);
+                            uniquechange |= postprocessing_doublecontent(segment, uniqueURLs, sid, url);
+                            if (uniquechange) proccount_uniquechange++;
                         }
                         
                     } catch (IllegalArgumentException e) {}
