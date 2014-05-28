@@ -59,9 +59,9 @@
       <h3>YaCy Network</h3>
       <ul class="SubMenu">
         <li><a href="Network.html" class="MenuItemLink">Network Overview</a></li>
-        <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Potential&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Junior&nbsp;(fragment)&nbsp;Peers</a></li>
       </ul>
     </div>
     #(/menu)#
@@ -78,11 +78,11 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
     #(page)#
     <h2>YaCy Search Network '#[networkName]#'</h2>
     ::
-    <h2>Active Peers in '#[networkName]#' Network</h2>
+    <h2>Active Principal and Senior Peers in '#[networkName]#' Network</h2>
     ::
-    <h2>Passive Peers in '#[networkName]#' Network</h2>
+    <h2>Passive Senior Peers in '#[networkName]#' Network</h2>
     ::
-    <h2>Potential Peers in '#[networkName]#' Network</h2>
+    <h2>Junior Peers (a fragment) in '#[networkName]#' Network</h2>
     ::
     <h2>Manually contacting Peer</h2>
     #(/page)#
@@ -202,19 +202,19 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
         <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>::
         <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>
         #(/active-switch)#
-        <td align="left">Active</td>
+        <td align="left">Active Senior</td>
         <td align="right">#[active-count]#</td>
         <td align="right">#[active-links]#</td>
         <td align="right" rowspan="3">#[gppm]#</td>
         <td align="right" rowspan="3">#[gqph]#</td>
       </tr>
       <tr class="TableCellLight">
-        <td align="left">Passive</td>
+        <td align="left">Passive Senior</td>
         <td align="right">#[passive-count]#</td>
         <td align="right">#[passive-links]#</td>
       </tr>
       <tr class="TableCellLight">
-        <td align="left">Potential</td>
+        <td align="left">Junior (fragment)</td>
         <td align="right">#[potential-count]#</td>
         <td align="right">#[potential-links]#</td>
       </tr>
