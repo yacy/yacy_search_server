@@ -78,7 +78,7 @@ public class HostQueue implements Balancer {
             final boolean exceed134217727) {
         this.onDemand = onDemand;
         this.exceed134217727 = exceed134217727;
-        this.hostName = hostName;
+        this.hostName = (hostName == null)  ? "localhost" : hostName; // might be null (file://) but hostqueue needs a name (for queue file)
         this.port = port;
         this.hostPath = new File(hostsPath, this.hostName + "." + this.port);
         init();
@@ -101,6 +101,9 @@ public class HostQueue implements Balancer {
     
     private final void init() {
         try {
+            if (this.hostName == null)
+                this.hostHash="";
+            else
             this.hostHash = DigestURL.hosthash(this.hostName, this.port);
         } catch (MalformedURLException e) {
             this.hostHash = "";

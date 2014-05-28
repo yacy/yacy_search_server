@@ -211,26 +211,25 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 this.searchpart = null;
                 this.anchor = null;
             } else if (this.protocol.equals("file")) {
-                // parse file url
+                // parse file url (RFC 1738 file://host.domain/path file://localhost/path file:///path)
+                // example unix  file://localhost/etc/fstab
+                //               file:///etc/fstab
+                // example windows file://localhost/c|/WINDOWS/clock.avi
+                //                 file:///c|/WINDOWS/clock.avi
+                //                 file://localhost/c:/WINDOWS/clock.avi
+                //      network    file://hostname/path/to/the%20file.txt
+                //      local      file:///c:/path/to/the%20file.txt
                 final String h = url.substring(p + 1);
-                if (h.startsWith("//")) {
+                this.host = null; // host is ignored on file: protocol
+                if (h.startsWith("///")) { //absolute local file path
                     // no host given
-                    this.host = null;
-                    this.path = h.substring(2);
-                } else {
-                    this.host = null;
-                    if (h.length() > 0 && h.charAt(0) == '/') {
-                        final char c = h.charAt(2);
-                        if (c == ':' || c == '|')
-                            this.path = h.substring(1);
-                        else
-                            this.path = h;
+                    this.path = h.substring(2); // "/path"  or "/c:/path"
+                } else { // "//host/path" or "//host/c:/path"
+                    int q = url.indexOf('/', p + 3);
+                    if (q < 0) {
+                        this.path = "/";
                     } else {
-                        final char c = h.charAt(1);
-                        if (c == ':' || c == '|')
-                            this.path = h;
-                        else
-                            this.path = "/" + h;
+                        this.path = url.substring(q);
                     }
                 }
                 this.userInfo = null;
