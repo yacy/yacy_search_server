@@ -247,9 +247,13 @@ public class Crawler_p {
                 if (crawlName.length() == 0 && sitemapURLStr.length() > 0) crawlName = "sitemap loader for " + sitemapURLStr;
                 
                 // delete old robots entries
-                for (DigestURL ru: rootURLs) {
+                for (DigestURL ru : rootURLs) {
                     sb.robots.delete(ru);
-                    try {Cache.delete(RobotsTxt.robotsURL(RobotsTxt.getHostPort(ru)).hash());} catch (IOException e) {}
+                    try {
+                        if (ru.getHost() != null) { // might be null for file://
+                            Cache.delete(RobotsTxt.robotsURL(RobotsTxt.getHostPort(ru)).hash());
+                        }
+                    } catch (IOException e) {}
                 }
                 try {sb.robots.clear();} catch (IOException e) {} // to be safe: clear all.
                 
@@ -645,7 +649,7 @@ public class Crawler_p {
         prop.put("crawlProfilesShow_linkstructure", 0);
         if (count > 0) {
             // collect the host names for 'wide' crawls which can be visualized
-            boolean showLinkstructure = hosts.length() > 0;
+            boolean showLinkstructure = hosts.length() > 0 && !hosts.contains("file:");
             if (showLinkstructure) {
                 StringBuilder q = new StringBuilder();
                 hosts = hosts.substring(1);
