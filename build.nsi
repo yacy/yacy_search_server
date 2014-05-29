@@ -42,9 +42,9 @@ InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 !define RecommendSpace "4"
 
 ; commands for firewall config, see http://support.microsoft.com/kb/947709/en-us
-!define WinXPAddFwRulePort 'netsh firewall add allowedprogram name="YaCy" program="%SystemRoot%\System32\javaw.exe"'
-!define WinXPDelFwRulePort 'netsh firewall del allowedprogram program="%SystemRoot%\System32\javaw.exe"'
-!define WinVistaAddFwRulePort 'netsh advfirewall firewall add rule name="YaCy" program="%SystemRoot%\System32\javaw.exe" dir=in action=allow'
+!define WinXPAddFwRulePort 'netsh firewall add portopening TCP 8090 name="YaCy"'
+!define WinXPDelFwRulePort 'netsh firewall del portopening TCP 8090'
+!define WinVistaAddFwRulePort 'netsh advfirewall firewall add rule name="YaCy" dir=in action=allow enable=yes protocol=TCP localport=8090'
 !define WinVistaDelFwRulePort 'netsh advfirewall firewall del rule name="YaCy"'
 var WinAddFwRulePort
 var WinDelFwRulePort
