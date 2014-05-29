@@ -996,7 +996,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
              collection.contains(CollectionSchema.cr_host_chance_d) &&
              collection.contains(CollectionSchema.cr_host_norm_i)))) try {
             int concurrency = Math.min(hostscore.size(), Runtime.getRuntime().availableProcessors());
-            ConcurrentLog.info("CollectionConfiguration", "collecting " + hostscore.size() + " hosts, concrrency = " + concurrency);
+            ConcurrentLog.info("CollectionConfiguration", "collecting " + hostscore.size() + " hosts, concurrency = " + concurrency);
             int countcheck = 0;
             for (String host: hostscore.keyList(true)) {
                 // Patch the citation index for links with canonical tags.
@@ -1005,7 +1005,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
                 String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
                 long patchquerycount = collectionConnector.getCountByQuery(patchquery);
-                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, 1,
+                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, 200, 1,
                         CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
                 SolrDocument doc_B;
                 int patchquerycountcheck = 0;
@@ -1087,7 +1087,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     final long count = segment.fulltext().getWebgraphConnector().getCountByQuery(query);
                     int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph, concurrency = " + concurrency);
-                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(query, WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, concurrency);
+                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(query, WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, 200, concurrency);
                     final AtomicInteger proccount = new AtomicInteger(0);
                     Thread[] t = new Thread[concurrency];
                     for (final AtomicInteger i = new AtomicInteger(0); i.get() < t.length; i.incrementAndGet()) {
@@ -1127,7 +1127,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                         try {
                                             sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
                                             sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
-                                            segment.fulltext().getWebgraphConnector().deleteById((String) sid.getFieldValue(WebgraphSchema.id.getSolrFieldName()));
+                                            //segment.fulltext().getWebgraphConnector().deleteById((String) sid.getFieldValue(WebgraphSchema.id.getSolrFieldName()));
                                             segment.fulltext().getWebgraphConnector().add(sid);
                                         } catch (SolrException e) {
                                             ConcurrentLog.logException(e);
@@ -1173,9 +1173,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(
                     query,
                     CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
-                    CollectionSchema.url_protocol_s.getSolrFieldName() + " asc," + // sort on protocol to get http before htts; that gives an opportunity to set http_unique_b flag to false
+                    CollectionSchema.url_protocol_s.getSolrFieldName() + " asc," + // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
                     CollectionSchema.url_chars_i.getSolrFieldName() + " asc",
-                    0, 100000000, 86400000, 200, 1);
+                    0, 100000000, Long.MAX_VALUE, 200, 1);
             int countcheck = 0;
             Collection<String> failids = new ArrayList<String>();
             SolrDocument doc;
@@ -1232,7 +1232,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
                     
                     // send back to index
-                    collectionConnector.deleteById(i);
+                    //collectionConnector.deleteById(i);
                     collectionConnector.add(sid);
                     
                     proccount++; allcount.incrementAndGet();
@@ -1260,6 +1260,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         } catch (IOException e3) {
             ConcurrentLog.warn("CollectionConfiguration", e3.getMessage(), e3);
         }
+        collectionConnector.commit(true); // make changes available directly to prevent that the process repeats again
         return allcount.get();
     }
 

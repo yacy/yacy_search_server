@@ -167,7 +167,10 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                             try {queue.put(d);} catch (final InterruptedException e) {break;}
                             count++;
                         }
-                        if (sdl.size() < pagesize) break;
+                        if (sdl.size() < pagesize) {
+                            //System.out.println("sdl.size() = " + sdl.size() + ", pagesize = " + pagesize);
+                            break;
+                        }
                         o += sdl.size();
                     } catch (final SolrException e) {
                         break;
@@ -175,7 +178,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         break;
                     }
                 }
-                for (int i = 0; i < concurrency; i++) {
+                for (int i = 0; i < Math.max(1, concurrency); i++) {
                     try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (final InterruptedException e1) {}
                 }
             }

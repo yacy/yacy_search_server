@@ -57,7 +57,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         this.hostname = null;
     }
     
-    public void fill(final SolrConnector solrConnector, String hostname, final DigestURL stopURL, final int maxtime, final int maxnodes) {
+    public void fill(final SolrConnector solrConnector, String hostname, final DigestURL stopURL, final long maxtime, final int maxnodes) {
         this.hostname = hostname;
         if (hostname.startsWith("www.")) hostname = hostname.substring(4);
         StringBuilder q = new StringBuilder();

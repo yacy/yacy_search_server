@@ -72,7 +72,7 @@ public class Vocabulary_p {
                         Segment segment = sb.index;
                         String t;
                         if (!discoverNot) {
-                            Iterator<DigestURL> ui = segment.urlSelector(discoveruri, 600000L, 100000);
+                            Iterator<DigestURL> ui = segment.urlSelector(discoveruri, Long.MAX_VALUE, 100000);
                             while (ui.hasNext()) {
                                 DigestURL u = ui.next();
                                 String u0 = u.toNormalform(true);

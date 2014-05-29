@@ -37,16 +37,16 @@ public class InstanceMirror {
 
     private EmbeddedInstance embeddedSolrInstance;
     private ShardInstance remoteSolrInstance;
-    private Map<String, ConcurrentUpdateSolrConnector> mirrorConnectorCache;
+    private Map<String, SolrConnector> mirrorConnectorCache;
     private Map<String, EmbeddedSolrConnector> embeddedConnectorCache;
     private Map<String, RemoteSolrConnector> remoteConnectorCache;
 
     public InstanceMirror() {
         this.embeddedSolrInstance = null;
         this.remoteSolrInstance = null;
-        this.mirrorConnectorCache = new ConcurrentHashMap<String, ConcurrentUpdateSolrConnector>();
-        this.embeddedConnectorCache = new ConcurrentHashMap<String, EmbeddedSolrConnector>();
-        this.remoteConnectorCache = new ConcurrentHashMap<String, RemoteSolrConnector>();
+        this.mirrorConnectorCache = new ConcurrentHashMap<>();
+        this.embeddedConnectorCache = new ConcurrentHashMap<>();
+        this.remoteConnectorCache = new ConcurrentHashMap<>();
     }
     
     public boolean isConnectedEmbedded() {
@@ -161,11 +161,12 @@ public class InstanceMirror {
     }
 
     public SolrConnector getGenericMirrorConnector(String corename) {
-        ConcurrentUpdateSolrConnector msc = this.mirrorConnectorCache.get(corename);
+        SolrConnector msc = this.mirrorConnectorCache.get(corename);
         if (msc != null) return msc;
         EmbeddedSolrConnector esc = getEmbeddedConnector(corename);
         RemoteSolrConnector rsc = getRemoteConnector(corename);
-        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), RemoteInstance.queueSizeByMemory(), 100000, Runtime.getRuntime().availableProcessors());
+        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), RemoteInstance.queueSizeByMemory(), 10000, Runtime.getRuntime().availableProcessors());
+        //msc = new MirrorSolrConnector(esc, rsc);
         this.mirrorConnectorCache.put(corename, msc);
         return msc;
     }
