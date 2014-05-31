@@ -494,6 +494,7 @@ public class CrawlStartExpert {
             agentNames.add(ClientIdentification.googleAgentName);
             if (sb.isAllIPMode()) {
                 agentNames.add(ClientIdentification.browserAgentName);
+                if (ClientIdentification.getAgent(ClientIdentification.customAgentName) != null) agentNames.add(ClientIdentification.customAgentName);
             }
             String defaultAgentName = agentNames.get(0);
             if (post != null && post.containsKey("agentName")) {

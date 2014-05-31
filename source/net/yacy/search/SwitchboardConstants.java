@@ -340,6 +340,10 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects"; // ignore the target url and follow to the redirect
     public static final String CRAWLER_RECORD_REDIRECTS         = "crawler.http.RecordRedirects"; // record the ignored redirected page to the index store
     
+    public static final String CRAWLER_USER_AGENT_NAME          = "crawler.userAgent.name";
+    public static final String CRAWLER_USER_AGENT_STRING        = "crawler.userAgent.string";
+    public static final String CRAWLER_USER_AGENT_MINIMUMDELTA  = "crawler.userAgent.minimumdelta";
+    public static final String CRAWLER_USER_AGENT_CLIENTTIMEOUT = "crawler.userAgent.clienttimeout";
     
     /**
      * debug flags

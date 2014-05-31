@@ -77,6 +77,7 @@ public class ClientIdentification {
     public final static Agent browserAgent = new Agent(browserAgents[random.nextInt(browserAgents.length)], new String[]{"Mozilla"}, minimumLocalDeltaInit, clientTimeoutInit);
     public final static String yacyProxyAgentName = "YaCyProxy";
     public final static Agent yacyProxyAgent = new Agent("yacy - this is a proxy access through YaCy from a browser, not a robot (the yacy bot user agent is 'yacybot')", new String[]{"yacy"}, minimumGlobalDeltaInit, clientTimeoutInit);
+    public final static String customAgentName = "Custom Agent";
 
     static {
         generateYaCyBot("new");
@@ -103,6 +104,12 @@ public class ClientIdentification {
         yacyIntranetCrawlerAgent = new Agent(agentString, new String[]{"yacybot"}, minimumLocalDeltaInit, clientTimeoutInit); // must have the same userAgent String as the web crawler because this is also used for snippets
         agents.put(yacyInternetCrawlerAgentName, yacyInternetCrawlerAgent);
         agents.put(yacyIntranetCrawlerAgentName, yacyIntranetCrawlerAgent);
+    }
+    
+    public static void generateCustomBot(String name, String string, int minimumdelta, int clienttimeout) {
+        if (name.toLowerCase().indexOf("yacy") >= 0 || string.toLowerCase().indexOf("yacy") >= 0) return; // don't allow 'yacy' in custom bot strings
+        String agentString = string.replace("$$SYSTEM$$", yacySystem.replace("java", "O"));
+        agents.put(customAgentName, new Agent(agentString, new String[]{name}, minimumdelta, clienttimeout));
     }
 
     /**

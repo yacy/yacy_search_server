@@ -319,8 +319,10 @@ public class Crawler_p {
 
                 env.setConfig("storeHTCache", storeHTCache);
                 
-                String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
+                String defaultAgentName = sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName;
+                String agentName = post.get("agentName", defaultAgentName);
                 ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
+                if (agent == null) agent = ClientIdentification.getAgent(defaultAgentName);
 
                 CacheStrategy cachePolicy = CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
                 if (cachePolicy == null) cachePolicy = CacheStrategy.IFFRESH;

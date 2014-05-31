@@ -395,13 +395,19 @@ public final class Switchboard extends serverSwitch {
 
         // load the network definition
         try {
-            overwriteNetworkDefinition();
+            overwriteNetworkDefinition(getSysinfo());
         } catch (final FileNotFoundException e) {
             ConcurrentLog.logException(e);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
-
+        // create custom user agent
+        ClientIdentification.generateCustomBot(
+                getConfig(SwitchboardConstants.CRAWLER_USER_AGENT_NAME, ""),
+                getConfig(SwitchboardConstants.CRAWLER_USER_AGENT_STRING, ""),
+                (int) getConfigLong(SwitchboardConstants.CRAWLER_USER_AGENT_MINIMUMDELTA, 500),
+                (int) getConfigLong(SwitchboardConstants.CRAWLER_USER_AGENT_CLIENTTIMEOUT , 1000));
+        
         // start indexing management
         this.log.config("Starting Indexing Management");
         final String networkName = getConfig(SwitchboardConstants.NETWORK_NAME, "");
@@ -1140,6 +1146,10 @@ public final class Switchboard extends serverSwitch {
         this.log.config("Finished Switchboard Initialization");
     }
 
+    final String getSysinfo() {
+        return getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global");
+    }
+    
     @Override
     public void setHttpServer(YaCyHttpServer server) {
         super.setHttpServer(server);
@@ -1162,7 +1172,7 @@ public final class Switchboard extends serverSwitch {
             + this.indexingStorageProcessor.getQueueSize();
     }
 
-    public void overwriteNetworkDefinition() throws FileNotFoundException, IOException {
+    public void overwriteNetworkDefinition(final String sysinfo) throws FileNotFoundException, IOException {
 
         // load network configuration into settings
         String networkUnitDefinition =
@@ -1264,9 +1274,7 @@ public final class Switchboard extends serverSwitch {
         }
         */
         // write the YaCy network identification inside the yacybot client user agent to distinguish networks
-        ClientIdentification.generateYaCyBot(getConfig(SwitchboardConstants.NETWORK_NAME, "")
-                + (isRobinsonMode() ? "-" : "/")
-                + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global"));
+        ClientIdentification.generateYaCyBot(sysinfo);
     }
 
     public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
@@ -1309,7 +1317,7 @@ public final class Switchboard extends serverSwitch {
 
             // new properties
             setConfig("network.unit.definition", networkDefinition);
-            overwriteNetworkDefinition();
+            overwriteNetworkDefinition(getSysinfo());
             final File indexPrimaryPath =
                 getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
             final int wordCacheMaxCount =
