@@ -60,13 +60,13 @@ public class NoticedURL {
 
     protected NoticedURL(
             final File cachePath,
-            @SuppressWarnings("unused") final boolean useTailCache,
+            final int onDemandLimit,
             final boolean exceed134217727) {
         ConcurrentLog.info("NoticedURL", "CREATING STACKS at " + cachePath.toString());
-        this.coreStack = new HostBalancer(new File(cachePath, "CrawlerCoreStacks"), exceed134217727);
-        this.limitStack = new HostBalancer(new File(cachePath, "CrawlerLimitStacks"), exceed134217727);
-        this.remoteStack = new HostBalancer(new File(cachePath, "CrawlerRemoteStacks"), exceed134217727);
-        this.noloadStack = new HostBalancer(new File(cachePath, "CrawlerNoLoadStacks"), exceed134217727);
+        this.coreStack = new HostBalancer(new File(cachePath, "CrawlerCoreStacks"), onDemandLimit, exceed134217727);
+        this.limitStack = new HostBalancer(new File(cachePath, "CrawlerLimitStacks"), onDemandLimit, exceed134217727);
+        this.remoteStack = new HostBalancer(new File(cachePath, "CrawlerRemoteStacks"), onDemandLimit, exceed134217727);
+        this.noloadStack = new HostBalancer(new File(cachePath, "CrawlerNoLoadStacks"), onDemandLimit, exceed134217727);
     }
 
     public void clear() {

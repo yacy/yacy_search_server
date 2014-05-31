@@ -772,6 +772,14 @@ crawler.defaultAverageLatency = 500
 # The result is the minimum remote server access delay time
 crawler.latencyFactor = 0.5
 
+# The onDemandLimit is the maximum number of crawl queues that are concurrently opened
+# at the same time. If the number of hosts exceeds this number, onDemand queues are opened
+# which are opened each time a queue is accessed which creates high IO load. On the other
+# hand, having too many entries in onDemandLimit may exceed the maximum number of file
+# pointers. You can increase this number in /proc/sys/fs/file-max and adopt it to the number
+# defined here
+crawler.onDemandLimit = 1000
+
 # maximum size of indexing queue
 indexer.slots = 100
 

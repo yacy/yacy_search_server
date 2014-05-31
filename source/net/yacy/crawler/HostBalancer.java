@@ -68,11 +68,14 @@ public class HostBalancer implements Balancer {
     private final boolean exceed134217727;
     private final Map<String, HostQueue> queues;
     private final Set<String> roundRobinHostHashes;
+    private final int onDemandLimit;
 
     public HostBalancer(
             final File hostsPath,
+            final int onDemandLimit,
             final boolean exceed134217727) {
         this.hostsPath = hostsPath;
+        this.onDemandLimit = onDemandLimit;
         this.exceed134217727 = exceed134217727;
         
         // create a stack for newly entered entries
@@ -81,7 +84,7 @@ public class HostBalancer implements Balancer {
         String[] list = this.hostsPath.list();
         for (String address: list) try {
             File queuePath = new File(this.hostsPath, address);
-            HostQueue queue = new HostQueue(queuePath, this.queues.size() > 100, this.exceed134217727);
+            HostQueue queue = new HostQueue(queuePath, this.queues.size() > this.onDemandLimit, this.exceed134217727);
             if (queue.size() == 0) {
                 queue.close();
                 queuePath.delete();
@@ -210,7 +213,7 @@ public class HostBalancer implements Balancer {
         synchronized (this) {
             HostQueue queue = this.queues.get(hosthash);
             if (queue == null) {
-                queue = new HostQueue(this.hostsPath, entry.url().getHost(), entry.url().getPort(), this.queues.size() > 100, this.exceed134217727);
+                queue = new HostQueue(this.hostsPath, entry.url().getHost(), entry.url().getPort(), this.queues.size() > this.onDemandLimit, this.exceed134217727);
                 this.queues.put(hosthash, queue);
                 // profile might be null when continue crawls after YaCy restart
                 robots.ensureExist(entry.url(), profile == null ? ClientIdentification.yacyInternetCrawlerAgent : profile.getAgent(), true); // concurrently load all robots.txt
