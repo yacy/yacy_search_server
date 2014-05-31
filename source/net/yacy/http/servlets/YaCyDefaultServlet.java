@@ -356,7 +356,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         } finally {
             if (resource != null) {
-                resource.release();
+                resource.close();
             }
         }
     }

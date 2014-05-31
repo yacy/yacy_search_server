@@ -87,7 +87,7 @@ public class CrawlQueues {
 
         // start crawling management
         log.config("Starting Crawling Management");
-        this.noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
+        this.noticeURL = new NoticedURL(queuePath, sb.getConfigInt("crawler.onDemandLimit", 1000), sb.exceed134217727);
         this.errorURL = new ErrorCache(sb.index.fulltext());
         this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
     }
@@ -104,7 +104,7 @@ public class CrawlQueues {
         this.errorURL.clearCache();
         this.remoteCrawlProviderHashes.clear();
         this.noticeURL.close();
-        this.noticeURL = new NoticedURL(newQueuePath, this.sb.useTailCache, this.sb.exceed134217727);
+        this.noticeURL = new NoticedURL(newQueuePath, sb.getConfigInt("crawler.onDemandLimit", 1000), this.sb.exceed134217727);
         this.delegatedURL.clear();
     }
 

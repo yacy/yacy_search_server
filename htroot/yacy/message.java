@@ -45,6 +45,7 @@ import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
@@ -148,8 +149,8 @@ public final class message {
             messageForwardingViaEmail(sb, msgEntry);
 
             // finally write notification
-            final File notifierSource = new File(sb.getAppPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
-            final File notifierDest   = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+            final File notifierSource = new File(sb.getAppPath(), sb.getConfig(SwitchboardConstants.HTROOT_PATH,SwitchboardConstants.HTROOT_PATH_DEFAULT) + "/env/grafics/message.gif");
+            final File notifierDest   = new File(sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT), "notifier.gif");
             try {
                 Files.copy(notifierSource, notifierDest);
             } catch (final IOException e) {

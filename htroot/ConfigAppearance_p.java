@@ -162,7 +162,7 @@ public class ConfigAppearance_p {
     }
 
     private static boolean changeSkin(final Switchboard sb, final String skinPath, final String skin) {
-        final File htdocsDir = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "env");
+        final File htdocsDir = new File(sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT), "env");
         final File styleFile = new File(htdocsDir, "style.css");
         final File skinFile = new File(skinPath, skin);
 
