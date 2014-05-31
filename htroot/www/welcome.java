@@ -35,6 +35,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -61,8 +62,8 @@ public class welcome {
         final boolean senior = (peertype.equals(Seed.PEERTYPE_SENIOR)) || (peertype.equals(Seed.PEERTYPE_PRINCIPAL));
         if (senior) { prop.put("couldcan", "can"); } else { prop.put("couldcan", "could"); }
         if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.putHTML("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }
-        final File wwwpath = env.getDataPath("htDocsPath", "DATA/HTDOCS");
-        prop.putHTML("wwwpath", wwwpath.isAbsolute() ? wwwpath.getAbsolutePath() : "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
+        final File wwwpath = env.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
+        prop.putHTML("wwwpath", wwwpath.isAbsolute() ? wwwpath.getAbsolutePath() : "<application_root_path>/" + env.getConfig(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT));
 
         // return rewrite properties
         return prop;
