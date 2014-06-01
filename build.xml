@@ -44,7 +44,7 @@
   <property name="libt" location="libt"/>
   <property name="libbuild" location="libbuild"/>
   <property name="build" location="classes"/>
-  <property name="javadoc" location="api"/>
+  <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
   <property name="test" location="test"/>
   <property name="langstats" location="langstats"/>
@@ -146,7 +146,7 @@
 
   <target name="javadoc" depends="init" description="make javadoc for YaCy core">
     <javadoc destdir="${javadoc}"
-      windowtitle="YaCy API"
+      windowtitle="YaCy API: javadoc documentation"
       encoding="UTF-8"
       charset="UTF-8"
       access="private">
