@@ -24,12 +24,12 @@
     <td>Specifies if the proxy should send the X-Forwarded-For http header.</td>
   </tr> 
   <tr valign="top">
-    <td colspan="3"><input type="submit" name="httpNetworking" value="Submit" /> <em>Changes will take effect immediately.</em></td>
+    <td colspan="3"><input type="submit" class="btn-primary btn-sm" name="httpNetworking" value="Submit" /> <em>Changes will take effect immediately.</em></td>
   </tr>  
 </table>
 </fieldset>
 </form><br />
-<form>
+<form action="SettingsAck_p.html">
 <fieldset><legend id="httpserver">HTTP Server</legend>
 <table border="0" cellspacing="5">
   <tr>
@@ -37,9 +37,15 @@
     <td><b>#[httpservername]#</b></td>
   </tr>
   <tr>
-    <td>HTTP Server Port:</td>
+    <td><a href="ConfigBasic.html">HTTP Server Port</a>:</td>
     <td><b>#[port]#</b></td>
   </tr>
+  #(server.https)#::
+  <tr>
+    <td>HTTPS Port:</td>
+    <td><input type="text" width="4" name="port.ssl" value="#[port.ssl]#" size="4" maxlength="6"/>&nbsp;<input class="btn-primary btn-xs" type="submit" value="change"/></td>
+  </tr>
+  #(/server.https)#
 </table>
 </fieldset>
 </form><br />

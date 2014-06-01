@@ -184,8 +184,11 @@ public final class Settings_p {
         prop.putHTML("crawler.ftp.maxFileSize",sb.getConfig("crawler.ftp.maxFileSize", "-1"));
         prop.putHTML("crawler.smb.maxFileSize",sb.getConfig("crawler.smb.maxFileSize", "-1"));
         prop.putHTML("crawler.file.maxFileSize",sb.getConfig("crawler.file.maxFileSize", "-1"));
-        
+
+        // http server info
         prop.put("httpservername",sb.getHttpServer().getVersion());
+        prop.put("server.https",sb.getConfigBool("server.https", false));
+        prop.put("server.https_port.ssl", sb.getConfig("port.ssl","8443"));
         
         // return rewrite properties
         return prop;

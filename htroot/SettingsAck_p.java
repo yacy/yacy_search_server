@@ -503,6 +503,16 @@ public class SettingsAck_p {
             return prop;
         }
 
+        // change https port
+        if (post.containsKey("port.ssl")) {
+            int port = post.getInt("port.ssl", 8443);
+            if (port > 0 && port != env.getConfigInt("port", 8090)) {
+                env.setConfig("port.ssl", port);
+            }
+            prop.put("info_port.ssl", port);
+            prop.put("info", "32");
+            return prop;
+        }
 
         // nothing made
         prop.put("info", "1");//no information submitted
