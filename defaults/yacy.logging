@@ -1,6 +1,6 @@
 # Set the logging level for the root of the namespace.
 # This becomes the default logging level for all Loggers.
-.level=ALL
+.level=INFO
 
 # setting logging levels vor individual classes
 # possible values are:
@@ -115,22 +115,14 @@ org.apache.solr.update.DefaultSolrCoreState.level = SEVERE
 org.apache.solr.update.SolrCoreState.level = SEVERE
 org.apache.solr.update.SolrIndexWriter.level = INFO
 org.apache.solr.update.UpdateHandler.level = SEVERE
-org.apache.solr.update.UpdateLog = INFO
-org.apache.solr.update.LoggingInfoStream = OFF
-
-# Properties for jena
-com.hp.hpl.jena.util.FileManager.level = SEVERE
-com.hp.hpl.jena.util.LocationMapper.level = SEVERE
-com.hp.hpl.jena.util.LocatorClassLoader.level = SEVERE
-com.hp.hpl.jena.util.LocatorFile.level = SEVERE
-com.hp.hpl.jena.util.SystemUtils.level = SEVERE
+org.apache.solr.update.UpdateLog.level = INFO
+org.apache.solr.update.LoggingInfoStream.level = OFF
 
 # Properties for the YaCy solr interface
 net.yacy.cora.federate.solr.connector.SolrServerConnector.level = INFO
 net.yacy.cora.federate.solr.instance.RemoteInstance$1.level = INFO
 
 # Some more cora loggers
-net.yacy.cora.lod.JenaTripleStore.level = SEVERE
 net.yacy.cora.protocol.Domains.level = SEVERE
 
 # java properties

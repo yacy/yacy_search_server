@@ -266,16 +266,7 @@ dc_rights
             for (Tagging.Metatag s: e.getValue()) {
                 objects.add(s.getObject());
                 //sb.append(',').append(s.getObject());
-                /*
-                String objectlink = vocabulary.getObjectlink(s.getObject());
-                if ((objectspace != null && objectspace.length() > 0) || (objectlink != null && objectlink.length() > 0)) {
-                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.isEmpty() ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
-                }
-                */
             }
-            // put to triplestore
-            //JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true));
-            //JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1)); // superfluous with the generic_facets
             this.generic_facets.put(vocabulary.getName(), objects);
         }
     }
