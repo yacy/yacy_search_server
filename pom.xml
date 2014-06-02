@@ -149,12 +149,13 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9</version>
                 <configuration>
-                    <reportOutputDirectory>api</reportOutputDirectory>
+                    <reportOutputDirectory>javadoc</reportOutputDirectory>
                     <author>true</author>
                     <version>true</version>
-                    <use>false</use>
-                    <encoding>iso-8859-1</encoding>
-                    <windowtitle>YaCy API Documentation</windowtitle>
+                    <use>true</use>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <windowtitle>YaCy API: javadoc documentation</windowtitle>
                     <excludes>
                         htroot/*.java
                     </excludes>
