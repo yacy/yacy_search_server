@@ -29,7 +29,7 @@
     </dd>
     
     <dt>Address</dt>
-    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled (port #[sslPort]#)#(/sslSupport)#<br />
+    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: <a href="ConfigBasic.html">enabled</a> (port <a href="Settings_p.html?page=http">#[sslPort]#</a>)#(/sslSupport)#<br />
     #(peerAddress)#
       peer address not assigned
       ::
