@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,7 +102,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     public List<SolrInputDocument> getEdges(
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int crawldepth_source,
-            final List<ImageEntry> images, final Collection<AnchorURL> links,
+            final List<ImageEntry> images, final Set<ProcessType> processTypes, final Collection<AnchorURL> links,
             final String sourceName) {
         boolean allAttr = this.isEmpty();
         boolean generalNofollow = responseHeader == null ? false : responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
@@ -111,7 +110,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         List<SolrInputDocument> edges = new ArrayList<SolrInputDocument>();
         for (final AnchorURL target_url: links) {
             SolrInputDocument edge = getEdge(
-                    subgraph, source, responseHeader, collections, crawldepth_source, images,
+                    subgraph, source, responseHeader, collections, crawldepth_source, images, processTypes,
                     sourceName, allAttr, generalNofollow, target_order, target_url);
             target_order++;
             // add the edge to the subgraph
@@ -123,10 +122,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     public SolrInputDocument getEdge(
             final Subgraph subgraph,
             final DigestURL source_url, final ResponseHeader responseHeader, Map<String, Pattern> collections, int crawldepth_source,
-            final List<ImageEntry> images,
+            final List<ImageEntry> images, final Set<ProcessType> processTypes,
             final String sourceName, boolean allAttr, boolean generalNofollow, int target_order, AnchorURL target_url) {
 
-        Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         final String name = target_url.getNameProperty(); // the name attribute
         final String text = target_url.getTextProperty(); // the text between the <a></a> tag
         String rel = target_url.getRelProperty();         // the rel-attribute
@@ -284,7 +282,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             }
         }
         
-        if (allAttr || contains(WebgraphSchema.process_sxt)) {
+        if ((allAttr || contains(WebgraphSchema.process_sxt)) && processTypes.size() > 0) {
             List<String> pr = new ArrayList<String>();
             for (ProcessType t: processTypes) pr.add(t.name());
             add(edge, WebgraphSchema.process_sxt, pr);

@@ -27,7 +27,6 @@
 
 import java.io.IOException;
 
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -40,6 +39,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
@@ -133,38 +133,31 @@ public class status_p {
         prop.put("crawlProfiles_count", count);
         prop.put("crawlProfiles", count == 0 ? 0 : 1);
 
-        prop.put("postprocessingRunning", Switchboard.postprocessingRunning ? 1 : 0);
+        prop.put("postprocessingRunning", CollectionConfiguration.postprocessingRunning ? 1 : 0);
         
         boolean processCollection =  sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.process_sxt) && (sb.index.connectedCitation() || sb.index.fulltext().useWebgraph());
         boolean processWebgraph =  sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.process_sxt) && sb.index.fulltext().useWebgraph();
 
-        long collectionTimeSinceStart = processCollection && Switchboard.postprocessingRunning ? System.currentTimeMillis() - Switchboard.postprocessingStartTime[0] : 0;
-        long webgraphTimeSinceStart = processWebgraph && Switchboard.postprocessingRunning ? System.currentTimeMillis() - Switchboard.postprocessingStartTime[1] : 0;
-
-        long collectionRemainingCount = 0;
-        if (processCollection) try {collectionRemainingCount = sb.index.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-        long collectionCountSinceStart = Switchboard.postprocessingRunning ? Switchboard.postprocessingCount[0] - collectionRemainingCount : 0;
-        int collectionSpeed = collectionTimeSinceStart == 0 ? 0 : (int) (60000 * collectionCountSinceStart / collectionTimeSinceStart); // pages per minute
-        long collectionRemainingTime = collectionSpeed == 0 ? 0 : 60000 * collectionRemainingCount / collectionSpeed; // millis
-        int collectionRemainingTimeMinutes = (int) (collectionRemainingTime / 60000);
-        int collectionRemainingTimeSeconds = (int) ((collectionRemainingTime - (collectionRemainingTimeMinutes * 60000)) / 1000);
-
-        long webgraphRemainingCount = 0;
-        if (processWebgraph) try {webgraphRemainingCount = sb.index.fulltext().getWebgraphConnector().getCountByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
-        long webgraphCountSinceStart = Switchboard.postprocessingRunning ? Switchboard.postprocessingCount[1] - webgraphRemainingCount : 0;
-        int webgraphSpeed = webgraphTimeSinceStart == 0 ? 0 : (int) (60000 * webgraphCountSinceStart / webgraphTimeSinceStart); // pages per minute
-        long webgraphRemainingTime = webgraphSpeed == 0 ? 0 : 60000 * webgraphRemainingCount / webgraphSpeed; // millis
-        int webgraphRemainingTimeMinutes = (int) (webgraphRemainingTime / 60000);
-        int webgraphRemainingTimeSeconds = (int) ((webgraphRemainingTime - (webgraphRemainingTimeMinutes * 60000)) / 1000);
+        long timeSinceStart = (processCollection || processWebgraph) && CollectionConfiguration.postprocessingRunning ? System.currentTimeMillis() - CollectionConfiguration.postprocessingStartTime : 0;
+        //postprocessingCollection1Count = 0;
+        //postprocessingsWebgraphCount = 0;
+        long collectionRemainingCount = 0, webgraphRemainingCount = 0;
+        if (processCollection) try {collectionRemainingCount = sb.index.fulltext().getDefaultConnector().getCountByQuery(CollectionConfiguration.collection1query(sb.index, null));} catch (IOException e) {}
+        if (processWebgraph) try {webgraphRemainingCount = sb.index.fulltext().getWebgraphConnector().getCountByQuery(CollectionConfiguration.webgraphquery(sb.index, null));} catch (IOException e) {}
+        long countSinceStart = CollectionConfiguration.postprocessingRunning ? CollectionConfiguration.postprocessingCollection1Count + CollectionConfiguration.postprocessingWebgraphCount - collectionRemainingCount - webgraphRemainingCount : 0;
+        int speed = timeSinceStart == 0 ? 0 : (int) (60000 * countSinceStart / timeSinceStart); // pages per minute
+        long remainingTime = speed == 0 ? 0 : 60000 * collectionRemainingCount / speed; // millis
+        int remainingTimeMinutes = (int) (remainingTime / 60000);
+        int remainingTimeSeconds = (int) ((remainingTime - (remainingTimeMinutes * 60000)) / 1000);
 
         prop.put("postprocessingCollectionRemainingCount", collectionRemainingCount);
         prop.put("postprocessingWebgraphRemainingCount", webgraphRemainingCount);
-        prop.put("postprocessingRunning_activity", collectionTimeSinceStart > 0 ? "collection" : "webgraph");
-        prop.put("postprocessingSpeed", collectionTimeSinceStart > 0 ? collectionSpeed : webgraphSpeed);
-        prop.put("postprocessingElapsedTime", collectionTimeSinceStart > 0 ? collectionTimeSinceStart : webgraphTimeSinceStart);
-        prop.put("postprocessingRemainingTime", collectionTimeSinceStart > 0 ? collectionRemainingTime : webgraphRemainingTime);
-        prop.put("postprocessingRemainingTimeMinutes", collectionTimeSinceStart > 0 ? collectionRemainingTimeMinutes : webgraphRemainingTimeMinutes);
-        prop.put("postprocessingRemainingTimeSeconds", collectionTimeSinceStart > 0 ? collectionRemainingTimeSeconds : webgraphRemainingTimeSeconds);
+        prop.put("postprocessingRunning_activity", collectionRemainingCount == CollectionConfiguration.postprocessingCollection1Count && webgraphRemainingCount == CollectionConfiguration.postprocessingWebgraphCount ? "citation computation" : collectionRemainingCount == CollectionConfiguration.postprocessingCollection1Count ? "webgraph" : "collection");
+        prop.put("postprocessingSpeed", speed);
+        prop.put("postprocessingElapsedTime", timeSinceStart);
+        prop.put("postprocessingRemainingTime", remainingTime);
+        prop.put("postprocessingRemainingTimeMinutes", (remainingTimeMinutes < 10 ? "0" : "") + Integer.toString(remainingTimeMinutes));
+        prop.put("postprocessingRemainingTimeSeconds", (remainingTimeSeconds < 10 ? "0" : "") + Integer.toString(remainingTimeSeconds));
         
         // return rewrite properties
         return prop;

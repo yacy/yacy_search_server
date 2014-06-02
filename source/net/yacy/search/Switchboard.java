@@ -2030,11 +2030,6 @@ public final class Switchboard extends serverSwitch {
         return c;
     }
 
-    public static boolean postprocessingRunning   = false;
-    // if started, the following values are assigned for [collection1, webgraph]:
-    public static long[]  postprocessingStartTime = new long[]{0,0}; // the start time for the processing; not started = 0
-    public static int[]   postprocessingCount     = new  int[]{0,0}; // number of documents to be processed
-    
     public boolean cleanupJob() {
         
         ConcurrentLog.ensureWorkerIsRunning();
@@ -2298,13 +2293,8 @@ public final class Switchboard extends serverSwitch {
                 if (allCrawlsFinished) {
                     if (postprocessing) {
                         // run postprocessing on all profiles
-                        postprocessingRunning = true;
-                        postprocessingStartTime[0] = System.currentTimeMillis();
-                        try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
                         ReferenceReportCache rrCache = index.getReferenceReportCache();
                         proccount += collection1Configuration.postprocessing(index, rrCache, null);
-                        postprocessingStartTime[0] = 0;
-                        try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
                         this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                     }
                     this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
@@ -2316,26 +2306,17 @@ public final class Switchboard extends serverSwitch {
                     if (cleanupByHarvestkey > 0) {
                         if (postprocessing) {
                             // run postprocessing on these profiles
-                            postprocessingRunning = true;
-                            postprocessingStartTime[0] = System.currentTimeMillis();
-                            try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {}
                             ReferenceReportCache rrCache = index.getReferenceReportCache();
                             for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash);
-                            postprocessingStartTime[0] = 0;
-                            try {postprocessingCount[0] = (int) fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);} catch (IOException e) {} // should be zero but you never know
                             this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                         }
                         this.crawler.cleanProfiles(deletionCandidates);
                         log.info("cleanup removed " + cleanupByHarvestkey + " crawl profiles, post-processed " + proccount + " documents");
                     } 
                 }
-                
-                postprocessingStartTime = new long[]{0,0}; // the start time for the processing; not started = 0                
-                postprocessingRunning = false;
             }
 
             if (allCrawlsFinished) {
-                postprocessingRunning = true;
                 // flush caches
                 Domains.clear();
                 this.crawlQueues.noticeURL.clear();
@@ -2357,8 +2338,7 @@ public final class Switchboard extends serverSwitch {
                     log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
                     fulltext.optimize(opts);
                     this.optimizeLastRun = System.currentTimeMillis();
-                }    
-                postprocessingRunning = false;
+                }
             }
             
             // execute api actions; this must be done after postprocessing because 

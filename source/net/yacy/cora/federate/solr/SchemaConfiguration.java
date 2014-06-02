@@ -145,7 +145,6 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         boolean changed = false;
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         String hostid = url.hosthash();
-        String protocol = url.getProtocol();
         for (CollectionSchema[] checkfields: new CollectionSchema[][]{
                 {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
                 {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
