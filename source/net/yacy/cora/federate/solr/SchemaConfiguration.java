@@ -156,7 +156,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                 // lookup the document with the same signature
                 long signature = ((Long) sid.getField(checkfield.getSolrFieldName()).getValue()).longValue();
                 try {
-                    long count = segment.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.url_protocol_s.getSolrFieldName() + ":\"" + protocol + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"");
+                    long count = segment.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"");
                     if (count > 1) {
                         String urlhash = ASCII.String(url.hash());
                         if (uniqueURLs.contains(urlhash)) {
@@ -191,7 +191,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                         continue uniquecheck;
                     }
                     try {
-                        final SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.url_protocol_s.getSolrFieldName() + ":\"" + protocol + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"", null, 0, 1);
+                        final SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"", null, 0, 1);
                         if (docs != null && !docs.isEmpty()) {
                             // switch unique attribute in new document
                             sid.setField(uniquefield.getSolrFieldName(), false);
