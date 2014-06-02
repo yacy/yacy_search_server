@@ -98,7 +98,6 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
@@ -368,6 +367,10 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
         this.log.config("Dictionaries Path:" + this.dictionariesPath.toString());
 
+        CollectionConfiguration.UNIQUE_HEURISTIC_PREFER_HTTPS = this.getConfigBool("search.ranking.uniqueheuristic.preferhttps", true);
+        CollectionConfiguration.UNIQUE_HEURISTIC_PREFER_WWWPREFIX = this.getConfigBool("search.ranking.uniqueheuristic.preferwwwprefix", true);
+        
+        
         // init libraries
         this.log.config("initializing libraries");
         new Thread() {

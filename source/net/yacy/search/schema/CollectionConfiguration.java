@@ -97,6 +97,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
     private static final long serialVersionUID=-499100932212840385L;
 
+    public static boolean UNIQUE_HEURISTIC_PREFER_HTTPS = true;
+    public static boolean UNIQUE_HEURISTIC_PREFER_WWWPREFIX = true;
+    
     private final ArrayList<Ranking> rankings;
     
     /**
@@ -476,9 +479,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.synonyms_sxt, synonyms);
         }
 
-        // unique-fields; these values must be corrected during postprocessing.
-        add(doc, CollectionSchema.http_unique_b, digestURL.isHTTPS()); // this must be corrected afterwards during storage!
-        add(doc, CollectionSchema.www_unique_b, host != null && host.startsWith("www.")); // this must be corrected afterwards during storage!
+        // unique-fields; these values must be corrected during postprocessing. (the following logic is !^ (not-xor) but I prefer to write it that way as it is)
+        add(doc, CollectionSchema.http_unique_b, UNIQUE_HEURISTIC_PREFER_HTTPS ? digestURL.isHTTPS() : digestURL.isHTTP()); // this must be corrected afterwards during storage!
+        add(doc, CollectionSchema.www_unique_b, host != null && (UNIQUE_HEURISTIC_PREFER_WWWPREFIX ? host.startsWith("www.") : !host.startsWith("www."))); // this must be corrected afterwards during storage!
         
         add(doc, CollectionSchema.exact_signature_l, condenser.exactSignature());
         add(doc, CollectionSchema.exact_signature_unique_b, true); // this must be corrected afterwards during storage!
