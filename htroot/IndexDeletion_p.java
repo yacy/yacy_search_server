@@ -58,7 +58,7 @@ public class IndexDeletion_p {
         // Delete by URL Matching
         String urldelete = post == null ? "" : post.get("urldelete", "");
         boolean urldelete_mm_subpath_checked = post == null ? true : post.get("urldelete-mm", "subpath").equals("subpath");
-        prop.put("urldelete", urldelete);
+        prop.putHTML("urldelete", urldelete);
         prop.put("urldelete-mm-subpath-checked", urldelete_mm_subpath_checked ? 1 : 0);
         prop.put("urldelete-mm-regexp-checked", urldelete_mm_subpath_checked ? 0 : 1);
         prop.put("urldelete-active", 0);
@@ -102,7 +102,7 @@ public class IndexDeletion_p {
         }
         prop.put("collectiondelete-mode-unassigned-checked", collectiondelete_mode_unassigned_checked ? 1 : 0);
         prop.put("collectiondelete-mode-assigned-checked", collectiondelete_mode_unassigned_checked ? 0 : 1);
-        prop.put("collectiondelete-select_collectiondelete", collectiondelete);
+        prop.putHTML("collectiondelete-select_collectiondelete", collectiondelete);
         prop.put("collectiondelete-active", 0);
         
         // Delete by Solr Query
@@ -110,7 +110,7 @@ public class IndexDeletion_p {
         String querydelete = post == null ? "" : post.get("querydelete", "");
         // simulate default search field if no field is given by adding text_t: as target field
         if (!querydelete.isEmpty() && !querydelete.contains(":")) querydelete = CollectionSchema.text_t.getSolrFieldName() + ":" + querydelete;
-        prop.put("querydelete", querydelete);
+        prop.putHTML("querydelete", querydelete);
         prop.put("querydelete-active", 0);
 
         
