@@ -67,10 +67,8 @@ public class ConfigNetwork_p
                 "network settings");
 
             if ( post.containsKey("changeNetwork") ) {
-                String networkDefinition =
-                    post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
-                final String networkDefinitionURL =
-                        post.get("networkDefinitionURL", "");
+                String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
+                final String networkDefinitionURL = post.get("networkDefinitionURL", "");
                 if ( !networkDefinitionURL.equals("")) {
                 	networkDefinition = networkDefinitionURL;
                 }
@@ -80,6 +78,7 @@ public class ConfigNetwork_p
                 } else {
                     // shut down old network and index, start up new network and index
                     commit = 1;
+                    sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, networkDefinition.indexOf("freeworld") >= 0);
                     sb.switchNetwork(networkDefinition);
                 }
             }
