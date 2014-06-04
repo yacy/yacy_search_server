@@ -155,7 +155,7 @@ public class ResourceObserver {
                 
                 // cut away too large RWIs
                 IndexCell<WordReference> termIndex = sb.index.termIndex();
-                try {
+                if (termIndex != null) try {
                     int shrinkedReferences = termIndex.deleteOld(100, 10000);
                     if (shrinkedReferences > 0) {
                         log.info("DISK SPACE EXHAUSTED - shrinked " + shrinkedReferences + " RWI references to a maximum of 100");
