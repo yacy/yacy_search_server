@@ -50,6 +50,7 @@ import net.yacy.kelondro.index.OnDemandOpenFileIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.table.Table;
+import static net.yacy.kelondro.util.FileUtils.deletedelete;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -134,14 +135,14 @@ public class HostQueue implements Balancer {
                     int sz = depthStack.size();
                     if (sz == 0) {
                         depthStack.close();
-                        stackFile.delete();
+                        deletedelete(stackFile);
                     } else {
                         this.depthStacks.put(depth, depthStack);
                         c += sz;
                     }
                 }
             } catch (NumberFormatException e) {}
-        }
+            }
         return c;
     }
 
@@ -154,7 +155,7 @@ public class HostQueue implements Balancer {
             if (entry == null) return 0; // happens only if map is empty
             if (entry.getValue().size() == 0) {
                 entry.getValue().close();
-                getFile(entry.getKey()).delete();
+                deletedelete(getFile(entry.getKey()));
                 this.depthStacks.remove(entry.getKey());
                 continue;
             }
@@ -174,7 +175,7 @@ public class HostQueue implements Balancer {
             if (entry == null) return null; // happens only if map is empty
             if (entry.getValue().size() == 0) {
                 entry.getValue().close();
-                getFile(entry.getKey()).delete();
+                deletedelete(getFile(entry.getKey()));
                 this.depthStacks.remove(entry.getKey());
                 continue;
             }
@@ -222,7 +223,7 @@ public class HostQueue implements Balancer {
                     ConcurrentLog.logException(e);
                 }
             } else {
-                try {
+                    try {
                     return new BufferedObjectIndex(new Table(f, Request.rowdef, EcoFSBufferSize, 0, false, exceed134217727, true), objectIndexBufferSize);
                 } catch (final SpaceExceededException e) {
                     try {
@@ -233,8 +234,8 @@ public class HostQueue implements Balancer {
                 } catch (kelondroException e) {
                     // possibly the file was closed meanwhile
                     ConcurrentLog.logException(e);
-                }
             }
+        }
         }
         return null;
     }
@@ -244,25 +245,25 @@ public class HostQueue implements Balancer {
         for (Map.Entry<Integer, Index> entry: this.depthStacks.entrySet()) {
             int size = entry.getValue().size();
             entry.getValue().close();
-            if (size == 0) getFile(entry.getKey()).delete();
+            if (size == 0) deletedelete(getFile(entry.getKey()));
         }
         this.depthStacks.clear();
         String[] l = this.hostPath.list();
-        if ((l == null || l.length == 0) && this.hostPath != null) this.hostPath.delete();
+        if ((l == null || l.length == 0) && this.hostPath != null) deletedelete(this.hostPath);
     }
 
     @Override
     public synchronized void clear() {
         for (Map.Entry<Integer, Index> entry: this.depthStacks.entrySet()) {
             entry.getValue().close();
-            getFile(entry.getKey()).delete();
+            deletedelete(getFile(entry.getKey()));
         }
         this.depthStacks.clear();
         String[] l = this.hostPath.list();
         if (l != null) for (String s: l) {
-            new File(this.hostPath, s).delete();
+            deletedelete(new File(this.hostPath, s));
         }
-        this.hostPath.delete();
+        deletedelete(this.hostPath);
     }
 
     @Override
