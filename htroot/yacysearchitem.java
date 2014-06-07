@@ -183,7 +183,7 @@ public class yacysearchitem {
 					}
 				}
 			}
-            prop.putHTML("content_link", modifyURL);
+            prop.putXML("content_link", modifyURL); // putXML for rss
 //            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
 // END interaction
 
@@ -208,8 +208,8 @@ public class yacysearchitem {
             prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));
             prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
-            prop.putHTML("content_file", resultFileName);
-            prop.putHTML("content_path", resultURL.getPath());
+            prop.putXML("content_file", resultFileName); // putXML for rss
+            prop.putXML("content_path", resultURL.getPath()); // putXML for rss
             prop.put("content_nl", (item == theSearch.query.offset) ? 0 : 1);
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author

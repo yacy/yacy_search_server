@@ -142,7 +142,7 @@ public class yacysearch {
         final String EXT = header.get("EXT", "");
         final boolean rss = EXT.equals("rss");
         final boolean json = EXT.equals("json");
-        prop.put("topmenu_promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         
         // adding some additional properties needed for the rss feed
         String hostName = header.get("Host", Domains.LOCALHOST);
