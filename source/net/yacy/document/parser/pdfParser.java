@@ -107,8 +107,10 @@ public class pdfParser extends AbstractParser implements Parser {
                 throw new Parser.Failure("Document is encrypted (3): " + e.getMessage(), location);
             }
             final AccessPermission perm = pdfDoc.getCurrentAccessPermission();
-            if (perm == null || !perm.canExtractContent())
+            if (perm == null || !perm.canExtractContent()) {
+                try {pdfDoc.close();} catch (final IOException ee) {}
                 throw new Parser.Failure("Document is encrypted and cannot be decrypted", location);
+            }
         }
 
         // extracting some metadata
