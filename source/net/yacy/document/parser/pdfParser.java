@@ -143,23 +143,24 @@ public class pdfParser extends AbstractParser implements Parser {
             writer.append(stripper.getText(pdfDoc));
             contentBytes = writer.getBytes(); // remember text in case of interrupting thread
 
-            stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
-            stripper.setEndPage(Integer.MAX_VALUE); // set to default
-            // we start the pdf parsing in a separate thread to ensure that it can be terminated
-            final PDDocument pdfDocC = pdfDoc;
-            final Thread t = new Thread() {
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("pdfParser.getText:" + location);
-                    try {
-                        writer.append(stripper.getText(pdfDocC));
-                    } catch (final Throwable e) {}
-                }
-            };
-            t.start();
-            t.join(3000);
-            if (t.isAlive()) t.interrupt();
-            pdfDoc.close();
+            if (pdfDoc.getNumberOfPages() > 3) { // spare creating/starting thread if all pages read
+                stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
+                stripper.setEndPage(Integer.MAX_VALUE); // set to default
+                // we start the pdf parsing in a separate thread to ensure that it can be terminated
+                final PDDocument pdfDocC = pdfDoc;
+                final Thread t = new Thread() {
+                    @Override
+                    public void run() {
+                        Thread.currentThread().setName("pdfParser.getText:" + location);
+                        try {
+                            writer.append(stripper.getText(pdfDocC));
+                        } catch (final Throwable e) {}
+                    }
+                };
+                t.start();
+                t.join(3000);
+                if (t.isAlive()) t.interrupt();
+            }
             contentBytes = writer.getBytes(); // get final text before closing writer
         } catch (final Throwable e) {
             // close the writer
