@@ -211,21 +211,32 @@ public class UTF8 implements Comparator<String> {
     /**
      * Decodes a <code>application/x-www-form-urlencoded</code> string using a specific
      * encoding scheme.
+     * for url query part only   application/x-www-form-urlencoded (+ -> space) is applied
      */
     public static String decodeURL(final String s) {
         boolean needToChange = false;
         final int numChars = s.length();
         final StringBuilder sb = new StringBuilder(numChars > 500 ? numChars / 2 : numChars);
         int i = 0;
+        boolean insearchpart = false;
         char c;
         byte[] bytes = null;
         while (i < numChars) {
             c = s.charAt(i);
             switch (c) {
-            case '+':
-                sb.append(' ');
+            case '?' : // mark start of query part (to start x-www-form-urlencoded)
+                sb.append(c);
                 i++;
-                needToChange = true;
+                insearchpart = true; // flag to start x-www-form + decoding
+                break;
+            case '+': //application/x-www-form-urlencoded  (in searchpart)
+                if (insearchpart) {
+                    sb.append(' ');
+                    needToChange = true;
+                } else {
+                    sb.append(c);
+                }
+                i++;
                 break;
             case '%':
                 try {
