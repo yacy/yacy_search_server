@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
+
 import javax.servlet.ReadListener;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -49,8 +50,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ByteBuffer;
@@ -73,18 +76,23 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 import net.yacy.visualization.RasterPlotter;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
 import static org.eclipse.jetty.http.HttpHeader.CONTENT_RANGE;
 import static org.eclipse.jetty.http.HttpHeader.IF_MODIFIED_SINCE;
 import static org.eclipse.jetty.http.HttpHeader.IF_UNMODIFIED_SINCE;
 import static org.eclipse.jetty.http.HttpHeader.REQUEST_RANGE;
 import static org.eclipse.jetty.http.HttpMethod.HEAD;
+
 import org.eclipse.jetty.http.MimeTypes;
+
 import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML;
 import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML_UTF_8;
+
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.util.MultiPartOutputStream;
@@ -757,8 +765,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return m;
     }
 
-    protected void handleTemplate(String target,  HttpServletRequest request,
-            HttpServletResponse response) throws IOException, ServletException {
+    protected void handleTemplate(String target,  HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
         String localeSelection = sb.getConfig("locale.language", "default");
@@ -771,6 +778,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             Enumeration<String> argNames = request.getParameterNames();
             while (argNames.hasMoreElements()) {
                 String argName = argNames.nextElement();
+                // standard attributes are just pushed as string
                 args.put(argName, request.getParameter(argName));
             }
             //TODO: for SSI request, local parameters are added as attributes, put them back as parameter for the legacy request
@@ -779,7 +787,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             while (attNames.hasMoreElements()) {
                 String argName = attNames.nextElement();
                 args.put(argName, request.getAttribute(argName).toString());
-            }          
+            }
             RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
             if (ServletFileUpload.isMultipartContent(request)) {
@@ -1001,6 +1009,17 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     } else {
                         // use default encoding (given as header or ISO-8859-1)
                         args.add(item.getFieldName(), item.getString());
+                    }
+                } else {
+                    try {
+                        InputStream filecontent = item.getInputStream();
+                        byte[] bytes = FileUtils.read(filecontent);
+                        filecontent.close();
+                        // the file is written in base64 encoded form to a string
+                        String fieldName = item.getFieldName();
+                        args.put(fieldName, Base64Order.standardCoder.encode(bytes));
+                    } catch (IOException e) {
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
