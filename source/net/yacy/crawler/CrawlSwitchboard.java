@@ -67,6 +67,7 @@ public final class CrawlSwitchboard {
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA = "snippetLocalMedia";
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA = "snippetGlobalMedia";
     public static final String CRAWL_PROFILE_SURROGATE = "surrogates";
+    public static final String CRAWL_PROFILE_PUSH_STUB = "push_";
 
     public static Set<String> DEFAULT_PROFILES = new HashSet<String>();
     static {
@@ -96,12 +97,9 @@ public final class CrawlSwitchboard {
     private final MapHeap profilesPassiveCrawls;
     private final Map<byte[], CrawlProfile> profilesActiveCrawlsCache; //TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
     private final Map<String, RowHandleSet> profilesActiveCrawlsCounter;
-    public CrawlProfile defaultProxyProfile;
-    public CrawlProfile defaultRemoteProfile;
-    public CrawlProfile defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
-    public CrawlProfile defaultTextGreedyLearningProfile;
-    public CrawlProfile defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
-    public CrawlProfile defaultSurrogateProfile;
+    public CrawlProfile defaultProxyProfile, defaultRemoteProfile, defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public CrawlProfile defaultTextGreedyLearningProfile, defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile, defaultSurrogateProfile;
+    private Map<String, CrawlProfile> defaultPushProfiles; // for each collection one profile
     private final File queuesRoot;
     private Switchboard switchboard;
 
@@ -110,6 +108,7 @@ public final class CrawlSwitchboard {
         this.switchboard = switchboard;
         this.log = this.switchboard.log;
         this.queuesRoot = this.switchboard.queuesRoot;
+        this.defaultPushProfiles = new ConcurrentHashMap<>();
         this.log.info("Initializing Word Index for the network '" + networkName + "'.");
 
         if ( networkName == null || networkName.isEmpty() ) {
@@ -493,7 +492,7 @@ public final class CrawlSwitchboard {
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE),
                 -1,
-                true, true, true,
+                true, true, false,
                 true,
                 false,
                 false,
@@ -504,6 +503,38 @@ public final class CrawlSwitchboard {
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultSurrogateProfile.handle()),
             this.defaultSurrogateProfile);
+    }
+    
+    public CrawlProfile getPushCrawlProfile(String collection) {
+        CrawlProfile genericPushProfile = this.defaultPushProfiles.get(collection);
+        if (genericPushProfile != null) return genericPushProfile;
+        genericPushProfile = new CrawlProfile(
+                CRAWL_PROFILE_PUSH_STUB + collection,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                0,
+                false,
+                System.currentTimeMillis(),
+                -1,
+                true, true, false,
+                true,
+                true,
+                false,
+                false,
+                CacheStrategy.NOCACHE,
+                collection,
+                ClientIdentification.yacyIntranetCrawlerAgentName);
+        this.profilesActiveCrawls.put(UTF8.getBytes(genericPushProfile.handle()), genericPushProfile);
+        this.defaultPushProfiles.put(collection, genericPushProfile);
+        return genericPushProfile;
     }
 
     private void resetProfiles() {

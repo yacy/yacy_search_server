@@ -1,0 +1,14 @@
+{#(mode)#::
+  "count":"#[count]#",
+  "successall": #(successall)#"false"::"true"#(/successall)#,
+#{results}#
+  "item-#[item]#":{
+    "item":"#[item]#",
+    "url":"#[url]#",
+    "success": #(success)#"false"::"true"#(/success)#,
+    "message": #(success)#"#[message]#"::"#[message]#"#(/success)#
+  },
+#{/results}#
+  "countsuccess":#[countsuccess]#,
+  "countfail":#[countfail]#
+#(/mode)#}

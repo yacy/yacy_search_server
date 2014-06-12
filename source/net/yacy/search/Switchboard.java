@@ -2069,7 +2069,6 @@ public final class Switchboard extends serverSwitch {
                 CrawlProfile selentry;
                 for ( final byte[] handle : this.crawler.getActive() ) {
                     selentry = this.crawler.getActive(handle);
-                    assert selentry.handle() != null : "profile.name = " + selentry.collectionName();
                     if ( selentry.handle() == null ) {
                         this.crawler.removeActive(handle);
                         continue;
