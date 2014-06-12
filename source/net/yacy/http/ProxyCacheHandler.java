@@ -83,7 +83,8 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
                         proxyHeaders,
                         cachedResponseHeader,
                         sb.crawler.defaultProxyProfile,
-                        false);
+                        false,
+                        null);
                 byte[] cacheContent = Cache.getContent(url.hash());
                 if (cacheContent != null && cachedResponse.isFreshForProxy()) {
                     handleRequestFromCache(request, response, cachedResponseHeader, cacheContent);

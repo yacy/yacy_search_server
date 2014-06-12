@@ -190,7 +190,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                     null,
                     responseHeaderLegacy,
                     sb.crawler.defaultProxyProfile,
-                    false
+                    false,
+                    null
             );
             
             final String storeError = yacyResponse.shallStoreCacheForProxy();

@@ -374,7 +374,8 @@ public final class HTTPDProxyHandler {
                         requestHeader,
                         cachedResponseHeader,
                         sb.crawler.defaultProxyProfile,
-                        true
+                        true,
+                        null
                 );
                 final byte[] cacheContent = Cache.getContent(url.hash());
                 if (cacheContent != null && response.isFreshForProxy()) {
@@ -520,7 +521,8 @@ public final class HTTPDProxyHandler {
                             requestHeader,
                             responseHeader,
                             sb.crawler.defaultProxyProfile,
-                            true
+                            true,
+                            null
                     );
                     final String storeError = response.shallStoreCacheForProxy();
                     final boolean storeHTCache = response.profile().storeHTCache();

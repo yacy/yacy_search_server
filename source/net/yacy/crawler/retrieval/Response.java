@@ -182,16 +182,7 @@ public class Response {
         this.fromCache = true;
         if (this.responseHeader != null) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0"); // 'virtual' length, shows that the resource was not loaded
     }
-
-    public Response(
-            final Request request,
-            final RequestHeader requestHeader,
-            final ResponseHeader responseHeader,
-            final CrawlProfile profile,
-            final boolean fromCache) {
-        this(request, requestHeader, responseHeader, profile, fromCache, null);
-    }
-
+    
     public void updateStatus(final int newStatus) {
         this.status = newStatus;
     }
