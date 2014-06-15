@@ -364,7 +364,7 @@ public class yacysearch {
             querystring = modifier.parse(querystring);
 
             // read collection
-            modifier.collection = post.get("collection", "");
+            modifier.collection = post.get("collection", modifier.collection); // post arguments may overrule parsed collection values
             
             int stp = querystring.indexOf('*');
             if (stp >= 0) {

@@ -236,6 +236,8 @@ public class YJsonResponseWriter implements QueryResponseWriter {
         NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.url_protocol_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
         NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.author_sxt.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> collections = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.collection_sxt.getSolrFieldName());
 
         if (domains != null) {
             writer.write("{\"facetname\":\"domains\",\"displayname\":\"Provider\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
@@ -275,6 +277,15 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             for (int i = 0; i < authors.size(); i++) {
                 facetEntry(writer, "author", authors.getName(i), Integer.toString(authors.getVal(i)));
                 if (i < authors.size() - 1) writer.write(',');
+                writer.write("\n");
+            }
+            writer.write("]},\n".toCharArray());
+        }
+        if (collections != null) {
+            writer.write("{\"facetname\":\"collections\",\"displayname\":\"Collections\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
+            for (int i = 0; i < collections.size(); i++) {
+                facetEntry(writer, "collection", collections.getName(i), Integer.toString(collections.getVal(i)));
+                if (i < collections.size() - 1) writer.write(',');
                 writer.write("\n");
             }
             writer.write("]},\n".toCharArray());

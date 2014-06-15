@@ -141,6 +141,7 @@ public final class SearchEvent {
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
     public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
     public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
+    public final ScoreMap<String> collectionNavigator; // a counter for the appearances of collections
     public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
@@ -229,6 +230,7 @@ public final class SearchEvent {
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "")+",language";
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
         this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
+        this.collectionNavigator = navcfg.contains("collections") ? new ConcurrentScoreMap<String>() : null;
         this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
         this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
@@ -807,6 +809,11 @@ public final class SearchEvent {
         if (this.authorNavigator != null) {
             fcts = facets.get(CollectionSchema.author_sxt.getSolrFieldName());
             if (fcts != null) this.authorNavigator.inc(fcts);
+        }
+
+        if (this.collectionNavigator != null) {
+            fcts = facets.get(CollectionSchema.collection_sxt.getSolrFieldName());
+            if (fcts != null) this.collectionNavigator.inc(fcts);
         }
 
         if (this.protocolNavigator != null) {

@@ -163,6 +163,21 @@ $(function() { $("#sidebarAuthors").accordion('activate', false); });
 ::#(/activate)#
 #(/nav-authors)#
 
+#(nav-collections)#::
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Collection</h3></li>
+#{element}#
+<li><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
+#{/element}#</ul>
+#(activate)#
+<script type="text/javascript">
+//<![CDATA[
+$(function() { $("#sidebarCollections").accordion('activate', false); });
+//]]>
+</script>
+::#(/activate)#
+#(/nav-collections)#
+
 #{nav-vocabulary}#
 <ul class="nav nav-sidebar menugroup">
 <li><h3>#[navname]#</h3></li>
