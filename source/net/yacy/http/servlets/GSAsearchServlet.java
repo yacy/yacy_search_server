@@ -148,8 +148,10 @@ public class GSAsearchServlet extends HttpServlet {
         } else {
             // if no such sort attribute is given, use the ranking as configured for YaCy
             Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+            String fq = ranking.getFilterQuery();
             String bq = ranking.getBoostQuery();
             String bf = ranking.getBoostFunction();
+            if (fq.length() > 0) post.put(CommonParams.FQ, bq);
             if (bq.length() > 0) post.put("bq", bq);
             if (bf.length() > 0) post.put("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         }

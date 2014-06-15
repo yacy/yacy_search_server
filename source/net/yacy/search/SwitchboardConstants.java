@@ -523,6 +523,7 @@ public final class SwitchboardConstants {
      */
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTNAME_         = "search.ranking.solr.collection.boostname.tmpa."; // temporary until we know best default values; add the index number (0..3) to that string
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_       = "search.ranking.solr.collection.boostfields.tmpa.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_FILTERQUERY_       = "search.ranking.solr.collection.filterquery.tmpa.";
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_        = "search.ranking.solr.collection.boostquery.tmpa.";
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_     = "search.ranking.solr.collection.boostfunction.tmpb.";
     

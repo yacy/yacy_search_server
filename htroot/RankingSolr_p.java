@@ -88,6 +88,21 @@ public class RankingSolr_p {
             }
         }
 
+        if (post != null && post.containsKey("EnterFQ")) {
+            String fq = post.get("fq");
+            if (fq != null) {
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_FILTERQUERY_ + profileNr, fq);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setFilterQuery(fq);
+            }
+        }
+        if (post != null && post.containsKey("ResetFQ")) {
+            String fq = ""; // i.e. "http_unique_b:true AND www_unique_b:true"
+            if (fq != null) {
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_FILTERQUERY_ + profileNr, fq);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setFilterQuery(fq);
+            }
+        }
+
         if (post != null && post.containsKey("EnterBF")) {
             String bf = post.get("bf");
             if (bf != null) {
@@ -124,6 +139,7 @@ public class RankingSolr_p {
             i++;
         }
         prop.put("boosts", i);
+        prop.put("fq", ranking.getFilterQuery());
         prop.put("bq", ranking.getBoostQuery());
         prop.put("bf", ranking.getBoostFunction());
 

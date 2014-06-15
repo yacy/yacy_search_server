@@ -157,8 +157,10 @@ public class SolrSelectServlet extends HttpServlet {
             if (!mmsp.getMap().containsKey("sort") && !mmsp.getMap().containsKey("bq") && !mmsp.getMap().containsKey("bf") && !mmsp.getMap().containsKey("boost")) {
                 if (!mmsp.getMap().containsKey("defType")) mmsp.getMap().put("defType", new String[]{"edismax"});        
                 Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
+                String fq = ranking.getFilterQuery();
                 String bq = ranking.getBoostQuery();
                 String bf = ranking.getBoostFunction();
+                if (fq.length() > 0) mmsp.getMap().put("fq", new String[]{fq});
                 if (bq.length() > 0) mmsp.getMap().put("bq", new String[]{bq});
                 if (bf.length() > 0) mmsp.getMap().put("boost", new String[]{bf}); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
             }

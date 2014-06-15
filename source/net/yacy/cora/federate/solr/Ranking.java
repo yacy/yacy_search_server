@@ -38,16 +38,16 @@ public class Ranking {
     private static int   minTokenLen = 3;   // to be filled with search.ranking.solr.doubledetection.minlength
     
     private Map<SchemaDeclaration, Float> fieldBoosts;
-    private String name, boostQuery, boostFunction;
+    private String name, filterQuery, boostQuery, boostFunction;
     
     public Ranking() {
         super();
         this.name = "";
         this.fieldBoosts = new LinkedHashMap<SchemaDeclaration, Float>();
+        this.filterQuery = "";
         this.boostQuery = "";
         this.boostFunction = "";
     }
-
 
     public String getName() {
         return name;
@@ -95,12 +95,32 @@ public class Ranking {
         }
     }
 
+    /**
+     * set a filter query which will be added as fq-attribute to the query
+     * @param filterQuery
+     */
+    public void setFilterQuery(String filterQuery) {
+        this.filterQuery = filterQuery;
+    }
+    
+    /**
+     * get a string that can be added as a filter query at the fq-attribute
+     * @return
+     */
+    public String getFilterQuery() {
+        return this.filterQuery;
+    }
+
+    /**
+     * set a boost query which will be added as bq-attribute to the query
+     * @param boostQuery
+     */
     public void setBoostQuery(String boostQuery) {
         this.boostQuery = boostQuery;
     }
     
     /**
-     * produce a string that can be added as a 'boost query' at the bq-attribute
+     * get a string that can be added as a 'boost query' at the bq-attribute
      * @return
      */
     public String getBoostQuery() {

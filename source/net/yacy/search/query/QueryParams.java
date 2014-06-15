@@ -347,13 +347,18 @@ public final class QueryParams {
         int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
         params.setQuery(this.queryGoal.collectionTextQueryString(this.indexSegment.fulltext().getDefaultConfiguration(), rankingProfile, excludeintext_image).toString());
         Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
-        
+
+        String fq = ranking.getFilterQuery();
         String bq = ranking.getBoostQuery();
         String bf = ranking.getBoostFunction();
         if (this.queryGoal.getIncludeSize() > 1) {
             // add boost on combined words
             if (bq.length() > 0) bq += " ";
             bq += CollectionSchema.text_t.getSolrFieldName() + ":\"" + this.queryGoal.getIncludeString() + "\"^10";
+        }
+        if (fq.length() > 0) {
+            String oldfq = params.get("fq");
+            params.setParam("fq", oldfq == null || oldfq.length() == 0 ? fq : "(" + oldfq + ") AND (" + fq + ")");
         }
         if (bq.length() > 0) params.setParam("bq", bq);
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
