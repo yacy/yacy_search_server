@@ -65,7 +65,6 @@ public class getpageinfo {
         prop.put("lang", "");
         prop.put("robots-allowed", "3"); //unknown
         prop.put("robotsInfo", ""); //unknown
-        prop.put("sitemap", "");
         prop.put("favicon","");
         prop.put("sitelist", "");
         prop.put("filter", ".*");
