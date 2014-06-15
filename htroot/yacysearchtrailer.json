@@ -63,7 +63,20 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-authors)##{nav-vocabulary}#
+    },#(/nav-authors)##(nav-collections)#::
+    {
+      "facetname": "collections",
+      "displayname": "Collections",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-collections)##{nav-vocabulary}#
     {
       "facetname": "#[navname]#",
       "displayname": "#[navname]#",

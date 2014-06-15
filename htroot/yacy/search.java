@@ -121,6 +121,7 @@ public final class search {
         modifier.sitehost = post.get("sitehost", ""); if (modifier.sitehost.isEmpty()) modifier.sitehost = null;
         modifier.sitehash = post.get("sitehash", ""); if (modifier.sitehash.isEmpty()) modifier.sitehash = null;
         modifier.author = post.get("author", ""); if (modifier.author.isEmpty()) modifier.author = null;
+        modifier.collection = post.get("collection", ""); if (modifier.collection.isEmpty()) modifier.collection = null;
         modifier.filetype = post.get("filetype", ""); if (modifier.filetype.isEmpty()) modifier.filetype = null;
         modifier.protocol = post.get("protocol", ""); if (modifier.protocol.isEmpty()) modifier.protocol = null;
         modifier.parse(post.get("modifier", "").trim());

@@ -265,6 +265,47 @@ public class yacysearchtrailer {
                 prop.put("nav-authors", 0); // this navigation is not useful
             }
         }
+        
+        // collection navigators
+        if (theSearch.collectionNavigator == null || theSearch.collectionNavigator.isEmpty()) {
+            prop.put("nav-collections", 0);
+        } else {
+            prop.put("nav-collections", 1);
+            navigatorIterator = theSearch.collectionNavigator.keys(false);
+            int i = 0, pos = 0, neg = 0;
+            String nav;
+            while (i < 10 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next().trim();
+                count = theSearch.collectionNavigator.get(name);
+                if (count == 0) {
+                    break;
+                }
+                nav = (name.indexOf(' ', 0) < 0) ? "collection%3A" + name : "collection%3A%28" + name.replace(" ", "+") + "%29";
+                if (theSearch.query.modifier.collection == null || !theSearch.query.modifier.collection.contains(name)) {
+                    pos++;
+                    prop.put("nav-collections_element_" + i + "_on", 1);
+                    prop.put(fileType, "nav-collections_element_" + i + "_modifier", nav);
+                } else {
+                    neg++;                    
+                    prop.put("nav-collections_element_" + i + "_on", 0);
+                    prop.put(fileType, "nav-collections_element_" + i + "_modifier", "-" + nav);
+                    nav="";
+                }
+                prop.put(fileType, "nav-collections_element_" + i + "_name", name);
+                prop.put(fileType, "nav-collections_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put("nav-collections_element_" + i + "_count", count);
+                prop.put("nav-collections_element_" + i + "_nl", 1);
+                i++;
+            }
+            prop.put("nav-collections_element", i);
+            prop.put("nav-collections_activate", neg > 0 ? 1 : 0); // by default off
+            i--;
+            prop.put("nav-collections_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0)
+             {
+                prop.put("nav-collections", 0); // this navigation is not useful
+            }
+        }
 
         // topics navigator
         final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopicNavigator(TOPWORDS_MAXCOUNT) : null;

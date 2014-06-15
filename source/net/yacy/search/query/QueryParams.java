@@ -88,6 +88,7 @@ public final class QueryParams {
         defaultfacetfields.put("protocol", CollectionSchema.url_protocol_s);
         defaultfacetfields.put("filetype", CollectionSchema.url_file_ext_s);
         defaultfacetfields.put("authors", CollectionSchema.author_sxt);
+        defaultfacetfields.put("collections", CollectionSchema.collection_sxt);
         defaultfacetfields.put("language", CollectionSchema.language_s);
         //missing: namespace
     }
@@ -226,7 +227,7 @@ public final class QueryParams {
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
         for (String navkey: search_navigation) {
             CollectionSchema f = defaultfacetfields.get(navkey);
-            if (f != null && solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
+            if (f != null && solrSchema.contains(f)) this.facetfields.add(f.getSolrFieldName());
         }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
@@ -468,6 +469,11 @@ public final class QueryParams {
         if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author_sxt)) {
             fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
         }
+
+        // add collection facets
+        if (this.modifier.collection != null && this.modifier.collection.length() > 0 && this.solrSchema.contains(CollectionSchema.collection_sxt)) {
+            fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.modifier.collection));
+        }
         
         if (this.modifier.protocol != null) {
             fq.append(" AND {!tag=").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append("}").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
@@ -507,10 +513,6 @@ public final class QueryParams {
             //params.set("d", GeoLocation.degreeToKm(this.radius));
             fq.append(" AND ").append("{!bbox sfield=" + CollectionSchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
             //params.setRows(Integer.MAX_VALUE);
-        }
-        
-        if (this.modifier.collection != null && this.modifier.collection.length() > 0) {
-            fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.modifier.collection));
         }
         
         return fq.length() > 0 ? fq.substring(5) : fq.toString();

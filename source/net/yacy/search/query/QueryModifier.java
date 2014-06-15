@@ -55,26 +55,26 @@ public class QueryModifier {
         // parse protocol
         if ( querystring.indexOf("/https", 0) >= 0 ) {
             querystring = querystring.replace("/https", "");
-            protocol = "https";
+            this.protocol = "https";
             add("/https");
         } else if ( querystring.indexOf("/http", 0) >= 0 ) {
             querystring = querystring.replace("/http", "");
-            protocol = "http";
+            this.protocol = "http";
             add("/http");
         }
         if ( querystring.indexOf("/ftp", 0) >= 0 ) {
             querystring = querystring.replace("/ftp", "");
-            protocol = "ftp";
+            this.protocol = "ftp";
             add("/ftp");
         }
         if ( querystring.indexOf("/smb", 0) >= 0 ) {
             querystring = querystring.replace("/smb", "");
-            protocol = "smb";
+            this.protocol = "smb";
             add("/smb");
         }
         if ( querystring.indexOf("/file", 0) >= 0 ) {
             querystring = querystring.replace("/file", "");
-            protocol = "file";
+            this.protocol = "file";
             add("/file");
         }
         
@@ -91,21 +91,21 @@ public class QueryModifier {
             if ( ftb == -1 ) {
                 ftb = querystring.length();
             }
-            sitehost = querystring.substring(sp + 5, ftb);
-            querystring = querystring.replace("site:" + sitehost, "");
-            while ( sitehost.length() > 0 && sitehost.charAt(0) == '.' ) {
-                sitehost = sitehost.substring(1);
+            this.sitehost = querystring.substring(sp + 5, ftb);
+            querystring = querystring.replace("site:" + this.sitehost, "");
+            while ( this.sitehost.length() > 0 && this.sitehost.charAt(0) == '.' ) {
+                this.sitehost = this.sitehost.substring(1);
             }
             while ( sitehost.endsWith(".") ) {
-                sitehost = sitehost.substring(0, sitehost.length() - 1);
+                this.sitehost = this.sitehost.substring(0, this.sitehost.length() - 1);
             }
             try {
-                sitehash = DigestURL.hosthash(sitehost, sitehost.startsWith("ftp.") ? 21 : 80);
+                this.sitehash = DigestURL.hosthash(this.sitehost, this.sitehost.startsWith("ftp.") ? 21 : 80);
             } catch (MalformedURLException e) {
-                sitehash = "";
+                this.sitehash = "";
                 ConcurrentLog.logException(e);
             }
-            add("site:" + sitehost);
+            add("site:" + this.sitehost);
         }
         
         // parse author
@@ -116,31 +116,43 @@ public class QueryModifier {
             if ( quotes ) {
                 int ftb = querystring.indexOf(')', authori + 8);
                 if (ftb == -1) ftb = querystring.length() + 1;
-                author = querystring.substring(authori + 8, ftb);
-                querystring = querystring.replace("author:(" + author + ")", "");
+                this.author = querystring.substring(authori + 8, ftb);
+                querystring = querystring.replace("author:(" + this.author + ")", "");
                 add("author:(" + author + ")");
             } else {
                 int ftb = querystring.indexOf(' ', authori);
                 if ( ftb == -1 ) {
                     ftb = querystring.length();
                 }
-                author = querystring.substring(authori + 7, ftb);
-                querystring = querystring.replace("author:" + author, "");
+                this.author = querystring.substring(authori + 7, ftb);
+                querystring = querystring.replace("author:" + this.author, "");
                 add("author:" + author);
             }
+        }
+        
+        // parse collection
+        final int collectioni = querystring.indexOf("collection:", 0);
+        if ( collectioni >= 0 ) {
+            int ftb = querystring.indexOf(' ', collectioni);
+            if ( ftb == -1 ) {
+                ftb = querystring.length();
+            }
+            this.collection = querystring.substring(collectioni + 11, ftb);
+            querystring = querystring.replace("collection:" + this.collection, "");
+            add("collection:" + this.collection);
         }
 
         // parse language
         final int langi = querystring.indexOf("/language/");
         if (langi >= 0) {
             if (querystring.length() >= (langi + 12)) {
-                language = querystring.substring(langi + 10, langi + 12);
-                querystring = querystring.replace("/language/" + language, "");
-                if (language.length() == 2 && ISO639.exists(language)) { // only 2-digit codes valid
-                    language = language.toLowerCase();
-                    add("/language/" + language);
+                this.language = querystring.substring(langi + 10, langi + 12);
+                querystring = querystring.replace("/language/" + this.language, "");
+                if (this.language.length() == 2 && ISO639.exists(this.language)) { // only 2-digit codes valid
+                    this.language = this.language.toLowerCase();
+                    add("/language/" + this.language);
                 } else {
-                    language = null;
+                    this.language = null;
                 }
             }
         }
@@ -223,12 +235,17 @@ public class QueryModifier {
             fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.author).append('\"');
         }
         
+        if (this.collection != null && this.collection.length() > 0 && fq.indexOf(CollectionSchema.collection_sxt.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(this.collection).append('\"');
+        }
+        
         if (this.protocol != null && this.protocol.length() > 0 && fq.indexOf(CollectionSchema.url_protocol_s.getSolrFieldName()) < 0) {
             fq.append(" AND ").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(":\"").append(this.protocol).append('\"');
         }
 
         return fq;
     }
+    
     public void apply(serverObjects post) {
         
         final StringBuilder fq = apply(post.get(CommonParams.FQ,""));

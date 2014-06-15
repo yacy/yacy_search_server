@@ -267,6 +267,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.url_protocol_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
         NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.author_sxt.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> collections = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.collection_sxt.getSolrFieldName());
         
         if (domains != null) {
             openTag(writer, "yacy:facet name=\"domains\" displayname=\"Domains\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
@@ -286,6 +288,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         if (authors != null) {
             openTag(writer, "yacy:facet name=\"authors\" displayname=\"Authors\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
             for (Map.Entry<String, Integer> entry: authors) facetEntry(writer, "author", entry.getKey(), Integer.toString(entry.getValue()));
+            closeTag(writer, "yacy:facet");
+        }
+        if (collections != null) {
+            openTag(writer, "yacy:facet name=\"collections\" displayname=\"Collections\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
+            for (Map.Entry<String, Integer> entry: collections) facetEntry(writer, "collection", entry.getKey(), Integer.toString(entry.getValue()));
             closeTag(writer, "yacy:facet");
         }
         closeTag(writer, "yacy:navigation");
