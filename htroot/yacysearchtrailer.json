@@ -89,7 +89,7 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#{/nav-vocabulary}##(nav-topics)#::
+    },#{/nav-vocabulary}##(nav-topics)#{}::
     {
       "facetname": "topics",
       "displayname": "Topics",
