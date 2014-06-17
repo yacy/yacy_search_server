@@ -197,6 +197,12 @@ public class Blacklist_p {
                 blacklistToUse = post.get("currentBlacklist", "").trim();
 
                 final String[] selectedBlacklistEntries = post.getAll("selectedEntry.*");
+                
+				// store this call as api call
+				ListManager.switchboard.tables.recordAPICall(post,
+						"Blacklist_p.html",
+						WorkTables.TABLE_API_TYPE_CONFIGURATION,
+						"delete from blacklist '" + blacklistToUse + "': " + Arrays.toString(selectedBlacklistEntries));
 
                 if (selectedBlacklistEntries.length > 0) {
                     String temp = null;
@@ -221,7 +227,11 @@ public class Blacklist_p {
                 final String blentry = post.get("newEntry", "").trim();
 
                 // store this call as api call
-                ListManager.switchboard.tables.recordAPICall(post, "Blacklist_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "add to blacklist: " + blentry);
+                ListManager.switchboard.tables.recordAPICall(
+                		post,
+                		"Blacklist_p.html",
+                		WorkTables.TABLE_API_TYPE_CONFIGURATION,
+                		"add to blacklist '" + blacklistToUse + "': " + blentry);
 
                 final String temp = BlacklistHelper.addBlacklistEntry(blacklistToUse, blentry, header);
                 if (temp != null) {
@@ -242,6 +252,15 @@ public class Blacklist_p {
                 final String targetBlacklist = post.get("targetBlacklist");
 
                 final String[] selectedBlacklistEntries = post.getAll("selectedEntry.*");
+                
+                // store this call as api call
+                ListManager.switchboard.tables.recordAPICall(
+                		post,
+                		"Blacklist_p.html",
+                		WorkTables.TABLE_API_TYPE_CONFIGURATION,
+						"move from blacklist '" + blacklistToUse
+								+ "' to blacklist '" + targetBlacklist + "': "
+								+ Arrays.toString(selectedBlacklistEntries));
 
                 if (selectedBlacklistEntries != null &&
                         selectedBlacklistEntries.length > 0 &&
