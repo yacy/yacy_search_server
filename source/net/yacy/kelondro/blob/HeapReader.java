@@ -683,7 +683,6 @@ public class HeapReader {
      * @throws IOException
      */
     public CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
-        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
             log.severe("this.index == null in keys(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
