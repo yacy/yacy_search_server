@@ -161,6 +161,15 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return s;
     }
 
+    public final char[] encodeLongCH(long c, int length) {
+        final char[] s = new char[length];
+        while (length > 0) {
+            s[--length] = (char) this.alpha[(byte) (c & 0x3F)];
+            c >>= 6;
+        }
+        return s;
+    }
+
     public final byte[] encodeLongSubstr(long c, int length) {
         final byte[] s = new byte[length];
         while (length > 0) {
@@ -209,20 +218,20 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     // we will do that by grouping each three input bytes to four output bytes.
     public final String encode(final byte[] in) {
         if (in == null || in.length == 0) return "";
-        final int lene = in.length / 3 * 4 + 3;
-        StringBuilder out = new StringBuilder(lene);
+        final int lene = in.length * 4 / 3 + 3;
+        final StringBuilder out = new StringBuilder(lene);
         int pos = 0;
         long l;
         while (in.length - pos >= 3) {
             l = ((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8) + (0XffL & in[pos + 2]);
             pos += 3;
-            out = out.append(encodeLongSB(l, 4));
+            out.append(encodeLongCH(l, 4));
         }
         // now there may be remaining bytes
-        if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLongSB((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLongSB((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
+        if (in.length % 3 != 0) out.append((in.length % 3 == 2) ? encodeLongSB((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLongSB((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
         if (this.rfc1521compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
-        //assert lene == out.length() : "lene = " + lene + ", out.len = " + out.length();
+        assert (!this.rfc1521compliant || lene == out.length()) && lene >= out.length() : "lene = " + lene + ", out.len = " + out.length();
         return out.toString();
     }
 
