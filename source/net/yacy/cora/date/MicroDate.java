@@ -42,10 +42,6 @@ public class MicroDate {
         // we take mod 64**3 = 262144, this is the mask of the storage
         return (int) ((modified / day) % 262144L);
     }
-        
-    public static String microDateHoursStr(final long time) {
-        return Base64Order.enhancedCoder.encodeLongSB(microDateHoursInt(time), 3).toString();
-    }
     
     public static int microDateHoursInt(final long time) {
         return (int) ((time / hour) % 262144L);
