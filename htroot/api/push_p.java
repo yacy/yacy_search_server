@@ -58,8 +58,8 @@ public class push_p {
         // push mode: this does a document upload
         prop.put("mode", 1);
         if (post == null) return prop;
-        boolean synchronous = post.getBoolean("synchronous");
         boolean commit = post.getBoolean("commit");
+        boolean synchronous = commit || post.getBoolean("synchronous");
         int count = post.getInt("count", 0);
         boolean successall = true;
         int countsuccess = 0;
@@ -103,12 +103,15 @@ public class push_p {
                         profile,
                         false,            // from cache?
                         data);            // content
+                IndexingQueueEntry in = new IndexingQueueEntry(response, null, null);
                 
-                // asynchronously push the content to the indexing queue
-                sb.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(
-                        response,
-                        null,
-                        null));
+                if (synchronous) {
+                    // synchronously process the content
+                    sb.storeDocumentIndex(sb.webStructureAnalysis(sb.condenseDocument(sb.parseDocument(in))));
+                } else {
+                    // asynchronously push the content to the indexing queue
+                    sb.indexingDocumentProcessor.enQueue(in);
+                }
                 prop.put("mode_results_" + i + "_success", "1");
                 prop.put("mode_results_" + i + "_success_message", "http://" + Domains.myPublicLocalIP().getHostAddress() + ":" + sb.getConfigInt("port", 8090) + "/solr/select?q=sku:%22" + u + "%22");
                 countsuccess++;
@@ -130,5 +133,5 @@ public class push_p {
         
         return prop;
     }
-
+    
 }
