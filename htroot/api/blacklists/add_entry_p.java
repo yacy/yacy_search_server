@@ -25,9 +25,12 @@ public class add_entry_p {
             final String blacklistToUse = post.get(KEY_CURRENT_BLACKLIST, "").trim();
             final String entry = post.get(KEY_NEW_ENTRY, "").trim();
 
-            // store this call as api call
-            ListManager.switchboard.tables.recordAPICall(post, "add_entry_p.xml", WorkTables.TABLE_API_TYPE_CONFIGURATION, "add to blacklist: " + entry);
-
+            ListManager.switchboard.tables.recordAPICall(
+            		post,
+            		"add_entry_p." + header.fileType().toString().toLowerCase(),
+            		WorkTables.TABLE_API_TYPE_CONFIGURATION,
+					"add to blacklist '" + blacklistToUse + "': " + entry);
+            
             if (BlacklistHelper.addBlacklistEntry(blacklistToUse, entry, header) == null) {
                 prop.put(XML_ITEM_STATUS, RESULT_SUCCESS);
 
