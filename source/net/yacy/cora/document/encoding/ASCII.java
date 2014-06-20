@@ -106,22 +106,19 @@ public class ASCII implements Comparator<String> {
 
     public final static String String(final byte[] bytes) {
         if (bytes == null) return null;
-        StringBuilder sb = new StringBuilder(bytes.length);
-        for (byte b : bytes) {
-            if (b < 0) throw new IllegalArgumentException();
-            sb.append((char) b);
-        }
-        return sb.toString();
+        final char[] c = new char[bytes.length];
+        for (int i = bytes.length - 1; i >= 0; i--) c[i] = (char) bytes[i];
+        return new String(c);
     }
 
     public final static String String(final byte[] bytes, final int offset, final int length) {
         int l = Math.min(length, bytes.length - offset);
-        StringBuilder sb = new StringBuilder(l);
+        final char[] c = new char[l];
         for (int i = 0; i < l; ++ i) {
             if (bytes[i + offset] < 0) throw new IllegalArgumentException();
-            sb.append((char) bytes[i + offset]);
+            c[i] = (char) bytes[i + offset];
         }
-        return sb.toString();
+        return new String(c);
     }
 
     public final static byte[] getBytes(final String s) {
