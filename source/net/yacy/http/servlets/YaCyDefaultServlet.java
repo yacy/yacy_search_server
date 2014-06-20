@@ -34,10 +34,14 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ReadListener;
@@ -982,7 +986,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param request
      * @param args found fields/values are added to the map
      */
-    protected void parseMultipart(HttpServletRequest request, serverObjects args) throws IOException {
+    protected void parseMultipart(final HttpServletRequest request, final serverObjects args) throws IOException {
 
         // reject too large uploads
         if (request.getContentLength() > SIZE_FILE_THRESHOLD) throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
@@ -999,6 +1003,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             List<FileItem> fileItems = upload.parseRequest(request);                 
             // Process the uploaded file items
             Iterator<FileItem> i = fileItems.iterator();
+            final BlockingQueue<Map.Entry<String, byte[]>> files = new LinkedBlockingQueue<>();
             while (i.hasNext()) {
                 FileItem item = i.next();
                 if (item.isFormField()) {
@@ -1011,17 +1016,43 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         args.add(item.getFieldName(), item.getString());
                     }
                 } else {
+                    // read file upload
+                    InputStream filecontent = null;
                     try {
-                        InputStream filecontent = item.getInputStream();
-                        byte[] bytes = FileUtils.read(filecontent);
-                        filecontent.close();
-                        // the file is written in base64 encoded form to a string
-                        String fieldName = item.getFieldName();
-                        args.put(fieldName, Base64Order.standardCoder.encode(bytes));
+                        filecontent = item.getInputStream();
+                        files.put(new AbstractMap.SimpleEntry<String, byte[]>(item.getFieldName(), FileUtils.read(filecontent)));
                     } catch (IOException e) {
                         ConcurrentLog.logException(e);
+                    } finally {
+                        if (filecontent != null) try {filecontent.close();} catch (IOException e) {ConcurrentLog.logException(e);}
                     }
                 }
+            }
+            if (files.size() <= 1) {
+                for (Map.Entry<String, byte[]> fe: files) {
+                    // the file is written in base64 encoded form to a string
+                    args.put(fe.getKey(), Base64Order.standardCoder.encode(fe.getValue()));
+                }
+            } else {
+                // do this concurrently (this would all be superfluous if serverObjects could store byte[] instead only String)
+                int t = Math.min(files.size(), Runtime.getRuntime().availableProcessors());
+                final Map.Entry<String, byte[]> POISON = new AbstractMap.SimpleEntry<>(null, null);
+                Thread[] p = new Thread[t];
+                for (int j = 0; j < t; j++) {
+                    files.put(POISON);
+                    p[j] = new Thread() {
+                        @Override
+                        public void run() {
+                            Map.Entry<String, byte[]> job;
+                            try {while ((job = files.take()) != POISON) {
+                                String b64 = Base64Order.standardCoder.encode(job.getValue());
+                                synchronized (args) {args.put(job.getKey(), b64);}
+                            }} catch (InterruptedException e) {}
+                        }
+                    };
+                    p[j].start();
+                }
+                for (int j = 0; j < t; j++) p[j].join();
             }
         } catch (Exception ex) {
             ConcurrentLog.logException(ex);
