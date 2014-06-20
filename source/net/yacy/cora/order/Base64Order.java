@@ -21,10 +21,13 @@
 package net.yacy.cora.order;
 
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.regex.Pattern;
 
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 
 //ATTENTION! THIS CLASS SHALL NOT IMPORT FROM OTHER PACKAGES THAN CORA AND JRE
@@ -161,24 +164,6 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return s;
     }
 
-    public final char[] encodeLongCH(long c, int length) {
-        final char[] s = new char[length];
-        while (length > 0) {
-            s[--length] = (char) this.alpha[(byte) (c & 0x3F)];
-            c >>= 6;
-        }
-        return s;
-    }
-
-    public final byte[] encodeLongSubstr(long c, int length) {
-        final byte[] s = new byte[length];
-        while (length > 0) {
-            s[--length] = this.alpha[(byte) (c & 0x3F)];
-            c >>= 6;
-        }
-        return s;
-    }
-
     public final void encodeLong(long c, final byte[] b, final int offset, int length) {
         assert offset + length <= b.length;
         while (length > 0) {
@@ -213,62 +198,57 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return encode(UTF8.getBytes(in));
     }
 
-    // we will use this encoding to encode strings with 2^8 values to
-    // b64-Strings
-    // we will do that by grouping each three input bytes to four output bytes.
+    /**
+     * encode arbitrary 2^8 bit-values to b64 strings. we will do that by grouping each three input bytes to four output bytes.
+     * @param in
+     * @return a base64-encoding of the input if rfc1521compliant = true, otherwise a b64-encoding of the input.
+     */
     public final String encode(final byte[] in) {
-        if (in == null || in.length == 0) return "";
-        final int lene = in.length * 4 / 3 + 3;
-        final StringBuilder out = new StringBuilder(lene);
-        int pos = 0;
-        long l;
-        while (in.length - pos >= 3) {
-            l = ((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8) + (0XffL & in[pos + 2]);
-            pos += 3;
-            out.append(encodeLongCH(l, 4));
-        }
-        // now there may be remaining bytes
-        if (in.length % 3 != 0) out.append((in.length % 3 == 2) ? encodeLongSB((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLongSB((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
-        if (this.rfc1521compliant) while (out.length() % 4 > 0) out.append("=");
-        // return result
-        assert (!this.rfc1521compliant || lene == out.length()) && lene >= out.length() : "lene = " + lene + ", out.len = " + out.length();
-        return out.toString();
+        int rfc1521compliantLength = ((in.length + 2) / 3) * 4; // (bytes/bits/chars) = {(0/0/0), (1/8/4), (2/16/4), (3/24/4), (4/32/8), (5/40/8), (6/48/8), (7/56/12), (8/64/12), (9/72/12), ..}
+        if (!this.rfc1521compliant) rfc1521compliantLength -= in.length % 3 == 2 ? 1 : in.length % 3 == 1 ? 2 : 0; // non-compliant are shorter (!)
+        return ASCII.String(encodeSubstring(in, rfc1521compliantLength));
     }
-
+    
     public final byte[] encodeSubstring(final byte[] in, final int sublen) {
-        if (in.length == 0) return null;
+        if (in.length == 0) return new byte[0];
+        assert sublen <= ((in.length + 2) / 3) * 4 : "sublen = " + sublen + ", expected: " + ((in.length + 2) / 3) * 4;
         final byte[] out = new byte[sublen];
         int writepos = 0;
         int pos = 0;
         long l;
         while (in.length - pos >= 3 && writepos < sublen) {
-            l = ((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8) + (0XffL & in[pos + 2]);
-            pos += 3;
-            System.arraycopy(encodeLongSubstr(l, 4), 0, out, writepos, 4);
+            l = ((((0XffL & in[pos++]) << 8) | (0XffL & in[pos++])) << 8) | (0XffL & in[pos++]);  
+            encodeLong(l, out, writepos, 4);
             writepos += 4;
         }
         // now there may be remaining bytes
         if (in.length % 3 != 0 && writepos < sublen) {
             if (in.length % 3 == 2) {
-                System.arraycopy(encodeLongBA((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4), 0, out, writepos, 3);
+                long c = (((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 2;
+                out[writepos + 2] = this.alpha[(byte) (c & 0x3F)]; c >>= 6;
+                out[writepos + 1] = this.alpha[(byte) (c & 0x3F)]; c >>= 6;
+                out[writepos    ] = this.alpha[(byte) (c & 0x3F)]; c >>= 6;
                 writepos += 3;
+                if (this.rfc1521compliant && writepos < sublen) out[writepos++] = '=';
             } else {
-                System.arraycopy(encodeLongBA((((0XffL & in[pos])) << 8) << 8, 4), 0, out, writepos, 2);
+                long c = (0XffL & in[pos]) << 4;
+                out[writepos + 1] = this.alpha[(byte) (c & 0x3F)]; c >>= 6;
+                out[writepos    ] = this.alpha[(byte) (c & 0x3F)]; c >>= 6;
                 writepos += 2;
+                if (this.rfc1521compliant) {if (writepos < sublen) out[writepos++] = '='; if (writepos < sublen) out[writepos++] = '=';}
             }
         }
-
-        if (this.rfc1521compliant) while (writepos % 4 > 0 && writepos < sublen) out[writepos] = '=';
-        //assert encode(in).substring(0, sublen).equals(ASCII.String(out));
         return out;
     }
-
+    
     public final String decodeString(final String in) {
         return UTF8.String(decode(in));
     }
 
+    final static Pattern cr = Pattern.compile("\n");
     public final byte[] decode(String in) {
         if ((in == null) || (in.isEmpty())) return new byte[0];
+        in = cr.matcher(in).replaceAll("");
         try {
             int posIn = 0;
             int posOut = 0;
@@ -607,43 +587,73 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             System.out.println(((double) Base64Order.enhancedCoder.cardinal(s[1].getBytes())) / ((double) Long.MAX_VALUE));
         }
         if ("-test".equals(s[0])) {
+            System.out.println("Pid: " + ManagementFactory.getRuntimeMXBean().getName());
             // do some checks
-            Random r = new Random(System.currentTimeMillis());
+            Random r = new Random(0); // not real random to be able to reproduce the test
 
             try {                
                 // use the class loader to call sun.misc.BASE64Encoder, the sun base64 encoder
                 // we do not instantiate that class here directly since that provokes a
                 // "warning: sun.misc.BASE64Encoder is internal proprietary API and may be removed in a future release"
 
-                // encode with enhancedCoder, decode with standard RFC 1521 base64
                 Class<?> rfc1521Decoder_class = Class.forName("sun.misc.BASE64Decoder");
                 Object rfc1521Decoder = rfc1521Decoder_class.newInstance();
                 Method rfc1521Decoder_decodeBuffer = rfc1521Decoder_class.getMethod("decodeBuffer", String.class);
-                for (int i = 0; i < 100000; i++) {
-                    String challenge = Long.toString(r.nextLong());
-                    String eb64 = enhancedCoder.encode(UTF8.getBytes(challenge));
-                    String rfc1521 = new String(eb64);
-                    while (rfc1521.length() % 4 != 0) rfc1521 += "=";
-                    rfc1521 = rfc1521.replace('-', '+').replace('_', '/');
-                    System.out.println("Encode enhancedB64 + Decode RFC1521: Challenge=" + challenge + ", eb64=" + eb64 + ", rfc1521=" + rfc1521);
-                    if (!UTF8.String((byte[]) rfc1521Decoder_decodeBuffer.invoke(rfc1521Decoder, rfc1521)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
-                }
-                
-                // encode with enhancedCoder, decode with standard RFC 1521 base64
                 Class<?> rfc1521Encoder_class = Class.forName("sun.misc.BASE64Encoder");
                 Object rfc1521Encoder = rfc1521Encoder_class.newInstance();
                 Method rfc1521Encoder_encode = rfc1521Encoder_class.getMethod("encode", byte[].class);
-                // sun.misc.BASE64Encoder rfc1521Encoder = new sun.misc.BASE64Encoder();
-                for (int i = 0; i < 100000; i++) {
-                    // encode with enhancedCoder, decode with standard RFC 1521 base64
-                    String challenge = Long.toString(r.nextLong());
-                    String rfc1521 = (String) rfc1521Encoder_encode.invoke(rfc1521Encoder, UTF8.getBytes(challenge));
-                    String eb64 = new String(rfc1521);
-                    while (eb64.endsWith("=")) eb64 = eb64.substring(0, eb64.length() - 1);
-                    eb64 = eb64.replace('+', '-').replace('/', '_');
-                    System.out.println("Encode RFC1521 + Decode enhancedB64: Challenge=" + challenge + ", rfc1521=" + rfc1521 + ", eb64=" + eb64);
-                    if (!UTF8.String(enhancedCoder.decode(eb64)).equals(challenge)) System.out.println("Encode Fail for " + challenge);
+
+                System.out.println("preparing tests..");
+                // prepare challenges and results with rfc1521Encoder
+                int count = 100000;
+                String[] challenges = new String[count];
+                String[] rfc1521Encoded = new String[count];
+                for (int i = 0; i < count; i++) {
+                    int len = r.nextInt(10000);
+                    StringBuilder challenge = new StringBuilder(len);
+                    for (int j = 0; j < len; j++) challenge.append((char) (32 + r.nextInt(64)));
+                    challenges[i] = challenge.toString();
+                    rfc1521Encoded[i] = (String) rfc1521Encoder_encode.invoke(rfc1521Encoder, UTF8.getBytes(challenges[i]));
                 }
+
+                // starting tests
+                long start = System.currentTimeMillis();
+                for (boolean rfc1521Compliant: new boolean[]{false, true}) {
+                    System.out.println("starting tests, rfc1521Compliant = " + rfc1521Compliant + " ...");
+                    String eb64, rfc1521;
+                    // encode with enhancedCoder, decode with standard RFC 1521 base64
+                    for (int i = 0; i < count; i++) {
+                        if (rfc1521Compliant) {
+                            rfc1521 = Base64Order.standardCoder.encode(UTF8.getBytes(challenges[i]));
+                        } else {
+                            eb64 = Base64Order.enhancedCoder.encode(UTF8.getBytes(challenges[i]));
+                            rfc1521 = new String(eb64);
+                            while (rfc1521.length() % 4 != 0) rfc1521 += "=";
+                            rfc1521 = rfc1521.replace('-', '+').replace('_', '/');
+                        }
+                        String rfc1521Decoded = UTF8.String((byte[]) rfc1521Decoder_decodeBuffer.invoke(rfc1521Decoder, rfc1521));
+                        if (!rfc1521Decoded.equals(challenges[i])) System.out.println("Encode enhancedB64 + Decode RFC1521: Fail for " + challenges[i]);
+                    }
+                    
+                    // encode with enhancedCoder, decode with standard RFC 1521 base64
+                    // sun.misc.BASE64Encoder rfc1521Encoder = new sun.misc.BASE64Encoder();
+                    for (int i = 0; i < count; i++) {
+                        // encode with enhancedCoder, decode with standard RFC 1521 base64
+                        rfc1521 = new String(rfc1521Encoded[i]);
+                        if (rfc1521Compliant) {
+                            String standardCoderDecoded = UTF8.String(Base64Order.standardCoder.decode(rfc1521));
+                            if (!standardCoderDecoded.equals(challenges[i])) System.out.println("Encode RFC1521 + Decode enhancedB64: Fail for " + rfc1521);
+                        } else {
+                            eb64 = new String(rfc1521);
+                            while (eb64.endsWith("=")) eb64 = eb64.substring(0, eb64.length() - 1);
+                            eb64 = eb64.replace('+', '-').replace('/', '_');
+                            String enhancedCoderDecoded = UTF8.String(Base64Order.enhancedCoder.decode(eb64));
+                            if (!enhancedCoderDecoded.equals(challenges[i])) System.out.println("Encode RFC1521 + Decode enhancedB64: Fail for " + eb64);
+                        }
+                    }
+                }
+                long time = System.currentTimeMillis() - start;
+                System.out.println("time: " + (time / 1000) + " seconds, " + (1000 * time / count) + " ms / 1000 steps");
             } catch (Throwable e) {
                 e.printStackTrace();
             }
