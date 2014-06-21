@@ -62,20 +62,20 @@
 			<string>$JAVAROOT/lib/jcl-over-slf4j-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/jempbox-1.8.5.jar</string>
 			<string>$JAVAROOT/lib/javax.servlet-api-3.1.0.jar</string>
-			<string>$JAVAROOT/lib/jetty-client-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-continuation-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-deploy-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-http-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-io-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-jmx-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-proxy-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-security-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-server-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-servlet-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-servlets-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-util-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-webapp-9.1.4.v20140401.jar</string>
-			<string>$JAVAROOT/lib/jetty-xml-9.1.4.v20140401.jar</string>			                      
+			<string>$JAVAROOT/lib/jetty-client-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-continuation-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-deploy-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-http-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-io-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-jmx-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-proxy-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-security-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-server-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-servlet-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-servlets-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-util-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-webapp-9.2.1.v20140609.jar</string>
+			<string>$JAVAROOT/lib/jetty-xml-9.2.1.v20140609.jar</string>			                      
 			<string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.1.jar</string>
 			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.2.jar</string>
