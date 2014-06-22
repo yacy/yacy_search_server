@@ -51,9 +51,9 @@
 			<string>$JAVAROOT/lib/geronimo-stax-api_1.0_spec-1.0.1.jar</string>
 			<string>$JAVAROOT/lib/guava-16.0.1.jar</string>
 			<string>$JAVAROOT/lib/htmllexer.jar</string>
-			<string>$JAVAROOT/lib/httpclient-4.3.3.jar</string>
+			<string>$JAVAROOT/lib/httpclient-4.3.4.jar</string>
 			<string>$JAVAROOT/lib/httpcore-4.3.2.jar</string>
-			<string>$JAVAROOT/lib/httpmime-4.3.3.jar</string>
+			<string>$JAVAROOT/lib/httpmime-4.3.4.jar</string>
 			<string>$JAVAROOT/lib/icu4j-core.jar</string>
 			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
 			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
