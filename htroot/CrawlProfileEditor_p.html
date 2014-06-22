@@ -59,7 +59,7 @@
 	    Finished
         <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
-        <input type="submit" name="delete" value="Delete"/>
+        <input type="submit" name="delete" value="Delete" class="btn btn-danger btn-xs"/>
         </div></form>
         #(/deleteButton)#
 	</td>
@@ -80,7 +80,7 @@
 </table>
 #(existPassiveCrawls)#::
 <form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8"><div>
-<input type="submit" name="deleteTerminatedProfiles" value="Delete finished crawls" />
+<input type="submit" name="deleteTerminatedProfiles" value="Delete finished crawls" class="btn btn-danger" />
 </div></form>
 #(/existPassiveCrawls)#
 </fieldset>
