@@ -107,10 +107,12 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String X_ROBOTS_TAG = "X-Robots-Tag"; // see http://googleblog.blogspot.com/2007/07/robots-exclusion-protocol-now-with-even.html
     public static final String X_ROBOTS = "X-Robots";
 
-    public static final String X_YACY_INDEX_CONTROL = "X-YACY-Index-Control";
+    public static final String X_YACY_INDEX_CONTROL = "X-YaCy-Index-Control";
     //public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
     public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
     public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
+    public static final String X_YACY_MEDIA_TITLE = "X-YaCy-Media-Title"; // can be attached to media files which do not have metadata; this will be used as title
+    public static final String X_YACY_MEDIA_KEYWORDS = "X-YaCy-Media-Keywords"; // can be attached to media files which do not have metadata; this will be used as keywords (space-separared list of words)
 
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";

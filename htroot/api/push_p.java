@@ -83,6 +83,15 @@ public class push_p {
                 responseHeader.put(HeaderFramework.LAST_MODIFIED, lastModified);
                 responseHeader.put(HeaderFramework.CONTENT_TYPE, contentType);
                 responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(data.length));
+                // add generic fields
+                String[] responseHeaderMap = post.getParams("responseHeader-" + i); // strings with key-value pairs; separated by ':'
+                for (String kv: responseHeaderMap) {
+                    int p = kv.indexOf(':');
+                    if (p < 0) continue;
+                    String key = kv.substring(0, p).trim();
+                    String value = kv.substring(p + 1).trim();
+                    responseHeader.put(key, value);
+                }
                 CrawlProfile profile = sb.crawler.getPushCrawlProfile(collection);
                 
                 // create requests and artificial response
