@@ -149,7 +149,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
     // settings for multipart/form-data
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
-    protected static final int SIZE_FILE_THRESHOLD = 20 * 1024 * 1024;
+    protected static final int SIZE_FILE_THRESHOLD = 100 * 1024 * 1024; // 100 MB is a lot but appropriate for multi-document pushed using the push_p.json servlet
     protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
     /* ------------------------------------------------------------ */
     @Override
