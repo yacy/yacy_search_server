@@ -92,7 +92,7 @@ public abstract class AbstractParser implements Parser {
 
     public static List<String> singleList(String t) {
         List<String> c = new ArrayList<String>(1);
-        c.add(t);
+        if (t != null) c.add(t);
         return c;
     }
 
