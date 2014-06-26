@@ -279,7 +279,7 @@ public class TimeoutRequest<E> {
                 } }
             }).call(timeout).longValue();
         } catch (final ExecutionException e) {
-            throw new IOException(e.getMessage());
+            throw new IOException(file.toString() + ":" + e.getMessage());
         }
     }
 
