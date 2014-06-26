@@ -367,7 +367,9 @@ public class QueryGoal {
         
         // combine these queries for all relevant fields
         q.append(" AND (");
-        q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
+        q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^100.0) OR ");
+        q.append('(').append(CollectionSchema.title.getSolrFieldName()).append(':').append(w).append("^50.0) OR ");
+        q.append('(').append(CollectionSchema.keywords.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
         q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');
         q.append(')');
 

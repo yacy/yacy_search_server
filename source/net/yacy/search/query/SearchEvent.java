@@ -65,6 +65,7 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
@@ -1467,41 +1468,37 @@ public final class SearchEvent {
     
     public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
         if (item < imageViewed.size()) return nthImage(item);
-        
+        if (imageSpare.size() > 0) return nextSpare();
         ResultEntry ms = oneResult(item, timeout);
         // check if the match was made in the url or in the image links
-        if (ms != null) {
-            SolrDocument doc = ms.getNode();
+        if (ms == null) throw new MalformedURLException("no image url found");
+        // try to get more
+        SolrDocument doc = ms.getNode();
+        // there can be two different kinds of image hits: either the document itself is an image or images are embedded in the links of text documents.
+        String mime = (String) doc.getFirstValue(CollectionSchema.content_type.getSolrFieldName());
+        if (Response.docType(ms.url()) == Response.DT_IMAGE || Response.docType(mime) == Response.DT_IMAGE) {
+            String id = ASCII.String(ms.hash());
+            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
+        } else {
             Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
             Collection<Object> prt = doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName());
-            if (img != null) {
-                int c = 0;
-                for (Object i: img) {
-                    String a = alt != null && alt.size() > c ? (String) SetTools.nth(alt, c) : "";
-                    if (query.getQueryGoal().matches((String) i) || query.getQueryGoal().matches(a)) {
+            if (img != null && img.size() > 0) {
+                for (int c = 0; c < img.size(); c++) {
+                    String image_urlstub =  (String) SetTools.nth(img, c);
+                    String image_alt = alt != null && alt.size() > c ? (String) SetTools.nth(alt, c) : "";
+                    if (query.getQueryGoal().matches(image_urlstub) || query.getQueryGoal().matches(image_alt)) {
                         try {
-                            DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + i);
+                            DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + image_urlstub);
                             Object heightO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName()), c);
                             Object widthO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName()), c);
                             String id = ASCII.String(imageUrl.hash());
-                            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", a, widthO == null ? 0 : (Integer) widthO, heightO == null ? 0 : (Integer) heightO, 0));
+                            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", image_alt, widthO == null ? 0 : (Integer) widthO, heightO == null ? 0 : (Integer) heightO, 0));
                         } catch (MalformedURLException e) {
                             continue;
                         }
                     }
-                    c++;
                 }
-            }
-            if (MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(ms.url().getFileName()))) {
-                String id = ASCII.String(ms.hash());
-                if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
-            }
-            if (img != null && img.size() > 0) {
-                DigestURL imageUrl = new DigestURL((prt != null && prt.size() > 0 ? SetTools.nth(prt, 0) : "http") + "://" + SetTools.nth(img, 0));
-                String imagetext =  alt != null && alt.size() > 0 ? (String) SetTools.nth(alt, 0) : "";
-                String id = ASCII.String(imageUrl.hash());
-                if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", imagetext, 0, 0, 0));
             }
         }
         if (imageSpare.size() > 0) return nextSpare();
