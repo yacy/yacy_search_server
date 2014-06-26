@@ -49,7 +49,7 @@ public class ParserTest {
                             assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
                             assertThat(doc.dc_title(), containsString(testFile[2]));
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
                         }
                     } catch (final InterruptedException ex) {}
                     }
@@ -81,9 +81,9 @@ public class ParserTest {
 
                             System.out.println("Parsed " + filename + ": " + str);
                             assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-                     //       assertThat(doc.dc_title(), containsString(testFile[2]));
+                            assertThat(doc.dc_title(), containsString(testFile[2]));
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
                         }
                     } catch (final InterruptedException ex) {}
                     }
@@ -115,7 +115,7 @@ public class ParserTest {
                             assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
                             assertThat(doc.dc_title(), containsString(testFile[2]));
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
                         }
                     } catch (final InterruptedException ex) {}
                     }
@@ -147,7 +147,7 @@ public class ParserTest {
                             assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
                             assertThat(doc.dc_title(), containsString(testFile[2]));
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
                         }
                     } catch (final InterruptedException ex) {}
                     }
