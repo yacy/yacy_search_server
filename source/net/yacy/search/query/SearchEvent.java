@@ -911,6 +911,13 @@ public final class SearchEvent {
                         continue pollloop;
                     }
                 }
+
+                if (this.query.modifier.author != null) {
+                    if (!this.query.modifier.author.equals(iEntry.dc_creator())) {
+                        if (log.isFine()) log.fine ("dropped Node: author");
+                        continue pollloop;
+                    }
+                }
                 // finally extend the double-check and insert result to stack
                 this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {
@@ -1098,6 +1105,13 @@ public final class SearchEvent {
                 continue;
             }
 
+            // check modifier constraint (author)
+            if (this.query.modifier.author != null && !page.dc_creator().toLowerCase().contains(this.query.modifier.author.toLowerCase()) /*!this.query.modifier.author.equalsIgnoreCase(page.dc_creator())*/) {
+                if (log.isFine()) log.fine("dropped RWI: author  constraint = " + this.query.modifier.author);
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                continue;
+            }
+            
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page.url())) {
                 if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
