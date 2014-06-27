@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -196,5 +197,104 @@ public class AccessTracker {
             }
         };
         t.start();
+    }
+    
+    /**
+     * read the log and return a list of lines which are equal or greater than
+     * the from-date and smaller than the to-date
+     * @param f the dump file
+     * @param from the left boundary of the sequence to search for (included)
+     * @param to the right boundary of the sequence to search for (excluded)
+     * @return a list of lines within the given dates
+     */
+    public static ArrayList<String> readLog(File f, Date from, Date to) {
+        ArrayList<String> list = new ArrayList<String>();
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(f, "r");
+            Date fd = readDate(raf, 0);
+            if (fd.after(from)) from = fd;
+            long seekFrom = binarySearch(raf, from, 0, raf.length());
+            long seekTo = binarySearch(raf, to, seekFrom, raf.length());
+            Date eDate = readDate(raf, seekTo);
+            if (eDate.before(to)) seekTo = raf.length();
+            raf.seek(seekFrom);
+            String line;
+            while (raf.getFilePointer() < seekTo && (line = raf.readLine()) != null) {
+                list.add(line);
+            }
+        } catch (final FileNotFoundException e) {
+            ConcurrentLog.logException(e);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
+        } finally {
+            if (raf != null) try {raf.close();} catch (final IOException e) {}
+        }
+        return list;
+    }
+
+    /**
+     * recursively search for a the smallest date which is equal or greater than the given date
+     * @param raf the random access file
+     * @param date the given date
+     * @param l first seek position to look (included, we expect a date there or after the position l)
+     * @param r last seek position to look (excluded, we do not expect that there is a date)
+     * @return the first position where a date appears that is equal or greater than the given one
+     */
+    private static long binarySearch(RandomAccessFile raf, Date date, long l, long r) throws IOException {
+        if (r <= l) return l;
+        long m = seekLB(raf, (l + r) / 2);
+        if (m <= l) return m;
+        Date mDate = readDate(raf, m);
+        if (mDate.after(date)) return binarySearch(raf, date, l, m);
+        return binarySearch(raf, date, m, r);
+    }
+    
+    /**
+     * find the beginning of a line
+     * @param raf the random access file
+     * @param x any seek position in the file
+     * @return the seek position of the beginning of a line smaller or equal to x
+     * @throws IOException
+     */
+    private static long seekLB(RandomAccessFile raf, long x) throws IOException {
+        if (x <= 0) return x;
+        raf.seek(x);
+        while (x > 0 && raf.read() >= 32) {x--; raf.seek(x);}
+        if (x == 0) return 0;
+        raf.seek(x);
+        return raf.read() >= 32 ? x : x + 1;
+    }
+    
+    /**
+     * read a date at the seek position; the seek position must be exactly at the date start
+     * @param raf the random access file
+     * @param x the seek position of the date string start position
+     * @return the date at position x
+     * @throws IOException
+     */
+    private static Date readDate(RandomAccessFile raf, long x) throws IOException {
+        raf.seek(x);
+        byte[] b = new byte[GenericFormatter.PATTERN_SHORT_SECOND.length()];
+        raf.readFully(b);
+        try {
+            return GenericFormatter.SHORT_SECOND_FORMATTER.parse(UTF8.String(b));
+        } catch (ParseException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
+    public static void main(String[] args) {
+        // i.e. /Users/admin/git/rc1/DATA/LOG/queries.log 20140522135156 20140614223118
+        String file = args[0];
+        Date from;
+        try {
+            from = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1]);
+            Date to = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2]);
+            ArrayList<String> dump = readLog(new File(file), from, to);
+            for (String s: dump) System.out.println(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }
