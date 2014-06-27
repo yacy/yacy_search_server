@@ -1,0 +1,7 @@
+<timeline>
+#{event}#
+    <event time="#[time]#" isDuration=#(isDuration)#"false"::duration="#[duration]#"#(/isDuration)# type="#[type]#">
+        #[description]#
+    </event>
+#{/event}#
+</timeline>

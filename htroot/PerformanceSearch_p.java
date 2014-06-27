@@ -24,7 +24,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -52,11 +51,11 @@ public class PerformanceSearch_p {
                 prop.put("table_" + c + "_event", search.processName.name());
                 prop.put("table_" + c + "_comment", search.comment);
                 prop.putNum("table_" + c + "_count", search.resultCount);
-                prop.putNum("table_" + c + "_delta", event.time - lastt);
-                prop.put("table_" + c + "_time", (new Date(event.time)).toString());
+                prop.putNum("table_" + c + "_delta", event.time.getTime() - lastt);
+                prop.put("table_" + c + "_time", (event.time).toString());
                 prop.putNum("table_" + c + "_duration", search.duration);
                 c++;
-                lastt = event.time;
+                lastt = event.time.getTime();
             }
         }
         prop.put("table", c);

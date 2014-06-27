@@ -26,12 +26,14 @@
 
 package net.yacy.search;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.peers.graphics.ProfilingGraph;
 
 
@@ -81,7 +83,7 @@ public class EventTracker {
             history = new LinkedBlockingQueue<Event>();
 
             // update entry
-            history.offer(new Event(eventPayload));
+            history.offer(new Event(new Date(), 0, "update", eventPayload, 0));
 
             // store map
             historyMaps.put(eventName, history);
@@ -89,7 +91,7 @@ public class EventTracker {
         }
 
         // update history
-        history.offer(new Event(eventPayload));
+        history.offer(new Event(new Date(), 0, "update", eventPayload, 0));
 
         // clean up too old entries
         int tp = history.size() - maxQueueSize;
@@ -101,7 +103,7 @@ public class EventTracker {
                     final long now = System.currentTimeMillis();
                     while (!history.isEmpty()) {
                         e = history.peek();
-                        if (now - e.time < maxQueueAge) break;
+                        if (now - e.time.getTime() < maxQueueAge) break;
                         history.poll();
                     }
                 }
@@ -121,19 +123,23 @@ public class EventTracker {
         final long now = System.currentTimeMillis();
         int count = 0;
         while (event.hasNext()) {
-            if (now - event.next().time < time) count++;
+            if (now - event.next().time.getTime() < time) count++;
         }
         return count;
     }
 
     public final static class Event {
-        public Object payload;
-        public long time;
-
-        public Event(final Object payload) {
-            this.payload = payload;
-            this.time = System.currentTimeMillis();
+        final public Date time;
+        final public int duration; // ms
+        final public String type;
+        final public Object payload;
+        final public int count;
+        public Event(final Date time, final int duration, final String type, final Object payload, final int count) {
+            this.time = time; this.duration = duration; this.type = type; this.payload = payload; this.count = count;
+        }
+        @Override
+        public String toString() {
+            return type + " " + GenericFormatter.SHORT_SECOND_FORMATTER.format(time) + (duration == 0 ? " " : "(" + duration + "ms) ") + (count == 0 ? " " : "[" + count + "] ") + payload;
         }
     }
-
 }

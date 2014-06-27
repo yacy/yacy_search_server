@@ -40,6 +40,7 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.EventTracker;
 
 public class AccessTracker {
 
@@ -48,7 +49,7 @@ public class AccessTracker {
     private static final int minSize = 100;
     private static final int maxSize = 1000;
     private static final int maxAge = 24 * 60 * 60 * 1000;
-
+    
     public static class QueryEvent {
         final public String address;
         final public String userAgent;
@@ -207,8 +208,8 @@ public class AccessTracker {
      * @param to the right boundary of the sequence to search for (excluded)
      * @return a list of lines within the given dates
      */
-    public static ArrayList<String> readLog(File f, Date from, Date to) {
-        ArrayList<String> list = new ArrayList<String>();
+    public static ArrayList<EventTracker.Event> readLog(File f, Date from, Date to) {
+        ArrayList<EventTracker.Event> list = new ArrayList<>();
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(f, "r");
@@ -221,7 +222,17 @@ public class AccessTracker {
             raf.seek(seekFrom);
             String line;
             while (raf.getFilePointer() < seekTo && (line = raf.readLine()) != null) {
-                list.add(line);
+                // parse the line
+                String[] ls = line.split(" ");
+                EventTracker.Event event;
+                try {
+                    event = new EventTracker.Event(GenericFormatter.SHORT_SECOND_FORMATTER.parse(ls[0]), 0, "query", line.substring(ls[0].length() + ls[1].length() + 2), Integer.valueOf(ls[1]));
+                    list.add(event);
+                } catch (NumberFormatException e) {
+                    continue;
+                } catch (ParseException e) {
+                    continue;
+                }
             }
         } catch (final FileNotFoundException e) {
             ConcurrentLog.logException(e);
@@ -291,8 +302,8 @@ public class AccessTracker {
         try {
             from = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1]);
             Date to = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2]);
-            ArrayList<String> dump = readLog(new File(file), from, to);
-            for (String s: dump) System.out.println(s);
+            ArrayList<EventTracker.Event> dump = readLog(new File(file), from, to);
+            for (EventTracker.Event s: dump) System.out.println(s.toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
