@@ -109,6 +109,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         h6(TagType.pair),
         title(TagType.pair),
         b(TagType.pair),
+        em(TagType.pair),
         strong(TagType.pair),
         u(TagType.pair),
         i(TagType.pair),
@@ -561,6 +562,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.bold.inc(h);
         } else if ((tag.name.equalsIgnoreCase("strong")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
+            if (h.length() > 0) this.bold.inc(h);
+        } else if ((tag.name.equalsIgnoreCase("em")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.bold.inc(h);
         } else if ((tag.name.equalsIgnoreCase("i")) && (tag.content.length() < 1024)) {

@@ -817,17 +817,22 @@ dc_rights
         final List<AnchorURL>       anchors       = new ArrayList<AnchorURL>();
         final LinkedHashMap<DigestURL, String> rss = new LinkedHashMap<DigestURL, String>();
         final LinkedHashMap<AnchorURL, ImageEntry> images = new LinkedHashMap<AnchorURL, ImageEntry>();
+        final Set<String> languages = new HashSet<String>();
         double lon = 0.0d, lat = 0.0d;
         Date date = new Date();
+        String charset = null;
 
         int mindepth = 999;
         for (final Document doc: docs) {
 
-        	if (doc == null) continue;
+            if (doc == null) continue;
+
+            if (charset == null) charset = doc.charset; // TODO: uses this charset for merged content
+
             final String author = doc.dc_creator();
             if (author.length() > 0) {
                 if (authors.length() > 0) authors.append(",");
-                subjects.append(author);
+                authors.append(author);
             }
 
             final String publisher = doc.dc_publisher();
@@ -861,6 +866,7 @@ dc_rights
             if (doc.date.before(date)) date = doc.date;
             
             if (doc.getDepth() < mindepth) mindepth = doc.getDepth();
+            if (doc.dc_language() != null) languages.add(doc.dc_language());
         }
 
         // clean up parser data
@@ -878,9 +884,9 @@ dc_rights
         Document newDoc = new Document(
                 location,
                 globalMime,
+                charset,
                 null,
-                null,
-                null,
+                languages,
                 subjects.toString().split(" |,"),
                 titlesa,
                 authors.toString(),

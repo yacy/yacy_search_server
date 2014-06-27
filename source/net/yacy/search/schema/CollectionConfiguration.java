@@ -421,9 +421,15 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             add(doc, CollectionSchema.collection_sxt, cs);
         }
-        
+        char doctype = Response.docType(responseHeader.getContentType());
         List<String> titles = document.titles();
         if (allAttr || contains(CollectionSchema.title)) {
+            if (doctype == Response.DT_IMAGE || doctype == Response.DT_AUDIO || doctype == Response.DT_MOVIE) {
+                String mediatitle = responseHeader.get(HeaderFramework.X_YACY_MEDIA_TITLE, "");
+                if (mediatitle.length() > 0) {
+                    if (titles.size() == 0) titles.add(mediatitle); else titles.set(0, mediatitle);
+                }
+            }
             add(doc, CollectionSchema.title, titles);
             if ((allAttr || contains(CollectionSchema.title_exact_signature_l)) && titles.size() > 0) {
                 add(doc, CollectionSchema.title_exact_signature_l, EnhancedTextProfileSignature.getSignatureLong(titles.get(0)));
@@ -473,7 +479,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (document.getDate().before(lastModified)) lastModified = document.getDate();
             add(doc, CollectionSchema.last_modified, lastModified);
         }
-        if (allAttr || contains(CollectionSchema.keywords)) add(doc, CollectionSchema.keywords, document.dc_subject(' '));
+        if (allAttr || contains(CollectionSchema.keywords)) {
+            String keywords = document.dc_subject(' ');
+            if (doctype == Response.DT_IMAGE || doctype == Response.DT_AUDIO || doctype == Response.DT_MOVIE) {
+                keywords = responseHeader.get(HeaderFramework.X_YACY_MEDIA_KEYWORDS, keywords);
+            }
+            add(doc, CollectionSchema.keywords, keywords);
+        }
         if (allAttr || contains(CollectionSchema.synonyms_sxt)) {
             List<String> synonyms = condenser.synonyms();
             add(doc, CollectionSchema.synonyms_sxt, synonyms);

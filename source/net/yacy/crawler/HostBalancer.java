@@ -348,6 +348,8 @@ public class HostBalancer implements Balancer {
             return request;
         } catch (ConcurrentModificationException e) {
             continue tryagain;
+        } catch (IOException e) {
+            throw e;
         } catch (Throwable e) {
             throw new IOException(e.getMessage());
         }

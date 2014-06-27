@@ -69,35 +69,64 @@ public class Response {
     private        int                status;          // tracker indexing status, see status defs below
     private final  boolean            fromCache;
 
-    // doctype calculation
+    /**
+     * doctype calculation by file extension
+     * TODO: this must be enhanced with a more generic way of configuration
+     * @param ext
+     * @return a character denoting the file type
+     */
+    public static char docTypeExt(final String ext) {
+        if (ext == null) return DT_UNKNOWN;
+        if (ext.equals("gif"))  return DT_IMAGE;
+        if (ext.equals("ico"))  return DT_IMAGE;
+        if (ext.equals("bmp"))  return DT_IMAGE;
+        if (ext.equals("jpg"))  return DT_IMAGE;
+        if (ext.equals("jpeg")) return DT_IMAGE;
+        if (ext.equals("png"))  return DT_IMAGE;
+        if (ext.equals("tif"))  return DT_IMAGE;
+        if (ext.equals("tiff")) return DT_IMAGE;
+        if (ext.equals("htm"))  return DT_HTML;
+        if (ext.equals("html")) return DT_HTML;
+        if (ext.equals("txt"))  return DT_TEXT;
+        if (ext.equals("doc"))  return DT_DOC;
+        if (ext.equals("rtf"))  return DT_DOC;
+        if (ext.equals("pdf"))  return DT_PDFPS;
+        if (ext.equals("ps"))   return DT_PDFPS;
+        if (ext.equals("mp3"))  return DT_AUDIO;
+        if (ext.equals("aac"))  return DT_AUDIO;
+        if (ext.equals("m4a"))  return DT_AUDIO;
+        if (ext.equals("ogg"))  return DT_AUDIO;
+        if (ext.equals("wav"))  return DT_AUDIO;
+        if (ext.equals("wma"))  return DT_AUDIO;
+        if (ext.equals("avi"))  return DT_MOVIE;
+        if (ext.equals("mov"))  return DT_MOVIE;
+        if (ext.equals("qt"))   return DT_MOVIE;
+        if (ext.equals("mpg"))  return DT_MOVIE;
+        if (ext.equals("mp4"))  return DT_MOVIE;
+        if (ext.equals("m4v"))  return DT_MOVIE;
+        if (ext.equals("mkv"))  return DT_MOVIE;
+        if (ext.equals("md5"))  return DT_SHARE;
+        if (ext.equals("mpeg")) return DT_MOVIE;
+        if (ext.equals("asf"))  return DT_FLASH;
+        return DT_UNKNOWN;
+    }
+    
+    /**
+     * doctype calculation based on file extensions; this is the url wrapper
+     * @param url
+     * @return a character denoting the file type
+     */
     public static char docType(final MultiProtocolURL url) {
         String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (ext == null) return DT_UNKNOWN;
-        if (ext.equals(".gif"))  return DT_IMAGE;
-        if (ext.equals(".ico"))  return DT_IMAGE;
-        if (ext.equals(".bmp"))  return DT_IMAGE;
-        if (ext.equals(".jpg"))  return DT_IMAGE;
-        if (ext.equals(".jpeg")) return DT_IMAGE;
-        if (ext.equals(".png"))  return DT_IMAGE;
-        if (ext.equals(".tif"))  return DT_IMAGE;
-        if (ext.equals(".tiff")) return DT_IMAGE;
-        if (ext.equals(".htm"))  return DT_HTML;
-        if (ext.equals(".html")) return DT_HTML;
-        if (ext.equals(".txt"))  return DT_TEXT;
-        if (ext.equals(".doc"))  return DT_DOC;
-        if (ext.equals(".rtf"))  return DT_DOC;
-        if (ext.equals(".pdf"))  return DT_PDFPS;
-        if (ext.equals(".ps"))   return DT_PDFPS;
-        if (ext.equals(".avi"))  return DT_MOVIE;
-        if (ext.equals(".mov"))  return DT_MOVIE;
-        if (ext.equals(".qt"))   return DT_MOVIE;
-        if (ext.equals(".mpg"))  return DT_MOVIE;
-        if (ext.equals(".md5"))  return DT_SHARE;
-        if (ext.equals(".mpeg")) return DT_MOVIE;
-        if (ext.equals(".asf"))  return DT_FLASH;
-        return DT_UNKNOWN;
+        return docTypeExt(ext);
     }
 
+    /**
+     * doctype calculation based on the mime type
+     * @param mime
+     * @return a character denoting the file type
+     */
     public static char docType(final String mime) {
         // serverLog.logFinest("PLASMA", "docType mime=" + mime);
         char doctype = DT_UNKNOWN;
@@ -120,6 +149,12 @@ public class Response {
         return doctype;
     }
 
+    /**
+     * reverse mime type calculation; this is just a heuristic
+     * @param ext
+     * @param doctype
+     * @return a mime type string
+     */
     public static String[] doctype2mime(String ext, char doctype) {
         if (doctype == DT_PDFPS) return new String[]{"application/pdf"};
         if (doctype == DT_HTML) return new String[]{"text/html"};

@@ -26,19 +26,28 @@
 						<dd>#[count]#</dd>
 						
 						<dt>Data</dt>
-						<dd><input name="data-#[count]#" type="file"></dd>
+						<dd>data-#[count]#=<input name="data-#[count]#" type="file"></dd>
 						
 						<dt>URL</dt>
-						<dd><input name="url-#[count]#" type="text" value="http://nowhere.cc/example.txt" size="80" maxlength="512"></dd>
-						
-						<dt>Last-Modified</dt><!-- see: http://tools.ietf.org/html/rfc2616#section-14.29 -->
-						<dd><input name="lastModified-#[count]#" type="text" value="Tue, 15 Nov 1994 12:45:26 GMT" size="30" maxlength="40"></dd>
-						
-						<dt>Content-Type</dt><!-- see: http://www.iana.org/assignments/media-types/media-types.xhtml -->
-						<dd><input name="contentType-#[count]#" type="text" value="text/plain" size="30" maxlength="80"></dd>
+						<dd>url-#[count]#=<input name="url-#[count]#" type="text" value="http://nowhere.cc/example.txt" size="80" maxlength="512"></dd>
 						
 						<dt>Collection</dt>
-						<dd><input name="collection-#[count]#" type="text" value="push" size="30" maxlength="512"></dd>
+						<dd>collection-#[count]#=<input name="collection-#[count]#" type="text" value="push" size="80" maxlength="512"></dd>
+						
+						<dt>Last-Modified</dt><!-- see: http://tools.ietf.org/html/rfc2616#section-14.29 -->
+						<!--<dd><input name="lastModified-#[count]#" type="text" value="Tue, 15 Nov 1994 12:45:26 GMT" size="30" maxlength="40"></dd>-->
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="Last-Modified:Tue, 15 Nov 1994 12:45:26 GMT" size="80" maxlength="80"></dd>
+						
+						<dt>Content-Type</dt><!-- see: http://www.iana.org/assignments/media-types/media-types.xhtml -->
+						<!--<dd><input name="contentType-#[count]#" type="text" value="text/plain" size="30" maxlength="80"></dd>-->
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="Content-Type:text/plain" size="80" maxlength="80"></dd>
+
+						<dt></dt><dd>The following attributes are only used for media type content</dd>
+						<dt>Media-Title</dt>
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="X-YaCy-Media-Title:Hello Pictureworld" size="80" maxlength="200"></dd>
+						
+						<dt>Media-Keywords ()</dt>
+						<dd>responseHeader-#[count]#=<input name="responseHeader-#[count]#" type="text" value="X-YaCy-Media-Keywords:uno dos tres cuatro cinco" size="80" maxlength="200"></dd>
 					</dl>
 				</dd>
 				#{/input}#

@@ -58,6 +58,7 @@ import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.parser.html.CharacterCoding;
 
 /**
@@ -1040,7 +1041,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     public static final boolean isImage(final String extension) {
-        return extension != null && extension.length() > 0 && "png.gif.jpg.jpeg.tif.tiff.ico".indexOf(extension.toLowerCase()) >= 0;
+        return extension != null && extension.length() > 0 && Response.docTypeExt(extension.toLowerCase()) == Response.DT_IMAGE;
     }
 
     public final boolean isIndividual() {
