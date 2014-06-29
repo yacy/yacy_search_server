@@ -227,7 +227,7 @@ public class Segment {
     }
     
     /**
-     * A ReferenceReport object is a container for all referenced to a specific url.
+     * A ReferenceReport object is a container for all references to a specific url.
      * The class stores the number of links from domain-internal and domain-external backlinks,
      * and the host hashes of all externally linking documents,
      * all IDs from external hosts and all IDs from the same domain.
@@ -268,7 +268,7 @@ public class Segment {
             if ((internalIDs.size() == 0 || !connectedCitation()) && Segment.this.fulltext.useWebgraph()) {
                 // reqd the references from the webgraph
                 SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
-                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 10000000, 10000, 100, 1, WebgraphSchema.source_id_s.getSolrFieldName());
+                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 10000000, Long.MAX_VALUE, 100, 1, WebgraphSchema.source_id_s.getSolrFieldName());
                 SolrDocument doc;
                 try {
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
