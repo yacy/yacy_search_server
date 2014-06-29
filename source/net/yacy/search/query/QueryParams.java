@@ -35,11 +35,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.SortClause;
-import org.apache.solr.common.params.FacetParams;
-
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
@@ -65,6 +60,10 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.SortClause;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.FacetParams;
 
 public final class QueryParams {
 
@@ -227,7 +226,8 @@ public final class QueryParams {
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
         for (String navkey: search_navigation) {
             CollectionSchema f = defaultfacetfields.get(navkey);
-            if (f != null && solrSchema.contains(f)) this.facetfields.add(f.getSolrFieldName());
+            // handle special field, authors_sxt (add to facet w/o contains check, as authors_sxt is not enabled (is copyfield))
+            if (f != null && (solrSchema.contains(f) || f.name().equals("author_sxt"))) this.facetfields.add(f.getSolrFieldName());
         }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
@@ -358,8 +358,8 @@ public final class QueryParams {
             bq += CollectionSchema.text_t.getSolrFieldName() + ":\"" + this.queryGoal.getIncludeString() + "\"^10";
         }
         if (fq.length() > 0) {
-            String oldfq = params.get("fq");
-            params.setParam("fq", oldfq == null || oldfq.length() == 0 ? fq : "(" + oldfq + ") AND (" + fq + ")");
+            String oldfq = params.get(CommonParams.FQ);
+            params.setParam(CommonParams.FQ, oldfq == null || oldfq.length() == 0 ? fq : "(" + oldfq + ") AND (" + fq + ")");
         }
         if (bq.length() > 0) params.setParam("bq", bq);
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
@@ -465,8 +465,8 @@ public final class QueryParams {
             fq.append(" AND ").append(CollectionSchema.language_s.getSolrFieldName()).append(":\"").append(this.modifier.language).append('\"');
         }
 
-        // add author facets
-        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author_sxt)) {
+        // add author facets (check for contains(author) as author_sxt is omitted copyfield)
+        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author)) {
             fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
         }
 

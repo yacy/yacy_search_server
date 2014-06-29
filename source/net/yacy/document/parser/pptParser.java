@@ -78,6 +78,12 @@ public class pptParser extends AbstractParser implements Parser {
                 if (title.length() == l) break;
                 l = title.length();
             }
+            // get keywords (for yacy as array)
+            final String keywords = pptExtractor.getSummaryInformation().getKeywords();
+            final String[] keywlist;
+            if (keywords != null && !keywords.isEmpty()) {
+               keywlist = keywords.split(",");
+            } else keywlist = null;
 
             /*
              * create the plasmaParserDocument for the database
@@ -89,9 +95,9 @@ public class pptParser extends AbstractParser implements Parser {
                     "UTF-8",
                     this,
                     null,
-                    null,
+                    keywlist,
                     singleList(title),
-                    "", // TODO: AUTHOR
+                    pptExtractor.getSummaryInformation().getAuthor(), // may be null
                     pptExtractor.getDocSummaryInformation().getCompany(),
                     null,
                     null,
