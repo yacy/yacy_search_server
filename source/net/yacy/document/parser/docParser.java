@@ -86,6 +86,14 @@ public class docParser extends AbstractParser implements Parser {
             if (title.length() == l) break;
             l = title.length();
         }
+        // get keywords (for yacy as array)
+        final String keywords = extractor.getSummaryInformation().getKeywords();
+        final String[] keywlist;
+        if (keywords != null && !keywords.isEmpty()) {
+            keywlist = keywords.split(",");
+        } else {
+            keywlist = null;
+        }
 
         Document[] docs;
         docs = new Document[]{new Document(
@@ -94,9 +102,9 @@ public class docParser extends AbstractParser implements Parser {
                   "UTF-8",
                   this,
                   null,
-                  null,
+                  keywlist,
                   singleList(title),
-                  "", // TODO: AUTHOR
+                  extractor.getSummaryInformation().getAuthor(), // constuctor can handle null
                   extractor.getDocSummaryInformation().getCompany(), // publisher
                   null,
                   null,
