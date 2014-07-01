@@ -79,21 +79,21 @@
 			<string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.1.jar</string>
 			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.2.jar</string>
-			<string>$JAVAROOT/lib/lucene-analyzers-common-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-analyzers-phonetic-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-classification-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-codecs-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-core-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-facet-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-grouping-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-highlighter-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-join-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-memory-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-misc-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-queries-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-queryparser-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-spatial-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/lucene-suggest-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-analyzers-common-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-analyzers-phonetic-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-classification-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-codecs-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-core-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-facet-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-grouping-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-highlighter-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-join-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-memory-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-misc-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-queries-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-queryparser-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-spatial-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/lucene-suggest-4.9.0.jar</string>
 			<string>$JAVAROOT/lib/metadata-extractor-2.6.2.jar</string>
 			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
 			<string>$JAVAROOT/lib/org.restlet.jar</string>
@@ -102,8 +102,8 @@
 			<string>$JAVAROOT/lib/poi-scratchpad-3.10-FINAL-20140208.jar</string>
 			<string>$JAVAROOT/lib/slf4j-api-1.7.6.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.2.jar</string>
-			<string>$JAVAROOT/lib/solr-core-4.8.1.jar</string>
-			<string>$JAVAROOT/lib/solr-solrj-4.8.1.jar</string>
+			<string>$JAVAROOT/lib/solr-core-4.9.0.jar</string>
+			<string>$JAVAROOT/lib/solr-solrj-4.9.0.jar</string>
 			<string>$JAVAROOT/lib/spatial4j-0.4.1.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>
 			<string>$JAVAROOT/lib/wstx-asl-3.2.9.jar</string>
