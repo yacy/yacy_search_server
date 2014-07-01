@@ -117,7 +117,7 @@ public class ProfilingGraph {
                     EventTracker.Event event;
                     while (events.hasNext()) {
                         event = events.next();
-                        time = event.time.getTime() - now;
+                        time = event.getTime() - now;
                         bytes = ((Long) event.payload).longValue();
                         x1 = (int) (time/1000);
                         y1 = (int) (bytes / 1024 / 1024);
@@ -138,7 +138,7 @@ public class ProfilingGraph {
                 int words;
                 while (events.hasNext()) {
                     event = events.next();
-                    time = event.time.getTime() - now;
+                    time = event.getTime() - now;
                     words = (int) ((Long) event.payload).longValue();
                     x1 = (int) (time/1000);
                     y1 = words;
@@ -158,7 +158,7 @@ public class ProfilingGraph {
                 int ppm;
                 while (events.hasNext()) {
                     event = events.next();
-                    time = event.time.getTime() - now;
+                    time = event.getTime() - now;
                     ppm = (int) ((Long) event.payload).longValue();
                     x1 = (int) (time/1000);
                     y1 = ppm;
@@ -180,7 +180,7 @@ public class ProfilingGraph {
                     String pingPeer;
                     while (events.hasNext()) {
                         event = events.next();
-                        time = event.time.getTime() - now;
+                        time = event.getTime() - now;
                         ping = (EventPing) event.payload;
                         x1 = (int) (time/1000);
                         y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;

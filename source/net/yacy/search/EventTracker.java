@@ -26,6 +26,7 @@
 
 package net.yacy.search;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -103,7 +104,7 @@ public class EventTracker {
                     final long now = System.currentTimeMillis();
                     while (!history.isEmpty()) {
                         e = history.peek();
-                        if (now - e.time.getTime() < maxQueueAge) break;
+                        if (now - e.getTime() < maxQueueAge) break;
                         history.poll();
                     }
                 }
@@ -123,13 +124,13 @@ public class EventTracker {
         final long now = System.currentTimeMillis();
         int count = 0;
         while (event.hasNext()) {
-            if (now - event.next().time.getTime() < time) count++;
+            if (now - event.next().getTime() < time) count++;
         }
         return count;
     }
 
     public final static class Event {
-        final public Date time;
+        final private Object time; // either a String in SHORT_SECOND format, a Long with ms since epoch or Date;
         final public int duration; // ms
         final public String type;
         final public Object payload;
@@ -137,9 +138,40 @@ public class EventTracker {
         public Event(final Date time, final int duration, final String type, final Object payload, final int count) {
             this.time = time; this.duration = duration; this.type = type; this.payload = payload; this.count = count;
         }
+        public Event(final Long time, final int duration, final String type, final Object payload, final int count) {
+            this.time = time; this.duration = duration; this.type = type; this.payload = payload; this.count = count;
+        }
+        public Event(final String time, final int duration, final String type, final Object payload, final int count) {
+            this.time = time; this.duration = duration; this.type = type; this.payload = payload; this.count = count;
+        }
+        public String getFormattedDate() {
+            if (this.time instanceof String) return (String) this.time;
+            if (this.time instanceof Long) return GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date((Long) this.time));
+            if (this.time instanceof Date) return GenericFormatter.SHORT_SECOND_FORMATTER.format((Date) this.time);
+            return null;
+        }
+        public long getTime() {
+            if (this.time instanceof String) try {
+                return GenericFormatter.SHORT_SECOND_FORMATTER.parse((String) this.time).getTime();
+            } catch (ParseException e) {
+                return -1L;
+            }
+            if (this.time instanceof Long) return (Long) this.time;
+            if (this.time instanceof Date) return ((Date) this.time).getTime();
+            return -1L;
+        }
+        public Date getDate() {
+            if (this.time instanceof String) try {
+                return GenericFormatter.SHORT_SECOND_FORMATTER.parse((String) this.time);
+            } catch (ParseException e) {
+                return null;
+            }if (this.time instanceof Long) return new Date((Long) this.time);
+            if (this.time instanceof Date) return (Date) this.time;
+            return null;
+        }
         @Override
         public String toString() {
-            return type + " " + GenericFormatter.SHORT_SECOND_FORMATTER.format(time) + (duration == 0 ? " " : "(" + duration + "ms) ") + (count == 0 ? " " : "[" + count + "] ") + payload;
+            return type + " " + getFormattedDate() + (duration == 0 ? " " : "(" + duration + "ms) ") + (count == 0 ? " " : "[" + count + "] ") + payload;
         }
     }
 }

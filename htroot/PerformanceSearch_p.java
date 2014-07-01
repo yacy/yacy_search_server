@@ -51,11 +51,11 @@ public class PerformanceSearch_p {
                 prop.put("table_" + c + "_event", search.processName.name());
                 prop.put("table_" + c + "_comment", search.comment);
                 prop.putNum("table_" + c + "_count", search.resultCount);
-                prop.putNum("table_" + c + "_delta", event.time.getTime() - lastt);
-                prop.put("table_" + c + "_time", (event.time).toString());
+                prop.putNum("table_" + c + "_delta", event.getTime() - lastt);
+                prop.put("table_" + c + "_time", event.getFormattedDate());
                 prop.putNum("table_" + c + "_duration", search.duration);
                 c++;
-                lastt = event.time.getTime();
+                lastt = event.getTime();
             }
         }
         prop.put("table", c);

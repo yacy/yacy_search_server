@@ -24,45 +24,122 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.OrderedScoreMap;
+import net.yacy.search.EventTracker.Event;
 import net.yacy.search.EventTracker;
-import net.yacy.search.Switchboard;
+import net.yacy.search.query.AccessTracker;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public final class timeline_p {
 
+    // example:
+    // http://localhost:8090/api/timeline_p.xml?from=20140601000000&to=20140629000000&data=queries&head=2&period=6h
+    
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        // return variable that accumulates replacements
-        final Switchboard sb = (Switchboard) env;
-
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
 
-
-        final String[] data = post.get("data", "").split(",");  // a string of word hashes that shall be searched and combined
-        Map<String, Map<Date, EventTracker.Event>> proc = new HashMap<>();
-        for (String s: data) proc.put(s, null);
-        
-        /*
-        while (i.hasNext() && c < count) {
-            entry = i.next();
-            lm = new Date(entry.lastModified());
-            lms = GenericFormatter.ANSIC_FORMATTER.format(lm);
-            prop.put("event_" + c + "_time", lms); // like "Wed May 01 1963 00:00:00 GMT-0600"
-            prop.put("event_" + c + "_isDuration", 0); // 0 (only a point) or 1 (period of time)
-            prop.put("event_" + c + "_isDuration_duration", 0); // 0 (only a point) or 1 (period of time)
-            prop.putHTML("event_" + c + "_type", "type"); // short title of the event
-            prop.putHTML("event_" + c + "_description", ""); // long description of the event
-            c++;
+        // get type of data to be listed in the timeline
+        int maxeventsperperiod = post.getInt("head", 1); // the maximum number of events per period
+        String period = post.get("period", ""); // must be an integer with a character c at the end, c = Y|M|d|h|m|s
+        int periodlength = 0;
+        if (period.length() > 0) {
+            char c = period.charAt(period.length() - 1);
+            int p = Integer.parseInt(period.substring(0, period.length() - 1));
+                 if (c == 's') periodlength = p * 1000;
+            else if (c == 'm') periodlength = p * 1000 * 60;
+            else if (c == 'h') periodlength = p * 1000 * 60 * 60;
+            else if (c == 'd') periodlength = p * 1000 * 60 * 60 * 24;
+            else if (c == 'M') periodlength = p * 1000 * 60 * 60 * 24 * 30;
+            else if (c == 'Y') periodlength = p * 1000 * 60 * 60 * 24 * 365;
+            else periodlength = 0;
         }
-        prop.put("event", c);
-*/
+        final String[] data = post.get("data", "").split(",");  // a string of word hashes that shall be searched and combined
+        Map<String, List<EventTracker.Event>> proc = new HashMap<>();
+        for (String s: data) if (s.length() > 0) proc.put(s, null);
+        
+        // get a time period
+        Date fromDate = new Date(0);
+        Date toDate = new Date();
+        try {fromDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("from", "20031215182700"));} catch (ParseException e) {}
+        try {toDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("to", GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date())));} catch (ParseException e) {}
+ 
+        // fill proc with events from the given data and time period
+        if (proc.containsKey("queries")) {
+            List<EventTracker.Event> events = AccessTracker.readLog(AccessTracker.getDumpFile(), fromDate, toDate);
+            proc.put("queries", events);
+        }
+        
+        // mix all events into one event list
+        TreeMap<String, EventTracker.Event> eax = new TreeMap<>();
+        for (List<EventTracker.Event> events: proc.values()) if (events != null) {
+            for (EventTracker.Event event: events) eax.put(event.getFormattedDate(), event);
+        }
+        proc.clear(); // we don't need that here any more
+        List<EventTracker.Event> ea = new ArrayList<>();
+        for (Event event: eax.values()) ea.add(event);
+        
+        if (periodlength > 0 && ea.size() > 0) {
+            // create a statistical analysis; step by chunks of periodlength entries
+            Event firstEvent = ea.iterator().next();
+            long startDate = fromDate.getTime();
+            //TreeMap<Date, EventTracker.Event>
+            OrderedScoreMap<String> accumulation = new OrderedScoreMap<>(null);
+            List<EventTracker.Event> eap = new ArrayList<>();
+            String limit = GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(startDate + periodlength));
+            for (Event event: ea) {
+                if (event.getFormattedDate().compareTo(limit) >= 0) {
+                    // write accumulation of the score map into eap
+                    stats(accumulation, eap, startDate, periodlength, maxeventsperperiod, firstEvent.type);
+                    firstEvent = event;
+                    startDate += periodlength;
+                    limit = GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(startDate + periodlength));
+                }
+                accumulation.inc(event.payload.toString());
+            }
+            stats(accumulation, eap, startDate, periodlength, maxeventsperperiod, firstEvent.type);
+            
+            // overwrite the old table for out
+            ea = eap;
+        }
+        
+        // create a list of these events
+        int count = 0;
+        for (Event event: ea) {
+            prop.put("event_" + count + "_time", event.getFormattedDate());
+            prop.put("event_" + count + "_isPeriod", event.duration == 0 ? 0 : 1);
+            prop.put("event_" + count + "_isPeriod_duration", event.duration);
+            prop.put("event_" + count + "_isPeriod_count", event.count);
+            prop.putHTML("event_" + count + "_type", event.type);
+            prop.putXML("event_" + count + "_description", event.payload.toString());
+            count++;
+        }
+        prop.put("event", count);
+        prop.put("count", count);
         return prop;
     }
 
+    private static void stats(OrderedScoreMap<String> accumulation, List<EventTracker.Event> eap, long startDate, int periodlength, int head, String type) {
+        // write accumulation of the score map into eap
+        Iterator<String> si = accumulation.keys(false);
+        int c = 0;
+        while (si.hasNext() && c++ < head) {
+            String key = si.next();
+            eap.add(new Event(startDate, periodlength, type, key, accumulation.get(key)));
+        }
+        accumulation.clear();
+    }
+    
 }

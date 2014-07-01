@@ -25,15 +25,20 @@
 
 package net.yacy.search.query;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.WordCache;
@@ -89,6 +94,10 @@ public class AccessTracker {
 
     public static void setDumpFile(File f) {
         dumpFile = f;
+    }
+
+    public static File getDumpFile() {
+        return dumpFile;
     }
 
     public static void add(final Location location, final QueryParams query, int resultCount) {
@@ -208,8 +217,8 @@ public class AccessTracker {
      * @param to the right boundary of the sequence to search for (excluded)
      * @return a list of lines within the given dates
      */
-    public static ArrayList<EventTracker.Event> readLog(File f, Date from, Date to) {
-        ArrayList<EventTracker.Event> list = new ArrayList<>();
+    public static List<EventTracker.Event> readLog(File f, Date from, Date to) {
+        List<EventTracker.Event> events = new ArrayList<>();
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(f, "r");
@@ -217,23 +226,32 @@ public class AccessTracker {
             if (fd.after(from)) from = fd;
             long seekFrom = binarySearch(raf, from, 0, raf.length());
             long seekTo = binarySearch(raf, to, seekFrom, raf.length());
-            Date eDate = readDate(raf, seekTo);
-            if (eDate.before(to)) seekTo = raf.length();
+            //Date eDate = readDate(raf, seekTo);
+            //if (eDate.before(to)) seekTo = raf.length();
             raf.seek(seekFrom);
+            byte[] buffer = new byte[(int) (seekTo - seekFrom)];
+            raf.readFully(buffer); // we make a copy because that dramatically speeds up reading lines; RandomAccessFile.readLine is very slow
+            raf.close();
+            ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(bais, "UTF-8"));
             String line;
-            while (raf.getFilePointer() < seekTo && (line = raf.readLine()) != null) {
+            Pattern sp = Pattern.compile(" ");
+            while ((line = reader.readLine()) != null) {
                 // parse the line
-                String[] ls = line.split(" ");
+                String[] ls = sp.split(line);
                 EventTracker.Event event;
-                try {
-                    event = new EventTracker.Event(GenericFormatter.SHORT_SECOND_FORMATTER.parse(ls[0]), 0, "query", line.substring(ls[0].length() + ls[1].length() + 2), Integer.valueOf(ls[1]));
-                    list.add(event);
+                if (ls.length > 1) try {
+                    event = new EventTracker.Event(ls[0], 0, "query", line.substring(ls[0].length() + ls[1].length() + 2), Integer.valueOf(ls[1]));
+                    events.add(event);
                 } catch (NumberFormatException e) {
                     continue;
-                } catch (ParseException e) {
+                } catch (Throwable e) {
                     continue;
                 }
             }
+            reader.close();
+            bais.close();
+            buffer = null;
         } catch (final FileNotFoundException e) {
             ConcurrentLog.logException(e);
         } catch (final IOException e) {
@@ -241,7 +259,7 @@ public class AccessTracker {
         } finally {
             if (raf != null) try {raf.close();} catch (final IOException e) {}
         }
-        return list;
+        return events;
     }
 
     /**
@@ -302,7 +320,7 @@ public class AccessTracker {
         try {
             from = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1]);
             Date to = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2]);
-            ArrayList<EventTracker.Event> dump = readLog(new File(file), from, to);
+            List<EventTracker.Event> dump = readLog(new File(file), from, to);
             for (EventTracker.Event s: dump) System.out.println(s.toString());
         } catch (ParseException e) {
             e.printStackTrace();
