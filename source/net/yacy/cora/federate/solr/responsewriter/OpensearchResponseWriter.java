@@ -239,16 +239,14 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             String tagname = RSSMessage.Token.description.name();
             if (snippet == null || snippet.size() == 0) {
-                for (String d: descriptions) {
-                    writer.write("<"); writer.write(tagname); writer.write('>');
-                    XML.escapeCharData(d, writer);
-                    writer.write("</"); writer.write(tagname); writer.write(">\n");
-                }
-            } else {
-                OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
                 writer.write("<"); writer.write(tagname); writer.write('>');
-                XML.escapeCharData(OpensearchResponseWriter.getLargestSnippet(snippet), writer);
+                for (String d: descriptions) {
+                    XML.escapeCharData(d, writer);
+                }
                 writer.write("</"); writer.write(tagname); writer.write(">\n");
+            } else {
+                removeSubsumedTitle(snippet, title);
+                solitaireTag(writer, tagname, getLargestSnippet(snippet)); // snippet may be size=0
             }
             // open: where do we get the subject?
             //solitaireTag(writer, DublinCore.Subject.getURIref(), ""); // TODO: fill with actual data
