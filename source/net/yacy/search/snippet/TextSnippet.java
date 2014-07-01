@@ -320,30 +320,14 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             sentences = null;
         } //encapsulate potential expensive sentences END
 
-        // compute snippet from media - attention document closed above!
-        //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
-        //String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
-        //String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
-        //String hrefline = computeMediaSnippet(document.getAnchors(), queryhashes);
-        //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
-
-        snippetLine = "";
-        //if (audioline != null) line += (line.isEmpty()) ? audioline : "<br />" + audioline;
-        //if (videoline != null) line += (line.isEmpty()) ? videoline : "<br />" + videoline;
-        //if (appline   != null) line += (line.isEmpty()) ? appline   : "<br />" + appline;
-        //if (hrefline  != null) line += (line.isEmpty()) ? hrefline  : "<br />" + hrefline;
-        //if (textline  != null) snippetLine += (snippetLine.isEmpty()) ? textline  : "<br />" + textline;
-
-        if (snippetLine == null || !remainingHashes.isEmpty()) {
+        if (textline == null || !remainingHashes.isEmpty()) {
             init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
             return;
         }
         if (snippetLine.length() > snippetMaxLength) snippetLine = snippetLine.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
-        snippetsCache.put(wordhashes, urls, snippetLine);
-
-//        document.close();
+        snippetsCache.put(wordhashes, urls, textline);
         init(url.hash(), snippetLine, false, source, null);
     }
 

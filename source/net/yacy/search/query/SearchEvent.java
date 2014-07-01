@@ -1246,7 +1246,7 @@ public final class SearchEvent {
             if (solrsnippet != null && solrsnippet.size() > 0) {
                 OpensearchResponseWriter.removeSubsumedTitle(solrsnippet, node.dc_title());
                 final TextSnippet snippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippet), true, ResultClass.SOURCE_CACHE, "");
-                ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, snippet, null, 0);
+                ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, snippet, 0);
                 addResult(re);
                 success = true;
             } else {
@@ -1375,7 +1375,7 @@ public final class SearchEvent {
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
                     SearchEvent.SNIPPET_MAX_LENGTH,
                     !this.query.isLocal());
-            return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, 0); // result without snippet
+            return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, 0); // result without snippet
         }
 
         // load snippet
@@ -1396,16 +1396,16 @@ public final class SearchEvent {
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
-                return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, snippetComputationTime); // result with snippet attached
+                return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, snippetComputationTime); // result with snippet attached
             } else if (cacheStrategy.mustBeOffline()) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, snippetComputationTime); // result without snippet
+                return new ResultEntry(page, this.query.getSegment(), this.peers, null, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
                 if (this.snippetFetchWordHashes.has(Segment.catchallHash)) {
                     // we accept that because the word cannot be on the page
-                    return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, 0);
+                    return new ResultEntry(page, this.query.getSegment(), this.peers, null, 0);
                 }
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.deleteIfSnippetFail) {
@@ -1415,7 +1415,7 @@ public final class SearchEvent {
                 return null;
             }
         }
-        return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, 0); // result without snippet
+        return new ResultEntry(page, this.query.getSegment(), this.peers, null, 0); // result without snippet
     }
     
     public ResultEntry oneResult(final int item, final long timeout) {        

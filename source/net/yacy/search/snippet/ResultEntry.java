@@ -57,7 +57,6 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
-    private final List<MediaSnippet> mediaSnippets;
     private final Segment indexSegment;
 
     // statistic objects
@@ -67,7 +66,6 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                        final Segment indexSegment,
                        SeedDB peers,
                        final TextSnippet textSnippet,
-                       final List<MediaSnippet> mediaSnippets,
                        final long snippetComputationTime) {
         this.urlentry = urlentry;
         this.urlentry.setField(CollectionSchema.text_t.getSolrFieldName(), ""); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
@@ -75,7 +73,6 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
         this.textSnippet = textSnippet;
-        this.mediaSnippets = mediaSnippets;
         this.snippetComputationTime = snippetComputationTime;
         final String host = urlentry.url().getHost();
         if (host != null && host.endsWith(".yacyh")) {
@@ -163,9 +160,6 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public TextSnippet textSnippet() {
         return this.textSnippet;
     }
-    public List<MediaSnippet> mediaSnippets() {
-        return this.mediaSnippets;
-    }
     public Date modified() {
         return this.urlentry.moddate();
     }
@@ -210,9 +204,6 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     }
     public boolean hasTextSnippet() {
         return (this.textSnippet != null) && (!this.textSnippet.getErrorCode().fail());
-    }
-    public boolean hasMediaSnippets() {
-        return (this.mediaSnippets != null) && (!this.mediaSnippets.isEmpty());
     }
     public String resource() {
         // generate transport resource
