@@ -43,7 +43,7 @@
 			<string>$JAVAROOT/lib/commons-codec-1.7.jar</string>
 			<string>$JAVAROOT/lib/commons-compress-1.8.jar</string>
 			<string>$JAVAROOT/lib/commons-fileupload-1.2.2.jar</string>
-			<string>$JAVAROOT/lib/commons-io-2.1.jar</string>
+			<string>$JAVAROOT/lib/commons-io-2.3.jar</string>
 			<string>$JAVAROOT/lib/commons-jxpath-1.3.jar</string>
 			<string>$JAVAROOT/lib/commons-lang-2.6.jar</string>
 			<string>$JAVAROOT/lib/commons-logging-1.1.3.jar</string>
@@ -100,7 +100,7 @@
 			<string>$JAVAROOT/lib/pdfbox-1.8.5.jar</string>
 			<string>$JAVAROOT/lib/poi-3.10-FINAL-20140208.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.10-FINAL-20140208.jar</string>
-			<string>$JAVAROOT/lib/slf4j-api-1.7.2.jar</string>
+			<string>$JAVAROOT/lib/slf4j-api-1.7.6.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/solr-core-4.8.1.jar</string>
 			<string>$JAVAROOT/lib/solr-solrj-4.8.1.jar</string>
