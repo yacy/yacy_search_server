@@ -28,7 +28,7 @@
 	<xsl:template match='item'>
 		<div class="searchresults">
 			<h4 class="linktitle"><a href="{link}" ><xsl:value-of select='title'/></a></h4>
-			<p class="snippet"><span class="snippetLoaded"><xsl:value-of select='description'/></span></p>
+			<p class="snippet"><span class="snippetLoaded"><xsl:value-of select='description' disable-output-escaping="yes"/></span></p>
 			<p class="url"><a href="{link}" ><xsl:value-of select='link' /></a></p>
 			<p class="urlinfo"><xsl:value-of select='pubDate' /></p>
 		</div>
