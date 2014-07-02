@@ -37,7 +37,7 @@ public class IndexReIndexMonitor_p {
         prop.put("currentselectquery","");
         BusyThread bt = sb.getThread("reindexSolr");
         if (bt == null) {
-            if (post != null && post.containsKey("reindexnow") && sb.index.fulltext().connectedLocalSolr()) {
+            if (post != null && post.containsKey("reindexnow")) {
                 migration.reindexToschema(sb);
                 prop.put("querysize", "0");
                 prop.put("infomessage","reindex job started");
@@ -75,13 +75,8 @@ public class IndexReIndexMonitor_p {
             }            
         } else {
             prop.put("reindexjobrunning", 0);
-            if (sb.index.fulltext().connectedLocalSolr()) {
-                prop.put("querysize", "is empty");
-                prop.put("infomessage", "no reindex job running");
-            } else {
-                prop.put("querysize", "");
-                prop.putHTML("infomessage", "! reindex works only with embedded Solr index !");
-            }
+            prop.put("querysize", "is empty");
+            prop.put("infomessage", "no reindex job running");
         }
         // return rewrite properties
         return prop;

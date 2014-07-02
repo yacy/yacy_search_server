@@ -290,9 +290,8 @@ public final class Protocol {
         }
         mySeed.setFlagRootNode(
                 (mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL)) &&
-                responseTime < 1000 && Domains.isThisHostIP(mySeed.getIP()) &&
-                Switchboard.getSwitchboard().index.fulltext().connectedLocalSolr()
-                ); // RootNode may receive direct Solr queries, set flag only if available
+                responseTime < 1000 && Domains.isThisHostIP(mySeed.getIP())
+                );
         
         // change our seed-type
         final Accessible accessible = new Accessible();
