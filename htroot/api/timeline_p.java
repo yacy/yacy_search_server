@@ -76,6 +76,9 @@ public final class timeline_p {
         try {fromDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("from", "20031215182700"));} catch (ParseException e) {}
         try {toDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("to", GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date())));} catch (ParseException e) {}
  
+        // get latest dump;
+        AccessTracker.dumpLog();
+        
         // fill proc with events from the given data and time period
         if (proc.containsKey("queries")) {
             List<EventTracker.Event> events = AccessTracker.readLog(AccessTracker.getDumpFile(), fromDate, toDate);
