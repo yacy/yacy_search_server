@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -39,22 +39,23 @@ import net.yacy.cora.util.LookAheadIterator;
 public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator<byte[]> {
 
     private final int chunksize;
-    
+
     /**
      * create a ChunkIterator
      * a ChunkIterator uses a BufferedInputStream to iterate through the file
      * and is therefore a fast option to get all elements in the file as a sequence
      * ATTENTION: before calling this class ensure that all file buffers are flushed
+     * ATTENTION: if the iterator is not read to the end or interrupted, close() must be called to release the InputStream
      * @param file: the file
      * @param recordsize: the size of the elements in the file
      * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the lenght of recordsize are skipped
-     * @throws FileNotFoundException 
+     * @throws FileNotFoundException
      */
-    
-    
+
+
     private final DataInputStream stream;
     private final int recordsize;
-    
+
     public ChunkIterator(final File file, final int recordsize, final int chunksize) throws FileNotFoundException {
         if (!file.exists()) throw new FileNotFoundException(file.getAbsolutePath());
         assert (file.exists());
@@ -63,7 +64,16 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
         this.chunksize = chunksize;
         this.stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 64 * 1024));
     }
-    
+
+    /**
+     * Special close methode to release the used InputStream
+     * stream is automatically closed on last next(),
+     * close() needs only be called if iterator not read to the end ( hasNext() or next() has not returned null)
+    */
+    public void close() throws IOException {
+        this.stream.close();
+    }
+
     @Override
     public byte[] next0() {
         final byte[] chunk = new byte[chunksize];
@@ -82,6 +92,11 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
             return chunk;
         } catch (final EOFException e) {
             // no real exception, this is the normal termination
+            try {
+                this.stream.close(); // close the underlaying inputstream
+            } catch (IOException ex) {
+                ConcurrentLog.logException(ex);
+            }
             return null;
         } catch (final IOException e) {
             ConcurrentLog.logException(e);

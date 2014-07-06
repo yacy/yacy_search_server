@@ -173,7 +173,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             } else {
                 byte[] record;
                 key = new byte[rowdef.primaryKeyLength];
-                final Iterator<byte[]> ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
+                final ChunkIterator ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
                 while (ri.hasNext()) {
                     record = ri.next();
                     assert record != null;
@@ -188,6 +188,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                             this.table.addUnique(this.taildef.newEntry(record, rowdef.primaryKeyLength, true));
                         } catch (final SpaceExceededException e) {
                             this.table = null;
+                            ri.close(); // close inputstream of chunkiterator
                             break;
                         }
                     } else {
