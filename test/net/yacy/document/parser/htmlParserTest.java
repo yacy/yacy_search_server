@@ -6,8 +6,6 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.List;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.Document;

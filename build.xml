@@ -439,7 +439,7 @@
   <target name="compileTest" depends="compile" description="run unittests">
 	  <javac srcdir="${test}" destdir="${test}"
            debug="true" debuglevel="lines,vars,source"
-           source="${javacSource}" target="${javacTarget}">
+           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
