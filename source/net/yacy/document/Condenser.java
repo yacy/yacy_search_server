@@ -222,22 +222,16 @@ public final class Condenser {
             document.addMetatags(this.tags);
         }
 
+        // create the synonyms set
         if (synlib != null && synlib.size() > 0) {
             for (String word: this.words.keySet()) {
                 Set<String> syms = synlib.getSynonyms(word);
                 if (syms != null) this.synonyms.addAll(syms);
             }
         }
+
         String text = document.getTextString();
-        
-        // create the synonyms set
-        if (synonyms != null && synlib.size() > 0) {
-            for (String word: this.words.keySet()) {
-                Set<String> syms = synlib.getSynonyms(word);
-                if (syms != null) this.synonyms.addAll(syms);
-            }
-        }
-        
+
         // create hashes for duplicate detection
         // check dups with http://localhost:8090/solr/select?q=*:*&start=0&rows=3&fl=sku,fuzzy_signature_text_t,fuzzy_signature_l,fuzzy_signature_unique_b
         EnhancedTextProfileSignature fuzzySignatureFactory = new EnhancedTextProfileSignature();
