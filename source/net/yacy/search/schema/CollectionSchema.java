@@ -40,7 +40,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false"),
     title(SolrType.text_general, true, true, true, false, true, "content of title tag"),
     title_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b"),
-    title_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if title is unique in the whole index; if yes and another document appears with same title, the unique-flag is set to false"),
+    title_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false"),
     host_id_s(SolrType.string, true, true, false, false, false, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
     md5_s(SolrType.string, true, true, false, false, false, "the md5 of the raw source"),// String md5();
     exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t"),
@@ -82,7 +82,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     author_sxt(SolrType.string, true, true, true, false, false, "content of author-tag as copy-field from author. This is used for facet generation"),
     description_txt(SolrType.text_general, true, true, true, false, true, "content of description-tag(s)"),
     description_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of description, used to compute description_unique_b"),
-    description_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if description is unique in the whole index; if yes and another document appears with same description, the unique-flag is set to false"),
+    description_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if description is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same description, the unique-flag is set to false"),
     keywords(SolrType.text_general, true, true, false, false, true, "content of keywords tag; words are separated by space"),
     charset_s(SolrType.string, true, true, false, false, false, "character encoding"),
     wordcount_i(SolrType.num_integer, true, true, false, false, false, "number of words in visible area"),

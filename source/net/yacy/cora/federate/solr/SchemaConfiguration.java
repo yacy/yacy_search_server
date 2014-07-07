@@ -107,74 +107,76 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return sd;
     }
     
-    public boolean postprocessing_http_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
-        if (!this.contains(CollectionSchema.http_unique_b)) return false;
-        if (!url.isHTTPS() && !url.isHTTP()) return false;
+    public void postprocessing_http_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+        if (!this.contains(CollectionSchema.http_unique_b)) return;
+        if (!url.isHTTPS() && !url.isHTTP()) return;
         try {
             DigestURL u = new DigestURL((url.isHTTP() ? "https://" : "http://") + url.urlstub(true, true));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.http_unique_b.getSolrFieldName());
-            return set_unique_flag(CollectionSchema.http_unique_b, sid, d);
+            set_unique_flag(CollectionSchema.http_unique_b, sid, d);
         } catch (final IOException e) {}
-        return false;
     }
     
-    public boolean postprocessing_www_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
-        if (!this.contains(CollectionSchema.www_unique_b)) return false;
+    public void postprocessing_www_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+        if (!this.contains(CollectionSchema.www_unique_b)) return;
         final String us = url.urlstub(true, true);
         try {
             DigestURL u = new DigestURL(url.getProtocol() + (us.startsWith("www.") ? "://" + us.substring(4) : "://www." + us));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.www_unique_b.getSolrFieldName());
-            return set_unique_flag(CollectionSchema.www_unique_b, sid, d);
+            set_unique_flag(CollectionSchema.www_unique_b, sid, d);
         } catch (final IOException e) {}
-        return false;
     }
     
-    private boolean set_unique_flag(CollectionSchema field, SolrInputDocument sid, SolrDocument d) {
+    private void set_unique_flag(CollectionSchema field, SolrInputDocument sid, SolrDocument d) {
         Object sb = sid.getFieldValue(field.getSolrFieldName());
         boolean sbb = sb != null && ((Boolean) sb).booleanValue();
         Object ob = d == null ? null : d.getFieldValue(field.getSolrFieldName());
         boolean obb = ob != null && ((Boolean) ob).booleanValue();
-        if (sbb == obb) {
-            sid.setField(field.getSolrFieldName(), !sbb);
-            return true;
-        }
-        return false;
+        if (sbb == obb) sid.setField(field.getSolrFieldName(), !sbb);
     }
     
-    public boolean postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURL url) {
-        boolean changed = false;
+    public void postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURL url) {
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
+        String urlhash = ASCII.String(url.hash());
         String hostid = url.hosthash();
-        for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+        uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
                 {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
                 {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
-            CollectionSchema checkfield = checkfields[0];
+            CollectionSchema signaturefield = checkfields[0];
             CollectionSchema uniquefield = checkfields[1];
             CollectionSchema countfield = checkfields[2];
-            if (this.contains(checkfield) && this.contains(uniquefield)) {
+            if (this.contains(signaturefield) && this.contains(uniquefield) && this.contains(countfield)) {
                 // lookup the document with the same signature
-                long signature = ((Long) sid.getField(checkfield.getSolrFieldName()).getValue()).longValue();
+                Long signature = (Long) sid.getField(signaturefield.getSolrFieldName()).getValue();
+                if (signature == null) continue uniquecheck;
                 try {
-                    long count = segment.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"");
-                    if (count > 1) {
-                        String urlhash = ASCII.String(url.hash());
-                        if (uniqueURLs.contains(urlhash)) {
-                            // this is not the first appearance, therefore this is a non-unique document
-                            sid.setField(uniquefield.getSolrFieldName(), false);
-                        } else {
-                            // this is the first appearance, therefore this shall be treated as unique document
-                            sid.setField(uniquefield.getSolrFieldName(), true);
-                            uniqueURLs.add(urlhash);
-                        }
-                        sid.setField(countfield.getSolrFieldName(), count);
-                        changed = true;
+                    SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"", null, 0, 100, CollectionSchema.id.getSolrFieldName());
+                    if (docs.getNumFound() == 0) {
+                        sid.setField(uniquefield.getSolrFieldName(), true);
+                        sid.setField(countfield.getSolrFieldName(), 1);
+                    } else {
+                        boolean firstappearance = true;
+                        for (SolrDocument d: docs) {if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
+                        sid.setField(uniquefield.getSolrFieldName(), firstappearance);
+                        sid.setField(countfield.getSolrFieldName(), docs.getNumFound() + 1); // the current url was excluded from search but is included in count
                     }
                 } catch (final IOException e) {}
             }
         }
+        
         // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
-        if (segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.host_id_s)) {
-            uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+        // in case that the document has no status code 200, has a noindex attribute
+        // or a canonical tag which does not point to the document itself,
+        // then the unique-field is not written at all!
+        Integer robots_i = this.contains(CollectionSchema.robots_i) ? (Integer) sid.getFieldValue(CollectionSchema.robots_i.getSolrFieldName()) : null;
+        Integer httpstatus_i = this.contains(CollectionSchema.httpstatus_i) ? (Integer) sid.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) : null;
+        String canonical_s = this.contains(CollectionSchema.canonical_s) ? (String) sid.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()) : null;
+        Boolean canonical_equal_sku_b = this.contains(CollectionSchema.canonical_equal_sku_b) ? (Boolean) sid.getFieldValue(CollectionSchema.canonical_equal_sku_b.getSolrFieldName()) : null;
+        if (segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.host_id_s) &&
+            (robots_i == null || (robots_i.intValue() & (1 << 9)) == 0) &&
+            (canonical_s == null || canonical_s.length() == 0 || (canonical_equal_sku_b != null && canonical_equal_sku_b.booleanValue()) || url.toNormalform(true).equals(canonical_s)) &&
+            (httpstatus_i == null || httpstatus_i.intValue() == 200)) {
+            uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][] {
                     {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
                     {CollectionSchema.description_txt, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
                 CollectionSchema checkfield = checkfields[0];
@@ -183,26 +185,24 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                 if (this.contains(checkfield) && this.contains(signaturefield) && this.contains(uniquefield)) {
                     // lookup in the index within the same hosts for the same title or description
                     //String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
-                    Long checkhash = (Long) sid.getFieldValue(signaturefield.getSolrFieldName());
-                    if (checkhash == null) {
-                        sid.setField(uniquefield.getSolrFieldName(), false);
-                        changed = true;
+                    Long signature = (Long) sid.getFieldValue(signaturefield.getSolrFieldName());
+                    if (signature == null) {
                         continue uniquecheck;
                     }
                     try {
-                        final SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"", null, 0, 1);
-                        if (docs != null && !docs.isEmpty()) {
-                            // switch unique attribute in new document
-                            sid.setField(uniquefield.getSolrFieldName(), false);
-                            changed = true;
-                        } else {
+                        SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"", null, 0, 100, CollectionSchema.id.getSolrFieldName());
+                        if (docs.getNumFound() == 0) {
                             sid.setField(uniquefield.getSolrFieldName(), true);
+                        } else {
+                            boolean firstappearance = true;
+                            for (SolrDocument d: docs) {if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
+                            sid.setField(uniquefield.getSolrFieldName(), firstappearance);
                         }
                     } catch (final IOException e) {}
                 }
             }
         }
-        return changed;
+        uniqueURLs.add(urlhash);
     }
 
     public boolean postprocessing_references(final ReferenceReportCache rrCache, final SolrInputDocument sid, final DigestURL url, final Map<String, Long> hostExtentCount) {

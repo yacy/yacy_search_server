@@ -1163,7 +1163,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                                 
                                             // set cr values
                                             if (tagtype == ProcessType.CITATION) {
-                                                if (webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) {
+                                                if (segment.fulltext().useWebgraph() && webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) {
                                                     id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
                                                     CRV crv = rankings.get(id);
                                                     if (crv != null) {
@@ -1221,7 +1221,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             Set<String> omitFields = new HashSet<String>();
             omitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
             omitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
-            int proccount = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
+            int proccount = 0, proccount_referencechange = 0, proccount_citationchange = 0;
             long count = collectionConnector.getCountByQuery(collection1query);
             long start = System.currentTimeMillis();
             ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
@@ -1263,11 +1263,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         }
 
                         if (tagtype == ProcessType.UNIQUE) {
-                            boolean uniquechange = false;
-                            uniquechange |= postprocessing_http_unique(segment, sid, url);
-                            uniquechange |= postprocessing_www_unique(segment, sid, url);
-                            uniquechange |= postprocessing_doublecontent(segment, uniqueURLs, sid, url);
-                            if (uniquechange) proccount_uniquechange++;
+                            postprocessing_http_unique(segment, sid, url);
+                            postprocessing_www_unique(segment, sid, url);
+                            postprocessing_doublecontent(segment, uniqueURLs, sid, url);
                         }
                         
                     } catch (IllegalArgumentException e) {}
@@ -1308,7 +1306,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (count != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck); // big gap for harvestkey = null
             ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
                         proccount_referencechange + " reference-count changes, " +
-                        proccount_uniquechange + " unique field changes, " +
                         proccount_citationchange + " citation ranking changes.");
         } catch (final InterruptedException e2) {
             ConcurrentLog.warn("CollectionConfiguration", e2.getMessage(), e2);
