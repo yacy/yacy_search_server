@@ -72,18 +72,12 @@ public class htmlParser extends AbstractParser implements Parser {
         this.SUPPORTED_EXTENSIONS.add("aspx");
         this.SUPPORTED_EXTENSIONS.add("tex");
         this.SUPPORTED_EXTENSIONS.add("txt");
-        //SUPPORTED_EXTENSIONS.add("js");
-        this.SUPPORTED_EXTENSIONS.add("jsp");
-        this.SUPPORTED_EXTENSIONS.add("mf");
-        this.SUPPORTED_EXTENSIONS.add("pl");
-        this.SUPPORTED_EXTENSIONS.add("py");
         this.SUPPORTED_MIME_TYPES.add("text/html");
         this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
         this.SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
         this.SUPPORTED_MIME_TYPES.add("application/x-httpd-php");
         this.SUPPORTED_MIME_TYPES.add("application/x-tex");
         this.SUPPORTED_MIME_TYPES.add("text/plain");
-        this.SUPPORTED_MIME_TYPES.add("text/sgml");
         this.SUPPORTED_MIME_TYPES.add("text/csv");
     }
 

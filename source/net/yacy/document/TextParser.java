@@ -43,6 +43,7 @@ import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.genericParser;
 import net.yacy.document.parser.gzipParser;
 import net.yacy.document.parser.htmlParser;
+import net.yacy.document.parser.linkScraperParser;
 import net.yacy.document.parser.mmParser;
 import net.yacy.document.parser.odtParser;
 import net.yacy.document.parser.ooxmlParser;
@@ -91,6 +92,7 @@ public final class TextParser {
         if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser());          
         initParser(new htmlParser()); // called within rdfa parser
         initParser(new genericImageParser());
+        initParser(new linkScraperParser());
         initParser(new mmParser());
         initParser(new odtParser());
         initParser(new ooxmlParser());

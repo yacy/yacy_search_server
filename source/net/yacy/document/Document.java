@@ -433,7 +433,7 @@ dc_rights
         return this.anchors;
     }
 
-    public Map<DigestURL, String> getRSS() {
+    public LinkedHashMap<DigestURL, String> getRSS() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return this.rss;
@@ -458,7 +458,7 @@ dc_rights
         return this.videolinks;
     }
 
-    public Map<AnchorURL, ImageEntry> getImages() {
+    public LinkedHashMap<AnchorURL, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!this.resorted) resortLinks();
