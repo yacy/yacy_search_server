@@ -131,17 +131,17 @@ public class EventTracker {
 
     public final static class Event {
         final private Object time; // either a String in SHORT_SECOND format, a Long with ms since epoch or Date;
-        final public int duration; // ms
+        final public long duration; // ms
         final public String type;
         final public Object payload;
         final public int count;
-        public Event(final Date time, final int duration, final String type, final Object payload, final int count) {
+        public Event(final Date time, final long duration, final String type, final Object payload, final int count) {
             this.time = time; this.duration = duration; this.type = type; this.payload = payload; this.count = count;
         }
-        public Event(final Long time, final int duration, final String type, final Object payload, final int count) {
+        public Event(final Long time, final long duration, final String type, final Object payload, final int count) {
             this.time = time; this.duration = duration; this.type = type; this.payload = payload; this.count = count;
         }
-        public Event(final String time, final int duration, final String type, final Object payload, final int count) {
+        public Event(final String time, final long duration, final String type, final Object payload, final int count) {
             this.time = time; this.duration = duration; this.type = type; this.payload = payload; this.count = count;
         }
         public String getFormattedDate() {

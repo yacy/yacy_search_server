@@ -1,8 +1,5 @@
 package net.yacy.document;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,7 +13,8 @@ import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.odtParser;
 import net.yacy.document.parser.ooxmlParser;
 import net.yacy.document.parser.pdfParser;
-
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 
@@ -88,7 +86,7 @@ public class ParserTest {
                     } catch (final InterruptedException ex) {}
                     }
 		}
-                
+
         	@Test public void testpdfParsers() throws FileNotFoundException, Parser.Failure, MalformedURLException, UnsupportedEncodingException, IOException	{
 		final String[][] testFiles = new String[][] {
                         // meaning:  filename in test/parsertest, mimetype, title, creator, description,
@@ -110,7 +108,7 @@ public class ParserTest {
                             int c;
                             while( (c = content.read()) != -1 )
                                     str.append((char)c);
-
+                             
                             System.out.println("Parsed " + filename + ": " + str);
                             assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
                             assertThat(doc.dc_title(), containsString(testFile[2]));

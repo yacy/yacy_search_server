@@ -38,7 +38,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.WordCache;
@@ -235,13 +234,22 @@ public class AccessTracker {
             ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
             BufferedReader reader = new BufferedReader(new InputStreamReader(bais, "UTF-8"));
             String line;
-            Pattern sp = Pattern.compile(" ");
             while ((line = reader.readLine()) != null) {
                 // parse the line
-                String[] ls = sp.split(line);
+                if (line.length() < GenericFormatter.PATTERN_SHORT_SECOND.length() + 3 ||
+                    line.charAt(GenericFormatter.PATTERN_SHORT_SECOND.length()) != ' ') continue;
+                String dateStr = line.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length());
+                int countEnd = -1;
+                for (int i = GenericFormatter.PATTERN_SHORT_SECOND.length() + 2; i < line.length(); i++) {
+                    if (line.charAt(i) == ' ') { countEnd = i; break; }
+                }
+                if (countEnd == -1) continue;
+                String countStr = line.substring(GenericFormatter.PATTERN_SHORT_SECOND.length() + 1, countEnd);
+                if (countStr.length() > 5) continue;
+                int hits = countStr.length() == 1 ? (countStr.charAt(0)) - 48 : Integer.parseInt(countStr);
                 EventTracker.Event event;
-                if (ls.length > 1) try {
-                    event = new EventTracker.Event(ls[0], 0, "query", line.substring(ls[0].length() + ls[1].length() + 2), Integer.valueOf(ls[1]));
+                try {
+                    event = new EventTracker.Event(dateStr, 0, "query", line.substring(dateStr.length() + countStr.length() + 2), hits);
                     events.add(event);
                 } catch (NumberFormatException e) {
                     continue;

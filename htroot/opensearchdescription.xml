@@ -15,6 +15,7 @@
   #(compareyacy)#
   <Url type="text/html" method="GET" template="http://#[thisaddress]#/yacysearch.html?query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;nav=all&amp;resource=global" />
   <Url type="application/rss+xml" method="GET" template="http://#[thisaddress]#/yacysearch.rss?nav=&amp;query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;nav=all&amp;resource=global" />
+  <Url type="application/atom+xml" method="GET" template="http://#[thisaddress]#/yacysearch.atom?query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;resource=global" />
   ::
   <Url type="text/html" method="GET" template="http://#[thisaddress]#/compare_yacy.html?query={searchTerms}&amp;left=#[search_left]#&amp;right=#[search_right]#&amp;display=2" />
   #(/compareyacy)#

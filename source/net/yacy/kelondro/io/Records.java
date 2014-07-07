@@ -116,7 +116,7 @@ public final class Records {
         this.buffer = new byte[buffersize];
         this.buffercount = 0;
     }
-    
+
     public void clear() {
         try {
             this.raf.setLength(0);
@@ -399,10 +399,14 @@ public final class Records {
             return;
         }
         // read entry from the file
-        final long endpos = this.raf.length() - this.recordsize;
-        this.raf.seek(endpos);
-        this.raf.readFully(b, start, this.recordsize);
-
+        long endpos = this.raf.length() - this.recordsize;
+        if (endpos >= 0) { // prevent seek error for 0 size file
+            this.raf.seek(endpos);
+            this.raf.readFully(b, start, this.recordsize);
+        } else {
+            endpos = 0;
+            System.arraycopy(this.zero, 0, b, start, this.recordsize);
+        }
         // write zero bytes to the cache and to the file
         this.raf.seek(endpos);
         this.raf.write(this.zero, 0, this.recordsize);
@@ -434,7 +438,8 @@ public final class Records {
             return;
         }
         // shrink file
-        this.raf.setLength(this.raf.length() - this.recordsize);
+        if (this.raf.length() > 0) // already 0 length, nothing to shrink (prevent seek io error)
+            this.raf.setLength(this.raf.length() - this.recordsize);
     }
 
     public final void deleteOnExit() {

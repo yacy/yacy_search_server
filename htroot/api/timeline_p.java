@@ -54,16 +54,16 @@ public final class timeline_p {
         // get type of data to be listed in the timeline
         int maxeventsperperiod = post.getInt("head", 1); // the maximum number of events per period
         String period = post.get("period", ""); // must be an integer with a character c at the end, c = Y|M|d|h|m|s
-        int periodlength = 0;
+        long periodlength = 0;
         if (period.length() > 0) {
             char c = period.charAt(period.length() - 1);
-            int p = Integer.parseInt(period.substring(0, period.length() - 1));
-                 if (c == 's') periodlength = p * 1000;
-            else if (c == 'm') periodlength = p * 1000 * 60;
-            else if (c == 'h') periodlength = p * 1000 * 60 * 60;
-            else if (c == 'd') periodlength = p * 1000 * 60 * 60 * 24;
-            else if (c == 'M') periodlength = p * 1000 * 60 * 60 * 24 * 30;
-            else if (c == 'Y') periodlength = p * 1000 * 60 * 60 * 24 * 365;
+            long p = Long.parseLong(period.substring(0, period.length() - 1));
+                 if (c == 's') periodlength = p * 1000L;
+            else if (c == 'm') periodlength = p * 1000L * 60L;
+            else if (c == 'h') periodlength = p * 1000L * 60L * 60L;
+            else if (c == 'd') periodlength = p * 1000L * 60L * 60L * 24L;
+            else if (c == 'M') periodlength = p * 1000L * 60L * 60L * 24L * 30L;
+            else if (c == 'Y' || c == 'y') periodlength = p * 1000L * 60L * 60L * 24L * 365L;
             else periodlength = 0;
         }
         final String[] data = post.get("data", "").split(",");  // a string of word hashes that shall be searched and combined
@@ -76,6 +76,9 @@ public final class timeline_p {
         try {fromDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("from", "20031215182700"));} catch (ParseException e) {}
         try {toDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("to", GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date())));} catch (ParseException e) {}
  
+        // get latest dump;
+        AccessTracker.dumpLog();
+        
         // fill proc with events from the given data and time period
         if (proc.containsKey("queries")) {
             List<EventTracker.Event> events = AccessTracker.readLog(AccessTracker.getDumpFile(), fromDate, toDate);
@@ -131,7 +134,7 @@ public final class timeline_p {
         return prop;
     }
 
-    private static void stats(OrderedScoreMap<String> accumulation, List<EventTracker.Event> eap, long startDate, int periodlength, int head, String type) {
+    private static void stats(OrderedScoreMap<String> accumulation, List<EventTracker.Event> eap, long startDate, long periodlength, int head, String type) {
         // write accumulation of the score map into eap
         Iterator<String> si = accumulation.keys(false);
         int c = 0;
