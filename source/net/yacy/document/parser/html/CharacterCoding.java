@@ -312,6 +312,13 @@ public final class CharacterCoding {
             }
             s = text.substring(p, q + 1);
             p = q + 1;
+            // check if another ampersand is in between
+            int pp;
+            while ((pp = s.indexOf('&', 1)) >= 0) {
+                // we skip the first ampersand
+                sb.append(s.substring(0, pp));
+                s = s.substring(pp);
+            }
             if (s.equals(AMP_HTML)) {
                 sb.append(AMP_UNICODE);
                 continue;
@@ -340,7 +347,8 @@ public final class CharacterCoding {
                 } catch (final NumberFormatException e) { }
                 continue;
             }
-            // the entity is unknown, skip it
+            // the entity is unknown, copy it
+            sb.append(s);
         }
         return sb.toString();
     }
