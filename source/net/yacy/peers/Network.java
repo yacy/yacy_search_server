@@ -89,11 +89,6 @@ public class Network
     // class variables
     Switchboard sb;
 
-    public static int yacyTime() {
-        // the time since startup of yacy in seconds
-        return Math.max(0, (int) ((System.currentTimeMillis() - serverCore.startupTime) / 1000));
-    }
-
     public Network(final Switchboard sb) {
         final long time = System.currentTimeMillis();
 

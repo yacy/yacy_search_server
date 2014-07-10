@@ -194,7 +194,6 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.RobotsTxtConfig;
 import net.yacy.utils.CryptoLib;
@@ -281,6 +280,7 @@ public final class Switchboard extends serverSwitch {
     public boolean useTailCache;
     public boolean exceed134217727;
 
+    public final long startupTime = System.currentTimeMillis();
     private final Semaphore shutdownSync = new Semaphore(0);
     private boolean terminate = false;
     private boolean startupAction = true; // this is set to false after the first event
@@ -3607,22 +3607,22 @@ public final class Switchboard extends serverSwitch {
     }
 
     public float averageQPM() {
-        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
         return (this.searchQueriesRobinsonFromRemote + this.searchQueriesGlobal) * 60f / Math.max(uptime, 1f);
     }
 
     public float averageQPMGlobal() {
-        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
         return (this.searchQueriesGlobal) * 60f / Math.max(uptime, 1f);
     }
 
     public float averageQPMPrivateLocal() {
-        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
         return (this.searchQueriesRobinsonFromLocal) * 60f / Math.max(uptime, 1f);
     }
 
     public float averageQPMPublicLocal() {
-        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
         return (this.searchQueriesRobinsonFromRemote) * 60f / Math.max(uptime, 1f);
     }
 
@@ -3632,7 +3632,7 @@ public final class Switchboard extends serverSwitch {
         this.peers.mySeed().put(Seed.PORT, getConfig("port", "8090"));
 
         //the speed of indexing (pages/minute) of the peer
-        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
         Seed mySeed = this.peers.mySeed();
         
         mySeed.put(Seed.ISPEED, Integer.toString(currentPPM()));
