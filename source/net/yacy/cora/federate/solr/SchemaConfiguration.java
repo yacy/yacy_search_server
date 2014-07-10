@@ -173,7 +173,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         String canonical_s = this.contains(CollectionSchema.canonical_s) ? (String) sid.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()) : null;
         Boolean canonical_equal_sku_b = this.contains(CollectionSchema.canonical_equal_sku_b) ? (Boolean) sid.getFieldValue(CollectionSchema.canonical_equal_sku_b.getSolrFieldName()) : null;
         if (segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.host_id_s) &&
-            (robots_i == null || (robots_i.intValue() & (1 << 9)) == 0) &&
+            (robots_i == null || (robots_i.intValue() & (1 << 9)) == 0 /*noindex in http X-ROBOTS*/ && (robots_i.intValue() & (1 << 3)) == 0 /*noindex in html metas*/ ) &&
             (canonical_s == null || canonical_s.length() == 0 || (canonical_equal_sku_b != null && canonical_equal_sku_b.booleanValue()) || url.toNormalform(true).equals(canonical_s)) &&
             (httpstatus_i == null || httpstatus_i.intValue() == 200)) {
             uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][] {
@@ -190,14 +190,8 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                         continue uniquecheck;
                     }
                     try {
-                        SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"", null, 0, 100, CollectionSchema.id.getSolrFieldName());
-                        if (docs.getNumFound() == 0) {
-                            sid.setField(uniquefield.getSolrFieldName(), true);
-                        } else {
-                            boolean firstappearance = true;
-                            for (SolrDocument d: docs) {if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
-                            sid.setField(uniquefield.getSolrFieldName(), firstappearance);
-                        }
+                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"");
+                        sid.setField(uniquefield.getSolrFieldName(), doccount == 0);
                     } catch (final IOException e) {}
                 }
             }
