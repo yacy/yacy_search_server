@@ -190,7 +190,16 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                         continue uniquecheck;
                     }
                     try {
-                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"");
+                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery(
+                                CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " +
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":8 AND " + // bit 3
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":24 AND " + // bit 3 + 4
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":512 AND " + // bit 9
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":1536 AND " + // bit 9 + 10
+                                "(-" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":[* TO *] OR " + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":true ) AND " +
+                                CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " +
+                                "-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " +
+                                signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"");
                         sid.setField(uniquefield.getSolrFieldName(), doccount == 0);
                     } catch (final IOException e) {}
                 }
