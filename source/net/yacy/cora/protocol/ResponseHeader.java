@@ -108,6 +108,7 @@ public class ResponseHeader extends HeaderFramework {
         if (x_robots_tag.isEmpty()) {
             x_robots_tag = this.get(HeaderFramework.X_ROBOTS, "");
         }
-        return x_robots_tag;
+        return x_robots_tag.toLowerCase();
     }
+
 }

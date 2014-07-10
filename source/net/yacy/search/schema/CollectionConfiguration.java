@@ -570,15 +570,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (robots_meta.indexOf("noindex",0) >= 0) b += 8;  // set bit 3
                 if (robots_meta.indexOf("nofollow",0) >= 0) b += 16; // set bit 4
             }
-            String x_robots_tag = "";
-            if (responseHeader != null) {
-                x_robots_tag = responseHeader.get(HeaderFramework.X_ROBOTS_TAG, "");
-                if (x_robots_tag.isEmpty()) {
-                    x_robots_tag = responseHeader.get(HeaderFramework.X_ROBOTS, "");
-                }
-            }
+            String x_robots_tag = responseHeader.getXRobotsTag();
             if (!x_robots_tag.isEmpty()) {
-                x_robots_tag = x_robots_tag.toLowerCase();
                 // this tag may have values: all, noindex, nofollow, noarchive, nosnippet, noodp, notranslate, noimageindex, unavailable_after, none; see https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag?hl=de
                 if (x_robots_tag.indexOf("all",0) >= 0) b += 1<<8;                // set bit 8
                 if (x_robots_tag.indexOf("noindex",0) >= 0||x_robots_tag.indexOf("none",0) >= 0) b += 1<<9;   // set bit 9
