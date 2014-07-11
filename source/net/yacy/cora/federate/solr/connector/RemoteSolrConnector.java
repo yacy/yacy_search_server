@@ -99,8 +99,9 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = params.get("q");
+        String fq = params.get("fq");
         String threadname = Thread.currentThread().getName();
-        if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+        if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         
         QueryRequest request = new QueryRequest(params);
         ResponseParser responseParser = useBinaryResponseWriter ? new BinaryResponseParser() : new XMLResponseParser();

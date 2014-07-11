@@ -293,8 +293,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = params.get("q");
+        String fq = params.get("fq");
         String threadname = Thread.currentThread().getName();
-        if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+        if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         QueryResponse rsp;
         try {
             rsp = this.server.query(params);
