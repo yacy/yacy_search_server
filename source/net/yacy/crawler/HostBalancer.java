@@ -284,6 +284,65 @@ public class HostBalancer implements Balancer {
                 }
                 if (this.roundRobinHostHashes.size() == 0) return null;
                 
+                // if the queue size is 1, just take that
+                if (this.roundRobinHostHashes.size() == 1) {
+                    rhh = this.roundRobinHostHashes.iterator().next();
+                    rhq = this.queues.get(rhh);
+                }
+                
+                if (rhq == null) {
+                    // mixed minimum sleep time / largest queue strategy:
+                    // create a map of sleep time / queue relations with a fuzzy sleep time (ms / 500).
+                    // if the entry with the smallest sleep time contains at least two entries,
+                    // then the larger one from these queues are selected.
+                    TreeMap<Integer, List<String>> fastTree = new TreeMap<>();
+                    mixedstrategy: for (String h: this.roundRobinHostHashes) {
+                        HostQueue hq = this.queues.get(h);
+                        if (hq != null) {
+                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), h, robots, ClientIdentification.yacyInternetCrawlerAgent) / 200;
+                            if (delta < 0) delta = 0;
+                            List<String> queueHashes = fastTree.get(delta);
+                            if (queueHashes == null) {
+                                queueHashes = new ArrayList<>(2);
+                                fastTree.put(delta, queueHashes);
+                            }
+                            queueHashes.add(h);
+                            // check stop criteria
+                            List<String> firstEntries = fastTree.firstEntry().getValue();
+                            if (firstEntries.size() > 1) {
+                                // select larger queue from that list
+                                int largest = Integer.MIN_VALUE;
+                                for (String hh: firstEntries) {
+                                    HostQueue hhq = this.queues.get(hh);
+                                    if (hhq != null) {
+                                        int s = hhq.size();
+                                        if (s > largest) {
+                                            largest = s;
+                                            rhh = hh;
+                                        }
+                                    }
+                                }
+                                rhq = this.queues.get(rhh);
+                                break mixedstrategy;
+                            }
+                        }
+                    }
+                    if (rhq == null && fastTree.size() > 0) {
+                        // it may be possible that the lowest entry never has more than one queues assigned
+                        // in this case just take the smallest entry
+                        List<String> firstEntries = fastTree.firstEntry().getValue();
+                        assert firstEntries.size() == 1;
+                        rhh = firstEntries.get(0);
+                        rhq = this.queues.get(rhh);
+                    }
+                    // to prevent that the complete roundrobinhosthashes are taken for each round, we remove the entries from the top of the fast queue
+                    List<String> lastEntries = fastTree.lastEntry().getValue();
+                    if (lastEntries != null) {
+                        for (String h: lastEntries) this.roundRobinHostHashes.remove(h);
+                    }
+                }
+                
+                /*
                 // first strategy: get one entry which does not need sleep time
                 Iterator<String> nhhi = this.roundRobinHostHashes.iterator();
                 nosleep: while (nhhi.hasNext()) {
@@ -299,7 +358,6 @@ public class HostBalancer implements Balancer {
                         break nosleep;
                     }
                 }
-                
                 if (rhq == null) {
                     // second strategy: take from the largest stack
                     int largest = Integer.MIN_VALUE;
@@ -315,9 +373,14 @@ public class HostBalancer implements Balancer {
                     }
                     rhq = this.queues.get(rhh);
                 }
+                */
             }
             
-            if (rhq == null) continue tryagain;
+            if (rhq == null) {
+                this.roundRobinHostHashes.clear(); // force re-initialization
+                continue tryagain;
+            }
+            this.roundRobinHostHashes.remove(rhh); // prevent that the queue is used again
             long timestamp = System.currentTimeMillis();
             Request request = rhq.pop(delay, cs, robots); // this pop is outside of synchronization to prevent blocking of pushes
             long actualwaiting = System.currentTimeMillis() - timestamp;
@@ -351,6 +414,7 @@ public class HostBalancer implements Balancer {
         } catch (IOException e) {
             throw e;
         } catch (Throwable e) {
+            ConcurrentLog.logException(e);
             throw new IOException(e.getMessage());
         }
     }
