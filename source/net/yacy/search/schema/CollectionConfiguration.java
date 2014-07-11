@@ -1587,6 +1587,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         public FailType getFailType() {
             return failType;
         }
+        public Date getFailDate() {
+            return this.failtime;
+        }
         public int getHttpstatus() {
             return httpstatus;
         }

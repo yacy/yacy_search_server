@@ -381,30 +381,28 @@ public final class CrawlStacker {
         final String urlstring = url.toString();
         // check if the url is double registered
         String urlhash = ASCII.String(url.hash());
+        final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
+        final Date oldDate = errorEntry == null ? null : errorEntry.getFailDate();
         final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
-        final long oldTime = this.indexSegment.fulltext().getLoadTime(urlhash);
-        if (oldTime < 0) {
+        if (oldDate == null) {
             if (dbocc != null) {
                 // do double-check
                 if (dbocc == HarvestProcess.ERRORS) {
-                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
                     return "double in: errors (" + (errorEntry == null ? "NULL" : errorEntry.getFailReason()) + ")";
                 }
                 return "double in: " + dbocc.toString();
             }
         } else {
-            final boolean recrawl = profile.recrawlIfOlder() > oldTime;
+            final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
             if (recrawl) {
                 if (CrawlStacker.log.isInfo())
                     CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                        ((System.currentTimeMillis() - oldTime) / 60000 / 60 / 24) + " days ago.");
+                        ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
             } else {
-                Date oldDate = new Date(oldTime);
                 if (dbocc == null) {
                     return "double in: LURL-DB, oldDate = " + oldDate.toString();
                 }
                 if (dbocc == HarvestProcess.ERRORS) {
-                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
                     if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + (errorEntry == null ? "NULL" : errorEntry.getFailReason()));
                     return "double in: errors (" + (errorEntry == null ? "NULL" : errorEntry.getFailReason()) + "), oldDate = " + oldDate.toString();
                 }

@@ -147,9 +147,6 @@ public class CrawlQueues {
         if (this.delegatedURL.containsKey(ASCII.String(hash))) {
             return HarvestProcess.DELEGATED;
         }
-        if (this.errorURL.exists(hash)) {
-            return HarvestProcess.ERRORS;
-        }
         //if (this.noticeURL.existsInStack(hash)) {
         //    return HarvestProcess.CRAWLER;
         //} // this is disabled because it prevents proper crawling of smb shares. The cause is unknown
@@ -157,6 +154,9 @@ public class CrawlQueues {
             if (Base64Order.enhancedCoder.equal(request.url().hash(), hash)) {
                 return HarvestProcess.WORKER;
             }
+        }
+        if (this.errorURL.exists(hash)) {
+            return HarvestProcess.ERRORS;
         }
         return null;
     }
