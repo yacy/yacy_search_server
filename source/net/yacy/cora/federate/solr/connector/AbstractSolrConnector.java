@@ -391,7 +391,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         // construct query
         StringBuilder sb = new StringBuilder(23);
         sb.append("{!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id);
-        query.setQuery(sb.toString());
+        query.setQuery("*:*");
+        query.addFilterQuery(sb.toString());
         query.clearSorts();
         query.setRows(1);
         query.setStart(0);
