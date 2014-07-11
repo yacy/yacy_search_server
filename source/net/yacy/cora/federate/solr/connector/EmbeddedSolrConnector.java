@@ -417,7 +417,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             if (doc == null) return null;
             return AbstractSolrConnector.getMetadata(doc);
             //}
-        } catch (Throwable e) {} finally {
+        } catch (Throwable e) {
+            ConcurrentLog.logException(e);
+        } finally {
             if (docListSearcher != null) docListSearcher.close();
         }
         return null;

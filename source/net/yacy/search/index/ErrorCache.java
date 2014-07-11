@@ -109,7 +109,7 @@ public class ErrorCache {
                 url, profile == null ? null : profile.collections(),
                 failCategory.name() + " " + reason, failCategory.failType,
                 httpcode, crawldepth);
-        if (this.fulltext.getDefaultConnector() != null && failCategory.store && !exists(url.hash())) {
+        if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
             // send the error to solr
             try {
                 // do not overwrite error reports with error reports
@@ -189,12 +189,10 @@ public class ErrorCache {
     public boolean exists(final byte[] urlHash) {
         String urlHashString = ASCII.String(urlHash);
         try {
-            // first try to check if the document exists at all.
-            long loaddate = this.fulltext.getLoadTime(urlHashString);
-            if (loaddate < 0) return false;
-            // then load the fail reason, if exists
+            // load the fail reason, if exists
             final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlHashString, CollectionSchema.failreason_s.getSolrFieldName());
             if (doc == null) return false;
+
             // check if the document contains a value in the field CollectionSchema.failreason_s
             Object failreason = doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
             return failreason != null && failreason.toString().length() > 0;
