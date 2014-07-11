@@ -1355,6 +1355,7 @@ public final class Protocol {
      * @return
      */
     public static String transferIndex(
+        final SeedDB seeds,
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
         final HandleSet urlRefs,
@@ -1383,15 +1384,21 @@ public final class Protocol {
         Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
 
         if ( in == null ) {
-            return "no connection from transferRWI";
+            String errorCause = "no connection from transferRWI";
+            seeds.peerActions.peerDeparture(targetSeed, errorCause); // disconnect unavailable peer
+            return errorCause;
         }
 
         String result = in.get("result");
         if ( result == null ) {
-            return "no result from transferRWI";
+            String errorCause = "no result from transferRWI";
+            seeds.peerActions.peerDeparture(targetSeed, errorCause); // disconnect unavailable peer
+            return errorCause;
         }
 
         if ( !(result.equals("ok")) ) {
+            targetSeed.setFlagAcceptRemoteIndex(false); // the peer does not want our index
+            seeds.addConnected(targetSeed); // update the peer
             return result;
         }
 
@@ -1426,10 +1433,14 @@ public final class Protocol {
 
         result = in.get("result");
         if ( result == null ) {
-            return "no result from transferURL";
+            String errorCause = "no result from transferURL";
+            seeds.peerActions.peerDeparture(targetSeed, errorCause); // disconnect unavailable peer
+            return errorCause;
         }
 
         if ( !result.equals("ok") ) {
+            targetSeed.setFlagAcceptRemoteIndex(false); // the peer does not want our index
+            seeds.addConnected(targetSeed); // update the peer
             return result;
         }
         EventChannel.channels(EventChannel.DHTSEND).addMessage(

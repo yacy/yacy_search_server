@@ -69,8 +69,8 @@ public class Transmission {
         this.timeout4Transfer = timeout4Transfer;
     }
 
-    public Chunk newChunk(final String primaryTarget, final List<Seed> targets) {
-        return new Chunk(primaryTarget, targets);
+    public Chunk newChunk(final Seed dhtTarget) {
+        return new Chunk(dhtTarget);
     }
 
     public class Chunk extends WorkflowJob implements Iterable<ReferenceContainer<WordReference>> {
@@ -84,27 +84,24 @@ public class Transmission {
          * - a set of yacy seeds which will shrink as the containers are transmitted to them
          * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
-        private final String                         primaryTarget;
+        private final Seed                           dhtTarget;
         private final ReferenceContainerCache<WordReference> containers;
         private final HandleSet                      references;
         private final HandleSet                      badReferences;
-        private final List<Seed>                     targets;
         private int                                  hit, miss;
 
         /**
          * generate a new dispatcher target. such a target is defined with a primary target and
          * a set of target peers that shall receive the entries of the containers
          * the payloadrow defines the structure of container entries
-         * @param primaryTarget
-         * @param targets
+         * @param dhtTarget
          */
-        public Chunk(final String primaryTarget, final List<Seed> targets) {
+        public Chunk(final Seed dhtTarget) {
             super();
-            this.primaryTarget = primaryTarget;
+            this.dhtTarget = dhtTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
             this.references = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.badReferences = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.targets    = targets;
             this.hit = 0;
             this.miss = 0;
         }
@@ -203,8 +200,8 @@ public class Transmission {
             return this.containers.size();
         }
 
-        public String primaryTarget() {
-            return this.primaryTarget;
+        public Seed dhtTarget() {
+            return this.dhtTarget;
         }
 
         /**
@@ -223,39 +220,27 @@ public class Transmission {
             return this.miss;
         }
 
-        /**
-         * return the number of targets that are left in the target cache
-         * if this is empty, there may be no more use of this object and it should be flushed
-         * with the iterator method
-         * @return
-         */
-        public int targets() {
-            return this.targets.size();
-        }
-
         public boolean transmit() {
-            if (this.targets.isEmpty()) return false;
-            final Seed target = this.targets.remove(0);
             // transferring selected words to remote peer
-            if (target == Transmission.this.seeds.mySeed() || target.hash.equals(Transmission.this.seeds.mySeed().hash)) {
+            if (this.dhtTarget == Transmission.this.seeds.mySeed() || this.dhtTarget.hash.equals(Transmission.this.seeds.mySeed().hash)) {
             	// target is my own peer. This is easy. Just restore the indexContainer
             	restore();
             	this.hit++;
             	Transmission.this.log.info("Transfer of chunk to myself-target");
             	return true;
             }
-            Transmission.this.log.info("starting new index transmission request to " + this.primaryTarget);
+            Transmission.this.log.info("starting new index transmission request to " + this.dhtTarget.getName());
             final long start = System.currentTimeMillis();
-            final String error = Protocol.transferIndex(target, this.containers, this.references, Transmission.this.segment, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
+            final String error = Protocol.transferIndex(Transmission.this.seeds, this.dhtTarget, this.containers, this.references, Transmission.this.segment, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
                 final long transferTime = System.currentTimeMillis() - start;
                 final Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
                 final ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
                 Transmission.this.log.info("Index transfer of " + this.containers.size() +
-                                 " words [" + ((firstContainer == null) ? null : ASCII.String(firstContainer.getTermHash())) + " .. " + this.primaryTarget + "]" +
+                                 " references for terms [ " + ((firstContainer == null) ? null : ASCII.String(firstContainer.getTermHash()))  + " ..]" +
                                  " and " + this.references.size() + " URLs" +
-                                 " to peer " + target.getName() + ":" + target.hash +
+                                 " to peer " + this.dhtTarget.getName() + ":" + this.dhtTarget.hash +
                                  " in " + (transferTime / 1000) +
                                  " seconds successful ("  + (1000 * this.containers.size() / (transferTime + 1)) +
                                  " words/s)");
@@ -263,20 +248,20 @@ public class Transmission {
                 Transmission.this.seeds.mySeed().incSU(this.references.size());
                 // if the peer has set a pause time and we are in flush mode (index transfer)
                 // then we pause for a while now
-                Transmission.this.log.info("Transfer finished of chunk to target " + target.hash + "/" + target.getName());
+                Transmission.this.log.info("Transfer finished of chunk to target " + this.dhtTarget.hash + "/" + this.dhtTarget.getName());
                 this.hit++;
                 return true;
             }
             Transmission.this.log.info(
-                    "Index transfer to peer " + target.getName() + ":" + target.hash +
+                    "Index transfer to peer " + this.dhtTarget.getName() + ":" + this.dhtTarget.hash +
                     " failed: " + error);
             this.miss++;
             // write information that peer does not receive index transmissions
-            Transmission.this.log.info("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
+            Transmission.this.log.info("Transfer failed of chunk to target " + this.dhtTarget.hash + "/" + this.dhtTarget.getName() + ": " + error);
             // get possibly newer target Info
-            final Seed newTarget = Transmission.this.seeds.get(target.hash);
+            final Seed newTarget = Transmission.this.seeds.get(this.dhtTarget.hash);
             if (newTarget != null) {
-                final String oldAddress = target.getPublicAddress();
+                final String oldAddress = this.dhtTarget.getPublicAddress();
                 if ((oldAddress != null) && (oldAddress.equals(newTarget.getPublicAddress()))) {
                     newTarget.setFlagAcceptRemoteIndex(false);
                     Transmission.this.seeds.update(newTarget.hash, newTarget);
@@ -287,16 +272,6 @@ public class Transmission {
                 // target not in DB anymore. ???
             }
             return false;
-        }
-
-        public boolean isFinished() {
-        	//System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
-            return this.hit >= Transmission.this.seeds.redundancy();
-        }
-
-        public boolean canFinish() {
-        	//System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
-            return this.targets.size() >= Transmission.this.seeds.redundancy() - this.hit;
         }
 
         public void restore() {

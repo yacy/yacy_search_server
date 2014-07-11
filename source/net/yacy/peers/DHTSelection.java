@@ -24,6 +24,7 @@
 
 package net.yacy.peers;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -48,13 +49,10 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.peers.operation.yacyVersion;
 
-
-
-/*
- * this package is a collection of peer selection iterations that had been
+/**
+ * This package is a collection of peer selection iterations that had been
  * part of yacyPeerActions, yacyDHTActions and yacySeedDB
  */
-
 public class DHTSelection {
     
     public static Set<Seed> selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
@@ -138,7 +136,7 @@ public class DHTSelection {
         
         return extraSeeds;
     }
-    
+
     public static Set<Seed> selectDHTSearchTargets(final SeedDB seedDB, final HandleSet wordhashes, final int minage, final int redundancy, final int maxredundancy, final Random random) {
 
         // put in seeds according to dht
@@ -172,11 +170,21 @@ public class DHTSelection {
         return collectedSeeds;
     }
     
+    @SuppressWarnings("unchecked")
+    public static List<Seed>[] selectDHTDistributionTargets(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy) {
+        // this method is called from the distribution target computation
+        List<Seed>[] seedlists = (List<Seed>[]) Array.newInstance(ArrayList.class, seedDB.scheme.verticalPartitions());
+        for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
+            seedlists[verticalPosition] = selectVerticalDHTPositions(seedDB, wordhash, minage, redundancy, verticalPosition);
+        }
+        return seedlists;
+    }
+    
     /**
      * collecting vertical positions: that chooses for each of the DHT partition a collection of redundant storage positions
      * @param seedDB the database of seeds
      * @param wordhash the word we are searching for
-     * @param minage the minimum age of a seed (to prevent that too young seeds which cannot have results yet are asked)
+     * @param minage the minimum age of a seed in days (to prevent that too young seeds which cannot have results yet are asked)
      * @param redundancy the number of redundant peer position for this parition, minimum is 1
      * @param verticalPosition the verical position, thats the number of the partition 0 <= verticalPosition < seedDB.scheme.verticalPartitions()
      * @return a list of seeds for the redundant positions
