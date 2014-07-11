@@ -102,8 +102,6 @@ public class ErrorCache {
     public void push(final DigestURL url, final int crawldepth, final CrawlProfile profile, final FailCategory failCategory, String anycause, final int httpcode) {
         // assert executor != null; // null == proxy !
         assert failCategory.store || httpcode == -1 : "failCategory=" + failCategory.name();
-        if (exists(url.hash()))
-            return; // don't insert double causes
         if (anycause == null) anycause = "unknown";
         final String reason = anycause + ((httpcode >= 0) ? " (http return code = " + httpcode + ")" : "");
         if (!reason.startsWith("double")) log.info(url.toNormalform(true) + " - " + reason);
@@ -111,7 +109,7 @@ public class ErrorCache {
                 url, profile == null ? null : profile.collections(),
                 failCategory.name() + " " + reason, failCategory.failType,
                 httpcode, crawldepth);
-        if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
+        if (this.fulltext.getDefaultConnector() != null && failCategory.store && !exists(url.hash())) {
             // send the error to solr
             try {
                 // do not overwrite error reports with error reports
