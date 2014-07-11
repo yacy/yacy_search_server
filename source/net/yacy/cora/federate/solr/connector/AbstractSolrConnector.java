@@ -273,12 +273,12 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             final String ... fields) {
         // construct query
         final SolrQuery params = new SolrQuery();
-        if (count < 2 && querystring.startsWith("{!raw f=")) {
-            params.setQuery("*:*");
-            params.addFilterQuery(querystring);
-        } else {
+        //if (count < 2 && querystring.startsWith("{!raw f=")) {
+        //    params.setQuery("*:*");
+        //    params.addFilterQuery(querystring);
+        //} else {
             params.setQuery(querystring);
-        }
+        //}
         params.clearSorts();
         if (sort != null) {
             params.set("sort", sort);
@@ -311,9 +311,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final SolrQuery params = new SolrQuery();
         //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
         String q = "{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id;
-        //params.setQuery(q);
-        params.setQuery("*:*");
-        params.addFilterQuery(q);
+        params.setQuery(q);
+        //params.setQuery("*:*");
+        //params.addFilterQuery(q);
         //params.set("defType", "raw");
         params.setRows(1);
         params.setStart(0);
@@ -399,9 +399,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         // construct query
         StringBuilder sb = new StringBuilder(23);
         sb.append("{!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id);
-        //query.setQuery(sb.toString());
-        query.setQuery("*:*");
-        query.addFilterQuery(sb.toString());
+        query.setQuery(sb.toString());
+        //query.setQuery("*:*");
+        //query.addFilterQuery(sb.toString());
         query.clearSorts();
         query.setRows(1);
         query.setStart(0);
