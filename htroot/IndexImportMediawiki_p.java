@@ -54,11 +54,16 @@ public class IndexImportMediawiki_p {
             } else {
                 if (post.containsKey("file")) {
                     final File sourcefile = new File(post.get("file"));
-                    MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
-                    MediawikiImporter.job.start();
+                    if (sourcefile.exists()) {
+                        MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
+                        MediawikiImporter.job.start();
+                        prop.put("import_dump", MediawikiImporter.job.source());
+                        prop.put("import_thread", "started");
+                    } else {
+                        prop.put("import_dump", "");
+                        prop.put("import_thread", "Error: file not found ["+sourcefile+"]");
+                    }
                     prop.put("import", 1);
-                    prop.put("import_thread", "started");
-                    prop.put("import_dump", MediawikiImporter.job.source());
                     prop.put("import_count", 0);
                     prop.put("import_speed", 0);
                     prop.put("import_runningHours", 0);
@@ -66,7 +71,6 @@ public class IndexImportMediawiki_p {
                     prop.put("import_remainingHours", 0);
                     prop.put("import_remainingMinutes", 0);
                 }
-                return prop;
             }
         }
         return prop;

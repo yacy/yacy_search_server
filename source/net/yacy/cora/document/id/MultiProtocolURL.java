@@ -59,7 +59,6 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.document.parser.html.CharacterCoding;
 
 /**
  * MultiProtocolURI provides a URL object for multiple protocols like http, https, ftp, smb and file
@@ -225,13 +224,15 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 if (h.startsWith("///")) { //absolute local file path
                     // no host given
                     this.path = h.substring(2); // "/path"  or "/c:/path"
-                } else { // "//host/path" or "//host/c:/path"
+                } else if (h.startsWith("//")) { // "//host/path" or "//host/c:/path"
                     int q = url.indexOf('/', p + 3);
                     if (q < 0) {
                         this.path = "/";
                     } else {
                         this.path = url.substring(q);
                     }
+                } else if (h.startsWith("/")) { // "/host/path" or "/host/c:/path"
+                    this.path = h;
                 }
                 this.userInfo = null;
                 this.port = -1;
@@ -418,7 +419,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     private void escape() {
         if (this.path != null && this.path.indexOf('%') == -1) escapePath();
         if (this.searchpart != null && this.searchpart.indexOf('%') == -1) escapeSearchpart();
-        if (this.anchor != null && this.anchor.indexOf('%') == -1) escapeAnchor();
+        if (this.anchor != null) this.anchor = escape(this.anchor).toString();
     }
 
     private void escapePath() {
@@ -429,10 +430,6 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             ptmp.append(escape(element));
         }
         this.path = ptmp.substring((ptmp.length() > 0) ? 1 : 0);
-    }
-
-    private void escapeAnchor() {
-        this.anchor = escape(this.anchor).toString();
     }
 
     private void escapeSearchpart() {
@@ -517,23 +514,38 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         final StringBuilder sbuf = new StringBuilder(len + 10);
         for (int i = 0; i < len; i++) {
             final int ch = s.charAt(i);
-            if ('A' <= ch && ch <= 'Z') {           // 'A'..'Z'
+            if (ch == ' ') {                 // space
+                sbuf.append("%20");
+            } else if (ch == '%') {
+                if (i < len - 2 && s.charAt(i + 1) >= '0' && s.charAt(i + 1) <= '9' && s.charAt(i + 2) >= '0' && s.charAt(i + 2) <= '9') {
+                    sbuf.append((char)ch);   // lets consider this is used for encoding, leave it that way
+                } else {
+                    sbuf.append("%23");      // RFC 1738 2.2 unsafe char shall be encoded
+                }
+            } else if (ch == '&') { 
+                if (i < len - 6 && "amp;".equals(s.substring(i + 1, i + 5).toLowerCase())) {
+                    sbuf.append((char)ch);   // leave it that way, it is used the right way
+                } else {
+                    sbuf.append("&amp;");    // this must be urlencoded
+                }
                 sbuf.append((char)ch);
-            } else if ('a' <= ch && ch <= 'z') {    // 'a'..'z'
+            } else if (ch == '#') {          // RFC 1738 2.2 unsafe char is _not_ encoded because it may already be used for encoding 
+                sbuf.append((char)ch);
+            } else if (ch == '!' || ch == ':'   // unreserved
+                    || ch == '-' || ch == '_'
+                    || ch == '.' || ch == '~' 
+                    || ch == '*' || ch == '\''
+                    || ch == '(' || ch == ')'
+                    || ch == '{' || ch == '}'
+                    || ch == ';' || ch == ',' || ch == '=') {    // RFC 1738 2.2 unsafe char (may be used unencoded)
                 sbuf.append((char)ch);
             } else if ('0' <= ch && ch <= '9') {    // '0'..'9'
                 sbuf.append((char)ch);
-            } else if (ch == ' ') {                 // space
-                sbuf.append("%20");
-            } else if (ch == '&' || ch == ':'       // unreserved
-                    || ch == '-' || ch == '_'
-                    || ch == '.' || ch == '!'
-                    || ch == '~' || ch == '*'
-                    || ch == '\'' || ch == '('
-                    || ch == ')' || ch == ';' 
-                    || ch == ',' || ch == '=') { // RFC 1738 2.2 special char (may be used unencoded)
-                sbuf.append((char)ch);
             } else if (ch == '/') {                 // reserved, but may appear in post part where it should not be replaced
+                sbuf.append((char)ch);
+            } else if ('A' <= ch && ch <= 'Z') {    // 'A'..'Z'
+                sbuf.append((char)ch);
+            } else if ('a' <= ch && ch <= 'z') {    // 'a'..'z'
                 sbuf.append((char)ch);
             } else if (ch <= 0x007f) {              // other ASCII
                 sbuf.append(hex[ch]);
@@ -647,11 +659,15 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         } else {
             this.searchpart = this.path.substring(r + 1);
             // strip &amp;
+            /*
             Matcher matcher = CharacterCoding.ampPattern.matcher(this.searchpart);
-            while (matcher.find()) {
+            int from = 0;
+            while (matcher.find(from)) {
+                from = matcher.start() + 1;
                 this.searchpart = matcher.replaceAll("&");
                 matcher.reset(this.searchpart);
             }
+            */
             this.path = this.path.substring(0, r);
         }
     }
@@ -934,7 +950,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
         String urlPath = this.getFile(excludeAnchor, removeSessionID);
         String h = getHost();
-        final StringBuilder u = new StringBuilder(20 + urlPath.length() + ((h == null) ? 0 : h.length()));
+        final StringBuilder u = new StringBuilder(20 + (urlPath == null ? 0 : urlPath.length()) + ((h == null) ? 0 : h.length()));
         u.append(this.protocol);
         u.append("://");
         if (h != null) {
@@ -2179,10 +2195,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 */
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
+          new String[]{null, "https://www.example.com/shoe/?p=2&ps=75#t={%22san_NaviPaging%22:2}"}, // ugly strange pagination link
           new String[]{null, "C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file://C:WINDOWS\\CMD0.EXE"},
-          new String[]{null, "file:/bin/yacy1"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
           new String[]{null, "file:///bin/yacy2"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
+          new String[]{null, "file:/bin/yacy1"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
           new String[]{null, "file:C:WINDOWS\\CMD.EXE"},
           new String[]{null, "file:///C:WINDOWS\\CMD1.EXE"},
           new String[]{null, "file:///C|WINDOWS\\CMD2.EXE"},

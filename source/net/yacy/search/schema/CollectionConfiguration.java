@@ -397,13 +397,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // we use the SolrCell design as index schema
         SolrVector doc = new SolrVector();
         final DigestURL digestURL = document.dc_source();
-        final String id = ASCII.String(digestURL.hash());
         boolean allAttr = this.isEmpty();
         String url = addURIAttributes(doc, allAttr, digestURL, Response.docType(digestURL));
         
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         String host = digestURL.getHost();
-        String us = digestURL.toNormalform(true);
         
         int crawldepth = document.getDepth();
         if ((allAttr || contains(CollectionSchema.crawldepth_i))) {
@@ -562,22 +560,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             // bit 15: "noimageindex" contained in http header X-Robots-Tag
             // bit 16: "unavailable_after" contained in http header X-Robots-Tag
             int b = 0;
-            final String robots_meta = html.getMetas().get("robots");
+            String robots_meta = html.getMetas().get("robots");
             // this tag may have values: all, index, noindex, nofollow; see http://www.robotstxt.org/meta.html
             if (robots_meta != null) {
+                robots_meta = robots_meta.toLowerCase();
                 if (robots_meta.indexOf("all",0) >= 0) b += 1;      // set bit 0
                 if (robots_meta.indexOf("index",0) == 0 || robots_meta.indexOf(" index",0) >= 0 || robots_meta.indexOf(",index",0) >= 0 ) b += 2; // set bit 1
                 if (robots_meta.indexOf("follow",0) == 0 || robots_meta.indexOf(" follow",0) >= 0 || robots_meta.indexOf(",follow",0) >= 0 ) b += 4; // set bit 2
                 if (robots_meta.indexOf("noindex",0) >= 0) b += 8;  // set bit 3
                 if (robots_meta.indexOf("nofollow",0) >= 0) b += 16; // set bit 4
             }
-            String x_robots_tag = "";
-            if (responseHeader != null) {
-                x_robots_tag = responseHeader.get(HeaderFramework.X_ROBOTS_TAG, "");
-                if (x_robots_tag.isEmpty()) {
-                    x_robots_tag = responseHeader.get(HeaderFramework.X_ROBOTS, "");
-                }
-            }
+            String x_robots_tag = responseHeader.getXRobotsTag();
             if (!x_robots_tag.isEmpty()) {
                 // this tag may have values: all, noindex, nofollow, noarchive, nosnippet, noodp, notranslate, noimageindex, unavailable_after, none; see https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag?hl=de
                 if (x_robots_tag.indexOf("all",0) >= 0) b += 1<<8;                // set bit 8
@@ -754,14 +747,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         }
                     }
                 }
-                if (canonical != null && !ASCII.String(canonical.hash()).equals(id)) {
+                if (canonical != null) {
                     containsCanonical = true;
                     inboundLinks.remove(canonical);
                     outboundLinks.remove(canonical);
                     add(doc, CollectionSchema.canonical_s, canonical.toNormalform(false));
                     // set a flag if this is equal to sku
                     if (contains(CollectionSchema.canonical_equal_sku_b)) {
-                        add(doc, CollectionSchema.canonical_equal_sku_b, canonical.equals(us));
+                        add(doc, CollectionSchema.canonical_equal_sku_b, canonical.equals(digestURL));
                     }
                 }
             }

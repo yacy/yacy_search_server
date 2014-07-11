@@ -49,7 +49,7 @@ import org.eclipse.jetty.server.Request;
  */
 abstract public class AbstractRemoteHandler extends ConnectHandler implements Handler {
 	
-	protected Switchboard sb = null;
+    protected Switchboard sb = null;
     private List<String> localVirtualHostNames; // list for quick check for req to local peer
     
     @Override
@@ -66,6 +66,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         if (localInetAddress != null) {
             if (!localVirtualHostNames.contains(localInetAddress.getHostName())) {
                 localVirtualHostNames.add(localInetAddress.getHostName());
+                localVirtualHostNames.add(localInetAddress.getHostAddress());  // same as getServer().getURI().getHost()
             }
 
             if (!localVirtualHostNames.contains(localInetAddress.getCanonicalHostName())) {

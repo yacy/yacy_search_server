@@ -355,7 +355,14 @@ public final class LoaderDispatcher {
         if (response.getContent() == null || response.getResponseHeader() == null) throw new IOException("no Content available for url " + url);
 
         // parse resource
-        return response.parse();
+        Document[] documents = response.parse();
+
+        String x_robots_tag = response.getResponseHeader().getXRobotsTag();
+        if (x_robots_tag.indexOf("noindex",0) >= 0) {
+            for (Document d: documents) d.setIndexingDenied(true);
+        }
+        
+        return documents;
     }
 
     public Document loadDocument(final DigestURL location, final CacheStrategy cachePolicy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
@@ -371,7 +378,12 @@ public final class LoaderDispatcher {
         // parse resource
         try {
             Document[] documents = response.parse();
-            return Document.mergeDocuments(location, response.getMimeType(), documents);
+            Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
+            
+            String x_robots_tag = response.getResponseHeader().getXRobotsTag();
+            if (x_robots_tag.indexOf("noindex",0) >= 0) merged.setIndexingDenied(true);
+            
+            return merged;
         } catch(final Parser.Failure e) {
             throw new IOException(e.getMessage());
         }

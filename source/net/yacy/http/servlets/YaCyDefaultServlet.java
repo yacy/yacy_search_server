@@ -895,7 +895,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
                 // add the application version, the uptime and the client name to every rewrite table
                 templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
-                templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() - serverCore.startupTime) / 1000) / 60); // uptime in minutes
+                templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() - sb.startupTime) / 1000) / 60); // uptime in minutes
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
                 templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());

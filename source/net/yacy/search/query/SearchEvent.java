@@ -130,7 +130,6 @@ public final class SearchEvent {
     public final List<Thread> nodeSearchThreads;
     public Thread[] secondarySearchThreads;
     public final SortedMap<byte[], String> preselectedPeerHashes;
-    private final Thread localSearchThread;
     private final SortedMap<byte[], Integer> IACount;
     private final SortedMap<byte[], String> IAResults;
     private final SortedMap<byte[], HeuristicResult> heuristics;
@@ -249,7 +248,6 @@ public final class SearchEvent {
         this.heuristics = new TreeMap<byte[], HeuristicResult>(Base64Order.enhancedCoder);
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
-        this.localSearchThread = null;
         this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false)));
         this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
         this.local_rwi_stored     = new AtomicInteger(0);
@@ -650,7 +648,6 @@ public final class SearchEvent {
 
         // clear all data structures
         if (this.preselectedPeerHashes != null) this.preselectedPeerHashes.clear();
-        if (this.localSearchThread != null && this.localSearchThread.isAlive()) this.localSearchThread.interrupt();
         if (this.IACount != null) this.IACount.clear();
         if (this.IAResults != null) this.IAResults.clear();
         if (this.heuristics != null) this.heuristics.clear();

@@ -90,7 +90,7 @@ public class Document {
     private MultiProtocolURL favicon;
     private boolean resorted;
     private final Set<String> languages;
-    private final boolean indexingDenied;
+    private boolean indexingDenied;
     private final double lon, lat;
     private final Object parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
@@ -733,6 +733,10 @@ dc_rights
         return this.indexingDenied;
     }
 
+    public void setIndexingDenied(boolean indexingDenied) {
+        this.indexingDenied = indexingDenied;
+    }
+
     public void setDepth(int depth) {
         this.crawldepth = depth;
     }
@@ -819,6 +823,7 @@ dc_rights
         final LinkedHashMap<AnchorURL, ImageEntry> images = new LinkedHashMap<AnchorURL, ImageEntry>();
         final Set<String> languages = new HashSet<String>();
         double lon = 0.0d, lat = 0.0d;
+        boolean indexingDenied = false;
         Date date = new Date();
         String charset = null;
 
@@ -867,6 +872,8 @@ dc_rights
             
             if (doc.getDepth() < mindepth) mindepth = doc.getDepth();
             if (doc.dc_language() != null) languages.add(doc.dc_language());
+            
+            indexingDenied |= doc.indexingDenied;
         }
 
         // clean up parser data
@@ -898,7 +905,7 @@ dc_rights
                 anchors,
                 rss,
                 images,
-                false,
+                indexingDenied,
                 date);
         newDoc.setDepth(mindepth);
         return newDoc;

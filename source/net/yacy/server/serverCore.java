@@ -37,7 +37,6 @@ public final class serverCore {
     public static final byte[] CRLF = {CR, LF};
     public static final String CRLF_STRING = UTF8.String(CRLF);
     public static final String LF_STRING = UTF8.String(new byte[]{LF});
-    public static final long startupTime = System.currentTimeMillis();
 
     public static boolean useStaticIP = false;
 
