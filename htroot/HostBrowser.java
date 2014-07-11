@@ -466,7 +466,7 @@ public class HostBrowser {
                         prop.putHTML("files_list_" + c + "_type_admin", admin ? "true" : "false");
                         StoreType type = (StoreType) entry.getValue();
                         try {uri = new DigestURL(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
-                        HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash());
+                        HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash(), true);
                         boolean loading = load.equals(entry.getKey()) || (process != null && process != HarvestProcess.ERRORS);
                         boolean error =  process == HarvestProcess.ERRORS || type == StoreType.EXCLUDED || type == StoreType.FAILED;
                         boolean dc = type != StoreType.INDEX && !error && !loading && list.containsKey(entry.getKey() + "/");

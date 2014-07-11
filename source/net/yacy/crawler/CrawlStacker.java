@@ -378,37 +378,25 @@ public final class CrawlStacker {
      */
     public String checkAcceptanceInitially(final DigestURL url, final CrawlProfile profile) {
 
-        final String urlstring = url.toString();
         // check if the url is double registered
+        final HarvestProcess dbocc = this.nextQueue.exists(url.hash(), false); // returns the name of the queue if entry exists
+        if (dbocc != null) {
+            return "double in: " + dbocc.name();
+        }
         String urlhash = ASCII.String(url.hash());
         final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
         final Date oldDate = errorEntry == null ? null : errorEntry.getFailDate();
-        final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
         if (oldDate == null) {
-            if (dbocc != null) {
-                // do double-check
-                if (dbocc == HarvestProcess.ERRORS) {
-                    return "double in: errors (" + (errorEntry == null ? "NULL" : errorEntry.getFailReason()) + ")";
-                }
-                return "double in: " + dbocc.toString();
-            }
+            return null; // no evidence that we know that url
+        }
+        final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
+        final String urlstring = url.toString();
+        if (recrawl) {
+            if (CrawlStacker.log.isInfo())
+                CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
+                    ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
-            if (recrawl) {
-                if (CrawlStacker.log.isInfo())
-                    CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                        ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
-            } else {
-                if (dbocc == null) {
-                    return "double in: LURL-DB, oldDate = " + oldDate.toString();
-                }
-                if (dbocc == HarvestProcess.ERRORS) {
-                    if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + (errorEntry == null ? "NULL" : errorEntry.getFailReason()));
-                    return "double in: errors (" + (errorEntry == null ? "NULL" : errorEntry.getFailReason()) + "), oldDate = " + oldDate.toString();
-                }
-                if (CrawlStacker.log.isInfo()) CrawlStacker.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
-                return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();
-            }
+            return "double in: LURL-DB, oldDate = " + oldDate.toString();
         }
 
         // deny urls that exceed allowed number of occurrences
@@ -416,7 +404,7 @@ public final class CrawlStacker {
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
             final AtomicInteger dp = profile.getCount(url.getHost());
             if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
-                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + url.toString() + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
                 return "crawl stack domain counter exceeded (test by profile)";
             }
 

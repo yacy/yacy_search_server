@@ -1616,7 +1616,7 @@ public final class Switchboard extends serverSwitch {
      */
     public HarvestProcess urlExists(final String hash) {
         if (this.index.getLoadTime(hash) >= 0) return HarvestProcess.LOADED;
-        return this.crawlQueues.exists(ASCII.getBytes(hash));
+        return this.crawlQueues.exists(ASCII.getBytes(hash), true);
     }
 
     public void urlRemove(final Segment segment, final byte[] hash) {
