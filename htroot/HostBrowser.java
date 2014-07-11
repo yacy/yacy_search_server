@@ -59,7 +59,6 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
-import net.yacy.search.schema.CollectionConfiguration.FailDoc;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -466,7 +465,7 @@ public class HostBrowser {
                         prop.putHTML("files_list_" + c + "_type_admin", admin ? "true" : "false");
                         StoreType type = (StoreType) entry.getValue();
                         try {uri = new DigestURL(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
-                        HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash(), true);
+                        HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash()); // todo: cannot identify errors
                         boolean loading = load.equals(entry.getKey()) || (process != null && process != HarvestProcess.ERRORS);
                         boolean error =  process == HarvestProcess.ERRORS || type == StoreType.EXCLUDED || type == StoreType.FAILED;
                         boolean dc = type != StoreType.INDEX && !error && !loading && list.containsKey(entry.getKey() + "/");
@@ -482,8 +481,8 @@ public class HostBrowser {
                                 FailType failType = errorDocs.get(entry.getKey());
                                 if (failType == null) {
                                     // maybe this is only in the errorURL
-                                    FailDoc faildoc = sb.crawlQueues.errorURL.get(ASCII.String(uri.hash()));
-                                    prop.putHTML("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS && faildoc != null ? faildoc.getFailReason() : "unknown error");
+                                    //Metadata faildoc = sb.index.fulltext().getDefaultConnector().getMetadata(ASCII.String(uri.hash()));
+                                    prop.putHTML("files_list_" + c + "_type_stored_error", "unknown error");
                                 } else {
                                     String ids = ASCII.String(uri.hash());
                                     InfoCacheEntry ice = infoCache.get(ids);

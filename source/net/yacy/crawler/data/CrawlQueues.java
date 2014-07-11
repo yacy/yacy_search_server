@@ -143,7 +143,7 @@ public class CrawlQueues {
      * @param hash
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
-    public HarvestProcess exists(final byte[] hash, final boolean checkErrorCache) {
+    public HarvestProcess exists(final byte[] hash) {
         if (this.delegatedURL.containsKey(ASCII.String(hash))) {
             return HarvestProcess.DELEGATED;
         }
@@ -154,9 +154,6 @@ public class CrawlQueues {
             if (Base64Order.enhancedCoder.equal(request.url().hash(), hash)) {
                 return HarvestProcess.WORKER;
             }
-        }
-        if (checkErrorCache && this.errorURL.exists(hash)) {
-            return HarvestProcess.ERRORS;
         }
         return null;
     }

@@ -98,6 +98,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
+import net.yacy.cora.federate.solr.connector.SolrConnector.Metadata;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
@@ -1616,7 +1617,16 @@ public final class Switchboard extends serverSwitch {
      */
     public HarvestProcess urlExists(final String hash) {
         if (this.index.getLoadTime(hash) >= 0) return HarvestProcess.LOADED;
-        return this.crawlQueues.exists(ASCII.getBytes(hash), true);
+        HarvestProcess hp = this.crawlQueues.exists(ASCII.getBytes(hash));
+        if (hp != null) return hp;
+        try {
+            Metadata md = this.index.fulltext().getDefaultConnector().getMetadata(hash);
+            if (md == null) return null;
+            return HarvestProcess.LOADED; // todo: can also be in error
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+            return null;
+        }
     }
 
     public void urlRemove(final Segment segment, final byte[] hash) {

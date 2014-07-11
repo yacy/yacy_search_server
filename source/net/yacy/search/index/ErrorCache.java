@@ -167,7 +167,8 @@ public class ErrorCache {
         }
         return l;
     }
-    
+
+    /*
     public CollectionConfiguration.FailDoc get(final String urlhash) {
         CollectionConfiguration.FailDoc failDoc = null;
         synchronized (this.cache) {
@@ -185,7 +186,6 @@ public class ErrorCache {
             return null;
         }
     }
-
     public boolean exists(final byte[] urlHash) {
         String urlHashString = ASCII.String(urlHash);
         try {
@@ -200,7 +200,7 @@ public class ErrorCache {
             return false;
         }
     }
-
+*/
     public void clearStack() {
         synchronized (this.cache) {
             this.cache.clear();

@@ -43,6 +43,7 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
+import net.yacy.cora.federate.solr.connector.SolrConnector.Metadata;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
@@ -60,7 +61,6 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.schema.CollectionConfiguration;
 
 public final class CrawlStacker {
     
@@ -379,22 +379,27 @@ public final class CrawlStacker {
     public String checkAcceptanceInitially(final DigestURL url, final CrawlProfile profile) {
 
         // check if the url is double registered
-        final HarvestProcess dbocc = this.nextQueue.exists(url.hash(), false); // returns the name of the queue if entry exists
+        final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
         if (dbocc != null) {
             return "double in: " + dbocc.name();
         }
         String urlhash = ASCII.String(url.hash());
-        final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(urlhash);
-        final Date oldDate = errorEntry == null ? null : errorEntry.getFailDate();
+        Metadata oldEntry = null;
+        try {
+            oldEntry = this.indexSegment.fulltext().getDefaultConnector().getMetadata(urlhash);
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+        }
+        final Long oldDate = oldEntry == null ? null : oldEntry.date;
         if (oldDate == null) {
             return null; // no evidence that we know that url
         }
-        final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
+        final boolean recrawl = profile.recrawlIfOlder() > oldDate.longValue();
         final String urlstring = url.toString();
         if (recrawl) {
             if (CrawlStacker.log.isInfo())
                 CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                    ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
+                    ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
             return "double in: LURL-DB, oldDate = " + oldDate.toString();
         }
