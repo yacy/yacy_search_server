@@ -40,6 +40,7 @@ import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
@@ -154,7 +155,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         // parse response header
         ResHead resHead = new ResHead();
         NamedList<?> val0 = (NamedList<?>) responseHeader.get("params");
-        resHead.rows = Integer.parseInt((String) val0.get("rows"));
+        resHead.rows = Integer.parseInt((String) val0.get(CommonParams.ROWS));
         resHead.offset = response.offset(); // equal to 'start'
         resHead.numFound = response.matches();
         //resHead.df = (String) val0.get("df");
@@ -200,14 +201,14 @@ public class GSAResponseWriter implements QueryResponseWriter {
             writer.write("<NB>");
             if (prevStart >= 0) {
                 writer.write("<PU>");
-                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + site +
+                XML.escapeCharData("/gsa/search?q=" + request.getParams().get(CommonParams.Q) + "&site=" + site +
                          "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + client + "&access=" + access +
                          "&sort=" + sort + "&start=" + prevStart + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
                 writer.write("</PU>");
             }
             if (nextNum > 0) {
                 writer.write("<NU>");
-                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + site +
+                XML.escapeCharData("/gsa/search?q=" + request.getParams().get(CommonParams.Q) + "&site=" + site +
                          "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + client + "&access=" + access +
                          "&sort=" + sort + "&start=" + nextStart + "&num=" + nextNum + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
                 writer.write("</NU>");
