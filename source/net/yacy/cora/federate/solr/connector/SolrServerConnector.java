@@ -351,6 +351,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             if (useluke == -1) return getSizeQueryRequest();
             long ls = getSizeLukeRequest();
             long qs = getSizeQueryRequest();
+            if (ls == 0 && qs == 0) {
+                // we don't know if this is caused by an error or not; don't change the useluke value
+                return 0;
+            }
             if (ls == qs) {
                 useluke = 1;
                 return ls;
