@@ -1031,14 +1031,15 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         postprocessingActivity = "create ranking map";
         ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+        boolean shallComputeCR = (segment.fulltext().useWebgraph() &&
+                ((webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) ||
+                        (webgraph.contains(WebgraphSchema.target_id_s) && webgraph.contains(WebgraphSchema.target_cr_host_norm_i))) ||
+                      (collection.contains(CollectionSchema.cr_host_count_i) &&
+                       collection.contains(CollectionSchema.cr_host_chance_d) &&
+                       collection.contains(CollectionSchema.cr_host_norm_i)));
         // create the ranking map
         final Map<String, CRV> rankings = new ConcurrentHashMap<String, CRV>();
-        if ((segment.fulltext().useWebgraph() &&
-             ((webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) ||
-              (webgraph.contains(WebgraphSchema.target_id_s) && webgraph.contains(WebgraphSchema.target_cr_host_norm_i))) ||
-            (collection.contains(CollectionSchema.cr_host_count_i) &&
-             collection.contains(CollectionSchema.cr_host_chance_d) &&
-             collection.contains(CollectionSchema.cr_host_norm_i)))) try {
+        if (shallComputeCR) try {
             int concurrency = Math.min(collection1hosts.size(), Runtime.getRuntime().availableProcessors());
             postprocessingActivity = "collecting cr for " + collection1hosts.size() + " hosts, concurrency = " + concurrency;
             ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
@@ -1118,7 +1119,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         
         // process all documents at the webgraph for the outgoing links of this document
         final AtomicInteger allcount = new AtomicInteger(0);
-        if (segment.fulltext().useWebgraph()) {
+        if (segment.fulltext().useWebgraph() && shallComputeCR) {
             postprocessingActivity = "collecting host facets for webgraph cr calculation";
             ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
             final Set<String> omitFields = new HashSet<String>();
@@ -1140,7 +1141,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     if (webgraphhosts.get(host) <= 0) continue;
                     final String hostfinal = host;
                     // select all webgraph edges and modify their cr value
-                    postprocessingActivity = "cr calculcation for webgraph, host " + host;
+                    postprocessingActivity = "writing cr values to webgraph for host " + host;
                     ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
                     String patchquery = WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + host + "\" AND " + WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
                     final long count = segment.fulltext().getWebgraphConnector().getCountByQuery(patchquery);
