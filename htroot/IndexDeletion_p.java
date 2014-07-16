@@ -55,6 +55,9 @@ public class IndexDeletion_p {
         SolrConnector webgraphConnector = sb.index.fulltext().getWebgraphConnector();
         if (post == null || post.size() == 0) defaultConnector.commit(false); // we must do a commit here because the user cannot see a proper count.
 
+        String schemaName = CollectionSchema.CORE_NAME;
+        if (post != null) schemaName = post.get("core", schemaName); 
+        
         // Delete by URL Matching
         String urldelete = post == null ? "" : post.get("urldelete", "");
         boolean urldelete_mm_subpath_checked = post == null ? true : post.get("urldelete-mm", "subpath").equals("subpath");
@@ -225,18 +228,20 @@ public class IndexDeletion_p {
         
         if (post != null && (post.containsKey("simulate-querydelete") || post.containsKey("engage-querydelete"))) {
             boolean simulate = post.containsKey("simulate-querydelete");
+
+            SolrConnector connector = schemaName.equals(CollectionSchema.CORE_NAME) ? defaultConnector : sb.index.fulltext().getWebgraphConnector();
             if (simulate) {
                 try {
-                    count = (int) defaultConnector.getCountByQuery(querydelete);
+                    count = (int) connector.getCountByQuery(querydelete);
                 } catch (final IOException e) {
                 }
                 prop.put("querydelete-active", count == 0 ? 2 : 1);
             } else {
                 try {
-                    ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size before deletion = " + defaultConnector.getSize());
-                    defaultConnector.deleteByQuery(querydelete);
-                    defaultConnector.commit(false);
-                    ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size after commit = " + defaultConnector.getSize());
+                    ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size before deletion = " + connector.getSize());
+                    connector.deleteByQuery(querydelete);
+                    connector.commit(false);
+                    ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size after commit = " + connector.getSize());
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, solr query, q = " + querydelete);
                 } catch (final IOException e) {
                 }
@@ -245,6 +250,13 @@ public class IndexDeletion_p {
             prop.put("querydelete-active_count", count);
         }
         prop.put("doccount", defaultConnector.getSize());
+        
+
+        prop.put("cores_" + 0 + "_name", CollectionSchema.CORE_NAME);
+        prop.put("cores_" + 0 + "_selected", CollectionSchema.CORE_NAME.equals(schemaName) ? 1 : 0);
+        prop.put("cores_" + 1 + "_name", WebgraphSchema.CORE_NAME);
+        prop.put("cores_" + 1 + "_selected", WebgraphSchema.CORE_NAME.equals(schemaName) ? 1 : 0);
+        prop.put("cores", 2);
         
         // return rewrite properties
         return prop;

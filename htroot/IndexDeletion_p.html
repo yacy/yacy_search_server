@@ -108,6 +108,14 @@
       <legend>Delete by Solr Query</legend>
       <p>This is the most generic option: select a set of documents using a solr query.</p>
       <dl>
+        <dt>Core</dt>
+        <dd>
+        <select id="core" name="core" onchange='submit()'>
+          #{cores}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+          #{/cores}#
+        </select>
+        </dd>
         <dt>q=</dt>
         <dd>
         <input type="text" name="querydelete" id="querydelete" value="#[querydelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-querydelete');d.disabled=true;d.className='btn btn-default';"/>
