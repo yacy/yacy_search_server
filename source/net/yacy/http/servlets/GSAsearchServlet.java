@@ -50,6 +50,7 @@ import net.yacy.server.serverObjects;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.QueryResponseWriter;
@@ -107,7 +108,7 @@ public class GSAsearchServlet extends HttpServlet {
 
         // create post
         serverObjects post = new serverObjects();
-        post.put("q", ""); post.put("num", "0");
+        post.put(CommonParams.Q, ""); post.put("num", "0");
         // convert servletrequest parameter to old style serverObjects map
         Map<String, String[]> map = header.getParameterMap();
         Iterator<Map.Entry<String, String[]>> it = map.entrySet().iterator();
@@ -136,7 +137,7 @@ public class GSAsearchServlet extends HttpServlet {
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100));
         
         // set ranking
-        if (post.containsKey("sort")) {
+        if (post.containsKey(CommonParams.SORT)) {
             // if a gsa-style sort attribute is given, use this to set the solr sort attribute
             GSAResponseWriter.Sort sort = new GSAResponseWriter.Sort(post.get(CommonParams.SORT, ""));
             String sorts = sort.toSolr();
@@ -151,8 +152,8 @@ public class GSAsearchServlet extends HttpServlet {
             String fq = ranking.getFilterQuery();
             String bq = ranking.getBoostQuery();
             String bf = ranking.getBoostFunction();
-            if (fq.length() > 0) post.put(CommonParams.FQ, bq);
-            if (bq.length() > 0) post.put("bq", bq);
+            if (fq.length() > 0) post.put(CommonParams.FQ, fq);
+            if (bq.length() > 0) post.put(DisMaxParams.BQ, bq);
             if (bf.length() > 0) post.put("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         }
         String daterange[] = post.remove("daterange");
