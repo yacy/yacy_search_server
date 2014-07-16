@@ -89,6 +89,7 @@ import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -967,6 +968,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
 
     public static boolean postprocessingRunning   = false;
+    public static String  postprocessingActivity  = "";
     // if started, the following values are assigned
     public static long  postprocessingStartTime = 0; // the start time for the processing; not started = 0
     public static int   postprocessingCollection1Count = 0; // number of documents to be processed
@@ -1003,7 +1005,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // calculate the number of documents to be processed
         String collection1query = collection1query(segment, harvestkey);
         String webgraphquery = webgraphquery(segment, harvestkey);
-
+        postprocessingRunning = true;
+        postprocessingStartTime = System.currentTimeMillis();
+        postprocessingActivity = "collecting counts";
+        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
         try {
             postprocessingCollection1Count = (int) collectionConnector.getCountByQuery(collection1query);
             postprocessingWebgraphCount = segment.fulltext().useWebgraph() ? (int) segment.fulltext().getWebgraphConnector().getCountByQuery(webgraphquery) : 0;
@@ -1011,10 +1016,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             postprocessingCollection1Count = -1;
             postprocessingWebgraphCount = -1;
         }
-        postprocessingRunning = true;
-        postprocessingStartTime = System.currentTimeMillis();
         
         // collect hosts from index which shall take part in citation computation
+        postprocessingActivity = "collecting host facets for collection";
+        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
         ReversibleScoreMap<String> collection1hosts;
         try {
             Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets(collection1query, 10000000, CollectionSchema.host_s.getSolrFieldName());
@@ -1023,7 +1028,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             ConcurrentLog.logException(e2);
             collection1hosts = new ClusteredScoreMap<String>();
         }
-        
+
+        postprocessingActivity = "create ranking map";
+        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
         // create the ranking map
         final Map<String, CRV> rankings = new ConcurrentHashMap<String, CRV>();
         if ((segment.fulltext().useWebgraph() &&
@@ -1033,7 +1040,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
              collection.contains(CollectionSchema.cr_host_chance_d) &&
              collection.contains(CollectionSchema.cr_host_norm_i)))) try {
             int concurrency = Math.min(collection1hosts.size(), Runtime.getRuntime().availableProcessors());
-            ConcurrentLog.info("CollectionConfiguration", "collecting " + collection1hosts.size() + " hosts, concurrency = " + concurrency);
+            postprocessingActivity = "collecting cr for " + collection1hosts.size() + " hosts, concurrency = " + concurrency;
+            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
             int countcheck = 0;
             for (String host: collection1hosts.keyList(true)) {
                 // Patch the citation index for links with canonical tags.
@@ -1111,6 +1119,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // process all documents at the webgraph for the outgoing links of this document
         final AtomicInteger allcount = new AtomicInteger(0);
         if (segment.fulltext().useWebgraph()) {
+            postprocessingActivity = "collecting host facets for webgraph cr calculation";
+            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
             final Set<String> omitFields = new HashSet<String>();
             omitFields.add(WebgraphSchema.process_sxt.getSolrFieldName());
             omitFields.add(WebgraphSchema.harvestkey_s.getSolrFieldName());
@@ -1130,6 +1140,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     if (webgraphhosts.get(host) <= 0) continue;
                     final String hostfinal = host;
                     // select all webgraph edges and modify their cr value
+                    postprocessingActivity = "cr calculcation for webgraph, host " + host;
+                    ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
                     String patchquery = WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + host + "\" AND " + WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
                     final long count = segment.fulltext().getWebgraphConnector().getCountByQuery(patchquery);
                     int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
@@ -1217,7 +1229,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             int proccount = 0, proccount_referencechange = 0, proccount_citationchange = 0;
             long count = collectionConnector.getCountByQuery(collection1query);
             long start = System.currentTimeMillis();
-            ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the collection for harvestkey " + harvestkey);
+            postprocessingActivity = "collecting " + count + " documents from the collection for harvestkey " + harvestkey;
+            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
             BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(
                     collection1query,
                     CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
@@ -1271,7 +1284,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         long hostExtentCount = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
                         hostExtentCache.put(hosthash, hostExtentCount);
                     }
-                    if (postprocessing_references(rrCache, sid, url, hostExtentCache)) proccount_referencechange++;
+                    if (this.contains(CollectionSchema.references_i) &&
+                        this.contains(CollectionSchema.references_internal_i) &&
+                        this.contains(CollectionSchema.references_external_i) &&
+                        this.contains(CollectionSchema.references_exthosts_i)) {
+                        if (postprocessing_references(rrCache, sid, url, hostExtentCache)) proccount_referencechange++;
+                    }
                     
                     // all processing steps checked, remove the processing and harvesting key
                     sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
@@ -1308,10 +1326,164 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         collectionConnector.commit(true); // make changes available directly to prevent that the process repeats again
         postprocessingCollection1Count = 0;
         postprocessingWebgraphCount = 0;
+        postprocessingActivity = "postprocessing terminated";
+        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
         postprocessingRunning = false;
         return allcount.get();
     }
 
+    public void postprocessing_http_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+        if (!this.contains(CollectionSchema.http_unique_b)) return;
+        if (!url.isHTTPS() && !url.isHTTP()) return;
+        try {
+            DigestURL u = new DigestURL((url.isHTTP() ? "https://" : "http://") + url.urlstub(true, true));
+            SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.http_unique_b.getSolrFieldName());
+            set_unique_flag(CollectionSchema.http_unique_b, sid, d);
+        } catch (final IOException e) {}
+    }
+    
+    public void postprocessing_www_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+        if (!this.contains(CollectionSchema.www_unique_b)) return;
+        final String us = url.urlstub(true, true);
+        try {
+            DigestURL u = new DigestURL(url.getProtocol() + (us.startsWith("www.") ? "://" + us.substring(4) : "://www." + us));
+            SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.www_unique_b.getSolrFieldName());
+            set_unique_flag(CollectionSchema.www_unique_b, sid, d);
+        } catch (final IOException e) {}
+    }
+    
+    private void set_unique_flag(CollectionSchema field, SolrInputDocument sid, SolrDocument d) {
+        Object sb = sid.getFieldValue(field.getSolrFieldName());
+        boolean sbb = sb != null && ((Boolean) sb).booleanValue();
+        Object ob = d == null ? null : d.getFieldValue(field.getSolrFieldName());
+        boolean obb = ob != null && ((Boolean) ob).booleanValue();
+        if (sbb == obb) sid.setField(field.getSolrFieldName(), !sbb);
+    }
+    
+    public void postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURL url) {
+        // FIND OUT IF THIS IS A DOUBLE DOCUMENT
+        String urlhash = ASCII.String(url.hash());
+        String hostid = url.hosthash();
+        uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+                {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
+                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
+            CollectionSchema signaturefield = checkfields[0];
+            CollectionSchema uniquefield = checkfields[1];
+            CollectionSchema countfield = checkfields[2];
+            if (this.contains(signaturefield) && this.contains(uniquefield) && this.contains(countfield)) {
+                // lookup the document with the same signature
+                Long signature = (Long) sid.getField(signaturefield.getSolrFieldName()).getValue();
+                if (signature == null) continue uniquecheck;
+                try {
+                    SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"", null, 0, 100, CollectionSchema.id.getSolrFieldName());
+                    if (docs.getNumFound() == 0) {
+                        sid.setField(uniquefield.getSolrFieldName(), true);
+                        sid.setField(countfield.getSolrFieldName(), 1);
+                    } else {
+                        boolean firstappearance = true;
+                        for (SolrDocument d: docs) {if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
+                        sid.setField(uniquefield.getSolrFieldName(), firstappearance);
+                        sid.setField(countfield.getSolrFieldName(), docs.getNumFound() + 1); // the current url was excluded from search but is included in count
+                    }
+                } catch (final IOException e) {}
+            }
+        }
+        
+        // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
+        // in case that the document has no status code 200, has a noindex attribute
+        // or a canonical tag which does not point to the document itself,
+        // then the unique-field is not written at all!
+        Integer robots_i = this.contains(CollectionSchema.robots_i) ? (Integer) sid.getFieldValue(CollectionSchema.robots_i.getSolrFieldName()) : null;
+        Integer httpstatus_i = this.contains(CollectionSchema.httpstatus_i) ? (Integer) sid.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) : null;
+        String canonical_s = this.contains(CollectionSchema.canonical_s) ? (String) sid.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()) : null;
+        Boolean canonical_equal_sku_b = this.contains(CollectionSchema.canonical_equal_sku_b) ? (Boolean) sid.getFieldValue(CollectionSchema.canonical_equal_sku_b.getSolrFieldName()) : null;
+        if (segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.host_id_s) &&
+            (robots_i == null || (robots_i.intValue() & (1 << 9)) == 0 /*noindex in http X-ROBOTS*/ && (robots_i.intValue() & (1 << 3)) == 0 /*noindex in html metas*/ ) &&
+            (canonical_s == null || canonical_s.length() == 0 || (canonical_equal_sku_b != null && canonical_equal_sku_b.booleanValue()) || url.toNormalform(true).equals(canonical_s)) &&
+            (httpstatus_i == null || httpstatus_i.intValue() == 200)) {
+            uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][] {
+                    {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
+                    {CollectionSchema.description_txt, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
+                CollectionSchema checkfield = checkfields[0];
+                CollectionSchema signaturefield = checkfields[1];
+                CollectionSchema uniquefield = checkfields[2];
+                if (this.contains(checkfield) && this.contains(signaturefield) && this.contains(uniquefield)) {
+                    // lookup in the index within the same hosts for the same title or description
+                    //String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
+                    Long signature = (Long) sid.getFieldValue(signaturefield.getSolrFieldName());
+                    if (signature == null) {
+                        continue uniquecheck;
+                    }
+                    try {
+                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery(
+                                CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " +
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":8 AND " + // bit 3
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":24 AND " + // bit 3 + 4
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":512 AND " + // bit 9
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":1536 AND " + // bit 9 + 10
+                                "(-" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":[* TO *] OR " + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":true ) AND " +
+                                CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " +
+                                "-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " +
+                                signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"");
+                        sid.setField(uniquefield.getSolrFieldName(), doccount == 0);
+                    } catch (final IOException e) {}
+                }
+            }
+        }
+        uniqueURLs.add(urlhash);
+    }
+
+    public boolean postprocessing_references(final ReferenceReportCache rrCache, final SolrInputDocument sid, final DigestURL url, final Map<String, Long> hostExtentCount) {
+        if (!(this.contains(CollectionSchema.references_i) ||
+              this.contains(CollectionSchema.references_internal_i) ||
+              this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;
+        Integer all_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
+        Integer internal_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
+        Integer external_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
+        Integer exthosts_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
+        Integer hostextc_old = sid == null ? null : (Integer) sid.getFieldValue(CollectionSchema.host_extent_i.getSolrFieldName());
+        try {
+            ReferenceReport rr = rrCache.getReferenceReport(ASCII.String(url.hash()), false);
+            List<String> internalIDs = new ArrayList<String>();
+            HandleSet iids = rr.getInternallIDs();
+            for (byte[] b: iids) internalIDs.add(ASCII.String(b));
+            
+            boolean change = false;
+            int all = rr.getExternalCount() + rr.getInternalCount();
+            if (this.contains(CollectionSchema.references_i) &&
+                (all_old == null || all_old.intValue() != all)) {
+                sid.setField(CollectionSchema.references_i.getSolrFieldName(), all);
+                change = true;
+            }
+            if (this.contains(CollectionSchema.references_internal_i) &&
+                (internal_old == null || internal_old.intValue() != rr.getInternalCount())) {
+                sid.setField(CollectionSchema.references_internal_i.getSolrFieldName(), rr.getInternalCount());
+                change = true;
+            }
+            if (this.contains(CollectionSchema.references_external_i) &&
+                (external_old == null || external_old.intValue() != rr.getExternalCount())) {
+                sid.setField(CollectionSchema.references_external_i.getSolrFieldName(), rr.getExternalCount());
+                change = true;
+            }
+            if (this.contains(CollectionSchema.references_exthosts_i) &&
+                (exthosts_old == null || exthosts_old.intValue() != rr.getExternalHostIDs().size())) {
+                sid.setField(CollectionSchema.references_exthosts_i.getSolrFieldName(), rr.getExternalHostIDs().size());
+                change = true;
+            }
+            Long hostExtent = hostExtentCount == null ? Integer.MAX_VALUE : hostExtentCount.get(url.hosthash());
+            if (this.contains(CollectionSchema.host_extent_i) &&
+                (hostextc_old == null || hostextc_old.intValue() != hostExtent)) {
+                sid.setField(CollectionSchema.host_extent_i.getSolrFieldName(), hostExtent.intValue());
+                change = true;
+            }
+            return change;
+        } catch (final IOException e) {
+        }
+        return false;
+    }
+    
+    
+    
     private static final class CRV {
         public double cr;
         public int crn, count;

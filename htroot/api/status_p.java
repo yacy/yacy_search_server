@@ -152,7 +152,7 @@ public class status_p {
 
         prop.put("postprocessingCollectionRemainingCount", collectionRemainingCount);
         prop.put("postprocessingWebgraphRemainingCount", webgraphRemainingCount);
-        prop.put("postprocessingRunning_activity", collectionRemainingCount == CollectionConfiguration.postprocessingCollection1Count && webgraphRemainingCount == CollectionConfiguration.postprocessingWebgraphCount ? "citation computation" : collectionRemainingCount == CollectionConfiguration.postprocessingCollection1Count ? "webgraph" : "collection");
+        prop.put("postprocessingRunning_activity", CollectionConfiguration.postprocessingActivity);
         prop.put("postprocessingSpeed", speed);
         prop.put("postprocessingElapsedTime", timeSinceStart);
         prop.put("postprocessingRemainingTime", remainingTime);
