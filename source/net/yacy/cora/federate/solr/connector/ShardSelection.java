@@ -21,91 +21,115 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 
-public class ShardSelection {
+public class ShardSelection implements Iterable<SolrServer> {
 
     private final Method method; // the sharding method
-    private final AtomicLong chardID;  // the next id that shall be given away
+    private final AtomicLong shardID;  // the next id that shall be given away
     private final int dimension; // the number of chards
+    private final ArrayList<SolrServer> server;
+    
     public enum Method {
-        MODULO_HOST_MD5, ROUND_ROBIN;
+        MODULO_HOST_MD5("hash-based calculation of storage targets, select all for retrieval"),
+        ROUND_ROBIN("round-robin of storage targets, select all for retrieval"),
+        SOLRCLOUD("round-robin of storage targets and round-robin for retrieval");
+        public final String description;
+        private Method(final String description) {
+            this.description = description;
+        }
     }
 
-    public ShardSelection(final Method method, final int dimension) {
+    public ShardSelection(final ArrayList<SolrServer> server, final Method method) {
+        this.server = server;
         this.method = method;
-        this.dimension = dimension;
-        this.chardID = new AtomicLong(0);
+        this.dimension = server.size();
+        this.shardID = new AtomicLong(0);
     }
 
+    public Method getMethod() {
+        return this.method;
+    }
+    
     private int selectRoundRobin() {
-        return (int) (this.chardID.getAndIncrement() % this.dimension);
+        int rr = (int) (this.shardID.getAndIncrement() % this.dimension);
+        if (this.shardID.get() < 0) this.shardID.set(0);
+        return rr;
     }
 
-    public int select(final SolrInputDocument solrdoc) throws IOException {
+    public SolrServer server4write(final SolrInputDocument solrdoc) throws IOException {
         if (this.method == Method.MODULO_HOST_MD5) {
             SolrInputField sif = solrdoc.getField(CollectionSchema.host_s.getSolrFieldName());
             if (sif != null) {
                 final String host = (String) sif.getValue();
-                return selectHost(host);
+                if (host != null && host.length() > 0) return server4write(host);
             }
             sif = solrdoc.getField(CollectionSchema.sku.getSolrFieldName());
             if (sif != null) {
                 final String url = (String) sif.getValue();
-                try {
-                    return selectURL(url);
+                if (url != null && url.length() > 0) try {
+                    return server4write(new URL(url));
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
-                    return 0;
+                    return this.server.get(0);
                 }
             }
-            return 0;
+            return this.server.get(0);
         }
 
         // finally if no method matches use ROUND_ROBIN
-        return selectRoundRobin();
+        return this.server.get(selectRoundRobin());
     }
 
-    public int selectHost(final String host) throws IOException {
+    public SolrServer server4write(final String host) throws IOException {
+        if (host == null) throw new IOException("sharding - host url, host empty: " + host);
+        if (host.indexOf("://") >= 0) return server4write(new URL(host)); // security catch for accidantly using the wrong method
         if (this.method == Method.MODULO_HOST_MD5) {
-            if (host == null) throw new IOException("sharding - host url, host empty: " + host);
             try {
                 final MessageDigest digest = MessageDigest.getInstance("MD5");
                 digest.update(ASCII.getBytes(host));
                 final byte[] md5 = digest.digest();
-                return (0xff & md5[0]) % this.dimension;
+                return this.server.get((0xff & md5[0]) % this.dimension);
             } catch (final NoSuchAlgorithmException e) {
                 throw new IOException("sharding - no md5 available: " + e.getMessage());
             }
         }
 
         // finally if no method matches use ROUND_ROBIN
-        return (int) (this.chardID.getAndIncrement() % this.dimension);
+        return this.server.get(selectRoundRobin());
     }
     
-    public int selectURL(final String sku) throws IOException {
-        if (this.method == Method.MODULO_HOST_MD5) {
-            try {
-                final URL url = new URL(sku);
-                final String host = url.getHost();
-                return selectHost(host);
-            } catch (final MalformedURLException e) {
-                throw new IOException("sharding - bad url: " + sku);
-            }
-        }
+    public SolrServer server4write(final URL url) throws IOException {
+        return server4write(url.getHost());
+    }
+    
+    public List<SolrServer> server4read() {
+        if (this.method == Method.MODULO_HOST_MD5 || this.method == Method.ROUND_ROBIN) return this.server; // return all
+        // this is a SolrCloud, we select just one of the SolrCloud server(s)
+        ArrayList<SolrServer> a = new ArrayList<>(1);
+        a.add(this.server.get(selectRoundRobin()));
+        return a;
+    }
 
-        // finally if no method matches use ROUND_ROBIN
-        return (int) (this.chardID.getAndIncrement() % this.dimension);
+    /**
+     * return all solr server
+     */
+    @Override
+    public Iterator<SolrServer> iterator() {
+        return this.server.iterator();
     }
 }

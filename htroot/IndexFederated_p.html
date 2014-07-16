@@ -64,7 +64,12 @@
       When a search request is made, all servers are accessed synchronously and the result is combined.</dd>
         
       <dt class="TableCellDark"></dt>
-      <dd>Sharding Method<br/><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
+      <dd>Sharding Method<br/>
+      <select id="solr.indexing.sharding" name="solr.indexing.sharding">
+          #{solr.indexing.sharding.methods}#
+            <option value="#[method]#" #(selected)#::selected="selected"#(/selected)#>#[method]#: #[description]#</option>
+          #{/solr.indexing.sharding.methods}#
+      </select></dd>
 
       <dt class="TableCellDark"></dt>
       <dd><input type="checkbox" name="solr.indexing.solrremote.writeenabled" id="solr_indexing_solrremote_writeenabled" #(solr.indexing.solrremote.writeenabled.checked)#:: checked="checked"#(/solr.indexing.solrremote.writeenabled.checked)#/> write-enabled (if unchecked, the remote server(s) will only be used as search peers)</dd>

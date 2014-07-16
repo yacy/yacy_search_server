@@ -28,6 +28,7 @@ import org.apache.solr.common.SolrException;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
+import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
@@ -110,7 +111,9 @@ public class IndexFederated_p {
             }
             solrurls = s.toString().trim();
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, solrurls);
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, post.get("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5")));
+            String shardMethodName = post.get("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, ShardSelection.Method.MODULO_HOST_MD5.name()));
+            ShardSelection.Method shardMethod = ShardSelection.Method.valueOf(shardMethodName);
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, shardMethod.name());
             
             if (solrRemoteWasOn && !solrRemoteIsOnAfterwards) {
                 // switch off
@@ -133,7 +136,7 @@ public class IndexFederated_p {
                 try {
                     if (usesolr) {
                         ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, solrtimeout);
-                        sb.index.fulltext().connectRemoteSolr(instances, writeEnabled);
+                        sb.index.fulltext().connectRemoteSolr(instances, shardMethod, writeEnabled);
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();
                     }
@@ -175,8 +178,16 @@ public class IndexFederated_p {
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_WEBGRAPH + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false) ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
-        prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
-        prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
+        prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));        
+        String thisShardingMethodName = env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, ShardSelection.Method.MODULO_HOST_MD5.name());
+        int mc = 0;
+        for (ShardSelection.Method method: ShardSelection.Method.values()) {
+            prop.put("solr.indexing.sharding.methods_" + mc + "_method", method.name());
+            prop.put("solr.indexing.sharding.methods_" + mc + "_description", method.description);
+            prop.put("solr.indexing.sharding.methods_" + mc + "_selected", method.name().equals(thisShardingMethodName) ? 1 : 0);
+            mc++;
+        }
+        prop.put("solr.indexing.sharding.methods", mc);
         prop.put("solr.indexing.solrremote.writeenabled.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED, true));
         prop.put("solr.indexing.lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
         

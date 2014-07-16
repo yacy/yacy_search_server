@@ -98,6 +98,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
+import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.SolrConnector.Metadata;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -527,7 +528,9 @@ public final class Switchboard extends serverSwitch {
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
                 ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, solrtimeout);
-                this.index.fulltext().connectRemoteSolr(instances, writeEnabled);
+                String shardMethodName = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, ShardSelection.Method.MODULO_HOST_MD5.name());
+                ShardSelection.Method shardMethod = ShardSelection.Method.valueOf(shardMethodName);
+                this.index.fulltext().connectRemoteSolr(instances, shardMethod, writeEnabled);
             } catch (final IOException e ) {
                 ConcurrentLog.logException(e);
             }
@@ -1371,7 +1374,9 @@ public final class Switchboard extends serverSwitch {
             if (usesolr && solrurls != null && solrurls.length() > 0) {
                 try {
                     ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, solrtimeout);
-                    this.index.fulltext().connectRemoteSolr(instances, writeEnabled);
+                    String shardMethodName = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, ShardSelection.Method.MODULO_HOST_MD5.name());
+                    ShardSelection.Method shardMethod = ShardSelection.Method.valueOf(shardMethodName);
+                    this.index.fulltext().connectRemoteSolr(instances, shardMethod, writeEnabled);
                 } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }

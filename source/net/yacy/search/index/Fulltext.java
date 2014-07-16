@@ -148,8 +148,8 @@ public final class Fulltext {
         return this.solrInstances.isConnectedRemote();
     }
 
-    public void connectRemoteSolr(final ArrayList<RemoteInstance> instances, final boolean writeEnabled) {
-        this.solrInstances.connectRemote(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5, writeEnabled));
+    public void connectRemoteSolr(final ArrayList<RemoteInstance> instances, final ShardSelection.Method shardMethod, final boolean writeEnabled) {
+        this.solrInstances.connectRemote(new ShardInstance(instances, shardMethod, writeEnabled));
     }
 
     public void disconnectRemoteSolr() {
