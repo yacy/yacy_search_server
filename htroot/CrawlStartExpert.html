@@ -298,9 +298,10 @@
             is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
             Following frames is NOT done by Gxxg1e, but we do by default to have a richer content. 'nofollow' in robots metadata can be overridden; this does not affect obeying of the robots.txt which is never ignored.
             </span></span>
-            Accept URLs with query-part ('?'): <input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# />&nbsp;&nbsp;
-            Obey html-robots-noindex: <input type="checkbox" name="obeyHtmlRobotsNoindex" id="obeyHtmlRobotsNoindex" #(obeyHtmlRobotsNoindexChecked)#::checked="checked"#(/obeyHtmlRobotsNoindexChecked)# /><!--&nbsp;&nbsp;
-            Follow Frames: <input type="checkbox" name="followFrames" id="followFrames" #(followFramesChecked)#::checked="checked"#(/followFramesChecked)# />&nbsp;&nbsp;-->
+            Accept URLs with query-part ('?'): <input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /><br/>
+            Obey html-robots-noindex: <input type="checkbox" name="obeyHtmlRobotsNoindex" id="obeyHtmlRobotsNoindex" #(obeyHtmlRobotsNoindexChecked)#::checked="checked"#(/obeyHtmlRobotsNoindexChecked)# /><br/>
+            Obey html-robots-nofollow: <input type="checkbox" name="obeyHtmlRobotsNofollow" id="obeyHtmlRobotsNofollow" #(obeyHtmlRobotsNofollowChecked)#::checked="checked"#(/obeyHtmlRobotsNofollowChecked)# /><!--<br/>
+            Follow Frames: <input type="checkbox" name="followFrames" id="followFrames" #(followFramesChecked)#::checked="checked"#(/followFramesChecked)# />-->
           </dd>
 	        <dt>Load Filter on URLs</dt>
 	        <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">

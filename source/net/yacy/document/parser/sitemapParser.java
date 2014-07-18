@@ -116,7 +116,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         final HTTPClient client = new HTTPClient(agent);
         client.setHeader(requestHeader.entrySet());
         try {
-            client.GET(sitemapURL.toString(), false);
+            client.GET(sitemapURL.toNormalform(false), false);
             if (client.getStatusCode() != 200) {
                 throw new IOException("Unable to download the sitemap file " + sitemapURL +
                         "\nServer returned status: " + client.getHttpResponse().getStatusLine());

@@ -151,7 +151,7 @@ public class DocumentIndex extends Segment {
         try {
             documents = TextParser.parseSource(url, null, null, 0, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null));
         } catch (final Exception e ) {
-            throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
+            throw new IOException("cannot parse " + url.toNormalform(false) + ": " + e.getMessage());
         }
         //Document document = Document.mergeDocuments(url, null, documents);
         final SolrInputDocument[] rows = new SolrInputDocument[documents.length];

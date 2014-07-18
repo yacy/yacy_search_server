@@ -243,7 +243,7 @@ public class ViewFile {
                 prop.put("viewMode_publisher", document.dc_publisher());
                 prop.put("viewMode_format", document.dc_format());
                 prop.put("viewMode_identifier", document.dc_identifier());
-                prop.put("viewMode_source", url.toString());
+                prop.put("viewMode_source", url.toNormalform(false));
                 prop.put("viewMode_lat", document.lat());
                 prop.put("viewMode_lon", document.lon());
                 prop.put("viewMode_parsedText", markup(wordArray, content).replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));

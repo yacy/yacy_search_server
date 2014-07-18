@@ -310,6 +310,9 @@ public class Crawler_p {
                 
                 boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "false"));
                 env.setConfig("obeyHtmlRobotsNoindex", obeyHtmlRobotsNoindex);
+                
+                boolean obeyHtmlRobotsNofollow = "on".equals(post.get("obeyHtmlRobotsNofollow", "false"));
+                env.setConfig("obeyHtmlRobotsNofollow", obeyHtmlRobotsNofollow);
 
                 final boolean indexText = "on".equals(post.get("indexText", "false"));
                 env.setConfig("indexText", indexText);
@@ -444,7 +447,8 @@ public class Crawler_p {
                             directDocByURL,
                             crawlingIfOlder,
                             crawlingDomMaxPages,
-                            crawlingQ, followFrames, obeyHtmlRobotsNoindex,
+                            crawlingQ, followFrames,
+                            obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                             indexText,
                             indexMedia,
                             storeHTCache,

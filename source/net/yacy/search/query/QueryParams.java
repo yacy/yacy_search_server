@@ -35,10 +35,11 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -60,6 +61,7 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.CommonParams;
@@ -522,11 +524,11 @@ public final class QueryParams {
         return this.queryGoal;
     }
 
-    public final Map<DigestURL, String> separateMatches(final Map<DigestURL, String> links) {
-        final Map<DigestURL, String> matcher = new HashMap<DigestURL, String>();
-        final Iterator <Map.Entry<DigestURL, String>> i = links.entrySet().iterator();
-        Map.Entry<DigestURL, String> entry;
-        DigestURL url;
+    public final Map<AnchorURL, String> separateMatches(final Map<AnchorURL, String> links) {
+        final Map<AnchorURL, String> matcher = new HashMap<>();
+        final Iterator <Map.Entry<AnchorURL, String>> i = links.entrySet().iterator();
+        Map.Entry<AnchorURL, String> entry;
+        AnchorURL url;
         String anchorText;
         while (i.hasNext()) {
             entry = i.next();

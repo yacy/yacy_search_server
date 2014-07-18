@@ -173,7 +173,7 @@ public class getpageinfo_p {
 					final DigestURL theURL = new DigestURL(url
 							+ "?verb=Identify");
 
-					final String oairesult = checkOAI(theURL.toString());
+					final String oairesult = checkOAI(theURL.toNormalform(false));
 
 					prop.put("oai", oairesult == "" ? 0 : 1);
 

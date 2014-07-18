@@ -356,7 +356,7 @@ public class CrawlQueues {
                     }
                 }
             } else {
-                CrawlQueues.log.severe("Unsupported protocol in URL '" + url.toString());
+                CrawlQueues.log.severe("Unsupported protocol in URL '" + url.toNormalform(false));
             }
         } else {
             if (CrawlQueues.log.isFine()) CrawlQueues.log.fine(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
@@ -627,7 +627,7 @@ public class CrawlQueues {
                 while ((request = CrawlQueues.this.workerQueue.poll(10, TimeUnit.SECONDS)) != POISON_REQUEST) {
                     if (request == null) break; // we run this only for a specific time and then let the process die to clear up resources
                     request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
-                    this.setName("CrawlQueues.Loader(" + request.url() + ")");
+                    this.setName("CrawlQueues.Loader(" + request.url().toNormalform(false) + ")");
                     CrawlProfile profile = CrawlQueues.this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
                     try {
                         // checking robots.txt for http(s) resources

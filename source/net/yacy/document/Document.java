@@ -818,7 +818,7 @@ dc_rights
         final List<String>       descriptions  = new ArrayList<String>();
         final Collection<String> titles        = new LinkedHashSet<String>();
         final Collection<String> sectionTitles = new LinkedHashSet<String>();
-        final List<AnchorURL>       anchors       = new ArrayList<AnchorURL>();
+        final List<AnchorURL>    anchors       = new ArrayList<AnchorURL>();
         final LinkedHashMap<DigestURL, String> rss = new LinkedHashMap<DigestURL, String>();
         final LinkedHashMap<AnchorURL, ImageEntry> images = new LinkedHashMap<AnchorURL, ImageEntry>();
         final Set<String> languages = new HashSet<String>();
@@ -913,16 +913,22 @@ dc_rights
 
     public final static String CANONICAL_MARKER = "canonical";
     
-    public static Map<DigestURL, String> getHyperlinks(final Document[] documents) {
-        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
+    public static Map<AnchorURL, String> getHyperlinks(final Document[] documents, boolean includeNofollow) {
+        final Map<AnchorURL, String> result = new HashMap<>();
         for (final Document d: documents) {
-            result.putAll(d.getHyperlinks());
+            if (includeNofollow) {
+                result.putAll(d.getHyperlinks());
+            } else {
+                for (Map.Entry<AnchorURL, String> entry: d.getHyperlinks().entrySet()) {
+                    if (!entry.getKey().attachedNofollow()) result.put(entry.getKey(), entry.getValue());
+                }
+            }
             final Object parser = d.getParserObject();
             if (parser instanceof ContentScraper) {
                 final ContentScraper html = (ContentScraper) parser;
                 String refresh = html.getRefreshPath();
-                if (refresh != null && refresh.length() > 0) try {result.put(new DigestURL(refresh), "refresh");} catch (final MalformedURLException e) {}
-                DigestURL canonical = html.getCanonical();
+                if (refresh != null && refresh.length() > 0) try {result.put(new AnchorURL(refresh), "refresh");} catch (final MalformedURLException e) {}
+                AnchorURL canonical = html.getCanonical();
                 if (canonical != null) {
                     result.put(canonical, CANONICAL_MARKER);
                 }

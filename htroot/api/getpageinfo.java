@@ -168,10 +168,8 @@ public class getpageinfo {
             }
             if (actions.indexOf("oai",0) >= 0) {
 				try {
-					final DigestURL theURL = new DigestURL(url
-							+ "?verb=Identify");
-
-					final String oairesult = checkOAI(theURL.toString());
+					final DigestURL theURL = new DigestURL(url + "?verb=Identify");
+					final String oairesult = checkOAI(theURL.toNormalform(false));
 
 					prop.put("oai", oairesult == "" ? 0 : 1);
 

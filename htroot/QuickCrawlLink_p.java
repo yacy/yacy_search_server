@@ -101,6 +101,7 @@ public class QuickCrawlLink_p {
         final boolean crawlingQ      = post.get("crawlingQ", "").equals("on");
         final boolean followFrames   = post.get("followFrames", "").equals("on");
         final boolean obeyHtmlRobotsNoindex = post.get("obeyHtmlRobotsNoindex", "").equals("on");
+        final boolean obeyHtmlRobotsNofollow = post.get("obeyHtmlRobotsNofollow", "").equals("on");
         final boolean indexText      = post.get("indexText", "off").equals("on");
         final boolean indexMedia     = post.get("indexMedia", "off").equals("on");
         final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
@@ -147,7 +148,8 @@ public class QuickCrawlLink_p {
                         true,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
                         -1, // domMaxPages, if negative: no count restriction
-                        crawlingQ, followFrames, obeyHtmlRobotsNoindex,
+                        crawlingQ, followFrames,
+                        obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                         indexText, indexMedia,
                         storeHTCache, remoteIndexing,
                         CacheStrategy.IFFRESH,

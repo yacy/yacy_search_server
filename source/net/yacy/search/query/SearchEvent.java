@@ -1531,7 +1531,7 @@ public final class SearchEvent {
         }
         @Override
         public String toString() {
-            return this.imageUrl.toString();
+            return this.imageUrl.toNormalform(false);
         }
     }
     

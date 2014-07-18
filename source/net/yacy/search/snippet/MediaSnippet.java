@@ -202,7 +202,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         while (i.hasNext()) {
             ientry = i.next();
             url = ientry.url();
-            final String u = url.toString();
+            final String u = url.toNormalform(false);
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
             if (u.indexOf(".ico",0) >= 0 || u.indexOf("favicon",0) >= 0) continue;
             if (ientry.height() > 0 && ientry.height() < 32) continue;
@@ -262,7 +262,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         if (isBlacklisted) {
             
             Switchboard.getSwitchboard().crawlQueues.errorURL.push(url, 996, null, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
-            ConcurrentLog.fine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
+            ConcurrentLog.fine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toNormalform(false) + "'. URL is in blacklist.");
         }
 
         return isBlacklisted;

@@ -396,7 +396,7 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<DigestURL, String> loadLinks(final AnchorURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+    public final Map<AnchorURL, String> loadLinks(final AnchorURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
         final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, agent);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
@@ -413,7 +413,7 @@ public final class LoaderDispatcher {
             throw new IOException("parser error: " + e.getMessage());
         }
 
-        return Document.getHyperlinks(documents);
+        return Document.getHyperlinks(documents, true);
     }
 
     public synchronized static void cleanupAccessTimeTable(final long timeout) {

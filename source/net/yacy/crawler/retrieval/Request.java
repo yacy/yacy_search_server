@@ -225,7 +225,7 @@ public class Request extends WorkflowJob
             new byte[][] {
                 this.url.hash(),
                 this.initiator,
-                UTF8.getBytes(this.url.toString()),
+                UTF8.getBytes(this.url.toNormalform(false)),
                 this.refhash,
                 namebytes,
                 appdatestr,

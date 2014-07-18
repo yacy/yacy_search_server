@@ -592,7 +592,7 @@ public class Segment {
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();
         final int urlLength = urlNormalform.length();
-        final int urlComps = MultiProtocolURL.urlComps(url.toString()).length;
+        final int urlComps = MultiProtocolURL.urlComps(url.toNormalform(false)).length;
 
         // create a word prototype which is re-used for all entries
         if ((this.termIndex != null && storeToRWI) || searchEvent != null) {

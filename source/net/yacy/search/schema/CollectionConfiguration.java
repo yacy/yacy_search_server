@@ -1199,10 +1199,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                         }
                                         proccount.incrementAndGet();
                                         allcount.incrementAndGet();
-                                        if (proccount.get() % 1000 == 0) ConcurrentLog.info(
-                                                "CollectionConfiguration", "webgraph - postprocessed " + proccount + " from " + count + " documents; " +
+                                        if (proccount.get() % 1000 == 0) {
+                                            postprocessingActivity = "writing cr values to webgraph for host " + hostfinal + "postprocessed " + proccount + " from " + count + " documents; " +
                                                 (proccount.get() * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " +
-                                                ((System.currentTimeMillis() - start) * (count - proccount.get()) / proccount.get() / 60000) + " minutes remaining for host " + hostfinal);
+                                                ((System.currentTimeMillis() - start) * (count - proccount.get()) / proccount.get() / 60000) + " minutes remaining";
+                                            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+                                        }
                                     }
                                 } catch (InterruptedException e) {
                                     ConcurrentLog.warn("CollectionConfiguration", e.getMessage(), e);
@@ -1301,10 +1303,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     collectionConnector.add(sid);
                     
                     proccount++; allcount.incrementAndGet();
-                    if (proccount % 100 == 0) ConcurrentLog.info(
-                            "CollectionConfiguration", "collection - postprocessed " + proccount + " from " + count + " documents; " +
+                    if (proccount % 100 == 0) {
+                        postprocessingActivity = "postprocessed " + proccount + " from " + count + " collection documents; " +
                             (proccount * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " +
-                            ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining");
+                            ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining";
+                        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+                    }
                 } catch (final Throwable e1) {
                     ConcurrentLog.logException(e1);
                     failids.add(i);

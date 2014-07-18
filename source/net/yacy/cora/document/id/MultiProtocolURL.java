@@ -857,6 +857,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     @Override
     public String toString() {
+        assert false; // this shall not be used to avoid confusion with AnchorURL.toString
         return toNormalform(false);
     }
 
@@ -2006,9 +2007,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             return TimeoutRequest.exists(getSmbFile(), SMB_TIMEOUT);
         } catch (final SmbException e) {
-            throw new IOException("SMB.exists SmbException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.exists SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.exists MalformedURLException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.exists MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false));
         }
         return false;
     }
@@ -2018,9 +2019,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             return TimeoutRequest.canRead(getSmbFile(), SMB_TIMEOUT);
         } catch (final SmbException e) {
-            throw new IOException("SMB.canRead SmbException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.canRead SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.canRead MalformedURLException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.canRead MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false));
         }
         return false;
     }
@@ -2030,9 +2031,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             return TimeoutRequest.canWrite(getSmbFile(), SMB_TIMEOUT);
         } catch (final SmbException e) {
-            throw new IOException("SMB.canWrite SmbException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.canWrite SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.canWrite MalformedURLException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.canWrite MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false));
         }
         return false;
     }
@@ -2042,9 +2043,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             return TimeoutRequest.isHidden(getSmbFile(), SMB_TIMEOUT);
         } catch (final SmbException e) {
-            throw new IOException("SMB.isHidden SmbException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.isHidden SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.isHidden MalformedURLException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.isHidden MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false));
         }
         return false;
     }
@@ -2054,9 +2055,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             return TimeoutRequest.isDirectory(getSmbFile(), SMB_TIMEOUT);
         } catch (final SmbException e) {
-            throw new IOException("SMB.isDirectory SmbException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.isDirectory SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.isDirectory MalformedURLException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.isDirectory MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false));
         }
         return false;
     }
@@ -2082,9 +2083,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             return TimeoutRequest.lastModified(getSmbFile(), SMB_TIMEOUT);
         } catch (final SmbException e) {
-            throw new IOException("SMB.lastModified SmbException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.lastModified SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.lastModified MalformedURLException (" + e.getMessage() + ") for " + toString());
+            throw new IOException("SMB.lastModified MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false));
         }
         return 0;
     }
@@ -2094,7 +2095,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             return getSmbFile().getName();
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.getName MalformedURLException (" + e.getMessage() + ") for " + toString() );
+            throw new IOException("SMB.getName MalformedURLException (" + e.getMessage() + ") for " + toNormalform(false) );
         }
         if (isFTP()) {
             return this.getFileName();
@@ -2113,7 +2114,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 throw new IOException("SMB.list SmbException for " + sf.toString() + ": " + e.getMessage());
             }
         } catch (final MalformedURLException e) {
-            throw new IOException("SMB.list MalformedURLException for " + toString() + ": " + e.getMessage());
+            throw new IOException("SMB.list MalformedURLException for " + toNormalform(false) + ": " + e.getMessage());
         }
         return null;
     }
@@ -2262,10 +2263,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             // check equality to java.net.URL
             if (((aURL == null) && (jURL != null)) ||
                 ((aURL != null) && (jURL == null)) ||
-                ((aURL != null) && (jURL != null) && (!(jURL.toString().equals(aURL.toString()))))) {
+                ((aURL != null) && (jURL != null) && (!(jURL.toString().equals(aURL.toNormalform(false)))))) {
                 System.out.println("Difference for environment=" + environment + ", url=" + url + ":");
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
-                System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toString());
+                System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toNormalform(false));
             }
 
             // check stability: the normalform of the normalform must be equal to the normalform
@@ -2273,12 +2274,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 aURL1 = new MultiProtocolURL(aURL.toNormalform(false));
                 if (!(aURL1.toNormalform(false).equals(aURL.toNormalform(false)))) {
                     System.out.println("no stability for url:");
-                    System.out.println("aURL0=" + aURL.toString());
-                    System.out.println("aURL1=" + aURL1.toString());
+                    System.out.println("aURL0=" + aURL.toNormalform(false));
+                    System.out.println("aURL1=" + aURL1.toNormalform(false));
                 }
             } catch (final MalformedURLException e) {
                 System.out.println("no stability for url:");
-                System.out.println("aURL0=" + aURL.toString());
+                System.out.println("aURL0=" + aURL.toNormalform(false));
                 System.out.println("aURL1 cannot be computed:" + e.getMessage());
             }
         }

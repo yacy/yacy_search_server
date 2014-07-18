@@ -395,7 +395,7 @@ public final class CrawlStacker {
             return null; // no evidence that we know that url
         }
         final boolean recrawl = profile.recrawlIfOlder() > oldDate.longValue();
-        final String urlstring = url.toString();
+        final String urlstring = url.toNormalform(false);
         if (recrawl) {
             if (CrawlStacker.log.isInfo())
                 CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
@@ -409,7 +409,7 @@ public final class CrawlStacker {
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
             final AtomicInteger dp = profile.getCount(url.getHost());
             if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
-                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + url.toString() + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + url.toNormalform(false) + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
                 return "crawl stack domain counter exceeded (test by profile)";
             }
 
@@ -435,7 +435,7 @@ public final class CrawlStacker {
 
         // check if the protocol is supported
         final String urlProtocol = url.getProtocol();
-        final String urlstring = url.toString();
+        final String urlstring = url.toNormalform(true);
         if (!Switchboard.getSwitchboard().loader.isSupportedProtocol(urlProtocol)) {
             CrawlStacker.log.severe("Unsupported protocol in URL '" + urlstring + "'.");
             return "unsupported protocol";

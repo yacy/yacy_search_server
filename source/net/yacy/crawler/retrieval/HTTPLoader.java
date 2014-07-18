@@ -149,7 +149,7 @@ public final class HTTPLoader {
 
             // restart crawling with new url
             this.log.info("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
-            this.log.info("CRAWLER ..Redirecting request to: " + redirectionUrl);
+            this.log.info("CRAWLER ..Redirecting request to: " + redirectionUrl.toNormalform(false));
 
             this.sb.webStructure.generateCitationReference(url, redirectionUrl);
             

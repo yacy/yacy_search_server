@@ -98,7 +98,7 @@ public class SitemapImporter extends Thread {
         this.sb.crawlStacker.enqueueEntry(new Request(
                 ASCII.getBytes(this.sb.peers.mySeed().hash),
                 url,
-                null, // this.siteMapURL.toString(),
+                null, // this.siteMapURL.toNormalform(false),
                 entry.url(),
                 entry.lastmod(new Date()),
                 this.crawlingProfile.handle(),

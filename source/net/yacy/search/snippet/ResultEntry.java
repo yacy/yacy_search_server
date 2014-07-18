@@ -29,7 +29,6 @@ package net.yacy.search.snippet;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;

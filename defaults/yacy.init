@@ -550,6 +550,7 @@ crawlingFilter=.*
 crawlingQ=true
 followFrames=true
 obeyHtmlRobotsNoindex=true
+obeyHtmlRobotsNofollow=false
 storeHTCache=true
 storeTXCache=true
 

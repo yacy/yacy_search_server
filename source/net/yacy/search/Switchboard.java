@@ -2584,26 +2584,27 @@ public final class Switchboard extends serverSwitch {
             for (Document d: documents) d.setDepth(response.depth());
             
             // get the hyperlinks
-            final Map<DigestURL, String> hl = Document.getHyperlinks(documents);
+            final Map<AnchorURL, String> hl = Document.getHyperlinks(documents, !response.profile().obeyHtmlRobotsNofollow());
+            
             if (response.profile().indexMedia()) {
                 for (Map.Entry<DigestURL, String> entry: Document.getImagelinks(documents).entrySet()) {
-                    if (TextParser.supportsExtension(entry.getKey()) == null) hl.put(entry.getKey(), entry.getValue());
+                    if (TextParser.supportsExtension(entry.getKey()) == null) hl.put(new AnchorURL(entry.getKey()), entry.getValue());
                 }
             }
             
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
             if (response.profile().directDocByURL()) {
                 for (Map.Entry<DigestURL, String> entry: Document.getImagelinks(documents).entrySet()) {
-                    if (TextParser.supportsExtension(entry.getKey()) != null) hl.put(entry.getKey(), entry.getValue());
+                    if (TextParser.supportsExtension(entry.getKey()) != null) hl.put(new AnchorURL(entry.getKey()), entry.getValue());
                 }
-                hl.putAll(Document.getApplinks(documents));
-                hl.putAll(Document.getVideolinks(documents));
-                hl.putAll(Document.getAudiolinks(documents));
+                for (Map.Entry<DigestURL, String> d: Document.getApplinks(documents).entrySet()) hl.put(new AnchorURL(d.getKey()), d.getValue());
+                for (Map.Entry<DigestURL, String> d: Document.getVideolinks(documents).entrySet()) hl.put(new AnchorURL(d.getKey()), d.getValue());
+                for (Map.Entry<DigestURL, String> d: Document.getAudiolinks(documents).entrySet()) hl.put(new AnchorURL(d.getKey()), d.getValue());
             }
 
             // insert those hyperlinks to the crawler
             MultiProtocolURL nextUrl;
-            for ( final Map.Entry<DigestURL, String> nextEntry : hl.entrySet() ) {
+            for ( final Map.Entry<AnchorURL, String> nextEntry : hl.entrySet() ) {
                 // check for interruption
                 checkInterruption();
 
@@ -2880,7 +2881,7 @@ public final class Switchboard extends serverSwitch {
 
     public final void addAllToIndex(
         final DigestURL url,
-        final Map<DigestURL, String> links,
+        final Map<AnchorURL, String> links,
         final SearchEvent searchEvent,
         final String heuristicName,
         final Map<String, Pattern> collections,
@@ -2893,15 +2894,15 @@ public final class Switchboard extends serverSwitch {
         }
 
         // check if some of the links match with the query
-        final Map<DigestURL, String> matcher = searchEvent.query.separateMatches(links);
+        final Map<AnchorURL, String> matcher = searchEvent.query.separateMatches(links);
 
         // take the matcher and load them all
-        for (final Map.Entry<DigestURL, String> entry : matcher.entrySet()) {
+        for (final Map.Entry<AnchorURL, String> entry : matcher.entrySet()) {
             urls.add(new DigestURL(entry.getKey(), (byte[]) null));
         }
 
         // take then the no-matcher and load them also
-        for (final Map.Entry<DigestURL, String> entry : links.entrySet()) {
+        for (final Map.Entry<AnchorURL, String> entry : links.entrySet()) {
             urls.add(new DigestURL(entry.getKey(), (byte[]) null));
         }
         addToIndex(urls, searchEvent, heuristicName, collections, doublecheck);
@@ -3479,12 +3480,12 @@ public final class Switchboard extends serverSwitch {
                     return;
                 }
 
-                final Map<DigestURL, String> links;
+                final Map<AnchorURL, String> links;
                 searchEvent.oneFeederStarted();
                 try {
                     links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     if ( links != null ) {
-                        final Iterator<DigestURL> i = links.keySet().iterator();
+                        final Iterator<AnchorURL> i = links.keySet().iterator();
                         while ( i.hasNext() ) {
                             if ( !i.next().getHost().endsWith(host) ) {
                                 i.remove();
@@ -3518,13 +3519,13 @@ public final class Switchboard extends serverSwitch {
                     return;
                 }
 
-                final Map<DigestURL, String> links;
+                final Map<AnchorURL, String> links;
                 DigestURL url;
                 try {
                     links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
-                            final Iterator<DigestURL> i = links.keySet().iterator();
+                            final Iterator<AnchorURL> i = links.keySet().iterator();
                             final boolean globalcrawljob = Switchboard.this.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL,false);
                             Collection<DigestURL> urls = new ArrayList<DigestURL>();
                             while (i.hasNext()) {
@@ -3590,11 +3591,11 @@ public final class Switchboard extends serverSwitch {
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
                     if ( rss != null ) {
-                        final Map<DigestURL, String> links = new TreeMap<DigestURL, String>();
-                        DigestURL uri;
+                        final Map<AnchorURL, String> links = new TreeMap<>();
+                        AnchorURL uri;
                         for ( final RSSMessage message : rss.getFeed() ) {
                             try {
-                                uri = new DigestURL(message.getLink());
+                                uri = new AnchorURL(message.getLink());
                                 links.put(uri, message.getTitle());
                             } catch (final MalformedURLException e ) {
                             }
@@ -3720,7 +3721,7 @@ public final class Switchboard extends serverSwitch {
                     final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                     client.setHeader(reqHeader.entrySet());
 
-                    client.HEADResponse(url.toString(), false);
+                    client.HEADResponse(url.toNormalform(false), false);
                     int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                     ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
                     if (checkAge) {

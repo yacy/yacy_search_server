@@ -55,7 +55,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 
 		// TODO: current hardcoded restriction: apply rdfa parser only on selected sources.
 
-		if (url.toString().contains(".yacy") || url.toString().contains("experiments")) {
+		if (url.toNormalform(true).contains(".yacy") || url.toNormalform(true).contains("experiments")) {
 		// if (true == false) {
 			Document rdfaDoc = parseRDFa(url, mimeType, charset, source);
 			Document[] retDocs = new Document[htmlDocs.length + 1];

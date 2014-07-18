@@ -183,7 +183,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private double lon, lat;
-    private DigestURL canonical, publisher;
+    private AnchorURL canonical, publisher;
     private final int maxLinks;
     private int breadcrumbs;
 
@@ -771,7 +771,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return this.script;
     }
 
-    public DigestURL getCanonical() {
+    public AnchorURL getCanonical() {
         return this.canonical;
     }
 

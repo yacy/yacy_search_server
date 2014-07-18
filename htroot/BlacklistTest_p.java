@@ -62,8 +62,8 @@ public class BlacklistTest_p {
             	testurl = null;
             }
             if(testurl != null) {
-                prop.putHTML("url",testurl.toString());
-                prop.putHTML("testlist_url",testurl.toString());
+                prop.putHTML("url",testurl.toNormalform(false));
+                prop.putHTML("testlist_url",testurl.toNormalform(false));
                 boolean isblocked = false;
 
                 if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl)) {

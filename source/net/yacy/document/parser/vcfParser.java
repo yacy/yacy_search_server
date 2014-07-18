@@ -179,7 +179,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
                             final AnchorURL newURL = new AnchorURL(value);
-                            newURL.setNameProperty(newURL.toString());
+                            newURL.setNameProperty(newURL.toNormalform(false));
                             anchors.add(newURL);
                             //parsedData.put(key,value);
                         } catch (final MalformedURLException ex) {/* ignore this */}

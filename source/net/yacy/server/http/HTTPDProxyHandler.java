@@ -585,7 +585,7 @@ public final class HTTPDProxyHandler {
                         }
                     } else {
                         // no caching
-                        if (log.isFine()) log.fine(reqID +" "+ url.toString() + " not cached." +
+                        if (log.isFine()) log.fine(reqID +" "+ url.toNormalform(false) + " not cached." +
                                 " StoreError=" + ((storeError==null)?"None":storeError) +
                                 " StoreHTCache=" + storeHTCache +
                                 " SupportError=" + supportError);
@@ -663,7 +663,7 @@ public final class HTTPDProxyHandler {
             if (requestHeader.containsKey(RequestHeader.IF_MODIFIED_SINCE)) {
                 // conditional request: freshness of cache for that condition was already
                 // checked within shallUseCache(). Now send only a 304 response
-                log.info("CACHE HIT/304 " + url.toString());
+                log.info("CACHE HIT/304 " + url.toNormalform(false));
                 conProp.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_HIT");
 
                 // setting the content length header to 0
@@ -674,7 +674,7 @@ public final class HTTPDProxyHandler {
                 //respondHeader(respond, "304 OK", cachedResponseHeader); // respond with 'not modified'
             } else {
                 // unconditional request: send content of cache
-                log.info("CACHE HIT/203 " + url.toString());
+                log.info("CACHE HIT/203 " + url.toNormalform(false));
                 conProp.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_HIT");
 
                 // setting the content header to the proper length

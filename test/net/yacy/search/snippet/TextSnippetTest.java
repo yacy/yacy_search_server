@@ -34,7 +34,7 @@ public class TextSnippetTest {
         doc = new SolrDocument();
         DigestURL url = new DigestURL("http://localhost/page.html");
         doc.addField(CollectionSchema.id.name(), ASCII.String(url.hash()));
-        doc.addField(CollectionSchema.sku.name(),url.toString());
+        doc.addField(CollectionSchema.sku.name(), url.toNormalform(false));
         // for testcases add other fields
         // fields involved in snippet extraction:
         // url, title, keywords, author, text_t

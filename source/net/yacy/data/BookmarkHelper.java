@@ -149,7 +149,7 @@ public class BookmarkHelper {
             title = url.getNameProperty();
             ConcurrentLog.info("BOOKMARKS", "links.get(url)");
             if ("".equals(title)) {//cannot be displayed
-                title = url.toString();
+                title = url.toNormalform(false);
             }
             bm = db.new Bookmark(url);
             bm.setProperty(Bookmark.BOOKMARK_TITLE, title);

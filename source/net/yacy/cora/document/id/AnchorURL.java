@@ -127,4 +127,16 @@ public class AnchorURL extends DigestURL {
         return tagopts;
     }
     
+    public boolean attachedNofollow() {
+        return this.relProperty.indexOf("nofollow") >= 0;
+    }
+    
+    @Override
+    public String toString() {
+        return "<a href=\"" + this.toNormalform(false) + "\"" +
+                (this.nameProperty.length() > 0 ? (" name=\"" + this.nameProperty + "\"") : "") +
+                (this.relProperty.length() > 0 ? (" rel=\"" + this.relProperty + "\"") : "") +
+                ">" + this.textProperty + "</a>";
+    }
+    
 }

@@ -201,9 +201,9 @@ public final class Cache {
 
     public static void store(final DigestURL url, final ResponseHeader responseHeader, final byte[] file) throws IOException {
         if (maxCacheSize == 0) return;
-        if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
-        if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
-        log.info("storing content of url " + url.toString() + ", " + file.length + " bytes");
+        if (responseHeader == null) throw new IOException("Cache.store of url " + url.toNormalform(false) + " not possible: responseHeader == null");
+        if (file == null) throw new IOException("Cache.store of url " + url.toNormalform(false) + " not possible: file == null");
+        log.info("storing content of url " + url.toNormalform(false) + ", " + file.length + " bytes");
 
         // store the file
         try {

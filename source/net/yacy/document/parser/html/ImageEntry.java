@@ -133,7 +133,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         final int ohc = (h).hashCode();
         if (thc < ohc) return -1;
         if (thc > ohc) return 1;
-        return this.imageurl.toString().compareTo((h).imageurl.toString());
+        return this.imageurl.toNormalform(true).compareTo((h).imageurl.toNormalform(true));
     }
 
     @Override

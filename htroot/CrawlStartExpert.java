@@ -192,16 +192,15 @@ public class CrawlStartExpert {
         }
 
         // Accept URLs with query-part?
-        // Obey html-robots-noindex?
+        // Obey html-robots-noindex, nofollow?
         if (post == null) {
-            prop.put("crawlingQChecked",
-                    env.getConfigBool("crawlingQ", true) ? 1 : 0);
-            prop.put("obeyHtmlRobotsNoindexChecked",
-                    env.getConfigBool("obeyHtmlRobotsNoindex", true) ? 1 : 0);
+            prop.put("crawlingQChecked", env.getConfigBool("crawlingQ", true) ? 1 : 0);
+            prop.put("obeyHtmlRobotsNoindexChecked", env.getConfigBool("obeyHtmlRobotsNoindex", true) ? 1 : 0);
+            prop.put("obeyHtmlRobotsNofollowChecked", env.getConfigBool("obeyHtmlRobotsNofollow", true) ? 1 : 0);
         } else {
             prop.put("crawlingQChecked", post.getBoolean("crawlingQ") ? 1 : 0);
-            prop.put("obeyHtmlRobotsNoindexChecked",
-                    post.getBoolean("obeyHtmlRobotsNoindex") ? 1 : 0);
+            prop.put("obeyHtmlRobotsNoindexChecked", post.getBoolean("obeyHtmlRobotsNoindex") ? 1 : 0);
+            prop.put("obeyHtmlRobotsNofollowChecked", post.getBoolean("obeyHtmlRobotsNofollow") ? 1 : 0);
         }
 
         // Load Filter on URLs (range)
