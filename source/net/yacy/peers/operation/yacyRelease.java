@@ -398,19 +398,19 @@ public final class yacyRelease extends yacyVersion {
             try{
                 ConcurrentLog.info("RESTART", "INITIATED");
                 final String script =
-                    "@echo off" + serverCore.LF_STRING +
-                    "title YaCy restarter" + serverCore.LF_STRING +
-                    "set loading=YACY RESTARTER" + serverCore.LF_STRING +
-                    "echo %loading%" + serverCore.LF_STRING +
-                    "cd \"" + sb.getDataPath().toString() + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
-                    ":WAIT" + serverCore.LF_STRING +
-                    "set loading=%loading%." + serverCore.LF_STRING +
-                    "cls" + serverCore.LF_STRING +
-                    "echo %loading%" + serverCore.LF_STRING +
-                    "ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
-                    "IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
-                    "cd \"" + sb.getAppPath().toString() + "\"" + serverCore.LF_STRING +
-                    "start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
+                    "@echo off" + serverCore.CRLF_STRING +
+                    "title YaCy restarter" + serverCore.CRLF_STRING +
+                    "set loading=YACY RESTARTER" + serverCore.CRLF_STRING +
+                    "echo %loading%" + serverCore.CRLF_STRING +
+                    "cd \"" + sb.getDataPath().toString() + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.CRLF_STRING +
+                    ":WAIT" + serverCore.CRLF_STRING +
+                    "set loading=%loading%." + serverCore.CRLF_STRING +
+                    "cls" + serverCore.CRLF_STRING +
+                    "echo %loading%" + serverCore.CRLF_STRING +
+                    "ping -n 2 127.0.0.1 >nul" + serverCore.CRLF_STRING +
+                    "IF exist ..\\yacy.running goto WAIT" + serverCore.CRLF_STRING +
+                    "cd \"" + sb.getAppPath().toString() + "\"" + serverCore.CRLF_STRING +
+                    "start /MIN CMD /C " + starterFile + serverCore.CRLF_STRING;
                 final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
                 OS.deployScript(scriptFile, script);
                 ConcurrentLog.info("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
@@ -495,38 +495,38 @@ public final class yacyRelease extends yacyVersion {
                 if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
                 if (startParameter.startsWith("-gui")) starterFile += " " + startParameter;
                 script =
-                    "@echo off" + serverCore.LF_STRING +
-                    "title YaCy updater" + serverCore.LF_STRING +
-                    "set loading=YACY UPDATER" + serverCore.LF_STRING +
-                    "echo %loading%" + serverCore.LF_STRING +
-                    "cd \"" + sb.getDataPath().toString() + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
+                    "@echo off" + serverCore.CRLF_STRING +
+                    "title YaCy updater" + serverCore.CRLF_STRING +
+                    "set loading=YACY UPDATER" + serverCore.CRLF_STRING +
+                    "echo %loading%" + serverCore.CRLF_STRING +
+                    "cd \"" + sb.getDataPath().toString() + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.CRLF_STRING +
 
-                    ":WAIT" + serverCore.LF_STRING +
-                    "set loading=%loading%." + serverCore.LF_STRING +
-                    "cls" + serverCore.LF_STRING +
-                    "echo %loading%" + serverCore.LF_STRING +
-                    "ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
-                    "IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
-                    "IF not exist yacy goto NODATA" + serverCore.LF_STRING +
+                    ":WAIT" + serverCore.CRLF_STRING +
+                    "set loading=%loading%." + serverCore.CRLF_STRING +
+                    "cls" + serverCore.CRLF_STRING +
+                    "echo %loading%" + serverCore.CRLF_STRING +
+                    "ping -n 2 127.0.0.1 >nul" + serverCore.CRLF_STRING +
+                    "IF exist ..\\yacy.running goto WAIT" + serverCore.CRLF_STRING +
+                    "IF not exist yacy goto NODATA" + serverCore.CRLF_STRING +
 
-                    "cd yacy" + serverCore.LF_STRING +
-                    "del /Q \"" + sb.getAppPath().toString() + "\\lib\\*\"  >nul" + serverCore.LF_STRING +
-                    "xcopy *.* \"" + sb.getAppPath().toString() + "\" /E /Y >nul" + serverCore.LF_STRING +
+                    "cd yacy" + serverCore.CRLF_STRING +
+                    "del /Q \"" + sb.getAppPath().toString() + "\\lib\\*\"  >nul" + serverCore.CRLF_STRING +
+                    "xcopy *.* \"" + sb.getAppPath().toString() + "\" /E /Y >nul" + serverCore.CRLF_STRING +
                     // /E - all subdirectories
                     // /Y - don't ask
-                    "cd .." + serverCore.LF_STRING +
-                    "rd yacy /S /Q" + serverCore.LF_STRING +
+                    "cd .." + serverCore.CRLF_STRING +
+                    "rd yacy /S /Q" + serverCore.CRLF_STRING +
                     // /S delete tree
                     // /Q don't ask
-                    "goto END" + serverCore.LF_STRING +
+                    "goto END" + serverCore.CRLF_STRING +
 
-                    ":NODATA" + serverCore.LF_STRING +
-                    "echo YACY UPDATER ERROR: NO UPDATE SOURCE FILES ON FILESYSTEM" + serverCore.LF_STRING +
-                    "pause" + serverCore.LF_STRING +
+                    ":NODATA" + serverCore.CRLF_STRING +
+                    "echo YACY UPDATER ERROR: NO UPDATE SOURCE FILES ON FILESYSTEM" + serverCore.CRLF_STRING +
+                    "pause" + serverCore.CRLF_STRING +
 
-                    ":END" + serverCore.LF_STRING +
-                    "cd \"" + sb.getAppPath().toString() + "\"" + serverCore.LF_STRING +
-                    "start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
+                    ":END" + serverCore.CRLF_STRING +
+                    "cd \"" + sb.getAppPath().toString() + "\"" + serverCore.CRLF_STRING +
+                    "start /MIN CMD /C " + starterFile + serverCore.CRLF_STRING;
                 scriptFileName = "update.bat";
             } else { // unix/linux
                 script =
