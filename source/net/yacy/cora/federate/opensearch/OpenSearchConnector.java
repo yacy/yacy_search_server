@@ -107,9 +107,7 @@ public class OpenSearchConnector {
                         Tables.Row row = ossysworktable.next();
                         String osurl = row.get("url", "");
                         String name = row.get("title", "");
-                        // to reuse existing heuristicRSS procedure replace querystring with "$"
-                        // querystring is inserted/replaced inside heuristicRSS
-                        sb.heuristicRSS(parseSearchTemplate(osurl, "$", 0, theSearch.query.itemsPerPage), theSearch, "opensearch:" + name);
+                        sb.heuristicRSS(parseSearchTemplate(osurl, theSearch.query.getQueryGoal().getQueryString(false), 0, theSearch.query.itemsPerPage), theSearch, name);
                     }
                 } catch (final IOException ex) {
                     ConcurrentLog.warn("OpenSearchConnector.query", "failed reading table opensearchsys");

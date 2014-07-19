@@ -3545,39 +3545,29 @@ public final class Switchboard extends serverSwitch {
         }.start();
     }
 
-    // blekko pattern: http://blekko.com/ws/$+/rss
+    /**
+     * Queries a remote opensearch system, expects RSS feed as response, parses the RSS feed and
+     * - adds the results to the results of the searchEvent
+     * - adds the results to the local index
+     *
+     * @param urlpattern the search query url (e.g. http://search.org?query=searchword)
+     * @param searchEvent
+     * @param feedName short/internal name of the remote system
+     */
     public final void heuristicRSS(
         final String urlpattern,
         final SearchEvent searchEvent,
         final String feedName) {
-        final int p = urlpattern.indexOf('$');
-        if ( p < 0 ) {
-            return;
-        }
+
         new Thread() {
             @Override
             public void run() {
-                String queryString = searchEvent.query.getQueryGoal().getQueryString(false);
-                Thread.currentThread().setName("Switchboard.heuristicRSS:" + queryString);
-                final int meta = queryString.indexOf("heuristic:", 0);
-                if ( meta >= 0 ) {
-                    final int q = queryString.indexOf(' ', meta);
-                    if ( q >= 0 ) {
-                        queryString = queryString.substring(0, meta) + queryString.substring(q + 1);
-                    } else {
-                        queryString = queryString.substring(0, meta);
-                    }
-                }
-
-                final String urlString =
-                    urlpattern.substring(0, p)
-                        + queryString.trim().replaceAll(" ", "+")
-                        + urlpattern.substring(p + 1);
+                Thread.currentThread().setName("heuristicRSS:" + feedName);
                 final DigestURL url;
                 try {
-                    url = new DigestURL(MultiProtocolURL.unescape(urlString));
+                    url = new DigestURL(MultiProtocolURL.unescape(urlpattern));
                 } catch (final MalformedURLException e1 ) {
-                    ConcurrentLog.warn("heuristicRSS", "url not well-formed: '" + urlString + "'");
+                    ConcurrentLog.warn("heuristicRSS", "url not well-formed: '" + urlpattern + "'");
                     return;
                 }
 
@@ -3588,7 +3578,6 @@ public final class Switchboard extends serverSwitch {
                     final Response response =
                         Switchboard.this.loader.load(Switchboard.this.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     final byte[] resource = (response == null) ? null : response.getContent();
-                    //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
                     if ( rss != null ) {
                         final Map<AnchorURL, String> links = new TreeMap<>();
@@ -3610,7 +3599,6 @@ public final class Switchboard extends serverSwitch {
                         addAllToIndex(null, links, searchEvent, feedName, CrawlProfile.collectionParser("rss"), true);
                     }
                 } catch (final Throwable e ) {
-                    //Log.logException(e);
                 } finally {
                     searchEvent.oneFeederTerminated();
                 }

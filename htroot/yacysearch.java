@@ -467,10 +467,10 @@ public class yacysearch {
                 }
             }
 
-            final int heuristicBlekko = querystring.indexOf("/heuristic/blekko", 0);
+            final int heuristicBlekko = querystring.indexOf("/heuristic", 0);
             if ( heuristicBlekko >= 0 ) {
-                querystring = querystring.replace("/heuristic/blekko", "");
-                modifier.add("/heuristic/blekko");
+                querystring = querystring.replace("/heuristic", "");
+                modifier.add("/heuristic");
             }
             
             final int tldp = querystring.indexOf("tld:", 0);
@@ -708,7 +708,7 @@ public class yacysearch {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
                 if ( heuristicBlekko >= 0  && authenticated && !stealthmode ) {
-                    sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
+                    OpenSearchConnector.query(sb, theSearch);
                 }
                 if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && authenticated && !stealthmode) {
                     OpenSearchConnector.query(sb, theSearch);
