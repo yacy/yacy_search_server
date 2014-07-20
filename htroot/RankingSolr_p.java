@@ -29,6 +29,8 @@ import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.DisMaxParams;
 
 public class RankingSolr_p {
 
@@ -54,8 +56,10 @@ public class RankingSolr_p {
                     if (fieldValue == null || fieldValue.length() == 0) continue;
                     try {
                         float boost = Float.parseFloat(fieldValue);
-                        if (boostString.length() > 0) boostString.append(',');
-                        boostString.append(field.getSolrFieldName()).append('^').append(Float.toString(boost));
+                        if (boost > 0.0f) { // don't allow <= 0
+                            if (boostString.length() > 0) boostString.append(',');
+                            boostString.append(field.getSolrFieldName()).append('^').append(Float.toString(boost));
+                        }
                     } catch (final NumberFormatException e) {
                         continue;
                     }
@@ -74,7 +78,7 @@ public class RankingSolr_p {
         }
 
         if (post != null && post.containsKey("EnterBQ")) {
-            String bq = post.get("bq");
+            String bq = post.get(DisMaxParams.BQ);
             if (bq != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + profileNr, bq);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostQuery(bq);
@@ -89,7 +93,7 @@ public class RankingSolr_p {
         }
 
         if (post != null && post.containsKey("EnterFQ")) {
-            String fq = post.get("fq");
+            String fq = post.get(CommonParams.FQ);
             if (fq != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_FILTERQUERY_ + profileNr, fq);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setFilterQuery(fq);
@@ -104,7 +108,7 @@ public class RankingSolr_p {
         }
 
         if (post != null && post.containsKey("EnterBF")) {
-            String bf = post.get("bf");
+            String bf = post.get(DisMaxParams.BF);
             if (bf != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + profileNr, bf);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostFunction(bf);
@@ -139,9 +143,9 @@ public class RankingSolr_p {
             i++;
         }
         prop.put("boosts", i);
-        prop.put("fq", ranking.getFilterQuery());
-        prop.put("bq", ranking.getBoostQuery());
-        prop.put("bf", ranking.getBoostFunction());
+        prop.put(CommonParams.FQ, ranking.getFilterQuery());
+        prop.put(DisMaxParams.BQ, ranking.getBoostQuery());
+        prop.put(DisMaxParams.BF, ranking.getBoostFunction());
 
         for (int j = 0; j < 4; j++) {
             prop.put("profiles_" + j + "_nr", j);
