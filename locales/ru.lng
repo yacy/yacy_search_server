@@ -1000,21 +1000,21 @@ Available Releases==Доступные версии
 \(unsigned\)==(не подписано)
 \(signed\)==(подписано)
 "Download Release"=="Загрузить версию"
-"Check for new Release"=="Проверить на новые обновления"
+"Check for new Release"=="Проверить обновления"
 Downloaded Releases==Загруженные обновления
-No downloaded releases available for deployment.==Нет скачанных версий доступных для установки.
+No downloaded releases available for deployment.==Нет скачанных версий доступных для установки
 no&nbsp;automated installation on development environments==без автоматической установки на средах разработки
 "Install Release"=="Установить версию"
 "Delete Release"=="Удалить версию"
 Automatic Update==Автоматическое обновление
-check for new releases, download if available and restart with downloaded release==проверить обновление, загрузить новую версию и перезапустить с новой версией
-"Check \+ Download \+ Install Release Now"=="Проверить, загрузить и установить новую версию сейчас"
+check for new releases, download if available and restart with downloaded release==Проверить обновления, загрузить и перезапустить с новой версией
+"Check \+ Download \+ Install Release Now"=="Выполнить"
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Загрузка версии #[downloadedRelease]# завершена. Начинается перезагрузка.
 No more recent release found.==Более новой версии не обнаружено.
 Release will be installed. Please wait.==Идет установка новой версии. Пожалуйста, подождите.
 You installed YaCy with a package manager.==
 To update YaCy, use the package manager:==Для обновления YaCy используйте менеджер пакетов.
-Omitting update because this is a development environment.==Пропускаю обновление, потому что это режим разработки.
+Omitting update because this is a development environment.==Пропускаю обновление, потому что это версия для разработчиков.
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==Пропускаю обновление, потому что загрузка версии #[downloadedRelease]# не была успешной.
 Automated System Update==Автоматическое обновление
 manual update==Ручное обновление
@@ -1032,7 +1032,7 @@ any release including developer releases==любые версии, включа�
 Signed autoupdate:==Подписанные обновления
 only accept signed files==принимать только подписанные файлы
 "Submit"=="Применить"
-Accepted Changes.==Принятые изменения.
+Accepted Changes.==Изменения приняты
 System Update Statistics==Статистика обновления системы
 Last System Lookup==Последняя проверка системы
 never==никогда
@@ -1730,7 +1730,7 @@ Limitation of number of references per word:==Ограничение числа 
 #>Delete Search Index<==>Удалить поисковый индекс<
 #Stop Crawler and delete Crawl Queues==Остановить индексатор и удалить очередь запросов
 #Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
-#Delete robots.txt Cache==Удалить кеш robots.txt
+#Delete robots.txt Cache==Удалить кэш robots.txt
 #Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты, полученные ошибочно во время поиска
 #"Delete"=="Удалить"
 No entry for word \'\#\[word\]\#\'==Не найдено для слова \'\#\[word\]\#\'
@@ -1827,7 +1827,7 @@ Delete RWI Index \(DHT transmission words\)==Удалить индекс RWI (п
 Delete Citation Index \(linking between URLs\)==Удалить индекс цитат (перекрестные ссылки)
 Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
 Stop Crawler and delete Crawl Queues==Остановить индексатор и удалить очередь запросов
-Delete robots.txt Cache==Удалить кеш robots.txt
+Delete robots.txt Cache==Удалить кэш robots.txt
 Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты, полученные ошибочно во время поиска
 "Delete"=="Удалить"
 Statistics about top-domains in URL Database==Список наиболее распространённых доменов в базе данных ссылок
@@ -1841,7 +1841,7 @@ Statistics about the top-\#\[domains\]\# domains in the database:==Статис�
 Dump and Restore of Solr Index==Создание дампа и восстановление индекса базы Solr
 "Create Dump"=="Создать дамп"
 Dump File==Файл дампа
-"Restore Dump"=="Восстановить дамп"
+"Restore Dump"=="Восстановить из дампа"
 >Optimize Solr<==>Оптимизация базы Solr<
 merge to max. <==Объединить максимум в<
 > segments==>сегментов
@@ -1865,7 +1865,7 @@ HTML \(URLs with title\)==HTML (ссылки с заголовками)
 #XML (RSS)==XML (RSS)
 "Export URLs"=="Экспортировать"
 Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Экспорт в файл #[exportfile]# начался ..  #[urlcount]# ссылок на данный момент
-Finished export of \#\[urlcount\]\# URLs to file==Завершен экспорт #[urlcount]# URL-адресов в файл
+Finished export of \#\[urlcount\]\# URLs to file==Завершён экспорт #[urlcount]# URL-адресов в файл
 Export to file \#\[exportfile\]\# failed:==Экспорт в файл #[exportfile]# произошёл с ошибкой:
 No entry found for URL-hash==Не найдено для хэш URL-адреса
 #URL String</td>==URL-адрес</td>
@@ -3349,7 +3349,7 @@ You can download a more recent version of YaCy. Click here to install this updat
 #"Update YaCy"=="Обновить YaCy"
 Install YaCy==Установка YaCy
 You can download the latest releases here:=Вы можете загрузить последние версии программы здесь:
-You are running a server in senior mode and you support the global internet index,==Ваш узел является старшим и вы учавствуете в создании глобального индекса интернета,
+You are running a server in senior mode and you support the global internet index,==Ваш узел является старшим и вы участвуете в создании глобального индекса интернета,
 which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Ваш узел является главным и вы можете публиковать свой сид-лист на публично-доступном сервере,
 where it can be retrieved using the URL==где он может быть получен с помощью ссылки:
@@ -3973,7 +3973,7 @@ Traffic \(Crawler\)==Трафик индексатора
 pending:==запросы:
 idle==Ожидание
 >Running Crawls==>Выполняется индексация
-Name==Название
+Name==Название сайта
 Status==Состояние
 Running==Выполняется
 Terminate All==Прервать всё
