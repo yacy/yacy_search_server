@@ -68,11 +68,9 @@ import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.feed.RSSReader;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.opensearch.SRURSSConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
-import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -554,29 +552,6 @@ public final class Protocol {
                 + e.toString());
             return null;
         }
-    }
-
-    public static RSSFeed search(
-        final Seed targetSeed,
-        final String query,
-        final CacheStrategy verify,
-        final boolean global,
-        final long timeout,
-        final int startRecord,
-        final int maximumRecords) throws IOException {
-        final String address =
-            (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:"
-                + Switchboard.getSwitchboard().getConfig("port", "8090") : targetSeed.getClusterAddress();
-        final String urlBase = "http://" + address + "/yacysearch.rss";
-        return SRURSSConnector.loadSRURSS(
-            urlBase,
-            query,
-            timeout,
-            startRecord,
-            maximumRecords,
-            verify,
-            global,
-            ClientIdentification.yacyInternetCrawlerAgent);
     }
 
     protected static int primarySearch(
