@@ -28,6 +28,7 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
@@ -66,7 +67,12 @@ public class index {
         if (!sb.getConfigBool("search.options", true)) {
             searchoptions = 0;
         } else { // show heuristic hint on search option screen
-            prop.put("searchoptions_heuristic", sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false));
+            int osdcnt = 0; // (only if some are active and heuristic is not ON by config)
+            try {
+                osdcnt = sb.tables.size("opensearchsys");
+            } catch (IOException ex) { }
+            prop.put("searchoptions_heuristic", !sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && osdcnt > 0);
+            prop.put("searchoptions_heuristic_count", osdcnt);
         }
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));

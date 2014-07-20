@@ -116,7 +116,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
                     final long st = System.currentTimeMillis();
                     RSSFeed feed;
                     try {
-                        feed = loadSRURSS(urlBase, query, timeout, startRecord, recordsPerSession, verify, global, agent);
+                        feed = loadSRURSS(urlBase, query, startRecord, recordsPerSession, verify, global, agent);
                     } catch (final IOException e1) {
                         //e1.printStackTrace();
                         break mainloop;
@@ -151,13 +151,11 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
      * @param maximumRecords maximum number of records
      * @param verify if true, result entries are verified using the snippet fetch (slow); if false simply the result is returned
      * @param global if true also search results from other peers are included
-     * @param timeout milliseconds that are waited at maximum for a search result
      * @return
      */
     public static RSSFeed loadSRURSS(
             final String rssSearchServiceURL,
             final String query,
-            final long timeout,
             final int startRecord,
             final int maximumRecords,
             final CacheStrategy cacheStrategy,
