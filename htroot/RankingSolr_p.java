@@ -72,7 +72,7 @@ public class RankingSolr_p {
             }
         }
         if (post != null && post.containsKey("ResetBoosts")) {
-            String s = "url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0";
+            String s = "url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,keywords^2.0,author^1.0";
             sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + profileNr, s);
             sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).updateBoosts(s);
         }

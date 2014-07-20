@@ -40,6 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.federate.solr.SchemaDeclaration;
+import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
@@ -129,9 +131,9 @@ public class SolrSelectServlet extends HttpServlet {
             
             // rename post fields according to result style
             String querystring = "";
-            if (!mmsp.getMap().containsKey(CommonParams.Q) && mmsp.getMap().containsKey("query")) {
-                querystring = mmsp.get("query", "");
-                mmsp.getMap().remove("query");
+            if (!mmsp.getMap().containsKey(CommonParams.Q) && mmsp.getMap().containsKey(CommonParams.QUERY)) {
+                querystring = mmsp.get(CommonParams.QUERY, "");
+                mmsp.getMap().remove(CommonParams.QUERY);
                 QueryModifier modifier = new QueryModifier();
                 querystring = modifier.parse(querystring);
                 modifier.apply(mmsp);
@@ -154,14 +156,14 @@ public class SolrSelectServlet extends HttpServlet {
             mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(Math.min(mmsp.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100))});            
             
             // set ranking according to profile number if ranking attributes are not given in the request
-            if (!mmsp.getMap().containsKey("sort") && !mmsp.getMap().containsKey("bq") && !mmsp.getMap().containsKey("bf") && !mmsp.getMap().containsKey("boost")) {
+            Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
+            if (!mmsp.getMap().containsKey(CommonParams.SORT) && !mmsp.getMap().containsKey(DisMaxParams.BQ) && !mmsp.getMap().containsKey(DisMaxParams.BF) && !mmsp.getMap().containsKey("boost")) {
                 if (!mmsp.getMap().containsKey("defType")) mmsp.getMap().put("defType", new String[]{"edismax"});        
-                Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
                 String fq = ranking.getFilterQuery();
                 String bq = ranking.getBoostQuery();
                 String bf = ranking.getBoostFunction();
-                if (fq.length() > 0) mmsp.getMap().put("fq", new String[]{fq});
-                if (bq.length() > 0) mmsp.getMap().put("bq", new String[]{bq});
+                if (fq.length() > 0) mmsp.getMap().put(CommonParams.FQ, new String[]{fq});
+                if (bq.length() > 0) mmsp.getMap().put(DisMaxParams.BQ, new String[]{bq});
                 if (bf.length() > 0) mmsp.getMap().put("boost", new String[]{bf}); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
             }
             
@@ -188,10 +190,6 @@ public class SolrSelectServlet extends HttpServlet {
                 if (!mmsp.getMap().containsKey("hl.simple.post")) mmsp.getMap().put("hl.simple.post", new String[]{"</b>"});
                 if (!mmsp.getMap().containsKey("hl.fragsize")) mmsp.getMap().put("hl.fragsize", new String[]{Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH)});
             }
-            
-            if (!mmsp.getMap().containsKey(DisMaxParams.QF) && !mmsp.getMap().containsKey(CommonParams.DF)) {
-                mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
-            }
 
             // get the embedded connector
             String requestURI = hrequest.getRequestURI();
@@ -199,6 +197,35 @@ public class SolrSelectServlet extends HttpServlet {
             mmsp.getMap().remove("core");
             EmbeddedSolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
             if (connector == null) throw new ServletException("no core");
+
+            // add default queryfield parameter according to local ranking config (or defaultfield)
+            if (!mmsp.getMap().containsKey(DisMaxParams.QF) && !mmsp.getMap().containsKey(CommonParams.DF)) {
+                
+                if (ranking != null && defaultConnector) { // ranking normally never null
+                    // construct the queryfield parameter
+                    StringBuilder qf = new StringBuilder(80);
+
+                    for (Map.Entry<SchemaDeclaration, Float> entry : ranking.getBoostMap()) {
+                        SchemaDeclaration field = entry.getKey();
+                        final Float boost = entry.getValue();
+                        if (field.getType() == SolrType.num_integer) {
+                            continue;
+                        }
+                        qf.append(field.getSolrFieldName());
+                        if (boost != null) {
+                            qf.append('^').append(boost.toString()).append(' ');
+                        } else {
+                            qf.append("^1.0 ");
+                        }
+                    }
+                    if (qf.length() > 4) // make sure qf has content (else use df)
+                        mmsp.getMap().put(DisMaxParams.QF, new String[]{qf.toString()});
+                    else
+                        mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
+                } else {
+                    mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
+                }
+            }
 
             // do the solr request, generate facets if we use a special YaCy format
             req = connector.request(mmsp);
