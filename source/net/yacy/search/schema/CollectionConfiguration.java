@@ -139,7 +139,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     public Ranking getRanking(final int idx) {
-        return this.rankings.get(idx);
+        return this.rankings.get(idx % this.rankings.size()); // simply prevent out of bound exeption (& callers don't check for null)
     }
     
     public Ranking getRanking(final String name) {
