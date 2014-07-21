@@ -318,9 +318,9 @@ public class Bookmarks {
 
                     if (bookmark != null){
                         if (bookmark.getFeed() && isAdmin) {
-                            prop.put("display_bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
+                            prop.putXML("display_bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
                         } else {
-                            prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
+                            prop.putXML("display_bookmarks_"+count+"_link",bookmark.getUrl());
                         }
                         prop.putHTML("display_bookmarks_"+count+"_title", bookmark.getTitle());
                         prop.putHTML("display_bookmarks_"+count+"_description", bookmark.getDescription());
