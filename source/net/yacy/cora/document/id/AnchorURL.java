@@ -131,12 +131,16 @@ public class AnchorURL extends DigestURL {
         return this.relProperty.indexOf("nofollow") >= 0;
     }
     
-    @Override
-    public String toString() {
+    public String toHTML() {
         return "<a href=\"" + this.toNormalform(false) + "\"" +
                 (this.nameProperty.length() > 0 ? (" name=\"" + this.nameProperty + "\"") : "") +
                 (this.relProperty.length() > 0 ? (" rel=\"" + this.relProperty + "\"") : "") +
                 ">" + this.textProperty + "</a>";
+    }
+    
+    @Override
+    public String toString() {
+        return this.toNormalform(false);
     }
     
 }

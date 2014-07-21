@@ -228,7 +228,7 @@ public class ConfigUpdate_p {
         for (int i = rlist.size() - 1; i >= 0; i--) {
             release = rlist.get(i);
             prop.put("candeploy_availreleases_" + relcount + "_name", ((release.isMainRelease()) ? "main" : "dev") + " " + release.getReleaseNr() + "/" + release.getSvn());
-            prop.put("candeploy_availreleases_" + relcount + "_url", release.getUrl().toString());
+            prop.put("candeploy_availreleases_" + relcount + "_url", release.getUrl().toNormalform(false));
             prop.put("candeploy_availreleases_" + relcount + "_signatures", (release.getPublicKey()!=null?"1":"0"));
             prop.put("candeploy_availreleases_" + relcount + "_selected", (relcount == 0) ? "1" : "0");
             relcount++;
