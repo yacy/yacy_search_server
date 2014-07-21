@@ -43,7 +43,7 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
-import net.yacy.cora.federate.solr.connector.SolrConnector.Metadata;
+import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
@@ -384,9 +384,9 @@ public final class CrawlStacker {
             return "double in: " + dbocc.name();
         }
         String urlhash = ASCII.String(url.hash());
-        Metadata oldEntry = null;
+        LoadTimeURL oldEntry = null;
         try {
-            oldEntry = this.indexSegment.fulltext().getDefaultConnector().getMetadata(urlhash);
+            oldEntry = this.indexSegment.fulltext().getDefaultConnector().getLoadTimeURL(urlhash);
         } catch (IOException e) {
             ConcurrentLog.logException(e);
         }

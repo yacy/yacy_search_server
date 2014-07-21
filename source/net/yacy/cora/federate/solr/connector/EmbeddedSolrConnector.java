@@ -405,7 +405,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public Metadata getMetadata(String id) {
+    public LoadTimeURL getLoadTimeURL(String id) {
         int responseCount = 0;
         DocListSearcher docListSearcher = null;
         try {
@@ -417,7 +417,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             //for (int i = 0; i < responseCount; i++) {
             Document doc = searcher.doc(iterator.nextDoc(), AbstractSolrConnector.SOLR_ID_and_LOAD_DATE_FIELDS);
             if (doc == null) return null;
-            return AbstractSolrConnector.getMetadata(doc);
+            return AbstractSolrConnector.getLoadTimeURL(doc);
             //}
         } catch (Throwable e) {
             ConcurrentLog.logException(e);

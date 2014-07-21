@@ -477,7 +477,7 @@ public final class Fulltext {
         if (urlHash == null || this.getDefaultConnector() == null) return null;
         
         try {
-            SolrConnector.Metadata md = this.getDefaultConnector().getMetadata(urlHash);
+            SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
             if (md == null) return null;
             return new DigestURL(md.url, ASCII.getBytes(urlHash));
         } catch (final IOException e) {
@@ -493,7 +493,7 @@ public final class Fulltext {
     public long getLoadTime(final String urlHash) {
         if (urlHash == null) return -1l;
         try {
-            SolrConnector.Metadata md = this.getDefaultConnector().getMetadata(urlHash);
+            SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
             if (md == null) return -1l;
             return md.date;
         } catch (final Throwable e) {

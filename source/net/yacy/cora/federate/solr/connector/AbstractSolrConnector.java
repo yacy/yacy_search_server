@@ -85,7 +85,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     protected final static int pagesize = 100;
     
-    protected static Metadata getMetadata(final Object doc) {
+    protected static LoadTimeURL getLoadTimeURL(final Object doc) {
         if (doc == null) return null;
         Object d = null;
         String url = null;
@@ -110,7 +110,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         long date = -1;
         if (d instanceof Long) date = ((Long) d).longValue();
         if (d instanceof Date) date = ((Date) d).getTime();
-        return new Metadata(url, date);
+        return new LoadTimeURL(url, date);
     }
 
     /**
@@ -306,7 +306,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public Metadata getMetadata(String id) throws IOException {
+    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
         // construct raw query
         final SolrQuery params = new SolrQuery();
         //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
@@ -326,7 +326,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final SolrDocumentList sdl = getDocumentListByParams(params);
         if (sdl == null || sdl.getNumFound() <= 0) return null;
         SolrDocument doc = sdl.iterator().next();
-        Metadata md = getMetadata(doc);
+        LoadTimeURL md = getLoadTimeURL(doc);
         return md;
     }
     

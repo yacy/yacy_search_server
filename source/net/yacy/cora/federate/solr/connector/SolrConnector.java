@@ -36,10 +36,10 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
 
-    public static class Metadata {
+    public static class LoadTimeURL {
         public long date;
         public String url;
-        public Metadata(final String url, final long date) {
+        public LoadTimeURL(final String url, final long date) {
             this.url = url;
             this.date = date;
         }
@@ -119,10 +119,10 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return the metadata (url and load data) if any entry in solr exists, null otherwise
+     * @return the load time metadata (url and load data) if any entry in solr exists, null otherwise
      * @throws IOException
      */
-    public Metadata getMetadata(final String id) throws IOException;
+    public LoadTimeURL getLoadTimeURL(final String id) throws IOException;
     
     /**
      * add a solr input document

@@ -72,7 +72,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     private SolrConnector connector;
-    private ARC<String, Metadata> metadataCache;
+    private ARC<String, LoadTimeURL> metadataCache;
     private final ARH<String> missCache;
     private final LinkedHashMap<String, SolrInputDocument> docBuffer;
     private CommitHandler processHandler;
@@ -119,7 +119,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             }
             // move documents to metadata cache
             for (Map.Entry<String, SolrInputDocument> entry: this.docBuffer.entrySet()) {
-                updateCache(entry.getKey(), AbstractSolrConnector.getMetadata(entry.getValue()));
+                updateCache(entry.getKey(), AbstractSolrConnector.getLoadTimeURL(entry.getValue()));
             }
             this.docBuffer.clear();
         }
@@ -137,7 +137,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         this.missCache.clear();
     }
 
-    private void updateCache(final String id, final Metadata md) {
+    private void updateCache(final String id, final LoadTimeURL md) {
         if (id == null) return;
         if (MemoryControl.shortStatus()) {
             this.metadataCache.clear();
@@ -243,9 +243,9 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
-    public Metadata getMetadata(String id) throws IOException {
+    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
         if (this.missCache.contains(id)) return null;
-        Metadata md = this.metadataCache.get(id);
+        LoadTimeURL md = this.metadataCache.get(id);
         if (md != null) {
             //System.out.println("*** metadata cache hit; metadataCache.size() = " + metadataCache.size());
             //Thread.dumpStack();
@@ -255,9 +255,9 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         if (doc != null) {
             //System.out.println("*** docBuffer cache hit; docBuffer.size() = " + docBuffer.size());
             //Thread.dumpStack();
-            return AbstractSolrConnector.getMetadata(doc);
+            return AbstractSolrConnector.getLoadTimeURL(doc);
         }
-        md = this.connector.getMetadata(id);
+        md = this.connector.getLoadTimeURL(id);
         if (md == null) {this.missCache.add(id); return null;}
         updateCache(id, md);
         return md;
@@ -272,7 +272,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             synchronized (this.docBuffer) {this.docBuffer.put(id, solrdoc);}
         } else {
             this.connector.add(solrdoc);
-            updateCache(id, AbstractSolrConnector.getMetadata(solrdoc));
+            updateCache(id, AbstractSolrConnector.getLoadTimeURL(solrdoc));
         }
         if (MemoryControl.shortStatus() || this.docBuffer.size() > this.updateCapacity) {
             commitDocBuffer();
@@ -312,7 +312,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             this.missCache.add(id);
             this.metadataCache.remove(id);
         } else {
-            updateCache(id, AbstractSolrConnector.getMetadata(solrdoc));
+            updateCache(id, AbstractSolrConnector.getLoadTimeURL(solrdoc));
         }
         return solrdoc;
     }
@@ -329,7 +329,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         SolrDocumentList sdl = this.connector.getDocumentListByParams(params);
         for (SolrDocument doc: sdl) {
             String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-            updateCache(id, AbstractSolrConnector.getMetadata(doc));
+            updateCache(id, AbstractSolrConnector.getLoadTimeURL(doc));
         }
         return sdl;
     }

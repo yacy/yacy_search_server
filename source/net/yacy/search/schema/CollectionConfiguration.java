@@ -59,7 +59,7 @@ import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.solr.connector.SolrConnector.Metadata;
+import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -1583,7 +1583,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             for (Map.Entry<byte[], CRV> entry: rm.entrySet()) {
                 if (entry == null || entry.getValue() == null) continue;
                 try {
-                    Metadata md = connector.getMetadata(ASCII.String(entry.getKey()));
+                    LoadTimeURL md = connector.getLoadTimeURL(ASCII.String(entry.getKey()));
                     ConcurrentLog.info("CollectionConfiguration", "CR for " + md.url);
                     ConcurrentLog.info("CollectionConfiguration", ">> " + entry.getValue().toString());
                 } catch (final IOException e) {

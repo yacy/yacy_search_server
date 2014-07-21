@@ -413,17 +413,17 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public Metadata getMetadata(String id) throws IOException {
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.getMetadata(id);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.getMetadata(id);
+    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
+        if (this.solr0 != null && this.solr1 == null) return this.solr0.getLoadTimeURL(id);
+        if (this.solr0 == null && this.solr1 != null) return this.solr1.getLoadTimeURL(id);
         if (this.solr0 == null && this.solr1 == null) return null;
-        Metadata md0 = this.solr0.getMetadata(id);
-        Metadata md1 = this.solr1.getMetadata(id);
+        LoadTimeURL md0 = this.solr0.getLoadTimeURL(id);
+        LoadTimeURL md1 = this.solr1.getLoadTimeURL(id);
         if (md0 == null) return md1;
         if (md1 == null) return md0;
         long date = Math.max(md0.date, md1.date);
         assert md0.url.equals(md1.url);
-        return new Metadata(md0.url, date);
+        return new LoadTimeURL(md0.url, date);
     }
 
     @Override
