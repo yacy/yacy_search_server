@@ -184,7 +184,7 @@ public final class ConcurrentLog {
     // static log messages
     public final static void logException(final Throwable thrown) {
         if (thrown == null) return;
-        enQueueLog("ConcurrentLog", Level.WARNING, thrown.getMessage(), thrown);
+        enQueueLog("ConcurrentLog", Level.WARNING, thrown.toString(), thrown);
     }
     public final static void severe(final String appName, final String message) {
         enQueueLog(appName, Level.SEVERE, message);
