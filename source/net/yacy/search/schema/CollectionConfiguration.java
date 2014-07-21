@@ -516,6 +516,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         int c = 0;
         final Object parser = document.getParserObject();
         boolean containsCanonical = false;
+        DigestURL canonical = null;
         if (parser instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) parser;
             images = html.getImages();
@@ -731,7 +732,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // canonical tag
             if (allAttr || contains(CollectionSchema.canonical_s)) {
-                DigestURL canonical = html.getCanonical();
+                canonical = html.getCanonical();
                 // if there is no canonical in the html then look into the http header:
                 if (canonical == null) {
                     String link = responseHeader.get("Link", null);
@@ -892,9 +893,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.inboundlinksnofollowcount_i)) add(doc, CollectionSchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
         if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, outboundLinks.size());
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
-        
+         
         // create a subgraph
-        if (!containsCanonical && webgraph != null) {
+        Boolean canonical_equal_sku = canonical == null ? null : canonical.toNormalform(true).equals(url);  
+        if (webgraph != null && (!containsCanonical || (canonical_equal_sku != null && (canonical_equal_sku.booleanValue())))) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
             List<SolrInputDocument> edges = webgraph.getEdges(subgraph, digestURL, responseHeader, collections, crawldepth, images, processTypes, document.getAnchors(), sourceName);
             // this also enriched the subgraph
