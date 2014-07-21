@@ -210,8 +210,7 @@ public class Crawler_p {
                 final boolean deleteage = restrictedcrawl && "age".equals(post.get("deleteold","off"));
                 Date deleteageDate = null;
                 if (deleteage) {
-                    long t = timeParser(true, post.getInt("deleteIfOlderNumber", -1), post.get("deleteIfOlderUnit","year")); // year, month, day, hour
-                    if (t > 0) deleteageDate = new Date(t);
+                    deleteageDate = timeParser(true, post.getInt("deleteIfOlderNumber", -1), post.get("deleteIfOlderUnit","year")); // year, month, day, hour
                 }
                 final boolean deleteold = (deleteage && deleteageDate != null) || (restrictedcrawl && post.getBoolean("deleteold"));
 
@@ -289,11 +288,11 @@ public class Crawler_p {
 
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
-                long crawlingIfOlder = 0;
+                Date crawlingIfOlder = null;
                 if ("reload".equals(recrawl)) {
                     crawlingIfOlder = timeParser(true, post.getInt("reloadIfOlderNumber", -1), post.get("reloadIfOlderUnit","year")); // year, month, day, hour
                 }
-                env.setConfig("crawlingIfOlder", crawlingIfOlder);
+                env.setConfig("crawlingIfOlder", crawlingIfOlder == null ? Long.MAX_VALUE : crawlingIfOlder.getTime());
 
                 // store this call as api call
                 sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true)));
@@ -672,14 +671,14 @@ public class Crawler_p {
         return prop;
     }
 
-    private static long timeParser(final boolean recrawlIfOlderCheck, final int number, final String unit) {
-        if (!recrawlIfOlderCheck) return 0L;
-        if ("year".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 365L;
-        if ("month".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 30L;
-        if ("day".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L;
-        if ("hour".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L;
-        if ("minute".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L;
-        return 0L;
+    private static Date timeParser(final boolean recrawlIfOlderCheck, final int number, final String unit) {
+        if (!recrawlIfOlderCheck) return null;
+        if ("year".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 365L);
+        if ("month".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 30L);
+        if ("day".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L);
+        if ("hour".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L);
+        if ("minute".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L);
+        return null;
     }
 
 }

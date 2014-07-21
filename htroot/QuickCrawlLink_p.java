@@ -146,7 +146,7 @@ public class QuickCrawlLink_p {
                         CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
                         CrawlingDepth,
                         true,
-                        60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
+                        CrawlProfile.getRecrawlDate(60 * 24 * 30), // recrawlIfOlder (minutes); here: one month
                         -1, // domMaxPages, if negative: no count restriction
                         crawlingQ, followFrames,
                         obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,

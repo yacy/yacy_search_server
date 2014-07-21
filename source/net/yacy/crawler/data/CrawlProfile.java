@@ -27,6 +27,7 @@ package net.yacy.crawler.data;
 
 import java.text.DateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -111,8 +112,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param indexContentMustNotMatch content which match this regex will be ignored for indexing
      * @param depth height of the tree which will be created by the crawler
      * @param directDocByURL if true, then linked documents that cannot be parsed are indexed as document
-     * @param recrawlIfOlder documents which have been indexed in the past will
-     * be indexed again if they are older than the time (ms) in this parameter
+     * @param recrawlIfOlder documents which have been indexed in the past will be indexed again if they are older than the given date
      * @param domMaxPages maximum number from one domain which will be indexed
      * @param crawlingQ true if URLs containing questionmarks shall be indexed
      * @param indexText true if text content of URL shall be indexed
@@ -134,7 +134,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final String indexContentMustMatch, final String indexContentMustNotMatch,
                  final int depth,
                  final boolean directDocByURL,
-                 final long recrawlIfOlder /*date*/,
+                 final Date recrawlIfOlder /*date*/,
                  final int domMaxPages,
                  final boolean crawlingQ, final boolean followFrames,
                  final boolean obeyHtmlRobotsNoindex, final boolean obeyHtmlRobotsNofollow,
@@ -167,7 +167,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(INDEXING_CONTENT_MUSTNOTMATCH, (indexContentMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexContentMustNotMatch);
         put(DEPTH,            depth);
         put(DIRECT_DOC_BY_URL, directDocByURL);
-        put(RECRAWL_IF_OLDER, recrawlIfOlder);
+        put(RECRAWL_IF_OLDER, recrawlIfOlder == null ? Long.MAX_VALUE : recrawlIfOlder.getTime());
         put(DOM_MAX_PAGES,    domMaxPages);
         put(CRAWLING_Q,       crawlingQ); // crawling of urls with '?'
         put(FOLLOW_FRAMES,    followFrames); // load pages contained in frames or ifames
@@ -487,8 +487,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
 
     /**
-     * Gets the minimum age that an entry must have to be re-crawled.
-     * @return time in ms
+     * Gets the minimum date that an entry must have to be re-crawled.
+     * @return time in ms representing a date
      */
     public long recrawlIfOlder() {
         // returns a long (millis) that is the minimum age that
@@ -566,8 +566,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
 
-    public static long getRecrawlDate(final long oldTimeMinutes) {
-        return System.currentTimeMillis() - (60000L * oldTimeMinutes);
+    /**
+     * get a recrawl date for a given age in minutes
+     * @param oldTimeMinutes
+     * @return a Date representing the recrawl date limit
+     */
+    public static Date getRecrawlDate(final long oldTimeMinutes) {
+        return new Date(System.currentTimeMillis() - (60000L * oldTimeMinutes));
     }
 
     public static String siteFilter(final Collection<? extends MultiProtocolURL> urls) {

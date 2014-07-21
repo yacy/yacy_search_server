@@ -315,7 +315,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
                 0,
                 false,
-                -1,
+                null,
                 -1,
                 true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                 true,
@@ -522,7 +522,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
                 0,
                 false,
-                System.currentTimeMillis(),
+                null,
                 -1,
                 true, true, false, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                 true,
