@@ -620,8 +620,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         String line = cleanLine(CharacterCoding.html2unicode(stripAllTags(scraper.content.getChars())));
         for (ImageEntry ie: scraper.images) {
             if (linkurl != null) {
-                ie.setLinkurl(linkurl);
-                ie.setAnchortext(line);
+                AnchorURL a = new AnchorURL(linkurl);
+                a.setTextProperty(line);
+                ie.setLinkurl(a);
             }
             // this image may have been added recently from the same location (as this is a recursive parse)
             // we want to keep only one of them, check if they are equal

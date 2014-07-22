@@ -33,7 +33,6 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
     private final AnchorURL imageurl;
     private AnchorURL linkurl;
     private final String alt;
-    private String anchortext;
     private final int width, height;
     private final long fileSize;
 
@@ -57,7 +56,6 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         assert imageurl != null;
         this.imageurl = imageurl;
         this.linkurl = null;
-        this.anchortext = null;
         this.alt = alt;
         this.width = width;
         this.height = height;
@@ -74,14 +72,6 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
     
     public AnchorURL linkurl() {
         return this.linkurl;
-    }
-
-    public void setAnchortext(String anchortext) {
-        this.anchortext = anchortext;
-    }
-
-    public String anchortext() {
-        return this.anchortext;
     }
 
     public String alt() {
@@ -102,7 +92,6 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
 
     @Override
     public String toString() {
-        if (anchortext != null) return anchortext;
         return "<img url=\"" + this.imageurl.toNormalform(false) + "\"" +
                (this.alt != null && this.alt.length() > 0 ? " alt=\"" + this.alt + "\"" : "") +
                (this.width >= 0 ? " width=\"" + this.width + "\"" : "") +

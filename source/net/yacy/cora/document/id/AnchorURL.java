@@ -38,6 +38,14 @@ public class AnchorURL extends DigestURL {
         this.hrefProperty = "";
     }
     
+    public AnchorURL(final AnchorURL url) {
+        super(url, url.hash());
+        this.nameProperty = url.nameProperty;
+        this.textProperty = url.textProperty;
+        this.relProperty = url.relProperty;
+        this.hrefProperty = url.hrefProperty;
+    }
+
     public AnchorURL(final DigestURL url) {
         super(url, url.hash());
         this.nameProperty = "";
