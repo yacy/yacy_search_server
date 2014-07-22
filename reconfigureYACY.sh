@@ -2,14 +2,10 @@
 
 # THIS SCRIPT CAN BE USED TO EDIT SOME BASIC SETTINGS OF YACY
 #
-# Copyright 2009 by Marc Nause; marc.nause@gmx.de
+# Copyright 2009 - 2014 by Marc Nause; marc.nause@gmx.de
 #
 # This is a part of YaCy, a peer-to-peer based web search engine.
 # http://www.yacy.net
-#
-# $LastChangedDate$
-# $LastChangedRevision$
-# $LastChangedBy$
 #
 # LICENSE
 #
@@ -158,10 +154,10 @@ change_mem_settings()
     esac
 }
 
-# CHANGES THE PORT SETTINGS
+# CHANGES THE PORT SETTINGS. PROPERTY NAME IN FIRST PARAMETER, HUMAN READABLE NAME IN SECOND PARAMETER.
 change_port_settings()
 {
-    if read_parameter 'port'
+    if read_parameter $1
     then
         CURRENTPORT="$REPLY"
     else
@@ -169,19 +165,19 @@ change_port_settings()
     fi
 
     echo
-    echo -n "Which port do you want YaCy to use (currently $CURRENTPORT)? "
+    echo -n "Which port do you want YaCy to use for $2 (currently $CURRENTPORT)? "
     read INPUT
 
     case $INPUT in
       [0-9]*)
             if [ "$INPUT" -ge 1024 ] && [ "$INPUT" -le 65535 ];
             then
-                replace_parameter 'port' $INPUT
-                STATUS="Port settings have been changed. YaCy listens to port $INPUT now."
+                replace_parameter $1 $INPUT
+                STATUS="Port settings for $2 have been changed. YaCy listens to port $INPUT now."
             else
                 echo
                 echo 'Please use choose a number between 1024 and 65535.'
-                change_port_settings
+                change_port_settings $1 $2
             fi
             ;;
       '')
@@ -190,7 +186,7 @@ change_port_settings()
       *)
             echo
             echo 'Please enter a number or just hit enter to abort.'
-            change_port_settings
+            change_port_settings $1 $2
             ;;
     esac
 }
@@ -249,7 +245,8 @@ print_menu()
     echo "Make your choice:"
     echo "[1] change memory settings"
     echo "[2] change admin password"
-    echo "[3] change port"
+    echo "[3] change HTTP port"
+    echo "[4] change HTTPS port"
     echo "[0] quit"
     echo
     echo "Status: $STATUS"
@@ -259,7 +256,7 @@ print_menu()
 # IF A SECOND PARAMETER, WHICH IS A VALID sed OPERATION LIKE "s/xxx/yyy/", EXISTS.
 read_parameter()
 {
-    REPLY="`cat "$CONFIGFILE" | grep "^$1" | sed "s/\(^$1 *= *\)\(.*\)$/\2/"`"
+    REPLY="`cat "$CONFIGFILE" | grep "^$1=" | sed "s/\(^$1 *= *\)\(.*\)$/\2/"`"
     if [ "$2" != '' ]
     then
         REPLY="`echo "$REPLY" | sed $2`"
@@ -295,7 +292,10 @@ do
         change_admin_settings
         ;;
     3)
-        change_port_settings
+        change_port_settings 'port' 'HTTP'
+        ;;
+    4)
+        change_port_settings 'port.ssl' 'HTTPS'
         ;;
    esac
    print_menu
