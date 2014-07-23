@@ -34,7 +34,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
@@ -49,7 +48,6 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
@@ -75,7 +73,7 @@ public final class Condenser {
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
 
     //private Properties analysis;
-    private final SortedMap<String, Word> words; // a string (the words) to (indexWord) - relation
+    private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
     private final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
     private final Set<String> synonyms; // a set of synonyms to the words
     private long fuzzy_signature = 0, exact_signature = 0; // signatures for double-check detection
@@ -99,7 +97,7 @@ public final class Condenser {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
-        this.words = new TreeMap<String, Word>(NaturalOrder.naturalComparator);
+        this.words = new HashMap<String, Word>();
         this.synonyms = new LinkedHashSet<String>();
         this.RESULT_FLAGS = new Bitfield(4);
 
@@ -212,7 +210,7 @@ public final class Condenser {
                 wprop = we.getValue();
                 if (wprop.flags == null) {
                     wprop.flags = this.RESULT_FLAGS.clone();
-                    this.words.put(we.getKey(), wprop);
+                    this.words.put(we.getKey().toLowerCase(), wprop);
                 }
             }
         }
@@ -274,7 +272,7 @@ public final class Condenser {
 	            if (wprop == null) wprop = new Word(0, pip, phrase);
 	            if (wprop.flags == null) wprop.flags = flagstemplate.clone();
 	            wprop.flags.set(flagpos, true);
-	            this.words.put(word, wprop);
+	            this.words.put(word.toLowerCase(), wprop);
 	            pip++;
 	            this.RESULT_NUMB_WORDS++;
 	            this.RESULT_DIFF_WORDS++;
@@ -293,7 +291,7 @@ public final class Condenser {
         return oldsize - this.words.size();
     }
 
-    public SortedMap<String, Word> words() {
+    public Map<String, Word> words() {
         // returns the words as word/indexWord relation map
         return this.words;
     }
@@ -409,7 +407,7 @@ public final class Condenser {
 	                    wordHandle = wordHandleCount++;
 	                    wsp = new Word(wordHandle, wordInSentenceCounter, sentences.size() + 100);
 	                    wsp.flags = this.RESULT_FLAGS.clone();
-	                    this.words.put(word, wsp);
+	                    this.words.put(word.toLowerCase(), wsp);
 	                }
 	                // we now have the unique handle of the word, put it into the sentence:
 	                wordInSentenceCounter++;
@@ -454,7 +452,7 @@ public final class Condenser {
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
     }
 
-    public static SortedMap<String, Word> getWords(final String text, final WordCache meaningLib) {
+    public static Map<String, Word> getWords(final String text, final WordCache meaningLib) {
         // returns a word/indexWord relation map
         if (text == null) return null;
         return new Condenser(text, meaningLib, false).words();
