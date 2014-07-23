@@ -225,12 +225,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     // no host given
                     this.path = h.substring(2); // "/path"  or "/c:/path"
                 } else if (h.startsWith("//")) { // "//host/path" or "//host/c:/path"
-                    int q = url.indexOf('/', p + 3);
-                    if (q < 0) {
-                        this.path = "/";
-                    } else {
-                        this.path = url.substring(q);
-                    }
+                    this.path = h.substring(2); // "/path"  or "/c:/path"
                 } else if (h.startsWith("/")) { // "/host/path" or "/host/c:/path"
                     this.path = h;
                 }
@@ -2196,6 +2191,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 */
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
+          new String[]{null, "file://Z:\\"},
           new String[]{null, "https://www.example.com/shoe/?p=2&ps=75#t={%22san_NaviPaging%22:2}"}, // ugly strange pagination link
           new String[]{null, "C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file://C:WINDOWS\\CMD0.EXE"},

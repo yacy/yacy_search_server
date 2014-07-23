@@ -149,7 +149,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         solitaireTag(writer, "opensearch:startIndex", Integer.toString(resHead.offset));
         solitaireTag(writer, "opensearch:itemsPerPage", Integer.toString(resHead.rows));
         solitaireTag(writer, RSSMessage.Token.title.name(), this.title);
-        writer.write("<atom:link rel=\"search\" href=\"http://localhost:8090/opensearchdescription.xml\" type=\"application/opensearchdescription+xml\"/>");
+        writer.write("<atom:link rel=\"search\" href=\"/opensearchdescription.xml\" type=\"application/opensearchdescription+xml\"/>");
         solitaireTag(writer, "description", "Search Result");
         //solitaireTag(writer, "link", "");
         //solitaireTag(writer, "image", "");
