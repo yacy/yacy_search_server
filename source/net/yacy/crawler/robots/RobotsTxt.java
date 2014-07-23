@@ -164,7 +164,7 @@ public class RobotsTxt {
                     try {
                         response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, agent);
                     } catch (final Throwable e) {
-                        log.info("Trying to download the robots.txt file from URL '" + robotsURL + "' failed - " + e.getMessage());
+                        log.info("Trying to download the robots.txt file from URL '" + robotsURL.toNormalform(false) + "' failed - " + e.getMessage());
                         response = null;
                     }
                 }
