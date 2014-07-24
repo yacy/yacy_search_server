@@ -338,7 +338,13 @@ public class RobotsTxt {
         return sb.toString();
     }
     
-    public static DigestURL robotsURL(final String urlHostPort) {
+    /**
+     * generate a robots.txt url.
+     * @param urlHostPort a string of the form <host>':'<port> or just <host>
+     * @return the full robots.txt url
+     */
+    public static DigestURL robotsURL(String urlHostPort) {
+        if (urlHostPort.endsWith(":80")) urlHostPort = urlHostPort.substring(0, urlHostPort.length() - 3);
         DigestURL robotsURL = null;
         try {
             robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");

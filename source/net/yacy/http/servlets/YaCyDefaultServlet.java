@@ -75,7 +75,6 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.http.HTTPDFileHandler;
 import net.yacy.server.http.TemplateEngine;
 import net.yacy.server.serverClassLoader;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;

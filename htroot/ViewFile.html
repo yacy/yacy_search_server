@@ -86,9 +86,16 @@ function updatepage(str) {
           <dd>
             <input type="text" size="60" name="url" id="url" value="#[url]#" />
             <input type="submit" name="show" value="Show Metadata" />
-            <input type="button" value="Browse Host" onClick="location.href='/HostBrowser.html?path=' + document.getElementById('url').value" />
+            #(moar)#::<input type="button" value="Browse Host" onClick="location.href='/HostBrowser.html?path=' + document.getElementById('url').value" />#(/moar)#
             <div id="searchresults"></div>
           </dd>
+          #(moar)#::
+          <dt>Search in Document:</dt>
+          <dd>
+            <input type="text" size="60" name="search" id="search" value="#[search]#" />
+            <input type="submit" name="show" value="Show Snippet" />
+          </dd>
+          #(/moar)#
         </dl>
       </fieldset>
     </form>
@@ -142,6 +149,16 @@ function updatepage(str) {
 <span class="error">Unsupported protocol.</span>
 #(/error)#
 </td><td valign="top">
+#(showSnippet)#::
+<form action="">
+<fieldset><legend>Snippet</legend>
+  <dl>
+    <dt>Headline</dt><dd>#[headline]#</dd>
+    <dt>Teaser Text</dt><dd>#[teasertext]#</dd>
+  </dl>
+</fieldset>
+</form>
+#(/showSnippet)#
 #(viewMode)#
 :: <!-- 1 -->
 	<fieldset><legend>Original Content from Web</legend>

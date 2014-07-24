@@ -100,7 +100,7 @@ public class QueryGoal {
     }
 
     /**
-     * Creates a QueryGoal from a serach query string
+     * Creates a QueryGoal from a search query string
      * @param query_words search string (the actual search terms, excluding application specific modifier)
      */
     public QueryGoal(String query_words) {

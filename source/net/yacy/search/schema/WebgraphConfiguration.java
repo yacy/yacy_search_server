@@ -51,8 +51,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HostBalancer;
-import net.yacy.document.parser.htmlParser;
-import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.search.schema.CollectionConfiguration.Subgraph;
 

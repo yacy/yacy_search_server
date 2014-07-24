@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
@@ -54,6 +55,8 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import net.yacy.search.query.QueryGoal;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -77,15 +80,15 @@ public class ViewFile {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
-
-        if (post == null) {
-            prop.putHTML("error_words", "");
-            prop.put("error_vMode-sentences", "1");
-            prop.put("error", "1");
-            prop.put("url", "");
-            prop.put("viewMode", VIEW_MODE_NO_TEXT);
-            return prop;
-        }
+        prop.put("moar", 0);
+        prop.put("viewMode", VIEW_MODE_NO_TEXT);
+        prop.putHTML("error_words", "");
+        prop.put("error_vMode-sentences", "1");
+        prop.put("error", "1");
+        prop.put("url", "");
+        prop.put("showSnippet", 0);
+        
+        if (post == null) return prop;
 
         // get segment
         Segment indexSegment = sb.index;
@@ -97,9 +100,18 @@ public class ViewFile {
             prop.putHTML("error_words", "");
         }
 
-        final String viewMode = post.get("viewMode","parsed");
+        prop.put("error_vMode-iframeWeb", "0");
+        prop.put("error_vMode-iframeCache", "0");
+        prop.put("error_vMode-plain", "0");
+        prop.put("error_vMode-parsed", "0");
+        prop.put("error_vMode-sentences", "0");
+        prop.put("error_vMode-words", "0");
+        prop.put("error_vMode-links", "0");
+        prop.put("error_vMode-iframeCitations", "0");
+        final boolean showSnippet = post.get("show", "").equals("Show Snippet");
+        final String viewMode = showSnippet ? "sentences" : post.get("viewMode", "sentences");
         prop.put("error_vMode-" + viewMode, "1");
-
+        
         DigestURL url = null;
         String descr = "";
         final int wordCount = 0;
@@ -155,6 +167,8 @@ public class ViewFile {
             return prop;
         }
         prop.put("url", url.toNormalform(true));
+        prop.put("moar", 1);
+        prop.put("moar_search", post.get("search",""));
 
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url.hash()) ? 1 : 0);
@@ -336,6 +350,27 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0));
                 prop.put("viewMode_links", i);
 
+            }
+            // optional: generate snippet
+            if (showSnippet) {
+                QueryGoal goal = new QueryGoal(post.get("search", ""));
+                TextSnippet snippet = new TextSnippet(
+                        null,
+                        urlEntry,
+                        goal.getIncludeHashes(),
+                        CacheStrategy.CACHEONLY,
+                        false,
+                        180,
+                        false);
+                String titlestr = urlEntry.dc_title();
+                // if title is empty use filename as title
+                if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
+                    titlestr = urlEntry.url() != null ? urlEntry.url().getFileName() : "";
+                }
+                final String desc = (snippet == null) ? "" : snippet.isMarked() ? snippet.getLineRaw() : snippet.getLineMarked(goal);
+                prop.put("showSnippet_headline", titlestr);
+                prop.put("showSnippet_teasertext", desc);
+                prop.put("showSnippet", 1);
             }
             if (document != null) document.close();
         }
