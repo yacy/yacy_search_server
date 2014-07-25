@@ -1001,11 +1001,11 @@ search.ranking.rwi.profile =
 # The field boostfunctionmode can be either 'add' or 'multiply' to describe the mode.
 # All boost methods > 0 must have names to be able to select this name with a query, with the syntax /name
 search.ranking.solr.collection.boostname.tmpa.0=Default Profile
-search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0
+search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,keywords^2.0,author^1.0
 search.ranking.solr.collection.filterquery.tmpa.0=
 search.ranking.solr.collection.boostquery.tmpa.0=crawldepth_i:0^0.8 crawldepth_i:1^0.4
 search.ranking.solr.collection.boostfunction.tmpb.0=
-search.ranking.solr.collection.boostname.tmpa.1=Date Profile: sort by date in descending order for a '/data' usage
+search.ranking.solr.collection.boostname.tmpa.1=Date Profile: sort by date in descending order for a '/date' usage
 search.ranking.solr.collection.boostfields.tmpa.1=text_t^1.0
 search.ranking.solr.collection.filterquery.tmpa.1=
 search.ranking.solr.collection.boostquery.tmpa.1=crawldepth_i:0^0.8 crawldepth_i:1^0.4
