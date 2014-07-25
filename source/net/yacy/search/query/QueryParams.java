@@ -400,6 +400,7 @@ public final class QueryParams {
     private SolrQuery getBasicParams(boolean getFacets) {
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
+        params.setParam("qf", CollectionSchema.text_t.getSolrFieldName() + "^1.0");
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);
