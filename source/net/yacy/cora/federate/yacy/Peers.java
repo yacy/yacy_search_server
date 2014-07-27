@@ -37,11 +37,6 @@ import net.yacy.cora.util.ConcurrentLog;
 
 public class Peers extends TreeMap<byte[], Peer> implements Serializable {
 
-    public final static String[] bootstrapPeers = new String[]{
-        "search.yacy.net", "yacy.dyndns.org:8000", "yacy-websuche.mxchange.org:8090",
-        "sokrates.homeunix.net:6070", "sokrates.homeunix.net:9090",
-        "141.52.175.27:8080", "62.75.214.113:8080", "141.52.175.30:8080"};
-
     private final static ConcurrentLog log = new ConcurrentLog(Peers.class.getName());
     private static final long serialVersionUID = -2939656606305545080L;
     private long lastBootstrap;
@@ -159,8 +154,13 @@ public class Peers extends TreeMap<byte[], Peer> implements Serializable {
     }
 
     public static void main(String[] args) {
+        final String[] bootstrapPeers = new String[]{
+            "search.yacy.net", "yacy.dyndns.org:8000", "yacy-websuche.mxchange.org:8090",
+            "sokrates.homeunix.net:6070", "sokrates.homeunix.net:9090",
+            "141.52.175.27:8080", "62.75.214.113:8080", "141.52.175.30:8080"};
+
         Peers peers = new Peers();
-        peers.bootstrap(Peers.bootstrapPeers, 4);
+        peers.bootstrap(bootstrapPeers, 4);
         //Peers peers = Network.getNetwork("sokrates.homeunix.net:9090");
         /*
         for (Peer p: peers.values()) {
