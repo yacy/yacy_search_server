@@ -1239,11 +1239,20 @@ public final class SearchEvent {
         Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
         URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
         if (node != null) {
-            LinkedHashSet<String> solrsnippet = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
-            if (solrsnippet != null && solrsnippet.size() > 0) {
-                OpensearchResponseWriter.removeSubsumedTitle(solrsnippet, node.dc_title());
-                final TextSnippet snippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippet), true, ResultClass.SOURCE_CACHE, "");
-                ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, snippet, 0);
+            LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
+            if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
+                OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
+                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_CACHE, "");
+                final TextSnippet yacysnippet = new TextSnippet(this.loader,
+                        node,
+                        this.query.getQueryGoal().getIncludeHashes(),
+                        CacheStrategy.CACHEONLY,
+                        false,
+                        180,
+                        false);
+                final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
+                final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
+                ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet, 0);
                 addResult(re);
                 success = true;
             } else {

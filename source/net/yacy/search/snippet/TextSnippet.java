@@ -405,6 +405,13 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return l.toString().trim();
     }
 
+    private String descriptionline = null;
+    public String descriptionline(QueryGoal queryGoal) {
+        if (descriptionline != null) return descriptionline;
+        descriptionline = this.isMarked() ? this.getLineRaw() : this.getLineMarked(queryGoal);
+        return descriptionline;
+    }
+    
     @Override
     public int compareTo(final TextSnippet o) {
         return Base64Order.enhancedCoder.compare(this.urlhash, o.urlhash);

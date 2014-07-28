@@ -56,6 +56,7 @@ import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.SearchEvent;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -168,7 +169,7 @@ public class ViewFile {
         }
         prop.put("url", url.toNormalform(true));
         prop.put("moar", 1);
-        prop.put("moar_search", post.get("search",""));
+        prop.putHTML("moar_search", post.get("search",""));
 
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url.hash()) ? 1 : 0);
@@ -355,19 +356,19 @@ public class ViewFile {
             if (showSnippet) {
                 QueryGoal goal = new QueryGoal(post.get("search", ""));
                 TextSnippet snippet = new TextSnippet(
-                        null,
+                        sb.loader,
                         urlEntry,
                         goal.getIncludeHashes(),
                         CacheStrategy.CACHEONLY,
                         false,
-                        180,
+                        SearchEvent.SNIPPET_MAX_LENGTH,
                         false);
                 String titlestr = urlEntry.dc_title();
                 // if title is empty use filename as title
                 if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
                     titlestr = urlEntry.url() != null ? urlEntry.url().getFileName() : "";
                 }
-                final String desc = (snippet == null) ? "" : snippet.isMarked() ? snippet.getLineRaw() : snippet.getLineMarked(goal);
+                final String desc = (snippet == null) ? "" : snippet.descriptionline(goal);
                 prop.put("showSnippet_headline", titlestr);
                 prop.put("showSnippet_teasertext", desc);
                 prop.put("showSnippet", 1);
