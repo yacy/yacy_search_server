@@ -27,192 +27,169 @@
 package net.yacy.utils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.InetAddress;
+import java.util.Map;
 
-import net.yacy.cora.protocol.Domains;
+import javax.xml.parsers.ParserConfigurationException;
+
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
-import net.yacy.upnp.DiscoveryAdvertisement;
-import net.yacy.upnp.DiscoveryEventHandler;
-import net.yacy.upnp.devices.UPNPRootDevice;
-import net.yacy.upnp.impls.InternetGatewayDevice;
-import net.yacy.upnp.messages.UPNPResponseException;
+
+import org.bitlet.weupnp.GatewayDevice;
+import org.bitlet.weupnp.GatewayDiscover;
+import org.xml.sax.SAXException;
 
 public class UPnP {
-	
-	public final static ConcurrentLog log = new ConcurrentLog("UPNP");
-	private static Switchboard sb = Switchboard.getSwitchboard();
-	
-	private final static int discoveryTimeout = 5000; // seconds to receive a response from devices
-	private static InternetGatewayDevice[] IGDs = null;
-	
+
+	private static final ConcurrentLog LOG = new ConcurrentLog("UPNP");
+	private static final Switchboard SB = Switchboard.getSwitchboard();
+
+	private static Map<InetAddress, GatewayDevice> GATEWAY_DEVICES = null;
+
 	// mapping variables
-	private final static String mappedName = "YaCy";
-	private final static String mappedProtocol = "TCP";
-	private static int mappedPort = 0;
-	private static String localHostIP = null;
-	
-	/* Discovery message sender IP /10.100.100.2 does not match device description IP /192.168.1.254 skipping message,
-	set the net.yacy.upnp.ddos.matchip system property to false to avoid this check
-	static {
-		System.setProperty("net.yacy.upnp.ddos.matchip", "false");
-	} */
-	
-	public static boolean setIGDs(InternetGatewayDevice[] igds) {
-		if(IGDs == null) {
-			IGDs = igds; // set only once to prevent many same devices by advertisement events
-			return true;
-		}
-		return false;
-	}
-	
+	private static final String MAPPED_NAME = "YaCy";
+	private static final String MAPPED_PROTOCOL = "TCP";
+	private static int mappedPort;
+
 	private static boolean init() {
 		boolean init = true;
+
 		try {
-			if (IGDs == null) IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
-			localHostIP = Domains.myPublicLocalIP().getHostAddress();
-			if (localHostIP.startsWith("127.")) log.warn("found odd local address: " + localHostIP + "; UPnP may fail");
-		} catch (final IOException e) {
+			if (GATEWAY_DEVICES == null) {
+				GATEWAY_DEVICES = new GatewayDiscover().discover();
+			}
+		} catch (IOException | SAXException | ParserConfigurationException e) {
 			init = false;
 		}
-		if (IGDs != null) {
-			for (InternetGatewayDevice IGD : IGDs) {
-				log.info("found device: " + IGD.getIGDRootDevice().getFriendlyName());
+		if (GATEWAY_DEVICES != null) {
+			for (final GatewayDevice gatewayDevice : GATEWAY_DEVICES.values()) {
+				LOG.info("found device: " + gatewayDevice.getFriendlyName());
 			}
 		} else {
-			log.info("no device found");
+			LOG.info("no device found");
 			init = false;
-			log.info("listening for device");
-			Listener.register();
 		}
-		
+
 		return init;
 	}
-	
-	private static String getRemoteHost() {
-		if (sb == null) return null;
-		return sb.getConfig(SwitchboardConstants.UPNP_REMOTEHOST, "");
-	}
-	
+
 	/**
-	 * add port mapping for configured port
+	 * Add port mapping for configured port.
 	 */
 	public static void addPortMapping() {
-		if (sb == null) return;
-		addPortMapping(Integer.parseInt(sb.getConfig("port", "0")));
+		if (SB == null) {
+			return;
+		}
+		addPortMapping(Integer.parseInt(SB.getConfig("port", "0")));
 	}
-	
+
 	/**
-	 * add TCP port mapping to all IGDs on the network<br/>
-	 * latest port mapping will be removed
+	 * Add TCP port mapping to all gateway devices on the network.<br/>
+	 * Latest port mapping will be removed.
+	 * 
 	 * @param port
 	 */
-	public static void addPortMapping(final int port) { //TODO: don't map already mapped port again
-		if (port < 1) return;
-		if (mappedPort > 0) deletePortMapping(); // delete old mapping first
-		if (mappedPort == 0 && ((IGDs != null && localHostIP != null) || init())) {
-			for (InternetGatewayDevice IGD : IGDs) {
+	public static void addPortMapping(final int port) { // TODO: don't map
+														// already mapped port
+														// again
+		if (port < 1) {
+			return;
+		}
+
+		if (mappedPort > 0) {
+			deletePortMapping(); // delete old mapping first
+		}
+
+		if (mappedPort == 0 && ((GATEWAY_DEVICES != null) || init())) {
+
+			String localHostIP;
+			boolean mapped;
+			String msg;
+			for (final GatewayDevice gatewayDevice : GATEWAY_DEVICES.values()) {
+
 				try {
-					boolean mapped = IGD.addPortMapping(mappedName, getRemoteHost(), port, port, localHostIP, 0, mappedProtocol);
-					String msg = "port " + port + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
+					localHostIP = toString(gatewayDevice.getLocalAddress());
+
+					mapped = gatewayDevice.addPortMapping(port, port,
+							localHostIP, MAPPED_PROTOCOL, MAPPED_NAME);
+
+					msg = "port " + port + " on device "
+							+ gatewayDevice.getFriendlyName();
+
 					if (mapped) {
-						log.info("mapped " + msg);
+						LOG.info("mapped " + msg);
 						mappedPort = port;
+					} else {
+						LOG.warn("could not map " + msg);
 					}
-					else log.warn("could not map " + msg);
-				} catch (final IOException e) {} catch (final UPNPResponseException e) { log.severe("mapping error: " + e.getMessage()); }
+				} catch (IOException | SAXException e) {
+					LOG.severe("mapping error: " + e.getMessage());
+				}
 			}
 		}
 	}
-	
+
 	/**
-	 * delete current port mapping
+	 * Delete current port mapping.
 	 */
 	public static void deletePortMapping() {
-		if (mappedPort > 0 && IGDs != null && localHostIP != null) {
-			for (InternetGatewayDevice IGD : IGDs) {
+		if (mappedPort > 0 && GATEWAY_DEVICES != null) {
+
+			boolean unmapped;
+			String msg;
+			for (final GatewayDevice gatewayDevice : GATEWAY_DEVICES.values()) {
+
 				try {
-					boolean unmapped = IGD.deletePortMapping(getRemoteHost(), mappedPort, mappedProtocol);
-					String msg = "port " + mappedPort + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
-					if (unmapped) log.info("unmapped " + msg);
-					else log.warn("could not unmap " + msg);
-				} catch (final IOException e) {} catch (final UPNPResponseException e) { log.severe("unmapping error: " + e.getMessage()); }
+					unmapped = gatewayDevice.deletePortMapping(mappedPort,
+							MAPPED_PROTOCOL);
+
+					msg = "port " + mappedPort + " on device "
+							+ gatewayDevice.getFriendlyName();
+
+					if (unmapped) {
+						LOG.info("unmapped " + msg);
+					} else {
+						LOG.warn("could not unmap " + msg);
+					}
+
+				} catch (SAXException | IOException e) {
+					LOG.severe("unmapping error: " + e.getMessage());
+				}
 			}
+
 			mappedPort = 0; // reset mapped port
 		}
 	}
-	
+
 	/**
-	 * @return mapped port or 0
+	 * Gets currently mapped port.
+	 * 
+	 * @return mapped port or 0 if no port is mapped
 	 */
 	public static int getMappedPort() {
 		return mappedPort;
 	}
-			
-	public static void main(String[] args) {
-		deletePortMapping(); // nothing
-		addPortMapping(40000); // map
-		addPortMapping(40000); // unmap, map
-		deletePortMapping(); // unmap
-		deletePortMapping(); // nothing
-	}
-	
-	/**
-	 * register devices that do not respond to discovery but advertise themselves
-	 */
-	public static class Listener {
-		
-		private final static Handler handler = new Handler();
-		private final static String devicetype = "urn:schemas-upnp-org:device:InternetGatewayDevice:1";
-		
-		public static void register() {
-			try {
-				DiscoveryAdvertisement.getInstance().registerEvent(DiscoveryAdvertisement.EVENT_SSDP_ALIVE, devicetype, handler);
-//				DiscoveryAdvertisement.getInstance().registerEvent(DiscoveryAdvertisement.EVENT_SSDP_BYE_BYE, devicetype, handler);
-			} catch (final IOException e) {}
-		}
-		
-		public static void unregister() {
-			DiscoveryAdvertisement.getInstance().unRegisterEvent(DiscoveryAdvertisement.EVENT_SSDP_ALIVE, devicetype, handler);
-//			DiscoveryAdvertisement.getInstance().unRegisterEvent(DiscoveryAdvertisement.EVENT_SSDP_BYE_BYE, devicetype, handler);
-		}
-		
-		protected static class Handler implements DiscoveryEventHandler {
-		
-			@Override
-            public void eventSSDPAlive(String usn, String udn, String nt, String maxAge, URL location) {
-				InternetGatewayDevice[] newIGD = { null };
-				boolean error = false;
-				String errorMsg = null;
-				try {
-					newIGD[0] = new InternetGatewayDevice(new UPNPRootDevice(location, maxAge, "", usn, udn));
-				} catch (final UnsupportedOperationException e) {
-					error = true;
-					errorMsg = e.getMessage();
-				} catch (final MalformedURLException e) {
-					error = true;
-					errorMsg = e.getMessage();
-				} catch (final IllegalStateException e) {
-					error = true;
-					errorMsg = e.getMessage();
-				}
-				if (error && errorMsg != null)
-					log.severe("eventSSDPAlive: " + errorMsg);
-				if (newIGD[0] == null) return;
-				log.info("discovered device: " + newIGD[0].getIGDRootDevice().getFriendlyName());
-				if (UPnP.setIGDs(newIGD) &&
-					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.UPNP_ENABLED, false))
-						UPnP.addPortMapping();
-				Listener.unregister();
+
+	private static String toString(final InetAddress inetAddress) {
+
+		final String localHostIP;
+
+		if (inetAddress != null) {
+
+			localHostIP = inetAddress.getHostAddress();
+
+			if (!inetAddress.isSiteLocalAddress()
+					|| localHostIP.startsWith("127.")) {
+				LOG.warn("found odd local address: " + localHostIP
+						+ "; UPnP may fail");
 			}
-		
-			@Override
-            public void eventSSDPByeBye(String usn, String udn, String nt) {}
-			
+		} else {
+
+			localHostIP = "";
+			LOG.warn("unknown local address, UPnP may fail");
 		}
-		
+
+		return localHostIP;
 	}
 
 }
