@@ -82,7 +82,7 @@
 
   <target name="buildGitRevTask">
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false" />
-    <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true">
+    <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8">
     	<classpath>
     		<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
     	</classpath>
@@ -244,7 +244,7 @@
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
            includes="net/yacy/peers/operation/yacyBuildProperties.java"
-           source="${javacSource}" target="${javacTarget}">
+           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
     </javac>
@@ -254,7 +254,7 @@
     <javac srcdir="${src}/" destdir="${build}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
            excludes="net/yacy/peers/operation/yacyBuildProperties.java"
-           source="${javacSource}" target="${javacTarget}">
+           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
     </javac>
@@ -284,7 +284,7 @@
     <!-- compile the cora sources -->
     <javac srcdir="${src}/net/yacy/cora/" destdir="${build}/"
            debug="true" debuglevel="lines,vars,source"
-           source="${javacSource}" target="${javacTarget}">
+           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
     </javac>
@@ -300,7 +300,7 @@
     <javac srcdir="${htroot}/"
     	   excludes="processing/**"
            source="${javacSource}" target="${javacTarget}"
-           debug="true" debuglevel="lines,vars,source" includeantruntime="false">
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false" encoding="UTF-8">
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
     </javac>
