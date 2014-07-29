@@ -47,7 +47,6 @@
           <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
           <li id="header_tutorial"><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
           <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
-          <li id="header_tutorial"><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;#(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
         </ul>
         </li>
         <li id="header_administration">
