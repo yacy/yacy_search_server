@@ -91,7 +91,7 @@ public class HostBalancer implements Balancer {
             } else {
                 this.queues.put(DigestURL.hosthash(queue.getHost(), queue.getPort()), queue);
             }
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException|RuntimeException e) {
             ConcurrentLog.logException(e);
         }
         this.roundRobinHostHashes = new HashSet<String>();
