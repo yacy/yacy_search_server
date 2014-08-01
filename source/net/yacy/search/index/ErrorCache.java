@@ -41,6 +41,7 @@ import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -109,7 +110,7 @@ public class ErrorCache {
                 url, profile == null ? null : profile.collections(),
                 failCategory.name() + " " + reason, failCategory.failType,
                 httpcode, crawldepth);
-        if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
+        if (this.fulltext.getDefaultConnector() != null && failCategory.store && !RobotsTxt.isRobotsURL(url)) {
             // send the error to solr
             try {
                 // do not overwrite error reports with error reports
@@ -123,13 +124,9 @@ public class ErrorCache {
             } catch (final IOException e) {
                 ConcurrentLog.warn("SOLR", "failed to send error " + url.toNormalform(true) + " to solr: " + e.getMessage());
             }
-            synchronized (this.cache) {
-                this.cache.put(ASCII.String(url.hash()), null);
-            }
-        } else {
-            synchronized (this.cache) {
-                this.cache.put(ASCII.String(url.hash()), failDoc);
-            }
+        }
+        synchronized (this.cache) {
+            this.cache.put(ASCII.String(url.hash()), failDoc);
         }
         checkStackSize();
     }

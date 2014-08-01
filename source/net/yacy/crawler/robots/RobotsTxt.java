@@ -56,6 +56,7 @@ public class RobotsTxt {
 
     private final static ConcurrentLog log = new ConcurrentLog(RobotsTxt.class.getName());
 
+    protected static final String ROBOTS_TXT_PATH = "/robots.txt";
     protected static final String ROBOTS_DB_PATH_SEPARATOR = ";";
     protected static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
 
@@ -338,6 +339,10 @@ public class RobotsTxt {
         return sb.toString();
     }
     
+    public static boolean isRobotsURL(MultiProtocolURL url) {
+        return url.getPath().equals(ROBOTS_TXT_PATH);
+    }
+    
     /**
      * generate a robots.txt url.
      * @param urlHostPort a string of the form <host>':'<port> or just <host>
@@ -347,7 +352,7 @@ public class RobotsTxt {
         if (urlHostPort.endsWith(":80")) urlHostPort = urlHostPort.substring(0, urlHostPort.length() - 3);
         DigestURL robotsURL = null;
         try {
-            robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
+            robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + ROBOTS_TXT_PATH);
         } catch (final MalformedURLException e) {
             log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
             robotsURL = null;
