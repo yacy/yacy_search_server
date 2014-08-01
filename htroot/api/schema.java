@@ -82,9 +82,9 @@ public class schema {
             
             prop.put("solruniquekey", WebgraphSchema.id.getSolrFieldName());
             prop.put("solrdefaultsearchfield",
-                    solrSchema.contains(WebgraphSchema.target_linktext_t) ? WebgraphSchema.target_linktext_t.getSolrFieldName() :
+                    solrSchema.contains(WebgraphSchema.target_linktext_s) ? WebgraphSchema.target_linktext_s.getSolrFieldName() :
                     solrSchema.contains(WebgraphSchema.target_name_t) ? WebgraphSchema.target_name_t.getSolrFieldName() :
-                    solrSchema.contains(WebgraphSchema.target_alt_t) ? WebgraphSchema.target_alt_t.getSolrFieldName() :
+                    solrSchema.contains(WebgraphSchema.target_alt_s) ? WebgraphSchema.target_alt_s.getSolrFieldName() :
                     WebgraphSchema.id.getSolrFieldName()
                     );
         }     

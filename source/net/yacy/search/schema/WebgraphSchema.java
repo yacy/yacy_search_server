@@ -62,10 +62,10 @@ public enum WebgraphSchema implements SchemaDeclaration {
     source_host_subdomain_s(SolrType.string, true, true, false, false, false, "the remaining part of the host without organizationdnc (source)"),
 
     // information in the source about the target
-    target_linktext_t(SolrType.text_general, true, true, false, false, true, "the text content of the a-tag (in source, but pointing to a target)"),
+    target_linktext_s(SolrType.string, true, true, false, false, true, "the text content of the a-tag (in source, but pointing to a target)"),
     target_linktext_charcount_i(SolrType.num_integer, true, true, false, false, false, "the length of the a-tag content text as number of characters (in source, but pointing to a target)"),
     target_linktext_wordcount_i(SolrType.num_integer, true, true, false, false, false, "the length of the a-tag content text as number of words (in source, but pointing to a target)"),
-    target_alt_t(SolrType.text_general, true, true, false, false, true, "if the link is an image link, this contains the alt tag if the image is also liked as img link (in source, but pointing to a target)"),
+    target_alt_s(SolrType.string, true, true, false, false, true, "if the link is an image link, this contains the alt tag if the image is also liked as img link (in source, but pointing to a target)"),
     target_alt_charcount_i(SolrType.num_integer, true, true, false, false, false, "the length of the a-tag content text as number of characters (in source, but pointing to a target)"),
     target_alt_wordcount_i(SolrType.num_integer, true, true, false, false, false, "the length of the a-tag content text as number of words (in source, but pointing to a target)"),
     target_name_t(SolrType.text_general, true, true, false, false, true, "the name property of the a-tag (in source, but pointing to a target)"),

@@ -207,12 +207,12 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         if (allAttr || contains(WebgraphSchema.target_name_t)) add(edge, WebgraphSchema.target_name_t, name.length() > 0 ? name : "");
         if (allAttr || contains(WebgraphSchema.target_rel_s)) add(edge, WebgraphSchema.target_rel_s, rel.length() > 0 ? rel : "");
         if (allAttr || contains(WebgraphSchema.target_relflags_i)) add(edge, WebgraphSchema.target_relflags_i, relEval(rel.length() > 0 ? rel : ""));
-        if (allAttr || contains(WebgraphSchema.target_linktext_t)) add(edge, WebgraphSchema.target_linktext_t, target_url.getTextProperty());
+        if (allAttr || contains(WebgraphSchema.target_linktext_s)) add(edge, WebgraphSchema.target_linktext_s, target_url.getTextProperty());
         if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, target_url.getTextProperty().length());
         if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, target_url.getTextProperty().length() > 0 ? CommonPattern.SPACE.split(target_url.getTextProperty()).length : 0);
         
         if (target_url.getImageAlt() != null) {
-            if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, target_url.getImageAlt());
+            if (allAttr || contains(WebgraphSchema.target_alt_s)) add(edge, WebgraphSchema.target_alt_s, target_url.getImageAlt());
             if (allAttr || contains(WebgraphSchema.target_alt_charcount_i)) add(edge, WebgraphSchema.target_alt_charcount_i, target_url.getImageAlt().length());
             if (allAttr || contains(WebgraphSchema.target_alt_wordcount_i)) add(edge, WebgraphSchema.target_alt_wordcount_i, target_url.getImageAlt().length() > 0 ? CommonPattern.SPACE.split(target_url.getImageAlt()).length : 0);
         }

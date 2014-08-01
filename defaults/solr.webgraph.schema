@@ -102,7 +102,7 @@ source_host_id_s
 ##
 
 ## the text content of the a-tag (in source, but pointing to a target)
-target_linktext_t
+target_linktext_s
 
 ## the length of the a-tag content text as number of characters (in source, but pointing to a target)
 #target_linktext_charcount_i
@@ -111,7 +111,7 @@ target_linktext_t
 #target_linktext_wordcount_i
 
 ## if the link is an image link, this contains the alt tag if the image is also liked as img link (in source, but pointing to a target)
-target_alt_t
+target_alt_s
 
 ## the length of the a-tag content text as number of characters (in source, but pointing to a target)
 #target_alt_charcount_i
