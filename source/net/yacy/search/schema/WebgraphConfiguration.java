@@ -100,7 +100,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     public List<SolrInputDocument> getEdges(
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int crawldepth_source,
-            final List<ImageEntry> images, final Set<ProcessType> processTypes, final Collection<AnchorURL> links,
+            final Set<ProcessType> processTypes, final Collection<AnchorURL> links,
             final String sourceName) {
         boolean allAttr = this.isEmpty();
         boolean generalNofollow = responseHeader == null ? false : responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
