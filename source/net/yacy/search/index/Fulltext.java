@@ -473,16 +473,12 @@ public final class Fulltext {
         return false;
     }
 
-    public DigestURL getURL(final String urlHash) {
+    public DigestURL getURL(final String urlHash) throws IOException {
         if (urlHash == null || this.getDefaultConnector() == null) return null;
         
-        try {
-            SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
-            if (md == null) return null;
-            return new DigestURL(md.url, ASCII.getBytes(urlHash));
-        } catch (final IOException e) {
-            return null;
-        }
+        SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
+        if (md == null) return null;
+        return new DigestURL(md.url, ASCII.getBytes(urlHash));
     }
     
     /**
@@ -490,16 +486,11 @@ public final class Fulltext {
      * @param urlHash
      * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
      */
-    public long getLoadTime(final String urlHash) {
+    public long getLoadTime(final String urlHash) throws IOException {
         if (urlHash == null) return -1l;
-        try {
-            SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
-            if (md == null) return -1l;
-            return md.date;
-        } catch (final Throwable e) {
-            ConcurrentLog.logException(e);
-        }
-        return -1l;
+        SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
+        if (md == null) return -1l;
+        return md.date;
     }
     
     public List<File> dumpFiles() {

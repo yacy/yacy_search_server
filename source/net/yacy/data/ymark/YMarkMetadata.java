@@ -35,6 +35,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
@@ -82,7 +83,12 @@ public class YMarkMetadata {
 	public YMarkMetadata(final byte[] urlHash, final Segment indexSegment) {
 		this.document = null;
 		this.indexSegment = indexSegment;
-		this.uri = this.indexSegment.fulltext().getURL(ASCII.String(urlHash));
+		try {
+            this.uri = this.indexSegment.fulltext().getURL(ASCII.String(urlHash));
+        } catch (IOException e) {
+            this.uri = null;
+            ConcurrentLog.logException(e);
+        }
 	}
 
 	public YMarkMetadata(final Document document) {

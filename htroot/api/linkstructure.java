@@ -17,6 +17,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.document.encoding.ASCII;
@@ -25,6 +26,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.HyperlinkEdge;
@@ -59,7 +61,11 @@ public class linkstructure {
             String hostname = null;
             if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
                 byte[] urlhash = ASCII.getBytes(about);
-                url = authenticated ? sb.getURL(urlhash) : null;
+                try {
+                    url = authenticated ? sb.getURL(urlhash) : null;
+                } catch (IOException e) {
+                    ConcurrentLog.logException(e);
+                }
             } else if (url == null && about.length() > 0) { // consider "about" as url or hostname
                 url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                 hostname = url.getHost();

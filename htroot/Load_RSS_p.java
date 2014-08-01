@@ -352,17 +352,23 @@ public class Load_RSS_p {
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();
-                    HarvestProcess harvestProcess = sb.urlExists(ASCII.String(messageurl.hash()));
-                    prop.put("showitems_item_" + i + "_state", harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
-                    prop.put("showitems_item_" + i + "_state_count", i);
-                    prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
-                    prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
-                    prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                    prop.putHTML("showitems_item_" + i + "_link", messageurl.toNormalform(true));
-                    prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
-                    prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
-                    prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
-                    i++;
+                    HarvestProcess harvestProcess;
+                    try {
+                        harvestProcess = sb.urlExists(ASCII.String(messageurl.hash()));
+                        prop.put("showitems_item_" + i + "_state", harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
+                        prop.put("showitems_item_" + i + "_state_count", i);
+                        prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
+                        prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
+                        prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
+                        prop.putHTML("showitems_item_" + i + "_link", messageurl.toNormalform(true));
+                        prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
+                        prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
+                        prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
+                        i++;
+                    } catch (IOException e) {
+                        ConcurrentLog.logException(e);
+                        continue;
+                    }
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
                     continue;

@@ -369,8 +369,7 @@ public class IndexControlRWIs_p {
                         Word.commonHashOrder,
                         urlb.size());
                 if ( post.containsKey("blacklisturls") ) {
-                    final String[] supportedBlacklistTypes =
-					    env.getConfig("BlackLists.types", "").split(",");
+                    final String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
 					DigestURL url;
 					for ( final byte[] b : urlb ) {
 					    try {
@@ -378,28 +377,32 @@ public class IndexControlRWIs_p {
 					    } catch (final SpaceExceededException e ) {
 					        ConcurrentLog.logException(e);
 					    }
-					    url = segment.fulltext().getURL(ASCII.String(b));
-					    segment.fulltext().remove(b);
-					    if ( url != null ) {
-					        for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
-					            if ( ListManager.listSetContains(
-					                supportedBlacklistType + ".BlackLists",
-					                blacklist) ) {
-					                try {
-                                        Switchboard.urlBlacklist.add(
-                                            BlacklistType.valueOf(supportedBlacklistType),
-                                            blacklist,
-                                            url.getHost(),
-                                            url.getFile());
-                                    } catch (PunycodeException e) {
-                                        ConcurrentLog.warn(APP_NAME,
-                                                        "Unable to add blacklist entry to blacklist "
-                                                                        + supportedBlacklistType, e);
+					    try {
+                            url = segment.fulltext().getURL(ASCII.String(b));
+                            segment.fulltext().remove(b);
+                            if ( url != null ) {
+                                for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
+                                    if ( ListManager.listSetContains(
+                                        supportedBlacklistType + ".BlackLists",
+                                        blacklist) ) {
+                                        try {
+                                            Switchboard.urlBlacklist.add(
+                                                BlacklistType.valueOf(supportedBlacklistType),
+                                                blacklist,
+                                                url.getHost(),
+                                                url.getFile());
+                                        } catch (PunycodeException e) {
+                                            ConcurrentLog.warn(APP_NAME,
+                                                            "Unable to add blacklist entry to blacklist "
+                                                                            + supportedBlacklistType, e);
+                                        }
                                     }
-					            }
-					        }
-					        SearchEventCache.cleanupEvents(true);
-					    }
+                                }
+                                SearchEventCache.cleanupEvents(true);
+                            }
+                        } catch (IOException e1) {
+                            ConcurrentLog.logException(e1);
+                        }
 					}
                 }
 
@@ -411,27 +414,29 @@ public class IndexControlRWIs_p {
 					    } catch (final SpaceExceededException e ) {
 					        ConcurrentLog.logException(e);
 					    }
-					    url = segment.fulltext().getURL(ASCII.String(b));
-					    segment.fulltext().remove(b);
-					    if ( url != null ) {
-					        for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
-					            if ( ListManager.listSetContains(
-					                supportedBlacklistType + ".BlackLists",
-					                blacklist) ) {
-					                try {
-                                        Switchboard.urlBlacklist.add(
-                                            supportedBlacklistType,
-                                            blacklist,
-                                            url.getHost(),
-                                            ".*");
-                                    } catch (PunycodeException e) {
-                                        ConcurrentLog.warn(APP_NAME,
-                                                        "Unable to add blacklist entry to blacklist "
-                                                                        + supportedBlacklistType, e);
+					    try {
+                            url = segment.fulltext().getURL(ASCII.String(b));
+                            segment.fulltext().remove(b);
+                            if ( url != null ) {
+                                for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
+                                    if ( ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklist) ) {
+                                        try {
+                                            Switchboard.urlBlacklist.add(
+                                                supportedBlacklistType,
+                                                blacklist,
+                                                url.getHost(),
+                                                ".*");
+                                        } catch (PunycodeException e) {
+                                            ConcurrentLog.warn(APP_NAME,
+                                                            "Unable to add blacklist entry to blacklist "
+                                                                            + supportedBlacklistType, e);
+                                        }
                                     }
-					            }
-					        }
-					    }
+                                }
+                            }
+                        } catch (IOException e1) {
+                            ConcurrentLog.logException(e1);
+                        }
 					}
                 }
                 try {

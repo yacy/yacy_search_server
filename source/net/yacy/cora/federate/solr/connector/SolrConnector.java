@@ -154,7 +154,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param query
      * @throws IOException
      */
-    public QueryResponse getResponseByParams(final ModifiableSolrParams query) throws IOException, SolrException;
+    public QueryResponse getResponseByParams(final ModifiableSolrParams query) throws IOException;
 
     /**
      * get the solr document list from a query response
@@ -165,7 +165,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      * @throws SolrException
      */
-    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException;
+    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException;
 
     /**
      * get the number of results for a query response
@@ -174,7 +174,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      * @throws SolrException
      */
-    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException;
+    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException;
     
     /**
      * get a query result from solr
@@ -191,7 +191,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final String sort,
             final int offset,
             final int count,
-            final String ... fields) throws IOException, SolrException;
+            final String ... fields) throws IOException;
     
     /**
      * get the number of results when this query is done.

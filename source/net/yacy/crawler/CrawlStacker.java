@@ -388,7 +388,10 @@ public final class CrawlStacker {
         try {
             oldEntry = this.indexSegment.fulltext().getDefaultConnector().getLoadTimeURL(urlhash);
         } catch (IOException e) {
+            // if an exception here occurs then there is the danger that urls which had been in the crawler are overwritten a second time
+            // to prevent that, we reject urls in these events
             ConcurrentLog.logException(e);
+            return "exception during double-test: " + e.getMessage();
         }
         final Long oldDate = oldEntry == null ? null : oldEntry.date;
         if (oldDate == null) {

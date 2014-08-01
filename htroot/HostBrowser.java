@@ -138,8 +138,13 @@ public class HostBrowser {
 
         String load = post.get("load", "");
         boolean wait = false;
-        if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && sb.index.getLoadTime(ASCII.String(pathURI.hash())) < 0) {
-            // in case that the url does not exist and loading is wanted turn this request into a loading request
+        try {
+            if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && sb.index.getLoadTime(ASCII.String(pathURI.hash())) < 0) {
+                // in case that the url does not exist and loading is wanted turn this request into a loading request
+                load = path;
+                wait = true;
+            }
+        } catch (IOException e1) {
             load = path;
             wait = true;
         }
@@ -156,8 +161,13 @@ public class HostBrowser {
                         0, 0, 0
                     ));
                 prop.putHTML("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
-                if (wait) for (int i = 0; i < 30; i++) {
-                    if (sb.index.getLoadTime(ASCII.String(url.hash())) >= 0) break;
+                if (wait) waitloop: for (int i = 0; i < 30; i++) {
+                    try {
+                        if (sb.index.getLoadTime(ASCII.String(url.hash())) >= 0) break;
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                        break waitloop;
+                    }
                     try {Thread.sleep(100);} catch (final InterruptedException e) {}
                 }
             } catch (final MalformedURLException e) {

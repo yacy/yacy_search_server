@@ -405,7 +405,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public LoadTimeURL getLoadTimeURL(String id) {
+    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
         int responseCount = 0;
         DocListSearcher docListSearcher = null;
         try {
@@ -421,10 +421,10 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             //}
         } catch (Throwable e) {
             ConcurrentLog.logException(e);
+            throw new IOException(e.getMessage());
         } finally {
             if (docListSearcher != null) docListSearcher.close();
         }
-        return null;
     }
     
     @Override

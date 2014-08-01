@@ -144,7 +144,14 @@ public final class transferURL {
             
             doublecheck = 0;
             for (String id : lEm.keySet()) {
-                if (sb.index.getLoadTime(id) < 0) {
+                long lt = -1;
+                try {
+                    lt = sb.index.getLoadTime(id);
+                } catch (IOException e1) {
+                    lt = -1;
+                    ConcurrentLog.logException(e1);
+                }
+                if (lt < 0) {
                     lEntry = lEm.get(id);
 
                     // write entry to database
