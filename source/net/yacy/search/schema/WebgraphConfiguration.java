@@ -109,15 +109,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         for (final AnchorURL target_url: links) {
             SolrInputDocument edge = getEdge(
                     subgraph, source, responseHeader, collections, crawldepth_source, processTypes,
-                    sourceName, allAttr, generalNofollow, target_order, target_url, null);
-            target_order++;
-            // add the edge to the subgraph
-            edges.add(edge);
-        }
-        for (final ImageEntry image_url: images) {
-            SolrInputDocument edge = getEdge(
-                    subgraph, source, responseHeader, collections, crawldepth_source, processTypes,
-                    sourceName, allAttr, generalNofollow, target_order, image_url.url(), image_url.alt());
+                    sourceName, allAttr, generalNofollow, target_order, target_url);
             target_order++;
             // add the edge to the subgraph
             edges.add(edge);
@@ -128,7 +120,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     public SolrInputDocument getEdge(
             final Subgraph subgraph, final DigestURL source_url, final ResponseHeader responseHeader, Map<String, Pattern> collections,
             int crawldepth_source, final Set<ProcessType> processTypes, final String sourceName, boolean allAttr, boolean generalNofollow, int target_order,
-            AnchorURL target_url, final String targetImageAlt /*only filled if target is an image, null otherwise*/) {
+            AnchorURL target_url) {
 
         final String name = target_url.getNameProperty(); // the name attribute
         final String text = target_url.getTextProperty(); // the text between the <a></a> tag
@@ -219,10 +211,10 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, target_url.getTextProperty().length());
         if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, target_url.getTextProperty().length() > 0 ? CommonPattern.SPACE.split(target_url.getTextProperty()).length : 0);
         
-        if (targetImageAlt != null) {
-            if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, targetImageAlt);
-            if (allAttr || contains(WebgraphSchema.target_alt_charcount_i)) add(edge, WebgraphSchema.target_alt_charcount_i, targetImageAlt.length());
-            if (allAttr || contains(WebgraphSchema.target_alt_wordcount_i)) add(edge, WebgraphSchema.target_alt_wordcount_i, targetImageAlt.length() > 0 ? CommonPattern.SPACE.split(targetImageAlt).length : 0);
+        if (target_url.getImageAlt() != null) {
+            if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, target_url.getImageAlt());
+            if (allAttr || contains(WebgraphSchema.target_alt_charcount_i)) add(edge, WebgraphSchema.target_alt_charcount_i, target_url.getImageAlt().length());
+            if (allAttr || contains(WebgraphSchema.target_alt_wordcount_i)) add(edge, WebgraphSchema.target_alt_wordcount_i, target_url.getImageAlt().length() > 0 ? CommonPattern.SPACE.split(target_url.getImageAlt()).length : 0);
         }
         
         // add the target attributes

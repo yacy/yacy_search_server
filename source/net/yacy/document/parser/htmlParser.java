@@ -123,7 +123,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 sections[p++] = headline;
             }
         }
-        LinkedHashMap<AnchorURL, ImageEntry> noDoubleImages = new LinkedHashMap<AnchorURL, ImageEntry>();
+        LinkedHashMap<DigestURL, ImageEntry> noDoubleImages = new LinkedHashMap<>();
         for (ImageEntry ie: scraper.getImages()) noDoubleImages.put(ie.url(), ie);
         final Document ppd = new Document(
                 location,

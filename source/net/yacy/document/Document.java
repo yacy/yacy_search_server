@@ -80,7 +80,7 @@ public class Document {
     private Object text;                        // the clear text, all that is visible
     private final Collection<AnchorURL> anchors;   // all links embedded as clickeable entities (anchor tags)
     private final LinkedHashMap<DigestURL, String> rss;   // all embedded rss feeds
-    private final LinkedHashMap<AnchorURL, ImageEntry> images; // all visible pictures in document
+    private final LinkedHashMap<DigestURL, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
@@ -108,7 +108,7 @@ public class Document {
                     final Object text,
                     final Collection<AnchorURL> anchors,
                     final LinkedHashMap<DigestURL, String> rss,
-                    final LinkedHashMap<AnchorURL, ImageEntry> images,
+                    final LinkedHashMap<DigestURL, ImageEntry> images,
                     final boolean indexingDenied,
                     final Date date) {
         this.source = location;
@@ -132,7 +132,7 @@ public class Document {
         }
         this.anchors = (anchors == null) ? new ArrayList<AnchorURL>(0) : anchors;
         this.rss = (rss == null) ? new LinkedHashMap<DigestURL, String>(0) : rss;
-        this.images = (images == null) ? new LinkedHashMap<AnchorURL, ImageEntry>() : images;
+        this.images = (images == null) ? new LinkedHashMap<DigestURL, ImageEntry>() : images;
         this.publisher = publisher;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -458,7 +458,7 @@ dc_rights
         return this.videolinks;
     }
 
-    public LinkedHashMap<AnchorURL, ImageEntry> getImages() {
+    public LinkedHashMap<DigestURL, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!this.resorted) resortLinks();
@@ -505,7 +505,7 @@ dc_rights
             this.applinks   = new LinkedHashMap<AnchorURL, String>();
             this.emaillinks = new LinkedHashMap<String, String>();
             final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-            for (final Map.Entry<AnchorURL, ImageEntry> entry: this.images.entrySet()) {
+            for (final Map.Entry<DigestURL, ImageEntry> entry: this.images.entrySet()) {
                 if (entry.getKey() != null && entry.getKey().getHost() != null && entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
             for (final AnchorURL url: this.anchors) {
@@ -629,13 +629,14 @@ dc_rights
         int pos;
         loop: while (i.hasNext())
             try {
+                url = null;
                 o = i.next();
                 if (o instanceof AnchorURL)
                     url = (AnchorURL) o;
                 else if (o instanceof String)
                     url = new AnchorURL((String) o);
                 else if (o instanceof ImageEntry)
-                    url = ((ImageEntry) o).url();
+                    url = new AnchorURL(((ImageEntry) o).url());
                 else {
                     assert false;
                     continue loop;
@@ -815,13 +816,13 @@ dc_rights
         final StringBuilder      authors       = new StringBuilder(80);
         final StringBuilder      publishers    = new StringBuilder(80);
         final StringBuilder      subjects      = new StringBuilder(80);
-        final List<String>       descriptions  = new ArrayList<String>();
-        final Collection<String> titles        = new LinkedHashSet<String>();
-        final Collection<String> sectionTitles = new LinkedHashSet<String>();
-        final List<AnchorURL>    anchors       = new ArrayList<AnchorURL>();
-        final LinkedHashMap<DigestURL, String> rss = new LinkedHashMap<DigestURL, String>();
-        final LinkedHashMap<AnchorURL, ImageEntry> images = new LinkedHashMap<AnchorURL, ImageEntry>();
-        final Set<String> languages = new HashSet<String>();
+        final List<String>       descriptions  = new ArrayList<>();
+        final Collection<String> titles        = new LinkedHashSet<>();
+        final Collection<String> sectionTitles = new LinkedHashSet<>();
+        final List<AnchorURL>    anchors       = new ArrayList<>();
+        final LinkedHashMap<DigestURL, String> rss = new LinkedHashMap<>();
+        final LinkedHashMap<DigestURL, ImageEntry> images = new LinkedHashMap<>();
+        final Set<String> languages = new HashSet<>();
         double lon = 0.0d, lat = 0.0d;
         boolean indexingDenied = false;
         Date date = new Date();

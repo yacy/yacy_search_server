@@ -327,7 +327,7 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
 
-                final Map<AnchorURL, ImageEntry> ts = document.getImages();
+                final Map<DigestURL, ImageEntry> ts = document.getImages();
                 final Iterator<ImageEntry> tsi = ts.values().iterator();
                 ImageEntry entry;
                 while (tsi.hasNext()) {

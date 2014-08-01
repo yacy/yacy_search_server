@@ -46,6 +46,7 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -200,10 +201,10 @@ public class genericImageParser extends AbstractParser implements Parser {
 
         final HashSet<String> languages = new HashSet<String>();
         final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
-        final LinkedHashMap<AnchorURL, ImageEntry> images  = new LinkedHashMap<AnchorURL, ImageEntry>();
+        final LinkedHashMap<DigestURL, ImageEntry> images  = new LinkedHashMap<>();
         // add this image to the map of images
         final String infoString = ii.info.toString();
-        images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
+        images.put(ii.location, new ImageEntry(ii.location, "", ii.width, ii.height, -1));
 
         if (title == null || title.isEmpty()) title = MultiProtocolURL.unescape(filename);
 

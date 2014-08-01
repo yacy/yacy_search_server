@@ -368,7 +368,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
             try {
                 if (src.length() > 0) {
-                    final AnchorURL url = absolutePath(src);
+                    final DigestURL url = absolutePath(src);
                     if (url != null) {
                         // use Numberformat.parse to allow parse of "550px"
                         NumberFormat intnum = NumberFormat.getIntegerInstance ();
@@ -618,10 +618,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             this.anchors.add(entry);
         }
         String line = cleanLine(CharacterCoding.html2unicode(stripAllTags(scraper.content.getChars())));
+        StringBuilder altakk = new StringBuilder();
         for (ImageEntry ie: scraper.images) {
             if (linkurl != null) {
+                if (ie.alt() != null) altakk.append(ie.alt().trim()).append(' ');
+                linkurl.setImageURL(ie.url());
                 AnchorURL a = new AnchorURL(linkurl);
                 a.setTextProperty(line);
+                a.setImageAlt(ie.alt());
+                a.setImageURL(ie.url());
                 ie.setLinkurl(a);
             }
             // this image may have been added recently from the same location (as this is a recursive parse)
@@ -630,6 +635,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 this.images.remove(this.images.size() - 1);
             }
             this.images.add(ie);
+        }
+        if (linkurl != null) {
+            linkurl.setImageAlt(altakk.toString().trim());
         }
 
         scraper.close();

@@ -38,6 +38,7 @@ import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSReader;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -98,7 +99,7 @@ public class rssParser extends AbstractParser implements Parser {
                     null,
                     anchors,
                     null,
-                    new LinkedHashMap<AnchorURL, ImageEntry>(),
+                    new LinkedHashMap<DigestURL, ImageEntry>(),
                     false,
                     item.getPubDate());
             docs.add(doc);

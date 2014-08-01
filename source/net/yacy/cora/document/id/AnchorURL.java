@@ -28,46 +28,68 @@ public class AnchorURL extends DigestURL {
 
     private static final long serialVersionUID = 1586579902179962086L;
 
-    private String nameProperty, textProperty, relProperty, hrefProperty; // may contain additional url properties, such as given in html a href-links
+    private String nameProperty, relProperty, hrefProperty, textBody; // may contain additional url properties, such as given in html a href-links
+    private DigestURL imageURL; // in case that the anchor contains an image link, store image url; if there is no image then set this to null
+    private String imageAlt; // in case that the anchor contains an image link, store the alt property; if there is no image then set this to null
 
     public AnchorURL(final String url) throws MalformedURLException {
         super(url);
+        this.textBody = "";
         this.nameProperty = "";
-        this.textProperty = "";
         this.relProperty = "";
         this.hrefProperty = "";
+        this.imageURL = null;
+        this.imageAlt = null;
     }
     
     public AnchorURL(final AnchorURL url) {
         super(url, url.hash());
+        this.textBody = url.textBody;
         this.nameProperty = url.nameProperty;
-        this.textProperty = url.textProperty;
         this.relProperty = url.relProperty;
         this.hrefProperty = url.hrefProperty;
+        this.imageURL = url.imageURL;
+        this.imageAlt = url.imageAlt;
     }
 
     public AnchorURL(final DigestURL url) {
         super(url, url.hash());
+        this.textBody = "";
         this.nameProperty = "";
-        this.textProperty = "";
         this.relProperty = "";
         this.hrefProperty = "";
+        this.imageURL = null;
+        this.imageAlt = null;
     }
 
     public AnchorURL(final MultiProtocolURL baseURL, final String relPath) throws MalformedURLException {
         super(baseURL, relPath);
+        this.textBody = "";
         this.nameProperty = "";
-        this.textProperty = "";
         this.relProperty = "";
         this.hrefProperty = "";
+        this.imageURL = null;
+        this.imageAlt = null;
     }
 
     public AnchorURL(final String protocol, final String host, final int port, final String path) throws MalformedURLException {
         super(protocol, host, port, path);
+        this.textBody = "";
         this.nameProperty = "";
-        this.textProperty = "";
         this.relProperty = "";
         this.hrefProperty = "";
+        this.imageURL = null;
+        this.imageAlt = null;
+    }
+    
+    public AnchorURL(final String protocol, final String host, final int port, final String path, final DigestURL imageURL, final String imageAlt) throws MalformedURLException {
+        super(protocol, host, port, path);
+        this.textBody = "";
+        this.nameProperty = "";
+        this.relProperty = "";
+        this.hrefProperty = "";
+        this.imageURL = imageURL;
+        this.imageAlt = imageAlt;
     }
 
     public static AnchorURL newAnchor(final DigestURL baseURL, String relPath) throws MalformedURLException {
@@ -96,11 +118,11 @@ public class AnchorURL extends DigestURL {
     }
 
     public String getTextProperty() {
-        return textProperty;
+        return textBody;
     }
 
     public void setTextProperty(String text) {
-        this.textProperty = text;
+        this.textBody = text;
     }
 
     public String getRelProperty() {
@@ -119,9 +141,25 @@ public class AnchorURL extends DigestURL {
         this.hrefProperty = href;
     }
 
+    public DigestURL getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(DigestURL imageURL) {
+        this.imageURL = imageURL;
+    }
+
+    public String getImageAlt() {
+        return imageAlt;
+    }
+
+    public void setImageAlt(String imageAlt) {
+        this.imageAlt = imageAlt;
+    }
+
     public void setAll(final Properties tagopts) {
         this.nameProperty = tagopts.getProperty("name", "");
-        this.textProperty = tagopts.getProperty("text", "");
+        this.textBody = tagopts.getProperty("text", "");
         this.relProperty = tagopts.getProperty("rel", "");
         this.hrefProperty = tagopts.getProperty("href", "");
     }
@@ -129,7 +167,7 @@ public class AnchorURL extends DigestURL {
     public Properties getAll() {
         final Properties tagopts = new Properties();
         tagopts.setProperty("name", this.nameProperty);
-        tagopts.setProperty("text", this.textProperty);
+        tagopts.setProperty("text", this.textBody);
         tagopts.setProperty("rel", this.relProperty);
         tagopts.setProperty("href", this.hrefProperty);
         return tagopts;
@@ -143,7 +181,7 @@ public class AnchorURL extends DigestURL {
         return "<a href=\"" + this.toNormalform(false) + "\"" +
                 (this.nameProperty.length() > 0 ? (" name=\"" + this.nameProperty + "\"") : "") +
                 (this.relProperty.length() > 0 ? (" rel=\"" + this.relProperty + "\"") : "") +
-                ">" + this.textProperty + "</a>";
+                ">" + this.textBody + "</a>";
     }
     
     @Override

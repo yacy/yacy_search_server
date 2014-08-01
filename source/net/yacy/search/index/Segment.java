@@ -571,7 +571,7 @@ public class Segment {
                     }
                 }
                 // media links as well!
-                for (AnchorURL image: document.getImages().keySet()) urlCitationIndex.add(image.hash(), new CitationReference(url.hash(), loadDate.getTime()));
+                for (DigestURL image: document.getImages().keySet()) urlCitationIndex.add(image.hash(), new CitationReference(url.hash(), loadDate.getTime()));
                 for (AnchorURL audio: document.getAudiolinks().keySet()) urlCitationIndex.add(audio.hash(), new CitationReference(url.hash(), loadDate.getTime()));
                 for (AnchorURL video: document.getVideolinks().keySet()) urlCitationIndex.add(video.hash(), new CitationReference(url.hash(), loadDate.getTime()));
             } catch (Throwable e) {

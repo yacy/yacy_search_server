@@ -96,7 +96,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     null,
                     null,
                     null,
-                    new LinkedHashMap<AnchorURL, ImageEntry>(),
+                    new LinkedHashMap<DigestURL, ImageEntry>(),
                     false,
                     new Date());
             docs.add(doc);
