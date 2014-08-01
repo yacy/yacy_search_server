@@ -33,7 +33,6 @@ import net.yacy.search.schema.CollectionSchema;
 import org.apache.lucene.analysis.NumericTokenStream;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -289,7 +288,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws SolrException
      */
     @Override
-    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
+    public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = params.get("q");
@@ -297,18 +296,25 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         String threadname = Thread.currentThread().getName();
         if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         QueryResponse rsp;
-        try {
-            rsp = this.server.query(params);
-            if (q != null) Thread.currentThread().setName(threadname);
-            if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
-            return rsp.getResults();
-        } catch (final SolrServerException e) {
-            clearCaches(); // prevent further OOM if this was caused by OOM
-            throw new SolrException(ErrorCode.UNKNOWN, e);
-        } catch (final Throwable e) {
-            clearCaches(); // prevent further OOM if this was caused by OOM
-            throw new IOException("Error executing query", e);
+        int retry = 10;
+        Throwable error = null;
+        while (retry-- > 0) {
+            try {
+                rsp = this.server.query(params);
+                if (q != null) Thread.currentThread().setName(threadname);
+                if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
+                return rsp.getResults();
+            } catch (final SolrServerException e) {
+                error = e;
+                clearCaches(); // prevent further OOM if this was caused by OOM
+            } catch (final Throwable e) {
+                error = e;
+                clearCaches(); // prevent further OOM if this was caused by OOM
+            }
+            ConcurrentLog.severe("SolrServerConnector", "Failed to query remote Solr: " + error.getMessage() + ", query:" + q + (fq == null ? "" : ", fq = " + fq));
+            try {Thread.sleep(1000);} catch (InterruptedException e) {}
         }
+        throw new IOException("Error executing query", error);
     }
     
     // luke requests: these do not work for attached SolrCloud Server

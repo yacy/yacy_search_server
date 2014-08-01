@@ -313,9 +313,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
         String q = "{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id;
         params.setQuery(q);
-        //params.setQuery("*:*");
-        //params.addFilterQuery(q);
-        //params.set("defType", "raw");
         params.setRows(1);
         params.setStart(0);
         params.setFacet(false);

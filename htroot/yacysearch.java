@@ -588,19 +588,23 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final DigestURL url = indexSegment.fulltext().getURL(bookmarkHash);
-                if ( url != null ) {
-                    try {
-                        sb.tables.bookmarks.createBookmark(
-                            sb.loader,
-                            url,
-                            ClientIdentification.yacyInternetCrawlerAgent,
-                            YMarkTables.USER_ADMIN,
-                            true,
-                            "searchresult",
-                            "/search");
-                    } catch (final Throwable e ) {
+                try {
+                    final DigestURL url = indexSegment.fulltext().getURL(bookmarkHash);
+                    if ( url != null ) {
+                        try {
+                            sb.tables.bookmarks.createBookmark(
+                                sb.loader,
+                                url,
+                                ClientIdentification.yacyInternetCrawlerAgent,
+                                YMarkTables.USER_ADMIN,
+                                true,
+                                "searchresult",
+                                "/search");
+                        } catch (final Throwable e ) {
+                        }
                     }
+                } catch (IOException e) {
+                    ConcurrentLog.logException(e);
                 }
             }
 

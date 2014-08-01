@@ -35,6 +35,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.SentenceReader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -86,10 +87,14 @@ public class citation {
             } catch (final MalformedURLException e) {}
         }
         if (uri == null && hash.length() > 0) {
-            uri = sb.getURL(ASCII.getBytes(hash));
-            if (uri == null) {
-                connector.commit(true); // try again, that url can be fresh
+            try {
                 uri = sb.getURL(ASCII.getBytes(hash));
+                if (uri == null) {
+                    connector.commit(true); // try again, that url can be fresh
+                    uri = sb.getURL(ASCII.getBytes(hash));
+                }
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
             }
         }
         if (uri == null) return prop; // no proper url addressed

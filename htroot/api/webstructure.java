@@ -65,7 +65,12 @@ public class webstructure {
             } else if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
             	urlhash = ASCII.getBytes(about);
             	hosthash = about.substring(6);
-            	url = authenticated ? sb.getURL(urlhash) : null;
+            	try {
+                    url = authenticated ? sb.getURL(urlhash) : null;
+                } catch (IOException e) {
+                    url = null;
+                    ConcurrentLog.logException(e);
+                }
             } else if (about.length() > 0) {
             	// consider "about" as url or hostname
                 try {
@@ -156,12 +161,17 @@ public class webstructure {
                     Iterator<byte[]> i = ids.iterator();
             		while (i.hasNext()) {
                     	byte[] refhash = i.next();
-                    	DigestURL refurl = authenticated ? sb.getURL(refhash) : null;
-                    	prop.put("citations_documents_0_anchors_" + d + "_urle", refurl == null ? 0 : 1);
-                    	if (refurl != null) prop.putXML("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true));
-                    	prop.put("citations_documents_0_anchors_" + d + "_urle_hash", refhash);
-                    	prop.put("citations_documents_0_anchors_" + d + "_urle_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date())); // superfluous?
-                    	d++;
+                    	DigestURL refurl;
+                        try {
+                            refurl = authenticated ? sb.getURL(refhash) : null;
+                            prop.put("citations_documents_0_anchors_" + d + "_urle", refurl == null ? 0 : 1);
+                            if (refurl != null) prop.putXML("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true));
+                            prop.put("citations_documents_0_anchors_" + d + "_urle_hash", refhash);
+                            prop.put("citations_documents_0_anchors_" + d + "_urle_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date())); // superfluous?
+                            d++;
+                        } catch (IOException e) {
+                            ConcurrentLog.logException(e);
+                        }
             		}
                     prop.put("citations_documents_0_count", d);
                     prop.put("citations_documents_0_anchors", d);

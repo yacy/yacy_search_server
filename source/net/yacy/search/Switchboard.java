@@ -1620,18 +1620,12 @@ public final class Switchboard extends serverSwitch {
      * @param hash
      * @return if it exists, the name of the database is returned, if it not exists, null is returned
      */
-    public HarvestProcess urlExists(final String hash) {
-        if (this.index.getLoadTime(hash) >= 0) return HarvestProcess.LOADED;
+    public HarvestProcess urlExists(final String hash) throws IOException {
+        LoadTimeURL md = this.index.fulltext().getDefaultConnector().getLoadTimeURL(hash);
+        if (md != null && md.date >= 0) return HarvestProcess.LOADED;
         HarvestProcess hp = this.crawlQueues.exists(ASCII.getBytes(hash));
         if (hp != null) return hp;
-        try {
-            LoadTimeURL md = this.index.fulltext().getDefaultConnector().getLoadTimeURL(hash);
-            if (md == null) return null;
-            return HarvestProcess.LOADED; // todo: can also be in error
-        } catch (IOException e) {
-            ConcurrentLog.logException(e);
-            return null;
-        }
+        return null; // todo: can also be in error
     }
 
     public void urlRemove(final Segment segment, final byte[] hash) {
@@ -1640,7 +1634,7 @@ public final class Switchboard extends serverSwitch {
         this.crawlQueues.removeURL(hash);
     }
 
-    public DigestURL getURL(final byte[] urlhash) {
+    public DigestURL getURL(final byte[] urlhash) throws IOException {
         if (urlhash == null) return null;
         if (urlhash.length == 0) return null;
         final DigestURL url = this.index.fulltext().getURL(ASCII.String(urlhash));
@@ -2977,7 +2971,15 @@ public final class Switchboard extends serverSwitch {
         // stacking may fail because of double occurrences of that url. Therefore
         // we must wait here until the url has actually disappeared
         int t = 100;
-        while (t-- > 0 && this.index.getLoadTime(ASCII.String(urlhash)) >= 0) {
+        while (t-- > 0) {
+            try {
+                long lt = this.index.getLoadTime(ASCII.String(urlhash));
+                if (lt < 0) break;
+            } catch (IOException e) {
+                // if this fails, the url may still exist
+                // we should abandon the whole process
+                return "exist-test failed: " + e.getMessage();
+            }
             try {Thread.sleep(100);} catch (final InterruptedException e) {}
             ConcurrentLog.fine("Switchboard", "STACKURL: waiting for deletion, t=" + t);
             //if (t == 20) this.index.fulltext().commit(true);
@@ -3094,9 +3096,17 @@ public final class Switchboard extends serverSwitch {
         final List<Request> requests = new ArrayList<Request>();
         for (Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
             final String urlName = e.getValue().toNormalform(true);
-            if (doublecheck && this.index.getLoadTime(e.getKey()) >= 0) {
-                this.log.info("addToIndex: double " + urlName);
-                continue;
+            if (doublecheck) {
+                try {
+                    if (this.index.getLoadTime(e.getKey()) >= 0) {
+                        this.log.info("addToIndex: double " + urlName);
+                        continue;
+                    }
+                } catch (IOException ee) {
+                    // double check fail may mean that the url exist
+                    this.log.info("addToIndex: doublecheck failed for " + urlName + ": " + ee.getMessage());
+                    continue;
+                }
             }
             final Request request = this.loader.request(e.getValue(), true, true);
             final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));
@@ -3168,7 +3178,11 @@ public final class Switchboard extends serverSwitch {
         Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (DigestURL url: urls) urlmap.put(ASCII.String(url.hash()), url);
         for (Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
-            if (this.index.getLoadTime(e.getKey()) >= 0) continue; // double
+            try {
+                if (this.index.getLoadTime(e.getKey()) >= 0) continue; // double
+            } catch (IOException ee) {
+                continue; // if the check fails, consider the url as double
+            }
             DigestURL url = e.getValue();
             final Request request = this.loader.request(url, true, true);
             final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));

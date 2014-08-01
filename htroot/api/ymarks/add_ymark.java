@@ -34,18 +34,16 @@ public class add_ymark {
 
             if (post.containsKey("urlHash")) {
             	final String urlHash = post.get("urlHash",YMarkUtil.EMPTY_STRING);
-            	final DigestURL url = sb.index.fulltext().getURL(urlHash);
-            	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt());
-            	final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
             	try {
+            	    final DigestURL url = sb.index.fulltext().getURL(urlHash);
+                    final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt());
+                    final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
                     ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
 					sb.tables.bookmarks.createBookmark(sb.loader, url, agent, bmk_user, true, tags, folders);
 					prop.put("status", "1");
 				} catch (final IOException e) {
-					// TODO Auto-generated catch block
 					ConcurrentLog.logException(e);
 				} catch (final Failure e) {
-					// TODO Auto-generated catch block
 					ConcurrentLog.logException(e);
 				}
 

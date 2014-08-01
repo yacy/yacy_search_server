@@ -356,7 +356,7 @@ public class Segment {
      * @param urlHash
      * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
      */
-    public long getLoadTime(final String urlhash) {
+    public long getLoadTime(final String urlhash) throws IOException {
         return this.fulltext.getLoadTime(urlhash);
     }
 
@@ -683,10 +683,10 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final DigestURL url = fulltext().getURL(ASCII.String(urlhash));
-        if (url == null) return 0;
-
         try {
+            final DigestURL url = fulltext().getURL(ASCII.String(urlhash));
+            if (url == null) return 0;
+
             // parse the resource
             final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, agent));
             if (document == null) {
