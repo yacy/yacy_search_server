@@ -60,6 +60,9 @@ import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
+import net.yacy.cora.federate.solr.logic.Conjunction;
+import net.yacy.cora.federate.solr.logic.DNF;
+import net.yacy.cora.federate.solr.logic.Literal;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -1371,18 +1374,27 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         String urlhash = ASCII.String(url.hash());
         String hostid = url.hosthash();
+        DNF dnf = new DNF();
         uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
                 {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
                 {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
             CollectionSchema signaturefield = checkfields[0];
             CollectionSchema uniquefield = checkfields[1];
             CollectionSchema countfield = checkfields[2];
+
             if (this.contains(signaturefield) && this.contains(uniquefield) && this.contains(countfield)) {
                 // lookup the document with the same signature
                 Long signature = (Long) sid.getField(signaturefield.getSolrFieldName()).getValue();
                 if (signature == null) continue uniquecheck;
+                Conjunction con = new Conjunction();
+                con.addLiteral(new Literal(CollectionSchema.id, urlhash, false));
+                con.addLiteral(new Literal(CollectionSchema.host_id_s, hostid, true));
+                con.addLiteral(new Literal(signaturefield, signature.toString(), true));
+                dnf.addConjunction(con);
+                String query = con.toString();
                 try {
-                    SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"", null, 0, 100, CollectionSchema.id.getSolrFieldName());
+                    //SolrDocumentList docsOld = segment.fulltext().getDefaultConnector().getDocumentListByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"", null, 0, 2000, CollectionSchema.id.getSolrFieldName());
+                    SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(query, null, 0, 2000, CollectionSchema.id.getSolrFieldName());
                     if (docs.getNumFound() == 0) {
                         sid.setField(uniquefield.getSolrFieldName(), true);
                         sid.setField(countfield.getSolrFieldName(), 1);
