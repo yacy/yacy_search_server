@@ -261,13 +261,13 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     }
 
     @Override
-    public float getLon() {
-        return Float.parseFloat(Token.lon.valueFrom(this.map, "0.0"));
+    public double getLon() {
+        return Double.parseDouble(Token.lon.valueFrom(this.map, "0.0"));
     }
 
     @Override
-    public float getLat() {
-        return Float.parseFloat(Token.lat.valueFrom(this.map, "0.0"));
+    public double getLat() {
+        return Double.parseDouble(Token.lat.valueFrom(this.map, "0.0"));
     }
 
     @Override
