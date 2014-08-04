@@ -307,7 +307,7 @@ public final class CrawlStacker {
         final CrawlProfile profile = this.crawler.get(handle);
         String error;
         if (profile == null) {
-            error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
+            error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url().toNormalform(true);
             CrawlStacker.log.warn(error);
             return error;
         }
