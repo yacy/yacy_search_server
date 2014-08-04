@@ -1,5 +1,5 @@
 /**
- *  Literal
+ *  Negation
  *  Copyright 2014 by Michael Peter Christen
  *  First released 03.08.2014 at http://yacy.net
  *
@@ -22,36 +22,31 @@ package net.yacy.cora.federate.solr.logic;
 
 import org.apache.solr.common.SolrDocument;
 
-import net.yacy.cora.federate.solr.SchemaDeclaration;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
+public class Negation extends AbstractTerm implements Term {
 
-public class Literal extends AbstractTerm implements Term {
-
-    private SchemaDeclaration key;
-    private String value;
+    private Term term;
     
-    public Literal(final SchemaDeclaration key, final String value) {
-        this.key = key;
-        this.value = value;
+    public Negation(final Term term) {
+        this.term = term;
     }
 
     @Override
     public Object clone() {
-        return new Literal(this.key, this.value);
+        return new Negation(this.term);
     }
 
     @Override
     public boolean equals(Object otherTerm) {
-        if (!(otherTerm instanceof Literal)) return false;
-        Literal o = (Literal) otherTerm;
-        return this.key.equals(o.key) && this.value.equals(o.value);
+        if (!(otherTerm instanceof Negation)) return false;
+        Negation o = (Negation) otherTerm;
+        return this.term.equals(o.term);
     }
-    
+
     @Override
     public int hashCode() {
-        return key.hashCode() + value.hashCode();
+        return -this.term.hashCode();
     }
-    
+
     /**
      * the length attribute of a term shows if rewritten terms
      * (using rules of replacement as allowed for propositional logic)
@@ -60,7 +55,7 @@ public class Literal extends AbstractTerm implements Term {
      */
     @Override
     public int weight() {
-        return 1;
+        return term.weight() + 1;
     }
     
     /**
@@ -70,8 +65,7 @@ public class Literal extends AbstractTerm implements Term {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.key.getSolrFieldName());
-        sb.append(':').append('"').append(this.value).append('"');
+        sb.append('-').append(this.term.toString());
         return sb.toString();
     }
     
@@ -83,13 +77,13 @@ public class Literal extends AbstractTerm implements Term {
      */
     @Override
     public boolean matches(SolrDocument doc) {
-        Object v = doc.getFieldValue(this.key.getSolrFieldName());
-        if (v == null) return false;
-        return this.value.equals(AbstractSolrConnector.CATCHALL_TERM) || v.toString().matches(this.value);
+        return !this.term.matches(doc);
     }
     
     @Override
     public Term lightestRewrite() {
-        return this;
+        // TODO: this can be enhanced if negations are not attached to atoms
+        Term t = this.term.lightestRewrite();
+        return new Negation(t);
     }
 }

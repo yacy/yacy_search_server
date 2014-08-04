@@ -1,5 +1,5 @@
 /**
- *  Conjunction
+ *  Disjunction
  *  Copyright 2014 by Michael Peter Christen
  *  First released 03.08.2014 at http://yacy.net
  *
@@ -23,44 +23,43 @@ package net.yacy.cora.federate.solr.logic;
 import org.apache.solr.common.SolrDocument;
 
 /**
- * A Conjunction is a conjunction of terms to Solr. The purpose of this class is,
+ * A Disjunction is a desjunction of terms to Solr. The purpose of this class is,
  * to provide a mechanism to reduce the calls to Solr when calling Solr several times with sets of
- * terms which are all conjunctive.
+ * terms which are all disjunctive.
  */
-public class Conjunction extends AbstractOperations implements Operations {
-    
-    public Conjunction() {
-        super("AND");
+public class Disjunction extends AbstractOperations implements Operations {
+
+    public Disjunction() {
+        super("OR");
     }
 
     @Override
     public Object clone() {
-        Conjunction c = new Conjunction();
+        Disjunction c = new Disjunction();
         for (Term t: this.terms) c.addOperand(t);
         return c;
     }
-    
+
     @Override
     public boolean equals(Object otherTerm) {
-        if (!(otherTerm instanceof Conjunction)) return false;
-        Conjunction o = (Conjunction) otherTerm;
+        if (!(otherTerm instanceof Disjunction)) return false;
+        Disjunction o = (Disjunction) otherTerm;
         for (Term t: this.terms) {
             if (!TermTools.isIn(t, o.getOperands())) return false;
         }
         return true;
     }
- 
+    
     /**
-     * check if this conjunction matches with a given SolrDocument
+     * check if this disjunction matches with a given SolrDocument
      * @param doc the SolrDocument to match to
-     * @return true, if all literals of this conjunction match with the terms of the document
+     * @return true, if all literals of this disjunction match with the terms of the document
      */
     @Override
     public boolean matches(SolrDocument doc) {
         for (Term term: this.terms) {
-            if (!term.matches(doc)) return false;
+            if (term.matches(doc)) return true;
         }
-        return true;
+        return false;
     }
-
 }

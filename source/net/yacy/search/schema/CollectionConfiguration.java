@@ -61,8 +61,9 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.logic.Conjunction;
-import net.yacy.cora.federate.solr.logic.DNF;
+import net.yacy.cora.federate.solr.logic.Disjunction;
 import net.yacy.cora.federate.solr.logic.Literal;
+import net.yacy.cora.federate.solr.logic.Negation;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -1374,7 +1375,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         String urlhash = ASCII.String(url.hash());
         String hostid = url.hosthash();
-        DNF dnf = new DNF();
+        Conjunction con = new Conjunction();
+        con.addOperand(new Negation(new Literal(CollectionSchema.id, urlhash)));
+        con.addOperand(new Literal(CollectionSchema.host_id_s, hostid));
+        Disjunction dnf = new Disjunction();
         uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
                 {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
                 {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
@@ -1386,25 +1390,42 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // lookup the document with the same signature
                 Long signature = (Long) sid.getField(signaturefield.getSolrFieldName()).getValue();
                 if (signature == null) continue uniquecheck;
-                Conjunction con = new Conjunction();
-                con.addLiteral(new Literal(CollectionSchema.id, urlhash, false));
-                con.addLiteral(new Literal(CollectionSchema.host_id_s, hostid, true));
-                con.addLiteral(new Literal(signaturefield, signature.toString(), true));
-                dnf.addConjunction(con);
-                String query = con.toString();
-                try {
-                    //SolrDocumentList docsOld = segment.fulltext().getDefaultConnector().getDocumentListByQuery("-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " + CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"", null, 0, 2000, CollectionSchema.id.getSolrFieldName());
-                    SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(query, null, 0, 2000, CollectionSchema.id.getSolrFieldName());
-                    if (docs.getNumFound() == 0) {
-                        sid.setField(uniquefield.getSolrFieldName(), true);
-                        sid.setField(countfield.getSolrFieldName(), 1);
-                    } else {
-                        boolean firstappearance = true;
-                        for (SolrDocument d: docs) {if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
-                        sid.setField(uniquefield.getSolrFieldName(), firstappearance);
-                        sid.setField(countfield.getSolrFieldName(), docs.getNumFound() + 1); // the current url was excluded from search but is included in count
-                    }
-                } catch (final IOException e) {}
+                //con.addOperand(new Negation(new Literal(CollectionSchema.id, urlhash)));
+                //con.addOperand(new Literal(CollectionSchema.host_id_s, hostid));
+                dnf.addOperand(new Literal(signaturefield, signature.toString()));
+            }
+        }
+        con.addOperand(dnf);
+        String query = con.toString();
+        SolrDocumentList docsAkk;
+        try {
+             docsAkk = segment.fulltext().getDefaultConnector().getDocumentListByQuery(query, null, 0, 2000,
+                     CollectionSchema.id.getSolrFieldName(), CollectionSchema.exact_signature_l.getSolrFieldName(), CollectionSchema.fuzzy_signature_l.getSolrFieldName());
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
+            docsAkk = new  SolrDocumentList(); 
+        }
+        uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+                {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
+                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
+            CollectionSchema signaturefield = checkfields[0];
+            CollectionSchema uniquefield = checkfields[1];
+            CollectionSchema countfield = checkfields[2];
+
+            if (this.contains(signaturefield) && this.contains(uniquefield) && this.contains(countfield)) {
+                // lookup the document with the same signature
+                Long signature = (Long) sid.getField(signaturefield.getSolrFieldName()).getValue();
+                if (signature == null) continue uniquecheck;
+                SolrDocumentList docs = new Literal(signaturefield, signature.toString()).apply(docsAkk);
+                if (docs.getNumFound() == 0) {
+                    sid.setField(uniquefield.getSolrFieldName(), true);
+                    sid.setField(countfield.getSolrFieldName(), 1);
+                } else {
+                    boolean firstappearance = true;
+                    for (SolrDocument d: docs) {if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
+                    sid.setField(uniquefield.getSolrFieldName(), firstappearance);
+                    sid.setField(countfield.getSolrFieldName(), docs.getNumFound() + 1); // the current url was excluded from search but is included in count
+                }
             }
         }
         
@@ -1440,7 +1461,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                 "-" + CollectionSchema.robots_i.getSolrFieldName() + ":24 AND " + // bit 3 + 4
                                 "-" + CollectionSchema.robots_i.getSolrFieldName() + ":512 AND " + // bit 9
                                 "-" + CollectionSchema.robots_i.getSolrFieldName() + ":1536 AND " + // bit 9 + 10
-                                "((-" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":[* TO *]) OR (" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":true)) AND " +
+                                "((-" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":" + AbstractSolrConnector.CATCHALL_TERM + ") OR (" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":true)) AND " +
                                 CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " +
                                 "-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " +
                                 signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"";

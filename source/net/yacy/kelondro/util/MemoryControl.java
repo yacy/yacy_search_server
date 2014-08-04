@@ -92,7 +92,8 @@ public class MemoryControl {
      * @return bytes
      */
     public static final long available() {
-        return getStrategy().available();
+        long available = getStrategy().available();
+        return available;
     }
 
     /**
