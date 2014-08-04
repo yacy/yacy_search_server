@@ -51,7 +51,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HostBalancer;
-import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.search.schema.CollectionConfiguration.Subgraph;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
@@ -271,9 +270,11 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             }
         }
         
-        if ((allAttr || contains(WebgraphSchema.process_sxt)) && processTypes.size() > 0) {
+        if ((allAttr || contains(WebgraphSchema.process_sxt)) &&
+                ((this.contains(WebgraphSchema.source_id_s) && this.contains(WebgraphSchema.source_cr_host_norm_i)) ||
+                 (this.contains(WebgraphSchema.target_id_s) && this.contains(WebgraphSchema.target_cr_host_norm_i))) && processTypes.contains(ProcessType.CITATION)) {
             List<String> pr = new ArrayList<String>();
-            for (ProcessType t: processTypes) pr.add(t.name());
+            pr.add(ProcessType.CITATION.name());
             add(edge, WebgraphSchema.process_sxt, pr);
             if (allAttr || contains(CollectionSchema.harvestkey_s)) {
                 add(edge, CollectionSchema.harvestkey_s, sourceName);
