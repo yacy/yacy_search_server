@@ -2319,7 +2319,7 @@ public final class Switchboard extends serverSwitch {
                     log.info("cleanup post-processed " + proccount + " documents");
                 } else {
                     Set<String> deletionCandidates = collection1Configuration.contains(CollectionSchema.harvestkey_s.getSolrFieldName()) ?
-                            this.crawler.getFinishesProfiles(this.crawlQueues) : new HashSet<String>();
+                            this.crawler.getFinishedProfiles(this.crawlQueues) : new HashSet<String>();
                     int cleanupByHarvestkey = deletionCandidates.size();
                     if (cleanupByHarvestkey > 0) {
                         if (postprocessing) {

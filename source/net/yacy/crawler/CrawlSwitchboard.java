@@ -599,7 +599,7 @@ public final class CrawlSwitchboard {
         return profileKeys;
     }
     
-    public Set<String> getFinishesProfiles(CrawlQueues crawlQueues) {
+    public Set<String> getFinishedProfiles(CrawlQueues crawlQueues) {
         // clear the counter cache
         this.profilesActiveCrawlsCounter.clear();        
         
