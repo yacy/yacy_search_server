@@ -982,14 +982,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
     public static final String collection1query(final Segment segment, final String harvestkey) {
         return (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ?
-                "" :
-                CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
               CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
     }
     public static final String webgraphquery(final Segment segment, final String harvestkey) {
         return (harvestkey == null || !segment.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.harvestkey_s) ?
-                "" :
-                WebgraphSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                "" : WebgraphSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
               WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
     }
     
@@ -1242,9 +1240,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
             BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(
                     collection1query,
+                    (this.contains(CollectionSchema.http_unique_b) || this.contains(CollectionSchema.www_unique_b)) ?
                     CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
-                    CollectionSchema.url_protocol_s.getSolrFieldName() + " asc," + // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
-                    CollectionSchema.url_chars_i.getSolrFieldName() + " asc",
+                    CollectionSchema.url_protocol_s.getSolrFieldName() + " asc" // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
+                    : null, // null sort is faster!
                     0, 100000000, Long.MAX_VALUE, 200, 1);
             int countcheck = 0;
             Collection<String> failids = new ArrayList<String>();
@@ -1376,12 +1375,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String urlhash = ASCII.String(url.hash());
         String hostid = url.hosthash();
         Conjunction con = new Conjunction();
-        con.addOperand(new Negation(new Literal(CollectionSchema.id, urlhash)));
-        con.addOperand(new Literal(CollectionSchema.host_id_s, hostid));
         Disjunction dnf = new Disjunction();
-        uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+        CollectionSchema[][] doccheckschema = new CollectionSchema[][]{
                 {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
-                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
+                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}};
+        uniquecheck: for (CollectionSchema[] checkfields: doccheckschema) {
             CollectionSchema signaturefield = checkfields[0];
             CollectionSchema uniquefield = checkfields[1];
             CollectionSchema countfield = checkfields[2];
@@ -1396,6 +1394,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
         }
         con.addOperand(dnf);
+        con.addOperand(new Negation(new Literal(CollectionSchema.id, urlhash)));
+        con.addOperand(new Literal(CollectionSchema.host_id_s, hostid));
         String query = con.toString();
         SolrDocumentList docsAkk;
         try {
@@ -1403,11 +1403,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                      CollectionSchema.id.getSolrFieldName(), CollectionSchema.exact_signature_l.getSolrFieldName(), CollectionSchema.fuzzy_signature_l.getSolrFieldName());
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-            docsAkk = new  SolrDocumentList(); 
+            docsAkk = new SolrDocumentList(); 
         }
-        uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
-                {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
-                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
+        if (docsAkk.getNumFound() > 0) uniquecheck: for (CollectionSchema[] checkfields: doccheckschema) {
             CollectionSchema signaturefield = checkfields[0];
             CollectionSchema uniquefield = checkfields[1];
             CollectionSchema countfield = checkfields[2];
@@ -1437,13 +1435,15 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Integer httpstatus_i = this.contains(CollectionSchema.httpstatus_i) ? (Integer) sid.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) : null;
         String canonical_s = this.contains(CollectionSchema.canonical_s) ? (String) sid.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()) : null;
         Boolean canonical_equal_sku_b = this.contains(CollectionSchema.canonical_equal_sku_b) ? (Boolean) sid.getFieldValue(CollectionSchema.canonical_equal_sku_b.getSolrFieldName()) : null;
+
+        CollectionSchema[][] metadatacheckschema = new CollectionSchema[][]{
+                {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
+                {CollectionSchema.description_txt, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}};
         if (segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.host_id_s) &&
             (robots_i == null || (robots_i.intValue() & (1 << 9)) == 0 /*noindex in http X-ROBOTS*/ && (robots_i.intValue() & (1 << 3)) == 0 /*noindex in html metas*/ ) &&
             (canonical_s == null || canonical_s.length() == 0 || (canonical_equal_sku_b != null && canonical_equal_sku_b.booleanValue()) || url.toNormalform(true).equals(canonical_s)) &&
             (httpstatus_i == null || httpstatus_i.intValue() == 200)) {
-            uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][] {
-                    {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
-                    {CollectionSchema.description_txt, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
+            uniquecheck: for (CollectionSchema[] checkfields: metadatacheckschema) {
                 CollectionSchema checkfield = checkfields[0];
                 CollectionSchema signaturefield = checkfields[1];
                 CollectionSchema uniquefield = checkfields[2];
