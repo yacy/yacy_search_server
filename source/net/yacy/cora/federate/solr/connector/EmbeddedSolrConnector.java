@@ -200,8 +200,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = req.getParams().get("q");
         String fq = req.getParams().get("fq");
+        String sort = req.getParams().get("sor");
         String threadname = Thread.currentThread().getName();
-        if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
+        if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort)); // for debugging in Threaddump
         
         SolrQueryResponse rsp = new SolrQueryResponse();
         NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
@@ -332,8 +333,14 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
         SolrQueryRequest req = this.request(params);
         SolrQueryResponse response = null;
+        String q = params.get("q");
+        String fq = params.get("fq");
+        String sort = params.get("sort");
+        String threadname = Thread.currentThread().getName();
         try {
+            if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort)); // for debugging in Threaddump
             response = this.query(req);
+            if (q != null) Thread.currentThread().setName(threadname);
             if (response == null) throw new IOException("response == null");
             return SolrQueryResponse2SolrDocumentList(req, response);
         } finally {

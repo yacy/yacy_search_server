@@ -293,26 +293,26 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = params.get("q");
         String fq = params.get("fq");
+        String sort = params.get("sort");
         String threadname = Thread.currentThread().getName();
-        if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         QueryResponse rsp;
-        int retry = 100;
+        int retry = 0;
         Throwable error = null;
-        while (retry-- > 0) {
+        while (retry++ < 60) {
             try {
+                if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort) + "; retry = " + retry); // for debugging in Threaddump
                 rsp = this.server.query(params);
                 if (q != null) Thread.currentThread().setName(threadname);
                 if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
                 return rsp.getResults();
             } catch (final SolrServerException e) {
                 error = e;
-                clearCaches(); // prevent further OOM if this was caused by OOM
             } catch (final Throwable e) {
                 error = e;
                 clearCaches(); // prevent further OOM if this was caused by OOM
             }
             ConcurrentLog.severe("SolrServerConnector", "Failed to query remote Solr: " + error.getMessage() + ", query:" + q + (fq == null ? "" : ", fq = " + fq));
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
+            try {Thread.sleep(1000);} catch (InterruptedException e) {}
         }
         throw new IOException("Error executing query", error);
     }
