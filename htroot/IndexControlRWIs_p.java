@@ -61,6 +61,7 @@ import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryModifier;
@@ -331,34 +332,38 @@ public class IndexControlRWIs_p {
                 }
             }
 
-            // generate list
-            if ( post.containsKey("keyhashsimilar") ) {
-                try {
-                    final Iterator<ReferenceContainer<WordReference>> containerIt =
-                        segment.termIndex().referenceContainer(keyhash, true, false, 256, false).iterator();
-                    ReferenceContainer<WordReference> container;
+            // generate list (if RWI connected, otherwise NPE)
+            if (sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) {
+                if ( post.containsKey("keyhashsimilar") ) {
+                    try {
+                        final Iterator<ReferenceContainer<WordReference>> containerIt =
+                                segment.termIndex().referenceContainer(keyhash, true, false, 256, false).iterator();
+                        ReferenceContainer<WordReference> container;
 
-                    int i = 0, rows = 0, cols = 0;
-                    prop.put("keyhashsimilar", "1");
-                    while ( containerIt.hasNext() && i < 256 ) {
-                        container = containerIt.next();
-                        prop.put(
-                            "keyhashsimilar_rows_" + rows + "_cols_" + cols + "_wordHash",
-                            container.getTermHash());
-                        cols++;
-                        if ( cols == 8 ) {
-                            prop.put("keyhashsimilar_rows_" + rows + "_cols", cols);
-                            cols = 0;
-                            rows++;
+                        int i = 0, rows = 0, cols = 0;
+                        prop.put("keyhashsimilar", "1");
+                        while ( containerIt.hasNext() && i < 256 ) {
+                            container = containerIt.next();
+                            prop.put(
+                                    "keyhashsimilar_rows_" + rows + "_cols_" + cols + "_wordHash",
+                                    container.getTermHash());
+                            cols++;
+                            if ( cols == 8 ) {
+                                prop.put("keyhashsimilar_rows_" + rows + "_cols", cols);
+                                cols = 0;
+                                rows++;
+                            }
+                            i++;
                         }
-                        i++;
+                        prop.put("keyhashsimilar_rows_" + rows + "_cols", cols);
+                        prop.put("keyhashsimilar_rows", rows + 1);
+                        prop.put("result", "");
+                    } catch (final IOException e ) {
+                        ConcurrentLog.logException(e);
                     }
-                    prop.put("keyhashsimilar_rows_" + rows + "_cols", cols);
-                    prop.put("keyhashsimilar_rows", rows + 1);
-                    prop.put("result", "");
-                } catch (final IOException e ) {
-                    ConcurrentLog.logException(e);
                 }
+            } else {
+                prop.put("result", "RWI index not connected (see Index Sources & Targets -> <a href='IndexFederated_p.html'>Peer-to-Peer Operation</a>)");
             }
 
             if ( post.containsKey("blacklist") ) {

@@ -985,9 +985,11 @@ dc_rights
         }
         StringBuilder sb = new StringBuilder(60);
         sb.append(d.dc_title());
-        if (!d.dc_description().equals(d.dc_title()) && sb.length() < Request.descrLength - tagname.length()) {
-            sb.append(' ');
-            sb.append(d.dc_description());
+        if (d.dc_description().length > 0) {
+            if (!d.dc_description()[0].equals(d.dc_title()) && sb.length() < Request.descrLength - tagname.length()) {
+                sb.append(' ');
+                sb.append(d.dc_description()[0]);
+            }
         }
         if (sb.length() < Request.descrLength - tagname.length()) {
             sb.append(' ');
