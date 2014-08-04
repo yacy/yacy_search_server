@@ -400,8 +400,8 @@ public final class CrawlStacker {
         final boolean recrawl = profile.recrawlIfOlder() > oldDate.longValue();
         final String urlstring = url.toNormalform(false);
         if (recrawl) {
-            if (CrawlStacker.log.isInfo())
-                CrawlStacker.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
+            if (CrawlStacker.log.isFine())
+                CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
             return "double in: LURL-DB, oldDate = " + oldDate.toString();
