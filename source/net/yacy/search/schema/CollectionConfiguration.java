@@ -1310,7 +1310,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     proccount++; allcount.incrementAndGet();
                     if (proccount % 100 == 0) {
                         postprocessingActivity = "postprocessed " + proccount + " from " + count + " collection documents; " +
-                            (proccount * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " +
+                            (proccount * 60000 / (System.currentTimeMillis() - start)) + " ppm; " +
                             ((System.currentTimeMillis() - start) * (count - proccount) / proccount / 60000) + " minutes remaining";
                         ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
                     }
