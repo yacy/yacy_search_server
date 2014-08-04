@@ -2297,11 +2297,16 @@ public final class Switchboard extends serverSwitch {
     
             if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
 
-                boolean postprocessing =
-                        collection1Configuration.contains(CollectionSchema.process_sxt) &&
-                        (index.connectedCitation() || fulltext.useWebgraph()) &&
-                        MemoryControl.available() > getConfigLong("postprocessing.minimum_ram", 0) &&
-                        Memory.load() < getConfigFloat("postprocessing.maximum_load", 0);
+                boolean process_key_exist = collection1Configuration.contains(CollectionSchema.process_sxt);
+                if (!process_key_exist) log.info("postprocessing deactivated: field process_sxt is not enabled");
+                boolean reference_index_exist = (index.connectedCitation() || fulltext.useWebgraph());
+                if (!reference_index_exist) log.info("postprocessing deactivated: no reference index avilable; activate citation index or webgraph");
+                boolean minimum_ram_fullfilled = MemoryControl.available() > getConfigLong("postprocessing.minimum_ram", 0);
+                if (!minimum_ram_fullfilled) log.info("postprocessing deactivated: no enough ram (" + MemoryControl.available() + "), needed " + getConfigLong("postprocessing.minimum_ram", 0) + ", to force change field postprocessing.minimum_ram");
+                boolean minimum_load_fullfilled = Memory.load() < getConfigFloat("postprocessing.maximum_load", 0);
+                if (!minimum_load_fullfilled) log.info("postprocessing deactivated: too high load (" + Memory.load() + ") > " + getConfigFloat("postprocessing.maximum_load", 0) + ", to force change field postprocessing.maximum_load");
+                boolean postprocessing = process_key_exist && reference_index_exist && minimum_ram_fullfilled && minimum_load_fullfilled;
+                if (!postprocessing) log.info("postprocessing deactivated: constraints violated");
                         
                 if (allCrawlsFinished) {
                     if (postprocessing) {
