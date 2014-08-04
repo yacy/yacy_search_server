@@ -296,7 +296,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         String threadname = Thread.currentThread().getName();
         if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         QueryResponse rsp;
-        int retry = 10;
+        int retry = 100;
         Throwable error = null;
         while (retry-- > 0) {
             try {
@@ -312,7 +312,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 clearCaches(); // prevent further OOM if this was caused by OOM
             }
             ConcurrentLog.severe("SolrServerConnector", "Failed to query remote Solr: " + error.getMessage() + ", query:" + q + (fq == null ? "" : ", fq = " + fq));
-            try {Thread.sleep(1000);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
         throw new IOException("Error executing query", error);
     }
