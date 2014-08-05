@@ -125,6 +125,16 @@ public class Crawler_p {
         }
 
         if (post != null && post.containsKey("queues_terminate_all")) {
+            // terminate crawls individually
+            for (final byte[] h: sb.crawler.getActive()) {
+                CrawlProfile p = sb.crawler.getActive(h);
+                if (CrawlSwitchboard.DEFAULT_PROFILES.contains(p.name())) continue;
+                if (p != null) sb.crawler.putPassive(h, p);
+                sb.crawler.removeActive(h);
+                sb.crawler.removePassive(h);
+                try {sb.crawlQueues.noticeURL.removeByProfileHandle(p.handle(), 10000);} catch (SpaceExceededException e) {}
+            }
+            
             // clear stacks
             for (StackType stackType: StackType.values()) sb.crawlQueues.noticeURL.clear(stackType);
             try { sb.cleanProfiles(); } catch (final InterruptedException e) {/* ignore this */}
