@@ -90,7 +90,7 @@ public final class UserDB {
     
     public void removeEntry(final String hostName) {
         try {
-            userTable.delete(UTF8.getBytes(hostName.toLowerCase()));
+            userTable.delete(UTF8.getBytes(hostName));
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
