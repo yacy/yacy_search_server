@@ -336,7 +336,7 @@ public class HostBalancer implements Balancer {
                         rhq = this.queues.get(rhh);
                     }
                     // to prevent that the complete roundrobinhosthashes are taken for each round, we remove the entries from the top of the fast queue
-                    List<String> lastEntries = fastTree.lastEntry().getValue();
+                    List<String> lastEntries = fastTree.size() > 0 ? fastTree.lastEntry().getValue() : null;
                     if (lastEntries != null) {
                         for (String h: lastEntries) this.roundRobinHostHashes.remove(h);
                     }
