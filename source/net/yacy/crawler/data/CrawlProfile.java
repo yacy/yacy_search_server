@@ -226,7 +226,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
     
     public AtomicInteger getCount(final String domain) {
-        return this.doms.get(domain);
+        AtomicInteger dp = this.doms.get(domain);
+        if (dp == null) {
+            // new domain
+            dp = new AtomicInteger(0);
+            this.doms.put(domain, dp);
+        }
+        return dp;
     }
 
     /**
