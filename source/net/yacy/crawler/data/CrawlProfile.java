@@ -607,9 +607,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
 
     public static String mustMatchSubpath(final MultiProtocolURL url) {
-        String u = url.toNormalform(true);
-        if (!u.endsWith("/")) {int p = u.lastIndexOf("/"); if (p > 0) u = u.substring(0, p + 1);}
-        return new StringBuilder(u.length() + 5).append(Pattern.quote(u)).append(".*").toString();
+        String host = url.getHost();
+        if (host == null) return url.getProtocol() + ".*";
+        if (host.startsWith("www.")) host = host.substring(4);
+        String protocol = url.getProtocol();
+        if ("http".equals(protocol) || "https".equals(protocol)) protocol = "https?+";
+        return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host)).append(url.getPath()).append(".*").toString();
     }
 
     public void putProfileEntry(
