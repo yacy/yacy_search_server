@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.schema.CollectionSchema;
@@ -156,13 +157,15 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final int ps = Math.min(pagesize, buffersize);
+        final int maxretries = 60;
         final Thread t = new Thread() {
             @Override
             public void run() {
                 this.setName("AbstractSolrConnector:concurrentDocumentsByQuery(" + querystring + ")");
                 int o = offset;
                 int count = 0;
-                while (System.currentTimeMillis() < endtime && count < maxcount) {
+                int retry = 0;
+                loop: while (System.currentTimeMillis() < endtime && count < maxcount) {
                     try {
                         SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, ps), fields);
                         for (SolrDocument d: sdl) {
@@ -171,12 +174,19 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         }
                         if (sdl.size() < ps) {
                             //System.out.println("sdl.size() = " + sdl.size() + ", pagesize = " + pagesize);
-                            break;
+                            break loop; // finished
                         }
                         o += sdl.size();
-                    } catch (final SolrException e) {
-                        break;
-                    } catch (final IOException e) {
+                        retry = 0;
+                    } catch (final SolrException | IOException e) {
+                        ConcurrentLog.logException(e);
+                        if (retry++ < maxretries) {
+                            // remote Solr may be temporary down, so we wait a bit
+                            try {Thread.sleep(100);} catch (InterruptedException e1) {}
+                            continue loop;
+                        }
+                        // fail
+                        ConcurrentLog.severe("AbstractSolrConnector", "aborted concurrentDocumentsByQuery after " + maxretries + " retries: " + e.getMessage());
                         break;
                     }
                 }
