@@ -136,7 +136,7 @@ public class NetworkGraph {
         // get dimensions
         final int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - 20;
         final int cx = eventPicture.getWidth() / 2;
-        final int cy = eventPicture.getHeight() / 2 + 20;
+        final int cy = eventPicture.getHeight() / 2;
 
         double angle;
 
