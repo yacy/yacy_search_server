@@ -415,7 +415,7 @@ public final class CrawlStacker {
                 if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + url.toNormalform(false) + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
                 return "crawl stack domain counter exceeded (test by profile)";
             }
-
+            
             /*
             if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= maxAllowedPagesPerDomain) {
                 if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");

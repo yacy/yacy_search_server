@@ -34,6 +34,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.kelondro.io.ByteCount;
@@ -158,10 +159,19 @@ public final class HTTPLoader {
             }
 
     	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
+    	        // we have two use cases here: loading from a crawl or just loading the url. Check this:
+    	        if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
+                    // put redirect url on the crawler queue to repeat a double-check
+                    request.redirectURL(redirectionUrl);
+    	            this.sb.crawlStacker.stackCrawl(request);
+    	            // in the end we must throw an exception (even if this is not an error, just to abort the current process
+                    throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to " + redirectionUrl.toNormalform(false) + " placed on crawler queue for double-check");
+    	        }
+    	        
                 // if we are already doing a shutdown we don't need to retry crawling
                 if (Thread.currentThread().isInterrupted()) {
                     this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
-                    throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.$");
+                    throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted because of server shutdown.$");
                 }
 
                 // retry crawling with new url
