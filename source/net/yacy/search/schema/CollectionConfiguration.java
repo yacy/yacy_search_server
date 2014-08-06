@@ -1055,7 +1055,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
                 String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
                 long patchquerycount = collectionConnector.getCountByQuery(patchquery);
-                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, 200, 1,
+                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, 20, 1,
                         CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
                 SolrDocument doc_B;
                 int patchquerycountcheck = 0;
@@ -1151,7 +1151,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     final long count = segment.fulltext().getWebgraphConnector().getCountByQuery(patchquery);
                     int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph, concurrency = " + concurrency);
-                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(patchquery, WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, 200, concurrency);
+                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(patchquery, WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency);
                     final AtomicInteger proccount = new AtomicInteger(0);
                     Thread[] t = new Thread[concurrency];
                     for (final AtomicInteger i = new AtomicInteger(0); i.get() < t.length; i.incrementAndGet()) {
@@ -1235,7 +1235,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             omitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
             final long count = collectionConnector.getCountByQuery(collection1query);
             final long start = System.currentTimeMillis();
-            final int concurrency = Runtime.getRuntime().availableProcessors();
+            final int concurrency = Math.max(1, Math.min((int) (MemoryControl.available() / (100L * 1024L * 1024L)), Runtime.getRuntime().availableProcessors()));
+            //final int concurrency = 1;
             final boolean reference_computation = this.contains(CollectionSchema.references_i) &&
                     this.contains(CollectionSchema.references_internal_i) &&
                     this.contains(CollectionSchema.references_external_i) &&
@@ -1248,7 +1249,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
                     CollectionSchema.url_protocol_s.getSolrFieldName() + " asc" // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
                     : null, // null sort is faster!
-                    0, 100000000, Long.MAX_VALUE, 100, concurrency);
+                    0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency);
             final AtomicInteger proccount = new AtomicInteger();
             final AtomicInteger proccount_referencechange = new AtomicInteger();
             final AtomicInteger proccount_citationchange = new AtomicInteger();

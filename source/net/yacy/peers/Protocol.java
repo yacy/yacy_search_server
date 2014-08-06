@@ -762,7 +762,7 @@ public final class Protocol {
 
             // the search-result-url transports all the attributes of word indexes
             if ( !Base64Order.enhancedCoder.equal(entry.urlhash(), urlEntry.hash()) ) {
-                Network.log.info("remote search: url-hash " + ASCII.String(urlEntry.hash()) + " does not belong to word-attached-hash " + ASCII.String(entry.urlhash()) + "; url = " + urlEntry.url() + " from peer " + target.getName());
+                Network.log.info("remote search: url-hash " + ASCII.String(urlEntry.hash()) + " does not belong to word-attached-hash " + ASCII.String(entry.urlhash()) + "; url = " + urlEntry.url().toNormalform(true) + " from peer " + target.getName());
                 continue; // spammed
             }
 

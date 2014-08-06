@@ -239,18 +239,24 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         DocList response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
         sdl.setNumFound(response == null ? 0 : response.matches());
         sdl.setStart(response == null ? 0 : response.offset());
+        String originalName = Thread.currentThread().getName();
         if (response != null) {
             try {
                 SolrIndexSearcher searcher = req.getSearcher();
                 final int responseCount = response.size();
                 DocIterator iterator = response.iterator();
                 for (int i = 0; i < responseCount; i++) {
-                    sdl.add(doc2SolrDoc(searcher.doc(iterator.nextDoc(), (Set<String>) null)));
+                    int docid = iterator.nextDoc();
+                    Thread.currentThread().setName("EmbeddedSolrConnector.SolrQueryResponse2SolrDocumentList: " + docid);
+                    Document responsedoc = searcher.doc(docid, (Set<String>) null);
+                    SolrDocument sordoc = doc2SolrDoc(responsedoc);
+                    sdl.add(sordoc);
                 }
             } catch (IOException e) {
                 ConcurrentLog.logException(e);
             }
         }
+        Thread.currentThread().setName(originalName);
         return sdl;
     }
     

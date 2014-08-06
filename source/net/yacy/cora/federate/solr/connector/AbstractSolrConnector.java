@@ -152,8 +152,10 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             final int buffersize,
             final int concurrency,
             final String ... fields) {
+        assert buffersize > 0;
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
+        final int ps = Math.min(pagesize, buffersize);
         final Thread t = new Thread() {
             @Override
             public void run() {
@@ -162,12 +164,12 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int count = 0;
                 while (System.currentTimeMillis() < endtime && count < maxcount) {
                     try {
-                        SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, pagesize), fields);
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, ps), fields);
                         for (SolrDocument d: sdl) {
                             try {queue.put(d);} catch (final InterruptedException e) {break;}
                             count++;
                         }
-                        if (sdl.size() < pagesize) {
+                        if (sdl.size() < ps) {
                             //System.out.println("sdl.size() = " + sdl.size() + ", pagesize = " + pagesize);
                             break;
                         }
