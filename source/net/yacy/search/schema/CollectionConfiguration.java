@@ -424,7 +424,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             add(doc, CollectionSchema.collection_sxt, cs);
         }
-        char doctype = Response.docType(responseHeader.getContentType());
+        char doctype = Response.docType(responseHeader== null ? null : responseHeader.getContentType()); // null returns DT_UNKNOWN
         List<String> titles = document.titles();
         if (allAttr || contains(CollectionSchema.title)) {
             if (doctype == Response.DT_IMAGE || doctype == Response.DT_AUDIO || doctype == Response.DT_MOVIE) {
@@ -576,7 +576,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (robots_meta.indexOf("noindex",0) >= 0) b += 8;  // set bit 3
                 if (robots_meta.indexOf("nofollow",0) >= 0) b += 16; // set bit 4
             }
-            String x_robots_tag = responseHeader.getXRobotsTag();
+            String x_robots_tag = responseHeader == null ? "" : responseHeader.getXRobotsTag();
             if (!x_robots_tag.isEmpty()) {
                 // this tag may have values: all, noindex, nofollow, noarchive, nosnippet, noodp, notranslate, noimageindex, unavailable_after, none; see https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag?hl=de
                 if (x_robots_tag.indexOf("all",0) >= 0) b += 1<<8;                // set bit 8
@@ -738,7 +738,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (allAttr || contains(CollectionSchema.canonical_s)) {
                 canonical = html.getCanonical();
                 // if there is no canonical in the html then look into the http header:
-                if (canonical == null) {
+                if (canonical == null && responseHeader != null) {
                     String link = responseHeader.get("Link", null);
                     int p;
                     if (link != null && ((p = link.indexOf("rel=\"canonical\"")) > 0)) {

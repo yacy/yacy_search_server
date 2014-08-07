@@ -170,11 +170,13 @@ public class Classification {
      * @return the content domain which classifies the content type
      */
     public static ContentDomain getContentDomainFromMime(final String mime) {
-        if (mime.startsWith("text/")) return ContentDomain.TEXT;
-        if (mime.startsWith("image/")) return ContentDomain.IMAGE;
-        if (mime.startsWith("audio/")) return ContentDomain.AUDIO;
-        if (mime.startsWith("video/")) return ContentDomain.VIDEO;
-        if (mime.startsWith("application/")) return ContentDomain.APP;
+        if (mime != null) {
+            if (mime.startsWith("text/")) return ContentDomain.TEXT;
+            if (mime.startsWith("image/")) return ContentDomain.IMAGE;
+            if (mime.startsWith("audio/")) return ContentDomain.AUDIO;
+            if (mime.startsWith("video/")) return ContentDomain.VIDEO;
+            if (mime.startsWith("application/")) return ContentDomain.APP;
+        }
         return ContentDomain.ALL;
     }
 
