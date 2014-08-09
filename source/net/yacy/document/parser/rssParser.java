@@ -63,7 +63,7 @@ public class rssParser extends AbstractParser implements Parser {
             throws Failure, InterruptedException {
         RSSReader rssReader;
         try {
-            rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source, RSSReader.Type.none);
+            rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source);
         } catch (final IOException e) {
             throw new Parser.Failure("Load error:" + e.getMessage(), url, e);
         }

@@ -37,7 +37,6 @@ public class RSSFeed implements Iterable<RSSMessage> {
 
     // class variables
     private RSSMessage channel;
-    private String imageURL;
     private final Map<String, RSSMessage> messages; // a guid:Item map
     private final int maxsize;
 
@@ -71,14 +70,6 @@ public class RSSFeed implements Iterable<RSSMessage> {
 
     public RSSMessage getChannel() {
         return this.channel;
-    }
-
-    public void setImage(final String imageURL) {
-        this.imageURL = imageURL;
-    }
-
-    public String getImage() {
-        return this.imageURL;
     }
 
     public Set<MultiProtocolURL> getLinks() {
