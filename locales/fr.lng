@@ -1,4 +1,4 @@
-#fra.lng
+﻿#fra.lng
 # English-->French
 # -----------------------
 # part of YaCy
@@ -1664,51 +1664,64 @@ Enabled==Angeschaltet
 
 #File: Status_p.inc
 #---------------------------
-Private System Properties==Propriétés privées du système
-System Resources==Ressources du système
+System Status==&Eacute;tat du syst&egrave;me
+System==Syst&egrave;me
+Unknown==Inconnu
+Uptime==En ligne depuis
 Processors:==Processeurs:
-Protection==Sécurité
-<strong>Your settings are _not_ protected!</strong> Please go to the==<strong>Vos paramètres ne sont pas protégés</strong> Allez à la 
-settings</a> page <strong>immediately</strong> and set an administration password.==page de paramètres </a> <strong>immédiatement</strong> et saisissez un mot de passe
-Your settings are protected by a password.==Vos paramètres sont protégés par un mot de passe.
-Noeud host==Noeud hôte
-Port forwarding host==Port forwarding host
-not used==non utilisé
-broken==brisé
-connected==connecté
-Remote proxy==Remote Proxy
-Used for YaCy -> YaCy communication:==Utilisé par la communication de YaCy à YaCy:
-Yes==Oui
-No==non
-Auto-popup on start-up==Auto-Popup au démarrage
-Disabled. To enable this again please use the==Désactivé. Pour réactiver cette fonction, utilisez la
-Settings</a> page.==page de paramètres</a>.
-Enabled. To disable this please use the==Activé. Pour désactiver cette fonction, utilisez la
-Memory Usage==Mémoire utilisée
-free:==libre:
-total:==totale:
-max:==maximale:
+Load:==Charge:
+Protection==S&eacute;curit&eacute;
+Password is missing==Sans mot de passe
+password-protected==prot&eacute;g&eacute; par mot de passe
+Unrestricted access from localhost==Acc&egrave;s sans restriction &agrave; partir de localhost
 Configure==Configurer
-Reset</a>==Réinitialiser</a>
-Connections Incoming==Connexions entrantes
-Active:==Actif:
-Idle:==En attente:
-#Max:Max:
-Indexing Queue==Queue d'indexation
-Loader Queue==Queue de chargement
-paused==En pause
-Crawler Queues==Queue du crawler
-Local Crawl==crawls locaux
-Remote triggered Crawl==crawls distants
-Global Crawl Trigger==crawls distants
-#Pre-Queueing==
- local== local
-Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the==Désactivé. Pour réactivere cela, il vous faut un compte FTP dous vous pourrez charger des fichiers vers un webspace. En faisant cela, vous devenez un serveur YaCy racine. Vous pouvez paramètrer votre compte à la
-Settings page</a>.==Page de paramètres</a>.
-Enabled: Updating periodically to server==Actif: Mise à jour périodique de
-Enabled: Updating periodically to file==Actif: Mise à jour périodique du fichier
-Last upload:==Dernier chargement:
-Steering==SALUT
+Address</dt>==Adresse</dt>
+Host:==H&ocirc;te:
+enabled==activ&eacute;
+disabled==d&eacute;sactiv&eacute;
+peer address not assigned==Aucune adresse assign&eacute;e &agrave; ce noeud
+Public Address:==Adresse publique:
+YaCy Address:==Adresse YaCy:
+Port Forwarding Host==H&ocirc;te effectuant le transfert de port
+broken==rompu
+connected==connect&eacute;
+on::off==activ&eacute;::d&eacute;sactiv&eacute;
+Used for YaCy -> YaCy communication:==Utilis&eacute; pour la communication YaCy -> YaCy:
+not used==pas utilis&eacute;
+Remote:==&Agrave; distance:
+Auto-popup on start-up==Afficher au d&eacute;marrage
+Tray-Icon==Ic&ocirc;ne dans la barre des t&acirc;ches
+Enable\]==Activer]
+Disable\]==D&eacute;sactiver]
+WARNING:==ATTENTION:
+You do this on your own risk.==Vous effectuez cette modification &agrave; vos propres risques.
+If you do this without YaCy running on a desktop-pc, this will possibly break startup.==Si vous changez cette option et que YaCy ne tourne pas sur un ordinateur de bureau, il est possible que YaCy ne d&eacute;marre plus.
+In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==Dans ce cas, vous devrez &eacute;diter manuellement la configuration dans le fichier DATA/SETTINGS/yacy.conf
+>Experimental<==>Exp&eacute;rimental<
+Disabled==D&eacute;sactiv&eacute;
+Enabled <a==Activ&eacute; <a
+Memory Usage==Utilisation de la m&eacute;moire
+RAM used:==RAM utilis&eacute;e:
+RAM max:==RAM max:
+DISK used:==DISK utilis&eacute;:
+\(approx.\)==(environ)
+DISK free:==DISK libre:
+Traffic==Trafic
+Reset</a>==R&eacute;initialiser</a>
+Incoming Connections==Connections entrantes
+Active:==Actives:
+>Queues<==>Files d'attente<
+Loader Queue==File de chargement
+Local Crawl==Balayage local
+pause local crawl==mettre le balayage local en pause
+continue local crawl==reprendre le balayage local
+(paused)==(en pause)
+Remote triggered Crawl==Balayages distants en cours
+Pre-Queueing==Pr&eacute;-file
+Seed server==Serveur d'amor&ccedil;age
+Enabled: Updating to server==Activ&eacute;: mise &agrave; jour du serveur
+Last upload: #\[lastUpload\]# ago.==Dernier chargement il y a #\[lastUpload\]#
+Enabled: Updating to file==Activ&eacute;: mise &agrave; jour du fichier
 #-----------------------------
 
 #File: Steering.html

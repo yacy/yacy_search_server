@@ -1,91 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="source"/>
-	<classpathentry excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/ymarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/|solr/|gsa/|solr/collection1/" kind="src" path="htroot"/>
-	<classpathentry excluding="bookmarks/|ymarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/" kind="src" path="htroot/api"/>
-	<classpathentry kind="src" path="htroot/env"/>
-	<classpathentry kind="src" path="htroot/yacy"/>
-	<classpathentry excluding="posts/|tags/|xbel/" kind="src" path="htroot/api/bookmarks"/>
-	<classpathentry kind="src" path="htroot/api/ymarks"/>
-	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
-	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
-	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.1.3.jar"/>
-	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
-	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
-	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/jsch-0.1.50.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
-	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
-	<classpathentry kind="lib" path="lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-compress-1.8.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
-	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/wstx-asl-3.2.9.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.3.4.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.3.2.jar"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.3.4.jar"/>
-	<classpathentry kind="lib" path="lib/noggit-0.5.jar"/>
-	<classpathentry kind="lib" path="lib/metadata-extractor-2.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar"/>
-	<classpathentry kind="lib" path="lib/guava-16.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/spatial4j-0.4.1.jar"/>
-	<classpathentry kind="lib" path="lib/zookeeper-3.4.6.jar"/>
-	<classpathentry kind="lib" path="lib/org.restlet.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-1.8.6.jar"/>
-	<classpathentry kind="lib" path="lib/jempbox-1.8.6.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.8.6.jar"/>
-	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar"/>
-	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
-	<classpathentry kind="lib" path="lib/poi-3.10-FINAL-20140208.jar"/>
-	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10-FINAL-20140208.jar"/>
-	<classpathentry kind="lib" path="lib/commons-io-2.3.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-classification-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-codecs-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-core-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-facet-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-grouping-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-highlighter-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-join-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-memory-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-misc-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queries-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queryparser-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-spatial-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-suggest-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/solr-core-4.9.0.jar"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-4.9.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
-	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
-	<classpathentry kind="lib" path="lib/jsoup-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-client-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-continuation-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-deploy-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-http-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-io-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-jmx-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-proxy-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-security-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-server-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlet-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlets-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-util-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-webapp-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-xml-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/weupnp-0.1.2.jar"/>
-	<classpathentry kind="output" path="gen"/>
+	<classpathentry kind="src" path="source" />
+	<classpathentry
+		excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/ymarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/|solr/|gsa/|solr/collection1/"
+		kind="src" path="htroot" />
+	<classpathentry
+		excluding="bookmarks/|ymarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/"
+		kind="src" path="htroot/api" />
+	<classpathentry kind="src" path="htroot/env" />
+	<classpathentry kind="src" path="htroot/yacy" />
+	<classpathentry excluding="posts/|tags/|xbel/" kind="src"
+		path="htroot/api/bookmarks" />
+	<classpathentry kind="src" path="htroot/api/ymarks" />
+	<classpathentry kind="src" path="htroot/api/bookmarks/posts" />
+	<classpathentry kind="src" path="htroot/api/bookmarks/tags" />
+	<classpathentry kind="src" path="htroot/api/bookmarks/xbel" />
+	<classpathentry kind="con"
+		path="org.eclipse.jdt.launching.JRE_CONTAINER" />
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3.jar" />
+	<classpathentry kind="lib" path="lib/J7Zip-modified.jar" />
+	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar" />
+	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar" />
+	<classpathentry kind="lib" path="lib/jsch-0.1.50.jar" />
+	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar" />
+	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar" />
+	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar" />
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar" />
+	<classpathentry kind="lib" path="lib/xercesImpl.jar" />
+	<classpathentry kind="lib" path="lib/xml-apis.jar" />
+	<classpathentry kind="lib"
+		path="lib/geronimo-stax-api_1.0_spec-1.0.1.jar" />
+	<classpathentry kind="lib" path="lib/commons-compress-1.8.jar" />
+	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar" />
+	<classpathentry kind="lib"
+		path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar" />
+	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar" />
+	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.2.jar" />
+	<classpathentry kind="lib" path="lib/wstx-asl-3.2.9.jar" />
+	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.2.jar" />
+	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.2.jar" />
+	<classpathentry kind="lib" path="lib/httpclient-4.3.4.jar" />
+	<classpathentry kind="lib" path="lib/httpcore-4.3.2.jar" />
+	<classpathentry kind="lib" path="lib/httpmime-4.3.4.jar" />
+	<classpathentry kind="lib" path="lib/noggit-0.5.jar" />
+	<classpathentry kind="lib" path="lib/metadata-extractor-2.6.2.jar" />
+	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar" />
+	<classpathentry kind="lib" path="lib/guava-16.0.1.jar" />
+	<classpathentry kind="lib" path="lib/spatial4j-0.4.1.jar" />
+	<classpathentry kind="lib" path="lib/zookeeper-3.4.6.jar" />
+	<classpathentry kind="lib" path="lib/org.restlet.jar" />
+	<classpathentry kind="lib" path="lib/fontbox-1.8.6.jar" />
+	<classpathentry kind="lib" path="lib/jempbox-1.8.6.jar" />
+	<classpathentry kind="lib" path="lib/pdfbox-1.8.6.jar" />
+	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar" />
+	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar" />
+	<classpathentry kind="lib" path="lib/poi-3.10-FINAL-20140208.jar" />
+	<classpathentry kind="lib"
+		path="lib/poi-scratchpad-3.10-FINAL-20140208.jar" />
+	<classpathentry kind="lib" path="lib/commons-io-2.3.jar" />
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.6.jar" />
+	<classpathentry kind="lib"
+		path="lib/lucene-analyzers-common-4.9.0.jar" />
+	<classpathentry kind="lib"
+		path="lib/lucene-analyzers-phonetic-4.9.0.jar" />
+	<classpathentry kind="lib"
+		path="lib/lucene-classification-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-codecs-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-core-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-facet-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-grouping-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-highlighter-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-join-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-memory-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-misc-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-queries-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-queryparser-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-spatial-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/lucene-suggest-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/solr-core-4.9.0.jar" />
+	<classpathentry kind="lib" path="lib/solr-solrj-4.9.0.jar" />
+	<classpathentry kind="con"
+		path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4" />
+	<classpathentry kind="lib" path="lib/icu4j-core.jar" />
+	<classpathentry kind="lib" path="lib/htmllexer.jar" />
+	<classpathentry kind="lib" path="lib/jsoup-1.6.3.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-client-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-continuation-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-deploy-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-http-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib" path="lib/jetty-io-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib" path="lib/jetty-jmx-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-proxy-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-security-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-server-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-servlet-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-servlets-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-util-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib"
+		path="lib/jetty-webapp-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib" path="lib/jetty-xml-9.2.1.v20140609.jar" />
+	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar" />
+	<classpathentry kind="lib" path="lib/weupnp-0.1.2.jar" />
+	<classpathentry kind="output" path="gen" />
 </classpath>
