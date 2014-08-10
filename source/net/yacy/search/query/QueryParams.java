@@ -65,6 +65,7 @@ import net.yacy.search.schema.CollectionSchema;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.FacetParams;
 
 public final class QueryParams {
@@ -363,7 +364,7 @@ public final class QueryParams {
             String oldfq = params.get(CommonParams.FQ);
             params.setParam(CommonParams.FQ, oldfq == null || oldfq.length() == 0 ? fq : "(" + oldfq + ") AND (" + fq + ")");
         }
-        if (bq.length() > 0) params.setParam("bq", bq);
+        if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq);
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         
         // prepare result
@@ -389,7 +390,7 @@ public final class QueryParams {
         bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
         bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
         bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\"");
-        params.setParam("bq", bq.toString());
+        params.setParam(DisMaxParams.BQ, bq.toString());
         
         // prepare result
         ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());
@@ -400,7 +401,7 @@ public final class QueryParams {
     private SolrQuery getBasicParams(boolean getFacets) {
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
-        params.setParam("qf", CollectionSchema.text_t.getSolrFieldName() + "^1.0");
+        params.setParam(DisMaxParams.QF, CollectionSchema.text_t.getSolrFieldName() + "^1.0");
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);

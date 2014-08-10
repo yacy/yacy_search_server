@@ -46,6 +46,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -198,9 +199,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         final long startTime = System.currentTimeMillis();
 
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-        String q = req.getParams().get("q");
-        String fq = req.getParams().get("fq");
-        String sort = req.getParams().get("sor");
+        String q = req.getParams().get(CommonParams.Q);
+        String fq = req.getParams().get(CommonParams.FQ);
+        String sort = req.getParams().get(CommonParams.SORT);
         String threadname = Thread.currentThread().getName();
         if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort)); // for debugging in Threaddump
         
@@ -309,8 +310,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-        String q = params.get("q");
-        String fq = params.get("fq");
+        String q = params.get(CommonParams.Q);
+        String fq = params.get(CommonParams.FQ);
         String threadname = Thread.currentThread().getName();
         if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         QueryResponse rsp;
@@ -339,9 +340,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException, SolrException {
         SolrQueryRequest req = this.request(params);
         SolrQueryResponse response = null;
-        String q = params.get("q");
-        String fq = params.get("fq");
-        String sort = params.get("sort");
+        String q = params.get(CommonParams.Q);
+        String fq = params.get(CommonParams.FQ);
+        String sort = params.get(CommonParams.SORT);
         String threadname = Thread.currentThread().getName();
         try {
             if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort)); // for debugging in Threaddump
@@ -355,21 +356,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         }
     }
 
-    @Override
-    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
-        SolrQueryRequest req = this.request(params);
-        SolrQueryResponse response = null;
-        try {
-            response = this.query(req);
-            if (response == null) throw new IOException("response == null");
-            NamedList<?> nl = response.getValues();
-            ResultContext resultContext = (ResultContext) nl.get("response");
-            return resultContext == null ? 0 : resultContext.docs.matches();
-        } finally {
-            req.close();
-            SolrRequestInfo.clearRequestInfo();
-        }
-    }
     
     private class DocListSearcher {
         private SolrQueryRequest request;

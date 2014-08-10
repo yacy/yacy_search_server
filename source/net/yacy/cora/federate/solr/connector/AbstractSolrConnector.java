@@ -49,6 +49,8 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
@@ -293,7 +295,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         //}
         params.clearSorts();
         if (sort != null) {
-            params.set("sort", sort);
+            params.set(CommonParams.SORT, sort);
         }
         params.setRows(count);
         params.setStart(offset);
@@ -301,15 +303,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         if (fields.length > 0) params.setFields(fields);
         params.setIncludeScore(false);
         params.setParam("defType", "edismax");
-        params.setParam("qf", CollectionSchema.text_t.getSolrFieldName() + "^1.0");
+        params.setParam(DisMaxParams.QF, CollectionSchema.text_t.getSolrFieldName() + "^1.0");
         return params;
-    }
-    
-    
-    @Override
-    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
-        final SolrDocumentList sdl = getDocumentListByParams(params);
-        return sdl == null ? 0 : sdl.getNumFound();
     }
     
     /**
@@ -351,7 +346,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(querystring);
-        params.setRows(0);
+        params.setRows(0); // essential to just get count
         params.setStart(0);
         params.setFacet(false);
         params.clearSorts();
@@ -359,7 +354,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setIncludeScore(false);
 
         // query the server
-        return getDocumentCountByParams(params);
+        final SolrDocumentList sdl = getDocumentListByParams(params);
+        return sdl == null ? 0 : sdl.getNumFound();
     }
 
     /**

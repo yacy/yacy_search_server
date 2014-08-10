@@ -166,16 +166,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws SolrException
      */
     public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException;
-
-    /**
-     * get the number of results for a query response
-     * @param params
-     * @return
-     * @throws IOException
-     * @throws SolrException
-     */
-    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException;
-    
+   
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"

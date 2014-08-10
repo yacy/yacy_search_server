@@ -32,6 +32,7 @@ import net.yacy.document.SentenceReader;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.XML;
@@ -87,7 +88,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         SolrParams params = request.getOriginalParams();
         String grep = params.get("grep");
         String query = "";
-        String q = params.get("q"); if (q == null) q = "";
+        String q = params.get(CommonParams.Q); if (q == null) q = "";
         int p = q.indexOf(':');
         if (p >= 0) {
             int r = q.charAt(p + 1) == '"' ? q.indexOf(p + 2, '"') : q.indexOf(' ');

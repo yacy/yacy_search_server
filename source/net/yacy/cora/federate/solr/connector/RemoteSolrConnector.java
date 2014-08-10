@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.impl.BinaryResponseParser;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 
@@ -98,8 +99,8 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     @Override
     public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-        String q = params.get("q");
-        String fq = params.get("fq");
+        String q = params.get(CommonParams.Q);
+        String fq = params.get(CommonParams.FQ);
         String threadname = Thread.currentThread().getName();
         if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         

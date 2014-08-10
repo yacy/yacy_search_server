@@ -46,6 +46,7 @@ import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 import org.apache.solr.client.solrj.response.LukeResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.params.CommonParams;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -291,9 +292,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-        String q = params.get("q");
-        String fq = params.get("fq");
-        String sort = params.get("sort");
+        String q = params.get(CommonParams.Q);
+        String fq = params.get(CommonParams.FQ);
+        String sort = params.get(CommonParams.SORT);
         String threadname = Thread.currentThread().getName();
         QueryResponse rsp;
         int retry = 0;

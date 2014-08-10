@@ -333,12 +333,6 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         }
         return sdl;
     }
-
-    @Override
-    public long getDocumentCountByParams(ModifiableSolrParams params) throws IOException, SolrException {
-        final SolrDocumentList sdl = getDocumentListByParams(params);
-        return sdl == null ? 0 : sdl.getNumFound();
-    }
     
     @Override
     public SolrDocumentList getDocumentListByQuery(String querystring, String sort, int offset, int count, String... fields) throws IOException, SolrException {
