@@ -227,6 +227,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
+            prop.put("content_mimetype",result.getNode().mime()); // for atom <link> type attribute
             final HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
             if (heuristic == null) {
                 prop.put("content_heuristic", 0);

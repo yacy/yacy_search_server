@@ -1,6 +1,6 @@
 #(content)#::<entry>
 <title type="html">#[title-xml]#</title>
-<link href="#[link]#" />
+<link href="#[link]#" type="#[mimetype]#" />
 <summary type="html">#[description-xml]#</summary>
 <updated>#[date822]#</updated>
 <dc:publisher><![CDATA[#[publisher]#]]></dc:publisher>
