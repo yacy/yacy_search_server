@@ -55,7 +55,7 @@ public class MultiProtocolURLTest {
             // conversion result
             String resolvedURL = "";
             try {
-                resolvedURL = (new MultiProtocolURL(testhost + testStrings[i][0])).toString();
+                resolvedURL = (new MultiProtocolURL(testhost + testStrings[i][0])).toNormalform(false);
             } catch (final MalformedURLException ex) {
                 fail("malformed URL");
             }

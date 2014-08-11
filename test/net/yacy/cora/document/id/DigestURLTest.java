@@ -21,7 +21,7 @@ public class DigestURLTest extends TestCase {
             String shouldBe = testStrings[i][1];
 
             // conversion result
-            String resolvedURL = (new DigestURL(testStrings[i][0])).toString();
+            String resolvedURL = (new DigestURL(testStrings[i][0])).toNormalform(false);
 
             // test if equal
             assertEquals(shouldBe, resolvedURL);
