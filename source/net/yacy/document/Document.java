@@ -641,7 +641,6 @@ dc_rights
                     assert false;
                     continue loop;
                 }
-                if (url == null) continue loop;
                 u = url.toNormalform(true);
                 if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
                     i.remove();

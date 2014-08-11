@@ -52,7 +52,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.FacetParams;
-import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class AbstractSolrConnector implements SolrConnector {
 
