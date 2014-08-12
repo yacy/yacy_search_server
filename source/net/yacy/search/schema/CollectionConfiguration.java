@@ -96,6 +96,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 
 
 public class CollectionConfiguration extends SchemaConfiguration implements Serializable {
@@ -1228,7 +1229,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         
         // process all documents in collection
         final Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
-        final Set<String> uniqueURLs = new HashSet<String>();
+        final Set<String> uniqueURLs = new ConcurrentHashSet<String>(); // will be used in a concurrent environment
         try {
             final Set<String> omitFields = new HashSet<String>();
             omitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
