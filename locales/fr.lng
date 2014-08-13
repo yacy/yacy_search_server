@@ -7,7 +7,7 @@
 # Frankfurt, Germany, 2005
 #
 # This file is maintained by gDupont
-# This file is written by gDupont, Marsupoil, Mikay&eacute;, Moubai
+# This file is written by gDupont, Marsupoil, Mikayé, Moubai
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
@@ -187,7 +187,7 @@ Your YaCy installation behaves independently from other peers and you define you
 Files may also be shared with the YaCy server, assign a path here:==Le serveur YaCy peut aussi &ecirc;tre utilis&eacute; pour le partage de fichiers. D&eacute;finissez un chemin ici:
 This path can be accessed at ==Ce chemin est accessible sous 
 Use that path as crawl start point.== Utilisez ce chemin comme point de d&eacute;marrage du balayage.
-Intranet Indexing==Indexation d'intranet
+Intranet Indexing==Indexage d'intranet
 Create a search portal for your intranet or web pages or your \(shared\) file system.==Cr&eacute;er un portail de recherche pour votre intranet, vos pages web ou votre syst&egrave;me de fichiers (partag&eacute;s).
 URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==Les URL peuvent &ecirc;tre utilis&eacute;es avec les protocoles http/https/ftp et un nom de domaine local, ou avec une URL de la forme
 or smb:==ou smb:
@@ -202,11 +202,11 @@ Peer Name:==Nom du noeud:
 #Peer User:==Utilisateur du noeud:
 #Peer Password:==Mot de passe du noeud :
 #repeat same password==R&eacute;p&eacute;ter le m&ecirc;me mot de passe
-Your peer cannot be reached from outside==Votre noeud est inaccessible de l'ext&eacute;rieur
-which is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais qu'il soit accessible serait mieux pour le r&eacute;seau YaCy
+Your peer cannot be reached from outside ==Votre noeud est inaccessible de l'ext&eacute;rieur  
+which is not fatal, but would be good for the YaCy network\); ==ce qui n'est pas trop grave, mais qu'il soit accessible serait mieux pour le r&eacute;seau YaCy).  
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurer votre pare-feu pour ouvrir ce port et/ou mettre en place un serveur virtuel sur votre routeur pour autoriser les connexions &agrave; ce port
-Opening a router port is <i>not</i> a YaCy-specific task;==Ouvrir un port sur un routeur n'est <i>pas</i> une op&eacute;ration sp&eacute;cifique &agrave; YaCy;
-you can see instruction videos everywhere in the internet, just search for ==des vid&eacute;os montrant la marche &agrave; suivre sont disponibles partout sur le web, cherchez par exemple 
+Opening a router port is <i>not</i> a YaCy-specific task;==Ouvrir un port sur un routeur n'est <i>pas</i> une op&eacute;ration sp&eacute;cifique &agrave; YaCy.
+you can see instruction videos everywhere in the internet, just search for ==Des vid&eacute;os montrant la marche &agrave; suivre sont disponibles partout sur le web, cherchez par exemple 
 Open\+Ports\+on\+a\+Router==Ouvrir+ports+routeur
 Open Ports on a &lt;our-router-type&gt; Router==Ouvrir des ports sur un  routeur &lt;mod&egrave;le-de-votre-routeur&gt; 
 and add your router type as search term. == et ajoutez le mod&egrave;le de votre routeur dans les termes de la recherche. 
@@ -224,7 +224,7 @@ What you should do next:==Ce que vous devriez faire ensuite:
 Your basic configuration is complete! You can now \(for example\)==Votre configuration de base est compl&egrave;te! Vous pouvez maintenant \(par exemple\)
 >just <==>simplement <
 start an uncensored search==commencer une recherche non censur&eacute;e
-start your own crawl</a> and contribute to the global index, or create your own private web index==d&eacute;marrer votre propre balayge</a> et contribuer &agrave; l'index global, ou construire votre propre index du web
+start your own crawl</a> and contribute to the global index, or create your own private web index==d&eacute;marrer votre propre balayage</a> et contribuer &agrave; l'index global, ou construire votre propre index du web
 set a personal peer profile</a> \(optional settings\)==remplir un profil de noeud personnel</a> (optionnel)
 monitor at the network page</a> what the other peers are doing==consulter la page r&eacute;seau</a> et ce que font les autres pairs
 
@@ -614,6 +614,38 @@ Busy Noeuds==Noeuds occup&eacute;s
 \#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)   \#\{/available\}\#==\#\{available\}\#\#\[name\]\# \(\#\[due\]\# secondes \)   \#\{/available\}\#
 \#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)  \#\{/busy\}\#==\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# secondes due\)  \#\{/busy\}\#
 #-----------------------------
+
+#File: CrawlStartSite.html
+#---------------------------
+>Crawl Start<==>D&eacute;marrer un balayage<
+>Site Crawling<==>Balayage de site<
+Site Crawler:==Balayeur de sites:
+Download all web pages from a given domain or base URL.==T&eacute;l&eacute;charger toutes les pages web d'un domaine donn&eacute; ou d'une URL de base.
+Site Crawl Start==D&eacute;marrer un balayage de site
+Start URL&nbsp;\(must start with==URL de d&eacute;part&nbsp;\(doit commencer par
+Link-List of URL==Lien vers une liste d'URLs
+Sitemap URL==URL d'un plan de site
+>Path<==>Chemin<
+load all files in domain==charger tous les fichiers du domaine
+load only files in a sub-path of given url==charger uniquement les fichiers contenu dans un sous-chemin de l'URL donn&eacute;e
+>Limitation<==>Limite<
+not more than==pas plus de
+>Start<==>D&eacute;marrer<
+Start New Crawl==D&eacute;marrer un nouveau balayage
+>Hints<==>Indications<
+>Crawl Speed Limitation<==>Limite de vitesse du balayage<
+No more that two pages are loaded from the same host in one second \(not more that 120 document per minute\) to limit the load on the target server.==Afin de limiter la charge sur le serveur cibl&eacute;, pas plus de 2 pages ne sont charg&eacute;es par seconde depuis le m&ecirc;me h&ocirc;te (pas plus de 120 documents par minute).
+>Target Balancer<==>R&eacute;partisseur de charge<
+A second crawl for a different host increases the throughput to a maximum of 240 documents per minute ==Un second balayage sur un h&ocirc;te diff&eacute;rent augmente le d&eacute;bit jusqu'&agrave; un maximum de 240 documents par minute, 
+since the crawler balances the load over all hosts.==puisque le balayeur &eacute;quilibre la charge entre tous les h&ocirc;tes.
+>High Speed Crawling<==>Balayage &agrave; haute vitesse<
+A \'shallow crawl\' which is not limited to a single host \(or site\)==Un "balayage superficiel" non limité &agrave; un seul h&ocirc;te (ou site) 
+can extend the pages per minute \(ppm\) rate to unlimited documents per minute ==peut augmenter le nombre de pages par minutes (ppm) jusqu'&agrave; r&eacute;colter un nombre illimit&eacute; de documents par minute 
+when the number of target hosts is high.==lorsque le nombre d'h&ocirc;tes cibl&eacute;s est &eacute;lev&eacute;.
+This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==Cela peut &ecirc;tre effectu&eacute; au moyen de cette servlet: <a href="CrawlStartExpert.html">d&eacute;marrer un balayage expert</a>.
+>Scheduler Steering<==>Commande du planificateur<
+The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering==Le planificateur de balayage peut &ecirc;tre modifi&eacute; ou supprim&eacute; au moyen de la <a href="Table_API_p.html">commande de l'API
+#---------------------------
 
 #File: IndexCreateIndexingQueue_p.html
 #---------------------------
@@ -2127,6 +2159,7 @@ Filter &amp; Blacklists==Filtres et listes noires
 Content Semantic==S&eacute;mantique du contenu
 ### SEARCH PORTAL INTEGRATION ###
 Search Portal Integration==Int&eacute;gration du portail de recherche
+Design==Apparence
 Ranking and Heuristics==Classement et heuristique
 
 #Portal Configuration==Rercherche int&eacute;gr&eacute;e &agrave; un site externe
@@ -2142,6 +2175,27 @@ Help / Wiki==Aide / Wiki
 Surftips</a>==Surftips</a>
 Project Home==Accueil projet
 #-----------------------------
+
+#File: env/templates/submenuComputation.template
+#---------------------------
+Application Status==&Eacute;tat de l'application
+>System<==>Syst&egrave;me<
+>Status<==>&Eacute;tat<
+>Processes<==>Processus<
+Thread Dump==Afficher les t&acirc;ches en cours
+Server Log==Journal du serveur
+Concurrent Indexing==Indexages concurrents
+Memory Usage==Utilisation de la m&eacute;moire
+Search Sequence==S&eacute;quence de recherche
+>Overview<==>Vue d'ensemble<
+Incoming&nbsp;News==Nouvelles&nbsp;sortantes
+Processed&nbsp;News==Nouvelles&nbsp;trait&eacute;es
+Outgoing&nbsp;News==Nouvelles&nbsp;sortantes
+Published&nbsp;News==Nouvelles&nbsp;publi&eacute;es
+Community Data==Donn&eacute;es communes
+Surftips==Astuces de navigation
+Local Peer Wiki==Wiki du noeud local
+#---------------------------
 
 #File: env/templates/submenuConfig.template
 #---------------------------
@@ -2162,6 +2216,13 @@ Advanced Properties==Configuration avanc&eacute;e
 Cookie Menu==Menu Cookie
 Incoming Cookies==Cookies entrants
 Outgoing Cookies==Cookies sortants
+#-----------------------------
+
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Load Web Pages, Crawler==Charger des pages web, balayeur
+Site Crawling==Balayage de sites
+Parser Configuration==Configuration de l'analyseur syntaxique
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
@@ -2195,6 +2256,13 @@ Performance Menu==Menu Performance
 Queues Performance Settings==Param&egrave;tres de performance des files d'attente
 Memory Settings for Database Caches==Param&egrave;tres de la m&eacute;moire cache de la base de donn&eacute;es
 Timing Settings for Search Sequence==Param&egrave;tres temporels la recherche
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+Use Case &amp; Accounts==Mode d'utilisation et comptes
+Basic Configuration==Configuration de base
+>Accounts<==>Comptes<
 #-----------------------------
 
 #File: htdocsdefault/dir.html
