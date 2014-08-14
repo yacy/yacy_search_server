@@ -248,8 +248,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 removeSubsumedTitle(snippet, title);
                 solitaireTag(writer, tagname, getLargestSnippet(snippet)); // snippet may be size=0
             }
-            // open: where do we get the subject?
-            //solitaireTag(writer, DublinCore.Subject.getURIref(), ""); // TODO: fill with actual data
+
+            solitaireTag(writer, DublinCore.Subject.getURIref(), doc.get(CollectionSchema.keywords.getSolrFieldName()));
             
             closeTag(writer, "item");
         }
