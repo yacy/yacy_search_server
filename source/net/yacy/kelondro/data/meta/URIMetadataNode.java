@@ -45,6 +45,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
+import net.yacy.document.SentenceReader;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.Bitfield;
@@ -209,6 +210,42 @@ public class URIMetadataNode extends SolrDocument {
         ArrayList<String> a = getStringList(CollectionSchema.title);
         if (a == null || a.size() == 0) return "";
         return a.get(0);
+    }
+
+    public List<String> h1() {
+        ArrayList<String> a = getStringList(CollectionSchema.h1_txt);
+        if (a == null || a.size() == 0) return new ArrayList<String>(0);
+        return a;
+    }
+
+    public List<String> h2() {
+        ArrayList<String> a = getStringList(CollectionSchema.h2_txt);
+        if (a == null || a.size() == 0) return new ArrayList<String>(0);
+        return a;
+    }
+
+    public List<String> h3() {
+        ArrayList<String> a = getStringList(CollectionSchema.h3_txt);
+        if (a == null || a.size() == 0) return new ArrayList<String>(0);
+        return a;
+    }
+
+    public List<String> h4() {
+        ArrayList<String> a = getStringList(CollectionSchema.h4_txt);
+        if (a == null || a.size() == 0) return new ArrayList<String>(0);
+        return a;
+    }
+
+    public List<String> h5() {
+        ArrayList<String> a = getStringList(CollectionSchema.h5_txt);
+        if (a == null || a.size() == 0) return new ArrayList<String>(0);
+        return a;
+    }
+
+    public List<String> h6() {
+        ArrayList<String> a = getStringList(CollectionSchema.h6_txt);
+        if (a == null || a.size() == 0) return new ArrayList<String>(0);
+        return a;
     }
 
     public String dc_creator() {
@@ -418,6 +455,18 @@ public class URIMetadataNode extends SolrDocument {
         return getString(CollectionSchema.text_t);
     }
 
+    public List<StringBuilder> getSentences(final boolean pre) {
+        List<StringBuilder> sentences = new ArrayList<>();
+        String text = this.getText();
+        if (text == null || text.length() == 0) return sentences;
+        SentenceReader sr = new SentenceReader(text, pre);
+        while (sr.hasNext()) sentences.add(sr.next());
+        sr.close();
+        sr = null;
+        text = null;
+        return sentences;
+    }
+    
     public ArrayList<String> getDescription() {
         return getStringList(CollectionSchema.description_txt);
     }    

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -178,75 +179,88 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // this requires that the document is parsed after loading
         String textline = null;
         HandleSet remainingHashes = queryhashes.clone();
-        { //encapsulate potential expensive sentences
-            Collection<StringBuilder> sentences = null;
-
-            // try to get the snippet from metadata
-            removeMatchingHashes(row.url().toTokens(), remainingHashes);
-            removeMatchingHashes(row.dc_title(), remainingHashes);
-            removeMatchingHashes(row.dc_creator(), remainingHashes);
-            removeMatchingHashes(row.dc_subject(), remainingHashes);
+        List<StringBuilder> sentences = null;
+        
+        // try to get the snippet from metadata
+        removeMatchingHashes(row.url().toTokens(), remainingHashes);
+        removeMatchingHashes(row.dc_title(), remainingHashes);
+        removeMatchingHashes(row.dc_creator(), remainingHashes);
+        removeMatchingHashes(row.dc_subject(), remainingHashes);
+        
+        if (!remainingHashes.isEmpty()) {
+            // we did not find everything in the metadata, look further into the document itself.
             
-            if (!remainingHashes.isEmpty()) {
-                // we did not find everything in the metadata, look further into the document itself.
-
-                // first acquire the sentences:
-                String solrText = row.getText();
-                if (solrText != null) {
-                    // compute sentences from solr query
-                    SentenceReader sr = new SentenceReader(solrText, pre);
-                    sentences = new ArrayList<StringBuilder>();
-                    while (sr.hasNext()) {
-                        sentences.add(sr.next());
-                    }
-                    sr.close();
-                    sr = null;
-                    solrText = null;
-                } else if (net.yacy.crawler.data.Cache.has(url.hash())) {
-                    // get the sentences from the cache
-                    final Request request = loader == null ? null : loader.request(url, true, reindexing);
-                    Response response;
+            // first acquire the sentences:
+            String solrText = row.getText();
+            if (solrText != null && solrText.length() > 0) {
+                // compute sentences from solr query
+                sentences = row.getSentences(pre);
+            } else if (net.yacy.crawler.data.Cache.has(url.hash())) {
+                // get the sentences from the cache
+                final Request request = loader == null ? null : loader.request(url, true, reindexing);
+                Response response;
+                try {
+                    response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
+                } catch (final IOException e1) {
+                    response = null;
+                }
+                Document document = null;
+                if (response != null) {
                     try {
-                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
-                    } catch (final IOException e1) {
+                        document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+                        sentences = document.getSentences(pre);
                         response = null;
-                    }
-                    Document document = null;
-                    if (response != null) {
-                        try {
-                            document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-                            sentences = document.getSentences(pre);
-                            response = null;
-                            document = null;
-                        } catch (final Parser.Failure e) {
-                        }
+                        document = null;
+                    } catch (final Parser.Failure e) {
                     }
                 }
-                if (sentences == null) {
-                    // not found the snippet
-                    init(url.hash(), null, false, ResultClass.SOURCE_METADATA, null);
+            }
+            if (sentences == null) {
+                // not found the snippet
+                init(url.hash(), null, false, ResultClass.SOURCE_METADATA, null);
+                return;
+            }
+
+            if (sentences.size() > 0) {
+                try {
+                    final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
+                    textline = tsr.getSnippet();
+                    remainingHashes = tsr.getRemainingWords();
+                } catch (final UnsupportedOperationException e) {
+                    init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage());
                     return;
                 }
+            }
+       }
 
-                if (sentences.size() > 0) {
-                    try {
-                        final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
-                        textline = tsr.getSnippet();
-                        remainingHashes = tsr.getRemainingWords();
-                    } catch (final UnsupportedOperationException e) {
-                        init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage());
-                        return;
-                    }
+       if (remainingHashes.isEmpty()) {
+            // we found the snippet or the query is fully included in the headline or url
+            if (textline == null || textline.length() == 0) {
+                // this is the case where we don't have a snippet because all search words are included in the headline or the url
+                String solrText = row.getText();
+                if (solrText != null && solrText.length() > 0) {
+                    // compute sentences from solr query
+                    sentences = row.getSentences(pre);
                 }
-           }
-
-           if (remainingHashes.isEmpty()) {
-                // we found the snippet
-                if (textline == null) {
-                    if (sentences == null) {
-                        textline = row.dc_subject();
-                    } else {
-                        // use the first lines from the text as snippet
+                if (sentences == null || sentences.size() == 0) {
+                    textline = row.dc_subject();
+                } else {
+                    // use the first lines from the text after the h1 tag as snippet
+                    // get first the h1 tag
+                    List<String> h1 = row.h1();
+                    if (h1 != null && h1.size() > 0 && sentences.size() > 2) {
+                        // find first appearance of first h1 in sencences and then take the next sentence
+                        String h1s = h1.get(0);
+                        if (h1s.length() > 0) {
+                            solrsearch: for (int i = 0; i < sentences.size() - 2; i++) {
+                                if (sentences.get(i).toString().startsWith(h1s)) {
+                                    textline = sentences.get(i + 1).toString();
+                                    break solrsearch;
+                                }
+                            }
+                        }
+                    }
+                    if (textline == null) {
                         final StringBuilder s = new StringBuilder(snippetMaxLength);
                         for (final StringBuilder t: sentences) {
                         s.append(t).append(' ');
@@ -256,69 +270,69 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                         textline = s.toString();
                     }
                 }
-                init(url.hash(), textline.length() > 0 ? textline : this.line, false, ResultClass.SOURCE_METADATA, null);
-                return;
             }
-            sentences = null; // we don't need this here any more
+            init(url.hash(), textline.length() > 0 ? textline : this.line, false, ResultClass.SOURCE_METADATA, null);
+            return;
+        }
+        sentences = null; // we don't need this here any more
 
-            // try to load the resource from the cache
-            Response response = null;
-            try {
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
-            } catch (final IOException e) {
-                response = null;
-            }
+        // try to load the resource from the cache
+        Response response = null;
+        try {
+            response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
+        } catch (final IOException e) {
+            response = null;
+        }
 
-            if (response == null) {
-                // in case that we did not get any result we can still return a success when we are not allowed to go online
-                if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
-                    init(url.hash(), null, false, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
-                    return;
-                }
-
-                // if it is still not available, report an error
-                init(url.hash(), null, false, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
+        if (response == null) {
+            // in case that we did not get any result we can still return a success when we are not allowed to go online
+            if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
+                init(url.hash(), null, false, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
                 return;
             }
 
-            if (!response.fromCache()) {
-                // place entry on indexing queue
-                Switchboard.getSwitchboard().toIndexer(response);
-                this.resultStatus = ResultClass.SOURCE_WEB;
-            }
+            // if it is still not available, report an error
+            init(url.hash(), null, false, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
+            return;
+        }
 
-            // parse the document to get all sentenced; available for snippet computation
-            Document document = null;
-            try {
-                document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-            } catch (final Parser.Failure e) {
-                init(url.hash(), null, false, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
-                return;
-            }
-            if (document == null) {
-                init(url.hash(), null, false, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
-                return;
-            }
+        if (!response.fromCache()) {
+            // place entry on indexing queue
+            Switchboard.getSwitchboard().toIndexer(response);
+            this.resultStatus = ResultClass.SOURCE_WEB;
+        }
 
-            // compute sentences from parsed document
-            sentences = document.getSentences(pre);
-            document.close();
+        // parse the document to get all sentenced; available for snippet computation
+        Document document = null;
+        try {
+            document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+        } catch (final Parser.Failure e) {
+            init(url.hash(), null, false, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
+            return;
+        }
+        if (document == null) {
+            init(url.hash(), null, false, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+            return;
+        }
 
-            if (sentences == null) {
-                init(url.hash(), null, false, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
-                return;
-            }
+        // compute sentences from parsed document
+        sentences = document.getSentences(pre);
+        document.close();
 
-            try {
-                final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
-                textline = tsr.getSnippet();
-                remainingHashes =  tsr.getRemainingWords();
-            } catch (final UnsupportedOperationException e) {
-                init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage());
-                return;
-            }
-            sentences = null;
-        } //encapsulate potential expensive sentences END
+        if (sentences == null) {
+            init(url.hash(), null, false, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
+            return;
+        }
+
+        try {
+            final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
+            textline = tsr.getSnippet();
+            remainingHashes =  tsr.getRemainingWords();
+        } catch (final UnsupportedOperationException e) {
+            init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage());
+            return;
+        }
+        sentences = null;
 
         if (textline == null || !remainingHashes.isEmpty()) {
             init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
