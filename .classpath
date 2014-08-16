@@ -71,20 +71,20 @@
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-client-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-continuation-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-deploy-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-http-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-io-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-jmx-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-proxy-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-security-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-server-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlet-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlets-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-util-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-webapp-9.2.1.v20140609.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-xml-9.2.1.v20140609.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-client-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-deploy-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-jmx-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-proxy-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-webapp-9.2.2.v20140723.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-xml-9.2.2.v20140723.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/weupnp-0.1.2.jar"/>
 	<classpathentry kind="output" path="gen"/>
