@@ -52,7 +52,7 @@ public class QueryGoal {
     private static char space = ' ';
     private static char sq = '\'';
     private static char dq = '"';
-    private static String seps = ".:;#'*`,!$%()=?^<>/&_";
+    private static String seps = ".:;#*`,!$%()=?^<>/&_";
     
     public String query_original;
     private HandleSet include_hashes, exclude_hashes;
