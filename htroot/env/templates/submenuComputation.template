@@ -11,11 +11,11 @@
   <div class="SubMenugroup">
   <h3>Processes</h3>
   <ul class="SubMenu">
-    <li><a href="Threaddump_p.html" class="MenuItemLink lock">Thread Dump</a></li>
-    <li><a href="ViewLog_p.html" class="MenuItemLink lock">Server Log</a></li>
-    <li><a href="PerformanceConcurrency_p.html" class="MenuItemLink lock">Concurrent Indexing</a></li>
-    <li><a href="PerformanceMemory_p.html" class="MenuItemLink lock">Memory Usage</a></li>
-    <li><a href="PerformanceSearch_p.html" class="MenuItemLink lock">Search Sequence</a></li>
+    <li><a href="Threaddump_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Thread Dump</a></li>
+    <li><a href="ViewLog_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Server Log</a></li>
+    <li><a href="PerformanceConcurrency_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Concurrent Indexing</a></li>
+    <li><a href="PerformanceMemory_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Memory Usage</a></li>
+    <li><a href="PerformanceSearch_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Search Sequence</a></li>
   </ul>
   </div>
   <div class="SubMenugroup">

@@ -14,9 +14,9 @@
   <div class="SubMenugroup">
     <h3>Network Harvesting</h3>
     <ul class="SubMenu">
-      <li><a href="CrawlStartScanner_p.html" class="MenuItemLink lock">Network Scanner</a></li>
-      <li><a href="RemoteCrawl_p.html" class="MenuItemLink lock">Remote Crawling</a></li>
-      <li><a href="ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Scraping Proxy</a></li>
+      <li><a href="CrawlStartScanner_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Network Scanner</a></li>
+      <li><a href="RemoteCrawl_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Remote Crawling</a></li>
+      <li><a href="ProxyIndexingMonitor_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Scraping Proxy</a></li>
     </ul>
   </div>
   

@@ -901,12 +901,18 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 Seed myPeer = sb.peers.mySeed();
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
+                boolean authorized = sb.adminAuthenticated(legacyRequestHeader) >= 2;
+                templatePatterns.put("authorized", authorized ? 1 : 0);
+                
+                // add navigation keys to enable or disable menu items
                 templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
                 String submitted = sb.getConfig("server.servlets.submitted", "");
                 boolean crawler_enabled = submitted.contains("Crawler_p");
                 boolean advanced_enabled = crawler_enabled || submitted.contains("ConfigBasic")  || submitted.contains("CrawlStart");
                 templatePatterns.put("navigation-crawlmonitor", crawler_enabled);
+                templatePatterns.put("navigation-crawlmonitor_authorized", authorized ? 1 : 0);
                 templatePatterns.put("navigation-advanced", advanced_enabled);
+                templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 

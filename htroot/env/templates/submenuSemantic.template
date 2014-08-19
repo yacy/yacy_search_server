@@ -5,16 +5,16 @@
   <div class="SubMenugroup">
     <h3>Automated Annotation</h3>
     <ul class="SubMenu">
-      <li><a href="Vocabulary_p.html" class="MenuItemLink lock">Auto-Annotation Vocabulary Editor</a></li>
-      <li><a href="DictionaryLoader_p.html" class="MenuItemLink lock">Knowledge Loader</a></li>
+      <li><a href="Vocabulary_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Auto-Annotation Vocabulary Editor</a></li>
+      <li><a href="DictionaryLoader_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Knowledge Loader</a></li>
     </ul>
   </div>
   
   <div class="SubMenugroup">
     <h3>Augmented Content</h3>
     <ul class="SubMenu">
-      <li><a href="AugmentedBrowsing_p.html" class="MenuItemLink lock">Augmented Browsing</a></li>
-      <li><a href="AugmentedParsing_p.html" class="MenuItemLink lock">Augmented Parsing</a></li>
+      <li><a href="AugmentedBrowsing_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Augmented Browsing</a></li>
+      <li><a href="AugmentedParsing_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Augmented Parsing</a></li>
     </ul>
   </div>
 </div>

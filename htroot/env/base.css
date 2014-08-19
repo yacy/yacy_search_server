@@ -535,6 +535,12 @@ a.MenuItemLink.lock{
   background-repeat:no-repeat;
 }
 
+a.MenuItemLink.unlock{
+  background-image:url(/env/grafics/lockopen.gif);
+  background-position:2px center;
+  background-repeat:no-repeat;
+}
+
 a:hover.MenuItemLink {
   text-decoration:none;
 }

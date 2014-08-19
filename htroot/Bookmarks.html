@@ -25,22 +25,22 @@
 		<!-- SubMenu (mode=0) -->
 			<ul class="SubMenu">
 				<li><a href="Bookmarks.html?login=true" class="MenuItemLink">Login</a></li>
-                <li><a href="Bookmarks.html" class="MenuItemLink lock">List Bookmarks</a></li>
-				<li><a href="Bookmarks.html?login=true&amp;mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
-				<li><a href="Bookmarks.html?login=true&amp;mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
-				<li><a href="api/bookmarks/xbel/xbel.xml" class="MenuItemLink lock">Bookmarks (XBEL)</a></li>
-				<li><a href="api/bookmarks/posts/all.xml" class="MenuItemLink lock">Bookmarks (XML)</a></li>
-				<li><a href="Bookmarks.rss" class="MenuItemLink lock">Bookmarks (RSS)</a></li>
+                <li><a href="Bookmarks.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">List Bookmarks</a></li>
+				<li><a href="Bookmarks.html?login=true&amp;mode=add" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Add Bookmark</a></li>
+				<li><a href="Bookmarks.html?login=true&amp;mode=importxml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Import Bookmarks</a></li>
+				<li><a href="api/bookmarks/xbel/xbel.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XBEL)</a></li>
+				<li><a href="api/bookmarks/posts/all.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XML)</a></li>
+				<li><a href="Bookmarks.rss" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (RSS)</a></li>
 			</ul>
 			<p/>
 		:: <!-- Submenu isAdmin (mode=1) -->
 			<ul class="SubMenu">
-				<li><a href="Bookmarks.html" class="MenuItemLink lock">List Bookmarks</a></li>
-                <li><a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
-                <li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
-				<li><a href="api/bookmarks/xbel/xbel.xml" class="MenuItemLink lock">Bookmarks (XBEL)</a></li>
-				<li><a href="api/bookmarks/posts/all.xml" class="MenuItemLink lock">Bookmarks (XML)</a></li>
-				<li><a href="Bookmarks.rss" class="MenuItemLink lock">Bookmarks (RSS)</a></li>
+				<li><a href="Bookmarks.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">List Bookmarks</a></li>
+                <li><a href="Bookmarks.html?mode=add" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Add Bookmark</a></li>
+                <li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Import Bookmarks</a></li>
+				<li><a href="api/bookmarks/xbel/xbel.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XBEL)</a></li>
+				<li><a href="api/bookmarks/posts/all.xml" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (XML)</a></li>
+				<li><a href="Bookmarks.rss" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Bookmarks (RSS)</a></li>
 			</ul>
 			<p/>
 		:: <!-- add or edit Bookmark (mode=2) -->

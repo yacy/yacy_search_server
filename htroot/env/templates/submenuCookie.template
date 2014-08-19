@@ -1,7 +1,7 @@
 <div class="SubMenu">
   <h3>Cookie Menu</h3>
   <ul class="SubMenu">
-    <li><a href="CookieMonitorIncoming_p.html" class="MenuItemLink lock">Incoming&nbsp;Cookies</a></li>
-    <li><a href="CookieMonitorOutgoing_p.html" class="MenuItemLink lock">Outgoing&nbsp;Cookies</a></li>
+    <li><a href="CookieMonitorIncoming_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Incoming&nbsp;Cookies</a></li>
+    <li><a href="CookieMonitorOutgoing_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Outgoing&nbsp;Cookies</a></li>
   </ul>
 </div>
