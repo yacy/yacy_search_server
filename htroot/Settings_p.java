@@ -49,9 +49,6 @@ public final class Settings_p {
         if (page.equals("ProxyAccess")) {
             prop.put("settingsTables", "Settings_ProxyAccess.inc");
         }
-        else if (page.equals("http")) {
-            prop.put("settingsTables", "Settings_Http.inc");
-        }
         else if (page.equals("proxy")) {
             prop.put("settingsTables", "Settings_Proxy.inc");
         }
@@ -186,7 +183,6 @@ public final class Settings_p {
         prop.putHTML("crawler.file.maxFileSize",sb.getConfig("crawler.file.maxFileSize", "-1"));
 
         // http server info
-        prop.put("httpservername",sb.getHttpServer().getVersion());
         prop.put("server.https",sb.getConfigBool("server.https", false));
         prop.put("server.https_port.ssl", sb.getConfig("port.ssl","8443"));
         

@@ -27,8 +27,6 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
-import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -37,9 +35,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Digest;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
@@ -101,31 +97,11 @@ public class SettingsAck_p {
         // proxy password
         if (post.containsKey("proxyaccount")) {
             /*
-             * set new port
+             * display port info
              */
-            final String port = post.get("port");
-            prop.putHTML("info_port", port);
-            if (!env.getConfig("port", port).equals(port)) {
-                // validation port
-                final YaCyHttpServer theServerCore =  env.getHttpServer();
-                try {
-                    final InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
-                    final String hostName = Domains.getHostName(theNewAddress.getAddress());
-                    prop.put("info_restart", "1");
-                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? Domains.LOCALHOST : hostName);
-                    prop.put("info_restart_port", theNewAddress.getPort());
-
-                    env.setConfig("port", port);
-
-                    theServerCore.reconnect(5000);
-                } catch (final SocketException e) {
-                    prop.put("info", "26");
-                    return prop;
-                }
-            } else {
-                prop.put("info_restart", "0");
-            }
-
+            prop.putHTML("info_port", env.getConfig("port", "8090"));
+            prop.put("info_restart", "0");
+     
             // read and process data
             String filter = (post.get("proxyfilter")).trim();
             final boolean useProxyAccounts = post.containsKey("use_proxyaccounts") && post.get("use_proxyaccounts").equals("on");

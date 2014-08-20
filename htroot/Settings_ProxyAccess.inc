@@ -1,30 +1,53 @@
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="http">Proxy Settings</legend>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td><label for="trans_proxy">Transparent Proxy</label>:</td>
+    <td><input type="checkbox" name="isTransparentProxy" id="trans_proxy" #(isTransparentProxy)#::checked="checked" #(/isTransparentProxy)#/></td>
+    <td>
+      With this you can specify if YaCy can be used as transparent proxy.<br />
+      <em>Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule</em>:<br />
+      <small><code>iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 --dport 80 -j DNAT --to 192.168.0.1:#[port]#</code></small>
+    </td>
+  </tr>  
+  <tr valign="top">
+    <td><label for="via_header">Send "Via" Header</label>:</td>
+    <td><input type="checkbox" name="proxy.sendViaHeader" id="via_header" #(proxy.sendViaHeader)#::checked="checked" #(/proxy.sendViaHeader)#/></td>
+    <td>
+      Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>
+      http header according to RFC 2616 Sect 14.45.
+    </td>
+  </tr> 
+   <tr valign="top">
+    <td><label for="x_forwarded_header">Send "X-Forwarded-For" Header</label>:</td>
+    <td><input type="checkbox" name="proxy.sendXForwardedForHeader" id="x_forwarded_header" #(proxy.sendXForwardedForHeader)#::checked="checked" #(/proxy.sendXForwardedForHeader)#/></td>
+    <td>Specifies if the proxy should send the X-Forwarded-For http header.</td>
+  </tr> 
+  <tr valign="top">
+    <td colspan="3"><input type="submit" class="btn btn-primary btn-sm" name="httpNetworking" value="Submit" /> <em>Changes will take effect immediately.</em></td>
+  </tr>  
+</table>
+</fieldset>
+</form>
+<form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend id="ProxyAccess">Proxy Access Settings</legend>
 <p>
   These settings configure the access method to your own http proxy and server.
   All traffic is routed throug one single port, for both proxy and server.<br />
-  <br />
-  <strong>Server/Proxy Port Configuration</strong>
 </p>
-<p>
-  The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.<br />
-  You have four possibilities to specify the address:
-</p>
-<ul>
-  <li>defining a port only (<em>e.g. 8090</em>)</li>
-  <li>defining IP address and port (<em>e.g. 192.168.0.1:8090</em>)</li>
-  <li>defining host name and port (<em>e.g. home:8090</em>)</li>
-  <li>defining interface name and port (<em>e.g. #eth0:8090</em>)</li>
-</ul>
-<p><em>Hint: Dont forget to change your firewall configuration after you have changed the port.</em></p>
 <table border="0" cellspacing="5">
-  <tr valign="top">
-    <td><label for="port">Proxy and http-Server Administration Port</label>:</td>
-    <td><input name="port" id="port" type="text" size="30" maxlength="30" value="#[port]#" /></td>
-    <td><em>Changes will take effect in 5-10 seconds</em></td>
-  </tr> 
-</table>
+  <tr>
+    <td><a href="ConfigBasic.html">HTTP Server Port</a>:</td>
+    <td><b>#[port]#</b></td>
 
+  #(server.https)#::
+    <td style="width:10%">&nbsp;</td>
+    <td>HTTPS Server Port:</td>
+    <td><input type="text" width="4" name="port.ssl" value="#[port.ssl]#" size="4" maxlength="6"/>&nbsp;<input class="btn btn-primary btn-xs" type="submit" value="change"/></td>
+  </tr>
+  #(/server.https)#
+</table>
+<br />
 <p>
   <strong>Server Access Restrictions</strong><br />
   <br />
@@ -56,7 +79,7 @@
     </td>
   </tr>
   <tr valign="top">
-    <td colspan="2"><input type="submit" name="proxyaccount" value="Submit" /></td>
+    <td colspan="2"><input class="btn btn-primary btn-sm" type="submit" name="proxyaccount" value="Submit" /></td>
   </tr>
 </table>
 </fieldset>

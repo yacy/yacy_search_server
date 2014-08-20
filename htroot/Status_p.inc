@@ -29,7 +29,7 @@
     </dd>
     
     <dt>Address</dt>
-    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: <a href="ConfigBasic.html">enabled</a> (port <a href="Settings_p.html?page=http">#[sslPort]#</a>)#(/sslSupport)#<br />
+    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: <a href="ConfigBasic.html">enabled</a> (port <a href="Settings_p.html?page=ProxyAccess">#[sslPort]#</a>)#(/sslSupport)#<br />
     #(peerAddress)#
       peer address not assigned
       ::
@@ -43,7 +43,7 @@
     #(/portForwarding)#
     
     <dt>Proxy</dt>
-    <dd>Transparent <a href="Settings_p.html?page=http">#(info_isTransparentProxy)#on::off#(/info_isTransparentProxy)#</a>&nbsp;&nbsp;
+    <dd>Transparent <a href="Settings_p.html?page=ProxyAccess">#(info_isTransparentProxy)#on::off#(/info_isTransparentProxy)#</a>&nbsp;&nbsp;
         URL <a href="AugmentedBrowsing_p.html">#(info_proxyURL)#on::off#(/info_proxyURL)#</a></dd>
     <dd>Remote: <a href="Settings_p.html?page=proxy">#(remoteProxy)#not used::#[host]#:#[port]# | Used for YaCy -> YaCy communication: #(4Yacy)#Yes::No #(/4Yacy)# #(/remoteProxy)#</a></dd>
     <dt>Auto-popup on start-up</dt>
