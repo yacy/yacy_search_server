@@ -305,7 +305,8 @@ public class SettingsAck_p {
             if (seedUrlChanged || uploadMethodChanged) {
                 env.setConfig("seedUploadMethod", newSeedUploadMethod);
                 sb.peers.mySeed().put(Seed.SEEDLISTURL, newSeedURLStr);
-
+                if (seedUrlChanged) sb.peers.saveMySeed();
+                
                 // try an upload
                 String error;
                 if ((error = Network.saveSeedList(sb)) == null) {
