@@ -3914,7 +3914,7 @@ All Connections<==Alle Verbindungen<
 Local Search<==Lokale Suche<
 #Log==Log
 Host Tracker==Host-Tracker
-Remote Search<==Remote-Suche
+Remote Search<==Remote-Suche<
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
