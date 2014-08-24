@@ -208,7 +208,11 @@ public final class SeedDB implements AlternativeDomainNames {
                 System.exit(-1);
             }
         }
-        this.mySeed.setIP("");       // we delete the old information to see what we have now
+        if (Switchboard.getSwitchboard().isIntranetMode()) {
+            this.mySeed.setIP(Domains.myPublicLocalIP().getHostAddress()); // in intranet mode host address is best choice (to become senior peer)
+        } else {
+            this.mySeed.setIP("");// we delete the old information to see what we have now
+        }
         this.mySeed.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // markup startup condition
     }
 

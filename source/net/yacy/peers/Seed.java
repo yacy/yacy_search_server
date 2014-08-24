@@ -318,13 +318,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     }
 
     /**
-     * try to get the IP<br>
+     * try to get the public IP<br>
      *
-     * @return the IP or null
+     * @return the IP or localhost IP (127.0.0.1)
      */
     public final String getIP() {
-        final String ip = get(Seed.IP, Domains.LOCALHOST);
-        return (ip == null || ip.isEmpty()) ? Domains.LOCALHOST : ip;
+        final String ip = this.dna.get(Seed.IP);
+        return (ip == null || ip.isEmpty()) ? Domains.LOCALHOST : ip; // not public (but leave as is for now 2014-08-24)
     }
 
     /**
