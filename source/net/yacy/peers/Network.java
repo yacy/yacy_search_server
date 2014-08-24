@@ -754,7 +754,9 @@ public class Network
                 }
                 seedURL = new DigestURL(seedURLStr);
                 final String host = seedURL.getHost();
-                if (Domains.isIntranet(host)) { // check seedlist reacheable
+                if (Domains.isLocalhost(host) || (Domains.isIntranet(host) && !sb.isIntranetMode())) { // check seedlist reacheable
+                    // TODO: this does not prevent setting a local hostname e.g. "http://testhost_8090/seedlist.txt" (fyi: never did)
+                    // but the or part allows to setup a principal peer in intranet environment
                     final String errorMsg = "seedURL in local network rejected (local hosts can't be reached from outside)";
                     log.warn("SaveSeedList: " + errorMsg);
                     return errorMsg;
