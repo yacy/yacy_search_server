@@ -581,7 +581,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final String getPublicAddress() {
         String ip = getIP();
         if (ip == null) ip = Domains.LOCALHOST; // that should not happen
-
+        
         int p = ip.lastIndexOf(':');
         if (p > 0 && (ip.indexOf(':') == p || "]:".equals(ip.substring(p - 1, p + 1)))) return ip; // includes already the port
 
@@ -1117,7 +1117,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 final URL url = new URL(seedURL);
                 final String host = url.getHost();
                 if (Domains.isIntranet(host)) {
-                    return "seedURL in local network rejected";
+                    // network.unit.domain = any returns isIntranet() always true (because noLocalCheck is set true)
+                    // but seedlist on intranet host must be allowed -> check for intranet mode and deny "localhost" or loopback IP
+                    if (Switchboard.getSwitchboard().isIntranetMode() ) {
+                        if (Domains.isLocalhost(host)) {
+                            return "seedURL on local host rejected ("+host+")";
+                        }
+                    } else {
+                        return "seedURL in local network rejected ("+host+")";
+                    }
                 }
             } catch (final MalformedURLException e ) {
                 return "seedURL malformed";
