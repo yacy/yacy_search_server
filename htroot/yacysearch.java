@@ -277,7 +277,11 @@ public class yacysearch {
             trackerHandles = new TreeSet<Long>();
         }
         boolean block = false;
-        if ( Domains.matchesList(client, sb.networkBlacklist) ) {
+        if ( Domains.matchesList(client, sb.networkWhitelist) ) {
+            ConcurrentLog.info("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
+                + client
+                + " gets no search restrictions");
+        } else if ( Domains.matchesList(client, sb.networkBlacklist) ) {
             global = false;
             if ( snippetFetchStrategy != null ) {
                 snippetFetchStrategy = null;
@@ -286,10 +290,6 @@ public class yacysearch {
             ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
                 + client
                 + " gets no permission to search");
-        } else if ( Domains.matchesList(client, sb.networkWhitelist) ) {
-            ConcurrentLog.info("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
-                + client
-                + " gets no search restrictions");
         } else if ( !authenticated && !localhostAccess && !intranetMode ) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized ( trackerHandles ) {

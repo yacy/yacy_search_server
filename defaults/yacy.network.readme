@@ -53,6 +53,9 @@
 # can be configured in the whitelist.
 # In contrast also a list of IPs may be given to be not allowed to access the peers at all
 # The YaCy-httpd will not respond on any request from IPs given in the blacklist
+#   Entries in whitelist take precedence over blacklist entries
+#       1. whitlist is checked if match - access is allowed
+#       2. blacklist ist checked if match - access is denied
 # By default both lists should be empty to provide a basic search functionality for everyone.
 # When running a private YaCy network, all peers that are in the own network should be configured
 # in the whitelist. Otherwise the access from whitelisted clients is allowed, but the executing
