@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 cd "`dirname $0`"
 if which curl &>/dev/null; then
   while getopts "ys" opt; do

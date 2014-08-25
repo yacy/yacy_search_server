@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 JAVA="`which java`"
 CONFIGFILE="DATA/SETTINGS/yacy.conf"
 LOGFILE="yacy.log"

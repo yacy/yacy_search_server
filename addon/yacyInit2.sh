@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 #
 # init script for the HTTP Proxy: YaCy
 #

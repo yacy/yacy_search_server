@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 cd "`dirname $0`"
 port=$(grep ^port= ../DATA/SETTINGS/yacy.conf |cut -d= -f2)
 pw=$(grep ^adminAccountBase64MD5= ../DATA/SETTINGS/yacy.conf |cut -d= -f2)

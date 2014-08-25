@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 cd "`dirname $0`"
 for N in `cat $1`; do 
   echo import of $N:

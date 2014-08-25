@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 cd "`dirname $0`"
 ./searchtest.sh ../test/words/searchtest.words.aa &
 sleep 1

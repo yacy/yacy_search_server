@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # THIS SCRIPT CAN BE USED TO EDIT SOME BASIC SETTINGS OF YACY
 #

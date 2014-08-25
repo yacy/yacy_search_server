@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # THIS IS ONLY FOR EMERGENCY CASES
 # To stop YaCy, use stopYACY.sh

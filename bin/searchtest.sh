@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 cd "`dirname $0`"
 S=`date "+%s"`
 C=0

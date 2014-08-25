@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 cd /tmp
 FILE=`tempfile`.html
 wget "$1" -O $FILE -k

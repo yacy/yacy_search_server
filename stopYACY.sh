@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 cd `dirname $0`
 
 bin/apicall.sh "Steering.html?shutdown=true" > /dev/null
