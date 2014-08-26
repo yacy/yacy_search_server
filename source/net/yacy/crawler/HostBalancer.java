@@ -473,6 +473,7 @@ public class HostBalancer implements Balancer {
      */
     @Override
     public List<Request> getDomainStackReferences(String host, int maxcount, long maxtime) {
+        if (host == null) return new ArrayList<Request>(0);
         try {
             HostQueue hq = this.queues.get(DigestURL.hosthash(host, host.startsWith("ftp.") ? 21 : 80));
             if (hq == null) hq = this.queues.get(DigestURL.hosthash(host, 443));
