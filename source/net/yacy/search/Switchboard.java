@@ -2692,7 +2692,7 @@ public final class Switchboard extends serverSwitch {
         // check which files may take part in the indexing process
         final List<Document> doclist = new ArrayList<Document>();
         docloop: for (final Document document : in.documents) {
-            if (document.indexingDenied() && profile.obeyHtmlRobotsNoindex()) {
+            if (document.indexingDenied() && profile.obeyHtmlRobotsNoindex() && !this.isIntranetMode()) {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 // create a new errorURL DB entry
                 this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by document-attached noindexing rule", -1);
