@@ -93,17 +93,16 @@ function updatepage(str) {
     </fieldset>
     </form>
     
-    #(cleanup)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-    <fieldset><legend>Cleanup</legend>
+    <fieldset#(cleanup)# disabled="disabled"::#(/cleanup)#><legend>Cleanup</legend>
       <dl>
         <dt class="TableCellDark">Index Deletion</dt>
         <dd><input type="checkbox" name="deleteIndex" id="deleteIndex"
              onclick="x=document.getElementById('deleteIndex').checked;#(rwi)#::document.getElementById('deleteRWI').checked=x;#(/rwi)#document.getElementById('deleteRobots').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';};document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
             /> Delete local search index (embedded Solr and old Metadata)<br/>
-            #(solr)#::<input type="checkbox" name="deleteRemoteSolr" id="deleteRemoteSolr" onclick="x=document.getElementById('deleteRemoteSolr').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete remote solr index<br/>#(/solr)#
-            #(rwi)#::<input type="checkbox" name="deleteRWI" id="deleteRWI" onclick="x=document.getElementById('deleteRWI').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete RWI Index (DHT transmission words)<br/>#(/rwi)#
-            #(citation)#::<input type="checkbox" name="deleteCitation" id="deleteCitation" onclick="x=document.getElementById('deleteCitation').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete Citation Index (linking between URLs)<br/>#(/citation)#
+            #(cleanupsolr)#::<input type="checkbox" name="deleteRemoteSolr" id="deleteRemoteSolr" onclick="x=document.getElementById('deleteRemoteSolr').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete remote solr index<br/>#(/cleanupsolr)#
+            #(cleanuprwi)#::<input type="checkbox" name="deleteRWI" id="deleteRWI" onclick="x=document.getElementById('deleteRWI').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete RWI Index (DHT transmission words)<br/>#(/cleanuprwi)#
+            #(cleanupcitation)#::<input type="checkbox" name="deleteCitation" id="deleteCitation" onclick="x=document.getElementById('deleteCitation').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete Citation Index (linking between URLs)<br/>#(/cleanupcitation)#
             <input type="checkbox" name="deleteCache" id="deleteCache" disabled="disabled" /> Delete HTTP &amp; FTP Cache<br/>
             <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /> Stop Crawler and delete Crawl Queues<br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /> Delete robots.txt Cache<br/>
@@ -113,7 +112,6 @@ function updatepage(str) {
       </dl>
     </fieldset>
     </form>
-    #(/cleanup)#
     
     #(statistics)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">

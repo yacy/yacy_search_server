@@ -65,7 +65,8 @@ public class IndexControlURLs_p {
         final serverObjects prop = new serverObjects();
 
         Segment segment = sb.index;
-
+        long ucount = segment.fulltext().collectionSize();
+        
         // set default values
         prop.put("urlstring", "");
         prop.put("urlhash", "");
@@ -83,10 +84,10 @@ public class IndexControlURLs_p {
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
-        prop.put("cleanup", post == null || post.size() == 0 ? 1 : 0);
-        prop.put("cleanup_solr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
-        prop.put("cleanup_rwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
-        prop.put("cleanup_citation", segment.connectedCitation() && !segment.urlCitation().isEmpty() ? 1 : 0);
+        prop.put("cleanup", ucount == 0 ? 0 : 1);
+        prop.put("cleanupsolr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
+        prop.put("cleanuprwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
+        prop.put("cleanupcitation", segment.connectedCitation() && !segment.urlCitation().isEmpty() ? 1 : 0);
         
         // show export messages
         final Fulltext.Export export = segment.fulltext().export();
@@ -121,7 +122,7 @@ public class IndexControlURLs_p {
         }
 
         if (post == null || env == null) {
-            prop.putNum("ucount", segment.fulltext().collectionSize());
+            prop.putNum("ucount", ucount);
             return prop; // nothing to do
         }
 
@@ -337,7 +338,7 @@ public class IndexControlURLs_p {
         }
 
         // insert constants
-        prop.putNum("ucount", segment.fulltext().collectionSize());
+        prop.putNum("ucount", ucount);
         // return rewrite properties
         return prop;
     }
