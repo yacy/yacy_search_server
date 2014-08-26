@@ -101,10 +101,6 @@ public final class HTTPDFileHandler {
                 if (!(htDocsPath.exists())) htDocsPath.mkdirs();
             }
 
-            // create a repository path
-            final File repository = new File(htDocsPath, "repository");
-            if (!repository.exists()) repository.mkdirs();
-
             // create htLocaleDefault, htLocalePath
             if (htDefaultPath == null) htDefaultPath = theSwitchboard.getAppPath("htDefaultPath", SwitchboardConstants.HTROOT_PATH_DEFAULT);
             if (htLocalePath == null) htLocalePath = theSwitchboard.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
@@ -123,8 +119,6 @@ public final class HTTPDFileHandler {
      * @param path relative from htroot */
     public static File getLocalizedFile(final String path){
         String localeSelection = switchboard.getConfig("locale.language","default");
-        if (path.startsWith("/repository/"))
-            return new File(switchboard.getConfig("repositoryPath", "DATA/HTDOCS/repository"), path.substring(11));
         if (!(localeSelection.equals("default"))) {
             final File localePath = new File(htLocalePath, localeSelection + '/' + path);
             if (localePath.exists()) return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled

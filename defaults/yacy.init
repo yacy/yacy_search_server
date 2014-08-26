@@ -207,14 +207,6 @@ htDefaultPath=htroot
 # the htdocs path shares its content with the htroot path
 htDocsPath = DATA/HTDOCS
 
-# alternative path for the repository path of the web server: the URL
-# http://localhost:8090/repository
-# points to DATA/HTDOCS/repository, but can be altered with this repository path
-# hint: the repository path is the default path for intranet indexing. The easiest ways
-# to do a indexing of the local storage system is to set a path here for the repository
-# that points to the root path of the files that shall be indexed
-repositoryPath=DATA/HTDOCS/repository
-
 # the default files (typically index.html), if no file name is given
 # The complete path to this file is created by combination with the rootPath
 # you can set a list of defaults, separated by comma

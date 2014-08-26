@@ -211,13 +211,6 @@ public class ConfigBasic {
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "cacheonly"); // nocache,iffresh,ifexist,cacheonly,false
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
             }
-            if ("intranet".equals(post.get("usecase", ""))) {
-                final String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repository");
-                final File repository = ((repositoryPath.length() > 0 && repositoryPath.charAt(0) == '/') || (repositoryPath.length() > 1 && repositoryPath.charAt(1) == ':')) ? new File(repositoryPath) : new File(sb.getDataPath(), repositoryPath);
-                if (repository.exists() && repository.isDirectory()) {
-                	sb.setConfig("repositoryPath", repositoryPath);
-                }
-            }
         }
 
         networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
