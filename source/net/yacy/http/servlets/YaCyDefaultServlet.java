@@ -908,7 +908,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
                 String submitted = sb.getConfig("server.servlets.submitted", "");
                 boolean crawler_enabled = submitted.contains("Crawler_p");
-                boolean advanced_enabled = crawler_enabled || submitted.contains("ConfigBasic")  || submitted.contains("CrawlStart");
+                boolean advanced_enabled =
+                            crawler_enabled ||
+                            submitted.contains("ConfigBasic") ||
+                            submitted.contains("Load_RSS_p") ||
+                            submitted.contains("IndexImportMediawiki_p") ||
+                            submitted.contains("CrawlStart");
                 templatePatterns.put("navigation-crawlmonitor", crawler_enabled);
                 templatePatterns.put("navigation-crawlmonitor_authorized", authorized ? 1 : 0);
                 templatePatterns.put("navigation-advanced", advanced_enabled);
