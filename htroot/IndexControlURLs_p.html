@@ -108,7 +108,7 @@ function updatepage(str) {
             <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /> Stop Crawler and delete Crawl Queues<br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /> Delete robots.txt Cache<br/>
             <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" /> Delete cached snippet-fetching failures during search<br/><br/>
-            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="btn btn-danger" style="width:240px;"/>
+            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="btn btn-danger" style="width:240px;" onclick="return confirm('Confirm Deletion')"/>
         </dd>
       </dl>
     </fieldset>
