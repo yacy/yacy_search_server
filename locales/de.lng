@@ -879,7 +879,7 @@ menu.=Menü geändert werden.
 #>Administration<==>Administration<
 >Web Search<==>Websuche<
 >File Search<==>Dateisuche<
->HostBrowser<==>Host Browser<
+>IndexBrowser<==>Index Browser<
 >About Us<==>Über Uns<
 >Help / YaCy Wiki<==>Hilfe / YaCy Wiki<
 "Search"=="Suche"
@@ -1493,7 +1493,7 @@ Please see the tutorials on==Bitte besuchen Sie auch die Anleitungen auf
 
 #File: HostBrowser.html
 #---------------------------
-#Host Browser==Host Browser
+#Index Browser==Index Browser
 Browse the index of \#\[ucount\]\# documents.==Durchsuchen Sie den Index von #[ucount]# Dokumenten.
 Enter a host or an URL for a file list or view a list of==Geben Sie einen Host oder eine URL an, um eine Liste mit Dateien zu bekommen. Oder sehen Sie eine Liste mit
 >all hosts<==>allen Hosts<
@@ -3898,7 +3898,7 @@ Ranking and Heuristics==Ranking und Heuristiken
 >Web Search<==>Web-Suche<
 >File Search<==>Datei-Suche<
 >Compare Search<==>Vergleichssuche<
->Host Browser<==>Host Browser<
+>Index Browser<==>Index Browser<
 >About Us<==>Impressum dieses Peers<
 Help / YaCy Wiki==Hilfe / YaCy Wiki
 #-----------------------------

@@ -953,7 +953,7 @@ Other portal settings can be adjusted in==Другие настройки пор
 >Web Search<==>Вэб-поиск<
 >File Search<==>Поиск файлов<
 >Tutorial<==>Помощь<
->Host Browser<==>Просмотр хостов<
+>Index Browser<==>Просмотр хостов<
 >About Us<==>О пользователе<
 >Help / YaCy Wiki<==>YaCy Wiki<
 "Search"=="Поиск"
@@ -1554,7 +1554,7 @@ Please see the tutorials on==Пожалуйста, смотрите больше
 
 #File: HostBrowser.html
 #---------------------------
-Host Browser==Просмотр хостов
+Index Browser==Просмотр хостов
 Browse the index of \#\[ucount\]\# documents.==В индексе находится #[ucount]# документов.
 Enter a host or an URL for a file list or view a list of==Введите хост или адрес для получения списка файлов, или просмотрите список из
 >all hosts<==>всех хостов<
@@ -4295,7 +4295,7 @@ Administration &raquo;==Управление &raquo;
 >Web Search<==>Вэб‐поиск<
 >File Search<==>Поиск файлов<
 >Compare Search<==>Сравнить поиск<
->Host Browser<==>Просмотр хостов<
+>Index Browser<==>Просмотр хостов<
 >URL Viewer<==>Просмотр ссылок<
 Solr Default Core==Параметры ядра Solr
 Solr Webgraph Core==Параметры графики Solr
@@ -4592,7 +4592,7 @@ Server Log==Лог сервера
 Web Visualization==Вэб-визуализация
 Web Structure==Вэб-структура
 Image Collage==Коллаж изображений
-Host Browser==Просмотр хостов
+Index Browser==Просмотр хостов
 #-----------------------------
 
 #File: proxymsg/authfail.inc

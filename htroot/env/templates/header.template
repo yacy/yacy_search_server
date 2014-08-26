@@ -84,8 +84,8 @@
       <li><h3>Monitoring</h3></li>
       <li><a href="Status.html?noforward=" class="MenuItemLink">System Status</a></li>
       #(navigation-p2p)#::<li><a href="Network.html" accesskey="w" class="MenuItemLink">Peer-to-Peer Network</a></li>#(/navigation-p2p)#
+      #(navigation-crawlmonitor)#::<li><a href="HostBrowser.html?admin=true&hosts=" class="MenuItemLink">Index Browser</a></li>#(/navigation-crawlmonitor)#
       <li><a href="AccessGrid_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Network Access</a></li>
-      #(navigation-crawlmonitor)#::<li><a href="HostBrowser.html?admin=true&hosts=" class="MenuItemLink">Web Visualization</a></li>#(/navigation-crawlmonitor)#
       #(navigation-crawlmonitor)#::<li><a href="Crawler_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Crawler Monitor</a></li>#(/navigation-crawlmonitor)#
       <!-- <li><a href="terminal_p.html" accesskey="t" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Terminal</a></li> -->
     </ul>

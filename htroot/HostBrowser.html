@@ -2,7 +2,7 @@
 <!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Host Browser</title>
+    <title>YaCy '#[clientname]#': Index Browser</title>
     #%env/templates/metas.template%#
   <script type="text/javascript">
 //<![CDATA[
@@ -76,7 +76,7 @@ function updatepage(str) {
 	#%env/templates/header.template%#
     #%env/templates/submenuWebStructure.template%#
     #(/topmenu)#
-    <h2>Host Browser</h2>
+    <h2>Index Browser</h2>
     <p>Browse the index of #[ucount]# documents. Enter a host or an URL for a file list or view a list of <a href="HostBrowser.html?admin=#[admin]#&hosts=">all hosts</a>, <a href="HostBrowser.html?admin=#[admin]#&hosts=crawling">only hosts with urls pending in the crawler</a> or <a href="HostBrowser.html?admin=#[admin]#&hosts=error">only with load errors</a>.</p>
     <form action="HostBrowser.html" id="searchform" method="get" onkeyup="xmlhttpPost(); return false;">
     <fieldset class="yacys">
