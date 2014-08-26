@@ -4,10 +4,6 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
 // LICENSE
 // 
 // This program is free software; you can redistribute it and/or modify
@@ -24,11 +20,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.utils;
+package net.yacy.utils.upnp;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.EnumMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -46,10 +44,14 @@ public class UPnP {
 
 	private static Map<InetAddress, GatewayDevice> GATEWAY_DEVICES = null;
 
-	// mapping variables
-	private static final String MAPPED_NAME = "YaCy";
-	private static final String MAPPED_PROTOCOL = "TCP";
-	private static int mappedPort;
+	private static final Map<UPnPMappingType, UPnPMapping> MAPPINGS = new EnumMap<>(
+			UPnPMappingType.class);
+	static {
+		MAPPINGS.put(UPnPMappingType.HTTP, new UPnPMapping("port", null, "TCP",
+				"YaCy HTTP"));
+		MAPPINGS.put(UPnPMappingType.HTTPS, new UPnPMapping("port.ssl",
+				"server.https", "TCP", "YaCy HTTPS"));
+	}
 
 	private static boolean init() {
 		boolean init = true;
@@ -74,33 +76,68 @@ public class UPnP {
 	}
 
 	/**
-	 * Add port mapping for configured port.
+	 * Add port mappings for configured ports.
 	 */
-	public static void addPortMapping() {
+	public static void addPortMappings() {
 		if (SB == null) {
 			return;
 		}
-		addPortMapping(Integer.parseInt(SB.getConfig("port", "0")));
+
+		UPnPMapping mapping;
+		for (final Entry<UPnPMappingType, UPnPMapping> entry : MAPPINGS
+				.entrySet()) {
+			mapping = entry.getValue();
+
+			addPortMapping(entry.getKey(), mapping,
+					SB.getConfigInt(mapping.getConfigPortKey(), 0));
+		}
 	}
 
 	/**
-	 * Add TCP port mapping to all gateway devices on the network.<br/>
+	 * Remove all port mappings.
+	 */
+	public static void deletePortMappings() {
+
+		if (SB == null) {
+			return;
+		}
+
+		UPnPMapping mapping;
+		for (final Entry<UPnPMappingType, UPnPMapping> entry : MAPPINGS
+				.entrySet()) {
+			mapping = entry.getValue();
+			deletePortMapping(mapping);
+		}
+	}
+
+	/**
+	 * Add port mapping to all gateway devices on the network.<br/>
 	 * Latest port mapping will be removed.
 	 * 
+	 * TODO: don't try to map already mapped port again, find alternative
+	 * 
+	 * @param type
+	 *            mapping type
+	 * @param mapping
+	 *            contains data about mapping
 	 * @param port
+	 *            port number to map
 	 */
-	public static void addPortMapping(final int port) { // TODO: don't map
-														// already mapped port
-														// again
+	public static void addPortMapping(final UPnPMappingType type,
+			final UPnPMapping mapping, final int port) {
+
 		if (port < 1) {
 			return;
 		}
 
-		if (mappedPort > 0) {
-			deletePortMapping(); // delete old mapping first
+		if (mapping.getPort() > 0) {
+			deletePortMapping(mapping); // delete old mapping first
 		}
 
-		if (mappedPort == 0 && ((GATEWAY_DEVICES != null) || init())) {
+		if ((mapping.isConfigEnabledKeyEmpty() || SB.getConfigBool(
+				mapping.getConfigEnabledKey(), false))
+				&& mapping.getPort() == 0
+				&& ((GATEWAY_DEVICES != null) || init())) {
 
 			String localHostIP;
 			boolean mapped;
@@ -111,14 +148,15 @@ public class UPnP {
 					localHostIP = toString(gatewayDevice.getLocalAddress());
 
 					mapped = gatewayDevice.addPortMapping(port, port,
-							localHostIP, MAPPED_PROTOCOL, MAPPED_NAME);
+							localHostIP, mapping.getProtocol(),
+							mapping.getDescription());
 
 					msg = "port " + port + " on device "
 							+ gatewayDevice.getFriendlyName();
 
 					if (mapped) {
 						LOG.info("mapped " + msg);
-						mappedPort = port;
+						mapping.setPort(port);
 					} else {
 						LOG.warn("could not map " + msg);
 					}
@@ -131,19 +169,22 @@ public class UPnP {
 
 	/**
 	 * Delete current port mapping.
+	 * 
+	 * @param mapping
+	 *            to delete
 	 */
-	public static void deletePortMapping() {
-		if (mappedPort > 0 && GATEWAY_DEVICES != null) {
+	public static void deletePortMapping(final UPnPMapping mapping) {
+		if (mapping.getPort() > 0 && GATEWAY_DEVICES != null) {
 
 			boolean unmapped;
 			String msg;
 			for (final GatewayDevice gatewayDevice : GATEWAY_DEVICES.values()) {
 
 				try {
-					unmapped = gatewayDevice.deletePortMapping(mappedPort,
-							MAPPED_PROTOCOL);
+					unmapped = gatewayDevice.deletePortMapping(
+							mapping.getPort(), mapping.getProtocol());
 
-					msg = "port " + mappedPort + " on device "
+					msg = "port " + mapping.getPort() + " on device "
 							+ gatewayDevice.getFriendlyName();
 
 					if (unmapped) {
@@ -157,17 +198,25 @@ public class UPnP {
 				}
 			}
 
-			mappedPort = 0; // reset mapped port
+			mapping.setPort(0); // reset mapped port
 		}
 	}
 
 	/**
 	 * Gets currently mapped port.
 	 * 
+	 * @param type
+	 *            mapping type
+	 * 
 	 * @return mapped port or 0 if no port is mapped
 	 */
-	public static int getMappedPort() {
-		return mappedPort;
+	public static int getMappedPort(final UPnPMappingType type) {
+
+		if (type == null) {
+			return 0;
+		}
+
+		return MAPPINGS.get(type).getPort();
 	}
 
 	private static String toString(final InetAddress inetAddress) {

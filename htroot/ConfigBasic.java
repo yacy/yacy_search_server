@@ -46,7 +46,8 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
-import net.yacy.utils.UPnP;
+import net.yacy.utils.upnp.UPnPMappingType;
+import net.yacy.utils.upnp.UPnP;
 
 public class ConfigBasic {
 
@@ -118,11 +119,11 @@ public class ConfigBasic {
         if (post != null && post.containsKey("port")) { // hack to allow checkbox
             upnp = post.containsKey("enableUpnp");
             if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
-                UPnP.addPortMapping();
+                UPnP.addPortMappings();
             }
             sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
             if (!upnp) {
-                UPnP.deletePortMapping();
+                UPnP.deletePortMappings();
             }
         } else {
             upnp = false;
@@ -141,7 +142,7 @@ public class ConfigBasic {
 
             // renew upnp port mapping
             if (upnp) {
-                UPnP.addPortMapping();
+                UPnP.addPortMappings();
             }
 
             String host = null;
@@ -265,7 +266,7 @@ public class ConfigBasic {
         prop.put("upnp", "1");
         prop.put("upnp_enabled", upnp_enabled ? "1" : "0");
         if (upnp_enabled) {
-            prop.put("upnp_success", (UPnP.getMappedPort() > 0) ? "2" : "1");
+            prop.put("upnp_success", (UPnP.getMappedPort(UPnPMappingType.HTTP) > 0) ? "2" : "1");
         }
         else {
             prop.put("upnp_success", "0");
