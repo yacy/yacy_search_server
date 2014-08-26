@@ -199,8 +199,8 @@ import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.RobotsTxtConfig;
 import net.yacy.utils.CryptoLib;
-import net.yacy.utils.UPnP;
 import net.yacy.utils.crypt;
+import net.yacy.utils.upnp.UPnP;
 import net.yacy.visualization.CircleTool;
 
 import com.google.common.io.Files;
@@ -315,7 +315,7 @@ public final class Switchboard extends serverSwitch {
 
         // UPnP port mapping
         if ( getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) ) {
-            InstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", 0);
+            InstantBusyThread.oneTimeJob(UPnP.class, "addPortMappings", 0);
         }
 
         // init TrayIcon if possible
@@ -1771,7 +1771,7 @@ public final class Switchboard extends serverSwitch {
         Domains.close();
         AccessTracker.dumpLog();
         Switchboard.urlBlacklist.close();
-        UPnP.deletePortMapping();
+        UPnP.deletePortMappings();
         this.tray.remove();
         try {
             HTTPClient.closeConnectionManager();
@@ -2274,7 +2274,7 @@ public final class Switchboard extends serverSwitch {
 
             // check if we are reachable and try to map port again if not (e.g. when router rebooted)
             if ( getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) && this.peers.mySeed().isJunior() ) {
-                UPnP.addPortMapping();
+                UPnP.addPortMappings();
             }
 
             // after all clean up is done, check the resource usage
