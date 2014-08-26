@@ -2014,7 +2014,7 @@ Delete all documents which are not assigned to any collection==Lösche alle Doku
 >generate the collection list...==>generiere die Liste der Kollektion...
 Assigned<==Zugewiesen<
 Delete all documents which are assigned to the following collection\(s\)==Lösche alle Dokumente die der(n) folgenden Kollektion(en) zugewiesen sind
-Delete by Solr Query<==Löschen durch Solr Abfrage
+Delete by Solr Query<==Löschen durch Solr Abfrage<
 This is the most generic option: select a set of documents using a solr query.==Dies ist die allgemeinste Option: Wählen Sie einen Satz Dokumente anhand einer Solr Abfrage aus.
 #-----------------------------
 
