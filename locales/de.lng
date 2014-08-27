@@ -3296,7 +3296,7 @@ If you are a professional user and you would like to use YaCy in your company in
 Then YaCy will restart.==Dann wird YaCy neu gestartet.
 If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
 Installing release==Installiere Release
-YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
+YaCy will be restarted after installation==YaCy wird nach der Installation neu gestartet
 #-----------------------------
 
 #File: Supporter.html
