@@ -1305,7 +1305,7 @@ no country code restriction==keine Einschränkung anhand von Ländercodes
 
 Document Filter==Dokument-Filter
 These are limitations on index feeder. The filters will be applied after a web page was loaded.==Das sind Limitierungen auf den Index-Feeder. Die Filter werden angewandt wenn eine Webseite geladen wurde.
->Filter on URLs<==Filter auf URLs<
+>Filter on URLs<==>Filter auf URLs<
 The filter is a==Der Filter ist ein
 >regular expression<==>Regülärer Ausdruck<
 that <b>must not match</b> with the URLs to allow that the content of the url is indexed.==der auf die URLs <b>nicht zutreffen darf</b>, damit der Inhalt der URL indexiert werden darf.
