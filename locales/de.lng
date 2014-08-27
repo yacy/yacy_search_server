@@ -758,7 +758,7 @@ IFEXIST: use the cache if the cache exist or load online==IFEXIST: Verwende den 
 If verification fails, delete index reference==Wenn die Überprüfung fehlschlägt lösche die Index Referenz
 CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet==CACHEONLY: Gehe niemals online und verwende den ganzen Content aus dem Cache. Wenn kein Eintrag im Cache existiert betrachte den Kontent trotzdem als existent und zeige Resultate ohne Snippets.
 FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE: Keine Linkprüfung und keine Snippet Generierung: Alle Suchergebnisse sind ohne Prüfung valide
-Greedy Learning Mode==Gieriger Lernmodus
+Greedy Learning Mode==Schnellstmöglicher Lernmodus
 load documents linked in search results, will be deactivated automatically when index size==Lade Dokumente die in Suchergebnissen verlinkt sind. Wird automatisch deaktiviert wenn die Indexgröße
 Show Navigation Bar on Search Page?==Navigationsleiste auf Suchseite anzeigen?
 Show Navigation Top-Menu&nbsp;==Zeige Top-Menu Navigation&nbsp;
@@ -1242,7 +1242,7 @@ Restrict to sub-path==Auf Sub-Pfad beschränken
 #Example: to allow only urls that contain the word \'science\', set the filter to \'.*science.*\'.==Beispiel: Um nur URLs zuzulassen, die das Wort 'Wissenschaft' beeinhalten, setzen Sie den Filter auf '.*Wissenschaft.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Sie können aber auch eine automatische Domain-Beschränkung benutzen, um eine einzelne Domain komplett zu crawlen.
 #Must-Not-Match Filter==Muss-nicht-entsprechen Filter
-#This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
+#This filter must not match to allow that the page is accepted for crawling.==Dieser Filter darf nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
 #The empty string is a never-match filter which should do well for most cases.==Ein leeres Feld ist ein niemals-passend Filter, der in den meisten Fällen gute Dienste leisten sollte.
 #Re-crawl known URLs:==Re-crawl bekannter URLs:
 
@@ -1308,9 +1308,9 @@ These are limitations on index feeder. The filters will be applied after a web p
 >Filter on URLs<==Filter auf URLs<
 The filter is a==Der Filter ist ein
 >regular expression<==>Regülärer Ausdruck<
-that <b>must not match</b> with the URLs to allow that the content of the url is indexed.==der auf die URLs <b>zutreffen muss</b>, damit der Inhalt der URL indexiert werden darf.
+that <b>must not match</b> with the URLs to allow that the content of the url is indexed.==der auf die URLs <b>nicht zutreffen darf</b>, damit der Inhalt der URL indexiert werden darf.
 > must-match<==> muss zutreffen<
-> must-not-match<==> muss nicht zutreffen<
+> must-not-match<==> darf nicht zutreffen<
 \(must not be empty\)==(darf nicht leer sein)
 
 Clean-Up before Crawl Start==Aufräumen vor dem Crawl Start
