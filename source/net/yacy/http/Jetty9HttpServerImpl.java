@@ -27,13 +27,7 @@ package net.yacy.http;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.security.KeyStore;
-import java.util.Enumeration;
 import java.util.StringTokenizer;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -351,57 +345,10 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         }
     }
 
-    @Override
-    public InetSocketAddress generateSocketAddress(String extendedPortString) throws SocketException {
-        // parsing the port configuration
-        String bindIP = null;
-        int bindPort;
-
-        int pos = extendedPortString.indexOf(':');
-        if (pos != -1) {
-            bindIP = extendedPortString.substring(0,pos).trim();
-            extendedPortString = extendedPortString.substring(pos+1);
-
-            if (bindIP.length() > 0 && bindIP.charAt(0) == '#') {
-                final String interfaceName = bindIP.substring(1);
-                String hostName = null;
-                if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Trying to determine IP address of interface '" + interfaceName + "'.");
-
-                final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-                if (interfaces != null) {
-                    while (interfaces.hasMoreElements()) {
-                        final NetworkInterface interf = interfaces.nextElement();
-                        if (interf.getName().equalsIgnoreCase(interfaceName)) {
-                            final Enumeration<InetAddress> addresses = interf.getInetAddresses();
-                            if (addresses != null) {
-                                while (addresses.hasMoreElements()) {
-                                    final InetAddress address = addresses.nextElement();
-                                    if (address instanceof Inet4Address) {
-                                        hostName = address.getHostAddress();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (hostName == null) {
-                    ConcurrentLog.warn("SERVER", "Unable to find interface with name '" + interfaceName + "'. Binding server to all interfaces");
-                    bindIP = null;
-                } else {
-                    ConcurrentLog.info("SERVER", "Binding server to interface '" + interfaceName + "' with IP '" + hostName + "'.");
-                    bindIP = hostName;
-                }
-            }
-        }
-        bindPort = Integer.parseInt(extendedPortString);
-
-        return (bindIP == null)
-                ? new InetSocketAddress(bindPort)
-                : new InetSocketAddress(bindIP, bindPort);
-
-    }
-
+    /**
+     * get Jetty version
+     * @return version_string
+     */
     @Override
     public String getVersion() {
         return "Jetty " + Server.getVersion();
@@ -505,5 +452,4 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             return null;
         }
     }
-    
 }

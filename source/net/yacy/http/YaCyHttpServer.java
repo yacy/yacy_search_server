@@ -1,9 +1,6 @@
 
 package net.yacy.http;
 
-import java.net.InetSocketAddress;
-import java.net.SocketException;
-
 /**
  * Isolation of HttpServer
  * 
@@ -11,15 +8,12 @@ import java.net.SocketException;
  *                   to provide the routines and entry points required by the
  *                   YaCy servlets
  * 
- *                   currently Jetty implementation is ongoing
- * 
- * Implementation    Jetty8HttpServerImpl.java
+ * Implementation    Jetty9HttpServerImpl.java
  */
 public interface YaCyHttpServer {
     
     abstract void startupServer() throws Exception;
     abstract void stop() throws Exception;
-    abstract InetSocketAddress generateSocketAddress(String port) throws SocketException;
     abstract int getSslPort();
     abstract boolean withSSL();
     abstract void reconnect(int milsec);
