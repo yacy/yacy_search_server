@@ -156,14 +156,24 @@ public class QueryGoal {
 
             // parse phrase
             boolean inc = true;
-            if (s.charAt(0) == '-') {inc = false; s = s.substring(1);}
-            if (s.charAt(0) == '+') {inc = true; s = s.substring(1);}
+            if (s.charAt(0) == '-') {
+                inc = false;
+                s = s.substring(1);
+            } else if (s.charAt(0) == '+') {
+                inc = true;
+                s = s.substring(1);
+            }
             if (s.length() == 0) return;
             
             // parse string
             char stop = space;
-            if (s.charAt(0) == dq) {stop = s.charAt(0); s = s.substring(1);}
-            if (s.charAt(0) == sq) {stop = s.charAt(0); s = s.substring(1);}
+            if (s.charAt(0) == dq) {
+                stop = s.charAt(0);
+                s = s.substring(1);
+            } else if (s.charAt(0) == sq) {
+                stop = s.charAt(0);
+                s = s.substring(1);
+            }
             p = 0;
             while (p < s.length() && s.charAt(p) != stop) p++;
             String string = s.substring(0, p);
