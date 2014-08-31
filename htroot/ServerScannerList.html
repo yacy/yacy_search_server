@@ -9,7 +9,6 @@
 #%env/templates/header.template%#
 <h2>Network Scanner Monitor</h2>
 ::
-#%env/templates/embeddedheader.template%#
 #(/embedded)#    
      
 	#(servertable)#::
@@ -56,7 +55,9 @@
     </fieldset></form>
 	#(/servertable)#
 	
-
+    #(embedded)#
     #%env/templates/footer.template%#
+    ::
+    #(/embedded)# 
   </body>
 </html>
