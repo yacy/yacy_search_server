@@ -495,6 +495,7 @@ public final class Switchboard extends serverSwitch {
             // apply some hard-coded patches for earlier experiments we do not want any more
             if (bf.equals("product(recip(rord(last_modified),1,1000,1000),div(product(log(product(references_external_i,references_exthosts_i)),div(references_internal_i,host_extent_i)),add(crawldepth_i,1)))") ||
                 bf.equals("scale(cr_host_norm_i,1,20)")) bf = "";
+            if (bf.equals("recip(rord(last_modified),1,1000,1000))")) bf = "recip(ms(NOW,last_modified),3.16e-11,1,1)"; // that was an outdated date boost that did not work well
             if (i == 0 && bq.equals("fuzzy_signature_unique_b:true^100000.0")) bq = "crawldepth_i:0^0.8 crawldepth_i:1^0.4";
             if (boosts.equals("url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0")) boosts = "url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^2.0";
             r.setName(name);
@@ -2941,6 +2942,13 @@ public final class Switchboard extends serverSwitch {
 
     public void stackURLs(Set<DigestURL> rootURLs, final CrawlProfile profile, final Set<DigestURL> successurls, final Map<DigestURL,String> failurls) {
         if (rootURLs == null || rootURLs.size() == 0) return;
+        if (rootURLs.size() == 1) {
+            // for single stack requests, do not use the multithreading overhead;
+            final DigestURL turl = rootURLs.iterator().next();
+            String failreason;
+            if ((failreason = Switchboard.this.stackUrl(profile, turl)) == null) successurls.add(turl); else failurls.put(turl, failreason);
+            return;
+        }
         final List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
         for (DigestURL url: rootURLs) {
             final DigestURL turl = url;
