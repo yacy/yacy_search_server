@@ -25,12 +25,15 @@
 package net.yacy.http;
 
 import java.net.MalformedURLException;
+
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverAccessTracker;
+
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.RoleInfo;
 import org.eclipse.jetty.server.Request;
@@ -80,6 +83,15 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
         if (protectedPage) {
             if (grantedForLocalhost) {
                 return null; // quick return for local admin
+            } else if (accessFromLocalhost) {
+                // last chance to authentify using the admin from localhost
+                final String credentials = request.getHeader("Authorization");
+                if (credentials != null && credentials.length() > 60 && credentials.startsWith("Basic ")) {
+                    final String foruser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+                    final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+                    final String b64 = Base64Order.standardCoder.encodeString(foruser + ":" + adminAccountBase64MD5);
+                    if ((credentials.substring(6)).equals(b64)) return null; // lazy authentification for local access with credential from config (only a user with read access to DATA can do that)
+                }
             }
             RoleInfo roleinfo = new RoleInfo();
             roleinfo.setChecked(true); // RoleInfo.setChecked() : in Jetty this means - marked to have any security constraint

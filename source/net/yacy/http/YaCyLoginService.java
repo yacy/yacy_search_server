@@ -56,7 +56,7 @@ public class YaCyLoginService extends MappedLoginService implements LoginService
             // is created for current user (and the pwd checked against the stored  username:pwd setting)
             credential = YaCyLegacyCredential.getCredentialForAdmin(username, adminAccountBase64MD5);
             // TODO: YaCy user:pwd hashes should longterm likely be switched to separable username + pwd-hash entries
-            //       and/or the standard admin account username shuld be fix = "admin"
+            //       and/or the standard admin account username should be fix = "admin"
             roles = new String[]{AccessRight.ADMIN_RIGHT.toString()};
         } else {
             Entry user = sb.userDB.getEntry(username);

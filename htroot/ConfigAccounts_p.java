@@ -66,7 +66,7 @@ public class ConfigAccounts_p {
             final String pw2  = post.get("adminpw2", "");
             int inputerror=0;
             // may be overwritten if new password is given
-            if (user.length() > 0 && pw1.length() > 3 && pw1.equals(pw2)) {
+            if (user.length() > 0 && pw1.length() > 2 && pw1.equals(pw2)) {
                 String oldusername = env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // check passed. set account:
                 // old: // env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));

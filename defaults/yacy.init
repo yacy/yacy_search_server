@@ -406,8 +406,8 @@ adminAccountAllPages=false
 #   with additional machines they have to belong to the same realm
 # - authentication defaults to BASIC 
 # - and can be configured in defaults/web.xml , tag <auth-method>
-
-adminRealm=YaCy-AdminUI
+#adminRealm=YaCy-AdminUI
+adminRealm=The YaCy access is limited to administrators. If you don't know the password, you can change it using <yacy-home>/bin/passwd.sh <new-password>
 
 # if you are running a principal peer, you must update the following variables
 # The upload method that should be used to upload the seed-list file to
