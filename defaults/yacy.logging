@@ -95,6 +95,7 @@ org.apache.solr.core.SolrConfig.level = SEVERE
 org.apache.solr.core.SolrCore.level = SEVERE
 org.apache.solr.core.SolrResourceLoader.level = SEVERE
 org.apache.solr.core.CachingDirectoryFactory.level = OFF
+org.apache.solr.rest.ManagedResource.level = SEVERE
 org.apache.solr.util.plugin.AbstractPluginLoader.level = INFO
 org.apache.solr.schema.IndexSchema.level = INFO
 org.apache.solr.schema.FieldTypePluginLoader.level = INFO
