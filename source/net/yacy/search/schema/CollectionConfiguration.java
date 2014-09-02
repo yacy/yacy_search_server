@@ -1750,7 +1750,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param protocol
      * @return a list of indexed protocol entries
      */
-    private static List<String> protocolList2indexedList(final List<String> protocol) {
+    public static List<String> protocolList2indexedList(final List<String> protocol) {
         List<String> a = new ArrayList<String>();
         String p;
         for (int i = 0; i < protocol.size(); i++) {
@@ -1761,6 +1761,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 a.add(c + "-" + p);
             }
         }
+        return a;
+    }
+    
+    public static List<String> indexedList2protocolList(Collection<Object> iplist, int dimension) {
+        List<String> a = new ArrayList<String>(dimension);
+        for (int i = 0; i < dimension; i++) a.add("http");
+        if (iplist == null) return a;
+        for (Object ip: iplist) a.set(Integer.parseInt(((String) ip).substring(0, 3)), ((String) ip).substring(4));
         return a;
     }
     

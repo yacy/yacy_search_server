@@ -54,7 +54,6 @@ import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -131,18 +130,6 @@ public final class CrawlStacker {
     public Request job(final Request entry) {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
-
-        // record the link graph for this request; this can be overwritten, replaced and enhanced by an index writing process in Segment.storeDocument
-        byte[] anchorhash = entry.url().hash();
-        if (entry.referrerhash() != null) {
-            if (this.indexSegment.connectedCitation()) try {
-                this.indexSegment.urlCitation().add(anchorhash, new CitationReference(entry.referrerhash(), entry.appdate().getTime()));
-            } catch (final Exception e) {
-                ConcurrentLog.logException(e);
-            }
-            
-            // TODO: write to webgraph??
-        }
         
         try {
             final String rejectReason = stackCrawl(entry);

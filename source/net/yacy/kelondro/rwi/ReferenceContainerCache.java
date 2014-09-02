@@ -170,7 +170,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         try {
             dump.close(true);
-            log.info("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
+            log.info("finished rwi heap dump: " + wordcount + " terms, " + urlcount + " term/data relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
         } catch (final IOException e) {
             log.severe("failed rwi heap dump: " + e.getMessage(), e);
         } finally {

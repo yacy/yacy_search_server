@@ -52,6 +52,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.utils.crypt;
 
@@ -417,18 +418,10 @@ public class URIMetadataNode extends SolrDocument {
     public WordReferenceVars word() {
         return this.word;
     }
-    
-    private static List<String> indexedList2protocolList(Collection<Object> iplist, int dimension) {
-        List<String> a = new ArrayList<String>(dimension);
-        for (int i = 0; i < dimension; i++) a.add("http");
-        if (iplist == null) return a;
-        for (Object ip: iplist) a.set(Integer.parseInt(((String) ip).substring(0, 3)), ((String) ip).substring(4));
-        return a;
-    }
 
     public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
         Collection<Object> urlstub = doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_urlstub_sxt :  CollectionSchema.outboundlinks_urlstub_sxt).getSolrFieldName());
-        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_protocol_sxt : CollectionSchema.outboundlinks_protocol_sxt).getSolrFieldName()), urlstub.size());
+        Collection<String> urlprot = urlstub == null ? null : CollectionConfiguration.indexedList2protocolList(doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_protocol_sxt : CollectionSchema.outboundlinks_protocol_sxt).getSolrFieldName()), urlstub.size());
         String u;
         LinkedHashSet<String> list = new LinkedHashSet<String>();
         if (urlprot != null && urlstub != null) {

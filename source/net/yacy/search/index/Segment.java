@@ -29,6 +29,7 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -44,7 +45,6 @@ import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
@@ -532,7 +532,8 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
+        final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
+        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);
@@ -560,23 +561,43 @@ public class Segment {
                 }
             }
         
-            // write the edges to the citation reference index
-            if (this.connectedCitation()) try {
-                // normal links
-                for (SolrInputDocument edge: webgraph) {
-                    String referrerhash = (String) edge.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
-                    String anchorhash = (String) edge.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
-                    if (referrerhash != null && anchorhash != null) {
-                        urlCitationIndex.add(ASCII.getBytes(anchorhash), new CitationReference(ASCII.getBytes(referrerhash), loadDate.getTime()));
+        }
+        
+
+        // write the edges to the citation reference index
+        if (this.connectedCitation()) try {
+            // we use the subgraph to write the citation index, that shall cause that the webgraph and the citation index is identical
+            
+            if (collectionConfig.contains(CollectionSchema.inboundlinks_protocol_sxt) || collectionConfig.contains(CollectionSchema.inboundlinks_urlstub_sxt)) {
+                Collection<Object> inboundlinks_urlstub = vector.getFieldValues(CollectionSchema.inboundlinks_urlstub_sxt.getSolrFieldName());
+                List<String> inboundlinks_protocol = inboundlinks_urlstub == null ? null : CollectionConfiguration.indexedList2protocolList(vector.getFieldValues(CollectionSchema.inboundlinks_protocol_sxt.getSolrFieldName()), inboundlinks_urlstub.size());
+                if (inboundlinks_protocol != null && inboundlinks_urlstub != null && inboundlinks_protocol.size() == inboundlinks_urlstub.size() && inboundlinks_urlstub instanceof List<?>) {
+                    for (int i = 0; i < inboundlinks_protocol.size(); i++) {
+                        String targetURL = inboundlinks_protocol.get(i) + "://" + ((String) ((List<?>) inboundlinks_urlstub).get(i));
+                        String referrerhash = id;
+                        String anchorhash = ASCII.String(new DigestURL(targetURL).hash());
+                        if (referrerhash != null && anchorhash != null) {
+                            urlCitationIndex.add(ASCII.getBytes(anchorhash), new CitationReference(ASCII.getBytes(referrerhash), loadDate.getTime()));
+                        }
                     }
                 }
-                // media links as well!
-                for (DigestURL image: document.getImages().keySet()) urlCitationIndex.add(image.hash(), new CitationReference(url.hash(), loadDate.getTime()));
-                for (AnchorURL audio: document.getAudiolinks().keySet()) urlCitationIndex.add(audio.hash(), new CitationReference(url.hash(), loadDate.getTime()));
-                for (AnchorURL video: document.getVideolinks().keySet()) urlCitationIndex.add(video.hash(), new CitationReference(url.hash(), loadDate.getTime()));
-            } catch (Throwable e) {
-                ConcurrentLog.logException(e);
             }
+            if (collectionConfig.contains(CollectionSchema.outboundlinks_protocol_sxt) || collectionConfig.contains(CollectionSchema.outboundlinks_urlstub_sxt)) {
+                Collection<Object> outboundlinks_urlstub = vector.getFieldValues(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName());
+                List<String> outboundlinks_protocol = outboundlinks_urlstub == null ? null : CollectionConfiguration.indexedList2protocolList(vector.getFieldValues(CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName()), outboundlinks_urlstub.size());
+                if (outboundlinks_protocol != null && outboundlinks_urlstub != null && outboundlinks_protocol.size() == outboundlinks_urlstub.size() && outboundlinks_urlstub instanceof List<?>) {
+                    for (int i = 0; i < outboundlinks_protocol.size(); i++) {
+                        String targetURL = outboundlinks_protocol.get(i) + "://" + ((String) ((List<?>) outboundlinks_urlstub).get(i));
+                        String referrerhash = id;
+                        String anchorhash = ASCII.String(new DigestURL(targetURL).hash());
+                        if (referrerhash != null && anchorhash != null) {
+                            urlCitationIndex.add(ASCII.getBytes(anchorhash), new CitationReference(ASCII.getBytes(referrerhash), loadDate.getTime()));
+                        }
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            ConcurrentLog.logException(e);
         }
         
         if (error != null) {
