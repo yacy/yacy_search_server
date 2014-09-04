@@ -21,23 +21,25 @@
 package net.yacy.document.parser;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Element;
-
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -62,55 +64,107 @@ public class apkParser extends AbstractParser implements Parser  {
          * - author (name of signer)
          * - strings from resources
          */
-        return null;
+        Document[] docs = null;
+        try {
+            File tempFile = File.createTempFile("apk" + System.currentTimeMillis(), "jar");
+            tempFile.deleteOnExit();
+            final FileOutputStream out = new FileOutputStream(tempFile);
+            int read = 0;
+            final byte[] data = new byte[1024];
+            while((read = source.read(data, 0, 1024)) != -1) {
+                out.write(data, 0, read);
+            }
+            out.close();
+            JarFile jf = new JarFile(tempFile);
+            docs = parse(location, mimeType, charset, jf);
+            tempFile.delete();
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+        }
+        return docs;
     }
     
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final JarFile jf) {
+        StringBuilder sb = new StringBuilder();
+        String title = location.getFileName();
+        AndroidManifestParser manifest = null;
+        try {
+            InputStream is = jf.getInputStream(jf.getEntry("AndroidManifest.xml"));
+            byte[] xml = new byte[is.available()];
+            is.read(xml);
+            manifest = new AndroidManifestParser(xml, true);
+            title = location.getFileName() + " " + manifest.packageName + " " + manifest.versionName;
+            sb.append(title).append(". ");
+            for (String p: manifest.permissions) sb.append(p).append(". ");
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+        }
+
+        Enumeration<JarEntry> je = jf.entries();
+        while (je.hasMoreElements()) {
+            String path = je.nextElement().toString();
+            sb.append(path).append(". ");
+        }
+
+        final Collection<AnchorURL> links = new ArrayList<>();
+        try {
+            InputStream is = jf.getInputStream(jf.getEntry("resources.arsc"));
+            List<String> resources = resourcesArscParser(is);
+            for (String s: resources) {
+                sb.append(s).append(". ");
+                int p = s.indexOf("http://");
+                if (p < 0) p = s.indexOf("https://");
+                if (p < 0) p = s.indexOf("ftp://");
+                if (p >= 0) {
+                    int q = s.indexOf(' ', p + 1);
+                    String link = q < 0 ? s.substring(p) : s.substring(p, q);
+                    try {
+                        links.add(new AnchorURL(link));
+                    } catch (MalformedURLException e) {}
+                }
+            }
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+        }        
+
+        return new Document[]{new Document(
+                location,
+                mimeType,
+                charset,
+                this,
+                null,
+                null,
+                singleList(title),
+                "",
+                manifest == null ? "" : manifest.packageName,
+                null,
+                null,
+                0.0f, 0.0f,
+                sb.toString(),
+                links,
+                null,
+                null,
+                false,
+                new Date())};
+    }
     
-    public static class BinaryXMLParser {
+    public static class AndroidManifestParser {
+        // this is a simplified Android binary XML parser which reads
+        // parts of the xml into metadata fields
     
         private boolean debug = false;
-        private org.w3c.dom.Document w3cdoc;
+        public String versionCode = null;
+        public String versionName = null;
+        public String packageName = null;
+        public String minSdkVersion = null;
+        public String targetSdkVersion = null;
+        public Set<String> permissions = new HashSet<>();
+        public Set<String> actions = new HashSet<>();
+        public Set<String> categories = new HashSet<>();
         
-        public BinaryXMLParser(boolean debug) {
+        public AndroidManifestParser(final byte[] xml, final boolean debug) {
             this.debug = debug;
-            try {
-
-                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-                this.w3cdoc = docBuilder.newDocument();
-
-                Element manifestElement = this.w3cdoc.createElement("manifest");
-                this.w3cdoc.appendChild(manifestElement);
-                manifestElement.setAttribute("versionCode", "resourceID 0x4");
-                manifestElement.setAttribute("versionName", "0.4");
-                manifestElement.setAttribute("package", "de.anomic.tvtroll");
-                
-                Element usessdk = this.w3cdoc.createElement("uses-sdk");
-                manifestElement.appendChild(usessdk);
-                usessdk.setAttribute("minSdkVersion", "resourceID 0x8");
-                usessdk.setAttribute("targetSdkVersion", "resourceID 0x8");
-                
-                Element usespermission = this.w3cdoc.createElement("uses-permission");
-                manifestElement.appendChild(usespermission);
-                usespermission.setAttribute("name", "android.permission.INTERNET");
-                usespermission.setTextContent("dummy");
-         
-                // write the content into xml file
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                DOMSource source = new DOMSource(this.w3cdoc);
-                StreamResult result = new StreamResult(new File("test.xml"));
-         
-                // Output to console for testing
-                // StreamResult result = new StreamResult(System.out);
-         
-                transformer.transform(source, result);
-         
-            } catch (ParserConfigurationException e) {
-                e.printStackTrace();
-            } catch (TransformerException e) {
-                e.printStackTrace();
-            }
+            decompressXML(xml);
         }
             
         /**
@@ -139,7 +193,7 @@ public class apkParser extends AbstractParser implements Parser  {
          * Parse the 'compressed' binary form of Android XML docs such as for AndroidManifest.xml in .apk files
          * @param xml
          */
-        public void decompressXML(byte[] xml) {
+        private void decompressXML(byte[] xml) {
             // Compressed XML file/bytes starts with 24x bytes of data,
             // 9 32 bit words in little endian order (LSB first):
             // 0th word is 03 00 08 00
@@ -226,7 +280,6 @@ public class apkParser extends AbstractParser implements Parser  {
                     //startTagLineNo = lineNo;
     
                     // Look for the Attributes
-                    StringBuffer sb = new StringBuffer();
                     Map<String, String> attributes = new LinkedHashMap<>();
                     for (int ii = 0; ii < numbAttrs; ii++) {
                         //int attrNameNsSi = LEW(xml, off); // AttrName Namespace Str
@@ -243,17 +296,16 @@ public class apkParser extends AbstractParser implements Parser  {
     
                         String attrName = compXmlString(xml, sitOff, stOff, attrNameSi);
                         String attrValue = attrValueSi != -1 ? compXmlString(xml, sitOff, stOff, attrValueSi) : "resourceID 0x" + Integer.toHexString(attrResId);
-                        sb.append(" " + attrName + "=\"" + attrValue + "\"");
                         attributes.put(attrName, attrValue);
                         // tr.add(attrName, attrValue);
                     }
-                    if (this.debug) prtIndent(indent, "<" + name + sb + ">");
+                    evaluateTag(indent, name, attributes);
                     indent++;
                 } else if (tag0 == endTag) { // XML END TAG
                     indent--;
                     off += 6 * 4; // Skip over 6 words of endTag data
                     String name = compXmlString(xml, sitOff, stOff, nameSi);
-                    if (this.debug) prtIndent(indent, "</" + name + ">");
+                    evaluateTag(indent, name, null);
                     // tr.parent(); // Step back up the NobTree
                 } else if (tag0 == endDocTag) { // END OF XML DOC TAG
                     break;    
@@ -265,17 +317,51 @@ public class apkParser extends AbstractParser implements Parser  {
         }
     
         public String compXmlString(byte[] xml, int sitOff, int stOff, int strInd) {
-            if (strInd < 0)
-                return null;
+            if (strInd < 0) return null;
             int strOff = stOff + LEW(xml, sitOff + strInd * 4);
             return compXmlStringAt(xml, strOff);
         }
     
-        public void prtIndent(int indent, String str) {
-            StringBuilder sb = new StringBuilder(indent * 2 + str.length());
-            for (int i = 0; i < indent; i++) sb.append("  ");
-            sb.append(str);
-            System.out.println(sb.toString());
+        public void evaluateTag(int indent, String tagName, Map<String, String> attributes) {
+            if (this.debug) {
+                StringBuilder sb = new StringBuilder(100);
+                for (int i = 0; i < indent; i++) sb.append("  ");
+                if (attributes == null) {
+                    sb.append("</").append(tagName).append('>');
+                } else {
+                    sb.append('<').append(tagName);
+                    for (Map.Entry<String, String> entry: attributes.entrySet()) {
+                        sb.append(' ').append(entry.getKey()).append("=\"").append(entry.getValue()).append('\"');
+                    }
+                    sb.append('>');
+                }
+                System.out.println(sb.toString());
+            }
+            
+            // evaluate the content
+            if (attributes != null) {
+                if ("manifest".equals(tagName)) {
+                    this.versionCode = attributes.get("versionCode");
+                    this.versionName = attributes.get("versionName");
+                    this.packageName = attributes.get("package");
+                }
+                if ("uses-sdk".equals(tagName)) {
+                    this.minSdkVersion = attributes.get("minSdkVersion");
+                    this.targetSdkVersion = attributes.get("targetSdkVersion");
+                }
+                if ("uses-permission".equals(tagName)) {
+                    final String permission = attributes.get("name");
+                    if (permission != null) this.permissions.add(permission);
+                }
+                if ("action".equals(tagName)) {
+                    final String action = attributes.get("name");
+                    if (action != null) this.actions.add(action);
+                }
+                if ("category".equals(tagName)) {
+                    final String category = attributes.get("name");
+                    if (category != null) this.categories.add(category);
+                }
+            }
         }
     
         /**
@@ -290,7 +376,9 @@ public class apkParser extends AbstractParser implements Parser  {
             int strLen = arr[strOff + 1] << 8 & 0xff00 | arr[strOff] & 0xff;
             char[] chars = new char[strLen];
             for (int ii = 0; ii < strLen; ii++) {
-                chars[ii] = (char) (((arr[strOff + 2 + ii * 2 + 1] & 0x00FF) << 8) + (arr[strOff + 2 + ii * 2] & 0x00FF));
+                int p0 = strOff + 2 + ii * 2;
+                if (p0 >= arr.length - 1) break; // this should never happen if the compressed xml is well-formed, but some are not(!)
+                chars[ii] = (char) (((arr[p0 + 1] & 0x00FF) << 8) + (arr[p0] & 0x00FF));
             }
             return new String(chars);
         }
@@ -307,18 +395,69 @@ public class apkParser extends AbstractParser implements Parser  {
     
     }
     
+    /**
+     * this arsc parser is far away from being correct, it's just a hack
+     * @param arscStream a stream from the arsc content
+     * @return a list of resource strings
+     * @throws IOException
+     */
+    public static List<String> resourcesArscParser(InputStream arscStream) throws IOException {
+        final byte[] asa = new byte[arscStream.available()];
+        arscStream.read(asa);
+        int pos = 0;
+        final Charset charset = Charset.forName("UTF-8");
+        final List<String> s = new ArrayList<>();
+        parseloop: while (pos < asa.length) {
+            while (pos < asa.length && asa[pos] != 0) pos++;
+            if (pos + 2 >= asa.length) break parseloop;
+            // the next two bytes are counters:
+            // the first counts the number of characters
+            // the second counts the number of bytes (which may be greater)
+            int charcount = asa[++pos];
+            if (charcount == 0) continue parseloop;
+            int bytecount = asa[++pos];
+            if (bytecount == 0) continue parseloop;
+            pos++;
+            if (bytecount < charcount) continue parseloop;
+            if (pos + bytecount + 1 > asa.length) break parseloop;
+            if (asa[pos + bytecount] != 0) {pos++; continue parseloop;} // must be terminated by 0
+            for (int i = pos; i < pos + bytecount; i++) if (asa[i] == 0) {pos++; continue parseloop;} // must not contain a 0
+            String t = new String(asa, pos, bytecount, charset);
+            if (t.length() == charcount) s.add(t);
+            pos += bytecount;
+        }
+        return s;
+    }
+    
     public static void main(String[] args) {
+        System.out.println("apk parser test with file " + args[0]);
+        System.out.println();
+        System.out.println("File list:");
         try {
             JarFile jf = new JarFile(args[0]);
+            Enumeration<JarEntry> e = jf.entries();
+            while (e.hasMoreElements()) {
+                String path = e.nextElement().toString();
+                System.out.println(path);
+            }
+            System.out.println();
+            System.out.println("AndroidManifest.xml:");
             InputStream is = jf.getInputStream(jf.getEntry("AndroidManifest.xml"));
             byte[] xml = new byte[is.available()];
             is.read(xml);
-            //Tree tr = TrunkFactory.newTree();
-            new BinaryXMLParser(true).decompressXML(xml);
-            //prt("XML\n"+tr.list());
-          } catch (Exception ex) {
-            //log("getIntents, ex: "+ex);  ex.printStackTrace();
-          }
+            @SuppressWarnings("unused")
+            AndroidManifestParser manifest = new AndroidManifestParser(xml, true);
+
+            System.out.println();
+            System.out.println("resources.arsc:");
+            is = jf.getInputStream(jf.getEntry("resources.arsc"));
+            List<String> resources = resourcesArscParser(is);
+            for (String s: resources) {
+                System.out.println(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.exit(1);
     }
     
