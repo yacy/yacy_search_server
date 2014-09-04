@@ -779,12 +779,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     public String getHost() {
+        /*
         if (this.host == null) return null;
         if (this.host.length() > 0 && this.host.charAt(0) == '[') {
             int p = this.host.indexOf(']');
             if (p < 0) return this.host;
             return this.host.substring(1, p);
         }
+        */
         return this.host;
     }
     
