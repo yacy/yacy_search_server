@@ -106,7 +106,7 @@ public class ISO639 {
         "mk-Macedonian",
         "ml-Malayalam",
         "mn-Mongolian",
-        "mo-Moldavian",
+        //"mo-Moldavian", // this maps on 'mozilla' :(
         "mr-Marathi",
         "ms-Malay",
         "mt-Maltese",
