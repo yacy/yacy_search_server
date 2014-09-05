@@ -485,10 +485,10 @@ which is not fatal, but would be good for the YaCy network==это не крит
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==пожалуйста, разрешите подключения на этот порт в вашем брандмауэре или в настройках роутера
 Your peer can be reached by other peers==Ваш узел доступен для других узлов
 Peer Port:==Порт узла:
-with SSL==использовать SSL
+with SSL== использовать SSL
 https enabled==HTTPS разрешено
 on port==на порту
-Configure your router for YaCy:==Включить UPnP:
+Configure your router for YaCy using UPnP:==Включить UPnP:
 Configuration was not successful. This may take a moment.==Настройки не были применены. Попробуйте через некоторое время.
 Set Configuration==Сохранить
 Your basic configuration is complete! You can now \(for example\)==Основная настройка завершена! Теперь вы можете
@@ -612,6 +612,9 @@ Active==Включено
 Attribute==Аттрибут
 Custom Solr Field Name==Пользовательское имя поля Solr
 Comment==Комментарий
+show active==Показать активные
+show all available==Показать все доступные
+show disabled==Показать отключенные
 "Set"=="Сохранить"
 "reset selection to default"=="Вернуть значения по-умолчанию"
 >Reindex documents<==>Переиндексация документов<
@@ -993,32 +996,32 @@ http://url-of-the-search-result.net==http://url-of-the-search-result.net
 >System Update<==>Обновление системы<
 Manual System Update==Ручное обновление
 Current installed Release==Текущая установленная версия
-Available Releases==Доступные версии
+Available Releases==Доступные обновления
 >changelog<==>список изменений<
 > and <==> и <
 > RSS feed<==> RSS лента<
 \(unsigned\)==(не подписано)
 \(signed\)==(подписано)
-"Download Release"=="Загрузить версию"
+"Download Release"=="Загрузить обновление"
 "Check for new Release"=="Проверить обновления"
 Downloaded Releases==Загруженные обновления
-No downloaded releases available for deployment.==Нет скачанных версий доступных для установки
+No downloaded releases available for deployment.==Нет скачанных обновлений доступных для установки
 no&nbsp;automated installation on development environments==без автоматической установки на средах разработки
-"Install Release"=="Установить версию"
-"Delete Release"=="Удалить версию"
+"Install Release"=="Установить обновление"
+"Delete Release"=="Удалить обновление"
 Automatic Update==Автоматическое обновление
-check for new releases, download if available and restart with downloaded release==Проверить обновления, загрузить и перезапустить с новой версией
+check for new releases, download if available and restart with downloaded release==Проверить обновления, загрузить и перезапустить с новым обновлением
 "Check \+ Download \+ Install Release Now"=="Выполнить"
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Загрузка версии #[downloadedRelease]# завершена. Начинается перезагрузка.
-No more recent release found.==Более новой версии не обнаружено.
-Release will be installed. Please wait.==Идет установка новой версии. Пожалуйста, подождите.
+No more recent release found.==Более нового обновления не обнаружено.
+Release will be installed. Please wait.==Идет установка нового обновления. Пожалуйста, подождите.
 You installed YaCy with a package manager.==
 To update YaCy, use the package manager:==Для обновления YaCy используйте менеджер пакетов.
 Omitting update because this is a development environment.==Пропускаю обновление, потому что это версия для разработчиков.
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==Пропускаю обновление, потому что загрузка версии #[downloadedRelease]# не была успешной.
 Automated System Update==Автоматическое обновление
 manual update==Ручное обновление
-no automatic look-up, updates can be made manually using this interface \(see options above\)==Обновление можно сделать вручную на этой странице.
+no automatic look-up, updates can be made manually using this interface \(see options above\)==Обновление можно выполнить вручную на этой странице.
 automatic update==Автоматическое обновление
 add the following line to==добавьте строку в файл
 updates are made within fixed cycles:==Обновление выполняется через установленный промежуток времени:
@@ -1028,15 +1031,15 @@ Release blacklist==Черный список релизов
 regex on release number strings==список регулярных выражений с номерами выпусков
 Release type==Тип релиза
 only main releases==только финальные релизы
-any release including developer releases==любые версии, включая версии для разработчиков
+any release including developer releases==любые обновления, включая версии для разработчиков
 Signed autoupdate:==Подписанные обновления
 only accept signed files==принимать только подписанные файлы
 "Submit"=="Применить"
 Accepted Changes.==Изменения приняты
 System Update Statistics==Статистика обновления системы
-Last System Lookup==Последняя проверка системы
+Last System Lookup==Последняя проверка обновления
 never==никогда
-Last Release Download==Последняя загрузка версии
+Last Release Download==Последняя загрузка обновления
 Last Deploy==Последнее обновление
 #-----------------------------
 
@@ -1238,7 +1241,7 @@ These web pages had been crawled by your own crawl task.==Эти вэб-стра
 \(6\) Results for Global Crawling==(6) Результаты глобального индексирования
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Эти страницы проиндексированы вашим узлом, но индексатор был инициирован удалённым узлом..
 This is the 'mirror'-case of process \(1\).==Это противоположность процессу (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==Этот список будет пополняться, если вы включите "Выполнять удалённое индексирование" на странице "Удалённое индексирование".
+<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the '<a href="RemoteCrawl_p.html">Index Create</a>' page==Этот список будет пополняться, если вы включите "Выполнять удалённое индексирование" на странице '<a href="RemoteCrawl_p.html">Удалённое индексирование</a>'.
 The stack is empty.==Список пуст.
 Statistics about \#\[domains\]\# domains in this stack:==В этой таблице данные о #[domains]# доменах:
 \(7\) Results from surrogates import==\(7\) Результаты замещающего импорта
@@ -1302,6 +1305,7 @@ Restrict to sub-path\(s\)==Запретить часть пути
 #that must match with the URLs which are used to be crawled; default is \'catch all\'.==которые должны совпадать с ссылками для индексации; по-умолчанию 'берутся все'.
 Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'.==Например, для разрешения только ссылок, содержащих слово 'science' , нужно установить фильтр '.*science.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Вы можете также использовать автоматическое ограничение домена при полном индексировании простого домена.
+Attention: you can test the functionality of your regular expressions using the <a href="/RegexTest.html">Regular Expression Tester</a> within YaCy</a>.==Внимание! Вы можете проверить правильность ваших регулярных выражений используя <a href="/RegexTest.html">тестер</a> в YaCy</a>.
 #Must-Not-Match Filter==Фильтр "не должно совпадать"
 #This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
 #The empty string is a never-match filter which should do well for most cases.==Пустая строка означает фильтр "никогда не совпадать", который хорошо подходит в большинстве случаев.
@@ -1830,6 +1834,7 @@ Stop Crawler and delete Crawl Queues==Остановить индексатор 
 Delete robots.txt Cache==Удалить кэш robots.txt
 Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты, полученные ошибочно во время поиска
 "Delete"=="Удалить"
+Confirm Deletion==Подтвердите удаление
 Statistics about top-domains in URL Database==Список наиболее распространённых доменов в базе данных ссылок
 Show top==Показать
 domains from all URLs.==наиболее часто встречающихся доменов среди всех URL.
@@ -2716,7 +2721,7 @@ Search Event Cache<==Поиск события кэша<
 #File: PerformanceQueues_p.html
 #---------------------------
 Performance Settings of Queues and Processes==Настройки производительности очередей и процессов
-Scheduled tasks overview and waiting time settings:==Обзор запланированных задач и настройки времени ожидания:
+Scheduled tasks overview and waiting time settings:==Обзор запланированных задач и настройки времени ожидания
 >Thread<==>Поток<
 Queue Size==Размер очереди
 >Total==>Общее
@@ -2866,6 +2871,8 @@ An error has occurred:==Произошла ошибка:
 You can see a snapshot of recently indexed pages==Вы можете увидеть недавно проиндексированные данные
 on the==на странице
 Page.==
+
+
 #-----------------------------
 
 #File: QuickCrawlLink_p.html
@@ -2950,7 +2957,7 @@ Example: to order by date, use==Например: для сортировки п
 The Boost Query is attached to every query. Use this to statically boost specific content in the index.==Die Boost Abfrage wird an jede Abfrage angehängt. Verwenden sie diese Einstellung, um spezifischen Inhalt im Index zu boosten.
 Example: "fuzzy==Например: "fuzzy
  means that documents, identified as 'double' are ranked very bad and appended to the end of all results \(because the unique are ranked high\).== bedeutet dass Dokumente die als 'double' identifiziert werden sehr schlecht geranked werden und an das Ende der Suchergebnisliste angehängt werden (weil die eindeutigen hoch geranked werden).
-To find appropriate fields for this query, see the ==Чтобы найти соответствующие поля запросов, смотрите
+To find appropriate fields for this query, see the ==Чтобы найти соответствующие поля запросов, смотрите 
 >YaCy Solr Schema<==>схему Solr<
  and look for boolean values \(with suffix '_b'\) or tags inside string fields \(with suffix '_s' or '_sxt'\).== и ищите логические значения (с суффиксом '_b') или тэги внутри строк (с суффиксом '_s' или '_sxt')
 
@@ -2981,8 +2988,8 @@ error in expression:==Ошибка в выражении:
 #File: RemoteCrawl_p.html
 #---------------------------
 Remote Crawl Configuration==Конфигурация удалённого индексирования
->Remote Crawler<==>Удалённый индексатор<
-The remote crawler is a process that requests urls from other peers.==Удалённый индексатор получает ссылки для индексирования от других узлов.
+>Remote Crawler<==>Удалённое индексирование<
+The remote crawler is a process that requests urls from other peers.==Удалённое индексирование выполняется при получении ссылок для индексирования от других узлов.
 Peers offer remote-crawl urls if the flag \'Do Remote Indexing\'==Узлы отправляют удалённому индексатору ссылки с флагом \'Произвести удалённое индексирование\' 
 is switched on when a crawl is started.==и после этого начинается индексация.
 Remote Crawler Configuration==Конфигурация удалённого индексирования
@@ -3023,9 +3030,9 @@ Server Access Settings==Настройки доступа к серверу
 Proxy Access Settings==Настройки доступа к прокси-серверу
 Crawler Settings==Настройки индексатора
 HTTP Networking==HTTP сеть
-Remote Proxy \(optional\)==Удалённый прокси (опционально)
+Remote Proxy \(optional\)==Удалённый прокси
 Seed Upload Settings==Настройки загрузки сида
-Message Forwarding \(optional\)==Отправка уведомления (опционально)
+Message Forwarding \(optional\)==Отправка уведомления
 #-----------------------------
 
 #File: Settings_Crawler.inc
@@ -3049,26 +3056,12 @@ Timeout:==Ожидание:
 
 #File: Settings_Http.inc
 #---------------------------
-HTTP Networking==Настройки протокола HTTP
-Transparent Proxy==Прозрачный прокси
-With this you can specify if YaCy can be used as transparent proxy.==Включите эту опцию, если вам нужно использовать YaCy в качестве прозрачного прокси.
-Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Совет: В линукс-системах вы можете настроить файервол на прозрачное перенаправление всего трафика через YaCy с этими правилами iptables
-Connection Keep-Alive==Постоянное соединение
-With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Включите эту опцию, если вам необходимо постоянное соединение с YaCy.
-Send "Via" Header==Отправлять заголовок "Via"
-Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Отметьте, если прокси должен отправлять заголовок <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
-http header according to RFC 2616 Sect 14.45.==, описанный в RFC 2616 раздел 14.45.
-Send "X-Forwarded-For" Header==Отправлять заголовок "X-Forward-For"
-Specifies if the proxy should send the X-Forwarded-For http header.==Отметьте, если прокси должен отправлять заголовок "X-Forward-For"
-"Submit"=="Сохранить"
-Changes will take effect immediately.==Изменения будут применены немедленно.
-HTTP Server==HTTP сервер
-Version==версии
+
 #-----------------------------
 
 #File: Settings_Proxy.inc
 #---------------------------
-Remote Proxy \(optional\)==Удалённый прокси (опционально)
+Remote Proxy \(optional\)==Удалённый прокси
 YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy может использовать другой прокси для соединения с интернетом. Вы можете указать адрес удалённого прокси здесь.
 Use remote proxy</label>==Использовать удалённый прокси</label>
 Enables the usage of the remote proxy by yacy==Разрешает использование удалённого прокси
@@ -3091,6 +3084,22 @@ Changes will take effect immediately.==Изменения будут приме�
 
 #File: Settings_ProxyAccess.inc
 #---------------------------
+Proxy Settings==Настройки прокси
+Transparent Proxy==Прозрачный прокси
+With this you can specify if YaCy can be used as transparent proxy.==Включите эту опцию, если вам нужно использовать YaCy в качестве прозрачного прокси.
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Совет: В линукс-системах вы можете настроить фаервол на прозрачное перенаправление всего трафика через YaCy с этими правилами iptables
+With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Включите эту опцию, если вам необходимо постоянное соединение с YaCy.
+Send "Via" Header==Отправлять заголовок "Via"
+Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Отметьте, если прокси должен отправлять заголовок <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
+http header according to RFC 2616 Sect 14.45.==, описанный в RFC 2616 раздел 14.45.
+Send "X-Forwarded-For" Header==Отправлять заголовок "X-Forward-For"
+Specifies if the proxy should send the X-Forwarded-For http header.==Отметьте, если прокси должен отправлять заголовок "X-Forward-For"
+"Submit"=="Сохранить"
+Changes will take effect immediately.==Изменения будут применены немедленно.
+HTTP Server Port==Порт HTTP
+HTTPS Server Port==Порт HTTPS
+"change"=="Изменить"
+Version==версии
 Proxy Access Settings==Настройки доступа к прокси
 These settings configure the access method to your own http proxy and server.==Здесь вы можете настроить доступ к вашему http-прокси и серверу.
 All traffic is routed throug one single port, for both proxy and server.==Весь трафик направляется на один порт для прокси и сервера.
@@ -3196,8 +3205,11 @@ By default, the access is not limited,==По-умолчанию доступ н�
 because this function is needed to spawn the p2p index-sharing function.==потому что это необходимо для начала передачи индекса посредством пиринга.
 If you block access to your server \(setting anything else than \'\*\'\), then you will also be blocked==Если вы заблокируете доступ к вашему серверу, то вы также заблокируете
 from using other peers' indexes for search service.==использование поиска индексов другими узлами.
-However, blocking access may be correct in enterprise environments where you only want to index your==Ограничение доступа может быть полезным в корпоративной сети, где требуется только индексирование,
+However, blocking access may be correct in enterprise environments where you only want to index your==Ограничение доступа может быть полезным в корпоративной сети, где требуется только индексирование 
 company's own web pages.==вэб-страниц компаний.
+Filter have to be entered as IP, IP range or first part of allowed IP's separated by comma \(e.g. 10.100.0-100.0-100, 127. \)== Фильтр возможен по ip-адресу, по диапазону ip-адресов или по первым числам ip-адреса через запятую, (например  10.100.0-100.0-100, 127.)
+further details on format see Jetty ==Подробную информацию об IPAccessHandler смотрите
+<a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.==<a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">здесь</a>.
 staticIP \(optional\):==Постоянный IP-адрес (необязательно):
 <strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>Использование постоянного IP-адреса может помочь вашему узлу соединиться с другиму узлами
 peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==в случае, если вы используете фаервол или прокси.</strong> Вы можете создать туннель через фаервол или прокси
@@ -4233,8 +4245,8 @@ YaCy - Distributed Search Engine==YaCy - Система распределённ
 ### SEARCH DESIGN ###
 Search&nbsp;Design==Интеграция поиска
 Search Integration==Интеграция поиска
-Portal Configuration==Конфигурация поискового портала
-Design==Настройка поиска
+Portal Configuration==Настройка интеграции поиска
+Portal Design==Настройка внешнего вида
 Ranking and Heuristics==Ранжирование и эвристика
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
@@ -4248,7 +4260,7 @@ Process Scheduler==Планировщик
 ### MONITORING ###
 Monitoring==Мониторинг
 YaCy Network==Сеть YaCy
-Web Visualization==Визуализация сети
+Index Browser==Просмотр индекса
 Network Access==Монитор доступа к серверу
 Computation==Лог сервера
 >Terminal==>Терминал
@@ -4324,6 +4336,9 @@ Local Search<==Локальный поиск<
 Log==Лог
 Host Tracker==Хост-трекер
 Remote Search<==Удалённый поиск<
+Cookie Menu==Монитор куки
+Incoming&nbsp;Cookies==Входящие куки
+Outgoing&nbsp;Cookies==Исходящие куки
 #-----------------------------
 
 #File: env/templates/submenuIndexImport.template
@@ -4390,7 +4405,7 @@ Thread Dump==Дамп потока
 
 #File: env/templates/submenuCrawler.template
 #-----------------------------
-Use Case &amp; Accounts==Учётные записи и варианты использования YaCy
+Load Web Pages==Индексирование сайта
 Site Crawling==Индексирование сайта
 Parser Configuration==Конфигурация парсера
 #-----------------------------
@@ -4407,6 +4422,8 @@ Advanced Settings==Настройки системы
 Local robots.txt==Локальный robots.txt
 Advanced Properties==Расширенные настройки
 >Thread Dump<==>Дамп потока<
+Viewer and administration for database tables==Просмотр и управление таблицами базы данных
+Performance Settings of Busy Queues==Настройки производительности
 #-----------------------------
 
 #File: env/templates/submenuDesign.template
@@ -4452,11 +4469,6 @@ Import Mediawiki dumps==Импорт дампов Mediawiki
 Import OAI-PMH Sources==Импорт OAI-PMH источников
 #-----------------------------
 
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Меню куки
-Incoming&nbsp;Cookies==Входящие куки
-Outgoing&nbsp;Cookies==Исходящие куки
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4589,7 +4601,7 @@ Server Log==Лог сервера
 
 #File: env/templates/submenuWebStructure.template
 #---------------------------
-Web Visualization==Вэб-визуализация
+Web Visualization==Просмотр индекса
 Web Structure==Вэб-структура
 Image Collage==Коллаж изображений
 Index Browser==Просмотр хостов
