@@ -117,10 +117,6 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
-            // move documents to metadata cache
-            for (Map.Entry<String, SolrInputDocument> entry: this.docBuffer.entrySet()) {
-                updateCache(entry.getKey(), AbstractSolrConnector.getLoadTimeURL(entry.getValue()));
-            }
             this.docBuffer.clear();
         }
     }
@@ -162,7 +158,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     @Override
     public long getSize() {
-        return this.connector.getSize() + this.docBuffer.size();
+        return Math.max(this.metadataCache.size(), this.connector.getSize() + this.docBuffer.size());
     }
 
     @Override
@@ -266,13 +262,12 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     @Override
     public void add(SolrInputDocument solrdoc) throws IOException, SolrException {
         String id = (String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-        this.metadataCache.remove(id); // remove the id from the metadata cache because it will be overwritten by the update process anyway
+        updateCache(id, AbstractSolrConnector.getLoadTimeURL(solrdoc));
         ensureAliveProcessHandler();
         if (this.processHandler.isAlive()) {
             synchronized (this.docBuffer) {this.docBuffer.put(id, solrdoc);}
         } else {
             this.connector.add(solrdoc);
-            updateCache(id, AbstractSolrConnector.getLoadTimeURL(solrdoc));
         }
         if (MemoryControl.shortStatus() || this.docBuffer.size() > this.updateCapacity) {
             commitDocBuffer();
@@ -285,6 +280,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         synchronized (this.docBuffer) {
             for (SolrInputDocument solrdoc: solrdocs) {
                 String id = (String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                updateCache(id, AbstractSolrConnector.getLoadTimeURL(solrdoc));
                 if (this.processHandler.isAlive()) {
                     this.docBuffer.put(id, solrdoc);
                 } else {
