@@ -10,7 +10,12 @@ a:link {
   background-color:transparent;
 }
 
-a:link:hover {
+a:visited {
+  color:#18294A;
+  background-color:transparent;
+}
+
+a:hover {
   color: #5cb85c;
   background-color:transparent;
 }
@@ -199,7 +204,7 @@ form.search.small h2 {
   text-decoration:none; 
   color:#1c65ba;
 }
-.searchresults h4 a:link:hover {
+.searchresults h4 a:hover {
   font-weight:bold;
   text-decoration:underline; 
   color:#1c65ba;
@@ -213,7 +218,7 @@ form.search.small h2 {
   text-decoration:none; 
   color:#3c7a3c;
 }
-.searchresults .url a:link:hover {
+.searchresults .url a:hover {
   text-decoration:underline; 
   color:#3c7a3c;
 }
@@ -289,7 +294,7 @@ legend a:link {
   color:white;
 }
 
-legend a:link:hover {
+legend a:hover {
   color:white;
 }
 

@@ -8,11 +8,11 @@ a:link {
   color:#5f5f5f;
 }
 
-a:link:hover {
+a:visited {
   color:#2f2f2f;
 }
 
-a:visited{
+a:hover {
   color:#2f2f2f;
 }
 

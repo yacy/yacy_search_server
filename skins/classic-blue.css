@@ -10,7 +10,12 @@ a:link {
   background-color:transparent;
 }
 
-a:link:hover {
+a:visited {
+  color:#00008B;
+  background-color:transparent;
+}
+
+a:hover {
   color:#0000FF;
   background-color:transparent;
 }

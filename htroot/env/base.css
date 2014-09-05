@@ -71,14 +71,17 @@ h4 {
 }
 
 a:link {
+  color:#18294A;
   text-decoration:underline;
 }
 
 a:visited {
+  color:#18294A;
   text-decoration:underline;
 }
 
 a:hover {
+  color:#18294A;
   text-decoration:underline;
 }
 

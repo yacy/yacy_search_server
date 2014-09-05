@@ -11,7 +11,12 @@ a:link {
   background-color:transparent;
 }
 
-a:link:hover {
+a:visited {
+  color:#9cdeed;
+  background-color:transparent;
+}
+
+a:hover {
   color: #52943e;
   background-color:transparent;
 }
@@ -199,7 +204,7 @@ form.search.small h2 {
   font-weight:normal;
   color:#ffffff;
 }
-.searchresults h4 a:link:hover {
+.searchresults h4 a:hover {
   color:#ffffff;
 }
 
@@ -210,7 +215,7 @@ form.search.small h2 {
 .searchresults .url a {
   color:#808080;
 }
-.searchresults .url a:link:hover {
+.searchresults .url a:hover {
   color:#808080;
 }
 

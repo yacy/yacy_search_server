@@ -9,14 +9,14 @@ a:link {
   color:#336633;
 }
 
-a:link:hover {
+a:visited {
+  color:#339933;
+}
+
+a:hover {
   color:#009900;
   text-decoration:underline;
 }
-
-a:link:visited {
-  color:#339933;
-  }
 
 
 /* Menu */
