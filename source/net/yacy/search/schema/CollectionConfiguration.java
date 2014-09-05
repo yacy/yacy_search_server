@@ -1852,7 +1852,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             
             final SolrInputDocument doc = new SolrInputDocument();
             String url = configuration.addURIAttributes(doc, allAttr, this.getDigestURL(), Response.docType(this.getDigestURL()));
-            if (allAttr || configuration.contains(CollectionSchema.load_date_dt)) configuration.add(doc, CollectionSchema.load_date_dt, new Date());
+            if (allAttr || configuration.contains(CollectionSchema.load_date_dt)) configuration.add(doc, CollectionSchema.load_date_dt, getFailDate());
             if (allAttr || configuration.contains(CollectionSchema.crawldepth_i)) configuration.add(doc, CollectionSchema.crawldepth_i, this.crawldepth);
             
             // fail reason and status
