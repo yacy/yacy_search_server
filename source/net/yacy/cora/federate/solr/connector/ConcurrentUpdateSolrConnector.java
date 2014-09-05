@@ -158,7 +158,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     @Override
     public long getSize() {
-        return Math.max(this.metadataCache.size(), this.connector.getSize() + this.docBuffer.size());
+        return Math.max(this.metadataCache.size(), this.connector.getSize());
     }
 
     @Override
