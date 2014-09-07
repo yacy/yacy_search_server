@@ -30,7 +30,6 @@ package net.yacy.gui;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -77,6 +76,7 @@ public final class Tray {
 			    if (SystemTray.isSupported()) {
     			    final String iconPath = sb.getAppPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
     			    final String progressPath = sb.getAppPath().toString() + "/addon/progressbar.png".replace("/", File.separator);
+    			    final String progressBootingPath = sb.getAppPath().toString() + "/addon/progress_booting.png".replace("/", File.separator);
                     ActionListener al = new ActionListener() {
     					@Override
                         public void actionPerformed(final ActionEvent e) {
@@ -84,13 +84,13 @@ public final class Tray {
     					}
     				};
     				this.trayIcon = ImageIO.read(new File(iconPath)); // 128x128
-    				Image progress_raw = ImageIO.read(new File(progressPath)); // 280x56
+                    Image progress_raw = ImageIO.read(new File(progressPath)); // 149x56
+                    Image progressBooting = ImageIO.read(new File(progressBootingPath)); // 128x28
     				BufferedImage progress = new BufferedImage(280, 56, BufferedImage.TYPE_INT_ARGB);
                     Graphics2D progressg = progress.createGraphics();
                     progressg.drawImage(progress_raw, 0, 0, null);
                     progressg.dispose();
                     this.progressIcons = new BufferedImage[4];
-                    Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 30);
                     for (int i = 0; i < 4; i++) {
     				    this.progressIcons[i] = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
                         Graphics2D h = this.progressIcons[i].createGraphics();
@@ -98,9 +98,7 @@ public final class Tray {
                         h.clearRect(0, 0, 128, 128);
                         h.drawImage(this.trayIcon, 0, 0, 128, 128 - progress.getHeight(), null);
                         h.drawImage(progress.getSubimage(i * 7, 0, 128, progress.getHeight() / 2), 0, 128 - progress.getHeight() / 2, null);
-                        h.setColor(Color.WHITE);
-                        h.setFont(font);
-                        h.drawString("booting...", 2, 128 - progress.getHeight() + 24);
+                        h.drawImage(progressBooting, 0, 128 - progress.getHeight(), null);
                         h.dispose();
     				}
                     final PopupMenu menu = (menuEnabled) ? getPopupMenu() : null;
