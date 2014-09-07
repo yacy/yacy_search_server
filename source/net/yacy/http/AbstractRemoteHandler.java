@@ -50,34 +50,38 @@ import org.eclipse.jetty.server.Request;
 abstract public class AbstractRemoteHandler extends ConnectHandler implements Handler {
 	
     protected Switchboard sb = null;
-    private List<String> localVirtualHostNames; // list for quick check for req to local peer
+    private final List<String> localVirtualHostNames = new LinkedList<String>(); // list for quick check for req to local peer
     
     @Override
     protected void doStart() throws Exception {
     	super.doStart();
-        sb = Switchboard.getSwitchboard();
+        this.sb = Switchboard.getSwitchboard();
+        this.localVirtualHostNames.add("localhost");
+        this.localVirtualHostNames.add(sb.getConfig("fileHost", "localpeer"));
 
-        localVirtualHostNames = new LinkedList<String>();
-        localVirtualHostNames.add("localhost");
-        localVirtualHostNames.add(sb.getConfig("fileHost", "localpeer"));
+        // Add some other known local host names
+        // The remote DNS sometimes takes very long when it is waiting for timeout, therefore we do this concurrently
+        new Thread() {
+            @Override
+            public void run() {
+                final InetAddress localInetAddress = Domains.myPublicLocalIP();
+                if (localInetAddress != null) {
+                    if (!localVirtualHostNames.contains(localInetAddress.getHostName())) {
+                        localVirtualHostNames.add(localInetAddress.getHostName());
+                        localVirtualHostNames.add(localInetAddress.getHostAddress());  // same as getServer().getURI().getHost()
+                    }
 
-        // add some other known local host names
-        InetAddress localInetAddress = Domains.myPublicLocalIP();
-        if (localInetAddress != null) {
-            if (!localVirtualHostNames.contains(localInetAddress.getHostName())) {
-                localVirtualHostNames.add(localInetAddress.getHostName());
-                localVirtualHostNames.add(localInetAddress.getHostAddress());  // same as getServer().getURI().getHost()
+                    if (!localVirtualHostNames.contains(localInetAddress.getCanonicalHostName())) {
+                        localVirtualHostNames.add(localInetAddress.getCanonicalHostName());
+                    }
+                }
+                if (sb.peers != null) {
+                    localVirtualHostNames.add(sb.peers.mySeed().getIP());
+                    localVirtualHostNames.add(sb.peers.myAlternativeAddress()); // add the "peername.yacy" address
+                    localVirtualHostNames.add(sb.peers.mySeed().getHexHash() + ".yacyh"); // bugfix by P. Dahl
+                }
             }
-
-            if (!localVirtualHostNames.contains(localInetAddress.getCanonicalHostName())) {
-                localVirtualHostNames.add(localInetAddress.getCanonicalHostName());
-            }
-        }
-        if (sb.peers != null) {
-            localVirtualHostNames.add(sb.peers.mySeed().getIP());
-            localVirtualHostNames.add(sb.peers.myAlternativeAddress()); // add the "peername.yacy" address
-            localVirtualHostNames.add(sb.peers.mySeed().getHexHash() + ".yacyh"); // bugfix by P. Dahl
-        }
+        }.start();
     }
 	
     abstract public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
