@@ -1,5 +1,3 @@
-package blacklists;
-
 import java.util.Collection;
 
 import net.yacy.cora.protocol.RequestHeader;

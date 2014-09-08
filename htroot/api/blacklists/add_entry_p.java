@@ -1,5 +1,3 @@
-package blacklists;
-
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.ListManager;
 import net.yacy.data.WorkTables;
