@@ -51,7 +51,7 @@ import net.yacy.search.SwitchboardConstants;
 public final class Tray {
 	private Switchboard sb;
 
-	private TrayIcon ti;
+	private TrayIcon ti = null;
 	private String trayLabel;
 
 	final private static boolean deutsch = System.getProperty("user.language","").equals("de");
@@ -63,6 +63,11 @@ public final class Tray {
 	private boolean menuEnabled = true;
     private Image trayIcon = null;
     private BufferedImage[] progressIcons = null;
+    
+    private MenuItem menuItemHeadline = null;
+    private MenuItem menuItemSearch = null;
+    private MenuItem menuItemAdministration = null;
+    private MenuItem menuItemTerminate = null;
 
 	public Tray(final Switchboard sb_par) {
 		sb = sb_par;
@@ -136,6 +141,7 @@ public final class Tray {
 	}
 	
 	private static void setDockIcon(Image icon) {
+	    if (!OS.isMacArchitecture) return;
 	    try {
 	        Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
 	        Method applicationGetApplication = applicationClass.getMethod("getApplication");
@@ -145,23 +151,21 @@ public final class Tray {
         } catch (Throwable e) {}
         // same as: Application.getApplication().setDockIconImage(i);
 	}
-
-    private MenuItem menuItemHeadline;
-    private MenuItem menuItemSearch;
-    private MenuItem menuItemAdministration;
-    private MenuItem menuItemTerminate;
+	
 	/**
 	 * set all functions available
 	 */
 	public void setReady() {
 		appIsReady = true;
-		ti.setImage(this.trayIcon);
-        if (OS.isMacArchitecture) setDockIcon(trayIcon);
-        ti.setToolTip(readyMessage());
-        this.menuItemHeadline.setLabel(readyMessage());
-        this.menuItemSearch.setEnabled(true);
-        this.menuItemAdministration.setEnabled(true);
-        this.menuItemTerminate.setEnabled(true);
+		if (ti != null) {
+	        ti.setImage(this.trayIcon);
+	        ti.setToolTip(readyMessage());
+		}
+        setDockIcon(trayIcon);
+        if (this.menuItemHeadline != null) this.menuItemHeadline.setLabel(readyMessage());
+        if (this.menuItemSearch != null) this.menuItemSearch.setEnabled(true);
+        if (this.menuItemAdministration != null) this.menuItemAdministration.setEnabled(true);
+        if (this.menuItemTerminate != null) this.menuItemTerminate.setEnabled(true);
 	}
 
 	public void remove() {
