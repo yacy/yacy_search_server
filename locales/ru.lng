@@ -833,7 +833,7 @@ IFFRESH: use the cache if the cache exists and is fresh otherwise load online==I
 IFEXIST: use the cache if the cache exist or load online==IFEXIST: использовать кэш или загружать из сети
 If verification fails, delete index reference==Если при проверке возникают ошибки, то удалите индекс ссылок
 CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet==CACHEONLY: не загружать фрагменты из сети, использовать только содержимое кэша. Если кэша нет, то данные загрузятся как есть. Некоторые фрагменты могут отсутствовать
-FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE: нет проверки ссылок и нет загрузки фрагментов: все результаты поиска не проверяются
+FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE: не проверять ссылки и не загружать фрагменты: все результаты поиска не проверяются
 Greedy Learning Mode=="Жадный" режим обучения
 load documents linked in search results, will be deactivated automatically when index size==Отображать в результатах поиска связанные документы. Может быть отключен автоматически при достижении размера индекса
 Show Navigation Bar on Search Page?==Показать панель управления на странице поиска
@@ -976,6 +976,8 @@ Other portal settings can be adjusted in==Другие настройки пор
 >Language<==>Язык<
 >Author<==>Автор<
 >Vocabulary<==>Словарь<
+>Provider<==>Домен<
+>Collection<==>Хранилище<
 >Title of Result<==>Заголовок результата<
 Description and text snippet of the search result==Описание и фрагмент текста результата поиска
 http://url-of-the-search-result.net==http://url-of-the-search-result.net
@@ -1570,7 +1572,7 @@ Browse Host==Поиск хоста
 "Browse Host"=="Просмотр хостов"
 "Delete Subpath"=="Удалить путь"
 Browser for==Просмотр
-"Re-Load 404"==""
+"Re-load load-failure docs \(404s etc\)"=="Перезагрузить документы в случае ошибки 404"
 Confirm Deletion==Подтвердите удаление
 >Host List<==>Список хостов<
 Count Colors:==Обозначение цветов:
@@ -1667,7 +1669,6 @@ doublequotes==двойные кавычки
 prefer given language==предпочитать указанный язык
 an ISO639 2-letter code==двухбуквенный языковой код ISO639
 heuristics==эвристики
-#add search results from scroogle==добавить результаты из Scroogle
 add search results from blekko==добавить результаты из Blekko
 Search Navigation==Навигация по поиску
 keyboard shotcuts==Назначения клавиш
@@ -2636,7 +2637,7 @@ Below normal==Ниже нормального
 Idle</option>==Ожидание</option>
 "Set new Priority"=="Установить новый приоритет"
 Changes take effect after <strong>restart</strong> of YaCy==Изменения будут применены после <strong>перезапуска</strong> YaCy.
-Online Caution Settings==Настройки онлайн задержек
+Online Caution Settings:==Настройки онлайн задержек
 This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Это время ожидания индексатора при работе прокси-сервера, выполнении локального или удалённого поиска.
 The delay is extended by this time each time the proxy is accessed afterwards.==Задержка выполняется каждый раз при доступности прокси.
 This shall improve performance of the affected process \(proxy or search\).==Это должно улучшить производительность соответствующих процессов (прокси или поиск).
@@ -3822,6 +3823,8 @@ View URL Content==Показать сведения об URL-адресе
 "Browse Host"=="Просмотр хоста"
 >URL Metadata<==>Метаданные<
 URL==URL
+Search in Document:==Поиск в документе:
+"Show Snippet"=="Показать фрагмент"
 Hash==Хэш
 (click this for full metadata)==кликните для отображения полных метаданных
 In Metadata:==В метаданных:
@@ -4118,7 +4121,7 @@ API wiki page==Wiki API
 loading from local index...==загружается из локального индекса...
 parsing result...==анализ результата...
 e="Search"==e="Поиск"
-"Search..."=="Поиск..."
+"Search..."=="Введите поисковый запрос..."
 #-----------------------------
 
 #File: yacysearch.html
@@ -4130,7 +4133,7 @@ SRU==SRU
 Click the API icon to see an example call to the search rss API.==Нажмите для просмотра примера вызова API поиска RSS-ленты.
 To see a list of all APIs, please visit the==Список всех API, смотрите на
 API wiki page==Wiki-странице API
-"Search"=="Поиск"
+"search"=="Поиск"
 'Search'=='Поиск'
 "search again"=="Искать ещё"
 #Text==Текст
@@ -4157,7 +4160,7 @@ and contributors, CC-BY-SA==и участники, лицензия CC-BY-SA
 #>URL<==>URL-адрес<
 > of==> из 
 g> local,==g> локально,
-#g> remote),==g> удалённо,
+g> remote\),==g> удалённо),
 > from==> из
 remote YaCy peers.==удалённых узлов YaCy.
 >search<==>Поиск<
@@ -4176,11 +4179,11 @@ Pictures==Изображения
 Show search results for "\#\[query\]\#" on map==Показать результат поиска "#[query]#" на карте
 >Provider==>Домен
 >Name Space==>Имя
->Author Facet==>Автор
+>Author==>Автор
 >Protocol==>Протокол
 >Filetype==>Тип файла
 >Language==>Язык
->Please support YaCy!<==>Пожалуйста, поддержите YaCy!<
+>Please support YaCy!==>Пожалуйста, поддержите YaCy!
 &nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;P2P&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;&nbsp;Режим&nbsp;стелс&nbsp;&nbsp;&nbsp;
 "Privacy"=="Частный"
@@ -4309,6 +4312,7 @@ Administration &raquo;==Управление &raquo;
 >Compare Search<==>Сравнить поиск<
 >Index Browser<==>Просмотр хостов<
 >URL Viewer<==>Просмотр ссылок<
+Example Calls to the Search API:==Примеры запросов в API поиска:
 Solr Default Core==Параметры ядра Solr
 Solr Webgraph Core==Параметры графики Solr
 Google Appliance API==Параметры API Google
@@ -4498,13 +4502,6 @@ Scheduler and Profile Editor<==Планировщик и редактор про
 robots.txt Monitor==Монитор robots.txt
 #-----------------------------
 
-#File: env/templates/submenuCustomization.template
-#---------------------------
-Customization==Настройка
->Appearance==>Внешний вид
-User Profile==Профиль пользователя
->Language==>Язык
-#-----------------------------
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
@@ -4795,5 +4792,14 @@ YaCy-UI is at most alpha status, as there is still problems with retriving the s
 I am currently changing the backend to a more application friendly format and getting good results with it \(I will check that in some time after the stable release 0.7\).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
 For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
 #-----------------------------
+
+#File: api/citation.html
+#---------------------------
+Document Citations for==Цитаты документа для
+List of Sentences in==Список предложений в
+List of other web pages with citations==Список других вэб-страниц с цитатами
+#-----------------------------
+
+
 
 # EOF
