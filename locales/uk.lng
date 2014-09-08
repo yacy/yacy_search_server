@@ -445,8 +445,6 @@ When a search is made using a \'site\'-operator \(like: \'download site:yacy.net
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Це означає: Відразу після пошуку буде завантажена головна сторінка порталу і кожна сторінка, на яку є посилання з головної і яка знаходиться на тому ж сервері.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Під час цього "миттєвого сканування" сканується також robots.txt і мінімальний час доступу до цих сторінок робить евристичний пошук надто повільним - але можна знайти всі бажані результати під час другого пошуку (після паузи в декілька секунд).
 load external search result list from==завантажити зовнішній список пошукових результатів з
-When using this heuristic, then every search request line is used for a call to scroogle.==Ця евристика використовує кожен рядок пошуку для виклику Scroogle.
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результатів витягуються зі Scroogle, одночасно завантажуються, аналізуються і негайно індексуються.
 When using this heuristic, then every search request line is used for a call to blekko.==Ця евристика використовує кожен рядок пошуку для виклику Blekko.
 20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.==20 результатів витягуються з Blekko, одночасно завантажуються, аналізуються і негайно індексуються.
 #-----------------------------
@@ -1339,7 +1337,6 @@ doublequotes==лапки
 prefer given language==Віддавати перевагу вказаній мові
 an ISO639 2-letter code==2-буквенний код ISO639
 heuristics==евристика
-add search results from scroogle==додати пошукові результати зі scroogle
 add search results from blekko==додати пошукові результати з blekko
 Search Navigation==Пошукова навігація
 keyboard shotcuts==швидкий доступ
@@ -3642,11 +3639,11 @@ Global Crawling==Глобальні
 Surrogate Import==Імпорт "Заміщень"
 #-----------------------------
 
-#File: env/templates/submenuCustomization.template
+#File: env/templates/submenuDesign.template
 #---------------------------
-Customization==Настройка
+#Customization==Настройка
 >Appearance==>Зовнішній вигляд
-User Profile==Профіль користувача
+#User Profile==Профіль користувача
 >Language==>Мова
 #-----------------------------
 

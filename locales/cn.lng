@@ -443,9 +443,6 @@ The search result was discovered by a heuristic, not previously known by YaCy==�
 When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==当使用'站点'-操作符搜索时(比如: 'download site:yacy.net') ,主机就会立即抓取层数为 最大限制深度-1 的内容.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==意即: 在链接请求发出后, 搜索引擎就会载入在同一主机中每一个与此页面相连的网页.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==因为'立即抓取'依赖于robots.txt和两个相连页面的最小访问时间, 所以这个启发式选项会相当慢, 但是在第二次搜索时会搜索到更多条目(需要间隔几秒钟).
-scroogle: load external search result list==scroogle: 载入外部搜索引擎结果
-When using this heuristic, then every search request line is used for a call to scroogle.==开启这个选项时, 每一次搜索都会引入scroogle的结果.
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==同时读取并索引从scroogle获得的20个结果.
 #-----------------------------
 
 #File: ConfigHTCache_p.html
@@ -1224,7 +1221,6 @@ doublequotes==双引号
 prefer given language==首选语言
 an ISO639 2-letter code==ISO639标准的双字母代码
 heuristics==启发式
-add search results from scroogle==添加来自scroogle的搜索结果
 add search results from blekko==添加来自blekko的搜索结果
 Search Navigation==搜索导航
 keyboard shotcuts==快捷键
@@ -3378,11 +3374,11 @@ Scheduler and Profile Editor<==定时器与资料编辑器<
 #robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
-#File: env/templates/submenuCustomization.template
+#File: env/templates/submenuDesign.template
 #---------------------------
-Customization==自定义
+#Customization==自定义
 >Appearance==>外观
-User Profile==用户资料
+#User Profile==用户资料
 >Language==>语言
 #-----------------------------
 

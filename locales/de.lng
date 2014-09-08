@@ -4001,12 +4001,11 @@ Scheduler and Profile Editor<==Scheduler und Profil Editor<
 #robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
-#File: env/templates/submenuCustomization.template
-#---------------------------
-Customization==Anpassung
+#File: env/templates/submenuDesign.template
+#-----------------------------
 >Appearance==>Erscheinungsbild
-User Profile==Benutzerprofil
 >Language==>Sprache
+>Search Page Layout==>Suchseitenlayout
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template

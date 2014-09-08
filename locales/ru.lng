@@ -1667,7 +1667,6 @@ doublequotes==двойные кавычки
 prefer given language==предпочитать указанный язык
 an ISO639 2-letter code==двухбуквенный языковой код ISO639
 heuristics==эвристики
-#add search results from scroogle==добавить результаты из Scroogle
 add search results from blekko==добавить результаты из Blekko
 Search Navigation==Навигация по поиску
 keyboard shotcuts==Назначения клавиш
@@ -4496,14 +4495,6 @@ No-Load==Холостая
 Crawler Steering==Управление индексатором
 Scheduler and Profile Editor<==Планировщик и редактор профиля<
 robots.txt Monitor==Монитор robots.txt
-#-----------------------------
-
-#File: env/templates/submenuCustomization.template
-#---------------------------
-Customization==Настройка
->Appearance==>Внешний вид
-User Profile==Профиль пользователя
->Language==>Язык
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
