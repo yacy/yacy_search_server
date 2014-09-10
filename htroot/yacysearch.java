@@ -224,7 +224,7 @@ public class yacysearch {
                         ? 100
                         : 5000) : (snippetFetchStrategy != null
                         && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000),
-                post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", 10)))); // SRU syntax with old property as alternative
+                post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10))))); // SRU syntax with old property as alternative
         int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
 
         final boolean indexof = (post != null && post.get("indexof", "").equals("on"));
