@@ -3850,6 +3850,7 @@ public final class Switchboard extends serverSwitch {
     public void terminate(final String reason) {
         this.terminate = true;
         this.log.info("caught terminate request: " + reason);
+        this.tray.setShutdown();
         this.shutdownSync.release();
     }
 
