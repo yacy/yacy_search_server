@@ -111,7 +111,7 @@ public final class search {
         final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
         final String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
         final String  abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
-        final int     count  = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 100), post.getInt("count", 10)); // maximum number of wanted results
+        final int     count  = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 10), post.getInt("count", 10)); // maximum number of wanted results
         final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum waiting time
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
@@ -326,6 +326,7 @@ public final class search {
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime);
             if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
+            if (theSearch.localsolrsearch != null && theSearch.localsolrsearch.isAlive()) try {theSearch.localsolrsearch.join();} catch (final InterruptedException e) {}
 
             // set statistic details of search result and find best result index set
             prop.put("joincount", Integer.toString(theSearch.getResultCount()));

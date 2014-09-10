@@ -135,7 +135,7 @@ public final class SearchEvent {
     private final SortedMap<byte[], HeuristicResult> heuristics;
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
-    private Thread localsolrsearch;
+    public Thread localsolrsearch;
     private int localsolroffset;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
@@ -382,7 +382,7 @@ public final class SearchEvent {
                 // give process time to accumulate a certain amount of data
                 // before a reading process wants to get results from it
                 try {
-                    if (rwiProcess != null && query.getSegment().connectedRWI()) rwiProcess.join(100);
+                    if (rwiProcess != null && query.getSegment().connectedRWI() && rwiProcess.isAlive()) rwiProcess.join(100);
                 } catch (final Throwable e ) {
                 }
                 // this will reduce the maximum waiting time until results are available to 100 milliseconds
@@ -1547,8 +1547,10 @@ public final class SearchEvent {
     public ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> completeResults(final long waitingtime) {
         final long timeout = waitingtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + waitingtime;
         int i = 0;
+        
         while (this.resultList.sizeAvailable() < this.query.neededResults() && System.currentTimeMillis() < timeout) {
-            oneResult(i++, timeout - System.currentTimeMillis());
+            ResultEntry re = oneResult(i++, timeout - System.currentTimeMillis());
+            if (re == null) break;
         }
         return this.resultList.list(Math.min(this.query.neededResults(), this.resultList.sizeAvailable()));
     }
