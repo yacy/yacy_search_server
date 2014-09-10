@@ -208,7 +208,7 @@ public final class QueryParams {
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
         this.siteexcludes = siteexcludes != null && siteexcludes.isEmpty() ? null: siteexcludes;
-        this.snippetCacheStrategy = contentdom == ContentDomain.TEXT ? snippetCacheStrategy : contentdom == null ? null : CacheStrategy.CACHEONLY;
+        this.snippetCacheStrategy = snippetCacheStrategy;
         this.clienthost = host;
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());

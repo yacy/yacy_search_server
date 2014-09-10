@@ -294,7 +294,7 @@ public final class LoaderDispatcher {
             throw new IOException("no response (NULL) for url " + url);
         }
         if (response.getContent() == null) {
-            throw new IOException("empty response (code " + response.getStatus() + ") for url " + url);
+            throw new IOException("empty response (code " + response.getStatus() + ") for url " + url.toNormalform(true));
         }
 
         // we got something. Now check if we want to store that to the cache

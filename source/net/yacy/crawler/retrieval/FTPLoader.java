@@ -242,9 +242,9 @@ public class FTPLoader {
             // only the metadata is returned
 
             if (parserError != null) {
-                this.log.info("No parser available in FTP crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.info("No parser available in FTP crawler: '" + parserError + "' for URL " + request.url().toNormalform(true) + ": parsing only metadata");
             } else {
-                this.log.info("Too big file in FTP crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.info("Too big file in FTP crawler with size = " + size + " Bytes for URL " + request.url().toNormalform(true) + ": parsing only metadata");
             }
 
             // create response with metadata only

@@ -1290,7 +1290,7 @@ public final class SearchEvent {
                 success = true;
             }
         } else {
-            new Thread() {
+            Thread t = new Thread() {
                 @Override
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
@@ -1300,7 +1300,9 @@ public final class SearchEvent {
                             SearchEvent.this.snippetFetchAlive.incrementAndGet();
                             try {
                                 addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy));
-                            } catch (final Throwable e) {} finally {
+                            } catch (final Throwable e) {
+                                ConcurrentLog.logException(e);
+                            } finally {    
                                 SearchEvent.this.snippetFetchAlive.decrementAndGet();
                             }
                         }
@@ -1308,7 +1310,8 @@ public final class SearchEvent {
                         SearchEvent.this.oneFeederTerminated();
                     }
                 }
-            }.start();
+            };
+            if (SearchEvent.this.query.snippetCacheStrategy == null) t.run(); else t.start(); //no need for concurrency if there is no latency
         }
         return success;
     }
@@ -1398,7 +1401,7 @@ public final class SearchEvent {
                     180,
                     !this.query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            SearchEvent.log.info("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            SearchEvent.log.info("text snippet load time for " + page.url().toNormalform(true) + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
@@ -1429,7 +1432,6 @@ public final class SearchEvent {
         // (happens if a search pages is accessed a second time)
         final long finishTime = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
-
         // wait until a local solr is finished, we must do that to be able to check if we need more
         if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (final InterruptedException e) {}}
         if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
@@ -1456,7 +1458,7 @@ public final class SearchEvent {
             // we have the wanted result already in the result array .. return that
             final ResultEntry re = this.resultList.element(item).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
-
+            
             if (this.localsolrsearch == null || !this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
                 if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
