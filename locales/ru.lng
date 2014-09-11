@@ -375,19 +375,19 @@ Search Result==Результат поиска
 
 #File: ConfigAccounts_p.html
 #---------------------------
-User Accounts==Учетные записи пользователей
+User Accounts==Учётные записи пользователей
 User Administration==Учётные записи
 User created:==Пользователь создан:
 User changed:==Пользователь изменён:
 Generic error.==Общая ошибка.
 Passwords do not match.==Пароли не совпадают.
 Username too short. Username must be &gt;= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше 4 символов.
-No password is set for the administration account.==Пароль не установлен для учетной записи администратора.
-Please define a password for the admin account.==Пожалуйста, установите пароль для учетной записи администратора.
-Admin Account==Учетная запись администратора
-Access from localhost without account==Доступ со своего компьютера возможен без учетной записи.
-Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Доступ к узлу со своего компьютера разрешен. Нет необходимости настраивать учетную запись.
-Access only with qualified account==Доступ только с квалифицированной учетной записи
+No password is set for the administration account.==Пароль не установлен для учётной записи администратора.
+Please define a password for the admin account.==Пожалуйста, установите пароль для учётной записи администратора.
+Admin Account==Учётная запись администратора
+Access from localhost without account==Доступ со своего компьютера возможен без учётной записи.
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Доступ к узлу со своего компьютера разрешен. Нет необходимости настраивать учётную запись.
+Access only with qualified account==Доступ только с квалифицированной учётной записи
 You need this only if you want a remote access to your peer.==Необходимо, если вы желаете открыть удалённый доступ к вашему узлу.
 Peer User:==Пользователь узла:
 New Peer Password:==Новый пароль узла:
@@ -501,7 +501,7 @@ Your Peer name is a default name; please set an individual peer name.==Ваше 
 What you should do next:==
 You did not set a user name and/or a password.==Вы не установили имя пользователя и/или пароль.
 Some pages are protected by passwords.==Некоторые страницы защищены паролем.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a href="ConfigAccounts_p.html">Учетные записи</a>, чтобы защитить узел 
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a href="ConfigAccounts_p.html">Учётные записи</a>, чтобы защитить узел 
 YaCy.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт на фаерволе или ваш роутер не перенаправляет запросы на порт сервера.
 This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в сети.
@@ -866,9 +866,7 @@ List of hosts that shall be excluded from search results by default but can be i
 \(Content\)==(Содержимое)
 "Change Search Page"=="Изменить страницу поиска"
 "Set to Default Values"=="Установить значения по-умолчанию"
-You have==Вам необходимо
-set a remote user/password==установить пароль и имя удалённого пользователя
-to change this options.==, чтобы изменить эти опции.
+You have to <a href="ConfigAccounts_p.html">set a remote user/password</a> to change this options.==Вам необходимо <a href="ConfigAccounts_p.html">установить пароль и имя удалённого пользователя,</a> чтобы изменить эти опции.
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Страница поиска может быть интегрирована в ваш собственный сайт с использованием фрейма. Просто используйте следующий код:
 This would look like:==Это будет выглядить так:
 For a search page with a small header, use this code:==Для страницы поиска с небольшим заголовком используйте этот код:
@@ -1942,48 +1940,41 @@ Host==Хост
 
 #File: ContentIntegrationPHPBB3_p.html
 #---------------------------
-Content Integration: Retrieval from phpBB3 Databases==Интеграция контента: Поиск из баз данных phpBB3
-It is possible to extract texts directly from mySQL and postgreSQL databases.==Es ist möglich Texte direkt aus MySQL und PostgreSQL Datenbanken zu extrahieren.
-Each extraction is specific to the data that is hosted in the database.==Jeder Vorgang extrahiert genau die Datensätze die in der Datenbank gehostet werden.
-This interface gives you access to the phpBB3 forums software content.==Dieses Interface erlaubt den Zugriff auf die Inhalte der phpBB3 Forum Software.
-If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Wenn aus einer importierten Datenbank gelesen werden soll sind hier einige Hinweise, um Probleme zu vermeiden wenn Datenbankdumps in phpMyAdmin importiert werden.
-before importing large database dumps, set==Bevor große Datenbankdumps importiert werden die folgende Zeile
-in phpmyadmin/config.inc.php and place your dump file in /tmp \(Otherwise it is not possible to upload files larger than 2MB\)==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen (Andernfalls ist es nicht möglich Dateien größer als 2MB hochzuladen)
-deselect the partial import flag==Den teilweisen Import Flag abschalten
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
-The URL stub==Der Teil der URL
-like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
-this must be the path right in front of '\/viewtopic.php\?'==dies muss den kompletten Pfad vor '\/viewtopic.php\?' enthalten
-Type==Typ
-> of database<==> der Datenbank<
-use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
-Host=Hostname
-> of the database<==> der Datenbank<
-of database service==des Datenbank Dienstes
-usually 3306 for mySQL==normalerweise 3306 für MySQL
-Name of the database==Name der Datenbank
-on the host==auf dem Host
-Table prefix string==Tabellen Präfix
-for table names==für Tabellennamen
-User==Benutzer
-that can access the database==mit Zugriff auf die Datenbank
-Password==Passwort
-for the account of that user given above==für den Zugang des oben angegebenen Benutzers
-Posts per file==Beiträge pro Datei
-in exported surrogates==in der exportierten Hilfsdatei
-Check database connection==Datenbankverbindung überprüfen
-Export Content to Surrogates==Exportiere Inhalt in Hilfsdateien
-Import a database dump==Importieren eines Datenbankauszugs
-Import Dump==Datenbankdump importieren
-Posts in database==Beiträge in Datenbank
-first entry==Erster Eintrag
-last entry==Letzter Eintrag
-Info failed:==Info Fehlgeschlagen:
-Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==Export erfolgreich! #[files]# Dateien in DATA/SURROGATES/in geschrieben
-Export failed:==Export fehlgeschlagen:
-Import successful!==Import erfolgreich!
-Import failed:==Import fehlgeschlagen:
+Content Integration: Retrieval from phpBB3 Databases==Интеграция контента: Извлечение данных из баз phpBB3
+It is possible to extract texts directly from mySQL and postgreSQL databases.==Возможно извлечение текстовых данных напрямую из баз mySQL и postgreSQL.
+Each extraction is specific to the data that is hosted in the database.==
+This interface gives you access to the phpBB3 forums software content.==Здесь вы можете получить доступ к содержимому phpBB3-форумов.
+If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Если вы желаете использовать импортированную базу данных, то вам пригодятся некоторые подсказки для устранения проблем, которые могут возникнуть при импортировании дампов в phpMyAdmin:
+before importing large database dumps, set==перед импортированием большого дампа базы данных, установите
+the following Line in phpmyadmin/config.inc.php and place your dump file in /tmp \(Otherwise it is not possible to upload files larger than 2MB\)==указанную ниже строку в phpmyadmin/config.inc.php и разместите ваш файл дампа в директории /tmp (иначе будет невозможна загрузка файлов размером больше 2МБайт)
+deselect the partial import flag==снимите флаг частичного импорта
+When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==После начала экспорта, замещающие файлы создаются в DATA/SURROGATE/in и автоматически добавляются в индексатор.
+All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Все проиндексированные замещающие файлы перемещаются в DATA/SURROGATE/out и могут быть использованы повторно в случае удаления индекса.
+The URL stub==Часть ссылки
+like http://forum.yacy-websuche.de==например, http://forum.yacy-websuche.de
+this must be the path right in front of '\/viewtopic.php\?'==(путь до '\/viewtopic.php\?')
+Type==Тип
+> of database<==> базы данных<
+use either 'mysql' or 'pgsql'==используйте 'mysql' или 'pgsql'
+<b>Host</b> of the database==Хост базы данных
+<b>Port</b> of database service<br />\(usually 3306 for mySQL\)==Порт базы данных (обычно 3306 для MySQL)
+<b>Name of the database</b> on the host==Название базы данных на хосте
+<b>Table prefix string</b> for table names==Префикс для таблицы имён
+<b>User</b> that can access the database==Пользователь базы данных
+<b>Password</b> for the account of that user given above==Пароль от учётной записи пользователя
+<b>Posts per file</b><br />in exported surrogates==Постов на файл в экспортированных замещающих файлах
+Check database connection==Проверить соединение
+Export Content to Surrogates==Экспортировать содержимое
+<b>Import a database dump</b>,<br />==Импортировать дамп базы данных
+Import Dump==Импортировать
+Posts in database==Постов в базе данных
+first entry==первая запись
+last entry==последняя запись
+Info failed:==Получение информации неудачно:
+Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==Экспорт успешно выполнен! #[files]# файлов записано DATA/SURROGATES/in
+Export failed:==Экспорт не был выполнен:
+Import successful!==Импорт успешно выполнен!
+Import failed:==Импорт не был выполнен:
 #-----------------------------
 
 #File: DictionaryLoader_p.html
@@ -2187,27 +2178,27 @@ Various stack files that belong to the crawling queue==Verschiedene Stack-Dateie
 
 #File: IndexImportMediawiki_p.html
 #---------------------------
-#MediaWiki Dump Import==MediaWiki Dump Import
-No import thread is running, you can start a new thread here==Sie können hier einen neuen Thread starten, da aktuell kein Import Thread läuft
-Bad input data:==Ungültige Eingabedaten:
-MediaWiki Dump File Selection: select an XML file \(which may be bz2- or gz-encoded\)==MediaWiki Dump Datei Auswahl: Wähle eine XML Datei (die auch bz2 oder gzip komprimiert sein darf)
-You can import MediaWiki dumps here. An example is the file==Hier können Sie MediaWiki Dumps importieren. Als Beispiel dient die Datei
-Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Legen Sie die Datei im YaCy-Verzeichnis oder einem Unterordner ab.
-"Import MediaWiki Dump"=="Importiere MediaWiki Dump"
-When the import is started, the following happens:==Wenn der Import gestartet wird passiert Folgendes:
-The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Der Dump wird zur Laufzeit extrahiert und die Wiki Einträge werden in das Dublin Core Datenformat übersetzt. Die Ausgabe schaut wie folgt aus:
-Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Je 10000 Wiki Einträge werden zusammen in eine Ausgabedatei geschrieben und in /DATA/SURROGATES/in temporär gespeichert.
-When each of the generated output file is finished, it is renamed to a .xml file==Wenn jede der generierten Ausgabedateien abgearbeitet wurde wird diese in eine .xml Datei umbenannt.
-Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Immer wenn eine xml Surrogat Datei in /DATA/SURROGATES/in erscheint, holt der YaCy Indexer diese Datei und indexiert die enthaltenen Datensätze.
-When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==Wenn eine Surrogat Datei vollständig indexiert wurde, wird sie nach /DATA/SURROGATES/out verschoben
-You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==Sie können schon abgearbeitete Surrogat Dateien durch Verschieben von /DATA/SURROGATES/out nach /DATA/SURROGATES/in recyclen.
-Import Process==Import Prozess
-#Thread:==Thread:
-#Dump:==Dump:
-Processed:==Bearbeitet:
-Wiki Entries==Wiki Einträge
-Speed:==Geschwindigkeit:
-articles per second<==Статьи в секунду<
+MediaWiki Dump Import==Импорт дампа MediaWiki
+No import thread is running, you can start a new thread here==В настоящее время импорт не производится, вы можете запустить импорт на этой странице.
+Bad input data:==Неправильные входящие данные:
+MediaWiki Dump File Selection: select an XML file \(which may be bz2- or gz-encoded\)==Выбор файла дампа MediaWiki 
+You can import MediaWiki dumps here. An example is the file==Выберите XML-файл (может быть bz2- или gzip-архивом). Пример этого файла
+Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Дамп должен быть в формате XML и может быть сжат в gz или bz2.
+"Import MediaWiki Dump"=="Импортировать дамп MediaWiki"
+When the import is started, the following happens:==После начала импорта произойдет следующее:
+The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Дамп извлекается "на лету" и значения wiki переводятся в формат дублинского ядра. Результат выглядит примерно так:
+Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Каждые 10000 записей Wiki формируются в один временный файл, который размещается в /DATA/SURROGATES/in.
+When each of the generated output file is finished, it is renamed to a .xml file==После завершения импортирования полученный файл переименовывается в .xml.
+Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Каждый раз xml-файл появляется в /DATA/SURROGATES/in, а индексатор YaCy из полученного файла извлекает записи индекса.
+When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==После завершения индексирования файл перемещается в /DATA/SURROGATES/out.
+You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==Вы можете повторно использовать замещающие файлы для индексирования, переместив их из /DATA/SURROGATES/out в /DATA/SURROGATES/in.
+Import Process==Выполнение импорта
+Thread:==Поток:
+Dump:==Дамп:
+Processed:==Выполнено:
+Wiki Entries==записей Wiki
+Speed:==Скорость:
+articles per second<==статей в секунду<
 Running Time:==Прошло времени:
 hours,==часы,
 minutes<==минуты<
@@ -2506,7 +2497,7 @@ Browse blog of peer==Просмотр блога узла
 Contact: passive==Контакт: пассивный
 Contact: direct==Контакт: прямой
 Seed download: possible==Загрузка сида: возможна
-runtime:==время работы:
+runtime:==Время генерации страницы:
 #Peers==Узлы
 #YaCy Cluster==YaCy кластер
 
@@ -3130,12 +3121,13 @@ so that every proxy user must authenticate first, but this is rather unusual.==,
 IP-Number filter==Фильтр IP-адресов
 Use <a==Использовать <a
 "Submit"=="Сохранить"
+
 #-----------------------------
 
 #File: Settings_Seed.inc
 #---------------------------
 Seed Upload Settings==Настройки загрузка сида
-With these settings you can configure if you have an account on a public accessible==Здесь вы можете указать данные вашей учетной записи на общем
+With these settings you can configure if you have an account on a public accessible==Здесь вы можете указать данные вашей учётной записи на общем
 server where you can host a seed-list file.==сервере, где вы храните сид-список.
 General Settings:==Общие настройки:
 If you enable one of the available uploading methods, you will become a principal peer.==В случае установки, ваш узел станет главным. 
@@ -3393,6 +3385,7 @@ Public Address:==Внешний IP-адрес:
 YaCy Address:==YaCy-адрес:
 Peer Host==Узел хоста
 #Port Forwarding Host==Порт пересылающего узла
+
 Proxy</dt>==Прокси</dt>
 Transparent ==Прозрачность 
 not used==не используется
@@ -4066,47 +4059,49 @@ Changes will be published as announcement on YaCyNews==Изменения буд
 
 #File: WikiHelp.html
 #---------------------------
-Wiki Help==Wiki Hilfe
-Wiki-Code==Wiki-Befehle
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Diese Tabelle enthält eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen
-of YaCy. For a more detailed description visit the==in YaCy benutzt werden können. Für eine detailliertere Beschreibung besuchen Sie bitte das
+Wiki Help==Wiki-справка
+Wiki-Code==Wiki-код
+This table contains a short description of the tags that can be used in the Wiki and several other servlets==Эта таблица содержит короткое описание тэгов, которые могут быть использованы в wiki и в некоторых других сервлетах
+of YaCy. For a more detailed description visit the==в YaCy. Если вам необходимо более детальное описание тэгов, то посетите
 #YaCy Wiki==YaCy Wiki
-Description==Beschreibung
-\=headline===Überschrift
-These tags create headlines. If a page has three or more headlines, a table of content will be created automatically.==Diese Tags erzeugen Überschriften. Wenn die Seite drei oder mehr Überschriften enthält, wird automatisch ein Inhaltsverzeichnis erstellt.
-Headlines of level 1 will be ignored in the table of content.==Überschriften im ersten Level werden beim Erstellen des Inhaltsverzeichnisses ignoriert.
+Code==Код
+Description==Описание
+#\=headline===заголовок
+These tags create headlines. If a page has three or more headlines, a table of content will be created automatically.==Эти тэги создают заголовки. Если на странице есть три и более заголовков, то оглавление будет создано автоматически.
+Headlines of level 1 will be ignored in the table of content.==Заголовки первого уровня пропускаются в оглавлении.
 #text==Text
-These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meisten Browser zeigen die Texte kursiv),
-the second one emphazises it more strongly \(i.e. bold\) and the last tags create a combination of both.==das Zweite betont den Text stärker (z.B. fett) und der letzte Tag erzeugt eine Mischung aus beidem.
-Text will be displayed <span class=\"strike\">stricken through</span>.==Text wird <span class="strike">durchgestrichen</span> angezeigt.
-Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint eingerückt. Dieser Tag eignet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.
-point==Punkt
-These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
-something<==etwas<
-another thing==was anderes
-and yet another==und wieder was anderes
-something else==irgendwas
-These tags create an unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
-word==Wort
-\:definition==:Definition
-These tags create a definition list.==Diese Tags erstellen eine definierte Liste.
-This tag creates a horizontal line.==Dieser Tag erzeugt eine horizontale Linie.
-pagename==Seitenname
-description\]\]==Beschreibung]]
-This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
-This tag displays an image, it can be aligned left, right or center.==Dieser Tag fügt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
-This tag displays a Youtube or Vimeo video with the id specified and fixed width 425 pixels and height 350 pixels.==Dieser Tag fügt ein Youtube oder Vimeo Video mit der angegeben id und einer fixen Höhe von 425 Pixeln und einer fixen Breite von 350 Pixeln ein.
-i.e. use==z.B. wird mit
-to embed this video:==dieses Video eingebunden:
-These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt 
-a new line, the third and fourth each create a new cell in the line. The last displayed tag==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletzt dargestellte Tag
-closes the table.==schließt die Tabelle.
+These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==Эти тэги создают подчёркнутый текст. Первая пара делает текст подчёркнутым (большинство браузеров отображают это курсивом), 
+the second one emphazises it more strongly \(i.e. bold\) and the last tags create a combination of both.==второе подчёркивание более выраженно (выделяется жирным) и последний тэг объединяет два предыдущих.
+Text will be displayed <span class=\"strike\">stricken through</span>.==Текст будет отображаться <span class="strike">перечёркнутым</span>.
+Text will be displayed <span class="underline">underlined</span>.==Текст будет отображаться <span class="underline">подчёркнутым</span>.
+Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Линии будут с отступом. Этот тэг служит для выделения цитат, но может быть использован для создания стиля страницы.
+#point==точка
+These tags create a numbered list.==Эти тэги создают пронумерованный список.
+#something<==любой<
+#another thing==другой
+#and yet another==произвольный
+#something else==текст
+These tags create an unnumbered list.==Эти тэги создают ненумерованный список.
+#word==слово
+#\:definition==:определение
+These tags create a definition list.==Эти тэги создают список определений.
+This tag creates a horizontal line.==Этот тэг создаёт горизонтальную линию.
+3pagename==название страницы
+#description\]\]==описание]]
+This tag creates links to other pages of the wiki.==Этот тэг создаёт ссылки на другие страницы Wiki.
+This tag displays an image, it can be aligned left, right or center.==Этот тэг служит для показа изображения, которое может быть выровнено по правую сторону, по левую или по центру.
+This tag displays a Youtube or Vimeo video with the id specified and fixed width 425 pixels and height 350 pixels.==Этот тэг служит для добавления видео с Youtube или Vimeo с заданным идентификатором и заданной шириной 425 пикселей и высотой 350 пикселей.
+i.e. use==Например
+to embed this video:==добавит это видео:
+These tags create a table, whereas the first marks the beginning of the table, the second starts==Эти тэги создают таблицу, где первые знаки начинают таблицу, вторые начинают 
+a new line, the third and fourth each create a new cell in the line. The last displayed tag==новую линию, третий и четвёртый создают новый отрезок линии. Последний показанный тэг
+closes the table.==закрывает таблицу.
 #The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben.
-A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbrüche beinhalten. Gut geeignet für ASCII-Kunst und Programm Code.
-If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anfängt, wird diese als nicht-proportionale Schriftart dargestellt.
-url description==url Beschreibung
-This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
-alt text==alt Beschreibung
+A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Текст между этими тэгами будет включать все пробелы и переносы. Хорошо подходит для программного кода и ASCII-графики.
+If a line starts with a space, it will be displayed in a non-proportional font.==Если линия начинается с пробела, то это может быть отображено непропорциональным шрифтом.
+#url description==описание ссылки
+This tag creates links to external websites.==Этот тэг создаёт ссылки на внешние сайты.
+#alt text==alt text
 #-----------------------------
 
 #File: yacyinteractive.html
@@ -4349,7 +4344,7 @@ Outgoing&nbsp;Cookies==Исходящие куки
 #-----------------------------
 Content Importer==Импорт контента
 External Datasets==Импорт из внешних источников
-Database Reader==Обозреватель баз данных
+>Database Reader<==>Обозреватель баз данных<
 RSS Feed Importer==Импорт RSS-лент
 OAI-PMH Importer==Импорт данных OAI-PMH
 Database Reader for phpBB3 Forums==Обозреватель баз данных phpBB3‐форумов
@@ -4420,7 +4415,7 @@ Parser Configuration==Конфигурация парсера
 System Administration==Настройки системы
 >Status==>Состояние
 Basic Configuration==Основные настройки
->Accounts==>Учетные записи
+>Accounts==>Учётные записи
 Network Configuration==Настройка сети
 Advanced Settings==Настройки системы
 Local robots.txt==Локальный robots.txt
