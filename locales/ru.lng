@@ -1971,7 +1971,7 @@ Posts in database==Постов в базе данных
 first entry==первая запись
 last entry==последняя запись
 Info failed:==Получение информации неудачно:
-Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==Экспорт успешно выполнен! #[files]# файлов записано DATA/SURROGATES/in
+Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==Экспорт успешно выполнен! #[files]# файлов записано в DATA/SURROGATES/in
 Export failed:==Экспорт не был выполнен:
 Import successful!==Импорт успешно выполнен!
 Import failed:==Импорт не был выполнен:
@@ -2189,7 +2189,7 @@ When the import is started, the following happens:==После начала им
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Дамп извлекается "на лету" и значения wiki переводятся в формат дублинского ядра. Результат выглядит примерно так:
 Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Каждые 10000 записей Wiki формируются в один временный файл, который размещается в /DATA/SURROGATES/in.
 When each of the generated output file is finished, it is renamed to a .xml file==После завершения импортирования полученный файл переименовывается в .xml.
-Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Каждый раз xml-файл появляется в /DATA/SURROGATES/in, а индексатор YaCy из полученного файла извлекает записи индекса.
+Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Каждый раз xml-файл появляется в /DATA/SURROGATES/in, а YaCy индексирует полученный файл.
 When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==После завершения индексирования файл перемещается в /DATA/SURROGATES/out.
 You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==Вы можете повторно использовать замещающие файлы для индексирования, переместив их из /DATA/SURROGATES/out в /DATA/SURROGATES/in.
 Import Process==Выполнение импорта
