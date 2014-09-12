@@ -149,10 +149,13 @@ public final class LoaderDispatcher {
     }
 
     public Response load(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
-        Semaphore check = this.loaderSteering.get(request.url());
+        Semaphore check = this.loaderSteering.get(request.url());        
         if (check != null) {
             // a loading process may be going on for that url
+            //ConcurrentLog.info("LoaderDispatcher", "waiting for " + request.url().toNormalform(true));
+            long t = System.currentTimeMillis();
             try { check.tryAcquire(5, TimeUnit.SECONDS);} catch (final InterruptedException e) {}
+            ConcurrentLog.info("LoaderDispatcher", "waited " + (System.currentTimeMillis() - t) + " ms for " + request.url().toNormalform(true));
             // now the process may have terminated and we run a normal loading
             // which may be successful faster because of a cache hit
         }
@@ -163,13 +166,12 @@ public final class LoaderDispatcher {
             check = this.loaderSteering.remove(request.url());
             if (check != null) check.release(1000);
             return response;
-        } catch (final IOException e) {
+        } catch (final Throwable e) {
             throw new IOException(e);
         } finally {
             // release the semaphore anyway
             check = this.loaderSteering.remove(request.url());
-            if (check != null) check.release(1000);
-            // Very noisy: ConcurrentLog.logException(e);            
+            if (check != null) check.release(1000);          
         }
     }
 

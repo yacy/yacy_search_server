@@ -106,7 +106,8 @@ public class ViewImage {
         if (image == null) {
             byte[] resourceb = null;
             if (url != null) try {
-                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                String agentName = post.get("agentName", auth ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
                 resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH, agent);
             } catch (final IOException e) {
                 ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());

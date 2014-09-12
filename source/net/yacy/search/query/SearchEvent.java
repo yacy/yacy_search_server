@@ -94,6 +94,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
+import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
@@ -185,8 +186,11 @@ public final class SearchEvent {
     public final AtomicInteger remote_solr_peerCount;// the number of peers which contributed to the remote search result
     
     public int getResultCount() {
-        return this.local_rwi_available.get() + this.remote_rwi_available.get() +
-               this.remote_solr_available.get() + this.local_solr_stored.get();
+        return Math.max(
+                this.local_rwi_available.get() + this.remote_rwi_available.get() +
+                this.remote_solr_available.get() + this.local_solr_stored.get(),
+                imageViewed.size() + sizeSpare()
+               );
     }
     
     protected SearchEvent(
@@ -1474,56 +1478,89 @@ public final class SearchEvent {
         return null;
     }
 
+    private int imagePageCounter = 0;
     private LinkedHashMap<String, ImageResult> imageViewed = new LinkedHashMap<String, ImageResult>();
-    private LinkedHashMap<String, ImageResult> imageSpare = new LinkedHashMap<String, ImageResult>();
+    private LinkedHashMap<String, ImageResult> imageSpareGood = new LinkedHashMap<String, ImageResult>();
+    private LinkedHashMap<String, ImageResult> imageSpareBad = new LinkedHashMap<String, ImageResult>();
     private ImageResult nthImage(int item) {
         Object o = SetTools.nth(this.imageViewed.values(), item);
         if (o == null) return null;
         return (ImageResult) o;
     }
+    private boolean hasSpare() {
+        return imageSpareGood.size() > 0 || imageSpareBad.size() > 0;
+    }
+    private boolean containsSpare(String id) {
+        return imageSpareGood.containsKey(id) || imageSpareBad.containsKey(id);
+    }
+    private int sizeSpare() {
+        return imageSpareGood.size() + imageSpareBad.size();
+    }
     private ImageResult nextSpare() {
-        Map.Entry<String, ImageResult> next = imageSpare.entrySet().iterator().next();
-        imageViewed.put(next.getKey(), next.getValue());
-        imageSpare.remove(next.getKey());
-        return next.getValue();
+        if (imageSpareGood.size() > 0) {
+            Map.Entry<String, ImageResult> next = imageSpareGood.entrySet().iterator().next();
+            imageViewed.put(next.getKey(), next.getValue());
+            imageSpareGood.remove(next.getKey());
+            return next.getValue();
+        }
+        if (imageSpareBad.size() > 0) {
+            Map.Entry<String, ImageResult> next = imageSpareBad.entrySet().iterator().next();
+            imageViewed.put(next.getKey(), next.getValue());
+            imageSpareBad.remove(next.getKey());
+            return next.getValue();
+        }
+        return null;
     }
     
     public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
         if (item < imageViewed.size()) return nthImage(item);
-        if (imageSpare.size() > 0) return nextSpare();
-        ResultEntry ms = oneResult(item, timeout);
+        if (imageSpareGood.size() > 0) return nextSpare(); // first put out all good spare, but no bad spare
+        ResultEntry ms = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
         // check if the match was made in the url or in the image links
-        if (ms == null) throw new MalformedURLException("no image url found");
+        if (ms == null) {
+            if (hasSpare()) return nextSpare();
+            throw new MalformedURLException("no image url found");
+        }
         // try to get more
         SolrDocument doc = ms.getNode();
         // there can be two different kinds of image hits: either the document itself is an image or images are embedded in the links of text documents.
         String mime = (String) doc.getFirstValue(CollectionSchema.content_type.getSolrFieldName());
-        if (Response.docType(ms.url()) == Response.DT_IMAGE || Response.docType(mime) == Response.DT_IMAGE) {
+        boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
+        if (!fakeImageHost && (Response.docType(ms.url()) == Response.DT_IMAGE || Response.docType(mime) == Response.DT_IMAGE)) {
             String id = ASCII.String(ms.hash());
-            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
+            if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
         } else {
-            Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
-            Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
-            Collection<Object> prt = doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName());
-            if (img != null && img.size() > 0) {
+            Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
+            Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
+            if (imgO != null && imgO.size() > 0 && imgO instanceof List<?>) {
+                List<Object> alt = altO == null ? new ArrayList<Object>(imgO.size()) : (List<Object>) altO;
+                List<Object> img = (List<Object>) imgO;
+                List<String> prt = CollectionConfiguration.indexedList2protocolList(doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName()), img.size());
+                Collection<Object> heightO = doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName());
+                Collection<Object> widthO = doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName());
+                List<Object> height = heightO == null ? new ArrayList<Object>(heightO.size()) : (List<Object>) heightO;
+                List<Object> width = widthO == null ? new ArrayList<Object>(widthO.size()) : (List<Object>) widthO;
                 for (int c = 0; c < img.size(); c++) {
-                    String image_urlstub =  (String) SetTools.nth(img, c);
-                    String image_alt = alt != null && alt.size() > c ? (String) SetTools.nth(alt, c) : "";
-                    if (query.getQueryGoal().matches(image_urlstub) || query.getQueryGoal().matches(image_alt)) {
-                        try {
-                            DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + image_urlstub);
-                            Object heightO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName()), c);
-                            Object widthO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName()), c);
-                            String id = ASCII.String(imageUrl.hash());
-                            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", image_alt, widthO == null ? 0 : (Integer) widthO, heightO == null ? 0 : (Integer) heightO, 0));
-                        } catch (MalformedURLException e) {
-                            continue;
+                    String image_urlstub =  (String) img.get(c);
+                    String image_alt = alt != null && alt.size() > c ? (String) alt.get(c) : "";
+                    boolean match = (query.getQueryGoal().matches(image_urlstub) || query.getQueryGoal().matches(image_alt));
+                    try {
+                        DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? prt.get(c) : "http") + "://" + image_urlstub);
+                        Integer h = (Integer) height.get(c);
+                        Integer w = (Integer) width.get(c);
+                        boolean sizeok = h != null && w != null && h.intValue() > 16 && w.intValue() > 16;
+                        String id = ASCII.String(imageUrl.hash());
+                        if (!imageViewed.containsKey(id) && !containsSpare(id)) {
+                            ImageResult imageResult = new ImageResult(ms.url(), imageUrl, "", image_alt, w == null ? 0 : w, h == null ? 0 : h, 0);
+                            if (match || sizeok) imageSpareGood.put(id, imageResult); else imageSpareBad.put(id, imageResult);
                         }
+                    } catch (MalformedURLException e) {
+                        continue;
                     }
                 }
             }
         }
-        if (imageSpare.size() > 0) return nextSpare();
+        if (hasSpare()) return nextSpare();
         throw new MalformedURLException("no image url found");
     }
 
