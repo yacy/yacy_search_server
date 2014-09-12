@@ -1538,8 +1538,8 @@ public final class SearchEvent {
                 List<String> prt = CollectionConfiguration.indexedList2protocolList(doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName()), img.size());
                 Collection<Object> heightO = doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName());
                 Collection<Object> widthO = doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName());
-                List<Object> height = heightO == null ? new ArrayList<Object>(heightO.size()) : (List<Object>) heightO;
-                List<Object> width = widthO == null ? new ArrayList<Object>(widthO.size()) : (List<Object>) widthO;
+                List<Object> height = heightO == null ? new ArrayList<Object>(img.size()) : (List<Object>) heightO;
+                List<Object> width = widthO == null ? new ArrayList<Object>(img.size()) : (List<Object>) widthO;
                 for (int c = 0; c < img.size(); c++) {
                     String image_urlstub =  (String) img.get(c);
                     String image_alt = alt != null && alt.size() > c ? (String) alt.get(c) : "";
