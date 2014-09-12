@@ -7,5 +7,6 @@
 <author><name><![CDATA[#[creator]#]]></name></author>
 <dc:subject><![CDATA[#[subject]#]]></dc:subject>
 <id>#[link]#</id>
+<updated>#[date822]#</updated>
 </entry>
 #(/content)#

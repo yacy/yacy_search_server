@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
@@ -128,15 +129,6 @@ public class yacysearchitem {
             final String resource = theSearch.query.domType.toString();
             final String origQ = theSearch.query.getQueryGoal().getQueryString(true);
             prop.put("content", 1); // switch on specific content
-            prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) ? 1 : 0);
-            prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
-            prop.put("content_showMetadata", sb.getConfigBool("search.result.show.metadata", true) ? 1 : 0);
-            prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
-            prop.put("content_showCitation", sb.getConfigBool("search.result.show.citation", true) ? 1 : 0);
-            prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
-            prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
-            prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
-            prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
@@ -145,7 +137,6 @@ public class yacysearchitem {
             prop.putHTML("content_authorized_recommend_deletelink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
             prop.putHTML("content_authorized_recommend_recommendlink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", urlhash);
-            final String resulthashString = urlhash;
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
@@ -187,26 +178,40 @@ public class yacysearchitem {
 //            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
 // END interaction
 
+            boolean isAtomFeed = header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("atom");
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
             if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
             prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
-            prop.put("content_urlhash", resulthashString);
+            prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
-            prop.put("content_showMetadata_urlhash", resulthashString);
-            prop.put("content_showCache_link", resultUrlstring);
-            prop.put("content_showProxy_link", resultUrlstring);
-            prop.put("content_showHostBrowser_link", resultUrlstring);
-            prop.put("content_showParser_urlhash", resulthashString);
-            prop.put("content_showCitation_urlhash", resulthashString);
-            prop.put("content_urlhexhash", Seed.b64Hash2hexHash(resulthashString));
+            if (fileType == FileType.HTML) { // html template specific settings
+                prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) ? 1 : 0);
+                prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
+                prop.put("content_showMetadata", sb.getConfigBool("search.result.show.metadata", true) ? 1 : 0);
+                prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
+                prop.put("content_showCitation", sb.getConfigBool("search.result.show.citation", true) ? 1 : 0);
+                prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
+                prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
+                prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
+                prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
+
+                prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
+                prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
+                prop.put("content_showMetadata_urlhash", urlhash);
+                prop.put("content_showParser_urlhash", urlhash);
+                prop.put("content_showCitation_urlhash", urlhash);
+                prop.putHTML("content_showPictures_former", origQ);
+                prop.put("content_showCache_link", resultUrlstring);
+                prop.put("content_showProxy_link", resultUrlstring);
+                prop.put("content_showHostBrowser_link", resultUrlstring);
+            }
+            prop.put("content_urlhexhash", Seed.b64Hash2hexHash(urlhash));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
-            prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
-            prop.put("content_date822", HeaderFramework.formatRFC1123(result.modified()));
+            prop.put("content_date822", isAtomFeed ? ISO8601Formatter.FORMATTER.format(result.modified()) : HeaderFramework.formatRFC1123(result.modified()));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
-            prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));
-            prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
+            prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));            
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
             prop.putXML("content_file", resultFileName); // putXML for rss
             prop.putXML("content_path", resultURL.getPath()); // putXML for rss
@@ -221,7 +226,6 @@ public class yacysearchitem {
             prop.putHTML("content_words", words);
             prop.putHTML("content_showParser_words", words);
             prop.putHTML("content_former", origQ);
-            prop.putHTML("content_showPictures_former", origQ);
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.descriptionline(theSearch.query.getQueryGoal());
             prop.put("content_description", desc);

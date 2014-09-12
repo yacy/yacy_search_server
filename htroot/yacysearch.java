@@ -139,8 +139,8 @@ public class yacysearch {
         // get segment
         Segment indexSegment = sb.index;
 
-        final String EXT = header.get("EXT", "");
-        final boolean rss = EXT.equals("rss");
+        final String EXT = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
+        final boolean rss = "rss.atom".contains(EXT);
         final boolean json = EXT.equals("json");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         
