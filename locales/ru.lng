@@ -4768,12 +4768,12 @@ Bookmark Folders==Папки закладок
 #---------------------------
 Bookmark Tags<==Закладки и тэги<
 Search Options==Опции поиска
-Constraint:==Einschränkungen:
+Constraint:==Ограничение:
 all pages==все страницы
 index pages==проиндексированные страницы
 URL mask:==фильтр URL-адресов:
 Prefer mask:==Предпочтительный фильтр:
-Bookmark TagCloud==Lesezeichen TagWolke
+Bookmark TagCloud==Облако тэгов
 Topwords<==Top Wörter<
 alt="help"==alt="Помощь"
 title="help"==title="Помощь"
