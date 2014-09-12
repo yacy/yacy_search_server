@@ -6,6 +6,7 @@
 <dc:publisher><![CDATA[#[publisher]#]]></dc:publisher>
 <author><name><![CDATA[#[creator]#]]></name></author>
 <dc:subject><![CDATA[#[subject]#]]></dc:subject>
-<id>#[urlhash]#</id>
+<id>#[link]#</id>
+<updated>#[date822]#</updated>
 </entry>
 #(/content)#
