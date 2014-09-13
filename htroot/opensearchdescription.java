@@ -41,11 +41,14 @@ public class opensearchdescription {
 
         String thisaddress = header.get("Host", Domains.LOCALHOST);
         if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + env.getConfig("port", "8090");
-
+        String thisprotocol = env.getConfigBool("server.https", false) ? "https" : "http";
+        
         final serverObjects prop = new serverObjects();
         prop.put("compareyacy", post != null && post.getBoolean("compare_yacy") ? 1 : 0);
-        prop.putXML("compareyacy_thisaddress", thisaddress);
         prop.putXML("thisaddress", thisaddress);
+        prop.putXML("compareyacy_thisaddress", thisaddress);
+        prop.putXML("thisprotocol", thisprotocol);
+        prop.putXML("compareyacy_thisprotocol", thisprotocol);
         prop.putXML("SearchPageGreeting", promoteSearchPageGreeting);
         prop.putXML("clientname", sb.peers.mySeed().getName());
         prop.putXML("compareyacy_search_left", post == null ? compare_yacy.defaultsearchL : post.get("left", compare_yacy.defaultsearchL));
