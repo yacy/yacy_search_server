@@ -228,7 +228,6 @@ public class ConfigBasic {
             prop.put("setUseCase", 0);
         }
         prop.put("setUseCase_port", port);
-        prop.put("setUseCase_repositoryPath", sb.getConfig("repositoryPath", "/DATA/HTROOT/repository"));
 
         // check if values are proper
         final boolean properPassword = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);

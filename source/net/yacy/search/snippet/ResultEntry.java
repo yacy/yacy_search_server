@@ -58,21 +58,16 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private final TextSnippet textSnippet;
     private final Segment indexSegment;
 
-    // statistic objects
-    public long snippetComputationTime;
-
     public ResultEntry(final URIMetadataNode urlentry,
                        final Segment indexSegment,
                        SeedDB peers,
-                       final TextSnippet textSnippet,
-                       final long snippetComputationTime) {
+                       final TextSnippet textSnippet) {
         this.urlentry = urlentry;
         this.urlentry.setField(CollectionSchema.text_t.getSolrFieldName(), ""); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
         this.indexSegment = indexSegment;
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
         this.textSnippet = textSnippet;
-        this.snippetComputationTime = snippetComputationTime;
         final String host = urlentry.url().getHost();
         if (host != null && host.endsWith(".yacyh")) {
             // translate host into current IP
