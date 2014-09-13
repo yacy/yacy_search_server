@@ -73,7 +73,7 @@ public class MonitorHandler extends AbstractHandler {
 		
 		if (ConnectionInfo.isServerCountReached()) {
 			if (Domains.isLocal(baseRequest.getRemoteAddr(), baseRequest.getRemoteInetSocketAddress().getAddress())) return;
-			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,"max. server connections reached (see System Administration -> Performance Settings of Busy Queues -> Thread Pool Settings).");
+			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,"max. server connections reached (increase /PerformanceQueues_p.html -> httpd Session Pool).");
             baseRequest.setHandled(true);
 		}
 	}
