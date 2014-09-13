@@ -191,7 +191,10 @@ public class DCEntry extends MultiMapSolrParams {
 
             //urn identifier koennen ueber den resolver der d-nb aufgeloest werden:
             //http://nbn-resolving.de/urn:nbn:de:bsz:960-opus-1860
-            if (uu.startsWith("urn:")) return "http://nbn-resolving.de/" + uu;
+            if (uu.startsWith("urn:nbn:")) return "http://nbn-resolving.de/" + uu;
+
+            // resolver service http://wm-urn.org/ (for nbn, isbn,issn,rfc) example http://wm-urn.org/urn:ietf:rfc:2141
+            if (uu.startsWith("urn:ietf:rfc")) return "http://wm-urn.org/" + uu;
         }
         return urls[0];
     }
