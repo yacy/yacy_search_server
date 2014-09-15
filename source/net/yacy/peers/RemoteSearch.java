@@ -34,6 +34,7 @@ import java.util.SortedMap;
 
 import org.apache.solr.client.solrj.SolrQuery;
 
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
@@ -53,7 +54,8 @@ public class RemoteSearch extends Thread {
     public static final ConcurrentLog log = new ConcurrentLog("DHT");
     
     final private SearchEvent event;
-    final private String wordhashes, excludehashes, contentdom;
+    final private String wordhashes, excludehashes;
+    final private ContentDomain contentdom;
     final private int partitions;
     final private SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
@@ -68,7 +70,7 @@ public class RemoteSearch extends Thread {
               final String wordhashes,
               final String excludehashes,
               final String language,
-              final String contentdom,
+              final ContentDomain contentdom,
               final int count,
               final long time,
               final int maxDistance,
@@ -228,7 +230,7 @@ public class RemoteSearch extends Thread {
                         QueryParams.hashSet2hashString(event.query.getQueryGoal().getIncludeHashes()),
                         QueryParams.hashSet2hashString(event.query.getQueryGoal().getExcludeHashes()),
                         event.query.targetlang == null ? "" : event.query.targetlang,
-                        event.query.contentdom == null ? "all" : event.query.contentdom.toString(),
+                        event.query.contentdom == null ? ContentDomain.ALL : event.query.contentdom,
                         count,
                         time,
                         event.query.maxDistance,
@@ -273,7 +275,7 @@ public class RemoteSearch extends Thread {
                                 event,
                                 QueryParams.hashSet2hashString(wordhashes),
                                 urlhashes,
-                                "all",
+                                ContentDomain.ALL,
                                 20,
                                 time,
                                 999,

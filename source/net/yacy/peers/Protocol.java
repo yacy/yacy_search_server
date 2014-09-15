@@ -62,6 +62,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
@@ -559,7 +560,7 @@ public final class Protocol {
         final String wordhashes,
         final String excludehashes,
         final String language,
-        final String contentdom,
+        final ContentDomain contentdom,
         final int count,
         final long time,
         final int maxDistance,
@@ -653,7 +654,7 @@ public final class Protocol {
         final SearchEvent event,
         final String wordhashes,
         final String urlhashes,
-        final String contentdom,
+        final ContentDomain contentdom,
         final int count,
         final long time,
         final int maxDistance,
@@ -848,7 +849,7 @@ public final class Protocol {
             final String excludehashes,
             final String urlhashes,
             final String language,
-            final String contentdom,
+            final ContentDomain contentdom,
             final int count,
             final long time,
             final int maxDistance,
@@ -900,8 +901,9 @@ public final class Protocol {
             parts.put("modifier", UTF8.StringBody(event.query.modifier.toString()));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(event.query.modifier.sitehash));
+            //parts.put("sitehost", UTF8.StringBody(event.query.modifier.sitehost));
             parts.put("author", UTF8.StringBody(event.query.modifier.author));
-            parts.put("contentdom", UTF8.StringBody(contentdom));
+            parts.put("contentdom", UTF8.StringBody(contentdom == null ? ContentDomain.ALL.toString() : contentdom.toString()));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
             parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.query.ranking.toExternalString())));
