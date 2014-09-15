@@ -447,7 +447,7 @@ public final class SearchEvent {
             // so following sortings together with the global results will be fast
             try {
                 final long timer = System.currentTimeMillis();
-                final TermSearch<WordReference> search =
+                TermSearch<WordReference> search =
                     SearchEvent.this.query
                         .getSegment()
                         .termIndex()
@@ -458,18 +458,41 @@ public final class SearchEvent {
                             Segment.wordReferenceFactory,
                             SearchEvent.this.query.maxDistance);
                 SearchEvent.this.localSearchInclusion = search.inclusion();
-                final ReferenceContainer<WordReference> index = search.joined();
-                EventTracker.update(
-                    EventTracker.EClass.SEARCH,
-                    new ProfilingGraph.EventSearch(
-                            SearchEvent.this.query.id(true),
-                        SearchEventType.JOIN,
-                        SearchEvent.this.query.getQueryGoal().getQueryString(false),
-                        index.size(),
-                        System.currentTimeMillis() - timer),
-                    false);
+                ReferenceContainer<WordReference> index = search.joined();
                 if ( !index.isEmpty() ) {
-                    addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), index.size(), SearchEvent.this.maxtime);
+                    int successcount = addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), index.size(), SearchEvent.this.maxtime);
+                    if (successcount == 0 &&
+                        SearchEvent.this.query.getQueryGoal().getIncludeHashes().has(Segment.catchallHash) &&
+                        SearchEvent.this.query.modifier.sitehost != null && SearchEvent.this.query.modifier.sitehost.length() > 0
+                        ) {
+                        // try again with sitehost
+                        String[] hp = SearchEvent.this.query.modifier.sitehost.split("\\.");
+                        String newGoal = hp.length <= 1 ? SearchEvent.this.query.modifier.sitehost : hp.length == 2 ? hp[0] : hp[hp.length - 2].length() == 2 ? hp[hp.length - 3] : hp[hp.length - 2];
+                        search =
+                                SearchEvent.this.query
+                                    .getSegment()
+                                    .termIndex()
+                                    .query(
+                                            QueryParams.hashes2Set(ASCII.String(Word.word2hash(newGoal))),
+                                            SearchEvent.this.query.getQueryGoal().getExcludeHashes(),
+                                        null,
+                                        Segment.wordReferenceFactory,
+                                        SearchEvent.this.query.maxDistance);
+                        SearchEvent.this.localSearchInclusion = search.inclusion();
+                        index = search.joined();
+                        if (!index.isEmpty()) {
+                            successcount = addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), index.size(), SearchEvent.this.maxtime);
+                        }
+                    }
+                    EventTracker.update(
+                            EventTracker.EClass.SEARCH,
+                            new ProfilingGraph.EventSearch(
+                                    SearchEvent.this.query.id(true),
+                                SearchEventType.JOIN,
+                                SearchEvent.this.query.getQueryGoal().getQueryString(false),
+                                successcount,
+                                System.currentTimeMillis() - timer),
+                                false);
                     SearchEvent.this.addFinalize();
                 }
             } catch (final Exception e ) {
@@ -480,7 +503,7 @@ public final class SearchEvent {
         }
     }
 
-    public void addRWIs(
+    public int addRWIs(
         final ReferenceContainer<WordReference> index,
         final boolean local,
         final String resourceName,
@@ -492,7 +515,7 @@ public final class SearchEvent {
 
         this.addRunning = true;
         assert (index != null);
-        if (index.isEmpty()) return;
+        if (index.isEmpty()) return 0;
         if (local) {
             assert fullResource >= 0 : "fullResource = " + fullResource;
             this.local_rwi_stored.addAndGet(fullResource);
@@ -519,9 +542,14 @@ public final class SearchEvent {
 
         // apply all constraints
         long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        int successcounter = 0;
         try {
             WordReferenceVars iEntry;
             long remaining;
+            String acceptableAlternativeSitehash = null;
+            if (this.query.modifier.sitehost != null && this.query.modifier.sitehost.length() > 0) try {
+                acceptableAlternativeSitehash = DigestURL.hosthash(this.query.modifier.sitehost.startsWith("www.") ? this.query.modifier.sitehost.substring(4) : "www." + this.query.modifier.sitehost, 80);
+            } catch (MalformedURLException e1) {}
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
                 if (remaining <= 0) {
@@ -578,7 +606,7 @@ public final class SearchEvent {
                     }
                 } else {
                     // filter out all domains that do not match with the site constraint
-                    if (!hosthash.equals(this.query.modifier.sitehash)) {
+                    if (!hosthash.equals(this.query.modifier.sitehash) && (acceptableAlternativeSitehash == null || !hosthash.equals(acceptableAlternativeSitehash))) {
                         if (log.isFine()) log.fine("dropped RWI: modifier.sitehash");
                         continue pollloop;
                     }
@@ -598,6 +626,7 @@ public final class SearchEvent {
                 }
                 // increase counter for statistics
                 if (local) this.local_rwi_available.incrementAndGet(); else this.remote_rwi_available.incrementAndGet();
+                successcounter++;
             }
             if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
 
@@ -612,6 +641,7 @@ public final class SearchEvent {
             resourceName,
             index.size(),
             System.currentTimeMillis() - timer), false);
+        return successcounter;
     }
     
     public long getEventTime() {

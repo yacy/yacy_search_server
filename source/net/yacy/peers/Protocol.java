@@ -915,6 +915,7 @@ public final class Protocol {
             }
 
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
+            //System.out.println("Protocol: http://" + hostaddress + "/yacy/search.html" + requestPartsToString(parts)); // DEBUG
             byte[] a = httpClient.POSTbytes(new MultiProtocolURL("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false, true);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
@@ -1762,4 +1763,17 @@ public final class Protocol {
         return parts;
     }
 
+    public static String requestPartsToString(Map<String, ContentBody> parts) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, ContentBody> part: parts.entrySet()) {
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                part.getValue().writeTo(baos);
+                baos.close();
+                sb.append("&").append(part.getKey()).append("=").append(ASCII.String(baos.toByteArray()));
+            } catch (IOException e) {}
+        }
+        return "?" + sb.toString().substring(1);
+    }
+    
 }
