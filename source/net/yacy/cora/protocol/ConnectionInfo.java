@@ -49,7 +49,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     private final static int staleAfterMillis = 30 * 60000; // 30 minutes
     
     private static int maxcount = 20;
-    private static int serverMaxCount = 20;
+    private static int serverMaxCount = 50;
 
     private final String protocol;
     private final String targetHost;
