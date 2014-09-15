@@ -362,6 +362,7 @@ public class yacysearch {
             final RankingProfile ranking = sb.getRanking();
             final QueryModifier modifier = new QueryModifier();
             querystring = modifier.parse(querystring);
+            if (modifier.sitehost != null && modifier.sitehost.length() > 0 && querystring.length() == 0) querystring = "*"; // allow to search for all documents on a host
 
             // read collection
             modifier.collection = post.get("collection", modifier.collection); // post arguments may overrule parsed collection values
@@ -372,7 +373,7 @@ public class yacysearch {
                 if (querystring.length() == 1) {
                     querystring = Segment.catchallString;
                 } else {
-                    querystring = querystring.replace('*', ' ').replaceAll("  ", " ");
+                    querystring = querystring.replaceAll("* ", Segment.catchallString + " ").replace(" *", " " + Segment.catchallString);
                 }
             }
             if ( querystring.indexOf("/near", 0) >= 0 ) {
