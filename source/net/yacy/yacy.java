@@ -265,9 +265,6 @@ public final class yacy {
                         System.out.println("Error creating htdocs readme: " + e.getMessage());
                     }
 
-            final File wwwDefaultPath = new File(htDocsPath, "www");
-            mkdirIfNeseccary(wwwDefaultPath);
-
             final File shareDefaultPath = new File(htDocsPath, "share");
             mkdirIfNeseccary(shareDefaultPath);
 
