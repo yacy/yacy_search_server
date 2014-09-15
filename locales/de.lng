@@ -2146,7 +2146,7 @@ Import List==Importierte Liste
 #File: IndexReIndexMonitor_p.html
 #---------------------------
 Field Re-Indexing<==Feld Re-Indexierung<
-In case that an index schema has changed, all documents with missing field entries can be indexed again with a reindex job.==Im Falle einer Änderung des Index-Schemas, können alle Dokumente mit fehlenden Feldeinträgen mit einem Re-Indexierungs-Job erneut indexiert werden.
+In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.==Im Falle einer Änderung des Index-Schemas des eingebauten/lokalen Index, können alle Dokumente mit fehlenden Feldeinträgen mit einem Re-Indexierungs-Job erneut indexiert werden.
 "refresh page"=="Seite neu laden"
 Documents in current queue<==Dokumente in aktueller Warteschlange<
 Documents processed<==Bearbeitete Dokumente<
