@@ -39,10 +39,12 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SecondarySearchSuperviser;
@@ -166,10 +168,28 @@ public class RemoteSearch extends Thread {
         
         // prepare seed targets and threads
         Random random = new Random(System.currentTimeMillis());
-        Set<Seed> dhtPeers = null;
+        Collection<Seed> dhtPeers = null;
         if (clusterselection != null) {
             dhtPeers = DHTSelection.selectClusterPeers(event.peers, clusterselection);
         } else {
+            if (event.query.getQueryGoal().isCatchall() || event.query.getQueryGoal().getIncludeHashes().has(Segment.catchallHash)) {
+               
+                if (event.query.modifier.sitehost != null && event.query.modifier.sitehost.length() > 0) {
+                    // select peers according to host name, not the query goal
+                    String[] hp = event.query.modifier.sitehost.split("\\.");
+                    String newGoal = hp.length <= 1 ? event.query.modifier.sitehost : hp.length == 2 ? hp[0] : hp[hp.length - 2].length() == 2 ? hp[hp.length - 3] : hp[hp.length - 2];
+                    dhtPeers = DHTSelection.selectDHTSearchTargets(
+                            event.peers,
+                            QueryParams.hashes2Set(ASCII.String(Word.word2hash(newGoal))),
+                            minage,
+                            redundancy, event.peers.redundancy(),
+                            random);
+                } else {
+                    // select just random peers
+                    dhtPeers = DHTSelection.seedsByAge(event.peers, false, count).values();
+                }
+            }
+            
             dhtPeers = DHTSelection.selectDHTSearchTargets(
                             event.peers,
                             event.query.getQueryGoal().getIncludeHashes(),

@@ -262,7 +262,7 @@ public class yacysearch {
         }
 
         // find search domain
-        final Classification.ContentDomain contentdom = ContentDomain.contentdomParser(post == null ? "all" : post.get("contentdom", "all"));
+        final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
 
         // patch until better search profiles are available
         if (contentdom == ContentDomain.IMAGE && (itemsPerPage == 10 || itemsPerPage == 100)) {

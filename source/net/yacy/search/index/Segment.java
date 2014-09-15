@@ -663,11 +663,7 @@ public class Segment {
     
             // assign the catchall word
             ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
-            if (this.termIndex != null) try {
-                this.termIndex.add(catchallHash, ientry);
-            } catch (final Exception e) {
-                ConcurrentLog.logException(e);
-            }
+            if (this.termIndex != null) try {this.termIndex.add(catchallHash, ientry);} catch (final Throwable e) {ConcurrentLog.logException(e);}
         }
 
         // finish index time

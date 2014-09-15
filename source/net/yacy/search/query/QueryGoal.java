@@ -287,9 +287,9 @@ public class QueryGoal {
     }
     
     public boolean isCatchall() {
-        if (include_strings.size() != 1 || exclude_strings.size() != 0) return false;
-        String w = include_strings.get(0);
-        return (Segment.catchallString.equals(w));
+        if (this.include_hashes != null && this.include_hashes.has(Segment.catchallHash)) return true;
+        if (this.include_strings == null || this.include_strings.size() != 1) return false;
+        return (this.include_strings.contains(Segment.catchallString));
     }
     
     public boolean containsInclude(String word) {
@@ -332,30 +332,30 @@ public class QueryGoal {
         // parse special requests
         if (isCatchall()) return q;
         
-        q.append(" AND (");
-        
         // add goal query
-        int wc = 0;
         StringBuilder w = getGoalQuery();
         
         // combine these queries for all relevant fields
-        wc = 0;
-        Float boost;
-        Ranking r = configuration.getRanking(rankingProfile);
-        for (Map.Entry<SchemaDeclaration,Float> entry: r.getBoostMap()) {
-            SchemaDeclaration field = entry.getKey();
-            boost = entry.getValue();
-            if (boost == null || boost.floatValue() <= 0.0f) continue;
-            if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
-            if (field.getType() == SolrType.num_integer) continue;
-            if (wc > 0) q.append(" OR ");
-            q.append('(');
-            q.append(field.getSolrFieldName()).append(':').append(w);
-            if (boost != null) q.append('^').append(boost.toString());
+        if (w.length() > 0) {
+            q.append(" AND (");
+            int wc = 0;
+            Float boost;
+            Ranking r = configuration.getRanking(rankingProfile);
+            for (Map.Entry<SchemaDeclaration,Float> entry: r.getBoostMap()) {
+                SchemaDeclaration field = entry.getKey();
+                boost = entry.getValue();
+                if (boost == null || boost.floatValue() <= 0.0f) continue;
+                if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
+                if (field.getType() == SolrType.num_integer) continue;
+                if (wc > 0) q.append(" OR ");
+                q.append('(');
+                q.append(field.getSolrFieldName()).append(':').append(w);
+                if (boost != null) q.append('^').append(boost.toString());
+                q.append(')');
+                wc++;
+            }
             q.append(')');
-            wc++;
         }
-        q.append(')');
 
         return q;
     }
@@ -376,13 +376,15 @@ public class QueryGoal {
         StringBuilder w = getGoalQuery();
         
         // combine these queries for all relevant fields
-        q.append(" AND (");
-        q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^100.0) OR ");
-        q.append('(').append(CollectionSchema.title.getSolrFieldName()).append(':').append(w).append("^50.0) OR ");
-        q.append('(').append(CollectionSchema.keywords.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
-        q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');
-        q.append(')');
-
+        if (w.length() > 0) {
+            q.append(" AND (");
+            q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^100.0) OR ");
+            q.append('(').append(CollectionSchema.title.getSolrFieldName()).append(':').append(w).append("^50.0) OR ");
+            q.append('(').append(CollectionSchema.keywords.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
+            q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');
+            q.append(')');
+        }
+        
         return q;
     }
     
@@ -390,6 +392,7 @@ public class QueryGoal {
         int wc = 0;
         StringBuilder w = new StringBuilder(80);
         for (String s: include_strings) {
+            if (Segment.catchallString.equals(s)) continue;
             if (wc > 0) w.append(" AND ");
             w.append(dq).append(s).append(dq);
             wc++;

@@ -85,7 +85,7 @@ public class DHTSelection {
             final SeedDB seedDB,
             final HandleSet wordhashes,
             final int minage,
-            final Set<Seed> omit,
+            final Collection<Seed> omit,
             final int maxcount,
             final Random r) {
         
