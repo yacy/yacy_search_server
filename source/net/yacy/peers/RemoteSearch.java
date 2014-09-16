@@ -36,6 +36,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
@@ -176,8 +177,7 @@ public class RemoteSearch extends Thread {
                
                 if (event.query.modifier.sitehost != null && event.query.modifier.sitehost.length() > 0) {
                     // select peers according to host name, not the query goal
-                    String[] hp = event.query.modifier.sitehost.split("\\.");
-                    String newGoal = hp.length <= 1 ? event.query.modifier.sitehost : hp.length == 2 ? hp[0] : hp[hp.length - 2].length() == 2 ? hp[hp.length - 3] : hp[hp.length - 2];
+                    String newGoal = Domains.getSmartSLD(event.query.modifier.sitehost);
                     dhtPeers = DHTSelection.selectDHTSearchTargets(
                             event.peers,
                             QueryParams.hashes2Set(ASCII.String(Word.word2hash(newGoal))),

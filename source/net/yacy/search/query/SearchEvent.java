@@ -55,6 +55,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -466,8 +467,7 @@ public final class SearchEvent {
                         SearchEvent.this.query.modifier.sitehost != null && SearchEvent.this.query.modifier.sitehost.length() > 0
                         ) {
                         // try again with sitehost
-                        String[] hp = SearchEvent.this.query.modifier.sitehost.split("\\.");
-                        String newGoal = hp.length <= 1 ? SearchEvent.this.query.modifier.sitehost : hp.length == 2 ? hp[0] : hp[hp.length - 2].length() == 2 ? hp[hp.length - 3] : hp[hp.length - 2];
+                        String newGoal = Domains.getSmartSLD(SearchEvent.this.query.modifier.sitehost);
                         search =
                                 SearchEvent.this.query
                                     .getSegment()
@@ -1571,6 +1571,7 @@ public final class SearchEvent {
                 List<Object> width = widthO == null ? new ArrayList<Object>(img.size()) : (List<Object>) widthO;
                 for (int c = 0; c < img.size(); c++) {
                     String image_urlstub =  (String) img.get(c);
+                    if (image_urlstub.endsWith(".ico")) continue; // we don't want favicons, makes the result look idiotic
                     String image_alt = alt != null && alt.size() > c ? (String) alt.get(c) : "";
                     boolean match = (query.getQueryGoal().matches(image_urlstub) || query.getQueryGoal().matches(image_alt));
                     try {

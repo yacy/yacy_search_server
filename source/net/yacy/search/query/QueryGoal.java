@@ -38,6 +38,7 @@ import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -360,7 +361,7 @@ public class QueryGoal {
         return q;
     }
     
-    public StringBuilder collectionImageQueryString() {
+    public StringBuilder collectionImageQueryString(final QueryModifier modifier) {
         final StringBuilder q = new StringBuilder(80);
 
         // add filter to prevent that results come from failed urls
@@ -377,8 +378,9 @@ public class QueryGoal {
         
         // combine these queries for all relevant fields
         if (w.length() > 0) {
+            String hostname = modifier == null || modifier.sitehost == null || modifier.sitehost.length() == 0 ? null : Domains.getSmartSLD(modifier.sitehost);
             q.append(" AND (");
-            q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^100.0) OR ");
+            q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(hostname == null ? w : "(" + w + " " /*NOT an OR!, the hostname shall only boost*/ + hostname + ")").append("^100.0) OR ");
             q.append('(').append(CollectionSchema.title.getSolrFieldName()).append(':').append(w).append("^50.0) OR ");
             q.append('(').append(CollectionSchema.keywords.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
             q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');

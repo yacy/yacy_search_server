@@ -1150,12 +1150,33 @@ public class Domains {
      * @return the TLD or ccSLD+TLD if that is on a list
      */
     public static String getDNC(String host) {
+        if (host == null || host.length() == 0) return "";
         int p0 = host.lastIndexOf('.');
         if (p0 < 0) return host.toLowerCase();
         int p1 = host.lastIndexOf('.', p0 - 1);
         if (p1 < 0) return host.substring(p0 + 1).toLowerCase();
         String ccSLDTLD = host.substring(p1 + 1).toLowerCase();
         return ccSLD_TLD.contains(ccSLDTLD) ? ccSLDTLD : host.substring(p0 + 1).toLowerCase();
+    }
+
+    /**
+     * Compute the Second Level Domain of a host name excluding a possible use of a ccSLD.
+     * If the SLD is a ccSLD, then the Third Level Domain is returned
+     * @param host
+     * @return the SLD or the Third Level Domain, if the SLD is a ccSLD
+     */
+    public static String getSmartSLD(String host) {        
+        if (host == null || host.length() == 0) return "";
+        int p0 = host.lastIndexOf('.');
+        if (p0 < 0) return host.toLowerCase(); // no subdomain present
+        int p1 = host.lastIndexOf('.', p0 - 1);
+        if (p1 < 0) return host.substring(0, p0).toLowerCase(); // no third-level domain present, just use the second level
+        String ccSLDTLD = host.substring(p1 + 1).toLowerCase();
+        if (!ccSLD_TLD.contains(ccSLDTLD)) return host.substring(p1 + 1, p0).toLowerCase(); // because the ccSLDTLD is not contained in the list of knwon ccSDL, we use the SLD from p1 to p0
+        // the third level domain is the correct one
+        int p2 = host.lastIndexOf('.', p1 - 1);
+        if (p2 < 0) return host.substring(0, p1).toLowerCase();
+        return host.substring(p2 + 1, p1);
     }
 
     public static void main(final String[] args) {

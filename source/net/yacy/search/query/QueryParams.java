@@ -382,7 +382,7 @@ public final class QueryParams {
         
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
-        params.setQuery(this.queryGoal.collectionImageQueryString().toString());
+        params.setQuery(this.queryGoal.collectionImageQueryString(this.modifier).toString());
         
         // set boosts
         StringBuilder bq = new StringBuilder();
