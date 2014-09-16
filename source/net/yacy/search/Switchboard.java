@@ -68,7 +68,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -294,14 +293,11 @@ public final class Switchboard extends serverSwitch {
         sb = this;
         // check if port is already occupied
         final int port = getConfigInt("port", 8090);
-        try {
-            if ( TimeoutRequest.ping(Domains.LOCALHOST, port, 500) ) {
-                throw new RuntimeException(
+        if (TimeoutRequest.ping(Domains.LOCALHOST, port, 500)) {
+            throw new RuntimeException(
                     "a server is already running on the YaCy port "
-                        + port
-                        + "; possibly another YaCy process has not terminated yet. Please stop YaCy before running a new instance.");
-            }
-        } catch (final ExecutionException e1 ) {
+                    + port
+                    + "; possibly another YaCy process has not terminated yet. Please stop YaCy before running a new instance.");
         }
 
         MemoryTracker.startSystemProfiling();

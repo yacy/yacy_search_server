@@ -559,10 +559,12 @@ public final class yacy {
                         delete(lockFile);
                     }                                
                 }
-            } catch (Throwable ex) {
+            } catch (IOException ex) {
+                System.err.println("ERROR: config file seems to be corrupt");
+                System.err.println("ERROR: if problem persists, delete file");
+                System.err.println(configFile.getAbsolutePath());
                 ConcurrentLog.logException(ex);
-                ConcurrentLog.severe("Startup", "cannot read " + configFile.toString() + ", removing old file");
-                configFile.delete();
+                ConcurrentLog.severe("Startup", "cannot read " + configFile.toString() + ", please delete the corrupted file if problem persits");
             }
         }
     }     
