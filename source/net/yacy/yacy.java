@@ -38,7 +38,6 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -549,20 +548,22 @@ public final class yacy {
                     System.out.println("WARNING: the file " + lockFile + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
 
                     int port = Integer.parseInt(p.getProperty("port", "8090"));
-                    try {
-                        if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
-                            Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
-                            // Thats it; YaCy was running, the user is happy, we can stop now.
-                            System.out.println("WARNING: YaCy instance was still running; just opening the browser and exit.");
-                            System.exit(0);
-                        } else {
-                            // YaCy is not running; thus delete the file an go on as nothing was wrong.
-                            System.err.println("INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
-                            delete(lockFile);
-                        }
-                    } catch (final ExecutionException ex) { }                                    
+                    if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
+                        Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                        // Thats it; YaCy was running, the user is happy, we can stop now.
+                        System.out.println("WARNING: YaCy instance was still running; just opening the browser and exit.");
+                        System.exit(0);
+                    } else {
+                        // YaCy is not running; thus delete the file an go on as nothing was wrong.
+                        System.err.println("INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
+                        delete(lockFile);
+                    }                                
                 }
-            } catch (IOException ex) { }
+            } catch (Throwable ex) {
+                ConcurrentLog.logException(ex);
+                ConcurrentLog.severe("Startup", "cannot read " + configFile.toString() + ", removing old file");
+                configFile.delete();
+            }
         }
     }     
 
