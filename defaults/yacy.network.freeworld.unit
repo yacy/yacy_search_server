@@ -55,16 +55,22 @@ network.unit.inspection.searchverify = true
 network.unit.remotecrawl.speed = 300
 
 # addresses of seed-list bootstrap locations
-network.unit.bootstrap.seedlist0 = http://www.yacy.de/seed.txt
-network.unit.bootstrap.seedlist1 = http://www.elso.sk/yacy/seed.txt
-network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
+network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
+network.unit.bootstrap.seedlist1 = http://low.audioattack.de/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = http://sixcooler.de/yacy/seed.txt
 network.unit.bootstrap.seedlist3 = http://fennec.cx/yacy/seed.txt
-network.unit.bootstrap.seedlist4 = http://5.45.105.16/yacyseed
-network.unit.bootstrap.seedlist5 = http://freenode.homeunix.org/yacy/seed.txt
-network.unit.bootstrap.seedlist6 = http://ns2.haunold.co.at:8090/www/seed.txt
-network.unit.bootstrap.seedlist7 = http://5.135.162.2/yacy/seed.txt
-network.unit.bootstrap.seedlist8 = http://yacy.tinuviel.ru/seed.txt
-network.unit.bootstrap.seedlist9 = http://www.eggers-blog.info/yacy/seed.txt
+network.unit.bootstrap.seedlist4 = http://buelte.com/share/seed.txt
+network.unit.bootstrap.seedlist5 = http://esbek.iv.net.pl/yacy/seed.txt
+network.unit.bootstrap.seedlist6 = http://freenode.homeunix.org/yacy/seed.txt
+network.unit.bootstrap.seedlist7 = http://titan.deep-one.in/yacy/seed.txt
+network.unit.bootstrap.seedlist8 = http://yacy.tschability.ch/seed.txt
+network.unit.bootstrap.seedlist9 = http://xz1.nl/yacy/seed.txt
+network.unit.bootstrap.seedlist10 = http://massagefreun.de/yacy/seed.txt
+network.unit.bootstrap.seedlist11 = http://yacy-vs2.db0anf.de/bootstrap/vs2-seed.txt
+network.unit.bootstrap.seedlist12 = http://178.63.78.81:8090/www/seed.txt
+network.unit.bootstrap.seedlist13 = http://188.243.64.125:37852/yacy/seed.txt
+network.unit.bootstrap.seedlist14 = http://213.174.50.179/seed.txt
+network.unit.bootstrap.seedlist15 = http://87.106.29.77:59465/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
@@ -72,6 +78,8 @@ network.unit.update.location0 = http://yacy.net/en/index.html
 network.unit.update.location0.key = MIIBtzCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYQAAoGAbGeo21lW3Ost86RxSrCLIHaYaaj/68jFrTMjAORGJqUTgnvYCd4T1HmD/pCYrW8sQtN4KFPbm8M/MbDWeojQpy+qVqewBilYIdNpArGknvFkw4jpDPu7aR6FRz56zcZTnBiOpqAbBXDB3o6D1w9zVDPd4LBSTLgedt0joZeVAVk=
 network.unit.update.location1 = http://kaskelix.de/update/
 network.unit.update.location1.key = MIIBtzCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYQAAoGAbGeo21lW3Ost86RxSrCLIHaYaaj/68jFrTMjAORGJqUTgnvYCd4T1HmD/pCYrW8sQtN4KFPbm8M/MbDWeojQpy+qVqewBilYIdNpArGknvFkw4jpDPu7aR6FRz56zcZTnBiOpqAbBXDB3o6D1w9zVDPd4LBSTLgedt0joZeVAVk=
+network.unit.update.location2 = http://latest.yacy.de/
+network.unit.update.location2.key = MIIBtzCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYQAAoGAbGeo21lW3Ost86RxSrCLIHaYaaj/68jFrTMjAORGJqUTgnvYCd4T1HmD/pCYrW8sQtN4KFPbm8M/MbDWeojQpy+qVqewBilYIdNpArGknvFkw4jpDPu7aR6FRz56zcZTnBiOpqAbBXDB3o6D1w9zVDPd4LBSTLgedt0joZeVAVk=
 
 # properties for in-protocol response authentication:
 network.unit.protocol.control = uncontrolled
