@@ -295,7 +295,7 @@ public final class CrawlStacker {
         String error;
         if (profile == null) {
             error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url().toNormalform(true);
-            CrawlStacker.log.warn(error);
+            CrawlStacker.log.info(error); // this is NOT an error but a normal effect when terminating a crawl queue
             return error;
         }
 
