@@ -25,7 +25,7 @@
 	<key>Java</key>
 	<dict>
 		<key>VMOptions</key>
-		<string>-server -Xmx600m -Xms90m -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8 -Dsolr.directoryFactory=solr.MMapDirectoryFactory</string>
+		<string>-Xmx600m -Xms600m -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8 -Dsolr.directoryFactory=solr.MMapDirectoryFactory</string>
 		<key>WorkingDirectory</key>
 		<string>$APP_PACKAGE/Contents/Resources/Java</string>
 		<key>MainClass</key>
@@ -78,6 +78,7 @@
 			<string>$JAVAROOT/lib/jetty-xml-9.2.2.v20140723.jar</string>			                      
 			<string>$JAVAROOT/lib/jsch-0.1.50.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.1.jar</string>
+			<string>$JAVAROOT/lib/jsoup-1.6.3.jar</string>
 			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.2.jar</string>
 			<string>$JAVAROOT/lib/lucene-analyzers-common-4.9.0.jar</string>
 			<string>$JAVAROOT/lib/lucene-analyzers-phonetic-4.9.0.jar</string>
@@ -106,6 +107,7 @@
 			<string>$JAVAROOT/lib/solr-solrj-4.9.0.jar</string>
 			<string>$JAVAROOT/lib/spatial4j-0.4.1.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>
+			<string>$JAVAROOT/lib/weupnp-0.1.2.jar</string>
 			<string>$JAVAROOT/lib/wstx-asl-3.2.9.jar</string>
 			<string>$JAVAROOT/lib/xercesImpl.jar</string>
 			<string>$JAVAROOT/lib/xml-apis.jar</string>
