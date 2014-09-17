@@ -266,7 +266,7 @@ public class Segment {
             if ((internalIDs.size() == 0 || !connectedCitation()) && Segment.this.fulltext.useWebgraph()) {
                 // reqd the references from the webgraph
                 SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
-                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 10000000, Long.MAX_VALUE, 100, 1, WebgraphSchema.source_id_s.getSolrFieldName());
+                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery("{!raw f=" + WebgraphSchema.target_id_s.getSolrFieldName() + "}" + ASCII.String(id), WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 10000000, Long.MAX_VALUE, 100, 1, false, WebgraphSchema.source_id_s.getSolrFieldName());
                 SolrDocument doc;
                 try {
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -369,7 +369,7 @@ public class Segment {
         final BlockingQueue<SolrDocument> docQueue;
         final String urlstub;
         if (stub == null) {
-            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(AbstractSolrConnector.CATCHALL_QUERY, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(AbstractSolrConnector.CATCHALL_QUERY, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, false, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = null;
         } else {
             final String host = stub.getHost();
@@ -379,7 +379,7 @@ public class Segment {
             } catch (MalformedURLException e) {
                 ConcurrentLog.logException(e);
             }
-            docQueue = hh == null ? new ArrayBlockingQueue<SolrDocument>(0) : this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = hh == null ? new ArrayBlockingQueue<SolrDocument>(0) : this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, Integer.MAX_VALUE, maxtime, maxcount, 1, false, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = stub.toNormalform(true);
         }
 

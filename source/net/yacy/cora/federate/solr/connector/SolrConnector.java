@@ -213,6 +213,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param maxtime the maximum time in milliseconds
      * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
      * @param concurrency is the number of AbstractSolrConnector.POISON_DOCUMENT entries to add at the end of the feed
+     * @param prefetchIDs if true, then first all IDs are fetched and then all documents are queries by the ID. If false then documents are retrieved directly
      * @param fields list of fields
      * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
@@ -224,6 +225,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final long maxtime,
             final int buffersize,
             final int concurrency,
+            final boolean prefetchIDs,
             final String ... fields);
 
     /**

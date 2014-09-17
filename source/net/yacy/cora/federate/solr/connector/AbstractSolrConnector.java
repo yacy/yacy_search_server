@@ -153,6 +153,51 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             final long maxtime,
             final int buffersize,
             final int concurrency,
+            final boolean prefetchIDs,
+            final String ... fields) {
+        assert buffersize > 0;
+        if (!prefetchIDs) return concurrentDocumentsByQueryNoPrefetch(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency, fields);
+        final BlockingQueue<String> idQueue = concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, Math.min(maxcount, 10000000), 1);
+        final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
+        final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
+        final Thread t = new Thread() {
+            @Override
+            public void run() {
+                this.setName("AbstractSolrConnector:concurrentDocumentsByQueryWithPrefetch(" + querystring + ")");
+                String nextID;
+                try {
+                    while (System.currentTimeMillis() < endtime && (nextID = idQueue.take()) != AbstractSolrConnector.POISON_ID) {
+                        
+                        try {
+                            SolrDocument d = getDocumentById(nextID, fields);
+                            try {queue.put(d);} catch (final InterruptedException e) {}
+                        } catch (final SolrException | IOException e) {
+                            ConcurrentLog.logException(e);
+                            // fail
+                            ConcurrentLog.severe("AbstractSolrConnector", "aborted concurrentDocumentsByQuery: " + e.getMessage());
+                            break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    ConcurrentLog.severe("AbstractSolrConnector", "interrupted concurrentDocumentsByQuery: " + e.getMessage());
+                }
+                for (int i = 0; i < Math.max(1, concurrency); i++) {
+                    try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (final InterruptedException e1) {}
+                }
+            }
+        };
+        t.start();
+        return queue;
+    }
+
+    private BlockingQueue<SolrDocument> concurrentDocumentsByQueryNoPrefetch(
+            final String querystring,
+            final String sort,
+            final int offset,
+            final int maxcount,
+            final long maxtime,
+            final int buffersize,
+            final int concurrency,
             final String ... fields) {
         assert buffersize > 0;
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
@@ -162,7 +207,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final Thread t = new Thread() {
             @Override
             public void run() {
-                this.setName("AbstractSolrConnector:concurrentDocumentsByQuery(" + querystring + ")");
+                this.setName("AbstractSolrConnector:concurrentDocumentsByQueryNoPrefetch(" + querystring + ")");
                 int o = offset;
                 int count = 0;
                 int retry = 0;
@@ -187,7 +232,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                             continue loop;
                         }
                         // fail
-                        ConcurrentLog.severe("AbstractSolrConnector", "aborted concurrentDocumentsByQuery after " + maxretries + " retries: " + e.getMessage());
+                        ConcurrentLog.severe("AbstractSolrConnector", "aborted concurrentDocumentsByQueryNoPrefetch after " + maxretries + " retries: " + e.getMessage());
                         break;
                     }
                 }
@@ -199,7 +244,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         t.start();
         return queue;
     }
-
+    
     @Override
     public BlockingQueue<String> concurrentIDsByQuery(
             final String querystring,

@@ -62,7 +62,7 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         if (hostname.startsWith("www.")) hostname = hostname.substring(4);
         StringBuilder q = new StringBuilder();
         q.append(CollectionSchema.host_s.getSolrFieldName()).append(':').append(hostname).append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(':').append("www.").append(hostname);
-        BlockingQueue<SolrDocument> docs = solrConnector.concurrentDocumentsByQuery(q.toString(), CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, maxnodes, maxtime, 100, 1,
+        BlockingQueue<SolrDocument> docs = solrConnector.concurrentDocumentsByQuery(q.toString(), CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, maxnodes, maxtime, 100, 1, true,
                 CollectionSchema.id.getSolrFieldName(),
                 CollectionSchema.sku.getSolrFieldName(),
                 CollectionSchema.failreason_s.getSolrFieldName(),
