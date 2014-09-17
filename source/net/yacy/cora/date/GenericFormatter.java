@@ -36,6 +36,7 @@ import net.yacy.cora.util.NumberTools;
 public class GenericFormatter extends AbstractFormatter implements DateFormatter {
 
     public static final String PATTERN_SHORT_DAY    = "yyyyMMdd";
+    public static final String PATTERN_SHORT_MINUTE = "yyyyMMddHHmm";
     public static final String PATTERN_SHORT_SECOND = "yyyyMMddHHmmss";
     public static final String PATTERN_SHORT_MILSEC = "yyyyMMddHHmmssSSS";
     public static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
@@ -43,6 +44,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final String PATTERN_SIMPLE  = "yyyy/MM/dd HH:mm:ss";
     
     public static final SimpleDateFormat FORMAT_SHORT_DAY     = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
+    public static final SimpleDateFormat FORMAT_SHORT_MINUTE  = new SimpleDateFormat(PATTERN_SHORT_MINUTE, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_SECOND  = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_MILSEC  = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
     public static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
@@ -65,6 +67,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final long time_day    = 24 * time_hour;
 
     public static final GenericFormatter SHORT_DAY_FORMATTER     = new GenericFormatter(FORMAT_SHORT_DAY, time_minute);
+    public static final GenericFormatter SHORT_MINUTE_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MINUTE, time_second);
     public static final GenericFormatter SHORT_SECOND_FORMATTER  = new GenericFormatter(FORMAT_SHORT_SECOND, time_second);
     public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MILSEC, 1);
     public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(FORMAT_RFC1123_SHORT, time_minute);

@@ -189,7 +189,7 @@ public class WorkTables extends Tables {
             Data data = new Data();
             data.put(TABLE_API_COL_TYPE, UTF8.getBytes(type));
             data.put(TABLE_API_COL_COMMENT, UTF8.getBytes(comment));
-            byte[] date = UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
+            byte[] date = ASCII.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
             data.put(TABLE_API_COL_DATE_RECORDING, date);
             data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
             data.put(TABLE_API_COL_URL, UTF8.getBytes(apiurl));

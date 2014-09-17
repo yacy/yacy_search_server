@@ -413,18 +413,18 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     /**
-     * count the number of peers that had been seed within the time limit
-     * @param limit the time limit in minutes. 1440 minutes is a day
+     * count the number of peers that had been seen within the given time limit
+     * @param limitMinutes the time limit in minutes. 1440 minutes is a day
      * @return the number of peers seen in the given time
      */
-    public int sizeActiveSince(final long limit) {
+    public int sizeActiveSince(final long limitMinutes) {
         int c = this.seedActiveDB.size();
         Seed seed;
         Iterator<Seed> i = seedsSortedDisconnected(false, Seed.LASTSEEN);
         while (i.hasNext()) {
             seed = i.next();
             if (seed != null) {
-                if (Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60) > limit) break;
+                if (Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60) > limitMinutes) break;
                 c++;
             }
         }
@@ -432,7 +432,7 @@ public final class SeedDB implements AlternativeDomainNames {
         while (i.hasNext()) {
             seed = i.next();
             if (seed != null) {
-                if (Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60) > limit) break;
+                if (Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60) > limitMinutes) break;
                 c++;
             }
         }

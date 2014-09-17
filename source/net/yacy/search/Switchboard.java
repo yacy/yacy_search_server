@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -155,6 +156,7 @@ import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
+import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
@@ -271,6 +273,7 @@ public final class Switchboard extends serverSwitch {
     public SeedDB peers;
     public WorkTables tables;
     public Tray tray;
+    private long lastStats = 0; // time when the last row was written to the stats table
 
     public WorkflowProcessor<IndexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<IndexingQueueEntry> indexingCondensementProcessor;
@@ -2355,6 +2358,26 @@ public final class Switchboard extends serverSwitch {
                     this.optimizeLastRun = System.currentTimeMillis();
                 }
             }
+            
+            // write statistics
+            if (System.currentTimeMillis() - this.lastStats > 1500000 /*25min, should cause 2 entries every hour at least*/) try {
+                BEncodedHeap statTable = this.tables.getHeap("stats");
+                Map<String, byte[]> entry = new LinkedHashMap<>();
+                if (this.isP2PMode()) {
+                    entry.put("aM", ASCII.getBytes(Integer.toString(this.peers.sizeActiveSince(30 * 1440)))); // activeLastMonth
+                    entry.put("aW", ASCII.getBytes(Integer.toString(this.peers.sizeActiveSince(7 * 1440)))); // activeLastWeek
+                    entry.put("aD", ASCII.getBytes(Integer.toString(this.peers.sizeActiveSince(1440)))); // activeLastDay
+                    entry.put("aH", ASCII.getBytes(Integer.toString(this.peers.sizeActiveSince(60)))); // activeLastHour
+                    entry.put("cC", ASCII.getBytes(Integer.toString(this.peers.sizeConnected()))); // countConnected (Active Senior)
+                    entry.put("cD", ASCII.getBytes(Integer.toString(this.peers.sizeDisconnected()))); // countDisconnected (Passive Senior)
+                    entry.put("cP", ASCII.getBytes(Integer.toString(this.peers.sizePotential()))); // countPotential (Junior)
+                    entry.put("cR", ASCII.getBytes(Long.toString(this.index.RWICount()))); // count of the RWI entries
+                }
+                entry.put("cI", ASCII.getBytes(Long.toString(this.index.fulltext().collectionSize()))); // size of the index (number of documents)
+                byte[] pk = ASCII.getBytes(GenericFormatter.SHORT_MINUTE_FORMATTER.format()); // the primary key is the date, the maximum length is 12 characters which is sufficient for up-to-minute accuracy
+                statTable.put(pk, entry);
+                this.lastStats = System.currentTimeMillis();
+            } catch (IOException e) {}
             
             // execute api actions; this must be done after postprocessing because 
             // these actions may also influence the search index/ call optimize steps
