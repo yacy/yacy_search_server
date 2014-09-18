@@ -21,12 +21,15 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -49,6 +52,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.FacetParams;
@@ -468,5 +472,46 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             throw new IOException(e.getMessage(), e);
         }
     }
+    
+    /**
+     * Update a solr document.
+     * This will write only a partial update for all fields given in the SolrInputDocument
+     * and leaves all other fields untouched.
+     * @param solrdoc
+     * @throws IOException
+     * @throws SolrException
+     */
+    @Override
+    public void update(final SolrInputDocument solrdoc) throws IOException, SolrException {
+        this.add(partialUpdatePatch(solrdoc));
+    }
+
+    /**
+     * Update a collection of solr input documents.
+     * This will write only a partial update for all fields given in the SolrInputDocuments
+     * and leaves all other fields untouched.
+     * @param solrdocs
+     * @throws IOException
+     * @throws SolrException
+     */
+    @Override
+    public void update(final Collection<SolrInputDocument> solrdoc) throws IOException, SolrException {
+        Collection<SolrInputDocument> docs = new ArrayList<>(solrdoc.size());
+        for (SolrInputDocument doc: solrdoc) docs.add(partialUpdatePatch(doc));
+        this.add(docs);
+    }
+    
+    private SolrInputDocument partialUpdatePatch(final SolrInputDocument docIn) {
+        SolrInputDocument docOut = new SolrInputDocument();
+        docOut.setField(CollectionSchema.id.name(), docIn.getFieldValue(CollectionSchema.id.name()));
+        for (Entry<String, SolrInputField> entry: docIn.entrySet()) {
+            if (entry.getKey().equals(CollectionSchema.id.name())) continue;
+            Map<String, Object> partialUpdate = new HashMap<>(1);
+            partialUpdate.put("set", entry.getValue());
+            docOut.setField(entry.getKey(), partialUpdate);
+        }
+        return docOut;
+    }
+    
 
 }

@@ -370,4 +370,15 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         return this.connector.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
     }
 
+    @Override
+    public void update(final SolrInputDocument solrdoc) throws IOException, SolrException {
+        commitDocBuffer();
+        this.connector.update(solrdoc);
+    }
+
+    @Override
+    public void update(final Collection<SolrInputDocument> solrdoc) throws IOException, SolrException {
+        commitDocBuffer();
+        this.connector.update(solrdoc);        
+    }
 }

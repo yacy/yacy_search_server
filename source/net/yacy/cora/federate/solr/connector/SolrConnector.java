@@ -123,7 +123,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      */
     public LoadTimeURL getLoadTimeURL(final String id) throws IOException;
-    
+
     /**
      * add a solr input document
      * @param solrdoc
@@ -133,12 +133,32 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
     
     /**
+     * Update a solr document.
+     * This will write only a partial update for all fields given in the SolrInputDocument
+     * and leaves all other fields untouched.
+     * @param solrdoc
+     * @throws IOException
+     * @throws SolrException
+     */
+    public void update(final SolrInputDocument solrdoc) throws IOException, SolrException;
+
+    /**
      * add a collection of solr input documents
      * @param solrdocs
      * @throws IOException
      * @throws SolrException
      */
     public void add(final Collection<SolrInputDocument> solrdoc) throws IOException, SolrException;
+
+    /**
+     * Update a collection of solr input documents.
+     * This will write only a partial update for all fields given in the SolrInputDocuments
+     * and leaves all other fields untouched.
+     * @param solrdocs
+     * @throws IOException
+     * @throws SolrException
+     */
+    public void update(final Collection<SolrInputDocument> solrdoc) throws IOException, SolrException;
     
     /**
      * get a document from solr by given key for the id-field
