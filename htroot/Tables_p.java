@@ -160,7 +160,7 @@ public class Tables_p {
                 count = 0;
                 try {
                     final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher);
-                    final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(plainIterator, maxcount).iterator();
+                    final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(plainIterator, maxcount, false).iterator();
                     Tables.Row row;
                     boolean dark = true;
                     byte[] cell;

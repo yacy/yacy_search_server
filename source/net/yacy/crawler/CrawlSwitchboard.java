@@ -677,11 +677,9 @@ public final class CrawlSwitchboard {
             ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
         } catch (final IOException e ) {
             ConcurrentLog.logException(e);
-            ConcurrentLog.logException(e);
             FileUtils.deletedelete(file);
             try {
-                ret =
-                    new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
+                ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
             } catch (final IOException e1 ) {
                 ConcurrentLog.logException(e1);
                 ret = null;

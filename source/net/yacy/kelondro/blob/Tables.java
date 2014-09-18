@@ -454,14 +454,14 @@ public class Tables implements Iterable<String> {
         return new RowIterator(table, wherePattern);
     }
 
-    public Collection<Row> orderByPK(final Iterator<Row> rowIterator, int maxcount) {
+    public Collection<Row> orderByPK(final Iterator<Row> rowIterator, int maxcount, boolean reverse) {
         final TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
         Row row;
         while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
             row = rowIterator.next();
             sortTree.put(UTF8.String(row.pk), row);
         }
-        return sortTree.values();
+        return reverse ? sortTree.descendingMap().values() : sortTree.values();
     }
 
     public Collection<Row> orderBy(final Iterator<Row> rowIterator, int maxcount, final String sortColumn) {
