@@ -1278,6 +1278,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                 Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
                                 final String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                                 final String i = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                                if (proctags == null) {
+                                    // this should not happen since we collected the documents using a process_sxt:[* TO *] term
+                                    ConcurrentLog.warn("CollectionConfiguration", "no process_sxt entry for url " + u);
+                                    continue;
+                                }
                                 try {
                                     DigestURL url = new DigestURL(u, ASCII.getBytes(i));
                                     byte[] id = url.hash();
