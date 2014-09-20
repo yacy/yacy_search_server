@@ -4,7 +4,7 @@
 
     <groupId>net.yacy</groupId>
     <artifactId>yacycore</artifactId>
-    <version>1.73</version>
+    <version>1.81</version>
     <packaging>jar</packaging>
     <description>YaCy - a Peer to Peer Web Search Engine</description>
     <name>YaCy</name>
