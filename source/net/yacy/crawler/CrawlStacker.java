@@ -380,19 +380,6 @@ public final class CrawlStacker {
             ConcurrentLog.logException(e);
             return "exception during double-test: " + e.getMessage();
         }
-        final Long oldDate = oldEntry == null ? null : oldEntry.date;
-        if (oldDate == null) {
-            return null; // no evidence that we know that url
-        }
-        final boolean recrawl = profile.recrawlIfOlder() > oldDate.longValue();
-        final String urlstring = url.toNormalform(false);
-        if (recrawl) {
-            if (CrawlStacker.log.isFine())
-                CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                    ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
-        } else {
-            return "double in: LURL-DB, oldDate = " + oldDate.toString();
-        }
 
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
@@ -409,6 +396,20 @@ public final class CrawlStacker {
                 return "result stack domain counter exceeded (test by domainCount)";
             }
             */
+        }
+        
+        final Long oldDate = oldEntry == null ? null : oldEntry.date;
+        if (oldDate == null) {
+            return null; // no evidence that we know that url
+        }
+        final boolean recrawl = profile.recrawlIfOlder() > oldDate.longValue();
+        final String urlstring = url.toNormalform(false);
+        if (recrawl) {
+            if (CrawlStacker.log.isFine())
+                CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
+                    ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
+        } else {
+            return "double in: LURL-DB, oldDate = " + oldDate.toString();
         }
 
         return null;

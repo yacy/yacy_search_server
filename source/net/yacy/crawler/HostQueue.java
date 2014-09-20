@@ -379,8 +379,12 @@ public class HostQueue implements Balancer {
             if (this.has(hash)) return "double occurrence in urlFileIndex";
 
             // increase dom counter
-            if (profile != null && profile.domMaxPages() != Integer.MAX_VALUE && profile.domMaxPages() > 0) {
-                profile.domInc(entry.url().getHost());
+            if (profile != null) {
+                int maxPages = profile.domMaxPages();
+                if (maxPages != Integer.MAX_VALUE && maxPages > 0) {
+                    String host = entry.url().getHost();
+                    profile.domInc(host);
+                }
             }
             
             // add to index
