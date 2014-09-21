@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
 <!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
 <html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
   <script type="text/javascript">
 //<![CDATA[
 function xmlhttpPost() {
@@ -23,7 +24,7 @@ function search(query) {
         if (self.xmlHttpReq.readyState == 4) {
             updatepage(self.xmlHttpReq.responseText);
         }
-    }
+    };
     self.xmlHttpReq.send(null);
 }
 
@@ -33,9 +34,6 @@ function updatepage(str) {
   var rsp = eval("("+str+")");
   var firstChannel = rsp.channels[0];
   var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
-  var startIndex = firstChannel.startIndex;
-  var itemsPerPage = firstChannel.itemsPerPage;
-  var navigation = firstChannel.navigation;
   
   var html = "";
   
@@ -54,7 +52,6 @@ function updatepage(str) {
 }
 //]]>
 </script>
-  <head>
     <title>YaCy '#[clientname]#': View URL Content</title>
     #%env/templates/metas.template%#
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
@@ -71,7 +68,7 @@ function updatepage(str) {
 </script>
 
 <div id="api">
-<a href="http://localhost:8090/api/getpageinfo_p.xml?actions=title,robots&url=#[url]#" id="apilink">
+<a href="api/getpageinfo_p.xml?actions=title,robots&url=#[url]#" id="apilink">
 <img src="env/grafics/api.png" width="60" height="40" alt="API"/>
 </a>
 <span>See the page info about the url.</span>
