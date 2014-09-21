@@ -78,7 +78,7 @@
     <dd>Proxy: #[trafficProxy]#<br/>Crawler: #[trafficCrawler]#</dd>
     
     <dt><a href="Connections_p.html">Incoming Connections</a></dt>
-    <dd>Active: #[connectionsActive]# | Max: #[connectionsMax]#</dd>
+    <dd>Active: #[connectionsActive]# | Max: <a href="PerformanceQueues_p.html#ThreadPoolSettings">#[connectionsMax]#</a></dd>
     
     <dt><a href="Crawler_p.html">Queues</a></dt>
     <dd>
@@ -86,7 +86,7 @@
     <table>
       <tr>
         <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" ></div></div></td>
-        <td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div></td>
+        <td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;<a href="PerformanceQueues_p.html#ThreadPoolSettings">#[loaderQueueMax]#</a></div></td>
       </tr>
       <tr>
         <td><a href="IndexCreateQueues_p.html?stack=LOCAL">Local Crawl</a></td>
