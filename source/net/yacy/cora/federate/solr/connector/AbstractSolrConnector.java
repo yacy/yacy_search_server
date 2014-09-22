@@ -348,7 +348,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setRows(count);
         params.setStart(offset);
         params.setFacet(false);
-        if (fields.length > 0) params.setFields(fields);
+        if (fields != null && fields.length > 0) params.setFields(fields);
         params.setIncludeScore(false);
         params.setParam("defType", "edismax");
         params.setParam(DisMaxParams.QF, CollectionSchema.text_t.getSolrFieldName() + "^1.0");

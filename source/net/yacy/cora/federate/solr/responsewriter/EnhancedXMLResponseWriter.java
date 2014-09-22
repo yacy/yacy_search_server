@@ -22,14 +22,19 @@ package net.yacy.cora.federate.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.federate.solr.SolrType;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
@@ -83,6 +88,12 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write(XML_STOP);
     }
 
+    public static void write(final Writer writer, final SolrQueryRequest request, final SolrDocumentList sdl) throws IOException {
+        writer.write(XML_START);
+        writeDocs(writer, request, sdl);
+        writer.write(XML_STOP);
+    }
+
     private static void writeProps(final Writer writer, final String name, final NamedList<?> val) throws IOException {
         if (val == null) return;
         int sz = val.size();
@@ -124,20 +135,43 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         for (int i = 0; i < sz; i++) {
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
-            writeDoc(writer, schema, null, doc, (includeScore ? iterator.score() : 0.0f), includeScore);
+            writeDoc(writer, schema, null, doc.getFields(), (includeScore ? iterator.score() : 0.0f), includeScore);
+        }
+        writer.write("</result>");
+        writer.write(lb);
+    }
+    
+    private static final void writeDocs(final Writer writer, @SuppressWarnings("unused") final SolrQueryRequest request, final SolrDocumentList docs) throws IOException {
+        boolean includeScore = false;
+        final int sz = docs.size();
+        writer.write("<result");
+        writeAttr(writer, "name", "response");
+        writeAttr(writer, "numFound", Long.toString(docs.getNumFound()));
+        writeAttr(writer, "start", Long.toString(docs.getStart()));
+        if (includeScore) {
+            writeAttr(writer, "maxScore", Float.toString(docs.getMaxScore()));
+        }
+        if (sz == 0) {
+            writer.write("/>");
+            return;
+        }
+        writer.write('>'); writer.write(lb);
+        Iterator<SolrDocument> iterator = docs.iterator();
+        for (int i = 0; i < sz; i++) {
+            SolrDocument doc = iterator.next();
+            writeDoc(writer, doc);
         }
         writer.write("</result>");
         writer.write(lb);
     }
 
-    private static final void writeDoc(final Writer writer, final IndexSchema schema, final String name, final Document doc, final float score, final boolean includeScore) throws IOException {
+    private static final void writeDoc(final Writer writer, final IndexSchema schema, final String name, final List<IndexableField> fields, final float score, final boolean includeScore) throws IOException {
         startTagOpen(writer, "doc", name);
 
         if (includeScore) {
             writeTag(writer, "float", "score", Float.toString(score), false);
         }
 
-        List<IndexableField> fields = doc.getFields();
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
         while (fidx1 < sz) {
@@ -156,16 +190,16 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
                 if (sf.multiValued()) {
                     startTagOpen(writer, "arr", fieldName);
                     String sv = value.stringValue();
-                    writeField(writer, type, null, sv); //sf.write(this, null, f1);
+                    writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, f1);
                     writer.write("</arr>");
                 } else {
-                    writeField(writer, type, value.name(), value.stringValue()); //sf.write(this, f1.name(), f1);
+                    writeField(writer, type.getTypeName(), value.name(), value.stringValue()); //sf.write(this, f1.name(), f1);
                 }
             } else {
                 startTagOpen(writer, "arr", fieldName);
                 for (int i = fidx1; i < fidx2; i++) {
                     String sv = fields.get(i).stringValue();
-                    writeField(writer, type, null, sv); //sf.write(this, null, (Fieldable)this.tlst.get(i));
+                    writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, (Fieldable)this.tlst.get(i));
                 }
                 writer.write("</arr>");
                 writer.write(lb);
@@ -175,10 +209,30 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write("</doc>");
         writer.write(lb);
     }
+    
+    private static final void writeDoc(final Writer writer, final SolrDocument doc) throws IOException {
+        startTagOpen(writer, "doc", null);
+        final Map<String, Object> fields = doc.getFieldValueMap();
+        for (String key: fields.keySet()) {
+            if (key == null)  continue;
+            Object value = doc.get(key);
+            if (value == null) {
+            } else if (value instanceof Collection<?>) {
+                startTagOpen(writer, "arr", key);
+                for (Object o: ((Collection<?>) value)) {
+                    writeField(writer, null, o);
+                }
+                writer.write("</arr>"); writer.write(lb);
+            } else {
+                writeField(writer, key, value);
+            }
+        }
+        writer.write("</doc>");
+        writer.write(lb);
+    }
 
     @SuppressWarnings("deprecation")
-    private static void writeField(final Writer writer, final FieldType type, final String name, final String value) throws IOException {
-        String typeName = type.getTypeName();
+    private static void writeField(final Writer writer, final String typeName, final String name, final String value) throws IOException {
         if (typeName.equals(SolrType.text_general.printName()) ||
             typeName.equals(SolrType.string.printName()) ||
             typeName.equals(SolrType.text_en_splitting_tight.printName())) {
@@ -197,7 +251,25 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             writeTag(writer, "double", name, value, true);
         }
     }
-
+    
+    private static void writeField(final Writer writer, final String name, final Object value) throws IOException {
+        if (value instanceof String) {
+            writeTag(writer, "str", name, (String) value, true);
+        } else if (value instanceof Boolean) {
+            writeTag(writer, "bool", name, ((Boolean) value).toString(), true);
+        } else if (value instanceof Integer) {
+            writeTag(writer, "int", name, ((Integer) value).toString(), true);
+        } else if (value instanceof Long) {
+            writeTag(writer, "long", name, ((Long) value).toString(), true);
+        } else if (value instanceof Date) {
+            writeTag(writer, "date", name, ((Date) value).toString(), true); // this is declared deprecated in solr 4.2.1 but is still used as done here
+        } else if (value instanceof Float) {
+            writeTag(writer, "float", name, ((Float) value).toString(), true);
+        } else if (value instanceof Double) {
+            writeTag(writer, "double", name, ((Double) value).toString(), true);
+        }
+    }
+    
     private static void writeTag(final Writer writer, final String tag, final String nameAttr, final String val, final boolean escape) throws IOException {
         int contentLen = val.length();
         if (contentLen == 0) {
@@ -224,7 +296,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
     private static void startTagOpen(final Writer writer, final String tag, final String nameAttr) throws IOException {
         writer.write('<'); writer.write(tag);
         if (nameAttr != null) writeAttr(writer, "name", nameAttr);
-        writer.write('>'); writer.write(lb);
+        writer.write('>'); //writer.write(lb);
     }
 
     private static void startTagClose(final Writer writer, final String tag, final String nameAttr) throws IOException {
@@ -236,4 +308,6 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
     private static void writeAttr(final Writer writer, final String nameAttr, final String val) throws IOException {
         writer.write(' '); writer.write(nameAttr); writer.write("=\""); XML.escapeAttributeValue(val, writer); writer.write('"');
     }
+    
+    
 }

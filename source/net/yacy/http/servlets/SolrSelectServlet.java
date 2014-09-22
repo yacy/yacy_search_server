@@ -43,6 +43,7 @@ import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
@@ -58,6 +59,7 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
@@ -195,7 +197,10 @@ public class SolrSelectServlet extends HttpServlet {
             String requestURI = hrequest.getRequestURI();
             boolean defaultConnector = (requestURI.startsWith("/solr/" + WebgraphSchema.CORE_NAME)) ? false : requestURI.startsWith("/solr/" + CollectionSchema.CORE_NAME) || mmsp.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
             mmsp.getMap().remove("core");
-            EmbeddedSolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
+            SolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
+            if (connector == null) {
+                connector = defaultConnector ? sb.index.fulltext().getDefaultConnector() : sb.index.fulltext().getConnectorForRead(WebgraphSchema.CORE_NAME);
+            }
             if (connector == null) throw new ServletException("no core");
 
             // add default queryfield parameter according to local ranking config (or defaultfield)
@@ -228,44 +233,56 @@ public class SolrSelectServlet extends HttpServlet {
             }
 
             // do the solr request, generate facets if we use a special YaCy format
-            req = connector.request(mmsp);
+            final SolrQueryResponse rsp;
+            if (connector instanceof EmbeddedSolrConnector) {
+                req = ((EmbeddedSolrConnector) connector).request(mmsp);
+                rsp = ((EmbeddedSolrConnector) connector).query(req);
 
-            SolrQueryResponse rsp = connector.query(req);
+                // prepare response
+                hresponse.setHeader("Cache-Control", "no-cache");
+                HttpCacheHeaderUtil.checkHttpCachingVeto(rsp, hresponse, reqMethod);
 
-            // prepare response
-            hresponse.setHeader("Cache-Control", "no-cache");
-            HttpCacheHeaderUtil.checkHttpCachingVeto(rsp, hresponse, reqMethod);
+                // check error
+                if (rsp.getException() != null) {
+                    AccessTracker.addToDump(querystring, "0", new Date());
+                    sendError(hresponse, rsp.getException());
+                    return;
+                }
+                
 
-            // check error
-            if (rsp.getException() != null) {
-                AccessTracker.addToDump(querystring, "0", new Date());
-                sendError(hresponse, rsp.getException());
-                return;
-            }
-            
+                NamedList<?> values = rsp.getValues();
+                DocList r = ((ResultContext) values.get("response")).docs;
+                int numFound = r.matches();
+                AccessTracker.addToDump(querystring, Integer.toString(numFound), new Date());
+                
+                // write response header
+                final String contentType = responseWriter.getContentType(req, rsp);
+                if (null != contentType) response.setContentType(contentType);
 
-            NamedList<?> values = rsp.getValues();
-            DocList r = ((ResultContext) values.get("response")).docs;
-            int numFound = r.matches();
-            AccessTracker.addToDump(querystring, Integer.toString(numFound), new Date());
-            
-            // write response header
-            final String contentType = responseWriter.getContentType(req, rsp);
-            if (null != contentType) response.setContentType(contentType);
+                if (Method.HEAD == reqMethod) {
+                    return;
+                }
 
-            if (Method.HEAD == reqMethod) {
-                return;
-            }
-
-            // write response body
-            if (responseWriter instanceof BinaryResponseWriter) {
-                ((BinaryResponseWriter) responseWriter).write(response.getOutputStream(), req, rsp);
+                // write response body
+                if (responseWriter instanceof BinaryResponseWriter) {
+                    ((BinaryResponseWriter) responseWriter).write(response.getOutputStream(), req, rsp);
+                } else {
+                    out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
+                    responseWriter.write(out, req, rsp);
+                    out.flush();
+                }
             } else {
-                out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
-                responseWriter.write(out, req, rsp);
-                out.flush();
+                // write a 'faked' response using a call to the backend
+                SolrDocumentList sdl = connector.getDocumentListByQuery(
+                        mmsp.getMap().get(CommonParams.Q)[0],
+                        mmsp.getMap().get(CommonParams.SORT) == null ? null : mmsp.getMap().get(CommonParams.SORT)[0],
+                        Integer.parseInt(mmsp.getMap().get(CommonParams.START)[0]),
+                        Integer.parseInt(mmsp.getMap().get(CommonParams.ROWS)[0]),
+                        mmsp.getMap().get(CommonParams.FL));
+                OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream());
+                EnhancedXMLResponseWriter.write(osw, req, sdl);
+                osw.close();
             }
-            
         } catch (final Throwable ex) {
             sendError(hresponse, ex);
         } finally {

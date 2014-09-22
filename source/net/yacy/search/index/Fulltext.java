@@ -164,6 +164,12 @@ public final class Fulltext {
         return this.solrInstances.getEmbeddedConnector(corename);
     }
 
+    public SolrConnector getConnectorForRead(String corename) {
+        if (this.solrInstances.isConnectedRemote()) return this.solrInstances.getRemoteConnector(corename);
+        if (this.solrInstances.isConnectedEmbedded()) return this.solrInstances.getEmbeddedConnector(corename);
+        return null;
+    }
+
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
         try {
             return this.solrInstances.getDefaultRemoteConnector(true);
