@@ -157,6 +157,8 @@ public class ViewFile {
             //urlEntry.wordCount();
             size = urlEntry.size();
             pre = urlEntry.flags().get(Condenser.flag_cat_indexof);
+            prop.put("moar", 1);
+            prop.putHTML("moar_search", post.get("search",""));
         }
 
         prop.put("error_inurldb", urlEntry == null ? 0 : 1);
@@ -168,8 +170,6 @@ public class ViewFile {
             return prop;
         }
         prop.put("url", url.toNormalform(true));
-        prop.put("moar", 1);
-        prop.putHTML("moar_search", post.get("search",""));
 
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url.hash()) ? 1 : 0);
