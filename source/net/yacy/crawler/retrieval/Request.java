@@ -288,4 +288,8 @@ public class Request extends WorkflowJob
         return this.profileHandle;
     }
 
+    @Override
+    public String toString() {
+        return this.url.toNormalform(true);
+    }
 }

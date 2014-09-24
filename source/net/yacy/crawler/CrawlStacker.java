@@ -325,12 +325,8 @@ public final class CrawlStacker {
 
         // check availability of parser and maxfilesize
         String warning = null;
-        ContentDomain contentDomain = entry.url().getContentDomainFromExt();
-        if (contentDomain == ContentDomain.APP  ||
-            (contentDomain == ContentDomain.IMAGE && TextParser.supportsExtension(entry.url()) != null) ||
-            contentDomain == ContentDomain.AUDIO  ||
-            contentDomain == ContentDomain.VIDEO ||
-            contentDomain == ContentDomain.CTRL) {
+        //ContentDomain contentDomain = entry.url().getContentDomainFromExt();
+        if (TextParser.supportsExtension(entry.url()) != null) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, profile, this.robots);
             //if (warning != null && this.log.isFine()) this.log.logFine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;

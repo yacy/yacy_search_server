@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.document.parser.apkParser;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.bzipParser;
 import net.yacy.document.parser.csvParser;
@@ -82,6 +83,7 @@ public final class TextParser {
     private static final Map<String, Object> denyExtensionx = new ConcurrentHashMap<String, Object>();
 
     static {
+        initParser(new apkParser());
         initParser(new bzipParser());
         initParser(new csvParser());
         initParser(new docParser());

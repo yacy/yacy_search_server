@@ -335,7 +335,7 @@ public class apkParser extends AbstractParser implements Parser  {
                     }
                     sb.append('>');
                 }
-                System.out.println(sb.toString());
+                //System.out.println(sb.toString());
             }
             
             // evaluate the content
