@@ -148,10 +148,22 @@ public final class LoaderDispatcher {
     	return load(request, cacheStrategy, protocolMaxFileSize(request.url()), blacklistType, agent);
     }
 
+    /**
+     * loads a resource from cache or web/ftp/smb/file
+     * on concurrent execution waits max 5 sec for the prev. loader to fill the cache (except for CacheStrategy.NOCACHE)
+     * 
+     * @param request the request essentials
+     * @param cacheStrategy strategy according to NOCACHE, IFFRESH, IFEXIST, CACHEONLY
+     * @param maxFileSize
+     * @param blacklistType
+     * @param agent
+     * @return the loaded entity in a Response object
+     * @throws IOException
+     */
     public Response load(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
-        Semaphore check = this.loaderSteering.get(request.url());        
-        if (check != null) {
-            // a loading process may be going on for that url
+        Semaphore check = this.loaderSteering.get(request.url());
+        if (check != null && cacheStrategy != CacheStrategy.NOCACHE) {
+            // a loading process is going on for that url
             //ConcurrentLog.info("LoaderDispatcher", "waiting for " + request.url().toNormalform(true));
             long t = System.currentTimeMillis();
             try { check.tryAcquire(5, TimeUnit.SECONDS);} catch (final InterruptedException e) {}
@@ -163,15 +175,14 @@ public final class LoaderDispatcher {
         this.loaderSteering.put(request.url(), new Semaphore(0));
         try {
             final Response response = loadInternal(request, cacheStrategy, maxFileSize, blacklistType, agent);
-            check = this.loaderSteering.remove(request.url());
-            if (check != null) check.release(1000);
+            // finally block cleans up loaderSteering and semaphore
             return response;
         } catch (final Throwable e) {
             throw new IOException(e);
         } finally {
             // release the semaphore anyway
-            check = this.loaderSteering.remove(request.url());
-            if (check != null) check.release(1000);          
+            check = this.loaderSteering.remove(request.url()); // = next caller goes directly to loadInternal (is ok we just wanted to fill cash)
+            if (check != null) check.release(1000); // don't block any other
         }
     }
 
