@@ -197,7 +197,6 @@ public class genericImageParser extends AbstractParser implements Parser {
         }
 
         final HashSet<String> languages = new HashSet<String>();
-        final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
         final LinkedHashMap<DigestURL, ImageEntry> images  = new LinkedHashMap<>();
         // add this image to the map of images
         final String infoString = ii.info.toString();
@@ -219,7 +218,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              descriptions, // description
              gpslon, gpslat, //  location
              infoString, // content text
-             anchors, // anchors
+             null, // anchors
              null,
              images,
              false,
