@@ -125,7 +125,6 @@ public final class QueryParams {
     public Seed remotepeer;
     public final long starttime; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
     protected final long maxtime;
-    private final long timeout;
     // values that are set after a search:
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
@@ -213,7 +212,6 @@ public final class QueryParams {
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
-        this.timeout = this.starttime + this.timeout;
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;

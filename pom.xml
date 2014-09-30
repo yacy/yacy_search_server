@@ -338,7 +338,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>fontbox</artifactId>
-            <version>1.8.6</version>
+            <version>1.8.7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
@@ -393,7 +393,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>jempbox</artifactId>
-            <version>1.8.6</version>
+            <version>1.8.7</version>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -483,7 +483,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>1.8.6</version>
+            <version>1.8.7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -533,68 +533,68 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>      
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>    
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-xml</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-http</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-security</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-io</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-continuation</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-jmx</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-proxy</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-deploy</artifactId>
-            <version>9.2.2.v20140723</version>
+            <version>9.2.3.v20140905</version>
         </dependency>
         <dependency>
             <groupId>org.bitlet</groupId>

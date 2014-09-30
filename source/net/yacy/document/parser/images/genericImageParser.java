@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,19 +77,15 @@ public class genericImageParser extends AbstractParser implements Parser {
     public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        SUPPORTED_EXTENSIONS.add("png");
-        SUPPORTED_EXTENSIONS.add("gif");
-        SUPPORTED_EXTENSIONS.add("jpg");
-        SUPPORTED_EXTENSIONS.add("jpeg");
-        SUPPORTED_EXTENSIONS.add("jpe");
         SUPPORTED_EXTENSIONS.add("bmp");
-        SUPPORTED_EXTENSIONS.add("tif");
-        SUPPORTED_EXTENSIONS.add("tiff");
-        SUPPORTED_MIME_TYPES.add("image/png");
-        SUPPORTED_MIME_TYPES.add("image/gif");
-        SUPPORTED_MIME_TYPES.add("image/jpeg");
-        SUPPORTED_MIME_TYPES.add("image/jpg"); // this is in fact a 'wrong' mime type. We leave it here because that is a common error that occurs in the internet frequently
+        // by default java ImageIO supports bmp, gif, jpg, jpeg, png, wbmp (tif if jai-imageio is in classpath/registered)
+        // http://download.java.net/media/jai-imageio/javadoc/1.1/overview-summary.html
+        SUPPORTED_EXTENSIONS.add("jpe"); // not listed in ImageIO extension but sometimes uses for jpeg
+        SUPPORTED_EXTENSIONS.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
+
         SUPPORTED_MIME_TYPES.add("image/bmp");
+        SUPPORTED_MIME_TYPES.add("image/jpg"); // this is in fact a 'wrong' mime type. We leave it here because that is a common error that occurs in the internet frequently        
+        SUPPORTED_MIME_TYPES.addAll(Arrays.asList(ImageIO.getReaderMIMETypes()));
     }
 
     public genericImageParser() {
@@ -200,7 +197,6 @@ public class genericImageParser extends AbstractParser implements Parser {
         }
 
         final HashSet<String> languages = new HashSet<String>();
-        final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
         final LinkedHashMap<DigestURL, ImageEntry> images  = new LinkedHashMap<>();
         // add this image to the map of images
         final String infoString = ii.info.toString();
@@ -222,7 +218,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              descriptions, // description
              gpslon, gpslat, //  location
              infoString, // content text
-             anchors, // anchors
+             null, // anchors
              null,
              images,
              false,
@@ -309,6 +305,22 @@ public class genericImageParser extends AbstractParser implements Parser {
 
 
     public static void main(final String[] args) {
+        // list support file extension by java ImageIO
+        String names[] = ImageIO.getReaderFileSuffixes();
+        System.out.print("supported file extension:");
+        for (int i = 0; i < names.length; ++i) {
+            System.out.print(" " + names[i]);
+        }
+        System.out.println();
+
+        // list supported mime types of java ImageIO
+        String mime[] = ImageIO.getReaderMIMETypes();
+        System.out.print("supported mime types:    ");
+        for (int i = 0; i < mime.length; ++i) {
+            System.out.print(" " + mime[i]);
+        }
+        System.out.println();
+
         final File image = new File(args[0]);
         final genericImageParser parser = new genericImageParser();
         AnchorURL uri;

@@ -12,7 +12,7 @@
            company's own web pages.<br />
            Filter have to be entered as IP, IP range or first part of allowed IP's separated by comma (e.g. 10.100.0-100.0-100, 127. ) 
            further details on format see Jetty 
-           <a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.
+           <a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.
     </td>
   </tr>
   <!--

@@ -1579,6 +1579,7 @@ only the local index==Nur lokaler Index
 Query Operators==Such-Operatoren
 restrictions==Restriktionen
 only urls with the &lt;phrase&gt; in the url==Nur URLs, welche &lt;phrase&gt; enthalten
+only urls with the &lt;phrase&gt; within outbound links of the document==Nur URLs, die &lt;phrase&gt; in einem Link enthalten
 only urls with extension==Nur URLs mit der Dateinamenserweiterung
 only urls from host==Nur URLs vom Server
 only pages with as-author-anotated==Nur Seiten mit dem angegebenen Autor
@@ -1598,7 +1599,6 @@ doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
 an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
 heuristics==Heuristiken
-#add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
 add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
 Search Navigation==Such-Navigation
 keyboard shotcuts==Tastatur-Kürzel
@@ -1610,7 +1610,8 @@ automatic result retrieval==Automatische Ergebnis-Abfrage
 browser integration==Browserintegration
 after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==Nach der Suche clicken Sie auf das Suchfeld Ihres Browsers und wählen Sie '"YaCy" hinzufügen'
 search as rss feed==Suche als RSS-Feed
-#click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
+click on the red icon in the upper right after a search. this works good in combination with the==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem
+See an==siehe
 >example==>Beispiel
 json search results==JSON-Suchergebnisse
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
