@@ -113,7 +113,6 @@ public class ViewProfile {
                 }
 
                 // try to get the profile from remote peer
-                if (sb.clusterhashes != null) seed.setAlternativeAddress(sb.clusterhashes.get(seed.hash.getBytes()));
                 profile = Protocol.getProfile(seed);
 
                 // if profile did not arrive, say that peer is disconnected
@@ -170,7 +169,7 @@ public class ViewProfile {
                     prop.put("success_" + key, "1");
                     // only comments get "wikified"
                     if(key.equals("comment")){
-                        prop.putWiki(sb.peers.mySeed().getClusterAddress(),
+                        prop.putWiki(sb.peers.mySeed().getPublicAddress(),
                                 "success_" + key + "_value",
                                 entry.getValue().replaceAll("\r", "").replaceAll("\\\\n", "\n"));
                         prop.put("success_" + key + "_b64value", Base64Order.standardCoder.encodeString(entry.getValue()));

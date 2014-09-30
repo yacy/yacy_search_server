@@ -51,6 +51,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -128,14 +129,7 @@ import org.apache.solr.common.SolrInputDocument;
 
 public final class Protocol {
 
-    private static byte[] postToFile(
-        final Seed target,
-        final String filename,
-        final Map<String, ContentBody> parts,
-        final int timeout) throws IOException {
-        return postToFile(target.getClusterAddress(), target.hash, filename, parts, timeout);
-    }
-
+    @Deprecated
     private static byte[] postToFile(
         final SeedDB seedDB,
         final String targetHash,
@@ -176,9 +170,8 @@ public final class Protocol {
     public static int hello(
         final Seed mySeed,
         final PeerActions peerActions,
-        final String address,
-        final String otherHash,
-        final String otherName) {
+        final Seed otherSeed) {
+        final String address = otherSeed.getPublicAddress(otherSeed.getIP());
 
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
@@ -198,7 +191,7 @@ public final class Protocol {
             content =
                 httpClient.POSTbytes(
                     new MultiProtocolURL("http://" + address + "/yacy/hello.html"),
-                    Seed.b64Hash2hexHash(otherHash) + ".yacyh",
+                    Seed.b64Hash2hexHash(otherSeed.hash) + ".yacyh",
                     parts,
                     false, true);
             responseTime = System.currentTimeMillis() - start;
@@ -210,12 +203,7 @@ public final class Protocol {
                     + "' interrupted.");
                 return -1;
             }
-            Network.log.info("yacyClient.hello thread '"
-                + Thread.currentThread().getName()
-                + "', peer "
-                + address
-                + "; exception: "
-                + e.getMessage());
+            Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "', peer " + address + "; exception: " + e.getMessage());
             // try again (go into loop)
             result = null;
         }
@@ -238,35 +226,25 @@ public final class Protocol {
         // check consistency with expectation
         Seed otherPeer = null;
         String seed;
-        if ( (otherHash != null) && (otherHash.length() > 0) && ((seed = result.get("seed0")) != null) ) {
+        if ( (otherSeed.hash != null) && (otherSeed.hash.length() > 0) && ((seed = result.get("seed0")) != null) ) {
             if ( seed.length() > Seed.maxsize ) {
-                Network.log.info("hello/client 0: rejected contacting seed; too large ("
-                    + seed.length()
-                    + " > "
-                    + Seed.maxsize
-                    + ")");
+                Network.log.info("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + Seed.maxsize + ")");
             } else {
                 try {
-                    final int p = address.indexOf(':');
-                    if ( p < 0 ) {
-                        return -1;
-                    }
+                    // patch the remote peer address to avoid that remote peers spoof the network with wrong addresses
+                    final int p = address.lastIndexOf(':');
+                    if ( p < 0 ) return -1;
                     String h = address.substring(0, p);
+                    if (h.charAt(0) == '[') h = h.substring(1);
+                    if (h.charAt(h.length() - 1) == ']') h = h.substring(0, h.length() - 1);
                     InetAddress ie = Domains.dnsResolve(h);
-                    final String host = ie == null ? h : ie.getHostAddress(); // hack to prevent NPEs
-                    otherPeer = Seed.genRemoteSeed(seed, false, host);
-                    if ( !otherPeer.hash.equals(otherHash) ) {
-                        Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = "
-                            + otherPeer.hash
-                            + ", otherHash = "
-                            + otherHash);
+                    otherPeer = Seed.genRemoteSeed(seed, false, ie.getHostAddress());
+                    if ( !otherPeer.hash.equals(otherSeed.hash) ) {
+                        Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherSeed.hash);
                         return -1; // no success
                     }
                 } catch (final IOException e ) {
-                    Network.log.info("yacyClient.hello: consistency error: other seed bad:"
-                        + e.getMessage()
-                        + ", seed="
-                        + seed);
+                    Network.log.info("yacyClient.hello: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
                     return -1; // no success
                 }
             }
@@ -281,11 +259,15 @@ public final class Protocol {
         // set my own seed according to new information
         // we overwrite our own IP number only
         if ( serverCore.useStaticIP ) {
-            mySeed.setIP(Switchboard.getSwitchboard().myPublicIP());
+            mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
         } else {
             final String myIP = result.get("yourip");
-            final String properIP = Seed.isProperIP(myIP);
-            if ( properIP == null ) mySeed.setIP(myIP);
+            // with the IPv6 extension, this may contain several ips, separated by comma ','
+            HashSet<String> h = new HashSet<>();
+            for (String s: myIP.split(",")) {
+                if (s.length() > 0 && Seed.isProperIP(s)) h.add(s);
+            }
+            if (h.size() > 0) mySeed.setIPs(h);
         }
         mySeed.setFlagRootNode(
                 (mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL)) &&
@@ -303,7 +285,7 @@ public final class Protocol {
             accessible.IWasAccessed = false;
         }
         accessible.lastUpdated = System.currentTimeMillis();
-        Network.amIAccessibleDB.put(otherHash, accessible);
+        Network.amIAccessibleDB.put(otherSeed.hash, accessible);
 
         /*
          * If we were reported as junior we have to check if your port forwarding channel is broken
@@ -387,52 +369,11 @@ public final class Protocol {
         final int connectedAfter = peerActions.sizeConnected();
 
         // update event tracker
-        EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(
-            mySeed.getName(),
-            otherName,
-            true,
-            connectedAfter - connectedBefore), false);
+        EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(mySeed.getName(), otherSeed.getName(), true, connectedAfter - connectedBefore), false);
 
         return count;
     }
-    /*
-    private int readSeeds(String prefix) {
-        String seedStr;
-        while ( (seedStr = result.get("seed" + i++)) != null ) {
-            // integrate new seed into own database
-            // the first seed, "seed0" is the seed of the responding peer
-            if ( seedStr.length() > Seed.maxsize ) {
-                Network.log.logInfo("hello/client: rejected contacting seed; too large ("
-                    + seedStr.length()
-                    + " > "
-                    + Seed.maxsize
-                    + ")");
-            } else {
-                try {
-                    if ( i == 1 ) {
-                        final int p = address.indexOf(':');
-                        if ( p < 0 ) {
-                            return -1;
-                        }
-                        InetAddress ia = Domains.dnsResolve(address.substring(0, p));
-                        if (ia == null) continue;
-                        final String host = ia.getHostAddress();
-                        s = Seed.genRemoteSeed(seedStr, false, host);
-                    } else {
-                        s = Seed.genRemoteSeed(seedStr, false, null);
-                    }
-                    if ( peerActions.peerArrival(s, (i == 1)) ) {
-                        count++;
-                    }
-                } catch (final IOException e ) {
-                    Network.log.logInfo("hello/client: rejected contacting seed; bad ("
-                        + e.getMessage()
-                        + ")");
-                }
-            }
-        }
-    }
-*/
+
     public static Seed querySeed(final Seed target, final String seedHash) {
         // prepare request
         final String salt = crypt.randomSalt();
@@ -443,7 +384,7 @@ public final class Protocol {
                 basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", UTF8.StringBody("seed"));
             parts.put("env", UTF8.StringBody(seedHash));
-            final byte[] content = postToFile(target, "query.html", parts, 10000);
+            final byte[] content = postToFile(target.getPublicAddress(target.getIP()), target.hash, "query.html", parts, 10000);
             final Map<String, String> result = FileUtils.table(content);
 
             if ( result == null || result.isEmpty() ) {
@@ -457,22 +398,24 @@ public final class Protocol {
         }
     }
 
-    public static long[] queryRWICount(final Seed target, final String wordHash) {
-        if (target == null) return new long[] {-1, -1};
-        
+    public static long[] queryRWICount(final String targetAddress, final String targetHash, int timeout) {        
         // prepare request
         final String salt = crypt.randomSalt();
 
         // send request
         try {
-            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("object", UTF8.StringBody("rwicount"));
             parts.put("ttl", UTF8.StringBody("0"));
-            parts.put("env", UTF8.StringBody(wordHash));
-            final byte[] content = postToFile(target, "query.html", parts, 6000);
+            parts.put("env", UTF8.StringBody(""));
+            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetAddress);
+            final byte[] content = postToFile(targetAddress, targetHash, "query.html", parts, timeout);
+            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received CONTENT from requesting " + targetAddress + (content == null ? "NULL" : (": length = " + content.length)));
             final Map<String, String> result = FileUtils.table(content);
             if (result == null || result.isEmpty()) return new long[] {-1, -1};
+            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESULT from requesting " + targetAddress + " : result = " + result.toString());
             final String resp = result.get("response");
+            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESPONSE from requesting " + targetAddress + " : response = " + resp);
             if (resp == null) return new long[] {-1, -1};
             String magic = result.get("magic");
             if (magic == null) magic = "0";
@@ -482,6 +425,7 @@ public final class Protocol {
                 return new long[] {-1, -1};
             }
         } catch (final Exception e ) {
+            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received EXCEPTION from requesting " + targetAddress + ": " + e.getMessage());
             if (Network.log.isFine()) Network.log.fine("yacyClient.queryRWICount error:" + e.getMessage());
             return new long[] {-1, -1};
         }
@@ -516,10 +460,7 @@ public final class Protocol {
             parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
             // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
-            final byte[] result =
-                httpClient.POSTbytes(new MultiProtocolURL("http://"
-                    + target.getClusterAddress()
-                    + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
+            final byte[] result = httpClient.POSTbytes(new MultiProtocolURL("http://" + target.getPublicAddress(target.getIP()) + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if ( reader == null ) {
                 Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '"
@@ -586,8 +527,8 @@ public final class Protocol {
         final long timestamp = System.currentTimeMillis();
         event.addExpectedRemoteReferences(count);
         SearchResult result;
-        String clusteraddress = target.getClusterAddress();
-        if (clusteraddress.equals(event.peers.mySeed().getClusterAddress())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
+        String clusteraddress = target.getPublicAddress(target.getIP());
+        if (target.clash(event.peers.mySeed().getIPs())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
         try {
             result =
                 new SearchResult(
@@ -680,7 +621,7 @@ public final class Protocol {
                     maxDistance,
                     partitions,
                     target.getHexHash() + ".yacyh",
-                    target.getClusterAddress(),
+                    target.getPublicAddress(),
                     null
                     );
         } catch (final IOException e ) {
@@ -1033,7 +974,7 @@ public final class Protocol {
                         Network.log.info("SEARCH skip (solr), remote Solr interface not accessible, peer=" + target.getName());
                         return -1;
                     }
-                    final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress();
+                    final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress(target.getIP());
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
                     Thread remoteRequest = new Thread() {
                         @Override
@@ -1285,7 +1226,7 @@ public final class Protocol {
         final String salt = crypt.randomSalt();
 
         // determining target address
-        final String address = target.getClusterAddress();
+        final String address = target.getPublicAddress(target.getIP());
         if ( address == null ) {
             return null;
         }
@@ -1435,7 +1376,7 @@ public final class Protocol {
         final ReferenceContainerCache<WordReference> indexes,
         boolean gzipBody,
         final int timeout) {
-        final String address = targetSeed.getPublicAddress();
+        final String address = targetSeed.getPublicAddress(targetSeed.getIP());
         if ( address == null ) {
             Network.log.warn("no address for transferRWI");
             return null;
@@ -1507,7 +1448,7 @@ public final class Protocol {
         boolean gzipBody,
         final int timeout) {
         // this post a message to the remote message board
-        final String address = targetSeed.getPublicAddress();
+        final String address = targetSeed.getPublicAddress(targetSeed.getIP());
         if ( address == null ) {
             return null;
         }
@@ -1577,7 +1518,7 @@ public final class Protocol {
         // this post a message to the remote message board
         final String salt = crypt.randomSalt();
 
-        String address = targetSeed.getClusterAddress();
+        String address = targetSeed.getPublicAddress(targetSeed.getIP());
         if ( address == null ) {
             address = "localhost:8090";
         }
@@ -1619,7 +1560,7 @@ public final class Protocol {
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", UTF8.StringBody("host"));
-            final byte[] content = postToFile(target, "idx.json", parts, 30000);
+            final byte[] content = postToFile(target.getPublicAddress(target.getIP()), target.hash, "idx.json", parts, 30000);
             if ( content == null || content.length == 0 ) {
                 Network.log.warn("yacyClient.loadIDXHosts error: empty result");
                 return null;
@@ -1702,64 +1643,45 @@ public final class Protocol {
         return false;
     }
 
-    private static final LinkedHashMap<String, ContentBody> basicRequestParts(
-        final Switchboard sb,
-        final String targetHash,
-        final String salt) {
-        // put in all the essentials for routing and network authentication
-        // generate a session key
-        final LinkedHashMap<String, ContentBody> parts =
-            basicRequestParts(
-                sb.peers.mySeed().hash,
-                targetHash,
-                Switchboard.getSwitchboard().getConfig(
-                    SwitchboardConstants.NETWORK_NAME,
-                    Seed.DFLT_NETWORK_UNIT));
+    /**
+     * put in all the essentials for routing and network authentication
+     * @param sb
+     * @param targetHash
+     * @param salt
+     * @return
+     */
+    private static final LinkedHashMap<String, ContentBody> basicRequestParts(final Switchboard sb, final String targetHash, final String salt) {
+        final LinkedHashMap<String, ContentBody> parts = new LinkedHashMap<String, ContentBody>();
+        
+        // just standard identification essentials
+        if ( sb.peers.mySeed().hash != null ) {
+            parts.put("iam", UTF8.StringBody(sb.peers.mySeed().hash));
+            if ( targetHash != null ) parts.put("youare", UTF8.StringBody(targetHash));
+        
+            // time information for synchronization
+            // use our own formatter to prevent concurrency locks with other processes
+            final GenericFormatter my_SHORT_SECOND_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
+            parts.put("mytime", UTF8.StringBody(my_SHORT_SECOND_FORMATTER.format()));
+            parts.put("myUTC", UTF8.StringBody(Long.toString(System.currentTimeMillis())));
+        
+            // network identification
+            parts.put(SwitchboardConstants.NETWORK_NAME, UTF8.StringBody(Switchboard.getSwitchboard().getConfig(
+                                SwitchboardConstants.NETWORK_NAME,
+                                Seed.DFLT_NETWORK_UNIT)));
+        }
         parts.put("key", UTF8.StringBody(salt));
 
         // authentication essentials
         final String authenticationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
-        final String authenticationMethod =
-            sb.getConfig("network.unit.protocol.request.authentication.method", "");
-        if ( (authenticationControl.equals("controlled")) && (authenticationMethod.length() > 0) ) {
-            if ( authenticationMethod.equals("salted-magic-sim") ) {
+        final String authenticationMethod = sb.getConfig("network.unit.protocol.request.authentication.method", "");
+        if ((authenticationControl.equals("controlled")) && (authenticationMethod.length() > 0) ) {
+            if (authenticationMethod.equals("salted-magic-sim") ) {
                 // generate an authentication essential using the salt, the iam-hash and the network magic
-                final String magic =
-                    sb.getConfig("network.unit.protocol.request.authentication.essentials", "");
+                final String magic = sb.getConfig("network.unit.protocol.request.authentication.essentials", "");
                 final String md5 = Digest.encodeMD5Hex(salt + sb.peers.mySeed().hash + magic);
                 parts.put("magicmd5", UTF8.StringBody(md5));
             }
         }
-
-        return parts;
-    }
-
-    private static final LinkedHashMap<String, ContentBody> basicRequestParts(
-        final String myHash,
-        final String targetHash,
-        final String networkName) {
-        // put in all the essentials for routing and network authentication
-        // generate a session key
-        final LinkedHashMap<String, ContentBody> parts = new LinkedHashMap<String, ContentBody>();
-
-        // just standard identification essentials
-        if ( myHash != null ) {
-            parts.put("iam", UTF8.StringBody(myHash));
-            if ( targetHash != null ) {
-                parts.put("youare", UTF8.StringBody(targetHash));
-            }
-
-            // time information for synchronization
-            // use our own formatter to prevent concurrency locks with other processes
-            final GenericFormatter my_SHORT_SECOND_FORMATTER =
-                new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
-            parts.put("mytime", UTF8.StringBody(my_SHORT_SECOND_FORMATTER.format()));
-            parts.put("myUTC", UTF8.StringBody(Long.toString(System.currentTimeMillis())));
-
-            // network identification
-            parts.put(SwitchboardConstants.NETWORK_NAME, UTF8.StringBody(networkName));
-        }
-
         return parts;
     }
 

@@ -35,7 +35,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -208,11 +209,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 System.exit(-1);
             }
         }
-        if (Switchboard.getSwitchboard().isIntranetMode()) {
-            this.mySeed.setIP(Domains.myPublicLocalIP().getHostAddress()); // in intranet mode host address is best choice (to become senior peer)
-        } else {
-            this.mySeed.setIP("");// we delete the old information to see what we have now
-        }
+        this.mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
         this.mySeed.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // markup startup condition
     }
 
@@ -229,10 +226,6 @@ public final class SeedDB implements AlternativeDomainNames {
         if (this.mySeed == null) {
             if (sizeConnected() == 0) try {Thread.sleep(5000);} catch (final InterruptedException e) {} // wait for init
             initMySeed();
-            // check if my seed has an IP assigned
-            if (myIP() == null || myIP().isEmpty()) {
-                this.mySeed.setIP(Domains.myPublicLocalIP().getHostAddress());
-            }
         }
         return this.mySeed;
     }
@@ -246,9 +239,14 @@ public final class SeedDB implements AlternativeDomainNames {
         return mySeed().getName() + ".yacy";
     }
 
-    @Override
+    @Deprecated
     public String myIP() {
         return mySeed().getIP();
+    }
+    
+    @Override
+    public Set<String> myIPs() {
+        return mySeed().getIPs();
     }
 
     @Override
@@ -349,7 +347,7 @@ public final class SeedDB implements AlternativeDomainNames {
         return new seedEnum(up, field, this.seedPotentialDB);
     }
 
-    public TreeMap<byte[], String> /* peer-b64-hashes/ipport */ clusterHashes(final String clusterdefinition) {
+    public TreeSet<byte[]> /* peer-b64-hashes/ipport */ clusterHashes(final String clusterdefinition) {
     	// collects seeds according to cluster definition string, which consists of
     	// comma-separated .yacy or .yacyh-domains
     	// the domain may be extended by an alternative address specification of the form
@@ -359,18 +357,16 @@ public final class SeedDB implements AlternativeDomainNames {
     	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
     	// clusterdef ::= {address}{','address}*
     	final String[] addresses = (clusterdefinition.isEmpty()) ? new String[0] : clusterdefinition.split(",");
-    	final TreeMap<byte[], String> clustermap = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
+    	final TreeSet<byte[]> clustermap = new TreeSet<>(Base64Order.enhancedCoder);
     	Seed seed;
-    	String hash, yacydom, ipport;
+    	String hash, yacydom;
     	int p;
     	for (final String addresse : addresses) {
     		p = addresse.indexOf('=');
     		if (p >= 0) {
     			yacydom = addresse.substring(0, p);
-    			ipport  = addresse.substring(p + 1);
     		} else {
     			yacydom = addresse;
-    			ipport  = null;
     		}
     		if (yacydom.endsWith(".yacyh")) {
     			// find a peer with its hexhash
@@ -379,7 +375,7 @@ public final class SeedDB implements AlternativeDomainNames {
     			if (seed == null) {
     				Network.log.warn("cluster peer '" + yacydom + "' was not found.");
     			} else {
-    				clustermap.put(ASCII.getBytes(hash), ipport);
+    				clustermap.add(ASCII.getBytes(hash));
     			}
     		} else if (yacydom.endsWith(".yacy")) {
     			// find a peer with its name
@@ -387,7 +383,7 @@ public final class SeedDB implements AlternativeDomainNames {
     			if (seed == null) {
     				Network.log.warn("cluster peer '" + yacydom + "' was not found.");
     			} else {
-    				clustermap.put(ASCII.getBytes(seed.hash), ipport);
+    				clustermap.add(ASCII.getBytes(seed.hash));
     			}
     		} else {
     			Network.log.warn("cluster peer '" + addresse + "' has wrong syntax. the name must end with .yacy or .yacyh");
@@ -732,9 +728,7 @@ public final class SeedDB implements AlternativeDomainNames {
         }
 
         // check local seed
-        if (this.mySeed == null) return null;
-        String s = this.mySeed.getIP();
-        if (s == null || !ipString.equals(s)) return null;
+        if (this.mySeed == null || !this.mySeed.getIPs().contains(ipString)) return null;
         int p = this.mySeed.getPort();
         if (port > 0 && p != port) return null;
         //System.out.println("*** found lookupByIP as my seed: " + peerIP.toString() + " -> " + this.mySeed.getName());
@@ -915,7 +909,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     seed = this.mySeed;
                 else return null;
             }
-            return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
+            return seed.getPublicAddress(seed.getIP()) + ((subdom == null) ? "" : ("/" + subdom));
         } else if (host.endsWith(".yacy")) {
             // identify subdomain
             p = host.indexOf('.');
@@ -932,7 +926,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 // take local ip instead of external
                 return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getConfig("port", "8090") + ((subdom == null) ? "" : ("/" + subdom));
             }
-            return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
+            return seed.getPublicAddress(seed.getIP()) + ((subdom == null) ? "" : ("/" + subdom));
         } else {
             return null;
         }
@@ -942,11 +936,11 @@ public final class SeedDB implements AlternativeDomainNames {
         // find target address
         String address;
         if (targetHash.equals(mySeed().hash)) {
-            address = mySeed().getClusterAddress();
+            address = mySeed().getPublicAddress(mySeed().getIP());
         } else {
             final Seed targetSeed = getConnected(targetHash);
             if (targetSeed == null) { return null; }
-            address = targetSeed.getClusterAddress();
+            address = targetSeed.getPublicAddress(targetSeed.getIP());
         }
         if (address == null) address = "localhost" + (this.mySeed.getPort() > 0 ? ":" + this.mySeed.getPort() : "");
         return address;

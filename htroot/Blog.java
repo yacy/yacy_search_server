@@ -192,7 +192,7 @@ public class Blog {
                 prop.putHTML("mode_author", UTF8.String(author));
                 prop.putHTML("mode_subject", post.get("subject",""));
                 prop.put("mode_date", dateString(new Date()));
-                prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", post.get("content", ""));
+                prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_page", post.get("content", ""));
                 prop.putHTML("mode_page-code", post.get("content", ""));
             }
             else {
@@ -327,7 +327,7 @@ public class Blog {
             prop.put("mode_entries_" + number + "_page", entry.getPage());
             prop.put("mode_entries_" + number + "_timestamp", entry.getTimestamp());
         } else {
-            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_entries_" + number + "_page", entry.getPage());
+            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_entries_" + number + "_page", entry.getPage());
         }
 
         if (hasRights) {

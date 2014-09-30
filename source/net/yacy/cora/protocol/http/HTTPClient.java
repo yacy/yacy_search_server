@@ -37,6 +37,11 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -58,6 +63,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -77,7 +83,6 @@ import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -112,7 +117,7 @@ public class HTTPClient {
 	private long upbytes = 0L;
 	private String host = null;
 	private final long timeout;
-
+	private static ExecutorService executor = Executors.newFixedThreadPool(200);
 
     public HTTPClient(final ClientIdentification.Agent agent) {
         super();
@@ -235,23 +240,6 @@ public class HTTPClient {
     		connectionMonitor.join();
     	}
     }
-
-//    public static void setAuth(final String host, final int port, final String user, final String pw) {
-//        final UsernamePasswordCredentials creds = new UsernamePasswordCredentials(user, pw);
-//        final AuthScope scope = new AuthScope(host, port);
-//        credsProvider.setCredentials(scope, creds);
-//        httpClient.getParams().setParameter(ClientContext.CREDS_PROVIDER, credsProvider);
-//    }
-
-//    /**
-//     * this method sets a host on which more than the default of 2 router per host are allowed
-//     *
-//     * @param the host to be raised in 'route per host'
-//     */
-//    public static void setMaxRouteHost(final String host) {
-//    	final HttpHost mHost = new HttpHost(host);
-//    	((PoolingClientConnectionManager) httpClient.getConnectionManager()).setMaxPerRoute(new HttpRoute(mHost), 50);
-//    }
 
     /**
      * This method sets the Header used for the request
@@ -454,10 +442,12 @@ public class HTTPClient {
      * @param length the contentlength
      * @throws IOException
      */
+    /*
     public void POST(final String uri, final InputStream instream, final long length, final boolean concurrent) throws IOException {
     	POST(new MultiProtocolURL(uri), instream, length, concurrent);
     }
-
+     */
+    
     /**
      * This method POSTs a page from the server.
      * to be used for streaming out
@@ -490,11 +480,13 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
+    /*
     public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip, final boolean concurrent) throws IOException {
         final MultiProtocolURL url = new MultiProtocolURL(uri);
         return POSTbytes(url, url.getHost(), parts, usegzip, concurrent);
     }
-
+     */
+    
     /**
      * send data to the server named by vhost
      *
@@ -512,8 +504,7 @@ public class HTTPClient {
     	if (vhost == null) setHost(Domains.LOCALHOST);
     	
     	final MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-    	for (final Entry<String,ContentBody> part : post.entrySet())
-    		entityBuilder.addPart(part.getKey(), part.getValue());
+    	for (final Entry<String,ContentBody> part : post.entrySet()) entityBuilder.addPart(part.getKey(), part.getValue());
     	final HttpEntity multipartEntity = entityBuilder.build();
         // statistics
         this.upbytes = multipartEntity.getContentLength();
@@ -536,6 +527,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
+    /*
     public byte[] POSTbytes(final String uri, final InputStream instream, final long length, final boolean concurrent) throws IOException {
         final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
@@ -549,8 +541,9 @@ public class HTTPClient {
         httpPost.setEntity(inputStreamEntity);
         return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
     }
+     */
 
-	/**
+    /**
 	 *
 	 * @return HttpResponse from call
 	 */
@@ -682,30 +675,26 @@ public class HTTPClient {
 	        assert !hrequest.expectContinue();
 	    }
 
-	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI().getHost());
+	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI());
         final long time = System.currentTimeMillis();
 	    try {
 	        final CloseableHttpClient client = clientBuilder.build();
 	        if (concurrent) {
-	            final CloseableHttpResponse[] thr = new CloseableHttpResponse[]{null};
-	            final Throwable[] te = new Throwable[]{null};
-	            Thread t = new Thread() {
+	            FutureTask<CloseableHttpResponse> t = new FutureTask<CloseableHttpResponse>(new Callable<CloseableHttpResponse>() {
 	                @Override
-                    public void run() {
-	                   this.setName("HTTPClient.execute(" + httpUriRequest.getURI() + ")");
-	                   try {
-	                       thr[0] = client.execute(httpUriRequest, context);
-	                   } catch (Throwable e) {
-	                       te[0] = e;
-	                   }
+                    public CloseableHttpResponse call() throws ClientProtocolException, IOException {
+	                    CloseableHttpResponse response = client.execute(httpUriRequest, context);
+	                    return response;
 	                }
-	            };
-	            t.start();
-	            try {t.join(this.timeout);} catch (InterruptedException e) {}
-	            if (t.isAlive()) try {t.interrupt();} catch (Throwable e) {}
-	            if (te[0] != null) throw te[0];
-	            if (thr[0] == null) throw new IOException("timout to client after " + this.timeout + "ms");
-	            this.httpResponse = thr[0];
+	            });
+	            executor.execute(t);
+	            try {
+	                this.httpResponse = t.get(this.timeout, TimeUnit.MILLISECONDS);
+	            } catch (ExecutionException e) {
+	                throw e.getCause();
+	            } catch (Throwable e) {}
+	            try {t.cancel(true);} catch (Throwable e) {}
+	            if (this.httpResponse == null) throw new IOException("timout to client after " + this.timeout + "ms");
 	        } else {
 	            this.httpResponse = client.execute(httpUriRequest, context);
 	        }

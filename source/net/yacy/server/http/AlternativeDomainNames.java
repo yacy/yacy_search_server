@@ -24,6 +24,8 @@
 
 package net.yacy.server.http;
 
+import java.util.Set;
+
 public interface AlternativeDomainNames {
 
     /**
@@ -42,10 +44,10 @@ public interface AlternativeDomainNames {
     public String myAlternativeAddress();
     
     /**
-     * return the IP as string of my server address
-     * @return IP as string of this server
+     * return a set of IPs of this server
+     * @return IP as set of strings of this server
      */
-    public String myIP();
+    public Set<String> myIPs();
     
     /**
      * return the port of my server address

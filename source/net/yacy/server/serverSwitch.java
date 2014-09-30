@@ -31,10 +31,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetAddress;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -50,6 +53,7 @@ import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.peers.Seed;
 import net.yacy.search.SwitchboardConstants;
 
 public class serverSwitch
@@ -139,8 +143,11 @@ public class serverSwitch
 
     /**
      * get my public IP, either set statically or figure out dynamic
-     * @return
+     * This method is deprecated because there may be more than one public IPs of this peer,
+     * i.e. one IPv4 and one IPv6. Please use myPublicIPs() instead
+     * @return the public IP of this peer, if known
      */
+    @Deprecated
     public String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
         final String staticIP = getConfig("staticIP", "");
@@ -150,6 +157,31 @@ public class serverSwitch
         final InetAddress pLIP = Domains.myPublicLocalIP();
         if ( pLIP != null ) return pLIP.getHostAddress();
         return null;
+    }
+
+    /**
+     * Get all my public IPs. If there was a static IP assignment, only one, that IP is returned.
+     * @return a set of IPs which are supposed to be my own public IPs
+     */
+    public Set<String> myPublicIPs() {
+        // if a static IP was configured, we have to return it here ...
+        final String staticIP = getConfig("staticIP", "");
+        if ( staticIP.length() > 0 ) {
+            HashSet<String> h = new HashSet<>();
+            h.add(staticIP);
+            return h;
+        }
+
+        Set<String> h = new LinkedHashSet<>();
+        for (InetAddress i: Domains.myPublicIPv6()) {
+            String s = i.getHostAddress();
+            if (Seed.isProperIP(s)) h.add(s);
+        }
+        for (InetAddress i: Domains.myPublicIPv4()) {
+            String s = i.getHostAddress();
+            if (Seed.isProperIP(s)) h.add(s);
+        }
+        return h;
     }
 
     // a logger for this switchboard

@@ -162,7 +162,7 @@ public class Messages_p {
             prop.putXML("mode_subject", message.subject());
             String theMessage = null;
             theMessage = UTF8.String(message.message());
-            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_message", theMessage);
+            prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_message", theMessage);
             prop.put("mode_hash", message.authorHash());
             prop.putXML("mode_key", key);
         }

@@ -174,10 +174,10 @@ public class ConfigNetwork_p
         prop.putHTML("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
         prop.putHTML("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
         StringBuilder hashes = new StringBuilder();
-        for ( final byte[] h : sb.clusterhashes.keySet() ) {
+        for (final byte[] h: sb.clusterhashes) {
             hashes.append(", ").append(ASCII.String(h));
         }
-        if ( hashes.length() > 2 ) {
+        if (hashes.length() > 2) {
             hashes = hashes.delete(0, 2);
         }
 

@@ -31,10 +31,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -55,18 +54,12 @@ import net.yacy.peers.operation.yacyVersion;
  */
 public class DHTSelection {
     
-    public static Set<Seed> selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
-        final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
+    public static Set<Seed> selectClusterPeers(final SeedDB seedDB, final SortedSet<byte[]> peerhashes) {
         final Set<Seed> l = new HashSet<Seed>();
-        Map.Entry<byte[], String> entry;
         Seed s;
-        while (i.hasNext()) {
-            entry = i.next();
-            s = seedDB.get(ASCII.String(entry.getKey())); // should be getConnected; get only during testing time
-            if (s != null) {
-                s.setAlternativeAddress(entry.getValue());
-                l.add(s);
-            }
+        for (byte[] hashb: peerhashes) {
+            s = seedDB.get(ASCII.String(hashb)); // should be getConnected; get only during testing time
+            if (s != null) l.add(s);
         }
         return l;
     }

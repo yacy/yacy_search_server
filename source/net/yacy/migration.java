@@ -37,7 +37,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
-import java.util.concurrent.ExecutionException;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.storage.Configuration.Entry;

@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
-import java.util.SortedMap;
+import java.util.SortedSet;
 
 import org.apache.solr.client.solrj.SolrQuery;
 
@@ -144,7 +144,7 @@ public class RemoteSearch extends Thread {
     		final int start, final int count, 
             final long time,
             final Blacklist blacklist,
-            final SortedMap<byte[], String> clusterselection) {
+            final SortedSet<byte[]> clusterselection) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
         
@@ -277,14 +277,13 @@ public class RemoteSearch extends Thread {
             final Blacklist blacklist) {
 
         // check own peer status
-        if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
+        if (event.peers.mySeed() == null || event.peers.mySeed().getIPs().size() == 0) { return null; }
         assert urlhashes != null;
         assert urlhashes.length() > 0;
 
         // prepare seed targets and threads
         final Seed targetPeer = event.peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
-        if (event.preselectedPeerHashes != null) targetPeer.setAlternativeAddress(event.preselectedPeerHashes.get(ASCII.getBytes(targetPeer.hash)));
         Thread secondary = new Thread() {
             @Override
             public void run() {
@@ -332,12 +331,8 @@ public class RemoteSearch extends Thread {
 
         assert solrQuery != null;
         // check own peer status
-        if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
-        // prepare seed targets and threads
-        if (targetPeer != null && targetPeer.hash != null && event.preselectedPeerHashes != null) {
-            if (!targetPeer.getFlagSolrAvailable()) return null; // solr interface not avail.
-            targetPeer.setAlternativeAddress(event.preselectedPeerHashes.get(ASCII.getBytes(targetPeer.hash)));
-        }
+        if (event.peers.mySeed() == null || event.peers.mySeed().getIPs().size() == 0) { return null; }
+        // prepare threads
         Thread solr = new Thread() {
             @Override
             public void run() {

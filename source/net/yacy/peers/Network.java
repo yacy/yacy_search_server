@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
@@ -101,7 +102,7 @@ public class Network
 
         // ensure that correct IP is used
         final String staticIP = sb.getConfig("staticIP", "");
-        if ( staticIP.length() != 0 && Seed.isProperIP(staticIP) == null ) {
+        if (staticIP.length() != 0 && Seed.isProperIP(staticIP)) {
             serverCore.useStaticIP = true;
             sb.peers.mySeed().setIP(staticIP);
             log.info("staticIP set to " + staticIP);
@@ -118,9 +119,7 @@ public class Network
     }
 
     public final void publishSeedList() {
-        if ( log.isFine() ) {
-            log.fine("yacyCore.publishSeedList: Triggered Seed Publish");
-        }
+        if (log.isFine()) log.fine("yacyCore.publishSeedList: Triggered Seed Publish");
 
         /*
         if (oldIPStamp.equals((String) seedDB.mySeed.get(yacySeed.IP, "127.0.0.1")))
@@ -131,14 +130,11 @@ public class Network
             yacyCore.log.logDebug("***DEBUG publishSeedList: I can reach myself");
         */
 
-        if ( (this.sb.peers.lastSeedUpload_myIP.equals(this.sb.peers.mySeed().getIP()))
+        if ((this.sb.peers.mySeed().getIPs().contains(this.sb.peers.lastSeedUpload_myIP))
             && (this.sb.peers.lastSeedUpload_seedDBSize == this.sb.peers.sizeConnected())
             && (System.currentTimeMillis() - this.sb.peers.lastSeedUpload_timeStamp < 1000 * 60 * 60 * 24)
             && (this.sb.peers.mySeed().isPrincipal()) ) {
-            if ( log.isFine() ) {
-                log
-                    .fine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
-            }
+            if (log.isFine()) log.fine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
             return;
         }
 
@@ -162,9 +158,7 @@ public class Network
             if ( seedUploadMethod.equals("") ) {
                 this.sb.setConfig("seedUploadMethod", "none");
             }
-            if ( log.isFine() ) {
-                log.fine("yacyCore.publishSeedList: No uploading method configured");
-            }
+            if (log.isFine()) log.fine("yacyCore.publishSeedList: No uploading method configured");
             return;
         }
     }
@@ -231,13 +225,7 @@ public class Network
         @Override
         public final void run() {
             try {
-                this.added =
-                    Protocol.hello(
-                        Network.this.sb.peers.mySeed(),
-                        Network.this.sb.peers.peerActions,
-                        this.seed.getClusterAddress(),
-                        this.seed.hash,
-                        this.seed.getName());
+                this.added = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed);
                 if ( this.added < 0 ) {
                     // no or wrong response, delete that address
                     final String cause = "peer ping to peer resulted in error response (added < 0)";
@@ -246,7 +234,7 @@ public class Network
                         + " peer '"
                         + this.seed.getName()
                         + "' from "
-                        + this.seed.getPublicAddress()
+                        + this.seed.getIPs()
                         + ": "
                         + cause);
                     Network.this.sb.peers.peerActions.peerDeparture(this.seed, cause);
@@ -258,7 +246,7 @@ public class Network
                         + " peer '"
                         + this.seed.getName()
                         + "' at "
-                        + this.seed.getPublicAddress());
+                        + this.seed.getIPs());
                     // check if seed's lastSeen has been updated
                     final Seed newSeed = Network.this.sb.peers.getConnected(this.seed.hash);
                     if ( newSeed != null ) {
@@ -269,7 +257,7 @@ public class Network
                                     + " peer '"
                                     + this.seed.getName()
                                     + "' at "
-                                    + this.seed.getPublicAddress()
+                                    + this.seed.getIPs()
                                     + " is not online."
                                     + " Removing Peer from connected");
                             }
@@ -284,7 +272,7 @@ public class Network
                                             + " peer '"
                                             + this.seed.getName()
                                             + "' at "
-                                            + this.seed.getPublicAddress()
+                                            + this.seed.getIPs()
                                             + " with old LastSeen: '"
                                             + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed
                                                 .getLastSeenUTC())) + "'");
@@ -299,7 +287,7 @@ public class Network
                                             + " peer '"
                                             + this.seed.getName()
                                             + "' at "
-                                            + this.seed.getPublicAddress()
+                                            + this.seed.getIPs()
                                             + " with old LastSeen: '"
                                             + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed
                                                 .getLastSeenUTC()))
@@ -319,7 +307,7 @@ public class Network
                                 + " peer '"
                                 + this.seed.getName()
                                 + "' at "
-                                + this.seed.getPublicAddress()
+                                + this.seed.getIPs()
                                 + " not in connectedDB");
                         }
                     }
@@ -364,25 +352,21 @@ public class Network
                 if ( attempts > PING_INITIAL ) {
                     attempts = PING_INITIAL;
                 }
-                final Map<byte[], String> ch = Switchboard.getSwitchboard().clusterhashes;
+                final Set<byte[]> ch = Switchboard.getSwitchboard().clusterhashes;
                 seeds = DHTSelection.seedsByAge(this.sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if ( ch != null ) {
-                    final Iterator<Map.Entry<byte[], String>> i = ch.entrySet().iterator();
                     String hash;
-                    Map.Entry<byte[], String> entry;
                     Seed seed;
-                    while ( i.hasNext() ) {
-                        entry = i.next();
-                        hash = ASCII.String(entry.getKey());
+                    for (byte[] hashb: ch) {
+                        hash = ASCII.String(hashb);
                         seed = seeds.get(hash);
-                        if ( seed == null ) {
+                        if (seed == null) {
                             seed = this.sb.peers.get(hash);
                             if ( seed == null ) {
                                 continue;
                             }
                         }
-                        seed.setAlternativeAddress(entry.getValue());
                         seeds.put(hash, seed);
                     }
                 }
@@ -441,17 +425,14 @@ public class Network
                 }
                 i++;
 
-                final String address = seed.getClusterAddress();
+                final String address = seed.getPublicAddress(seed.getIP());
                 if ( log.isFine() ) {
                     log.fine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
                 }
                 final String seederror = seed.isProper(false);
                 if ( (address == null) || (seederror != null) ) {
                     // we don't like that address, delete it
-                    this.sb.peers.peerActions.peerDeparture(seed, "peer ping to peer resulted in address = "
-                        + address
-                        + "; seederror = "
-                        + seederror);
+                    this.sb.peers.peerActions.peerDeparture(seed, "peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
                     sync.acquire();
                 } else {
                     // starting a new publisher thread
@@ -567,16 +548,13 @@ public class Network
             //if (ip.equals("")) ip = natLib.retrieveIP(DI604use, DI604pw);
 
             // yacyCore.log.logDebug("DEBUG: new IP=" + ip);
-            if ( Seed.isProperIP(ip) == null ) {
+            if (Seed.isProperIP(ip)) {
                 this.sb.peers.mySeed().setIP(ip);
             }
             if ( this.sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR).equals(Seed.PEERTYPE_JUNIOR) ) {
                 this.sb.peers.mySeed().put(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
             }
-            log.info("publish: no recipient found, our address is "
-                + ((this.sb.peers.mySeed().getPublicAddress() == null) ? "unknown" : this.sb.peers
-                    .mySeed()
-                    .getPublicAddress()));
+            log.info("publish: no recipient found, our address is " + this.sb.peers.mySeed().getIPs());
             this.sb.peers.saveMySeed();
             return 0;
         } catch (final InterruptedException e ) {

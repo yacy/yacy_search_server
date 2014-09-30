@@ -268,8 +268,7 @@ public class Transmission {
             // get possibly newer target Info
             final Seed newTarget = Transmission.this.seeds.get(this.dhtTarget.hash);
             if (newTarget != null) {
-                final String oldAddress = this.dhtTarget.getPublicAddress();
-                if ((oldAddress != null) && (oldAddress.equals(newTarget.getPublicAddress()))) {
+                if (this.dhtTarget.clash(newTarget.getIPs())) {
                     newTarget.setFlagAcceptRemoteIndex(false);
                     Transmission.this.seeds.update(newTarget.hash, newTarget);
                 } else {

@@ -277,7 +277,7 @@ public class Surftips {
                 Seed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
                 if (seed != null) {
-                    url = "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
+                    url = "http://" + seed.getPublicAddress(seed.getIP()) + "/Wiki.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
                                 UTF8.getBytes(url),
                                 UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
@@ -292,7 +292,7 @@ public class Surftips {
                 Seed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
                 if (seed != null) {
-                    url = "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
+                    url = "http://" + seed.getPublicAddress(seed.getIP()) + "/Blog.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
                             UTF8.getBytes(url),
                             UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),

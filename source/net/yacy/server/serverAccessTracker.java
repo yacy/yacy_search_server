@@ -140,7 +140,9 @@ public class serverAccessTracker {
             track.add(new Track(System.currentTimeMillis(), accessPath));
             clearTooOldAccess(track);
         }
-        if (Domains.isLocalhost(host)) lastLocalhostAccess = System.currentTimeMillis();
+        if (Domains.isLocalhost(host)) lastLocalhostAccess = System.currentTimeMillis(); else {
+            System.out.println("******** Access not from localhost: " + host);
+        }
     }
 
     public static Collection<Track> accessTrack(final String host) {

@@ -97,7 +97,7 @@ public class CrawlStartScanner_p
             } else {
                 ip = Domains.myPublicLocalIP();
                 if ( Domains.isThisHostIP(ip) ) {
-                    ip = sb.peers.mySeed().getInetAddress();
+                    ip = Domains.dnsResolve(sb.peers.mySeed().getIP());
                 }
             }
             if ( ip != null ) {

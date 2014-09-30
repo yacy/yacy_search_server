@@ -3,7 +3,7 @@ title YaCy Windows Service Install
 
 :STARTJAVA
 REM set the Java options
-set javaopts=-Xss256k;-XX:MaxPermSize=256m;-Djava.net.preferIPv4Stack=true;-Djava.awt.headless=true;-Dfile.encoding=UTF-8
+set javaopts=-Xss256k;-XX:MaxPermSize=256m;-Djava.awt.headless=true;-Dfile.encoding=UTF-8
 
 REM set max Java heap memory (in MB)
 set jmx=800

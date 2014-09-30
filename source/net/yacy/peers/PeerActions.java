@@ -28,6 +28,7 @@ import java.util.Map;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.operation.yacyVersion;
@@ -66,7 +67,7 @@ public class PeerActions {
             return false;
         }
         if ((this.seedDB.mySeedIsDefined()) && (seed.hash.equals(this.seedDB.mySeed().hash))) {
-            Network.log.info("connect: SELF reference " + seed.getPublicAddress());
+            Network.log.info("connect: SELF reference " + seed.getIPs());
             return false;
         }
         final String peerType = seed.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);
@@ -82,7 +83,7 @@ public class PeerActions {
             return false;
         }
 
-        final Seed doubleSeed = this.seedDB.lookupByIP(seed.getInetAddress(), seed.getPort(), true, false, false);
+        final Seed doubleSeed = this.seedDB.lookupByIP(Domains.dnsResolve(seed.getIP()), seed.getPort(), true, false, false);
         if ((doubleSeed != null) && (doubleSeed.getPort() == seed.getPort()) && (!(doubleSeed.hash.equals(seed.hash)))) {
             // a user frauds with his peer different peer hashes
             if (Network.log.isFine()) Network.log.fine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
@@ -107,7 +108,7 @@ public class PeerActions {
         }
         if (Math.abs(nowUTC0Time - ctimeUTC0) / 1000 / 60 > 60 * 6 ) {
             // the new connection is out-of-age, we reject the connection
-            if (Network.log.isFine()) Network.log.fine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
+            if (Network.log.isFine()) Network.log.fine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getIPs() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
             return false;
         }
 
@@ -144,13 +145,13 @@ public class PeerActions {
             if (!direct) {
                 if (ctimeUTC0 < dtimeUTC0) {
                     // the disconnection was later, we reject the connection
-                    if (Network.log.isFine()) Network.log.fine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+                    if (Network.log.isFine()) Network.log.fine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getIPs());
                     return false;
                 }
             }
 
             // this is a return of a lost peer
-            if (Network.log.isFine()) Network.log.fine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getIPs());
             this.seedDB.addConnected(seed);
             return true;
         }
@@ -169,10 +170,10 @@ public class PeerActions {
                     // TODO: update seed name lookup cache
                 }*/
             } catch (final NumberFormatException e) {
-                if (Network.log.isFine()) Network.log.fine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
+                if (Network.log.isFine()) Network.log.fine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getIPs() + ". Cause: " + e.getMessage());
                 return false;
             }
-            if (Network.log.isFine()) Network.log.fine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getIPs());
             this.seedDB.addConnected(seed);
             return true;
         }
@@ -181,10 +182,10 @@ public class PeerActions {
         if ((this.seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
             // seed from the same IP as the calling client: can be
             // the case if there runs another one over a NAT
-            if (Network.log.isFine()) Network.log.fine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: saved NEW seed (myself IP) " + seed.getIPs());
         } else {
             // completely new seed
-            if (Network.log.isFine()) Network.log.fine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getIPs());
         }
         this.seedDB.addConnected(seed);
         return true;
@@ -204,7 +205,7 @@ public class PeerActions {
     public void peerDeparture(final Seed peer, final String cause) {
         if (peer == null) return;
         // we do this if we did not get contact with the other peer
-        if (Network.log.isFine()) Network.log.fine("connect: no contact to a " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
+        if (Network.log.isFine()) Network.log.fine("connect: no contact to a " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getIPs() + ". Cause: " + cause);
         synchronized (this.seedDB) {
             if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
             peer.put(Seed.DCT, Long.toString(System.currentTimeMillis()));

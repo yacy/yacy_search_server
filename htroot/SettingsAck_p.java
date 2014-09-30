@@ -177,7 +177,7 @@ public class SettingsAck_p {
             } else if (staticIP.startsWith("https://")) {
                 if (staticIP.length() > 8) { staticIP = staticIP.substring(8); } else { staticIP = ""; }
             }
-            String error = Seed.isProperIP(staticIP);
+            String error = Seed.isProperIP(staticIP) ? null : "ip not proper: " + staticIP;
             if (error == null) {
                 serverCore.useStaticIP = true;
                 sb.peers.mySeed().setIP(staticIP);

@@ -29,7 +29,7 @@ package net.yacy.search.query;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.SortedMap;
+import java.util.SortedSet;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
@@ -135,7 +135,7 @@ public class SearchEventCache {
             final QueryParams query,
             final SeedDB peers,
             final WorkTables workTables,
-            final SortedMap<byte[], String> preselectedPeerHashes,
+            final SortedSet<byte[]> preselectedPeerHashes,
             final boolean generateAbstracts,
             final LoaderDispatcher loader,
             final int remote_maxcount,

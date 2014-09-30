@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -68,15 +69,19 @@ public class Domains {
     
     private final static ConcurrentLog log = new ConcurrentLog(Domains.class.getName());
     
-    public  static final String LOCALHOST = "127.0.0.1"; // replace with IPv6 0:0:0:0:0:0:0:1 ?
+    public  static final String LOCALHOST = "localhost"; // replace with IPv6 0:0:0:0:0:0:0:1 ?
     private static       String LOCALHOST_NAME = LOCALHOST; // this will be replaced with the actual name of the local host
 
     private static Class<?> InetAddressLocatorClass;
     private static Method InetAddressLocatorGetLocaleInetAddressMethod;
     private static final Set<String> ccSLD_TLD = new HashSet<String>();
     private static final String PRESENT = "";
-    private static final Pattern LOCALHOST_PATTERNS = Pattern.compile("(127\\..*)|(localhost)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
-    private static final Pattern INTRANET_PATTERNS = Pattern.compile("(10\\..*)|(127\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)|(localhost)|(\\[?\\:\\:1/.*)|(\\[?fc.*\\:.*)|(\\[?fd.*\\:.*)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)", Pattern.CASE_INSENSITIVE);
+    private static final String LOCALHOST_IPv4_PATTERN = "(127\\..*)";
+    private static final String LOCALHOST_IPv6_PATTERN = "(\\[?fe80\\:\\:(/.*|\\z))|(\\[?0\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)|(\\[?\\:\\:1(/.*|\\z))";
+    private static final String INTRANET_IPv4_PATTERN = "(10\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)";
+    private static final String INTRANET_IPv6_PATTERN = "(\\[?(fc|fd).*\\:.*)";
+    private static final Pattern LOCALHOST_PATTERNS = Pattern.compile("(localhost)|" + LOCALHOST_IPv4_PATTERN + "|" + LOCALHOST_IPv6_PATTERN, Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTRANET_PATTERNS = Pattern.compile(LOCALHOST_PATTERNS.pattern() + "|" + INTRANET_IPv4_PATTERN + "|" + INTRANET_IPv6_PATTERN, Pattern.CASE_INSENSITIVE);
 
     private static final int MAX_NAME_CACHE_HIT_SIZE = 10000;
     private static final int MAX_NAME_CACHE_MISS_SIZE = 1000;
@@ -90,6 +95,92 @@ public class Domains {
     public static long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
     public static long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write
 
+    private static Set<InetAddress> myHostAddresses = new HashSet<InetAddress>();
+    private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
+    private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
+    private static Set<InetAddress> publicIPv6HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
+    private static Set<String> myHostNames = new HashSet<String>();
+    private static Set<String> localHostNames = new HashSet<String>(); // subset of myHostNames
+    private static Set<String> publicIPv4HostNames = new HashSet<String>(); // subset of myHostNames
+    private static Set<String> publicIPv6HostNames = new HashSet<String>(); // subset of myHostNames
+    static {
+        myHostNames.add(LOCALHOST);
+        localHostNames.add(LOCALHOST);
+        try {
+            InetAddress localHostAddress = InetAddress.getLocalHost();
+            if (localHostAddress != null) myHostAddresses.add(localHostAddress);
+        } catch (final UnknownHostException e) {}
+        try {
+            final InetAddress[] moreAddresses = InetAddress.getAllByName(LOCALHOST_NAME);
+            if (moreAddresses != null) myHostAddresses.addAll(Arrays.asList(moreAddresses));
+        } catch (final UnknownHostException e) {}
+
+        // to get the local host name, a dns lookup is necessary.
+        // if such a lookup blocks, it can cause that the static initiatializer does not finish fast
+        // therefore we start the host name lookup as concurrent thread
+        // meanwhile the host name is "127.0.0.1" which is not completely wrong
+        new Thread() {
+            @Override
+            public void run() {
+                Thread.currentThread().setName("Domains: init");
+                // try to get local addresses from interfaces
+                try {
+                    final Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+                    while (nis.hasMoreElements()) {
+                        final NetworkInterface ni = nis.nextElement();
+                        final Enumeration<InetAddress> addrs = ni.getInetAddresses();
+                        while (addrs.hasMoreElements()) {
+                            final InetAddress addr = addrs.nextElement();
+                            if (addr != null) myHostAddresses.add(addr);
+                        }
+                    }
+                } catch (final SocketException e) {
+                }
+
+                // now look up the host name
+                try {
+                    LOCALHOST_NAME = getHostName(InetAddress.getLocalHost());
+                } catch (final UnknownHostException e) {}
+
+                // after the host name was resolved, we try to look up more local addresses
+                // using the host name:
+                try {
+                    final InetAddress[] moreAddresses = InetAddress.getAllByName(LOCALHOST_NAME);
+                    if (moreAddresses != null) myHostAddresses.addAll(Arrays.asList(moreAddresses));
+                } catch (final UnknownHostException e) {
+                }
+
+                // fill a cache of local host names
+                for (final InetAddress a: myHostAddresses) {
+                    final String hostname = getHostName(a);
+                    if (hostname != null) {
+                        myHostNames.add(hostname);
+                        myHostNames.add(a.getHostAddress());
+                    }
+                    // we write the local tests into variables to be able to debug these values
+                    boolean isAnyLocalAddress  = a.isAnyLocalAddress();
+                    boolean isLinkLocalAddress = a.isLinkLocalAddress(); // true i.e. for localhost/fe80:0:0:0:0:0:0:1%1, myhost.local/fe80:0:0:0:223:dfff:fedf:30ce%7
+                    boolean isLoopbackAddress  = a.isLoopbackAddress();  // true i.e. for localhost/0:0:0:0:0:0:0:1, localhost/127.0.0.1
+                    boolean isSiteLocalAddress = a.isSiteLocalAddress(); // true i.e. for myhost.local/192.168.1.33
+                    if (isAnyLocalAddress || isLinkLocalAddress || isLoopbackAddress || isSiteLocalAddress) {
+                        ConcurrentLog.info("Domain Init", "local host address: " + a + " (local)");
+                        localHostAddresses.add(a);
+                        if (hostname != null) {localHostNames.add(hostname); localHostNames.add(a.getHostAddress());}
+                    } else {
+                        ConcurrentLog.info("Domain Init", "local host address: " + a + " (public)");
+                        if (a instanceof Inet4Address) {
+                            publicIPv4HostAddresses.add(a);
+                            if (hostname != null) {publicIPv4HostNames.add(hostname); publicIPv4HostNames.add(a.getHostAddress());}
+                        } else {
+                            publicIPv6HostAddresses.add(a);
+                            if (hostname != null) {publicIPv6HostNames.add(hostname); publicIPv6HostNames.add(a.getHostAddress());}
+                        }
+                    }
+                }
+            }
+        }.start();
+    }
+    
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
      *
@@ -810,7 +901,7 @@ public class Domains {
                 // add also the isLocal host name caches
                 final boolean localp = ip.isAnyLocalAddress() || ip.isLinkLocalAddress() || ip.isSiteLocalAddress();
                 if (localp) {
-                    localHostNames.add(host);
+                    myHostNames.add(host);
                 } else {
                     if (globalHosts != null) try {
                         globalHosts.add(host);
@@ -847,131 +938,54 @@ public class Domains {
         return nameCacheNoCachingPatterns.size();
     }
 
-    private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>();
-    private static Set<String> localHostNames = new HashSet<String>();
-    static {
-        try {
-            final InetAddress localHostAddress = InetAddress.getLocalHost();
-            if (localHostAddress != null) localHostAddresses.add(localHostAddress);
-        } catch (final UnknownHostException e) {}
-        try {
-            final InetAddress[] moreAddresses = InetAddress.getAllByName(LOCALHOST_NAME);
-            if (moreAddresses != null) localHostAddresses.addAll(Arrays.asList(moreAddresses));
-        } catch (final UnknownHostException e) {}
-
-        // to get the local host name, a dns lookup is necessary.
-        // if such a lookup blocks, it can cause that the static initiatializer does not finish fast
-        // therefore we start the host name lookup as concurrent thread
-        // meanwhile the host name is "127.0.0.1" which is not completely wrong
-        new Thread() {
-            @Override
-            public void run() {
-                Thread.currentThread().setName("Domains: init");
-                // try to get local addresses from interfaces
-                try {
-                    final Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
-                    while (nis.hasMoreElements()) {
-                        final NetworkInterface ni = nis.nextElement();
-                        final Enumeration<InetAddress> addrs = ni.getInetAddresses();
-                        while (addrs.hasMoreElements()) {
-                            final InetAddress addr = addrs.nextElement();
-                            if (addr != null) localHostAddresses.add(addr);
-                        }
-                    }
-                } catch (final SocketException e) {
-                }
-
-                // now look up the host name
-                try {
-                    LOCALHOST_NAME = getHostName(InetAddress.getLocalHost());
-                } catch (final UnknownHostException e) {}
-
-                // after the host name was resolved, we try to look up more local addresses
-                // using the host name:
-                try {
-                    final InetAddress[] moreAddresses = InetAddress.getAllByName(LOCALHOST_NAME);
-                    if (moreAddresses != null) localHostAddresses.addAll(Arrays.asList(moreAddresses));
-                } catch (final UnknownHostException e) {
-                }
-
-                // fill a cache of local host names
-                for (final InetAddress a: localHostAddresses) {
-                    final String hostname = getHostName(a);
-                    if (hostname != null) {
-                        localHostNames.add(hostname);
-                        localHostNames.add(a.getHostAddress());
-                    }
-                }
-            }
-        }.start();
+    /**
+     * myPublicLocalIP() returns the IP of this host which is reachable in the public network under this address
+     * This is deprecated since it should be possible that the host is reachable with more than one IP
+     * That is particularly the case if the host supports IPv4 and IPv6.
+     * Please use myPublicIPv4() or (preferred) myPublicIPv6() instead.
+     * @return
+     */
+    @Deprecated
+    public static InetAddress myPublicLocalIP() {
+        // for backward compatibility, we try to select a IPv4 address here.
+        // future methods should use myPublicIPs() and prefer IPv6
+        if (publicIPv4HostAddresses.size() > 0) return publicIPv4HostAddresses.iterator().next();
+        if (publicIPv6HostAddresses.size() > 0) return publicIPv6HostAddresses.iterator().next();
+        return null;
     }
 
-    public static InetAddress myPublicLocalIP() {
-        // list all addresses
-        // for (int i = 0; i < localHostAddresses.length; i++) System.out.println("IP: " + localHostAddresses[i].getHostAddress()); // DEBUG
-        if (localHostAddresses.isEmpty()) {
-            return null;
-        }
-        if (localHostAddresses.size() == 1) {
-            // only one network connection available
-            return localHostAddresses.iterator().next();
-        }
-        // we have more addresses, find an address that is not local
-        int b0, b1;
-        for (final InetAddress a: localHostAddresses) {
-            b0 = 0Xff & a.getAddress()[0];
-            b1 = 0Xff & a.getAddress()[1];
-            if (b0 != 10 && // class A reserved
-                b0 != 127 && // loopback
-                (b0 != 172 || b1 < 16 || b1 > 31) && // class B reserved
-                (b0 != 192 || b1 != 168) && // class C reserved
-                (a.getHostAddress().indexOf(':',0) < 0))
-                return a;
-        }
-        // there is only a local address
-        // return that one that is returned with InetAddress.getLocalHost()
-        // if appropriate
-        try {
-            final InetAddress localHostAddress = InetAddress.getLocalHost();
-            if (localHostAddress != null &&
-                (0Xff & localHostAddress.getAddress()[0]) != 127 &&
-                localHostAddress.getHostAddress().indexOf(':',0) < 0) return localHostAddress;
-        } catch (final UnknownHostException e) {
-        }
-        // we filter out the loopback address 127.0.0.1 and all addresses without a name
-        for (final InetAddress a: localHostAddresses) {
-            if ((0Xff & a.getAddress()[0]) != 127 &&
-                a.getHostAddress().indexOf(':',0) < 0 &&
-                a.getHostName() != null &&
-                !a.getHostName().isEmpty()) return a;
-        }
-        // if no address has a name, then take any other than the loopback
-        for (final InetAddress a: localHostAddresses) {
-            if ((0Xff & a.getAddress()[0]) != 127 &&
-                a.getHostAddress().indexOf(':',0) < 0) return a;
-        }
-        // if all fails, give back whatever we have
-        for (final InetAddress a: localHostAddresses) {
-            if (a.getHostAddress().indexOf(':',0) < 0) return a;
-        }
-        // finally, just get any
-        return localHostAddresses.iterator().next();
+    public static Set<String> myPublicIPs() {
+        Set<String> h = new HashSet<>(publicIPv4HostAddresses.size() + publicIPv6HostAddresses.size());
+        for (InetAddress i: publicIPv4HostAddresses) h.add(i.getHostAddress());
+        for (InetAddress i: publicIPv6HostAddresses) h.add(i.getHostAddress());
+        return h;
+    }
+    
+    /**
+     * Get all IPv4 addresses which are assigned to the local host but are public IP addresses.
+     * These should be the possible addresses which can be used to access this peer.
+     * @return the public IPv4 Addresses of this peer
+     */
+    public static Set<InetAddress> myPublicIPv4() {
+        return publicIPv4HostAddresses;
+    }
+    
+    /**
+     * Get all IPv6 addresses which are assigned to the local host but are public IP addresses.
+     * These should be the possible addresses which can be used to access this peer.
+     * @return the public IPv6 addresses of this peer
+     */
+    public static Set<InetAddress> myPublicIPv6() {
+        return publicIPv6HostAddresses;
     }
 
     /**
-     * generate a list of intranet InetAddresses without the loopback address 127.0.0.1
+     * generate a list of intranet InetAddresses
      * @return list of all intranet addresses
      */
     public static Set<InetAddress> myIntranetIPs() {
-        // list all local addresses
-        if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
-        final Set<InetAddress> list = new HashSet<InetAddress>();
-        if (localHostAddresses.isEmpty()) return list; // give up
-        for (final InetAddress a: localHostAddresses) {
-            if ((0Xff & a.getAddress()[0]) == 127) continue;
-            list.add(a);
-        }
-        return list;
+        if (myHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
+        return localHostAddresses;
     }
 
     public static boolean isThisHostIP(final String hostName) {
@@ -982,7 +996,7 @@ public class Domains {
             final InetAddress clientAddress = Domains.dnsResolve(hostName);
             if (clientAddress == null) return false;
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-            for (final InetAddress a: localHostAddresses) {
+            for (final InetAddress a: myHostAddresses) {
                 if (a.equals(clientAddress)) {
                     isThisHostIP = true;
                     break;
@@ -999,7 +1013,7 @@ public class Domains {
         try {
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
 
-            for (final InetAddress a: localHostAddresses) {
+            for (final InetAddress a: myHostAddresses) {
                 if (a.equals(clientAddress)) {
                     isThisHostIP = true;
                     break;
@@ -1024,7 +1038,9 @@ public class Domains {
      * @return true if the host from the string is the localhost
      */
     public static boolean isLocalhost(final String host) {
-        return (host != null && LOCALHOST_PATTERNS.matcher(host).matches());
+        return host == null || // filesystems do not have host names
+               LOCALHOST_PATTERNS.matcher(host).matches() ||
+               localHostNames.contains(host);
     }
 
     /**
@@ -1038,7 +1054,9 @@ public class Domains {
      */
     public static boolean isIntranet(final String host) {
         return (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
-                (host != null && INTRANET_PATTERNS.matcher(host).matches()));
+                host == null || // filesystems do not have host names
+                INTRANET_PATTERNS.matcher(host).matches()) ||
+                localHostNames.contains(host);
     }
     
     /**
@@ -1060,10 +1078,7 @@ public class Domains {
 
         // check local ip addresses
         if (isIntranet(host)) return true;
-        if (hostaddress != null && (
-                isIntranet(hostaddress.getHostAddress()) ||
-                isLocal(hostaddress)
-            )) return true;
+        if (hostaddress != null && (isIntranet(hostaddress.getHostAddress()) || isLocal(hostaddress))) return true;
 
         // check if there are other local IP addresses that are not in
         // the standard IP range

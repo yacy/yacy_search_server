@@ -109,7 +109,7 @@ public final class query {
 
         if (obj.equals("lurlcount")) {
             // return the number of all available l-url's
-            prop.put("response", 1 /*sb.index.fulltext().collectionSize()*/); // patched to not call collectionSize() any more because the acutal size is not needed. Instead, rwicount should be called
+            prop.put("response", "1" /*sb.index.fulltext().collectionSize()*/); // patched to not call collectionSize() any more because the acutal size is not needed. Instead, rwicount should be called
             return prop;
         }
 

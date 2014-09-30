@@ -191,7 +191,7 @@ public class Network {
 
             if (sb.peers.mySeed() != null) {
 	            prop.put("table_my-hash", sb.peers.mySeed().hash );
-	            prop.put("table_my-ip", sb.peers.mySeed().getIP() );
+	            prop.put("table_my-ip", sb.peers.mySeed().getIPs().toString());
 	            prop.put("table_my-port", sb.peers.mySeed().getPort() );
             }
 
@@ -210,11 +210,11 @@ public class Network {
                 Seed peer = new Seed(post.get("peerHash"), map);
 
                 sb.updateMySeed();
-                final int added = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(), peer.hash, peer.getName());
+                final int added = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer);
 
                 if (added <= 0) {
                     prop.put("table_comment",1);
-                    prop.putHTML("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getPublicAddress());
+                    prop.putHTML("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getIPs());
                 } else {
                     peer = sb.peers.getConnected(peer.hash);
                     if (peer == null) {
@@ -222,7 +222,7 @@ public class Network {
                         prop.putHTML("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
                     } else {
                         prop.put("table_comment",2);
-                        prop.putHTML("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress());
+                        prop.putHTML("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getIPs());
                         prop.putHTML("table_comment_details",peer.toString());
                     }
                 }
@@ -397,7 +397,8 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
-                                prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.getIP() );
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_complete_ip", seed.getIP() );
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_complete_ips", seed.getIPs().toString() );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get(Seed.PORT, "-") );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
@@ -447,7 +448,7 @@ public class Network {
                                 }
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_nodestate", seed.getFlagRootNode() ? 1 : 0);
-                            prop.put(STR_TABLE_LIST + conCount + "_nodestate_ip", seed.getIP() );
+                            prop.put(STR_TABLE_LIST + conCount + "_nodestate_ip", seed.getIP());
                             prop.put(STR_TABLE_LIST + conCount + "_nodestate_port", seed.get(Seed.PORT, "-") );
                             if (seed.getFlagAcceptRemoteIndex()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");

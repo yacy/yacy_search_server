@@ -134,6 +134,7 @@ public class RequestHeader extends HeaderFramework {
             return false;
         }
         final String refererHost = this.refererHost();
-        return refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost);
+        if (refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost)) return true;
+        return false;
     }
 }

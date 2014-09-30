@@ -70,7 +70,7 @@ public class mediawiki_p {
         page = page.substring(p, q);
 
         prop.putHTML("title", title);
-        prop.putWiki(sb.peers.mySeed().getClusterAddress(), "page", page);
+        prop.putWiki(sb.peers.mySeed().getPublicAddress(), "page", page);
 
         return prop;
     }

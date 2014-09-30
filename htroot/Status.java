@@ -27,8 +27,8 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
-import java.net.InetAddress;
 import java.util.Date;
+import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
@@ -189,8 +189,9 @@ public class Status
         } else {
             prop.put("extPortFormat", "0");
         }
-        final InetAddress hostIP = Domains.myPublicLocalIP();
-        prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
+
+        Set<String> ips = Domains.myPublicIPs();
+        prop.put("host", ips.toString());
 
         // ssl support
         prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() || !sb.getConfigBool("server.https", false) ? 0 : 1);
@@ -227,7 +228,7 @@ public class Status
             prop.putNum("peerStatistics_disconnects", sb.peers.peerActions.disconnects);
             prop.put("peerStatistics_connects", Formatter.number(sb.peers.mySeed().get(Seed.CCOUNT, "0")));
             thisHash = sb.peers.mySeed().hash;
-            if ( sb.peers.mySeed().getPublicAddress() == null ) {
+            if ( sb.peers.mySeed().getIPs().size() == 0 ) {
                 prop.put("peerAddress", "0"); // not assigned + instructions
                 prop.put("warningGoOnline", "1");
             } else {

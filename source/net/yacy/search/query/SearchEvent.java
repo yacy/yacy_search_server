@@ -37,6 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -131,7 +132,7 @@ public final class SearchEvent {
     public final List<RemoteSearch> primarySearchThreadsL;
     public final List<Thread> nodeSearchThreads;
     public Thread[] secondarySearchThreads;
-    public final SortedMap<byte[], String> preselectedPeerHashes;
+    public final SortedSet<byte[]> preselectedPeerHashes;
     private final SortedMap<byte[], Integer> IACount;
     private final SortedMap<byte[], String> IAResults;
     private final SortedMap<byte[], HeuristicResult> heuristics;
@@ -198,7 +199,7 @@ public final class SearchEvent {
         final QueryParams query,
         final SeedDB peers,
         final WorkTables workTables,
-        final SortedMap<byte[], String> preselectedPeerHashes,
+        final SortedSet<byte[]> preselectedPeerHashes,
         final boolean generateAbstracts,
         final LoaderDispatcher loader,
         final int remote_maxcount,

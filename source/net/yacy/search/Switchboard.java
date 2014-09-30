@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -265,7 +264,7 @@ public final class Switchboard extends serverSwitch {
     public int searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
     public int searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
     public float searchQueriesGlobal = 0f; // partial counter of remote queries (1/number-of-requested-peers)
-    public SortedMap<byte[], String> clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
+    public SortedSet<byte[]> clusterhashes; // a set of cluster hashes
     public List<Pattern> networkWhitelist, networkBlacklist;
     public FilterEngine domainList;
     private Dispatcher dhtDispatcher;
@@ -1592,7 +1591,7 @@ public final class Switchboard extends serverSwitch {
             getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
         if ( clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER) ) {
             // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(ASCII.getBytes(peer));
+            return this.clusterhashes.contains(ASCII.getBytes(peer));
         }
         return false;
     }
@@ -1610,7 +1609,7 @@ public final class Switchboard extends serverSwitch {
             getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
         if ( clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER) ) {
             // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(ASCII.getBytes(seed.hash));
+            return this.clusterhashes.contains(ASCII.getBytes(seed.hash));
         }
         return false;
     }
@@ -2888,9 +2887,6 @@ public final class Switchboard extends serverSwitch {
         if ( (processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null) ) {
             final Seed initiatorPeer = this.peers.get(ASCII.String(queueEntry.initiator()));
             if ( initiatorPeer != null ) {
-                if ( this.clusterhashes != null ) {
-                    initiatorPeer.setAlternativeAddress(this.clusterhashes.get(queueEntry.initiator()));
-                }
                 // start a thread for receipt sending to avoid a blocking here
                 SolrDocument sd = this.index.fulltext().getDefaultConfiguration().toSolrDocument(newEntry);
                 new Thread(new receiptSending(initiatorPeer, new URIMetadataNode(sd)), "sending receipt to " + ASCII.String(queueEntry.initiator())).start();
@@ -3712,6 +3708,11 @@ public final class Switchboard extends serverSwitch {
         mySeed.setFlagAcceptRemoteCrawl(getConfigBool("crawlResponse", true));
         mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
+
+        // set local ips
+        String staticIP = this.getConfig("staticIP", "");
+        if (staticIP.length() > 0) mySeed.setIP(staticIP);
+        mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
     }
 
     public void loadSeedLists() {

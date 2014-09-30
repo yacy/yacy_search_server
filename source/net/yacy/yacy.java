@@ -530,7 +530,7 @@ public final class yacy {
                 p.load(fis);
                 fis.close();
                 // Test for server access restriction (is implemented using Jetty IPaccessHandler which does not support IPv6
-                // try to disavle IPv6 
+                // try to disable IPv6 
                 String teststr = p.getProperty("serverClient", "*");
                 if (!teststr.equals("*")) {
                     // testing on Win-8 showed this property has to be set befor Switchboard starts 
@@ -569,7 +569,6 @@ public final class yacy {
         }
     }     
 
-    
     /**
      * Main-method which is started by java. Checks for special arguments or
      * starts up the application.
@@ -601,8 +600,7 @@ public final class yacy {
 	        if (OS.isWindows) headless = false;
 	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
 	        System.setProperty("java.awt.headless", headless ? "true" : "false");
-            // System.setProperty("java.net.preferIPv4Stack", "true"); // DO NOT PREFER IPv6, i.e. freifunk uses ipv6 only and host resolving does not work
-           
+            
 	        String s = ""; for (final String a: args) s += a + " ";
 	        yacyRelease.startParameter = s.trim();
 

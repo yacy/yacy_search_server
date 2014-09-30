@@ -147,7 +147,7 @@ public class Wiki {
             prop.putHTML("mode_pagename", pagename);
             prop.putHTML("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
-            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", post.get("content", ""));
+            prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_page", post.get("content", ""));
             prop.putHTML("mode_page-code", post.get("content", ""));
         }
         //end contrib of [MN]
@@ -237,7 +237,7 @@ public class Wiki {
                     prop.putHTML("mode_versioning_pagename", pagename);
                     prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
-                    prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_versioning_page", oentry.page());
+                    prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_versioning_page", oentry.page());
                     prop.putHTML("mode_versioning_page-code", UTF8.String(oentry.page()));
                 }
             } catch (final IOException e) {
@@ -252,7 +252,7 @@ public class Wiki {
             prop.putHTML("mode_pagename", pagename);
             prop.putHTML("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
-            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", page.page());
+            prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_page", page.page());
 
             prop.put("controls", "0");
             prop.putHTML("controls_pagename", pagename);
