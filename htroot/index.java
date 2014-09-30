@@ -79,7 +79,6 @@ public class index {
         final int maximumRecords = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? "" : post.get("constraint", "");
-        final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
 
         //final boolean indexDistributeGranted = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
@@ -118,7 +117,6 @@ public class index {
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");
         prop.put("results", "");
-        prop.putHTML("cat", cat);
         prop.put("type", type);
         prop.put("depth", "0");
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);

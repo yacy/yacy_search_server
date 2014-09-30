@@ -168,10 +168,8 @@ public class yacysearch {
             prop.put("resource", "global");
             prop.put("urlmaskfilter", (post == null) ? ".*" : post.get("urlmaskfilter", ".*"));
             prop.put("prefermaskfilter", (post == null) ? "" : post.get("prefermaskfilter", ""));
-            prop.put("tenant", (post == null) ? "" : post.get("tenant", ""));
             prop.put("indexof", "off");
             prop.put("constraint", "");
-            prop.put("cat", "href");
             prop.put("depth", "0");
             prop.put(
                 "search.verify",
@@ -348,7 +346,7 @@ public class yacysearch {
             }
         }
 
-        if ( !block && (post == null || post.get("cat", "href").equals("href")) ) {
+        if ( !block ) {
             String urlmask = null;
             String tld = null;
             String inlink = null;
@@ -858,7 +856,6 @@ public class yacysearch {
                 prop.put("num-results", "3");
             }
 
-            prop.put("cat", "href");
             prop.put("depth", "0");
 
         }
