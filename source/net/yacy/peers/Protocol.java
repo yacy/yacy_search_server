@@ -167,7 +167,7 @@ public final class Protocol {
      *
      * @return the number of new seeds
      */
-    public static int hello(
+    public static Map<String, String> hello(
         final Seed mySeed,
         final PeerActions peerActions,
         final Seed otherSeed) {
@@ -201,7 +201,7 @@ public final class Protocol {
                 Network.log.info("yacyClient.hello thread '"
                     + Thread.currentThread().getName()
                     + "' interrupted.");
-                return -1;
+                return null;
             }
             Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "', peer " + address + "; exception: " + e.getMessage());
             // try again (go into loop)
@@ -211,7 +211,7 @@ public final class Protocol {
         if (result == null || result.size() == 0) {
             Network.log.info("yacyClient.hello result error: "
                 + ((result == null) ? "result null" : ("result=" + result.toString())));
-            return -1;
+            return null;
         }
         Network.log.info("yacyClient.hello thread '"
                         + Thread.currentThread().getName()
@@ -233,7 +233,7 @@ public final class Protocol {
                 try {
                     // patch the remote peer address to avoid that remote peers spoof the network with wrong addresses
                     final int p = address.lastIndexOf(':');
-                    if ( p < 0 ) return -1;
+                    if ( p < 0 ) return null;
                     String h = address.substring(0, p);
                     if (h.charAt(0) == '[') h = h.substring(1);
                     if (h.charAt(h.length() - 1) == ']') h = h.substring(0, h.length() - 1);
@@ -241,11 +241,11 @@ public final class Protocol {
                     otherPeer = Seed.genRemoteSeed(seed, false, ie.getHostAddress());
                     if ( !otherPeer.hash.equals(otherSeed.hash) ) {
                         Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherSeed.hash);
-                        return -1; // no success
+                        return null; // no success
                     }
                 } catch (final IOException e ) {
                     Network.log.info("yacyClient.hello: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
-                    return -1; // no success
+                    return null; // no success
                 }
             }
         }
@@ -313,7 +313,7 @@ public final class Protocol {
                     + mytype
                     + ", rejecting other peer.");
             }
-            return -1;
+            return null;
         }
         if ( mySeed.orVirgin().equals(Seed.PEERTYPE_VIRGIN) ) {
             mySeed.put(Seed.PEERTYPE, mytype);
@@ -322,7 +322,7 @@ public final class Protocol {
         final String error = mySeed.isProper(true);
         if ( error != null ) {
             Network.log.warn("yacyClient.hello mySeed error - not proper: " + error);
-            return -1;
+            return null;
         }
 
         //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
@@ -347,7 +347,7 @@ public final class Protocol {
                     if ( i == 1 ) {
                         final int p = address.indexOf(':');
                         if ( p < 0 ) {
-                            return -1;
+                            return null;
                         }
                         InetAddress ia = Domains.dnsResolve(address.substring(0, p));
                         if (ia == null) continue;
@@ -371,7 +371,7 @@ public final class Protocol {
         // update event tracker
         EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(mySeed.getName(), otherSeed.getName(), true, connectedAfter - connectedBefore), false);
 
-        return count;
+        return result;
     }
 
     public static Seed querySeed(final Seed target, final String seedHash) {

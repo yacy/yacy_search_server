@@ -185,14 +185,7 @@ public class Network
                 + this.sb.peers.sizeConnected()
                 + " new peer(s)");
         }
-        final int newSeeds = publishMySeed(false);
-        if ( newSeeds > 0 ) {
-            log.info("received "
-                + newSeeds
-                + " new peer(s), know a total of "
-                + this.sb.peers.sizeConnected()
-                + " different peers");
-        }
+        publishMySeed(false);
     }
 
     // use our own formatter to prevent concurrency locks with other processes
@@ -202,7 +195,7 @@ public class Network
 
     protected class publishThread extends Thread
     {
-        int added;
+        private Map<String, String> result;
         private final Seed seed;
         private final Semaphore sync;
         private final List<Thread> syncList;
@@ -219,14 +212,14 @@ public class Network
             this.syncList = syncList;
 
             this.seed = seed;
-            this.added = 0;
+            this.result = null;
         }
 
         @Override
         public final void run() {
             try {
-                this.added = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed);
-                if ( this.added < 0 ) {
+                this.result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed);
+                if ( this.result == null ) {
                     // no or wrong response, delete that address
                     final String cause = "peer ping to peer resulted in error response (added < 0)";
                     log.info("publish: disconnected "
@@ -324,7 +317,7 @@ public class Network
         }
     }
 
-    private int publishMySeed(final boolean force) {
+    private boolean publishMySeed(final boolean force) {
         try {
             // call this after the httpd was started up
 
@@ -349,9 +342,7 @@ public class Network
 
             // getting a list of peers to contact
             if ( this.sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN).equals(Seed.PEERTYPE_VIRGIN) ) {
-                if ( attempts > PING_INITIAL ) {
-                    attempts = PING_INITIAL;
-                }
+                if (attempts > PING_INITIAL) attempts = PING_INITIAL;
                 final Set<byte[]> ch = Switchboard.getSwitchboard().clusterhashes;
                 seeds = DHTSelection.seedsByAge(this.sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
@@ -363,9 +354,7 @@ public class Network
                         seed = seeds.get(hash);
                         if (seed == null) {
                             seed = this.sb.peers.get(hash);
-                            if ( seed == null ) {
-                                continue;
-                            }
+                            if (seed == null) continue;
                         }
                         seeds.put(hash, seed);
                     }
@@ -385,12 +374,8 @@ public class Network
                 seeds = DHTSelection.seedsByAge(this.sb.peers, false, attempts); // best for seed list maintenance/cleaning
             }
 
-            if ( seeds == null || seeds.isEmpty() ) {
-                return 0;
-            }
-            if ( seeds.size() < attempts ) {
-                attempts = seeds.size();
-            }
+            if (seeds == null || seeds.isEmpty()) return false;
+            if (seeds.size() < attempts) attempts = seeds.size();
 
             // This will try to get Peers that are not currently in amIAccessibleDB
             final Iterator<Seed> si = seeds.values().iterator();
@@ -408,14 +393,13 @@ public class Network
                 log.severe("publishMySeed: problem with news encoding", e);
             }
             this.sb.peers.mySeed().setUnusedFlags();
-            int newSeeds = -1;
             //if (seeds.length > 1) {
             // holding a reference to all started threads
             int contactedSeedCount = 0;
             final List<Thread> syncList = Collections.synchronizedList(new LinkedList<Thread>()); // memory for threads
             final Semaphore sync = new Semaphore(attempts);
 
-            // going through the peer list and starting a new publisher thread for each peer
+            // go through the peer list and starting a new publisher thread for each peer
             int i = 0;
             while ( si.hasNext() ) {
                 seed = si.next();
@@ -426,9 +410,7 @@ public class Network
                 i++;
 
                 final String address = seed.getPublicAddress(seed.getIP());
-                if ( log.isFine() ) {
-                    log.fine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
-                }
+                if ( log.isFine() ) log.fine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
                 final String seederror = seed.isProper(false);
                 if ( (address == null) || (seederror != null) ) {
                     // we don't like that address, delete it
@@ -456,15 +438,6 @@ public class Network
 
                 // getting a reference to the finished thread
                 final publishThread t = (publishThread) syncList.remove(0);
-
-                // getting the amount of new reported seeds
-                if ( t.added >= 0 ) {
-                    if ( newSeeds == -1 ) {
-                        newSeeds = t.added;
-                    } else {
-                        newSeeds += t.added;
-                    }
-                }
             }
 
             int accessible = 0;
@@ -486,19 +459,9 @@ public class Network
                         }
                     }
                 }
-                if ( log.isFine() ) {
-                    log
-                        .fine("DBSize before -> after Cleanup: "
-                            + dbSize
-                            + " -> "
-                            + amIAccessibleDB.size());
-                }
+                if (log.isFine()) log.fine("DBSize before -> after Cleanup: " + dbSize + " -> " + amIAccessibleDB.size());
             }
-            log.info("PeerPing: I am accessible for "
-                + accessible
-                + " peer(s), not accessible for "
-                + notaccessible
-                + " peer(s).");
+            log.info("PeerPing: I am accessible for " + accessible + " peer(s), not accessible for " + notaccessible + " peer(s).");
 
             if ( (accessible + notaccessible) > 0 ) {
                 final String newPeerType;
@@ -517,11 +480,7 @@ public class Network
                 if ( this.sb.peers.mySeed().orVirgin().equals(newPeerType) ) {
                     log.info("PeerPing: myType is " + this.sb.peers.mySeed().orVirgin());
                 } else {
-                    log.info("PeerPing: changing myType from '"
-                        + this.sb.peers.mySeed().orVirgin()
-                        + "' to '"
-                        + newPeerType
-                        + "'");
+                    log.info("PeerPing: changing myType from '" + this.sb.peers.mySeed().orVirgin() + "' to '" + newPeerType + "'");
                     this.sb.peers.mySeed().put(Seed.PEERTYPE, newPeerType);
                 }
             } else {
@@ -534,20 +493,11 @@ public class Network
             this.sb.peers.saveMySeed();
 
             // if we have an address, we do nothing
-            if ( this.sb.peers.mySeed().isProper(true) == null && !force ) {
-                return 0;
-            }
-            if ( newSeeds > 0 ) {
-                return newSeeds;
-            }
+            if (this.sb.peers.mySeed().isProper(true) == null) return true;
 
-            // still no success: ask own NAT or internet responder
-            //final boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
-            //final String  DI604pw  = switchboard.getConfig("DI604pw", "");
+            // still no success
             final String ip = this.sb.getConfig("staticIP", "");
-            //if (ip.equals("")) ip = natLib.retrieveIP(DI604use, DI604pw);
 
-            // yacyCore.log.logDebug("DEBUG: new IP=" + ip);
             if (Seed.isProperIP(ip)) {
                 this.sb.peers.mySeed().setIP(ip);
             }
@@ -556,7 +506,7 @@ public class Network
             }
             log.info("publish: no recipient found, our address is " + this.sb.peers.mySeed().getIPs());
             this.sb.peers.saveMySeed();
-            return 0;
+            return false;
         } catch (final InterruptedException e ) {
             try {
                 log.info("publish: Interruption detected while publishing my seed.");
@@ -606,12 +556,10 @@ public class Network
                 log.info("publish: Shutdown off all remaining publishing thread finished.");
 
             } catch (final Exception ee ) {
-                log.warn(
-                    "publish: Unexpected error while trying to shutdown all remaining publishing threads.",
-                    e);
+                log.warn("publish: Unexpected error while trying to shutdown all remaining publishing threads.", e);
             }
 
-            return 0;
+            return false;
         }
     }
 

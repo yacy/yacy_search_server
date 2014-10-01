@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -210,19 +211,21 @@ public class Network {
                 Seed peer = new Seed(post.get("peerHash"), map);
 
                 sb.updateMySeed();
-                final int added = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer);
+                final Map<String, String> response = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer);
 
-                if (added <= 0) {
+                if (response == null) {
                     prop.put("table_comment",1);
-                    prop.putHTML("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getIPs());
+                    prop.putHTML("table_comment_status","publish: no response from peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getIPs());
                 } else {
+                    String yourtype = response.get("yourtype");
+                    String yourip = response.get("yourip");
                     peer = sb.peers.getConnected(peer.hash);
                     if (peer == null) {
                         prop.put("table_comment",1);
-                        prop.putHTML("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
+                        prop.putHTML("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN, yourtype = " + yourtype + ", yourip = " + yourip);
                     } else {
                         prop.put("table_comment",2);
-                        prop.putHTML("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getIPs());
+                        prop.putHTML("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getIPs() +", yourtype = " + yourtype + ", yourip = " + yourip);
                         prop.putHTML("table_comment_details",peer.toString());
                     }
                 }
@@ -285,7 +288,7 @@ public class Network {
 
                     boolean dark = true;
                     Seed seed;
-                    final boolean complete = (post != null && post.containsKey("ip"));
+                    final boolean c = (post != null && post.containsKey("ip"));
                     final boolean onlyIncomingDHT = (post != null && post.containsKey("onlydhtin"));
                     final boolean onlyNode = (post != null && post.containsKey("onlynode"));
                     final long onlyAgeOverDays = post == null ? 0 : post.getLong("onlyageoverdays", 0);
@@ -341,6 +344,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
+                            String ip = seed.getIP();
                             if (conCount >= maxCount) { break; }
                             if (sb.peers != null && sb.peers.mySeed() != null && seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
@@ -356,7 +360,7 @@ public class Network {
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 1);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_updatedWiki_page", wikiMap.get("page"));
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getPublicAddress());
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getPublicAddress(ip));
                             }
                             if ((blogMap = updatedBlog.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
@@ -364,7 +368,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 1);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_page", blogMap.get("page"));
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_updatedBlog_subject", blogMap.get("subject"));
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getPublicAddress());
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getPublicAddress(ip));
                             }
                             PPM = seed.getPPM();
                             QPM = seed.getQPM();
@@ -386,29 +390,38 @@ public class Network {
                                 userAgent = ClientIdentification.yacyInternetCrawlerAgent.userAgent;
                                 location = ClientIdentification.generateLocation();
                             } else {
-                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
+                                userAgent = sb.peers.peerActions.getUserAgent(ip);
                                 location = ClientIdentification.parseLocationInUserAgent(userAgent);
                             }
                             if (location.length() > 10) location = location.substring(0, 10);
                             if (location.length() == 0) {
-                                Locale l = Domains.getLocale(seed.getIP());
+                                Locale l = Domains.getLocale(ip);
                                 if (l != null) location = l.toString();
                             }
                             prop.putHTML(STR_TABLE_LIST + conCount + "_location", location);
-                            if (complete) {
-                                prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_complete_ip", seed.getIP() );
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_complete_ips", seed.getIPs().toString() );
-                                prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get(Seed.PORT, "-") );
-                                prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
-                                prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_seeds", seed.getLong(Seed.SCOUNT, 0L));
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", seed.getFloat(Seed.CCOUNT, 0F));
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_complete_userAgent", userAgent);
-                            } else {
-                                prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
+                            String port = seed.get(Seed.PORT, "-");
+                            Set<String> ips = seed.getIPs();
+                            int ipsc = 0;
+                            for (String s: ips) {
+                                prop.put(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_nodestate", seed.getFlagRootNode() ? 1 : 0);
+                                prop.put(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_c", c ? 1 : 0);
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_c_hash", seed.hash);
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_c_ip", s);
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_c_port", port);
+                                prop.put(STR_TABLE_LIST + conCount + "_ips_" + ipsc++ + "_c_ipv6", s.indexOf(':') >= 0 ? 1 : 0);
                             }
-
+                            prop.put(STR_TABLE_LIST + conCount + "_ips", ipsc);
+                            prop.put(STR_TABLE_LIST + conCount + "_port", port);
+                            prop.put(STR_TABLE_LIST + conCount + "_hash", seed.hash);
+                            prop.put(STR_TABLE_LIST + conCount + "_age", seed.getAge());
+                            prop.putNum(STR_TABLE_LIST + conCount + "_seeds", seed.getLong(Seed.SCOUNT, 0L));
+                            prop.putNum(STR_TABLE_LIST + conCount + "_connects", seed.getFloat(Seed.CCOUNT, 0F));
+                            if (c) {
+                                prop.put(STR_TABLE_LIST + conCount + "_c", 1);
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_c_userAgent", userAgent);
+                            } else {
+                                prop.put(STR_TABLE_LIST + conCount + "_c", 0);
+                            }
 
                             if (seed.isJunior()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_type", 0);
@@ -447,9 +460,6 @@ public class Network {
                                     prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 0);  // red/red; offline was off
                                 }
                             }
-                            prop.put(STR_TABLE_LIST + conCount + "_nodestate", seed.getFlagRootNode() ? 1 : 0);
-                            prop.put(STR_TABLE_LIST + conCount + "_nodestate_ip", seed.getIP());
-                            prop.put(STR_TABLE_LIST + conCount + "_nodestate_port", seed.get(Seed.PORT, "-") );
                             if (seed.getFlagAcceptRemoteIndex()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
                             } else {
@@ -479,7 +489,7 @@ public class Network {
                     prop.put("table", 1);
                     prop.putNum("table_num", conCount);
                     prop.putNum("table_total", ((page == 1) && (iAmActive)) ? (size + 1) : size );
-                    prop.put("table_complete", ((complete)? 1 : 0) );
+                    prop.put("table_c", ((c)? 1 : 0) );
                 }
             }
             prop.put("page", page);

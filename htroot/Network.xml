@@ -21,17 +21,16 @@
     <direct>#(type_direct)#direct::passive#(/type_direct)#</direct> 
     <acceptcrawl>#[acceptcrawl]#</acceptcrawl>
     <dhtreceive>#[dhtreceive]#</dhtreceive>
-    <nodestate>#[nodestate]#</nodestate>
+    <nodestate>#(nodestate)#false::true#(/nodestate)#</nodestate>
     <location>#[location]#</location>
     <seedurl>#[type_url]#</seedurl>
-    #(complete)#
-    ::
     <age>#[age]#</age>
     <seeds>#[seeds]#</seeds>
     <connects>#[connects]#</connects>
-    <address>#[ip]#:#[port]#</address>
-    <useragent>#[userAgent]#</useragent>
-    #(/complete)#    
+    #{ips}#<ip>#(c)##[ip]#::#[ip]##(/c)#</ip>#{/ips}#
+    #{ips}#<address>#(c)##(ipv6)#::[#(/ipv6)##[ip]##(ipv6)#::]#(/ipv6)#:#[port]#::#(/c)#</address>#{/ips}#
+    <port>#[port]#</port>
+    #(c)#::<useragent>#[userAgent]#</useragent>#(/c)#    
   </peer>
 #{/list}#
 ::
