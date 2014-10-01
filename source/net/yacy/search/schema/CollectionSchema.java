@@ -111,15 +111,21 @@ public enum CollectionSchema implements SchemaDeclaration {
     scripts_sxt(SolrType.string, true, true, true, false, false, "normalized urls within a scripts tag"),
     scriptscount_i(SolrType.num_integer, true, true, false, false, false, "number of entries in scripts_sxt"),
     // encoded as binary value into an integer:
-    // bit  0: "all" contained in html header meta
-    // bit  1: "index" contained in html header meta
-    // bit  2: "noindex" contained in html header meta
-    // bit  3: "nofollow" contained in html header meta
-    // bit  8: "noarchive" contained in http header properties
-    // bit  9: "nosnippet" contained in http header properties
-    // bit 10: "noindex" contained in http header properties
-    // bit 11: "nofollow" contained in http header properties
-    // bit 12: "unavailable_after" contained in http header properties
+            // bit  0: "all" contained in html header meta
+            // bit  1: "index" contained in html header meta
+            // bit  2: "follow" contained in html header meta
+            // bit  3: "noindex" contained in html header meta
+            // bit  4: "nofollow" contained in html header meta
+            // bit  5: "noarchive" contained in html header meta
+            // bit  8: "all" contained in http header X-Robots-Tag
+            // bit  9: "noindex" contained in http header X-Robots-Tag
+            // bit 10: "nofollow" contained in http header X-Robots-Tag
+            // bit 11: "noarchive" contained in http header X-Robots-Tag
+            // bit 12: "nosnippet" contained in http header X-Robots-Tag
+            // bit 13: "noodp" contained in http header X-Robots-Tag
+            // bit 14: "notranslate" contained in http header X-Robots-Tag
+            // bit 15: "noimageindex" contained in http header X-Robots-Tag
+            // bit 16: "unavailable_after" contained in http header X-Robots-Tag
     robots_i(SolrType.num_integer, true, true, false, false, false, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
     metagenerator_t(SolrType.text_general, true, true, false, false, false, "content of <meta name=\"generator\" content=#content#> tag"),
     inboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "internal links, only the protocol"),

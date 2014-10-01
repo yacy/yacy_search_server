@@ -557,6 +557,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             // bit  2: "follow" contained in html header meta
             // bit  3: "noindex" contained in html header meta
             // bit  4: "nofollow" contained in html header meta
+            // bit  5: "noarchive" contained in html header meta
             // bit  8: "all" contained in http header X-Robots-Tag
             // bit  9: "noindex" contained in http header X-Robots-Tag
             // bit 10: "nofollow" contained in http header X-Robots-Tag
@@ -576,6 +577,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (robots_meta.indexOf("follow",0) == 0 || robots_meta.indexOf(" follow",0) >= 0 || robots_meta.indexOf(",follow",0) >= 0 ) b += 4; // set bit 2
                 if (robots_meta.indexOf("noindex",0) >= 0) b += 8;  // set bit 3
                 if (robots_meta.indexOf("nofollow",0) >= 0) b += 16; // set bit 4
+                if (robots_meta.indexOf("noarchive",0) >= 0) b += 32; // set bit 5
             }
             String x_robots_tag = responseHeader == null ? "" : responseHeader.getXRobotsTag();
             if (!x_robots_tag.isEmpty()) {
@@ -1494,10 +1496,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     try {
                         String doccountquery = 
                                 CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " +
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":8 AND " + // bit 3
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":24 AND " + // bit 3 + 4
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":512 AND " + // bit 9
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":1536 AND " + // bit 9 + 10
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":8 AND " + // bit 3 (noindex)
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":24 AND " + // bit 3 + 4 (noindex + nofollow)
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":512 AND " + // bit 9 (noindex)
+                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":1536 AND " + // bit 9 + 10 (noindex + nofollow)
                                 "((-" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":" + AbstractSolrConnector.CATCHALL_TERM + ") OR (" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":true)) AND " +
                                 CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " +
                                 "-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " +
