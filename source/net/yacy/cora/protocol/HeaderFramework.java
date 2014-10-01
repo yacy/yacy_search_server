@@ -574,7 +574,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
 
         int port, pos;
-        if ((pos = host.indexOf(':')) < 0) {
+        if ((pos = host.lastIndexOf(':')) < 0 || host.charAt(pos - 1) != ']') {
             port = 80;
         } else {
             port = NumberTools.parseIntDecSubstring(host, pos + 1);

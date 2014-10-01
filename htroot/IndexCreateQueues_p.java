@@ -14,6 +14,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -141,8 +142,7 @@ public class IndexCreateQueues_p {
             int hc = 0;
             for (Map.Entry<String, Integer[]> host: hosts.entrySet()) {
                 String hostnameport = host.getKey();
-                int p = hostnameport.lastIndexOf(':');
-                String hostname = p < 0 ? hostnameport : hostnameport.substring(0, p);
+                String hostname = Domains.stripToHostName(hostnameport);
                 prop.putHTML("crawler_host_" + hc + "_hostnameport", hostnameport);
                 prop.putHTML("crawler_host_" + hc + "_hostname", hostname);
                 prop.put("crawler_host_" + hc + "_embed", embed ? 1 : 0);

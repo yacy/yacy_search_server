@@ -232,12 +232,8 @@ public final class Protocol {
             } else {
                 try {
                     // patch the remote peer address to avoid that remote peers spoof the network with wrong addresses
-                    final int p = targetAddress.lastIndexOf(':');
-                    if ( p < 0 ) return null;
-                    String h = targetAddress.substring(0, p);
-                    if (h.charAt(0) == '[') h = h.substring(1);
-                    if (h.charAt(h.length() - 1) == ']') h = h.substring(0, h.length() - 1);
-                    InetAddress ie = Domains.dnsResolve(h);
+                    String host = Domains.stripToHostName(targetAddress);
+                    InetAddress ie = Domains.dnsResolve(host);
                     otherPeer = Seed.genRemoteSeed(seed, false, ie.getHostAddress());
                     if ( !otherPeer.hash.equals(targetHash) ) {
                         Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + targetHash);
@@ -340,13 +336,10 @@ public final class Protocol {
             } else {
                 try {
                     if ( i == 1 ) {
-                        final int p = targetAddress.lastIndexOf(':');
-                        if ( p < 0 ) {
-                            return null;
-                        }
-                        InetAddress ia = Domains.dnsResolve(targetAddress.substring(0, p));
+                        String host = Domains.stripToHostName(targetAddress);
+                        InetAddress ia = Domains.dnsResolve(host);
                         if (ia == null) continue;
-                        final String host = ia.getHostAddress(); // the actual address of the target as we had been successful when contacting them is patched here
+                        host = ia.getHostAddress(); // the actual address of the target as we had been successful when contacting them is patched here
                         s = Seed.genRemoteSeed(seedStr, false, host);
                     } else {
                         s = Seed.genRemoteSeed(seedStr, false, null);

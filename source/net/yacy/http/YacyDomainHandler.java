@@ -72,16 +72,8 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
                 path = "";
                 hostPort = resolved;
             }
-            int posPort = hostPort.lastIndexOf(':');
-            String newHost;
-            int newPort;
-            if (posPort >= 0) {
-                newHost = hostPort.substring(0, posPort);
-                newPort = Integer.parseInt(hostPort.substring(posPort + 1));
-            } else {
-                newHost = hostPort;
-                newPort = 80;
-            }
+            int newPort = Domains.stripToPort(hostPort);
+            String newHost = Domains.stripToHostName(hostPort);
             if (alternativeResolvers.myIPs().contains(newHost)) return;  
             if (Domains.isLocal(newHost, null)) return;
             RequestDispatcher dispatcher = request.getRequestDispatcher(path + target);

@@ -792,11 +792,77 @@ public class Domains {
     final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newFixedThreadPool(20));
 
     /**
+     * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,
+     * considering that the host may also be an (IPv4) IP or a IPv6 IP in brackets.
+     * @param target
+     * @return a host name or IP string
+     */
+    public static String stripToHostName(String target) {
+        // normalize
+        if (target == null || target.isEmpty()) return null;
+        target = target.toLowerCase().trim(); // we can lowercase this because host names are case-insensitive
+        
+        // extract the address (host:port) part (applies if this is an url)
+        int p = target.indexOf("://");
+        if (p > 0) target = target.substring(p + 3);
+        p = target.indexOf('/');
+        if (p > 0) target = target.substring(0, p);
+        
+        // IPv4 / host heuristics
+        p = target.lastIndexOf(':');        
+        if ( p < 0 ) {
+            // may be IPv4 or IPv6, we chop off brackets if exist
+            if (target.charAt(0) == '[') target = target.substring(1);
+            if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
+            return target;
+        }
+        
+        // the ':' at pos p may be either a port divider or a part of an IPv6 address
+        if (target.charAt(p - 1) == ']') {
+            target = target.substring(1, p - 1);
+            return target;
+        }
+        
+        // the ':' must be a port divider
+        target = target.substring(0, p);
+        return target;
+    }
+    
+    public static int stripToPort(String target) {
+        int port = 80; // default port
+        
+        // normalize
+        if (target == null || target.isEmpty()) return port;
+        target = target.toLowerCase().trim(); // we can lowercase this because host names are case-insensitive
+        
+        // extract the address (host:port) part (applies if this is an url)
+        int p = target.indexOf("://");
+        if (p > 0) {
+            String protocol = target.substring(0, p);
+            target = target.substring(p + 3);
+            if ("https".equals(protocol)) port = 443;
+            if ("ftp".equals(protocol)) port = 21;
+            if ("smb".equals(protocol)) port = 445;
+        }
+        p = target.indexOf('/');
+        if (p > 0) target = target.substring(0, p);
+        
+        // IPv4 / host heuristics
+        p = target.lastIndexOf(':');        
+        if ( p < 0 ) return port;
+
+        // the ':' must be a port divider
+        port = Integer.parseInt(target.substring(p + 1));
+        return port;
+    }
+    
+    /**
      * resolve a host address using a local DNS cache and a DNS lookup if necessary
      * @param clienthost
      * @return the hosts InetAddress or null if the address cannot be resolved
      */
     public static InetAddress dnsResolve(final String host0) {
+        // consider to call stripToHostName() before calling this
         if (host0 == null || host0.isEmpty()) return null;
         final String host = host0.toLowerCase().trim();
 

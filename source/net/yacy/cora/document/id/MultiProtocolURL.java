@@ -155,7 +155,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "file://" + url;
         }
 
-        int p = url.indexOf(':');
+        int p = url.indexOf("://");
         if (p < 0) {
             url = "http://" + url;
             p = 4;

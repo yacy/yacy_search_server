@@ -144,14 +144,8 @@ public final class HTTPDemon {
             final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);
             final String method = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
 
-            final int port;
-            final int pos = host.indexOf(':');
-            if (pos != -1) {
-                port = NumberTools.parseIntDecSubstring(host, pos + 1);
-                host = host.substring(0, pos);
-            } else {
-                port = 80;
-            }
+            final int port = Domains.stripToPort(host);
+            host = Domains.stripToHostName(host);
 
             String urlString;
             try {

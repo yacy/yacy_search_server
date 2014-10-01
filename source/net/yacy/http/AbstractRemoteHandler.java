@@ -93,9 +93,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
 
         String host = request.getHeader("Host");
         if (host == null) return; // no proxy request, continue processing by handlers
-                   
-        int hostSplitPos = host.indexOf(':');
-        String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
+        String hostOnly = Domains.stripToHostName(host);
         
         if (localVirtualHostNames.contains(hostOnly)) return; // no proxy request (quick check), continue processing by handlers        
         if (Domains.isLocal(hostOnly, null)) return; // no proxy, continue processing by handlers
