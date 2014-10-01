@@ -206,26 +206,30 @@ public class Network {
                 }
 
                 final ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
-                map.put(Seed.IP, post.get("peerIP"));
-                map.put(Seed.PORT, post.get("peerPort"));
+                String challengeIP = post.get("peerIP");
+                String challengePort = post.get("peerPort");
+                map.put(Seed.IP, challengeIP);
+                map.put(Seed.PORT, challengePort);
                 Seed peer = post.get("peerHash") == null ? null : new Seed(post.get("peerHash"), map);
-
+                String challengeAddress = peer.getPublicAddress(challengeIP);
                 sb.updateMySeed();
-                final Map<String, String> response = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(post.get("peerIP")), peer.hash);
+                Seed mySeed = sb.peers.mySeed();
+                final Map<String, String> response = Protocol.hello(mySeed, sb.peers.peerActions, challengeAddress, peer.hash);
 
                 if (response == null) {
+                    
                     prop.put("table_comment",1);
-                    prop.putHTML("table_comment_status","publish: no response from peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getIPs());
+                    prop.put("table_comment_status", "publish: no response from peer '" + peer.getName() + "/" + post.get("peerHash") + "' from <a href=\"http://" + challengeAddress + "\" target=\"_blank\">" + challengeAddress + "</a>");
                 } else {
                     String yourtype = response.get("yourtype");
                     String yourip = response.get("yourip");
                     peer = sb.peers.getConnected(peer.hash);
                     if (peer == null) {
                         prop.put("table_comment",1);
-                        prop.putHTML("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN, yourtype = " + yourtype + ", yourip = " + yourip);
+                        prop.put("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from <a href=\"http://" + challengeAddress + "\" target=\"_blank\">" + challengeAddress + "</a>, yourtype = " + yourtype + ", yourip = " + yourip);
                     } else {
                         prop.put("table_comment",2);
-                        prop.putHTML("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getIPs() +", yourtype = " + yourtype + ", yourip = " + yourip);
+                        prop.put("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at <a href=\"http://" + challengeAddress + "\" target=\"_blank\">" + challengeAddress + "</a>, yourtype = " + yourtype + ", yourip = " + yourip);
                         prop.putHTML("table_comment_details",peer.toString());
                     }
                 }

@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -152,28 +153,43 @@ public class Domains {
 
                 // fill a cache of local host names
                 for (final InetAddress a: myHostAddresses) {
-                    final String hostname = getHostName(a);
-                    if (hostname != null) {
-                        myHostNames.add(hostname);
-                        myHostNames.add(a.getHostAddress());
+                    String hostaddressP = a.getHostAddress();
+                    int p = hostaddressP.indexOf('%');
+                    if (p > 0) hostaddressP = hostaddressP.substring(0, p);
+                    Set<String> hns = new LinkedHashSet<>();
+                    // generate alternative representations of IPv6 addresses which are needed to check access on the interface (i.e. localhost check)
+                    if (hostaddressP.indexOf("::") < 0) {
+                        hns.add(hostaddressP.replaceFirst(":0:0:0:0:0:0:", "::"));
+                        hns.add(hostaddressP.replaceFirst(":0:0:0:0:0:", "::"));
+                        hns.add(hostaddressP.replaceFirst(":0:0:0:0:", "::"));
+                        hns.add(hostaddressP.replaceFirst(":0:0:0:", "::"));
+                        hns.add(hostaddressP.replaceFirst(":0:0:", "::"));
+                        hns.add(hostaddressP.replaceFirst(":0:", "::"));
                     }
-                    // we write the local tests into variables to be able to debug these values
-                    boolean isAnyLocalAddress  = a.isAnyLocalAddress();
-                    boolean isLinkLocalAddress = a.isLinkLocalAddress(); // true i.e. for localhost/fe80:0:0:0:0:0:0:1%1, myhost.local/fe80:0:0:0:223:dfff:fedf:30ce%7
-                    boolean isLoopbackAddress  = a.isLoopbackAddress();  // true i.e. for localhost/0:0:0:0:0:0:0:1, localhost/127.0.0.1
-                    boolean isSiteLocalAddress = a.isSiteLocalAddress(); // true i.e. for myhost.local/192.168.1.33
-                    if (isAnyLocalAddress || isLinkLocalAddress || isLoopbackAddress || isSiteLocalAddress) {
-                        ConcurrentLog.info("Domain Init", "local host address: " + a + " (local)");
-                        localHostAddresses.add(a);
-                        if (hostname != null) {localHostNames.add(hostname); localHostNames.add(a.getHostAddress());}
-                    } else {
-                        ConcurrentLog.info("Domain Init", "local host address: " + a + " (public)");
-                        if (a instanceof Inet4Address) {
-                            publicIPv4HostAddresses.add(a);
-                            if (hostname != null) {publicIPv4HostNames.add(hostname); publicIPv4HostNames.add(a.getHostAddress());}
+                    hns.add(hostaddressP);
+                    final String hostname = getHostName(a);
+                    if (hostname != null) myHostNames.add(hostname);
+                    myHostNames.addAll(hns);
+                    for (String hostaddress: hns) {
+                        if (hostaddress.contains("::0:") || hostaddress.contains(":0::")) continue; // not common (but possible); we skip that
+                        // we write the local tests into variables to be able to debug these values
+                        boolean isAnyLocalAddress  = a.isAnyLocalAddress();
+                        boolean isLinkLocalAddress = a.isLinkLocalAddress(); // true i.e. for localhost/fe80:0:0:0:0:0:0:1%1, myhost.local/fe80:0:0:0:223:dfff:fedf:30ce%7
+                        boolean isLoopbackAddress  = a.isLoopbackAddress();  // true i.e. for localhost/0:0:0:0:0:0:0:1, localhost/127.0.0.1
+                        boolean isSiteLocalAddress = a.isSiteLocalAddress(); // true i.e. for myhost.local/192.168.1.33
+                        if (isAnyLocalAddress || isLinkLocalAddress || isLoopbackAddress || isSiteLocalAddress) {
+                            ConcurrentLog.info("Domain Init", "local host address: " + hostaddress + " (local)");
+                            localHostAddresses.add(a);
+                            if (hostname != null) {localHostNames.add(hostname); localHostNames.add(hostaddress);}
                         } else {
-                            publicIPv6HostAddresses.add(a);
-                            if (hostname != null) {publicIPv6HostNames.add(hostname); publicIPv6HostNames.add(a.getHostAddress());}
+                            ConcurrentLog.info("Domain Init", "local host address: " + hostaddress + " (public)");
+                            if (a instanceof Inet4Address) {
+                                publicIPv4HostAddresses.add(a);
+                                if (hostname != null) {publicIPv4HostNames.add(hostname); publicIPv4HostNames.add(hostaddress);}
+                            } else {
+                                publicIPv6HostAddresses.add(a);
+                                if (hostname != null) {publicIPv6HostNames.add(hostname); publicIPv6HostNames.add(hostaddress);}
+                            }
                         }
                     }
                 }
@@ -814,17 +830,23 @@ public class Domains {
             // may be IPv4 or IPv6, we chop off brackets if exist
             if (target.charAt(0) == '[') target = target.substring(1);
             if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
+            p = target.lastIndexOf('%');
+            if (p > 0) target = target.substring(0, p);
             return target;
         }
         
         // the ':' at pos p may be either a port divider or a part of an IPv6 address
         if (target.charAt(p - 1) == ']') {
             target = target.substring(1, p - 1);
+            p = target.lastIndexOf('%');
+            if (p > 0) target = target.substring(0, p);
             return target;
         }
         
         // the ':' must be a port divider
         target = target.substring(0, p);
+        p = target.lastIndexOf('%');
+        if (p > 0) target = target.substring(0, p);
         return target;
     }
     

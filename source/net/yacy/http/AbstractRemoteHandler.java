@@ -97,13 +97,13 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         
         if (localVirtualHostNames.contains(hostOnly)) return; // no proxy request (quick check), continue processing by handlers        
         if (Domains.isLocal(hostOnly, null)) return; // no proxy, continue processing by handlers
-        if (hostOnly.startsWith(sb.peers.myIP())) { // remote access to my external IP, continue processing by handlers
-            localVirtualHostNames.add(sb.peers.myIP()); // not available on init, add it now for quickcheck
+        if (sb.peers.myIPs().contains(hostOnly)) { // remote access to my external IP, continue processing by handlers
+            localVirtualHostNames.addAll(sb.peers.myIPs()); // not available on init, add it now for quickcheck
             return;
         }
         
         InetAddress resolvedIP = Domains.dnsResolve(hostOnly); // during testing isLocal() failed to resolve domain against publicIP  
-        if (resolvedIP != null && sb.myPublicIP().equals(resolvedIP.getHostAddress())) {
+        if (resolvedIP != null && sb.myPublicIPs().contains(resolvedIP.getHostAddress())) {
             localVirtualHostNames.add(resolvedIP.getHostName()); // remember resolved hostname
             //localVirtualHostNames.add(resolved.getHostAddress()); // might change ?
             return;  

@@ -213,15 +213,7 @@ public final class Protocol {
                 + ((result == null) ? "result null" : ("result=" + result.toString())));
             return null;
         }
-        Network.log.info("yacyClient.hello thread '"
-                        + Thread.currentThread().getName()
-                        + "' contacted peer at "
-                        + targetAddress
-                        + ", received "
-                        + ((content == null) ? "null" : content.length)
-                        + " bytes, time = "
-                        + responseTime
-                        + " milliseconds");
+        Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + targetAddress + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + responseTime + " milliseconds");
 
         // check consistency with expectation
         Seed otherPeer = null;
