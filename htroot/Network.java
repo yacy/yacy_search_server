@@ -208,10 +208,10 @@ public class Network {
                 final ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
                 map.put(Seed.IP, post.get("peerIP"));
                 map.put(Seed.PORT, post.get("peerPort"));
-                Seed peer = new Seed(post.get("peerHash"), map);
+                Seed peer = post.get("peerHash") == null ? null : new Seed(post.get("peerHash"), map);
 
                 sb.updateMySeed();
-                final Map<String, String> response = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer);
+                final Map<String, String> response = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(post.get("peerIP")), peer.hash);
 
                 if (response == null) {
                     prop.put("table_comment",1);

@@ -218,7 +218,10 @@ public class Network
         @Override
         public final void run() {
             try {
-                this.result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed);
+                for (String ip: this.seed.getIPs()) {
+                    this.result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed.getPublicAddress(ip), this.seed.hash);
+                    if (this.result != null) break;
+                }
                 if ( this.result == null ) {
                     // no or wrong response, delete that address
                     final String cause = "peer ping to peer resulted in error response (added < 0)";
