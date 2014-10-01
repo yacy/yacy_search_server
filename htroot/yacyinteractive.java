@@ -53,8 +53,8 @@ public class yacyinteractive {
         final String maximumRecords = (post == null) ? sb.getConfig(SwitchboardConstants.SEARCH_ITEMS, "10") : post.get("maximumRecords", "");
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
         prop.putHTML("query", query);
-        prop.put("startRecord", startRecord);
-        prop.put("maximumRecords", maximumRecords);
+        prop.putHTML("startRecord", startRecord);
+        prop.putHTML("maximumRecords", maximumRecords);
         prop.putHTML("querys", query.replaceAll(" ", "+"));
         prop.put("serverlist", query.isEmpty() ? 1 : 0);
         prop.put("focus", focus ? 1 : 0);
