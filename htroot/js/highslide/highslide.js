@@ -2,7 +2,7 @@
 Name:    Highslide JS
 Version: 3.3.9 (February 15 2008)
 Config:  default
-Author:  Torstein Hønsi
+Author:  Torstein Hï¿½nsi
 Support: http://vikjavev.no/highslide/forum
 
 Licence:
@@ -1197,7 +1197,7 @@ writeCaption : function() {
 				null, null, true); // to get height
 			this.caption.innerHTML = '';
 			this.caption.appendChild(temp);	
-			height = this.caption.childNodes[0].offsetHeight;
+			height = this.caption.offsetHeight;
 			this.caption.innerHTML = this.caption.childNodes[0].innerHTML;
 		}
 		hs.setStyles(this.caption, { overflow: 'hidden', height: 0, zIndex: 2, marginTop: 0 });
