@@ -675,11 +675,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      *
      * @param name Cookie name
      * @param value Cookie value
-     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param expires when should this cookie be automatically deleted. If <b>null</b> - cookie will stay forever
      * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      * @param domain Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
      *
-     * Note: this cookie will be sent over each connection independend if it is safe connection or not.
+     * Note: this cookie will be sent over each connection independent if it is safe connection or not.
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(final String name, final String value, final String expires, final String path, final String domain)
@@ -691,10 +691,10 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      *
      * @param name Cookie name
      * @param value Cookie value
-     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param expires when should this cookie be automatically deleted. If <b>null</b> - cookie will stay forever
      * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      *
-     * Note: this cookie will be sent over each connection independend if it is safe connection or not.
+     * Note: this cookie will be sent over each connection independent if it is safe connection or not.
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(final String name, final String value, final String expires, final String path)
@@ -706,9 +706,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      *
      * @param name Cookie name
      * @param value Cookie value
-     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param expires when should this cookie be automatically deleted. If <b>null</b> - cookie will stay forever
      *
-     * Note: this cookie will be sent over each connection independend if it is safe connection or not.
+     * Note: this cookie will be sent over each connection independent if it is safe connection or not.
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(final String name, final String value, final String expires)
@@ -721,7 +721,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @param name Cookie name
      * @param value Cookie value
      *
-     * Note: this cookie will be sent over each connection independend if it is safe connection or not. This cookie never expires
+     * Note: this cookie will be sent over each connection independent if it is safe connection or not. This cookie never expires
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(final String name, final String value )
