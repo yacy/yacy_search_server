@@ -47,6 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
@@ -200,7 +201,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param doctype
      * @return the normalized url
      */
-    public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURL, final char doctype) {
+    public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURL) {
         add(doc, CollectionSchema.id, ASCII.String(digestURL.hash()));
         if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, digestURL.hosthash());
         String us = digestURL.toNormalform(true);
@@ -237,9 +238,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filenameStub);
         if (allAttr || contains(CollectionSchema.url_file_name_tokens_t)) add(doc, CollectionSchema.url_file_name_tokens_t, MultiProtocolURL.toTokens(filenameStub));
         if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
-        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(extension, doctype));
         
-
         Map<String, String> searchpart = digestURL.getSearchpartMap();
         if (searchpart == null) {
             if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, 0);
@@ -253,13 +252,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     
     public SolrInputDocument metadata2solr(final URIMetadataNode md) {
 
-        final SolrInputDocument doc = new SolrInputDocument();
-        boolean allAttr = this.isEmpty();
+        SolrInputDocument doc = toSolrInputDocument(md); //urimetadatanode stores some values in private fields, add now to sorldocument
 
-        addURIAttributes(doc, allAttr, md.url(), md.doctype());
+        boolean allAttr = this.isEmpty();
+        addURIAttributes(doc, allAttr, md.url());
 
         String title = md.dc_title();
-        if (allAttr || contains(CollectionSchema.title)) add(doc, CollectionSchema.title, new String[]{title});
         if (allAttr || contains(CollectionSchema.title_count_i)) add(doc, CollectionSchema.title_count_i, 1);
         if (allAttr || contains(CollectionSchema.title_chars_val)) {
             Integer[] cv = new Integer[]{new Integer(title.length())};
@@ -281,10 +279,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.description_words_val)) {
             add(doc, CollectionSchema.description_words_val, description_exist ? new Integer[]{new Integer(description.length() == 0 ? 0 : CommonPattern.SPACE.split(description).length)} : new Integer[0]);
         }
-
-        if (allAttr || contains(CollectionSchema.author)) add(doc, CollectionSchema.author, md.dc_creator());
-        if (allAttr || contains(CollectionSchema.last_modified)) add(doc, CollectionSchema.last_modified, md.moddate());
-        if (allAttr || contains(CollectionSchema.wordcount_i)) add(doc, CollectionSchema.wordcount_i, md.wordCount());
 
         String keywords = md.dc_subject();
     	Bitfield flags = md.flags();
@@ -310,13 +304,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, 200);
 
         // fields that are in URIMetadataRow additional to yacy2solr basic requirement
-        if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, md.loaddate());
-        if (allAttr || contains(CollectionSchema.fresh_date_dt)) add(doc, CollectionSchema.fresh_date_dt, md.freshdate());
-        if ((allAttr || contains(CollectionSchema.referrer_id_s)) && md.referrerHash() != null) add(doc, CollectionSchema.referrer_id_s, ASCII.String(md.referrerHash()));
-        if (allAttr || contains(CollectionSchema.md5_s)) add(doc, CollectionSchema.md5_s, md.md5());
-        if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, md.dc_publisher());
-        if (allAttr || contains(CollectionSchema.language_s)) add(doc, CollectionSchema.language_s, md.language());
-        if (allAttr || contains(CollectionSchema.size_i)) add(doc, CollectionSchema.size_i, md.size());
         if (allAttr || contains(CollectionSchema.audiolinkscount_i)) add(doc, CollectionSchema.audiolinkscount_i, md.laudio());
         if (allAttr || contains(CollectionSchema.videolinkscount_i)) add(doc, CollectionSchema.videolinkscount_i, md.lvideo());
         if (allAttr || contains(CollectionSchema.applinkscount_i)) add(doc, CollectionSchema.applinkscount_i, md.lapp());
@@ -342,7 +329,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     	text = text.trim();
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
-    
+
     public static class Subgraph {
         public final ArrayList<String>[] urlProtocols, urlStubs, urlAnchorTexts;
         @SuppressWarnings("unchecked")
@@ -404,8 +391,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         SolrVector doc = new SolrVector();
         final DigestURL digestURL = document.dc_source();
         boolean allAttr = this.isEmpty();
-        String url = addURIAttributes(doc, allAttr, digestURL, Response.docType(digestURL));
-        
+        String url = addURIAttributes(doc, allAttr, digestURL);
+        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
+
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         String host = digestURL.getHost();
         
@@ -476,7 +464,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (author == null || author.length() == 0) author = document.dc_publisher();
             add(doc, CollectionSchema.author, author);
         }
-        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
         if (allAttr || contains(CollectionSchema.last_modified)) {
             Date lastModified = responseHeader == null ? new Date() : responseHeader.lastModified();
             if (lastModified == null) lastModified = new Date();
@@ -1858,7 +1845,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             assert allAttr || configuration.contains(CollectionSchema.failreason_s);
             
             final SolrInputDocument doc = new SolrInputDocument();
-            String url = configuration.addURIAttributes(doc, allAttr, this.getDigestURL(), Response.docType(this.getDigestURL()));
+            String url = configuration.addURIAttributes(doc, allAttr, this.getDigestURL());
+            
+            if (allAttr || configuration.contains(CollectionSchema.content_type)) configuration.add(doc, CollectionSchema.content_type, new String[]{Classification.url2mime(this.digestURL)});
+
             if (allAttr || configuration.contains(CollectionSchema.load_date_dt)) configuration.add(doc, CollectionSchema.load_date_dt, getFailDate());
             if (allAttr || configuration.contains(CollectionSchema.crawldepth_i)) configuration.add(doc, CollectionSchema.crawldepth_i, this.crawldepth);
             
