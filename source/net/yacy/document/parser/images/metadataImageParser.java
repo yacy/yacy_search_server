@@ -157,7 +157,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
         return new Document[]{new Document(
             location,
             mimeType,
-            "UTF-8",
+            documentCharset,
             this,
             new HashSet<String>(0), // languages
             keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords

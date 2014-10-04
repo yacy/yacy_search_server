@@ -206,9 +206,9 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             final String servletstub = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getServletPath() + "?url=";
             Document doc;
             try {            
-                doc = Jsoup.parse(proxyout, UTF8.charset.name(), proxyurl.toString());
+                doc = Jsoup.parse(proxyout, proxyResponseHeader.getCharacterEncoding(), proxyurl.toString());
             } catch (IOException eio) {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Proxy: parser error on " + proxyurl.toString());
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Proxy: parser error on " + proxyurl.toString() +"\n\n"+ eio.getMessage());
                 return;
             }
 

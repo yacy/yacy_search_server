@@ -136,7 +136,7 @@ public final class yacy {
             try {
                 "a".isEmpty(); // needs at least Java 1.6
             } catch (final NoSuchMethodError e) {
-                System.err.println("STARTUP: Java Version too low. You need at least Java 1.6 to run YaCy");
+                System.err.println("STARTUP: Java Version too low. You need at least Java 1.7 to run YaCy");
                 System.exit(-1);
             }
 
