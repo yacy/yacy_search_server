@@ -28,6 +28,7 @@ package net.yacy.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -222,7 +224,6 @@ public class WorkTables extends Tables {
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         client.setTimout(120000);
         Tables.Row row;
-        String url;
         LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();
         for (final String pk: pks) {
             row = null;
@@ -234,20 +235,25 @@ public class WorkTables extends Tables {
                 ConcurrentLog.logException(e);
             }
             if (row == null) continue;
-            url = "http://" + host + ":" + port + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
-            url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
-            ConcurrentLog.info("WorkTables", "executing url: " + url);
+            String theapicall = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)) + "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
             try {
-                client.GETbytes(url, username, pass, false);
-                l.put(url, client.getStatusCode());
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-                l.put(url, -1);
+                // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
+                MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
+                ConcurrentLog.info("WorkTables", "executing url: " + url.toString());
+                try {
+                    client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
+                    l.put(url.toString(), client.getStatusCode());
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
+                    l.put(url.toString(), -1);
+                }
+            } catch (MalformedURLException ex) {
+                ConcurrentLog.warn("APICALL", "wrong url in apicall " + theapicall);
             }
         }
         return l;
     }
-
+    
     public static int execAPICall(String host, int port, String path, byte[] pk, final String username, final String pass) {
         // now call the api URLs and store the result status
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
