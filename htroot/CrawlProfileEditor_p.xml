@@ -4,7 +4,6 @@
 	<crawlProfile>
 		<name>#[name]#</name>
 		<status>#(status)#terminated::active#(/status)#</status>
-		<starturl>#[startURL]#</starturl>
 		<depth>#[depth]#</depth>
 		<mustmatch>#[mustmatch]#</mustmatch>
 		<mustnotmatch>#[mustnotmatch]#</mustnotmatch>

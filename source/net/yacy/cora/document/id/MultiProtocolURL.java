@@ -66,8 +66,6 @@ import net.yacy.crawler.retrieval.Response;
  */
 public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolURL> {
 
-    public static final MultiProtocolURL POISON = new MultiProtocolURL(); // poison pill for concurrent link generators
-
     private static final long serialVersionUID = -1173233022912141884L;
     private static final long SMB_TIMEOUT = 5000;
 
@@ -155,7 +153,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "file://" + url;
         }
 
-        int p = url.indexOf(':');
+        int p = url.indexOf("://");
         if (p < 0) {
             url = "http://" + url;
             p = 4;
@@ -373,6 +371,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         escape();
     }
 
+    /**
+    * creates MultiProtocolURL
+    * if path contains '?' search part is automatically created by splitting input into path and searchpart
+    * dto for anchor's ('#')
+    */
     public MultiProtocolURL(final String protocol, String host, final int port, final String path) throws MalformedURLException {
         if (protocol == null) throw new MalformedURLException("protocol is null");
         if (host.indexOf(':') >= 0 && host.charAt(0) != '[') host = '[' + host + ']'; // IPv6 host must be enclosed in square brackets
@@ -521,9 +524,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 if (i < len - 6 && "amp;".equals(s.substring(i + 1, i + 5).toLowerCase())) {
                     sbuf.append((char)ch);   // leave it that way, it is used the right way
                 } else {
-                    sbuf.append("&amp;");    // this must be urlencoded
+                    sbuf.append("%26");    // this must be urlencoded
                 }
-                sbuf.append((char)ch);
             } else if (ch == '#') {          // RFC 1738 2.2 unsafe char is _not_ encoded because it may already be used for encoding 
                 sbuf.append((char)ch);
             } else if (ch == '!' || ch == ':'   // unreserved

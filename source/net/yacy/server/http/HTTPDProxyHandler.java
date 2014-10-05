@@ -423,13 +423,8 @@ public final class HTTPDProxyHandler {
             final String ip =      (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
             final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the ip from the connecting peer
 
-            int port, pos;
-            if ((pos = host.indexOf(':')) < 0) {
-                port = 80;
-            } else {
-                port = Integer.parseInt(host.substring(pos + 1));
-                host = host.substring(0, pos);
-            }
+            int port = Domains.stripToPort(host);
+            host = Domains.stripToHostName(host);
 
             // resolve yacy and yacyh domains
             String yAddress = resolveYacyDomains(host);
@@ -438,10 +433,10 @@ public final class HTTPDProxyHandler {
             final String remotePath = (args == null) ? path : (path + "?" + args); // with leading '/'
 
             // remove yacy-subdomain-path, when accessing /env
-            if ( (yAddress != null)
+            if ((yAddress != null)
             		&& (remotePath.startsWith("/env"))
-            		&& ((pos = yAddress.indexOf('/')) != -1)
-            ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
+            		&& (yAddress.indexOf('/') != -1)
+               ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
 
             modifyProxyHeaders(requestHeader, httpVer);
 
@@ -1050,11 +1045,8 @@ public final class HTTPDProxyHandler {
         String orgHostName = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
         if (orgHostName == null) orgHostName = "unknown";
         orgHostName = orgHostName.toLowerCase();
-        int pos = orgHostName.indexOf(':');
-        if (pos != -1) {
-            orgHostPort = orgHostName.substring(pos+1);
-            orgHostName = orgHostName.substring(0,pos);
-        }
+        orgHostPort = Integer.toString(Domains.stripToPort(orgHostName));
+        orgHostName = Domains.stripToHostName(orgHostName);
         String orgHostPath = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); if (orgHostPath == null) orgHostPath = "";
         String orgHostArgs = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); if (orgHostArgs == null) orgHostArgs = "";
         if (orgHostArgs.length() > 0) orgHostArgs = "?" + orgHostArgs;
@@ -1078,7 +1070,7 @@ public final class HTTPDProxyHandler {
             if (addr != null) if (addr != null) testHostNames.add(testHostName);
         }
 
-        pos = orgHostName.lastIndexOf('.');
+        int pos = orgHostName.lastIndexOf('.');
         if (pos != -1) {
             final Iterator<String> iter = topLevelDomains.iterator();
             while (iter.hasNext()) {

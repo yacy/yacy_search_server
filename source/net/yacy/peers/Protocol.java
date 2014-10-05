@@ -167,11 +167,11 @@ public final class Protocol {
      *
      * @return the number of new seeds
      */
-    public static int hello(
+    public static Map<String, String> hello(
         final Seed mySeed,
         final PeerActions peerActions,
-        final Seed otherSeed) {
-        final String address = otherSeed.getPublicAddress(otherSeed.getIP());
+        final String targetAddress,
+        final String targetHash) {
 
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
@@ -190,8 +190,8 @@ public final class Protocol {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000);
             content =
                 httpClient.POSTbytes(
-                    new MultiProtocolURL("http://" + address + "/yacy/hello.html"),
-                    Seed.b64Hash2hexHash(otherSeed.hash) + ".yacyh",
+                    new MultiProtocolURL("http://" + targetAddress + "/yacy/hello.html"),
+                    Seed.b64Hash2hexHash(targetHash) + ".yacyh",
                     parts,
                     false, true);
             responseTime = System.currentTimeMillis() - start;
@@ -201,9 +201,9 @@ public final class Protocol {
                 Network.log.info("yacyClient.hello thread '"
                     + Thread.currentThread().getName()
                     + "' interrupted.");
-                return -1;
+                return null;
             }
-            Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "', peer " + address + "; exception: " + e.getMessage());
+            Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "', peer " + targetAddress + "; exception: " + e.getMessage());
             // try again (go into loop)
             result = null;
         }
@@ -211,41 +211,29 @@ public final class Protocol {
         if (result == null || result.size() == 0) {
             Network.log.info("yacyClient.hello result error: "
                 + ((result == null) ? "result null" : ("result=" + result.toString())));
-            return -1;
+            return null;
         }
-        Network.log.info("yacyClient.hello thread '"
-                        + Thread.currentThread().getName()
-                        + "' contacted peer at "
-                        + address
-                        + ", received "
-                        + ((content == null) ? "null" : content.length)
-                        + " bytes, time = "
-                        + responseTime
-                        + " milliseconds");
+        Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + targetAddress + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + responseTime + " milliseconds");
 
         // check consistency with expectation
         Seed otherPeer = null;
         String seed;
-        if ( (otherSeed.hash != null) && (otherSeed.hash.length() > 0) && ((seed = result.get("seed0")) != null) ) {
+        if ( (targetHash != null) && (targetHash.length() > 0) && ((seed = result.get("seed0")) != null) ) {
             if ( seed.length() > Seed.maxsize ) {
                 Network.log.info("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + Seed.maxsize + ")");
             } else {
                 try {
                     // patch the remote peer address to avoid that remote peers spoof the network with wrong addresses
-                    final int p = address.lastIndexOf(':');
-                    if ( p < 0 ) return -1;
-                    String h = address.substring(0, p);
-                    if (h.charAt(0) == '[') h = h.substring(1);
-                    if (h.charAt(h.length() - 1) == ']') h = h.substring(0, h.length() - 1);
-                    InetAddress ie = Domains.dnsResolve(h);
+                    String host = Domains.stripToHostName(targetAddress);
+                    InetAddress ie = Domains.dnsResolve(host);
                     otherPeer = Seed.genRemoteSeed(seed, false, ie.getHostAddress());
-                    if ( !otherPeer.hash.equals(otherSeed.hash) ) {
-                        Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherSeed.hash);
-                        return -1; // no success
+                    if ( !otherPeer.hash.equals(targetHash) ) {
+                        Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + targetHash);
+                        return null; // no success
                     }
                 } catch (final IOException e ) {
                     Network.log.info("yacyClient.hello: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
-                    return -1; // no success
+                    return null; // no success
                 }
             }
         }
@@ -285,7 +273,7 @@ public final class Protocol {
             accessible.IWasAccessed = false;
         }
         accessible.lastUpdated = System.currentTimeMillis();
-        Network.amIAccessibleDB.put(otherSeed.hash, accessible);
+        Network.amIAccessibleDB.put(targetHash, accessible);
 
         /*
          * If we were reported as junior we have to check if your port forwarding channel is broken
@@ -313,7 +301,7 @@ public final class Protocol {
                     + mytype
                     + ", rejecting other peer.");
             }
-            return -1;
+            return null;
         }
         if ( mySeed.orVirgin().equals(Seed.PEERTYPE_VIRGIN) ) {
             mySeed.put(Seed.PEERTYPE, mytype);
@@ -322,14 +310,13 @@ public final class Protocol {
         final String error = mySeed.isProper(true);
         if ( error != null ) {
             Network.log.warn("yacyClient.hello mySeed error - not proper: " + error);
-            return -1;
+            return null;
         }
 
         //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
 
         // read the seeds that the peer returned and integrate them into own database
         int i = 0;
-        int count = 0;
         String seedStr;
         Seed s;
         final int connectedBefore = peerActions.sizeConnected();
@@ -337,41 +324,30 @@ public final class Protocol {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
             if ( seedStr.length() > Seed.maxsize ) {
-                Network.log.info("hello/client: rejected contacting seed; too large ("
-                    + seedStr.length()
-                    + " > "
-                    + Seed.maxsize
-                    + ")");
+                Network.log.info("hello/client: rejected contacting seed; too large ("+ seedStr.length() + " > " + Seed.maxsize + ")");
             } else {
                 try {
                     if ( i == 1 ) {
-                        final int p = address.indexOf(':');
-                        if ( p < 0 ) {
-                            return -1;
-                        }
-                        InetAddress ia = Domains.dnsResolve(address.substring(0, p));
+                        String host = Domains.stripToHostName(targetAddress);
+                        InetAddress ia = Domains.dnsResolve(host);
                         if (ia == null) continue;
-                        final String host = ia.getHostAddress();
+                        host = ia.getHostAddress(); // the actual address of the target as we had been successful when contacting them is patched here
                         s = Seed.genRemoteSeed(seedStr, false, host);
                     } else {
                         s = Seed.genRemoteSeed(seedStr, false, null);
                     }
-                    if ( peerActions.peerArrival(s, (i == 1)) ) {
-                        count++;
-                    }
+                    peerActions.peerArrival(s, (i == 1));
                 } catch (final IOException e ) {
-                    Network.log.info("hello/client: rejected contacting seed; bad ("
-                        + e.getMessage()
-                        + ")");
+                    Network.log.info("hello/client: rejected contacting seed; bad (" + e.getMessage() + ")");
                 }
             }
         }
         final int connectedAfter = peerActions.sizeConnected();
 
         // update event tracker
-        EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(mySeed.getName(), otherSeed.getName(), true, connectedAfter - connectedBefore), false);
+        EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(mySeed.getName(), targetHash, true, connectedAfter - connectedBefore), false);
 
-        return count;
+        return result;
     }
 
     public static Seed querySeed(final Seed target, final String seedHash) {

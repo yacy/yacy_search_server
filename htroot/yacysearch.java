@@ -28,7 +28,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -168,10 +167,8 @@ public class yacysearch {
             prop.put("resource", "global");
             prop.put("urlmaskfilter", (post == null) ? ".*" : post.get("urlmaskfilter", ".*"));
             prop.put("prefermaskfilter", (post == null) ? "" : post.get("prefermaskfilter", ""));
-            prop.put("tenant", (post == null) ? "" : post.get("tenant", ""));
             prop.put("indexof", "off");
             prop.put("constraint", "");
-            prop.put("cat", "href");
             prop.put("depth", "0");
             prop.put(
                 "search.verify",
@@ -348,7 +345,7 @@ public class yacysearch {
             }
         }
 
-        if ( !block && (post == null || post.get("cat", "href").equals("href")) ) {
+        if ( !block ) {
             String urlmask = null;
             String tld = null;
             String inlink = null;
@@ -858,7 +855,6 @@ public class yacysearch {
                 prop.put("num-results", "3");
             }
 
-            prop.put("cat", "href");
             prop.put("depth", "0");
 
         }
@@ -871,13 +867,9 @@ public class yacysearch {
         prop.putHTML("prefermaskfilter", prefermask);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("search.verify", snippetFetchStrategy == null
-            ? sb.getConfig("search.verify", "iffresh")
-            : snippetFetchStrategy.toName());
-        prop.put(
-            "search.navigation",
-            (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
-        prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
+        prop.put("search.verify", snippetFetchStrategy == null ? sb.getConfig("search.verify", "iffresh") : snippetFetchStrategy.toName());
+        prop.put("search.navigation", (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
+        prop.putHTML("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
 
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);
@@ -886,8 +878,8 @@ public class yacysearch {
         sb.localSearchLastAccess = System.currentTimeMillis();
 
         // hostname and port (assume locahost if nothing helps)
-        final InetAddress hostIP = Domains.myPublicLocalIP();
-        prop.put("myhost", hostIP != null ? hostIP.getHostAddress() : Domains.LOCALHOST);
+        final String hostIP = sb.peers.mySeed().getIP();
+        prop.put("myhost", hostIP != null ? hostIP : Domains.LOCALHOST);
         prop.put("myport", sb.getConfig("port", "8090"));
 
         // return rewrite properties

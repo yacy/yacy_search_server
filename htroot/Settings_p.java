@@ -108,7 +108,7 @@ public final class Settings_p {
         } else {
             prop.put("use_proxyAccounts", "1"); //checked
             /*s = env.getConfig("proxyAccount", "proxy:void");
-            pos = s.indexOf(":");
+            pos = s.indexOf(':');
             if (pos < 0) {
                 prop.put("proxyuser","proxy");
             } else {

@@ -36,6 +36,7 @@ import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.feed.RSSReader;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -212,7 +213,7 @@ public class Load_RSS_p {
                         final Date date_next_exec = r.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                         prop.put("showscheduledfeeds_list_" + apic + "_pk", UTF8.String(row.getPK()));
                         prop.put("showscheduledfeeds_list_" + apic + "_count", apic);
-                        prop.putXML("showscheduledfeeds_list_" + apic + "_rss", messageurl);
+                        prop.put("showscheduledfeeds_list_" + apic + "_rss", MultiProtocolURL.escape(messageurl).toString());
                         prop.putXML("showscheduledfeeds_list_" + apic + "_title", row.get("title", ""));
                         prop.putXML("showscheduledfeeds_list_" + apic + "_referrer", referrer == null ? "#" : referrer.toNormalform(true));
                         prop.put("showscheduledfeeds_list_" + apic + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
