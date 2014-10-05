@@ -33,14 +33,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.pdfbox.pdmodel.interactive.action.type.PDAction;
+import org.apache.pdfbox.pdmodel.interactive.action.type.PDActionURI;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 import net.yacy.cora.document.id.AnchorURL;
@@ -135,9 +143,10 @@ public class pdfParser extends AbstractParser implements Parser {
         }
         final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
         byte[] contentBytes = new byte[0];
+        Collection<AnchorURL> pdflinks = null;
         try {
             // create a writer for output
-            final PDFTextStripper  stripper = new PDFTextStripper();
+            final PDFTextStripper  stripper = new PDFTextStripper("UTF-8");
 
             stripper.setEndPage(3); // get first 3 pages (always)
             writer.append(stripper.getText(pdfDoc));
@@ -162,10 +171,9 @@ public class pdfParser extends AbstractParser implements Parser {
                 if (t.isAlive()) t.interrupt();
             }
             contentBytes = writer.getBytes(); // get final text before closing writer
+            pdflinks = extractPdfLinks(pdfDoc);
         } catch (final Throwable e) {
-            // close the writer
-            if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (final Throwable ee) {}
+            // close the writer (in finally)
             //throw new Parser.Failure(e.getMessage(), location);
         } finally {
             try {pdfDoc.close();} catch (final Throwable e) {}
@@ -207,13 +215,43 @@ public class pdfParser extends AbstractParser implements Parser {
                 null,
                 0.0f, 0.0f,
                 contentBytes,
-                null,
+                (pdflinks == null || pdflinks.isEmpty()) ? null : pdflinks,
                 null,
                 null,
                 false,
                 docDate)};
     }
-    
+
+    /**
+     * extract clickable links from pdf
+     * @param pdf the document to parse
+     * @return all detected links
+     */
+    private Collection<AnchorURL> extractPdfLinks(final PDDocument pdf) {
+        final Collection<AnchorURL> pdflinks = new ArrayList<AnchorURL>();
+        @SuppressWarnings("unchecked")
+        List<PDPage> allPages = pdf.getDocumentCatalog().getAllPages();
+        for (PDPage page : allPages) {
+            try {
+                List<PDAnnotation> annotations = page.getAnnotations();
+                if (annotations != null) {
+                    for (PDAnnotation pdfannotation : annotations) {
+                        if (pdfannotation instanceof PDAnnotationLink) {
+                            PDAction link = ((PDAnnotationLink)pdfannotation).getAction();
+                            if (link != null && link instanceof PDActionURI) {
+                                PDActionURI pdflinkuri = (PDActionURI) link;
+                                String uristr = pdflinkuri.getURI();
+                                AnchorURL url = new AnchorURL(uristr);
+                                pdflinks.add(url);
+                            }
+                        }
+                    }
+                }
+            } catch (IOException ex) {}
+        }
+        return pdflinks;
+    }
+
     public static void clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes() {
         // thank you very much, PDFParser hackers, this font cache will occupy >80MB RAM for a single pdf and then stays forever
         // AND I DO NOT EVEN NEED A FONT HERE TO PARSE THE TEXT!
