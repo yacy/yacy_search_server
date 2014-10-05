@@ -1278,9 +1278,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                 Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
                                 final String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                                 final String i = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                                if (proctags == null) {
+                                if (proctags == null || proctags.size() == 0) {
                                     // this should not happen since we collected the documents using a process_sxt:[* TO *] term
-                                    ConcurrentLog.warn("CollectionConfiguration", "no process_sxt entry for url " + u);
+                                    ConcurrentLog.warn("CollectionConfiguration", "no process_sxt entry for url " + u + ", id=" + i);
                                     continue;
                                 }
                                 try {
