@@ -239,10 +239,10 @@ public class WorkTables extends Tables {
             try {
                 // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
                 MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
-                ConcurrentLog.info("WorkTables", "executing url: " + url.toString());
+                ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
                 try {
                     client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
-                    l.put(url.toString(), client.getStatusCode());
+                    l.put(url.toNormalform(true), client.getStatusCode());
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                     l.put(url.toString(), -1);
