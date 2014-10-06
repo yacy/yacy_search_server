@@ -173,7 +173,7 @@ public class pdfParser extends AbstractParser implements Parser {
             contentBytes = writer.getBytes(); // get final text before closing writer
             pdflinks = extractPdfLinks(pdfDoc);
         } catch (final Throwable e) {
-            // close the writer (in finally)
+            //close the writer (in finally)
             //throw new Parser.Failure(e.getMessage(), location);
         } finally {
             try {pdfDoc.close();} catch (final Throwable e) {}
