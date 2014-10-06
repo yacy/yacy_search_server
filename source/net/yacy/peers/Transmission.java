@@ -270,7 +270,7 @@ public class Transmission {
             if (newTarget != null) {
                 if (this.dhtTarget.clash(newTarget.getIPs())) {
                     newTarget.setFlagAcceptRemoteIndex(false);
-                    Transmission.this.seeds.update(newTarget.hash, newTarget);
+                    Transmission.this.seeds.updateConnected(newTarget);
                 } else {
                     // we tried an old Address. Don't change anything
                 }

@@ -1078,20 +1078,7 @@ public class Domains {
 
     public static boolean isThisHostIP(final String hostName) {
         if ((hostName == null) || (hostName.isEmpty())) return false;
-
-        boolean isThisHostIP = false;
-        try {
-            final InetAddress clientAddress = Domains.dnsResolve(hostName);
-            if (clientAddress == null) return false;
-            if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-            for (final InetAddress a: myHostAddresses) {
-                if (a.equals(clientAddress)) {
-                    isThisHostIP = true;
-                    break;
-                }
-            }
-        } catch (final Exception e) {}
-        return isThisHostIP;
+        return isThisHostIP(Domains.dnsResolve(hostName));
     }
 
     public static boolean isThisHostIP(final InetAddress clientAddress) {

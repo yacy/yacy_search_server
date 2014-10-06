@@ -455,7 +455,7 @@ public final class SeedDB implements AlternativeDomainNames {
     public long countPassiveRWI() { return this.seedPassiveDB.getLongAcc(Seed.ICOUNT); }
     public long countPotentialURL() { return this.seedPotentialDB.getLongAcc(Seed.LCOUNT); }
     public long countPotentialRWI() { return this.seedPotentialDB.getLongAcc(Seed.ICOUNT); }
-
+    
     public void addConnected(final Seed seed) {
         if (seed.isProper(false) != null) return;
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
@@ -601,21 +601,41 @@ public final class SeedDB implements AlternativeDomainNames {
         return seed;
     }
 
-    public void update(final String hash, final Seed seed) {
-        if (this.mySeed == null) initMySeed();
-        if (hash.equals(this.mySeed.hash)) {
-            this.mySeed = seed;
-            return;
+    public void updateConnected(final Seed seed) {
+        if (seed.isProper(false) != null) return;
+        final ConcurrentMap<String, String> seedPropMap = seed.getMap();
+        synchronized (this) {
+            if (this.seedActiveDB.containsKey(ASCII.getBytes(seed.hash))) try {
+                this.seedActiveDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
+            } catch (final Exception e) {
+                Network.log.severe("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                resetActiveTable();
+            }
         }
-        final byte[] hashb = ASCII.getBytes(hash);
-        Seed s = get(hash, this.seedActiveDB);
-        if (s != null) try { this.seedActiveDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {ConcurrentLog.logException(e);}
-
-        s = get(hash, this.seedPassiveDB);
-        if (s != null) try { this.seedPassiveDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {ConcurrentLog.logException(e);}
-
-        s = get(hash, this.seedPotentialDB);
-        if (s != null) try { this.seedPotentialDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {ConcurrentLog.logException(e);}
+    }
+    public void updateDisconnected(final Seed seed) {
+        if (seed.isProper(false) != null) return;
+        final ConcurrentMap<String, String> seedPropMap = seed.getMap();
+        synchronized (this) {
+            if (this.seedPassiveDB.containsKey(ASCII.getBytes(seed.hash))) try {
+                this.seedPassiveDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
+            } catch (final Exception e) {
+                Network.log.severe("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                resetActiveTable();
+            }
+        }
+    }
+    public void updatePotential(final Seed seed) {
+        if (seed.isProper(false) != null) return;
+        final ConcurrentMap<String, String> seedPropMap = seed.getMap();
+        synchronized (this) {
+            if (this.seedPotentialDB.containsKey(ASCII.getBytes(seed.hash))) try {
+                this.seedPotentialDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
+            } catch (final Exception e) {
+                Network.log.severe("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                resetActiveTable();
+            }
+        }
     }
 
     public Seed lookupByName(String peerName) {
@@ -662,6 +682,20 @@ public final class SeedDB implements AlternativeDomainNames {
         return null;
     }
 
+    public Seed lookupByIPs(
+            final Set<String> peerIPs,
+            final int port,                 /* port may be -1 if not significant */
+            final boolean lookupConnected,
+            final boolean lookupDisconnected,
+            final boolean lookupPotential
+    ) {
+        for (String i: peerIPs) {
+            Seed s = lookupByIP(Domains.dnsResolve(i), port, lookupConnected, lookupDisconnected, lookupPotential);
+            if (s != null) return s;
+        }
+        return null;
+    }
+    
     public Seed lookupByIP(
             final InetAddress peerIP,
             final int port,                 /* port may be -1 if not significant */
