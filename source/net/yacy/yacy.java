@@ -202,7 +202,7 @@ public final class yacy {
             sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
 
             // start gui if wanted
-            if (gui) YaCyApp.start("localhost", (int) sb.getConfigLong("port", 8090));
+            if (gui) YaCyApp.start("localhost", sb.getLocalPort("port", 8090));
 
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
@@ -277,7 +277,7 @@ public final class yacy {
             HTTPClient.setDefaultUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
             // start main threads
-            final int port = sb.getConfigInt("port", 8090);
+            final int port = sb.getLocalPort("port", 8090);
             try {
                 // start http server
             	YaCyHttpServer httpServer;

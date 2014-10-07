@@ -214,7 +214,7 @@ public class CrawlStartScanner_p
                             path += "&crawlingURL=" + url.toNormalform(true);
                             WorkTables.execAPICall(
                                 Domains.LOCALHOST,
-                                (int) sb.getConfigLong("port", 8090),
+                                sb.getLocalPort("port", 8090),
                                 path,
                                 pk,
                                 sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
@@ -261,7 +261,7 @@ public class CrawlStartScanner_p
                                     path += "&crawlingURL=" + urlString;
                                     WorkTables.execAPICall(
                                         Domains.LOCALHOST,
-                                        (int) sb.getConfigLong("port", 8090),
+                                        sb.getLocalPort("port", 8090),
                                         path,
                                         u.hash(),
                                         sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),

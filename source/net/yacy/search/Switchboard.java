@@ -294,7 +294,7 @@ public final class Switchboard extends serverSwitch {
         super(dataPath, appPath, initPath, configPath);
         sb = this;
         // check if port is already occupied
-        final int port = getConfigInt("port", 8090);
+        final int port = getLocalPort("port", 8090);
         if (TimeoutRequest.ping(Domains.LOCALHOST, port, 500)) {
             throw new RuntimeException(
                     "a server is already running on the YaCy port "
@@ -2453,7 +2453,7 @@ public final class Switchboard extends serverSwitch {
         startupAction = false;
         
         // execute api calls
-        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", getLocalPort("port", 8090), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
         for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
             this.log.info("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
         }
@@ -3675,7 +3675,7 @@ public final class Switchboard extends serverSwitch {
     private static long indeSizeCache = 0;
     private static long indexSizeTime = 0;
     public void updateMySeed() {
-        this.peers.mySeed().put(Seed.PORT, getConfig("port", "8090"));
+        this.peers.mySeed().put(Seed.PORT, Integer.toString(getPublicPort("port", 8090)));
 
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;

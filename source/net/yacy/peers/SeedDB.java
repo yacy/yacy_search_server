@@ -958,7 +958,7 @@ public final class SeedDB implements AlternativeDomainNames {
             if (this.mySeed == null) initMySeed();
             if ((seed == this.mySeed) && (!(seed.isOnline()))) {
                 // take local ip instead of external
-                return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getConfig("port", "8090") + ((subdom == null) ? "" : ("/" + subdom));
+                return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getLocalPort("port", 8090) + ((subdom == null) ? "" : ("/" + subdom));
             }
             return seed.getPublicAddress(seed.getIP()) + ((subdom == null) ? "" : ("/" + subdom));
         } else {
