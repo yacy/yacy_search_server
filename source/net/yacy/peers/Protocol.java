@@ -503,7 +503,8 @@ public final class Protocol {
         final long timestamp = System.currentTimeMillis();
         event.addExpectedRemoteReferences(count);
         SearchResult result;
-        String clusteraddress = target.getPublicAddress(target.getIP());
+        String ip = target.getIP();
+        String clusteraddress = target.getPublicAddress(ip);
         if (target.clash(event.peers.mySeed().getIPs())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
         try {
             result =
@@ -525,7 +526,7 @@ public final class Protocol {
                     );
         } catch (final IOException e ) {
             Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-            event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+            event.peers.peerActions.interfaceDeparture(target, ip);
             return -1;
         }
         // computation time
