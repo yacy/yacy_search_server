@@ -3694,15 +3694,10 @@ public final class Switchboard extends serverSwitch {
         }
         mySeed.put(Seed.LCOUNT, Long.toString(indeSizeCache)); // the number of links that the peer has stored (LURL's)
         mySeed.put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
-        mySeed.put(
-            Seed.RCOUNT,
-            Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.GLOBAL))); // the number of links that the peer provides for remote crawling (ZURL's)
+        mySeed.put(Seed.RCOUNT, Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.GLOBAL))); // the number of links that the peer provides for remote crawling (ZURL's)
         mySeed.put(Seed.ICOUNT, Long.toString(this.index.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         mySeed.put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
-        mySeed.put(
-            Seed.CCOUNT,
-            Float.toString(((int) ((this.peers.sizeConnected() + this.peers.sizeDisconnected() + this.peers
-                .sizePotential()) * 60.0f / (uptime + 1.01f)) * 100.0f) / 100.0f)); // the number of clients that the peer connects (as connects/hour)
+        mySeed.put(Seed.CCOUNT, Float.toString(((int) ((this.peers.sizeConnected() + this.peers.sizeDisconnected() + this.peers.sizePotential()) * 60.0f / (uptime + 1.01f)) * 100.0f) / 100.0f)); // the number of clients that the peer connects (as connects/hour)
         mySeed.put(Seed.VERSION, yacyBuildProperties.getLongVersion());
         mySeed.setFlagDirectConnect(true);
         mySeed.setLastSeenUTC();
@@ -3714,7 +3709,8 @@ public final class Switchboard extends serverSwitch {
         // set local ips
         String staticIP = this.getConfig("staticIP", "");
         if (staticIP.length() > 0) mySeed.setIP(staticIP);
-        mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
+        Set<String> publicips = myPublicIPs();
+        if (!mySeed.clash(publicips)) mySeed.setIPs(publicips);
     }
 
     public void loadSeedLists() {
