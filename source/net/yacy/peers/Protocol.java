@@ -503,31 +503,34 @@ public final class Protocol {
 
         final long timestamp = System.currentTimeMillis();
         event.addExpectedRemoteReferences(count);
-        SearchResult result;
-        String clusteraddress = target.getPublicAddress(target.getIP());
-        if (target.clash(event.peers.mySeed().getIPs())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
-        try {
-            result =
-                new SearchResult(
-                    event,
-                    basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
-                    wordhashes,
-                    excludehashes,
-                    "",
-                    language,
-                    contentdom,
-                    count,
-                    time,
-                    maxDistance,
-                    partitions,
-                    target.getHexHash() + ".yacyh",
-                    clusteraddress,
-                    secondarySearchSuperviser
-                    );
-        } catch (final IOException e ) {
-            Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-            event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
-            return -1;
+        SearchResult result = null;
+        for (String ip: target.getIPs()) {
+            if (ip.indexOf(':') >= 0) System.out.println("Search target: IPv6: " + ip);
+            String clusteraddress = target.getPublicAddress(ip);
+            if (target.clash(event.peers.mySeed().getIPs())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
+            try {
+                result =
+                    new SearchResult(
+                        event,
+                        basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
+                        wordhashes,
+                        excludehashes,
+                        "",
+                        language,
+                        contentdom,
+                        count,
+                        time,
+                        maxDistance,
+                        partitions,
+                        target.getHexHash() + ".yacyh",
+                        clusteraddress,
+                        secondarySearchSuperviser
+                        );
+            } catch (final IOException e ) {
+                Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
+                event.peers.peerActions.interfaceDeparture(target, ip);
+                return -1;
+            }
         }
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;

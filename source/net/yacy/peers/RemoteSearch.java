@@ -174,7 +174,6 @@ public class RemoteSearch extends Thread {
             dhtPeers = DHTSelection.selectClusterPeers(event.peers, clusterselection);
         } else {
             if (event.query.getQueryGoal().isCatchall() || event.query.getQueryGoal().getIncludeHashes().has(Segment.catchallHash)) {
-               
                 if (event.query.modifier.sitehost != null && event.query.modifier.sitehost.length() > 0) {
                     // select peers according to host name, not the query goal
                     String newGoal = Domains.getSmartSLD(event.query.modifier.sitehost);
@@ -186,29 +185,29 @@ public class RemoteSearch extends Thread {
                             random);
                 } else {
                     // select just random peers
-                    dhtPeers = DHTSelection.seedsByAge(event.peers, false, count).values();
+                    dhtPeers = DHTSelection.seedsByAge(event.peers, false, event.peers.redundancy()).values();
                 }
-            }
-            
-            dhtPeers = DHTSelection.selectDHTSearchTargets(
-                            event.peers,
-                            event.query.getQueryGoal().getIncludeHashes(),
-                            minage,
-                            redundancy, event.peers.redundancy(),
-                            random);
-            // this set of peers may be too large and consume too many threads if more than one word is searched.
-            // to prevent overloading, we do a subset collection based on random to prevent the death of the own peer
-            // and to do a distributed load-balancing on the target peers
-            long targetSize = 1 + redundancy * event.peers.scheme.verticalPartitions(); // this is the maximum for one word plus one
-            if (dhtPeers.size() > targetSize) {
-                ArrayList<Seed> pa = new ArrayList<Seed>(dhtPeers.size());
-                pa.addAll(dhtPeers);
-                dhtPeers.clear();
-                for (int i = 0; i < targetSize; i++) dhtPeers.add(pa.remove(random.nextInt(pa.size())));
+            } else {
+                dhtPeers = DHTSelection.selectDHTSearchTargets(
+                                event.peers,
+                                event.query.getQueryGoal().getIncludeHashes(),
+                                minage,
+                                redundancy, event.peers.redundancy(),
+                                random);
+                // this set of peers may be too large and consume too many threads if more than one word is searched.
+                // to prevent overloading, we do a subset collection based on random to prevent the death of the own peer
+                // and to do a distributed load-balancing on the target peers
+                long targetSize = 1 + redundancy * event.peers.scheme.verticalPartitions(); // this is the maximum for one word plus one
+                if (dhtPeers.size() > targetSize) {
+                    ArrayList<Seed> pa = new ArrayList<Seed>(dhtPeers.size());
+                    pa.addAll(dhtPeers);
+                    dhtPeers.clear();
+                    for (int i = 0; i < targetSize; i++) dhtPeers.add(pa.remove(random.nextInt(pa.size())));
+                }
             }
         }
         if (dhtPeers == null) dhtPeers = new HashSet<Seed>();
-        
+
         // select node targets
         final Collection<Seed> robinsonPeers = DHTSelection.selectExtraTargets(event.peers, event.query.getQueryGoal().getIncludeHashes(), minage, dhtPeers, robinsoncount, random);
         

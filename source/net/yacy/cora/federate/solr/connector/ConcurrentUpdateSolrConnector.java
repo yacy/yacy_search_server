@@ -123,7 +123,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     
     @Override
     public int bufferSize() {
-        return this.updateCapacity;
+        return this.docBuffer.size();
     }
 
     @Override
