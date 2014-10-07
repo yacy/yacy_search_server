@@ -1076,26 +1076,37 @@ public class Domains {
         return localHostAddresses;
     }
 
+    /**
+     * this method is deprecated in some way because it is not applicable on IPv6
+     * TODO: remove / replace
+     * @param hostName
+     * @return
+     */
     public static boolean isThisHostIP(final String hostName) {
         if ((hostName == null) || (hostName.isEmpty())) return false;
+        if (hostName.indexOf(':') > 0) return false; // IPv6 addresses do not count because they are always host IPs
         return isThisHostIP(Domains.dnsResolve(hostName));
+    }
+
+    /**
+     * this method is deprecated in some way because it is not applicable on IPv6
+     * TODO: remove / replace
+     * @param hostName
+     * @return
+     */
+    public static boolean isThisHostIP(final Set<String> hostNames) {
+        if ((hostNames == null) || (hostNames.isEmpty())) return false;
+        for (String hostName: hostNames) {
+            if (hostName.indexOf(':') > 0) return false; // IPv6 addresses do not count because they are always host IPs
+            if (isThisHostIP(Domains.dnsResolve(hostName))) return true;
+        }
+        return false;
     }
 
     public static boolean isThisHostIP(final InetAddress clientAddress) {
         if (clientAddress == null) return false;
-
-        boolean isThisHostIP = false;
-        try {
-            if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-
-            for (final InetAddress a: myHostAddresses) {
-                if (a.equals(clientAddress)) {
-                    isThisHostIP = true;
-                    break;
-                }
-            }
-        } catch (final Exception e) {}
-        return isThisHostIP;
+        if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
+        return myHostAddresses.contains(clientAddress);
     }
 
     public static int getDomainID(final String host, final InetAddress hostaddress) {

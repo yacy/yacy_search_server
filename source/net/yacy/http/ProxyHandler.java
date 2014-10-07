@@ -246,8 +246,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
      * adds specific header elements for the connection of the internal
      * httpclient to the remote server according to local config
      *
-     * @param header header f��r http client (already preset with headers from
-     * original ServletRequest
+     * @param header header for http client (already preset with headers from
+     * original ServletRequest)
      * @param origServletRequest original request/header
      */
     private void setProxyHeaderForClient(final HttpServletRequest origServletRequest, final HeaderFramework header) {
