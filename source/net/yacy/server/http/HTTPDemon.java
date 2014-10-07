@@ -44,7 +44,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -163,13 +162,13 @@ public final class HTTPDemon {
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);
             if (hostAddress == null) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", switchboard.getConfig("port", "8090"));
+                tp.put("port", switchboard.getLocalPort("port", 8090));
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", switchboard.getConfig("port", "8090"));
+                tp.put("port", switchboard.getLocalPort("port", 8090));
             } else {
                 tp.put("host", switchboard.myPublicIP());
-                tp.put("port", switchboard.getConfig("port", "8090"));
+                tp.put("port", switchboard.getPublicPort("port", 8090));
             }
 
             tp.put("peerName", (switchboard.peers == null) ? "" : switchboard.peers.myName());

@@ -217,7 +217,9 @@ public class Network {
                 final Map<String, String> response = Protocol.hello(mySeed, sb.peers.peerActions, challengeAddress, peer.hash);
 
                 if (response == null) {
-                    
+                    Seed peerd = sb.peers.get(peer.hash);
+                    if (peerd != null) peer = peerd;
+                    sb.peers.peerActions.interfaceDeparture(peer, challengeIP);
                     prop.put("table_comment",1);
                     prop.put("table_comment_status", "publish: no response from peer '" + peer.getName() + "/" + post.get("peerHash") + "' from <a href=\"http://" + challengeAddress + "\" target=\"_blank\">" + challengeAddress + "</a>");
                 } else {

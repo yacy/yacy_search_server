@@ -68,7 +68,7 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            final Map<String, String> result = Protocol.permissionMessage(sb.peers, hash);
+            final Map<String, String> result = Protocol.permissionMessage(sb.peers.targetAddress(hash), hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
             Seed targetPeer = null;
@@ -106,7 +106,7 @@ public class MessageSend_p {
                     prop.putXML("mode_permission_message", message);
                     prop.putHTML("mode_permission_hash", hash);
                     if (post.containsKey("preview")) {
-                        prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_permission_previewmessage", message);
+                        prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_permission_previewmessage", message);
 
                     }
 

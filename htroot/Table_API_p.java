@@ -206,7 +206,7 @@ public class Table_API_p {
             }
 
             // now call the api URLs and store the result status
-            final Map<String, Integer> l = sb.tables.execAPICalls(Domains.LOCALHOST, (int) sb.getConfigLong("port", 8090), pks, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+            final Map<String, Integer> l = sb.tables.execAPICalls(Domains.LOCALHOST, sb.getLocalPort("port", 8090), pks, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
 
             // construct result table
             prop.put("showexec", l.isEmpty() ? 0 : 1);
@@ -297,7 +297,7 @@ public class Table_API_p {
                 } else {
                     prop.put("showtable_list_" + count + "_isCrawlerStart", 0);
                 }
-                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8090") + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
+                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getPublicPort("port", 8090) + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
                 prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
                 prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());
                 prop.put("showtable_list_" + count + "_scheduler_query", query.pattern());

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSMessage;
@@ -37,6 +38,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
+import net.yacy.gui.Audio;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
@@ -174,6 +176,8 @@ public final class transferURL {
             // return rewrite properties
             Network.log.info("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
+            if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.dhtin.play();
+            
             if (doublecheck > 0) {
             	Network.log.warn("Received " + doublecheck + "/" + urlc + " double URLs from peer " + otherPeerName); // double should not happen because we demanded only documents which we do not have yet
             	doublevalues = Integer.toString(doublecheck);

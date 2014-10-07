@@ -332,22 +332,22 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         Set<String> ip6s = MapTools.string2set(ip6, "|");
         
         if (ip6s == null || ip6s.size() == 0) {
-            if (ipx != null && !ipx.isEmpty()) return chopZoneID(ipx);
+            if (ipx != null && !ipx.isEmpty()) return Domains.chopZoneID(ipx);
         }
         if (ip6s != null && ip6s.size() == 1) {
             // We prefer IPv6
-            for (String s: ip6s) if (s.length() > 0) return chopZoneID(s);
-            if (ipx != null && !ipx.isEmpty()) return chopZoneID(ipx);
+            for (String s: ip6s) if (s.length() > 0) return Domains.chopZoneID(s);
+            if (ipx != null && !ipx.isEmpty()) return Domains.chopZoneID(ipx);
         }
         
         // if we have more than one IPv6, then chances are high that one of them do not work.
         // in that case we prefer the IPv4
-        if (ipx != null && !ipx.isEmpty()) return chopZoneID(ipx);
-        if (ip6s != null) for (String s: ip6s) if (s.length() > 0) return chopZoneID(s);
+        if (ipx != null && !ipx.isEmpty()) return Domains.chopZoneID(ipx);
+        if (ip6s != null) for (String s: ip6s) if (s.length() > 0) return Domains.chopZoneID(s);
         
         // in case that we don't have any address using the dna (i.e. a fresh peer), then use all locally known addresses
-        for (InetAddress i: Domains.myPublicIPv4()) return chopZoneID(i.getHostAddress());
-        for (InetAddress i: Domains.myPublicIPv6()) return chopZoneID(i.getHostAddress());
+        for (InetAddress i: Domains.myPublicIPv4()) return Domains.chopZoneID(i.getHostAddress());
+        for (InetAddress i: Domains.myPublicIPv6()) return Domains.chopZoneID(i.getHostAddress());
 
         // final chance    
         return Domains.LOCALHOST;
@@ -367,33 +367,82 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         Set<String> ip6s = MapTools.string2set(ip6, "|");
         
         if (ip6s == null || ip6s.size() == 0) {
-            if (ipx != null && !ipx.isEmpty()) h.add(chopZoneID(ipx));
+            if (ipx != null && !ipx.isEmpty()) h.add(Domains.chopZoneID(ipx));
         } else if (ip6s != null && ip6s.size() == 1) {
             // We add IPv6 first because then those addresses appear first
             // in the LinkedHashSet and are preferred by methods using only the first one.
-            for (String s: ip6s) if (s.length() > 0) h.add(chopZoneID(s));
-            if (ipx != null && !ipx.isEmpty()) h.add(chopZoneID(ipx));
+            for (String s: ip6s) if (s.length() > 0) h.add(Domains.chopZoneID(s));
+            if (ipx != null && !ipx.isEmpty()) h.add(Domains.chopZoneID(ipx));
         } else {
             // if we have more than one IPv6, then chances are high that one of them do not work.
             // in that case we prefer the IPv4
-            if (ipx != null && !ipx.isEmpty()) h.add(chopZoneID(ipx));
-            if (ip6s != null) for (String s: ip6s) if (s.length() > 0) h.add(chopZoneID(s));
+            if (ipx != null && !ipx.isEmpty()) h.add(Domains.chopZoneID(ipx));
+            if (ip6s != null) for (String s: ip6s) if (s.length() > 0) h.add(Domains.chopZoneID(s));
         }
         
         // in case that we don't have any address using the dna (i.e. a fresh peer), then use all locally known addresses
         if (h.size() == 0) {
-            for (InetAddress i: Domains.myPublicIPv4()) h.add(chopZoneID(i.getHostAddress()));
-            for (InetAddress i: Domains.myPublicIPv6()) h.add(chopZoneID(i.getHostAddress()));
+            for (InetAddress i: Domains.myPublicIPv4()) h.add(Domains.chopZoneID(i.getHostAddress()));
+            for (InetAddress i: Domains.myPublicIPv6()) h.add(Domains.chopZoneID(i.getHostAddress()));
             h.add(Domains.LOCALHOST);
         }
         return h;
     }
     
-    private String chopZoneID(String ip) {
-        int i = ip.indexOf('%');
-        return i < 0 ? ip : ip.substring(0, i);
+    /**
+     * count the number of IPs assgined to that peer
+     * @return the number of peers in field IP (should be 1 all the time) plus the number of IPs in the IP6 field.
+     */
+    public final int countIPs() {
+        final String ipx = this.dna.get(Seed.IP); // may contain both, IPv4 or IPv6
+        final String ip6 = this.dna.get(Seed.IP6);
+        Set<String> ip6s = MapTools.string2set(ip6, "|");
+        
+        if (ip6s == null || ip6s.size() == 0) {
+            return (ipx == null || ipx.isEmpty()) ? 0 : 1;
+        }
+        return (ipx == null || ipx.isEmpty()) ? ip6s.size() : ip6s.size() + 1;
+    }
+    
+    /**
+     * remove the given IP from the seed. Be careful not to remove the last IP; maybe call countIPs before calling the method.
+     * @param ip
+     * @return true if the IP was in the seed and had been removed. If the peer did not change, this returns false.
+     */
+    public final boolean removeIP(String ip) {
+        String ipx = Domains.chopZoneID(this.dna.get(Seed.IP)); // may contain both, IPv4 or IPv6
+        final String ip6 = this.dna.get(Seed.IP6);
+        Set<String> ip6s = MapTools.string2set(ip6, "|");
+        Iterator<String> i =  ip6s.iterator();
+        while (i.hasNext()) {String x = i.next(); if (x.indexOf('%') >= 0) i.remove();}
+                
+        if (ip6s == null || ip6s.size() == 0) {
+            if (ipx != null && !ipx.isEmpty() && ipx.equals(ip)) {
+                this.dna.put(Seed.IP, ""); // DON'T DO THAT! (the line is correct but you should not remove the last IP
+                return true;
+            }
+            return false;
+        }
+        if (ip6s != null && ip6s.contains(ip)) {
+            ip6s.remove(ip);
+            this.dna.put(Seed.IP6, MapTools.set2string(ip6s, "|", false));
+            return true;
+        }
+        if (ipx != null && !ipx.isEmpty() && ipx.equals(ip)) {
+            ipx = ip6s.iterator().next();
+            this.dna.put(Seed.IP, Domains.chopZoneID(ipx));
+            ip6s.remove(ipx);
+            this.dna.put(Seed.IP6, MapTools.set2string(ip6s, "|", false));
+            return true;
+        }
+        return false;
     }
 
+    /**
+     * clash tests if any of the given ips are also contained in the Seeds ip set
+     * @param ips
+     * @return true if any of the given IPs are identical to the Seeds IP set
+     */
     public boolean clash(Set<String> ips) {
         Set<String> myIPs = getIPs();
         for (String s: ips) {
@@ -509,7 +558,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * ATTENTION: if the given IP is IPv6, then after the call that IP is the only one assigned to the peer!
      * @param ip
      */
-    public final void setIP(final String ip) {
+    public final void setIP(String ip) {
+        ip = Domains.chopZoneID(ip);
         if (!isProperIP(ip)) return;
         String oldIP = this.dna.get(Seed.IP);
         String oldIP6 = this.dna.get(Seed.IP6);
@@ -544,7 +594,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 this.dna.put(Seed.IP6, MapTools.set2string(ipv6, "|", false));
             }  
         } else {
-            this.dna.put(Seed.IP, ipv4.iterator().next());
+            this.dna.put(Seed.IP, Domains.chopZoneID(ipv4.iterator().next()));
             this.dna.put(Seed.IP6, MapTools.set2string(ipv6, "|", false));
         }
     }
@@ -1107,9 +1157,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final Seed newSeed = new Seed(hashs);
 
         // now calculate other information about the host
-        final long port = Switchboard.getSwitchboard().getConfigLong("port", 8090); //get port from config
+        final int port = Switchboard.getSwitchboard().getPublicPort("port", 8090); //get port from config
         newSeed.dna.put(Seed.NAME, defaultPeerName() );
-        newSeed.dna.put(Seed.PORT, Long.toString(port));
+        newSeed.dna.put(Seed.PORT, Integer.toString(port));
         return newSeed;
     }
 

@@ -78,7 +78,7 @@ public class Domains {
     private static final Set<String> ccSLD_TLD = new HashSet<String>();
     private static final String PRESENT = "";
     private static final String LOCALHOST_IPv4_PATTERN = "(127\\..*)";
-    private static final String LOCALHOST_IPv6_PATTERN = "(\\[?fe80\\:\\:(/.*|\\z))|(\\[?0\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)|(\\[?\\:\\:1(/.*|\\z))";
+    private static final String LOCALHOST_IPv6_PATTERN = "((\\[?fe80\\:.*)|(\\[?0\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)|(\\[?\\:\\:1))(/.*|%.*|\\z)";
     private static final String INTRANET_IPv4_PATTERN = "(10\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)";
     private static final String INTRANET_IPv6_PATTERN = "(\\[?(fc|fd).*\\:.*)";
     private static final Pattern LOCALHOST_PATTERNS = Pattern.compile("(localhost)|" + LOCALHOST_IPv4_PATTERN + "|" + LOCALHOST_IPv6_PATTERN, Pattern.CASE_INSENSITIVE);
@@ -180,7 +180,7 @@ public class Domains {
                         if (isAnyLocalAddress || isLinkLocalAddress || isLoopbackAddress || isSiteLocalAddress) {
                             ConcurrentLog.info("Domain Init", "local host address: " + hostaddress + " (local)");
                             localHostAddresses.add(a);
-                            if (hostname != null) {localHostNames.add(hostname); localHostNames.add(hostaddress);}
+                            if (hostname != null) {localHostNames.add(chopZoneID(hostname)); localHostNames.add(chopZoneID(hostaddress));}
                         } else {
                             ConcurrentLog.info("Domain Init", "local host address: " + hostaddress + " (public)");
                             if (a instanceof Inet4Address) {
@@ -1078,20 +1078,7 @@ public class Domains {
 
     public static boolean isThisHostIP(final String hostName) {
         if ((hostName == null) || (hostName.isEmpty())) return false;
-
-        boolean isThisHostIP = false;
-        try {
-            final InetAddress clientAddress = Domains.dnsResolve(hostName);
-            if (clientAddress == null) return false;
-            if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-            for (final InetAddress a: myHostAddresses) {
-                if (a.equals(clientAddress)) {
-                    isThisHostIP = true;
-                    break;
-                }
-            }
-        } catch (final Exception e) {}
-        return isThisHostIP;
+        return isThisHostIP(Domains.dnsResolve(hostName));
     }
 
     public static boolean isThisHostIP(final InetAddress clientAddress) {
@@ -1120,15 +1107,20 @@ public class Domains {
         return (isLocal(host, hostaddress)) ? TLD_Local_ID : TLD_Generic_ID;
     }
 
+    public static String chopZoneID(String ip) {
+        int i = ip.indexOf('%');
+        return i < 0 ? ip : ip.substring(0, i);
+    }
+    
     /**
      * check the host ip string against localhost names
      * @param host
      * @return true if the host from the string is the localhost
      */
-    public static boolean isLocalhost(final String host) {
-        return host == null || // filesystems do not have host names
-               LOCALHOST_PATTERNS.matcher(host).matches() ||
-               localHostNames.contains(host);
+    public static boolean isLocalhost(String host) {
+        if (host == null) return true; // filesystems do not have host names
+        host = chopZoneID(host);
+        return LOCALHOST_PATTERNS.matcher(host).matches() || localHostNames.contains(host);
     }
 
     /**

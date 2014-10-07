@@ -28,7 +28,6 @@ import java.util.Map;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSMessage;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.operation.yacyVersion;
@@ -83,7 +82,7 @@ public class PeerActions {
             return false;
         }
 
-        final Seed doubleSeed = this.seedDB.lookupByIP(Domains.dnsResolve(seed.getIP()), seed.getPort(), true, false, false);
+        final Seed doubleSeed = this.seedDB.lookupByIPs(seed.getIPs(), seed.getPort(), true, false, false);
         if ((doubleSeed != null) && (doubleSeed.getPort() == seed.getPort()) && (!(doubleSeed.hash.equals(seed.hash)))) {
             // a user frauds with his peer different peer hashes
             if (Network.log.isFine()) Network.log.fine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
@@ -179,7 +178,7 @@ public class PeerActions {
         }
 
         // the seed is new
-        if ((this.seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
+        if ((this.seedDB.mySeedIsDefined()) && (seed.clash(this.seedDB.mySeed().getIPs()))) {
             // seed from the same IP as the calling client: can be
             // the case if there runs another one over a NAT
             if (Network.log.isFine()) Network.log.fine("connect: saved NEW seed (myself IP) " + seed.getIPs());
@@ -202,6 +201,44 @@ public class PeerActions {
         return res;
     }
 
+    /**
+     * If any of the peer2peer communication attempts fail, then remove the tested IP from the peer by calling this method.
+     * if the given IP is the only one which is remaining, then the IP is NOT removed from the peer but the peer is removed from the
+     * active list of peers instead. That means when a peer arrives in the deactivated peer list, then it has at least one IP left
+     * which should be actually the latest IP where the peer was accessible.
+     * @param peer
+     * @param ip
+     */
+    public void interfaceDeparture(final Seed peer, String ip) {
+        if (peer == null) return;
+        if (Network.log.isFine()) Network.log.fine("connect: no contact to a interface from " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + ip);
+        synchronized (this.seedDB) {
+            if (this.seedDB.hasConnected(ASCII.getBytes(peer.hash))) {
+                if (peer.countIPs() > 1) {
+                    if (peer.removeIP(ip)) {
+                        this.seedDB.updateConnected(peer);
+                    } else {
+                        // this is bad because the IP does not appear at all in the seed. We consider the seed as poisoned and remove it from the active peers
+                        this.seedDB.addDisconnected(peer);
+                    }
+                } else {
+                    // disconnect the peer anyway
+                    if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
+                    peer.put(Seed.DCT, Long.toString(System.currentTimeMillis()));
+                    this.seedDB.addDisconnected(peer);
+                }
+            }
+        }
+        EventChannel.channels(EventChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " interface not available: " + ip, "", ""));
+    }
+    
+    /**
+     * PeerDeparture marks a peers as not available. Because with IPv6 we have more than one IP, we first mark single IPs as not available instead of marking the whole peer.
+     * Therefore this method is deprecated. Please use interfaceDeparture instead.
+     * @param peer
+     * @param cause
+     */
+    @Deprecated
     public void peerDeparture(final Seed peer, final String cause) {
         if (peer == null) return;
         // we do this if we did not get contact with the other peer

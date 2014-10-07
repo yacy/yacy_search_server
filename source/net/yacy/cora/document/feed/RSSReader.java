@@ -30,7 +30,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSMessage.Token;
 
 import org.xml.sax.Attributes;
@@ -100,11 +99,8 @@ public class RSSReader extends DefaultHandler {
     public static RSSReader parse(final int maxsize, final byte[] a) throws IOException {
 
         // check integrity of array
-        if ((a == null) || (a.length == 0)) {
-            throw new IOException("response=null");
-        }
-        if (a.length < 100) {
-            throw new IOException("response to short=" + UTF8.String(a));
+        if (a == null || a.length < 100) {
+            return null; // returning null instead of throwing an IOException is expected in most calling methods where a fail is checked against null
         }
 
         // make input stream

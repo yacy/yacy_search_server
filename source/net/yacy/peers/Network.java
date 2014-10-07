@@ -185,7 +185,7 @@ public class Network
                 + this.sb.peers.sizeConnected()
                 + " new peer(s)");
         }
-        publishMySeed(false);
+        publishMySeed();
     }
 
     // use our own formatter to prevent concurrency locks with other processes
@@ -220,77 +220,36 @@ public class Network
             try {
                 for (String ip: this.seed.getIPs()) {
                     this.result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed.getPublicAddress(ip), this.seed.hash);
-                    if (this.result != null) break;
-                }
-                if ( this.result == null ) {
-                    // no or wrong response, delete that address
-                    final String cause = "peer ping to peer resulted in error response (added < 0)";
-                    log.info("publish: disconnected "
-                        + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
-                        + " peer '"
-                        + this.seed.getName()
-                        + "' from "
-                        + this.seed.getIPs()
-                        + ": "
-                        + cause);
-                    Network.this.sb.peers.peerActions.peerDeparture(this.seed, cause);
-                } else {
+                    if ( this.result == null ) {
+                        // no or wrong response, delete that address
+                        final String cause = "peer ping to peer resulted in error response (added < 0)";
+                        log.info("publish: disconnected " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getIPs() + ": " + cause);
+                        Network.this.sb.peers.peerActions.interfaceDeparture(this.seed, ip);
+                        continue;
+                    }
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
-                    log.info("publish: handshaked "
-                        + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
-                        + " peer '"
-                        + this.seed.getName()
-                        + "' at "
-                        + this.seed.getIPs());
+                    log.info("publish: handshaked "+ this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs());
                     // check if seed's lastSeen has been updated
                     final Seed newSeed = Network.this.sb.peers.getConnected(this.seed.hash);
                     if ( newSeed != null ) {
                         if ( !newSeed.isOnline() ) {
                             if ( log.isFine() ) {
-                                log.fine("publish: recently handshaked "
-                                    + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
-                                    + " peer '"
-                                    + this.seed.getName()
-                                    + "' at "
-                                    + this.seed.getIPs()
-                                    + " is not online."
-                                    + " Removing Peer from connected");
+                                log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " is not online." + " Removing Peer from connected");
                             }
-                            Network.this.sb.peers.peerActions.peerDeparture(newSeed, "peer not online");
+                            Network.this.sb.peers.peerActions.interfaceDeparture(newSeed, ip);
+                            continue;
                         } else if ( newSeed.getLastSeenUTC() < (System.currentTimeMillis() - 10000) ) {
                             // update last seed date
                             if ( newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC() ) {
                                 if ( log.isFine() ) {
-                                    log
-                                        .fine("publish: recently handshaked "
-                                            + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
-                                            + " peer '"
-                                            + this.seed.getName()
-                                            + "' at "
-                                            + this.seed.getIPs()
-                                            + " with old LastSeen: '"
-                                            + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed
-                                                .getLastSeenUTC())) + "'");
+                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "'");
                                 }
                                 newSeed.setLastSeenUTC();
                                 Network.this.sb.peers.peerActions.peerArrival(newSeed, true);
                             } else {
                                 if ( log.isFine() ) {
-                                    log
-                                        .fine("publish: recently handshaked "
-                                            + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
-                                            + " peer '"
-                                            + this.seed.getName()
-                                            + "' at "
-                                            + this.seed.getIPs()
-                                            + " with old LastSeen: '"
-                                            + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed
-                                                .getLastSeenUTC()))
-                                            + "', this is more recent: '"
-                                            + my_SHORT_SECOND_FORMATTER.format(new Date(this.seed
-                                                .getLastSeenUTC()))
-                                            + "'");
+                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" + my_SHORT_SECOND_FORMATTER.format(new Date(this.seed.getLastSeenUTC())) + "'");
                                 }
                                 this.seed.setLastSeenUTC();
                                 Network.this.sb.peers.peerActions.peerArrival(this.seed, true);
@@ -298,13 +257,7 @@ public class Network
                         }
                     } else {
                         if ( log.isFine() ) {
-                            log.fine("publish: recently handshaked "
-                                + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
-                                + " peer '"
-                                + this.seed.getName()
-                                + "' at "
-                                + this.seed.getIPs()
-                                + " not in connectedDB");
+                            log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " not in connectedDB");
                         }
                     }
                 }
@@ -320,7 +273,7 @@ public class Network
         }
     }
 
-    private boolean publishMySeed(final boolean force) {
+    private boolean publishMySeed() {
         try {
             // call this after the httpd was started up
 
@@ -412,12 +365,13 @@ public class Network
                 }
                 i++;
 
-                final String address = seed.getPublicAddress(seed.getIP());
+                String ip = seed.getIP();
+                final String address = seed.getPublicAddress(ip);
                 if ( log.isFine() ) log.fine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
                 final String seederror = seed.isProper(false);
                 if ( (address == null) || (seederror != null) ) {
                     // we don't like that address, delete it
-                    this.sb.peers.peerActions.peerDeparture(seed, "peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
+                    this.sb.peers.peerActions.interfaceDeparture(seed, ip);
                     sync.acquire();
                 } else {
                     // starting a new publisher thread
