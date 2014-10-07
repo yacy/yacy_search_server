@@ -110,21 +110,33 @@ public class Network {
                 prop.putHTML("table_my-name", seed.get(Seed.NAME, "-") );
                 prop.put("table_my-hash", seed.hash );
                 prop.put("table_my-ssl", sb.peers.mySeed().getFlagSSLAvailable() ? 1 : 0);
-                if (sb.peers.mySeed().isVirgin()) {
+                if (seed.isVirgin()) {
                     prop.put("table_my-info", 0);
-                } else if(sb.peers.mySeed().isJunior()) {
+                } else if (seed.isJunior()) {
                     prop.put("table_my-info", 1);
                     accPotLinks += LCount;
                     accPotWords += ICount;
-                } else if(sb.peers.mySeed().isSenior()) {
+                } else if (seed.isSenior()) {
                     prop.put("table_my-info", 2);
                     accActLinks += LCount;
                     accActWords += ICount;
-                } else if(sb.peers.mySeed().isPrincipal()) {
+                } else if (seed.isPrincipal()) {
                     prop.put("table_my-info", 3);
                     accActLinks += LCount;
                     accActWords += ICount;
                 }
+                String port = seed.get(Seed.PORT, "-");
+                Set<String> ips = seed.getIPs();
+                int ipsc = 0;
+                for (String s: ips) {
+                    prop.put("table_ips_" + ipsc + "_nodestate", seed.getFlagRootNode() ? 1 : 0);
+                    prop.put("table_ips_" + ipsc + "_c", 0);
+                    prop.putHTML("table_ips_" + ipsc + "_c_hash", seed.hash);
+                    prop.putHTML("table_ips_" + ipsc + "_c_ip", s);
+                    prop.putHTML("table_ips_" + ipsc + "_c_port", port);
+                    prop.put("table_ips_" + ipsc++ + "_c_ipv6", s.indexOf(':') >= 0 ? 1 : 0);
+                }
+                prop.put("table_ips", ipsc);
                 prop.put("table_my-acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
                 prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
                 prop.put("table_my-nodestate", seed.getFlagRootNode() ? 1 : 0);
