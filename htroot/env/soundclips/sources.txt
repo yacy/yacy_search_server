@@ -1,14 +1,6 @@
 The following sounds had been taken from https://www.freesound.org and renamed from their original name.
 Please see license, author and original download page below:
 
-atmocrawling.wav
-(CC BY 3.0) by cydon, https://www.freesound.org/people/cydon/
-https://www.freesound.org/people/cydon/sounds/126178/
-
-atmomonitor.wav
-(CC0) by Diboz, https://www.freesound.org/people/Diboz/
-https://www.freesound.org/people/Diboz/sounds/211683/
-
 dhtin.wav (converted from mp3)
 (CC0) by Kastenfrosch, https://www.freesound.org/people/Kastenfrosch/
 https://www.freesound.org/people/Kastenfrosch/sounds/113986/

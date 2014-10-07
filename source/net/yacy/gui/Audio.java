@@ -45,8 +45,6 @@ public class Audio {
     
     public static enum Soundclip {
         
-        atmocrawling("atmocrawling.wav"),
-        atmomonitor("atmomonitor.wav"),
         dhtin("dhtin.wav"),
         newdoc("newdoc.wav"),
         remotesearch("remotesearch.wav");
@@ -184,9 +182,9 @@ public class Audio {
             Soundclip.dhtin.play();Thread.sleep(500);
             Soundclip.dhtin.play();Thread.sleep(500);
             Soundclip.dhtin.play();Thread.sleep(500);
-            Soundclip.atmocrawling.start(); Thread.sleep(1000); Soundclip.atmocrawling.stop(); Thread.sleep(1000);
-            Soundclip.atmocrawling.start(); Thread.sleep(1000); Soundclip.atmocrawling.stop(); Thread.sleep(1000);
-            Soundclip.atmocrawling.start(); Thread.sleep(1000); Soundclip.atmocrawling.stop(); Thread.sleep(1000);
+            Soundclip.remotesearch.start(); Thread.sleep(1000); Soundclip.remotesearch.stop(); Thread.sleep(1000);
+            Soundclip.remotesearch.start(); Thread.sleep(1000); Soundclip.remotesearch.stop(); Thread.sleep(1000);
+            Soundclip.remotesearch.start(); Thread.sleep(1000); Soundclip.remotesearch.stop(); Thread.sleep(1000);
         } catch(Exception ex) {
             System.out.println("Error playing sound: " + ex.getMessage());
             ex.printStackTrace();
