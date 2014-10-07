@@ -39,7 +39,7 @@ public class Load_MediawikiWiki {
 
         // define visible variables
         String a = sb.peers.mySeed().getPublicAddress();
-        if (a == null) a = "localhost:" + sb.getConfig("port", "8090");
+        if (a == null) a = "localhost:" + sb.getLocalPort("port", 8090);
         final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
         final String repository = "http://" + a + "/repository/";
         prop.put("starturl", (intranet) ? repository : "http://");

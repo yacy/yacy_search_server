@@ -91,7 +91,7 @@ public class yacysearch_location {
 
             if (query.length() > 0 && (metatag || search_title || search_publisher || search_creator || search_subject)) try {
                 // get a queue of search results
-                final String rssSearchServiceURL = "http://127.0.0.1:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
+                final String rssSearchServiceURL = "http://127.0.0.1:" + sb.getLocalPort("port", 8090) + "/yacysearch.rss";
                 final BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
                 SRURSSConnector.searchSRURSS(results, rssSearchServiceURL, lon == 0.0d && lat == 0.0d ? query : query + " /radius/" + lat + "/" + lon + "/" + radius, maximumTime, Integer.MAX_VALUE, null, false, ClientIdentification.yacyInternetCrawlerAgent);
 
@@ -121,7 +121,7 @@ public class yacysearch_location {
             String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
             if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
             String hostName = header.get("Host", Domains.LOCALHOST);
-            if (hostName.indexOf(':',0) == -1) hostName += ":" + env.getConfig("port", "8090");
+            if (hostName.indexOf(':',0) == -1) hostName += ":" + env.getLocalPort("port", "8090");
             final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
             final boolean global = post.get("kml_resource", "local").equals("global");
 

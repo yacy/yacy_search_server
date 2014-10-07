@@ -35,6 +35,7 @@ import net.yacy.search.Switchboard;
 
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
+import org.bitlet.weupnp.PortMappingEntry;
 import org.xml.sax.SAXException;
 
 public class UPnP {
@@ -42,7 +43,7 @@ public class UPnP {
 	private static final ConcurrentLog LOG = new ConcurrentLog("UPNP");
 	private static final Switchboard SB = Switchboard.getSwitchboard();
 
-	private static Map<InetAddress, GatewayDevice> GATEWAY_DEVICES = null;
+	private static GatewayDevice gatewayDevice;
 
 	private static final Map<UPnPMappingType, UPnPMapping> MAPPINGS = new EnumMap<>(
 			UPnPMappingType.class);
@@ -53,20 +54,23 @@ public class UPnP {
 				"server.https", "TCP", "YaCy HTTPS"));
 	}
 
+	private static final int MIN_CANDIDATE_PORT = 49152;
+	private static final int MAX_CANDIDATE_PORT = 65535;
+
 	private static boolean init() {
 		boolean init = true;
 
 		try {
-			if (GATEWAY_DEVICES == null) {
-				GATEWAY_DEVICES = new GatewayDiscover().discover();
+			if (gatewayDevice == null || !gatewayDevice.isConnected()) {
+				final GatewayDiscover discover = new GatewayDiscover();
+				discover.discover();
+				gatewayDevice = discover.getValidGateway();
 			}
 		} catch (IOException | SAXException | ParserConfigurationException e) {
 			init = false;
 		}
-		if (GATEWAY_DEVICES != null) {
-			for (final GatewayDevice gatewayDevice : GATEWAY_DEVICES.values()) {
-				LOG.info("found device: " + gatewayDevice.getFriendlyName());
-			}
+		if (gatewayDevice != null) {
+			LOG.info("found device: " + gatewayDevice.getFriendlyName());
 		} else {
 			LOG.info("no device found");
 			init = false;
@@ -91,6 +95,8 @@ public class UPnP {
 			addPortMapping(entry.getKey(), mapping,
 					SB.getConfigInt(mapping.getConfigPortKey(), 0));
 		}
+
+		SB.setConnectedViaUpnp(true);
 	}
 
 	/**
@@ -101,6 +107,8 @@ public class UPnP {
 		if (SB == null) {
 			return;
 		}
+
+		SB.setConnectedViaUpnp(false);
 
 		UPnPMapping mapping;
 		for (final Entry<UPnPMappingType, UPnPMapping> entry : MAPPINGS
@@ -123,7 +131,7 @@ public class UPnP {
 	 * @param port
 	 *            port number to map
 	 */
-	public static void addPortMapping(final UPnPMappingType type,
+	private static void addPortMapping(final UPnPMappingType type,
 			final UPnPMapping mapping, final int port) {
 
 		if (port < 1) {
@@ -137,32 +145,49 @@ public class UPnP {
 		if ((mapping.isConfigEnabledKeyEmpty() || SB.getConfigBool(
 				mapping.getConfigEnabledKey(), false))
 				&& mapping.getPort() == 0
-				&& ((GATEWAY_DEVICES != null) || init())) {
+				&& ((gatewayDevice != null) || init())) {
 
 			String localHostIP;
 			boolean mapped;
 			String msg;
-			for (final GatewayDevice gatewayDevice : GATEWAY_DEVICES.values()) {
 
-				try {
-					localHostIP = toString(gatewayDevice.getLocalAddress());
+			try {
+				localHostIP = toString(gatewayDevice.getLocalAddress());
 
-					mapped = gatewayDevice.addPortMapping(port, port,
+				int portCandidate = port;
+				while (isInUse(portCandidate) && portCandidate > 0) {
+					LOG.info(portCandidate + " in use, trying different port.");
+					portCandidate = getNewPortCandidate(portCandidate);
+				}
+
+				if (portCandidate > 0) {
+
+					mapped = gatewayDevice.addPortMapping(portCandidate, port,
 							localHostIP, mapping.getProtocol(),
 							mapping.getDescription());
 
-					msg = "port " + port + " on device "
-							+ gatewayDevice.getFriendlyName();
+					msg = "mapped port " + port + " to port " + portCandidate
+							+ " on device " + gatewayDevice.getFriendlyName()
+							+ ", external IP is "
+							+ gatewayDevice.getExternalIPAddress();
 
-					if (mapped) {
-						LOG.info("mapped " + msg);
-						mapping.setPort(port);
-					} else {
-						LOG.warn("could not map " + msg);
-					}
-				} catch (IOException | SAXException e) {
-					LOG.severe("mapping error: " + e.getMessage());
+				} else {
+
+					mapped = false;
+
+					msg = "no free port found";
 				}
+
+				if (mapped) {
+					LOG.info("mapped " + msg);
+					mapping.setPort(portCandidate);
+
+					SB.setUpnpPorts(mapping.getConfigPortKey(), portCandidate);
+				} else {
+					LOG.warn("could not map " + msg);
+				}
+			} catch (IOException | SAXException e) {
+				LOG.severe("mapping error: " + e.getMessage());
 			}
 		}
 	}
@@ -173,33 +198,31 @@ public class UPnP {
 	 * @param mapping
 	 *            to delete
 	 */
-	public static void deletePortMapping(final UPnPMapping mapping) {
-		if (mapping.getPort() > 0 && GATEWAY_DEVICES != null) {
+	private static void deletePortMapping(final UPnPMapping mapping) {
+		if (mapping.getPort() > 0 && gatewayDevice != null) {
 
 			boolean unmapped;
 			String msg;
-			for (final GatewayDevice gatewayDevice : GATEWAY_DEVICES.values()) {
 
-				try {
-					unmapped = gatewayDevice.deletePortMapping(
-							mapping.getPort(), mapping.getProtocol());
+			try {
+				unmapped = gatewayDevice.deletePortMapping(mapping.getPort(),
+						mapping.getProtocol());
 
-					msg = "port " + mapping.getPort() + " on device "
-							+ gatewayDevice.getFriendlyName();
+				msg = "port " + mapping.getPort() + " on device "
+						+ gatewayDevice.getFriendlyName();
 
-					if (unmapped) {
-						LOG.info("unmapped " + msg);
-					} else {
-						LOG.warn("could not unmap " + msg);
-					}
-
-				} catch (SAXException | IOException e) {
-					LOG.severe("unmapping error: " + e.getMessage());
+				if (unmapped) {
+					LOG.info("unmapped " + msg);
+				} else {
+					LOG.warn("could not unmap " + msg);
 				}
-			}
 
-			mapping.setPort(0); // reset mapped port
+			} catch (SAXException | IOException e) {
+				LOG.severe("unmapping error: " + e.getMessage());
+			}
 		}
+
+		mapping.setPort(0); // reset mapped port
 	}
 
 	/**
@@ -217,6 +240,30 @@ public class UPnP {
 		}
 
 		return MAPPINGS.get(type).getPort();
+	}
+
+	public static int getNewPortCandidate(final int oldCandidate) {
+
+		int newPortCandidate = Math.min(
+				Math.max(MIN_CANDIDATE_PORT, oldCandidate + 1),
+				MAX_CANDIDATE_PORT);
+
+		if (newPortCandidate == MAX_CANDIDATE_PORT) {
+			newPortCandidate = -1;
+		}
+
+		return newPortCandidate;
+	}
+
+	private static boolean isInUse(final int port) {
+
+		try {
+			return gatewayDevice != null
+					&& gatewayDevice.getSpecificPortMappingEntry(port, "TCP",
+							new PortMappingEntry());
+		} catch (IOException | SAXException e) {
+			return false;
+		}
 	}
 
 	private static String toString(final InetAddress inetAddress) {

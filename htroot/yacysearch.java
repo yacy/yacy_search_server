@@ -146,7 +146,7 @@ public class yacysearch {
         // adding some additional properties needed for the rss feed
         String hostName = header.get("Host", Domains.LOCALHOST);
         if ( hostName.indexOf(':', 0) == -1 ) {
-            hostName += ":" + env.getConfig("port", "8090");
+            hostName += ":" + env.getLocalPort("port", 8090);
         }
         prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
         prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
@@ -880,7 +880,7 @@ public class yacysearch {
         // hostname and port (assume locahost if nothing helps)
         final String hostIP = sb.peers.mySeed().getIP();
         prop.put("myhost", hostIP != null ? hostIP : Domains.LOCALHOST);
-        prop.put("myport", sb.getConfig("port", "8090"));
+        prop.put("myport", Domains.LOCALHOST.equals(hostIP) ? sb.getLocalPort("port", 8090) : sb.getPublicPort("port", 8090));
 
         // return rewrite properties
         return prop;

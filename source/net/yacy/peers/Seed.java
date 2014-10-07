@@ -1162,9 +1162,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final Seed newSeed = new Seed(hashs);
 
         // now calculate other information about the host
-        final long port = Switchboard.getSwitchboard().getConfigLong("port", 8090); //get port from config
+        final int port = Switchboard.getSwitchboard().getPublicPort("port", 8090); //get port from config
         newSeed.dna.put(Seed.NAME, defaultPeerName() );
-        newSeed.dna.put(Seed.PORT, Long.toString(port));
+        newSeed.dna.put(Seed.PORT, Integer.toString(port));
         return newSeed;
     }
 

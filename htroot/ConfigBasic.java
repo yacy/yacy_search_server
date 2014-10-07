@@ -100,7 +100,7 @@ public class ConfigBasic {
             port = post.getLong("port", 8090);
             ssl = post.getBoolean("withssl");
         } else {
-            port = env.getConfigLong("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
+            port = env.getLocalPort("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
             ssl = env.getConfigBool("server.https", false);
         }
         if (ssl) prop.put("withsslenabled_sslport",env.getHttpServer().getSslPort());
@@ -266,7 +266,7 @@ public class ConfigBasic {
 
         // set default values
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
-        prop.putHTML("defaultPort", env.getConfig("port", "8090"));
+        prop.put("defaultPort", env.getLocalPort("port", 8090));
         prop.put("withsslenabled", env.getConfigBool("server.https", false) ? 1 : 0);
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         prop.put("lang_de", "0");

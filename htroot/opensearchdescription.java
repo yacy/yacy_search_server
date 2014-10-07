@@ -40,7 +40,7 @@ public class opensearchdescription {
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
 
         String thisaddress = header.get("Host", Domains.LOCALHOST);
-        if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + env.getConfig("port", "8090");
+        if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + env.getLocalPort("port", 8090);
         String thisprotocol = env.getConfigBool("server.https", false) ? "https" : "http";
         
         final serverObjects prop = new serverObjects();

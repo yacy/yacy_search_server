@@ -99,7 +99,7 @@ public class SettingsAck_p {
             /*
              * display port info
              */
-            prop.putHTML("info_port", env.getConfig("port", "8090"));
+            prop.put("info_port", env.getLocalPort("port", 8090));
             prop.put("info_restart", "0");
      
             // read and process data
@@ -483,7 +483,7 @@ public class SettingsAck_p {
         // change https port
         if (post.containsKey("port.ssl")) {
             int port = post.getInt("port.ssl", 8443);
-            if (port > 0 && port != env.getConfigInt("port", 8090)) {
+            if (port > 0 && port != env.getLocalPort("port", 8090)) {
                 env.setConfig("port.ssl", port);
             }
             prop.put("info_port.ssl", port);
