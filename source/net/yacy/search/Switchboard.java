@@ -154,6 +154,7 @@ import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
+import net.yacy.gui.Audio;
 import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.blob.Tables;
@@ -2847,7 +2848,8 @@ public final class Switchboard extends serverSwitch {
                     ? EventChannel.LOCALINDEXING
                     : EventChannel.REMOTEINDEXING);
         feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url(), ASCII.String(queueEntry.url().hash())));
-
+        if (this.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.newdoc.play();
+        
         // store rss feeds in document into rss table
         for ( final Map.Entry<DigestURL, String> rssEntry : document.getRSS().entrySet() ) {
             final Tables.Data rssRow = new Tables.Data();

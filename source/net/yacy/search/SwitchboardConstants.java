@@ -554,4 +554,10 @@ public final class SwitchboardConstants {
      * Skins
      */
     public static final String SKINS_PATH_DEFAULT                  = "DATA/SKINS";
+    
+    /*
+     * decorations
+     */
+    public static final String DECORATION_AUDIO                    = "decoration.audio";
+    
 }
