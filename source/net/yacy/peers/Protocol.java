@@ -505,7 +505,7 @@ public final class Protocol {
         event.addExpectedRemoteReferences(count);
         SearchResult result = null;
         for (String ip: target.getIPs()) {
-            if (ip.indexOf(':') >= 0) System.out.println("Search target: IPv6: " + ip);
+            //if (ip.indexOf(':') >= 0) System.out.println("Search target: IPv6: " + ip);
             String clusteraddress = target.getPublicAddress(ip);
             if (target.clash(event.peers.mySeed().getIPs())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
             try {
@@ -531,6 +531,7 @@ public final class Protocol {
                 event.peers.peerActions.interfaceDeparture(target, ip);
                 return -1;
             }
+
         }
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
