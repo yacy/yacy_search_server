@@ -115,12 +115,10 @@ public final class hello {
         //final double clientversion = remoteSeed.getVersion();
 
         if (remoteSeed.getPort() == sb.peers.mySeed().getPort()) {
-            for (String reportedip: reportedips) {
-                if (sb.peers.mySeed().getIPs().contains(reportedip)) {
-                    // reject a self-ping
-                    prop.put("message", "I am I");
-                    return prop;
-                }
+            if (sb.peers.mySeed().clash(reportedips)) {
+                // reject a self-ping
+                prop.put("message", "I am I");
+                return prop;
             }
         }
         if (remoteSeed.hash.equals(sb.peers.mySeed().hash)) {

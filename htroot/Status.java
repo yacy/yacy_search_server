@@ -233,7 +233,7 @@ public class Status
                 prop.put("warningGoOnline", "1");
             } else {
                 prop.put("peerAddress", "1"); // Address
-                prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress());
+                prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
                 prop.putXML("peerAddress_peername", sb.peers.mySeed().getName().toLowerCase());
             }
         }

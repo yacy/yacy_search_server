@@ -219,7 +219,7 @@ public class ConfigPortal {
         prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
-        String myaddress = (sb.peers == null) ? null : sb.peers.mySeed() == null ? null : sb.peers.mySeed().getPublicAddress();
+        String myaddress = (sb.peers == null) ? null : sb.peers.mySeed() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getLocalPort("port", 8090);
         }

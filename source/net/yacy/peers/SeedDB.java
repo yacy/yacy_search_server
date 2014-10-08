@@ -966,6 +966,11 @@ public final class SeedDB implements AlternativeDomainNames {
         }
     }
 
+    /**
+     * use getConnected(hash) instead and retrieve the addresses from the seed
+     * @param targetHash
+     * @return
+     */
     @Deprecated
     public String targetAddress(final String targetHash) {
         // find target address
@@ -979,19 +984,6 @@ public final class SeedDB implements AlternativeDomainNames {
         }
         if (address == null) address = "localhost" + (this.mySeed.getPort() > 0 ? ":" + this.mySeed.getPort() : "");
         return address;
-    }
-    
-    public Set<String> targetIPs(final String targetHash) {
-        // find target address
-        Set<String> ips;
-        if (targetHash.equals(mySeed().hash)) {
-            ips = mySeed().getIPs();
-        } else {
-            final Seed targetSeed = getConnected(targetHash);
-            if (targetSeed == null) { return null; }
-            ips = targetSeed.getIPs();
-        }
-        return ips;
     }
 
     private class seedEnum implements Iterator<Seed> {

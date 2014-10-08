@@ -157,11 +157,11 @@ public class News {
                     	title = record.attribute("title", "");
                     	description = record.attribute("url", "");
                     } else if (category.equals(NewsPool.CATEGORY_WIKI_UPDATE)) {
-                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
+                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress(seed.getIP()) + "/Wiki.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Wiki Update: " + record.attribute("description", "");
                     } else if (category.equals(NewsPool.CATEGORY_BLOG_ADD)) {
-                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
+                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress(seed.getIP()) + "/Blog.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Blog Entry: " + record.attribute("subject", "");
                     } else {
@@ -180,7 +180,7 @@ public class News {
         }
 
         // adding the peer address
-        prop.put("address", sb.peers.mySeed().getPublicAddress());
+        prop.put("address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
 
         // return rewrite properties
         return prop;

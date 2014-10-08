@@ -97,7 +97,7 @@ public final class seedlist {
                     }
                 }
                 prop.putJSON("peers_" + count + "_map_" + c + "_k", "Address");
-                prop.putJSON("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress());
+                prop.putJSON("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress(seed.getIP()));
                 prop.put("peers_" + count + "_map_" + c + "_c", 0);
                 prop.put("peers_" + count + "_map", c + 1);
                 prop.put("peers_" + count + "_c", 1);
@@ -124,7 +124,7 @@ public final class seedlist {
                     }
                 }
                 prop.putXML("peers_" + count + "_map_" + c + "_k", "Address");
-                prop.putXML("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress());
+                prop.putXML("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress(seed.getIP()));
                 prop.put("peers_" + count + "_map_" + c + "_c", 0);
                 prop.put("peers_" + count + "_map", c + 1);
                 count++;

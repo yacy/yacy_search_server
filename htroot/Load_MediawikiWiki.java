@@ -38,7 +38,7 @@ public class Load_MediawikiWiki {
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        String a = sb.peers.mySeed().getPublicAddress();
+        String a = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (a == null) a = "localhost:" + sb.getLocalPort("port", 8090);
         final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
         final String repository = "http://" + a + "/repository/";

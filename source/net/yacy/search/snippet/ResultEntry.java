@@ -76,7 +76,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
             final Seed seed = peers.getConnected(hash);
             final String path = urlentry.url().getFile();
             String address = null;
-            if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
+            if ((seed == null) || ((address = seed.getPublicAddress(seed.getIP())) == null)) {
                 // seed is not known from here
                 try {
                     if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(

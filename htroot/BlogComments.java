@@ -175,7 +175,7 @@ public class BlogComments {
             prop.putHTML("mode_allow_author", UTF8.String(author));
             prop.putHTML("mode_subject", post.get("subject",""));
             prop.put("mode_date", dateString(new Date()));
-            prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_page", post.get("content", ""));
+            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", post.get("content", ""));
             prop.put("mode_page-code", post.get("content", ""));
         } else {
             // show blog-entry/entries
@@ -191,7 +191,7 @@ public class BlogComments {
                 prop.putHTML("mode_allow_author", UTF8.String(author));
                 prop.put("mode_comments", page.getCommentsSize());
                 prop.put("mode_date", dateString(page.getDate()));
-                prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_page", page.getPage());
+                prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", page.getPage());
                 if (hasRights) {
                     prop.put("mode_admin", "1");
                     prop.put("mode_admin_pageid", page.getKey());
@@ -234,7 +234,7 @@ public class BlogComments {
                     if (!xml) {
                         prop.putHTML("mode_entries_"+count+"_subject", UTF8.String(entry.getSubject()));
                         prop.putHTML("mode_entries_"+count+"_author", UTF8.String(entry.getAuthor()));
-                        prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_entries_"+count+"_page", entry.getPage());
+                        prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_entries_"+count+"_page", entry.getPage());
                     } else {
                         prop.putHTML("mode_entries_"+count+"_subject", UTF8.String(entry.getSubject()));
                         prop.putHTML("mode_entries_"+count+"_author", UTF8.String(entry.getAuthor()));

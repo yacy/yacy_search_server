@@ -190,7 +190,7 @@ public class Tables_p {
         }
 
         // adding the peer address
-        prop.put("address", sb.peers.mySeed().getPublicAddress());
+        prop.put("address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
 
         // return rewrite properties
         return prop;

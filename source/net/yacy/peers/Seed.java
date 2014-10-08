@@ -744,16 +744,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final int getRevision() {
         return yacyVersion.revision(get(Seed.VERSION, Seed.ZERO));
     }
-
-    /**
-     * deprecated, use getIPs() instead
-     * @return the public address of the peer as IP:port string or <code>null</code> if no valid values for
-     *         either the IP or the port could be retrieved from this yacySeed object
-     */
-    @Deprecated
-    public final String getPublicAddress() {
-        return getPublicAddress(getIP());
-    }
     
     /**
      * generate a public address using a given ip. This combines the ip with the port and encloses the ip

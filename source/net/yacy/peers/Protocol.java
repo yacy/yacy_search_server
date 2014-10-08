@@ -367,14 +367,15 @@ public final class Protocol {
                 basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", UTF8.StringBody("seed"));
             parts.put("env", UTF8.StringBody(seedHash));
-            final Post post = new Post(target.getPublicAddress(target.getIP()), target.hash, "/yacy/query.html", parts, 10000);
+            String ip = target.getIP();
+            final Post post = new Post(target.getPublicAddress(ip), target.hash, "/yacy/query.html", parts, 10000);
             final Map<String, String> result = FileUtils.table(post.result);
 
             if ( result == null || result.isEmpty() ) {
                 return null;
             }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return Seed.genRemoteSeed(result.get("response"), false, target.getIP());
+            return Seed.genRemoteSeed(result.get("response"), false, ip);
         } catch (final Exception e ) {
             Network.log.warn("yacyClient.querySeed error:" + e.getMessage());
             return null;
@@ -434,43 +435,42 @@ public final class Protocol {
         final String salt = crypt.randomSalt();
 
         // send request
-        try {
-            /* a long time-out is needed */
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
-            parts.put("call", UTF8.StringBody("remotecrawl"));
-            parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
-            parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
-            // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
-            String ip = target.getIP();
-            final byte[] result = httpClient.POSTbytes(new MultiProtocolURL("http://" + target.getPublicAddress(ip) + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
-            final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
-            if ( reader == null ) {
-                Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
-                target.put(Seed.RCOUNT, "0");
-                seedDB.peerActions.interfaceDeparture(target, ip);
-                //Log.logException(e);
-                return null;
+        /* a long time-out is needed */
+        final Map<String, ContentBody> parts =
+            basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+        parts.put("call", UTF8.StringBody("remotecrawl"));
+        parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
+        parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
+        // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
+        final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
+        RSSReader reader = null;
+        for (String ip: target.getIPs()) {
+            try {
+                final byte[] result = httpClient.POSTbytes(new MultiProtocolURL("http://" + target.getPublicAddress(ip) + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
+                reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
+            } catch (final IOException e ) {
+                reader = null;
             }
-            final RSSFeed feed = reader.getFeed();
-            if ( feed == null ) {
-                // case where the rss reader does not understand the content
-                Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (2)");
-                //System.out.println("***DEBUG*** rss input = " + UTF8.String(result));
-                target.put(Seed.RCOUNT, "0");
-                seedDB.updateConnected(target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
-                //Log.logException(e);
-                return null;
-            }
-            // update number of remotely available links in seed
-            target.put(Seed.RCOUNT, Integer.toString(Math.max(0, targetCount - feed.size())));
-            seedDB.updateConnected(target);
-            return feed;
-        } catch (final IOException e ) {
-            Network.log.warn("yacyClient.queryRemoteCrawlURLs error asking peer '" + target.getName() + "':" + e.toString());
+            if (reader != null) break;
+            Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
+            target.put(Seed.RCOUNT, "0");
+            seedDB.peerActions.interfaceDeparture(target, ip);
+        }
+        
+        final RSSFeed feed = reader == null ? null : reader.getFeed();
+        if ( feed == null ) {
+            // case where the rss reader does not understand the content
+            Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (2)");
+            //System.out.println("***DEBUG*** rss input = " + UTF8.String(result));
+            target.put(Seed.RCOUNT, "0");
+            seedDB.updateConnected(target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
+            //Log.logException(e);
             return null;
         }
+        // update number of remotely available links in seed
+        target.put(Seed.RCOUNT, Integer.toString(Math.max(0, targetCount - feed.size())));
+        seedDB.updateConnected(target);
+        return feed;
     }
 
     protected static int primarySearch(
@@ -526,13 +526,15 @@ public final class Protocol {
                         clusteraddress,
                         secondarySearchSuperviser
                         );
+                break;
             } catch (final IOException e ) {
                 Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
                 event.peers.peerActions.interfaceDeparture(target, ip);
                 return -1;
             }
-
         }
+        if (result == null) return -1;
+        
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
 
@@ -586,30 +588,35 @@ public final class Protocol {
 
         final long timestamp = System.currentTimeMillis();
         event.addExpectedRemoteReferences(count);
-        SearchResult result;
-        try {
-            result =
-                new SearchResult(
-                    event,
-                    basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
-                    wordhashes,
-                    "",
-                    urlhashes,
-                    "",
-                    contentdom,
-                    count,
-                    time,
-                    maxDistance,
-                    partitions,
-                    target.getHexHash() + ".yacyh",
-                    target.getPublicAddress(),
-                    null
-                    );
-        } catch (final IOException e ) {
-            Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-            event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
-            return -1;
+        SearchResult result = null;
+        for (String ip: target.getIPs()) {
+            try {
+                result =
+                    new SearchResult(
+                        event,
+                        basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
+                        wordhashes,
+                        "",
+                        urlhashes,
+                        "",
+                        contentdom,
+                        count,
+                        time,
+                        maxDistance,
+                        partitions,
+                        target.getHexHash() + ".yacyh",
+                        target.getPublicAddress(ip),
+                        null
+                        );
+                break;
+            } catch (final IOException e ) {
+                Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
+                event.peers.peerActions.interfaceDeparture(target, ip);
+                return -1;
+            }
         }
+        if (result == null) return -1;
+        
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
 
@@ -660,7 +667,7 @@ public final class Protocol {
             }
             if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry.url()) ) {
                 if ( Network.log.isInfo() ) {
-                    Network.log.info("remote search: filtered blacklisted url " + urlEntry.url() + " from peer " + target.getName());
+                    Network.log.info("remote search: filtered blacklisted url " + urlEntry.url().toNormalform(true) + " from peer " + target.getName());
                 }
                 continue; // block with backlist
             }
@@ -669,7 +676,7 @@ public final class Protocol {
                 Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
             if ( urlRejectReason != null ) {
                 if ( Network.log.isInfo() ) {
-                    Network.log.info("remote search: rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
+                    Network.log.info("remote search: rejected url '" + urlEntry.url().toNormalform(true) + "' (" + urlRejectReason + ") from peer " + target.getName());
                 }
                 continue; // reject url outside of our domain
             }
@@ -935,6 +942,7 @@ public final class Protocol {
         Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // this will be a list of urlhash-snippet entries
         final QueryResponse[] rsp = new QueryResponse[]{null};
         final SolrDocumentList[] docList = new SolrDocumentList[]{null};
+        String ip = target.getIP();
         {// encapsulate expensive solr QueryResponse object
             if (localsearch && !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
                 // search the local index
@@ -955,7 +963,7 @@ public final class Protocol {
                         Network.log.info("SEARCH skip (solr), remote Solr interface not accessible, peer=" + target.getName());
                         return -1;
                     }
-                    final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress(target.getIP());
+                    final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress(ip);
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
                     Thread remoteRequest = new Thread() {
                         @Override
@@ -981,20 +989,20 @@ public final class Protocol {
                     remoteRequest.join(solrtimeout); // just wait until timeout appears
                     if (remoteRequest.isAlive()) {
                         try {remoteRequest.interrupt();} catch (Throwable e) {}
-                        Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " does not answer (time-out)");
+                        Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " does not answer (time-out)");
                         target.setFlagSolrAvailable(false || myseed);
                         return -1; // give up, leave remoteRequest abandoned.
                     }
                     // no need to close this here because that sends a commit to remote solr which is not wanted here
                 } catch (final Throwable e) {
-                    Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")");
+                    Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " (" + e.getMessage() + ")");
                     target.setFlagSolrAvailable(false || localsearch);
                     return -1;
                 }
             }
 
             if (rsp[0] == null || docList[0] == null) {
-                Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress() + " returned null");
+                Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " returned null");
                 target.setFlagSolrAvailable(false || localsearch);
                 return -1;
             }
@@ -1040,7 +1048,8 @@ public final class Protocol {
             Network.log.info("SEARCH (solr), returned 0 out of 0 documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
             return 0;
         }
-	List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
+        
+        List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
         Network.log.info("SEARCH (solr), returned " + docList[0].size() + " out of " + docList[0].getNumFound() + " documents and " + facets.size() + " facets " + facets.keySet().toString() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
         Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList[0].size());
@@ -1156,8 +1165,7 @@ public final class Protocol {
 
         // send request
         try {
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("process", UTF8.StringBody("post"));
             parts.put("myseed", UTF8.StringBody(seedDB.mySeed().genSeedStr(salt)));
             parts.put("subject", UTF8.StringBody(subject));

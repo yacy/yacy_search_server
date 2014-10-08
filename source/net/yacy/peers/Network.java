@@ -586,7 +586,7 @@ public class Network
             String logt;
 
             // be shure that we have something to say
-            if ( sb.peers.mySeed().getPublicAddress() == null ) {
+            if ( sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()) == null ) {
                 final String errorMsg = "We have no valid IP address until now";
                 log.warn("SaveSeedList: " + errorMsg);
                 return errorMsg;

@@ -102,7 +102,7 @@ public class Bookmarks {
     	*/
 
     	// set peer address
-    	prop.put("address", sb.peers.mySeed().getPublicAddress());
+    	prop.put("address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
 
     	//defaultvalues
     	if(isAdmin) {

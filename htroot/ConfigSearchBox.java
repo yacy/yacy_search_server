@@ -34,7 +34,7 @@ public class ConfigSearchBox {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        String myaddress = sb.peers.mySeed().getPublicAddress();
+        String myaddress = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) myaddress = "localhost:" + sb.getLocalPort("port", 8090);
         prop.put("myaddress", myaddress);
         return prop;

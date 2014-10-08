@@ -81,7 +81,7 @@ public class yacysearch_location {
                     prop.put("kml_placemark_" + placemarkCounter + "_subject", "");
                     prop.put("kml_placemark_" + placemarkCounter + "_description", "");
                     prop.put("kml_placemark_" + placemarkCounter + "_date", "");
-                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", "http://" + sb.peers.mySeed().getPublicAddress() + "/yacysearch.html?query=" + location.getName());
+                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", "http://" + sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()) + "/yacysearch.html?query=" + location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_pointname", location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_lon", location.lon());
                     prop.put("kml_placemark_" + placemarkCounter + "_lat", location.lat());

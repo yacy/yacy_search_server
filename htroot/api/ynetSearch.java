@@ -15,8 +15,8 @@ import net.yacy.server.serverSwitch;
 public class ynetSearch {
 
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        final Switchboard switchboard = (Switchboard) env;
-        final boolean isAdmin=switchboard.verifyAuthentication(header);
+        final Switchboard sb = (Switchboard) env;
+        final boolean isAdmin=sb.verifyAuthentication(header);
         final serverObjects prop = new serverObjects();
 
     	if(post != null){
@@ -32,7 +32,7 @@ public class ynetSearch {
                 String searchaddress = post.get("url");
                 if (!searchaddress.startsWith("http://")) {
                     // a relative path .. this addresses the local peer
-                    searchaddress = "http://" + switchboard.peers.mySeed().getPublicAddress() + ((searchaddress.length() > 0 && searchaddress.charAt(0) == '/') ? "" : "/") + searchaddress;
+                    searchaddress = "http://" + sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()) + ((searchaddress.length() > 0 && searchaddress.charAt(0) == '/') ? "" : "/") + searchaddress;
                 }
                 post.remove("url");
                 post.remove("login");

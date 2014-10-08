@@ -56,7 +56,7 @@ public class goto_p {
             Seed seed = sb.peers.getConnected(hash);
 
             if (seed != null) {
-                String peersUrl = seed.getPublicAddress();
+                String peersUrl = seed.getPublicAddress(seed.getIP());
                 if (peersUrl != null) {
                     String path = post.get("path", "/");
                     if (!path.startsWith("/")) path = "/" + path;

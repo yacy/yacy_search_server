@@ -33,7 +33,7 @@ public class get_folders {
     	prop.putHTML("display_user", username);
 
     	// set peer address
-    	prop.put("display_address", sb.peers.mySeed().getPublicAddress());
+    	prop.put("display_address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
     	prop.put("display_peer", sb.peers.mySeed().getName());
 
     	String root = "/";

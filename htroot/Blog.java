@@ -78,7 +78,7 @@ public class Blog {
 
 
         final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
-        final String address = sb.peers.mySeed().getPublicAddress();
+        final String address = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
 
         prop.put("mode_admin", hasRights ? "1" : "0");
 
@@ -192,7 +192,7 @@ public class Blog {
                 prop.putHTML("mode_author", UTF8.String(author));
                 prop.putHTML("mode_subject", post.get("subject",""));
                 prop.put("mode_date", dateString(new Date()));
-                prop.putWiki(sb.peers.mySeed().getPublicAddress(), "mode_page", post.get("content", ""));
+                prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", post.get("content", ""));
                 prop.putHTML("mode_page-code", post.get("content", ""));
             }
             else {
