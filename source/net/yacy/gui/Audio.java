@@ -35,6 +35,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import net.yacy.kelondro.util.MemoryControl;
+
 
 /**
  * wrapper class for audio tools
@@ -130,10 +132,12 @@ public class Audio {
             Clip clip;
             if ((clip = getClip()) == null) return;
             if (clip.isActive()) {
-                Clip onetimeclip = getFreshClip();
-                FloatControl gainControl = (FloatControl) onetimeclip.getControl(FloatControl.Type.MASTER_GAIN);
-                gainControl.setValue(gain);
-                onetimeclip.start();
+                if (!MemoryControl.shortStatus()) try {
+                    Clip onetimeclip = getFreshClip();
+                    FloatControl gainControl = (FloatControl) onetimeclip.getControl(FloatControl.Type.MASTER_GAIN);
+                    gainControl.setValue(gain);
+                    onetimeclip.start();
+                } catch (OutOfMemoryError e) {}
             } else {
                 FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
                 gainControl.setValue(gain);

@@ -825,7 +825,7 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized Entry removeOne() throws IOException {
-        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        //assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         final byte[] le = new byte[this.rowdef.objectsize];
         final long fsb = this.file.size();
@@ -845,7 +845,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             this.table.removeOne();
             assert this.table.size() < tsb : "table.size() = " + this.table.size() + ", tsb = " + tsb;
         }
-        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        //assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         return lr;
     }

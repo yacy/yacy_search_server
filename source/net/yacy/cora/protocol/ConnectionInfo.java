@@ -26,6 +26,7 @@
 package net.yacy.cora.protocol;
 
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -294,12 +295,12 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
     
     private static void cleanup(final Iterator<ConnectionInfo> iter) {
     	synchronized (iter) { 
-            while (iter.hasNext()) {
+            while (iter.hasNext()) try {
                 ConnectionInfo con = iter.next();
                 if(con.getLifetime() > staleAfterMillis) {
                 	getAllConnections().remove(con);
                 }
-            }
+            } catch (ConcurrentModificationException e) {}
         }
     }
     
