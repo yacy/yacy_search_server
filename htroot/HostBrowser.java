@@ -287,7 +287,7 @@ public class HostBrowser {
                 
                 // get all files for a specific host from the index
                 StringBuilder q = new StringBuilder();
-                if (host != null) q.append(CollectionSchema.host_s.getSolrFieldName()).append(':').append(host);
+                if (host != null) q.append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(host).append("\"");
                 if (pathparts.length > 0 && pathparts[0].length() > 0) {
                     for (String pe: pathparts) {
                         if (pe.length() > 0) q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(":\"").append(pe).append('\"');

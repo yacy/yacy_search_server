@@ -335,7 +335,8 @@ public class RobotsTxt {
         String host = theURL.getHost();
         if (host == null) return null;
         StringBuilder sb = new StringBuilder(host.length() + 6);
-        sb.append(host).append(':').append(Integer.toString(port));
+        if (host.indexOf(':') >= 0) {sb.append('[').append(host).append(']');} else sb.append(host);
+        sb.append(':').append(Integer.toString(port));
         return sb.toString();
     }
     

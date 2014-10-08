@@ -230,7 +230,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
 
         final int id = Domains.getDomainID(this.host, this.hostAddress); // id=7: tld is local
         final boolean isHTTP = isHTTP();
-        int p = (this.host == null) ? -1 : this.host.lastIndexOf('.');
+        int p = (this.host == null || this.host.indexOf(':') >= 0) ? -1 : this.host.lastIndexOf('.');
         String dom = (p > 0) ? dom = this.host.substring(0, p) : "";
         p = dom.lastIndexOf('.'); // locate subdomain
         final String subdom;
@@ -295,8 +295,11 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         if (host == null) {
             return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol)).substring(0, 5);
         }
+        boolean isIPv6HostIP = host.indexOf(':') >= 0;
         final StringBuilder sb = new StringBuilder(host.length() + 15);
-        sb.append(protocol).append(':').append(host).append(':').append(Integer.toString(port));
+        sb.append(protocol).append(':');
+        if (isIPv6HostIP) {sb.append('[').append(host).append(']');} else sb.append(host);
+        sb.append(':').append(Integer.toString(port));
         return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).substring(0, 5);
     }
 

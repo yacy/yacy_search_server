@@ -2069,7 +2069,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             return -1;
         }
         if (isSMB()) try {
-            return TimeoutRequest.length(getSmbFile(), SMB_TIMEOUT);
+            return getSmbFile().length();
+            //return TimeoutRequest.length(getSmbFile(), SMB_TIMEOUT); // a timeout request is a bad idea, that will create a lot of concurrent threads during crawling
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
             return -1;
@@ -2080,7 +2081,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public long lastModified() throws IOException {
         if (isFile()) return getFSFile().lastModified();
         if (isSMB()) try {
-            return TimeoutRequest.lastModified(getSmbFile(), SMB_TIMEOUT);
+            return getSmbFile().lastModified();
+            // return TimeoutRequest.lastModified(getSmbFile(), SMB_TIMEOUT); // a timeout request is a bad idea, that will create a lot of concurrent threads during crawling
         } catch (final SmbException e) {
             throw new IOException("SMB.lastModified SmbException (" + e.getMessage() + ") for " + toNormalform(false));
         } catch (final MalformedURLException e) {
