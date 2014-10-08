@@ -36,7 +36,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     private final static ConcurrentLog log = new ConcurrentLog("BusyThread");
     private long startup = 0, intermission = 0, idlePause = 0, busyPause = 0;
     private long idletime = 0, memprereq = 0;
-    private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
+    private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0, highCPUCycles = 0;
     private double loadprereq = 9;
     private boolean intermissionObedient = true;
     private final Object syncObject = new Object();
@@ -122,6 +122,11 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         // a job execution was omitted because of memory shortage
         return this.outofmemoryCycles;
     }
+
+    @Override
+    public long getHighCPUCycles() {
+        return this.highCPUCycles;
+    }
     
     @Override
     public final long getSleepTime() {
@@ -182,6 +187,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
             	logSystem("Thread '" + this.getName() + "' runs high load cycle. current: " + Memory.load() + " max.: " + loadprereq);
                 timestamp = System.currentTimeMillis();
                 ratz(this.idlePause);
+                highCPUCycles++;
                 idletime += System.currentTimeMillis() - timestamp;
             } else if (MemoryControl.request(memprereq, false)) try {
                 // do job

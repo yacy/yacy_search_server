@@ -14,6 +14,7 @@
 	        <idlecycles>#[idlecycles]#</idlecycles>
 	        <busycycles>#[busycycles]#</busycycles>
 	        <memscycles>#[memscycles]#</memscycles>
+	        <highcpucycles>#[highcpucycles]#</highcpucycles>
 	        <sleeppercycle>#[sleeppercycle]#</sleeppercycle>
 	        <execpercycle>#[execpercycle]#</execpercycle>
 	        <memusepercycle>#[memusepercycle]#</memusepercycle>

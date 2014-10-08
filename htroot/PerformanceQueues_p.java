@@ -113,7 +113,7 @@ public class PerformanceQueues_p {
         int queuesize;
         threads = sb.threadNames();
         int c = 0;
-        long idleCycles, busyCycles, memshortageCycles;
+        long idleCycles, busyCycles, memshortageCycles, highCPUCycles;
         // set profile?
         final boolean setProfile = (post != null && post.containsKey("submitdefault"));
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
@@ -148,16 +148,18 @@ public class PerformanceQueues_p {
             idleCycles = thread.getIdleCycles();
             busyCycles = thread.getBusyCycles();
             memshortageCycles = thread.getOutOfMemoryCycles();
+            highCPUCycles = thread.getHighCPUCycles();
             prop.putNum("table_" + c + "_blocktime", blocktime / 1000);
             prop.putNum("table_" + c + "_blockpercent", 100 * blocktime / blocktime_total);
             prop.putNum("table_" + c + "_sleeptime", sleeptime / 1000);
             prop.putNum("table_" + c + "_sleeppercent", 100 * sleeptime / sleeptime_total);
             prop.putNum("table_" + c + "_exectime", exectime / 1000);
             prop.putNum("table_" + c + "_execpercent", 100 * exectime / exectime_total);
-            prop.putNum("table_" + c + "_totalcycles", idleCycles + busyCycles + memshortageCycles);
+            prop.putNum("table_" + c + "_totalcycles", idleCycles + busyCycles + memshortageCycles + highCPUCycles);
             prop.putNum("table_" + c + "_idlecycles", idleCycles);
             prop.putNum("table_" + c + "_busycycles", busyCycles);
             prop.putNum("table_" + c + "_memscycles", memshortageCycles);
+            prop.putNum("table_" + c + "_highcpucycles", highCPUCycles);
             prop.putNum("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? -1 : sleeptime / (idleCycles + busyCycles));
             prop.putNum("table_" + c + "_execpercycle", (busyCycles == 0) ? -1 : exectime / busyCycles);
             prop.putNum("table_" + c + "_memusepercycle", (busyCycles == 0) ? -1 : memuse / busyCycles / 1024);

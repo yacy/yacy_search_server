@@ -92,7 +92,13 @@ public interface BusyThread extends WorkflowThread {
      *         because of memory shortage
      */
     public long getOutOfMemoryCycles();
- 
+
+    /**
+     * @return the total number of cycles where a job execution was omitted
+     *         because of too high CPU load
+     */
+    public long getHighCPUCycles();
+    
     /**
      * @return the total time that this thread has slept so far
      */
