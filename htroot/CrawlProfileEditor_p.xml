@@ -3,7 +3,7 @@
 #{crawlProfiles}# 
 	<crawlProfile>
 		<name>#[name]#</name>
-		<status>#(status)#terminated::active#(/status)#</status>
+		<status>#(status)#terminated::active::system#(/status)#</status>
 		<depth>#[depth]#</depth>
 		<mustmatch>#[mustmatch]#</mustmatch>
 		<mustnotmatch>#[mustnotmatch]#</mustnotmatch>

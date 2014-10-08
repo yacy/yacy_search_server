@@ -622,12 +622,14 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final boolean dark,
             final int count,
             final int domlistlength) {
-
+        boolean terminateButton = active && !CrawlSwitchboard.DEFAULT_PROFILES.contains(this.name());
+        boolean deleteButton = !active;
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_name", this.collectionName());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || CrawlSwitchboard.DEFAULT_PROFILES.contains(this.name())) ? "0" : "1");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_status", terminateButton ? 1 : deleteButton ? 0 : 2);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", terminateButton);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", deleteButton);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", this.depth());
