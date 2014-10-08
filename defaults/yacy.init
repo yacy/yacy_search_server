@@ -1260,3 +1260,5 @@ crawler.userAgent.clienttimeout = 10000
 
 # interface decorations
 decoration.audio = false
+decoration.grafics.linkstructure = true
+

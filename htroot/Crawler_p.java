@@ -662,7 +662,8 @@ public class Crawler_p {
         prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
 
         prop.put("crawlProfilesShow_linkstructure", 0);
-        if (count > 0) {
+        
+        if (count > 0 && sb.getConfigBool(SwitchboardConstants.DECORATION_GRAFICS_LINKSTRUCTURE, true)) {
             // collect the host names for 'wide' crawls which can be visualized
             boolean showLinkstructure = hosts.length() > 0 && !hosts.contains("file:");
             if (showLinkstructure) {

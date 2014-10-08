@@ -559,5 +559,6 @@ public final class SwitchboardConstants {
      * decorations
      */
     public static final String DECORATION_AUDIO                    = "decoration.audio";
+    public static final String DECORATION_GRAFICS_LINKSTRUCTURE    = "decoration.grafics.linkstructure";
     
 }

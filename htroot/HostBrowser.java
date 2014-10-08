@@ -514,7 +514,7 @@ public class HostBrowser {
                 prop.put("files_subpathdetectedsize", filecounter - storedDocs.size());
                 prop.put("files", 1);
                 uri = new DigestURL(path);
-                prop.put("files_linkgraph", uri.getPath().length() <= 1 && hostsize > 0);
+                prop.put("files_linkgraph", uri.getPath().length() <= 1 && hostsize > 0 && sb.getConfigBool(SwitchboardConstants.DECORATION_GRAFICS_LINKSTRUCTURE, true));
                 prop.put("files_linkgraph_host", uri.getHost());
 
                 // generate inbound-links table
