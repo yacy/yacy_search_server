@@ -192,16 +192,6 @@ div.ProgressBarFill {
   background-color:#333333;
 }
 
-
-/* Copyright info */
-
-div#api {
-  position:absolute;
-  top:3px;
-  right:20px;
-  z-index: 100;
-}
-
 /* Searchresults */
 
 fieldset.maininput, fieldset.yacys { 

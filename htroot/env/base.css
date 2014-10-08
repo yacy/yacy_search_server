@@ -961,7 +961,7 @@ div#kiosk:hover span {
 /* API */
 div#api {
   position:absolute;
-  top:60px;
+  top:0px;
   right:20px;
   z-index: 1600;
 }
@@ -975,7 +975,7 @@ div#api:hover span {
   position: absolute;
   font-size:1em;
   top: 48px; 
-  left: -200px; /* 30 - width */
+  left: -120px; /* 30 - width */
   width: 160px;
   padding: 3px;
   color: #000000; 
