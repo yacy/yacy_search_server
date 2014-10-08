@@ -339,13 +339,12 @@ public class RemoteSearch extends Thread {
                     int urls = 0;
                     try {
                         event.oneFeederStarted();
-                        boolean localsearch = (targetPeer == null || targetPeer.equals(event.peers.mySeed())) && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false);
                         urls = Protocol.solrQuery(
                                         event,
                                         solrQuery,
                                         start,
                                         count,
-                                        localsearch ? event.peers.mySeed() : targetPeer,
+                                        targetPeer == null ? event.peers.mySeed() : targetPeer,
                                         partitions,
                                         blacklist);
                         if (urls >= 0) {
