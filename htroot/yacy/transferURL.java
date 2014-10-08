@@ -176,7 +176,7 @@ public final class transferURL {
             // return rewrite properties
             Network.log.info("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
-            if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.dhtin.play();
+            if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.dhtin.play(-10.0f);
             
             if (doublecheck > 0) {
             	Network.log.warn("Received " + doublecheck + "/" + urlc + " double URLs from peer " + otherPeerName); // double should not happen because we demanded only documents which we do not have yet

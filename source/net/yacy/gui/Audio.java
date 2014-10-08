@@ -126,13 +126,17 @@ public class Audio {
         /**
          * play a soundclip once
          */
-        public void play() {
+        public void play(float gain) {
             Clip clip;
             if ((clip = getClip()) == null) return;
             if (clip.isActive()) {
                 Clip onetimeclip = getFreshClip();
+                FloatControl gainControl = (FloatControl) onetimeclip.getControl(FloatControl.Type.MASTER_GAIN);
+                gainControl.setValue(gain);
                 onetimeclip.start();
             } else {
+                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                gainControl.setValue(gain);
                 clip.setFramePosition(0);
                 clip.start();
             }
@@ -179,9 +183,9 @@ public class Audio {
     public static void main(String[] args) {
         try {
             Soundclip.dhtin.playExperimental();Thread.sleep(100);
-            Soundclip.dhtin.play();Thread.sleep(500);
-            Soundclip.dhtin.play();Thread.sleep(500);
-            Soundclip.dhtin.play();Thread.sleep(500);
+            Soundclip.newdoc.play(-20.0f);Thread.sleep(500);
+            Soundclip.newdoc.play(-20.0f);Thread.sleep(500);
+            Soundclip.newdoc.play(-20.0f);Thread.sleep(500);
             Soundclip.remotesearch.start(); Thread.sleep(1000); Soundclip.remotesearch.stop(); Thread.sleep(1000);
             Soundclip.remotesearch.start(); Thread.sleep(1000); Soundclip.remotesearch.stop(); Thread.sleep(1000);
             Soundclip.remotesearch.start(); Thread.sleep(1000); Soundclip.remotesearch.stop(); Thread.sleep(1000);

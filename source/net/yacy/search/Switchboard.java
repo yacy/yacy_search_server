@@ -2848,7 +2848,7 @@ public final class Switchboard extends serverSwitch {
                     ? EventChannel.LOCALINDEXING
                     : EventChannel.REMOTEINDEXING);
         feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url(), ASCII.String(queueEntry.url().hash())));
-        if (this.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.newdoc.play();
+        if (this.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.newdoc.play(-20.0f);
         
         // store rss feeds in document into rss table
         for ( final Map.Entry<DigestURL, String> rssEntry : document.getRSS().entrySet() ) {
