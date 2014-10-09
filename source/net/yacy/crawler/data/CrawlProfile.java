@@ -25,7 +25,6 @@
 
 package net.yacy.crawler.data;
 
-import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -625,39 +624,58 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         boolean terminateButton = active && !CrawlSwitchboard.DEFAULT_PROFILES.contains(this.name());
         boolean deleteButton = !active;
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_name", this.collectionName());
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_handle", this.handle());
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_name", this.name());
+        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_collection", this.get(COLLECTIONS)); // TODO: remove, replace with 'collections'
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_collections", this.get(COLLECTIONS));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_agentName", this.get(AGENT_NAME));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_userAgent", this.getAgent().userAgent);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", this.depth());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_directDocByURL", this.directDocByURL() ? 1 : 0);
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_recrawlIfOlder", this.recrawlIfOlder() == Long.MAX_VALUE ? "eternity" : (new Date(this.recrawlIfOlder()).toString()));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_domMaxPages", this.domMaxPages());
+        //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (this.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(this.domMaxPages())); // TODO: remove, replace with 'domMaxPages'
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingQ", this.crawlingQ() ? 1 : 0);
+        //prop.put(CRAWL_PROFILE_PREFIX + count + "_withQuery", (this.crawlingQ()) ? "1" : "0"); // TODO: remove, replace with crawlingQ
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_followFrames", this.followFrames() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNoindex", this.obeyHtmlRobotsNoindex() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNofollow", this.obeyHtmlRobotsNofollow() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", this.indexText() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", this.indexMedia() ? 1 : 0);
+        //prop.put(CRAWL_PROFILE_PREFIX + count + "_storeCache", this.storeHTCache() ? 1 : 0); // TODO: remove, replace with 'storeHTCache'
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeHTCache", this.storeHTCache() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", this.remoteIndexing() ? 1 : 0);
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_cacheStrategy", this.get(CACHE_STRAGEGY));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustMatch", this.get(CRAWLER_URL_MUSTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustNotMatch", this.get(CRAWLER_URL_MUSTNOTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustMatch", this.get(CRAWLER_IP_MUSTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustNotMatch", this.get(CRAWLER_IP_MUSTNOTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerCountryMustMatch", this.get(CRAWLER_COUNTRY_MUSTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerNoLimitURLMustMatch", this.get(CRAWLER_URL_NODEPTHLIMITMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustMatch", this.get(INDEXING_URL_MUSTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustNotMatch", this.get(INDEXING_URL_MUSTNOTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustMatch", this.get(INDEXING_CONTENT_MUSTMATCH));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustNotMatch", this.get(INDEXING_CONTENT_MUSTNOTMATCH));
+        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustmatch", this.urlMustMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustMatch
+        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", this.urlMustNotMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustNotMatch
+        //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (this.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(this.recrawlIfOlder())); // TODO: remove, replace with recrawlIfOlder
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_status", terminateButton ? 1 : deleteButton ? 0 : 2);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", terminateButton);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", deleteButton);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_handle", this.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", this.depth());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustmatch", this.urlMustMatchPattern().toString());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", this.urlMustNotMatchPattern().toString());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (this.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(this.recrawlIfOlder()));
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
-
+        
         int i = 0;
-        if (active && this.domMaxPages() > 0
-                && this.domMaxPages() != Integer.MAX_VALUE) {
-        String item;
-        while (i <= domlistlength && !(item = this.domName(true, i)).isEmpty()){
-            if (i == domlistlength) {
-                item += " ...";
+        if (active && this.domMaxPages() > 0 && this.domMaxPages() != Integer.MAX_VALUE) {
+            String item;
+            while (i <= domlistlength && !(item = this.domName(true, i)).isEmpty()) {
+                if (i == domlistlength) item += " ...";
+                prop.putHTML(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterContent_" + i + "_item", item);
+                i++;
             }
-            prop.putHTML(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterContent_" + i + "_item", item);
-            i++;
         }
-        }
-
         prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
 
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (this.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(this.domMaxPages()));
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_withQuery", (this.crawlingQ()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeCache", (this.storeHTCache()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", (this.indexText()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", (this.indexMedia()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", (this.remoteIndexing()) ? "1" : "0");
     }
 }
