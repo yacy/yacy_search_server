@@ -38,6 +38,11 @@ import org.bitlet.weupnp.GatewayDiscover;
 import org.bitlet.weupnp.PortMappingEntry;
 import org.xml.sax.SAXException;
 
+/**
+ * Maps port(s) in LAN to port(s) in WAN vie UPnP.
+ * 
+ * @author David Wieditz, Marc Nause
+ */
 public class UPnP {
 
 	private static final ConcurrentLog LOG = new ConcurrentLog("UPNP");
@@ -122,8 +127,6 @@ public class UPnP {
 	 * Add port mapping to all gateway devices on the network.<br/>
 	 * Latest port mapping will be removed.
 	 * 
-	 * TODO: don't try to map already mapped port again, find alternative
-	 * 
 	 * @param type
 	 *            mapping type
 	 * @param mapping
@@ -156,7 +159,6 @@ public class UPnP {
 
 				int portCandidate = port;
 				while (isInUse(portCandidate) && portCandidate > 0) {
-					LOG.info(portCandidate + " in use, trying different port.");
 					portCandidate = getNewPortCandidate(portCandidate);
 				}
 
@@ -242,7 +244,7 @@ public class UPnP {
 		return MAPPINGS.get(type).getPort();
 	}
 
-	public static int getNewPortCandidate(final int oldCandidate) {
+	private static int getNewPortCandidate(final int oldCandidate) {
 
 		int newPortCandidate = Math.min(
 				Math.max(MIN_CANDIDATE_PORT, oldCandidate + 1),
