@@ -2,23 +2,40 @@
 <crawlProfiles>
 #{crawlProfiles}# 
 	<crawlProfile>
+		<handle>#[handle]#</handle>
 		<name>#[name]#</name>
-		<status>#(status)#terminated::active::system#(/status)#</status>
+		<collections>#[collections]#</collections>
+		<agentName>#[agentName]#</agentName>
+		<userAgent>#[userAgent]#</userAgent>
 		<depth>#[depth]#</depth>
-		<mustmatch>#[mustmatch]#</mustmatch>
-		<mustnotmatch>#[mustnotmatch]#</mustnotmatch>
-		<crawlingIfOlder>#[crawlingIfOlder]#</crawlingIfOlder>
+		<directDocByURL>#(directDocByURL)#false::true#(/directDocByURL)#</directDocByURL>
+		<recrawlIfOlder>#[recrawlIfOlder]#</recrawlIfOlder>
+		<domMaxPages>#[domMaxPages]#</domMaxPages>
+		<crawlingQ>#(crawlingQ)#false::true#(/crawlingQ)#</crawlingQ>
+		<followFrames>#(followFrames)#false::true#(/followFrames)#</followFrames>
+		<obeyHtmlRobotsNoindex>#(obeyHtmlRobotsNoindex)#false::true#(/obeyHtmlRobotsNoindex)#</obeyHtmlRobotsNoindex>
+		<obeyHtmlRobotsNofollow>#(obeyHtmlRobotsNofollow)#false::true#(/obeyHtmlRobotsNofollow)#</obeyHtmlRobotsNofollow>
+		<indexText>#(indexText)#false::true#(/indexText)#</indexText>
+		<indexMedia>#(indexMedia)#false::true#(/indexMedia)#</indexMedia>
+		<storeHTCache>#(storeHTCache)#false::true#(/storeHTCache)#</storeHTCache>
+		<remoteIndexing>#(remoteIndexing)#false::true#(/remoteIndexing)#</remoteIndexing>
+		<cacheStrategy>#[cacheStrategy]#</cacheStrategy>
+		<crawlerURLMustMatch>#[crawlerURLMustMatch]#</crawlerURLMustMatch>
+		<crawlerURLMustNotMatch>#[crawlerURLMustNotMatch]#</crawlerURLMustNotMatch>
+		<crawlerIPMustMatch>#[crawlerIPMustMatch]#</crawlerIPMustMatch>
+		<crawlerIPMustNotMatch>#[crawlerIPMustNotMatch]#</crawlerIPMustNotMatch>
+		<crawlerCountryMustMatch>#[crawlerCountryMustMatch]#</crawlerCountryMustMatch>
+		<crawlerNoLimitURLMustMatch>#[crawlerNoLimitURLMustMatch]#</crawlerNoLimitURLMustMatch>
+		<indexURLMustMatch>#[indexURLMustMatch]#</indexURLMustMatch>
+		<indexURLMustNotMatch>#[indexURLMustNotMatch]#</indexURLMustNotMatch>
+		<indexContentMustMatch>#[indexContentMustMatch]#</indexContentMustMatch>
+		<indexContentMustNotMatch>#[indexContentMustNotMatch]#</indexContentMustNotMatch>
+		<status>#(status)#terminated::active::system#(/status)#</status>
 		<crawlingDomFilterContent>
 		#{crawlingDomFilterContent}#
 			<item>#[item]#</item>
 		#{/crawlingDomFilterContent}#
 		</crawlingDomFilterContent>
-		<crawlingDomMaxPages>#[crawlingDomMaxPages]#</crawlingDomMaxPages>
-		<withQuery>#(withQuery)#no::yes#(/withQuery)#</withQuery>
-		<storeCache>#(storeCache)#no::yes#(/storeCache)#</storeCache>
-		<indexText>#(indexText)#no::yes#(/indexText)#</indexText>
-		<indexMedia>#(indexMedia)#no::yes#(/indexMedia)#</indexMedia>
-		<remoteIndexing>#(remoteIndexing)#no::yes#(/remoteIndexing)#</remoteIndexing>
 	</crawlProfile>
 #{/crawlProfiles}# 
 </crawlProfiles>

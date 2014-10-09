@@ -307,11 +307,11 @@ public class serverObjects implements Serializable, Cloneable {
      * @see CharacterCoding#encodeUnicode2html(String, boolean)
      */
     public void putHTML(final String key, final String value) {
-        put(key, CharacterCoding.unicode2html(value, true));
+        put(key, value == null ? "" : CharacterCoding.unicode2html(value, true));
     }
 
     public void putHTML(final String key, final byte[] value) {
-        putHTML(key, UTF8.String(value));
+        putHTML(key, value == null ? "" : UTF8.String(value));
     }
 
     /**
@@ -321,7 +321,7 @@ public class serverObjects implements Serializable, Cloneable {
      * replaced in the returned String.
      */
     public void putXML(final String key, final String value) {
-        put(key, CharacterCoding.unicode2xml(value, true));
+        put(key, value == null ? "" : CharacterCoding.unicode2xml(value, true));
     }
 
     /**
@@ -332,9 +332,9 @@ public class serverObjects implements Serializable, Cloneable {
      * @return
      */
     public void put(final RequestHeader.FileType fileType, final String key, final String value) {
-        if (fileType == FileType.JSON) putJSON(key, value);
-        else if (fileType == FileType.XML) putXML(key, value);
-        else putHTML(key, value);
+        if (fileType == FileType.JSON) putJSON(key, value == null ? "" : value);
+        else if (fileType == FileType.XML) putXML(key, value == null ? "" : value);
+        else putHTML(key, value == null ? "" : value);
     }
 
     /**
