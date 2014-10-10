@@ -956,7 +956,7 @@ public final class SeedDB implements AlternativeDomainNames {
             seed = lookupByName(domain);
             if (seed == null) return null;
             if (this.mySeed == null) initMySeed();
-            if ((seed == this.mySeed) && (!(seed.isOnline()))) {
+            if (seed == this.mySeed && !(seed.isOnline())) {
                 // take local ip instead of external
                 return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getLocalPort("port", 8090) + ((subdom == null) ? "" : ("/" + subdom));
             }
@@ -964,26 +964,6 @@ public final class SeedDB implements AlternativeDomainNames {
         } else {
             return null;
         }
-    }
-
-    /**
-     * use getConnected(hash) instead and retrieve the addresses from the seed
-     * @param targetHash
-     * @return
-     */
-    @Deprecated
-    public String targetAddress(final String targetHash) {
-        // find target address
-        String address;
-        if (targetHash.equals(mySeed().hash)) {
-            address = mySeed().getPublicAddress(mySeed().getIP());
-        } else {
-            final Seed targetSeed = getConnected(targetHash);
-            if (targetSeed == null) { return null; }
-            address = targetSeed.getPublicAddress(targetSeed.getIP());
-        }
-        if (address == null) address = "localhost" + (this.mySeed.getPort() > 0 ? ":" + this.mySeed.getPort() : "");
-        return address;
     }
 
     private class seedEnum implements Iterator<Seed> {

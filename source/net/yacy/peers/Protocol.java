@@ -133,7 +133,7 @@ public final class Protocol {
     /**
      * wrapper class for multi-post attempts to multiple IPs
      */
-    private static class Post {
+    public static class Post {
     
         public byte[] result;                      // contains the result from a successful post or null if no attempt was successful
         public Set<String> unsuccessfulAddresses;  // contains a set of addresses which had been tested for submission was without success
@@ -1153,32 +1153,6 @@ public final class Protocol {
         }
     }
 
-    public static Map<String, String> postMessage(
-        final SeedDB seedDB,
-        final String targetHash,
-        final String subject,
-        final byte[] message) {
-        // this post a message to the remote message board
-
-        // prepare request
-        final String salt = crypt.randomSalt();
-
-        // send request
-        try {
-            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
-            parts.put("process", UTF8.StringBody("post"));
-            parts.put("myseed", UTF8.StringBody(seedDB.mySeed().genSeedStr(salt)));
-            parts.put("subject", UTF8.StringBody(subject));
-            parts.put("message", UTF8.StringBody(message));
-            final Post post = new Post(seedDB.targetAddress(targetHash), targetHash, "/yacy/message.html", parts, 20000);
-            final Map<String, String> result = FileUtils.table(post.result);
-            return result;
-        } catch (final Exception e ) {
-            Network.log.warn("yacyClient.postMessage error:" + e.getMessage());
-            return null;
-        }
-    }
-
     public static Map<String, String> crawlReceipt(
         final Seed mySeed,
         final Seed target,
@@ -1634,7 +1608,7 @@ public final class Protocol {
      * @param salt
      * @return
      */
-    private static final LinkedHashMap<String, ContentBody> basicRequestParts(final Switchboard sb, final String targetHash, final String salt) {
+    public static final LinkedHashMap<String, ContentBody> basicRequestParts(final Switchboard sb, final String targetHash, final String salt) {
         final LinkedHashMap<String, ContentBody> parts = new LinkedHashMap<String, ContentBody>();
         
         // just standard identification essentials
