@@ -218,6 +218,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ... */
     private final ConcurrentMap<String, String> dna;
     private long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
+    Bitfield bitfield = null;
     
     public Seed(final String theHash, final ConcurrentMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
@@ -925,8 +926,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     }
 
     private boolean getFlag(final int flag) {
-        final String flags = get(Seed.FLAGS, Seed.FLAGSZERO);
-        return (new Bitfield(ASCII.getBytes(flags))).get(flag);
+        if (this.bitfield == null) {
+            final String flags = get(Seed.FLAGS, Seed.FLAGSZERO);
+            this.bitfield = new Bitfield(ASCII.getBytes(flags));
+        }
+        return this.bitfield.get(flag);
     }
 
     private void setFlag(final int flag, final boolean value) {
@@ -937,6 +941,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final Bitfield f = new Bitfield(ASCII.getBytes(flags));
         f.set(flag, value);
         this.dna.put(Seed.FLAGS, UTF8.String(f.getBytes()));
+        this.bitfield = null;
     }
 
     public final void setFlagDirectConnect(final boolean value) {
@@ -995,6 +1000,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
              this.dna.put(Seed.SOLRAVAILABLE, "OK");
          else
              this.dna.put(Seed.SOLRAVAILABLE, "NA");
+         this.bitfield = null;
     }
 
     /**
