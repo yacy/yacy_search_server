@@ -77,7 +77,7 @@ import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
-import net.yacy.utils.bitfield;
+import net.yacy.utils.Bitfield;
 import net.yacy.utils.crypt;
 
 public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
@@ -926,7 +926,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     private boolean getFlag(final int flag) {
         final String flags = get(Seed.FLAGS, Seed.FLAGSZERO);
-        return (new bitfield(ASCII.getBytes(flags))).get(flag);
+        return (new Bitfield(ASCII.getBytes(flags))).get(flag);
     }
 
     private void setFlag(final int flag, final boolean value) {
@@ -934,7 +934,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( flags.length() != 4 ) {
             flags = Seed.FLAGSZERO;
         }
-        final bitfield f = new bitfield(ASCII.getBytes(flags));
+        final Bitfield f = new Bitfield(ASCII.getBytes(flags));
         f.set(flag, value);
         this.dna.put(Seed.FLAGS, UTF8.String(f.getBytes()));
     }

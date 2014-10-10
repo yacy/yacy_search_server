@@ -23,20 +23,20 @@ package net.yacy.utils;
 import net.yacy.cora.document.encoding.ASCII;
 
 
-public class bitfield {
+public class Bitfield {
     
     private byte[] bb;    
 
-    public bitfield() {
+    public Bitfield() {
         this(0);
     }
     
-    public bitfield(final int bytelength) {
+    public Bitfield(final int bytelength) {
         this.bb= new byte[bytelength];
         for (int i = 0 ; i < bytelength; i++) bb[i] = ' ';
     }
     
-    public bitfield(final byte[] field) {
+    public Bitfield(final byte[] field) {
         bb = field;
     }
     
@@ -93,7 +93,7 @@ public class bitfield {
     
     public static void main(final String[] args) {
         //final bitfield f = new bitfield(ASCII.getBytes(Seed.FLAGSZERO));
-        final bitfield f = new bitfield(4);
+        final Bitfield f = new Bitfield(4);
         for (int i = 0; i < 20; i++) {
             f.set(i, false);
             if (f.get(i)) System.out.println("i = " + i);
@@ -102,7 +102,7 @@ public class bitfield {
             System.out.println(i + ":" + f.toString());
         }
         
-        final bitfield test = new bitfield(4);
+        final Bitfield test = new Bitfield(4);
         final int l = test.length();
         System.out.println("available: " + l);
         System.out.println("before:    " + test.toString());
