@@ -90,7 +90,8 @@ public class ProfilingGraph {
         long time;
         final long now = System.currentTimeMillis();
         long bytes;
-        int x0, x1, y0, y1;
+        float x0, x1;
+        int y0, y1;
         try {
             // draw urls
             /*
@@ -112,18 +113,18 @@ public class ProfilingGraph {
             // draw memory
             if (showMemory) {
                 events = EventTracker.getHistory(EventTracker.EClass.MEMORY);
-                x0 = 1; y0 = 0;
+                x0 = 1.0f; y0 = 0;
                 if (events != null) {
                     EventTracker.Event event;
                     while (events.hasNext()) {
                         event = events.next();
                         time = event.getTime() - now;
                         bytes = ((Long) event.payload).longValue();
-                        x1 = (int) (time/1000);
+                        x1 = time / 1000.0f;
                         y1 = (int) (bytes / 1024 / 1024);
-//  the dots don't        chart.setColor(Long.parseLong("AAAAFF", 16));
+//  the dots don't        chart.setColor(0xAAAAFF);
 //  very nice             chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
-                        chart.setColor(Long.parseLong("0000FF", 16));
+                        chart.setColor(0x0000FF);
                         if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
                         x0 = x1; y0 = y1;
                     }
@@ -132,7 +133,7 @@ public class ProfilingGraph {
 
             // draw wordcache
             events = EventTracker.getHistory(EventTracker.EClass.WORDCACHE);
-            x0 = 1; y0 = 0;
+            x0 = 1.0f; y0 = 0;
             if (events != null) {
                 EventTracker.Event event;
                 int words;
@@ -140,11 +141,11 @@ public class ProfilingGraph {
                     event = events.next();
                     time = event.getTime() - now;
                     words = (int) ((Long) event.payload).longValue();
-                    x1 = (int) (time/1000);
+                    x1 = time / 1000.0f;
                     y1 = words;
-                    chart.setColor(Long.parseLong("228822", 16));
+                    chart.setColor(0x228822);
                     chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x1, y1, 2, null, 315);
-                    chart.setColor(Long.parseLong("008800", 16));
+                    chart.setColor(0x008800);
                     if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x0, y0, x1, y1);
                     x0 = x1; y0 = y1;
                 }
@@ -152,7 +153,7 @@ public class ProfilingGraph {
 
             // draw ppm
             events = EventTracker.getHistory(EventTracker.EClass.PPM);
-            x0 = 1; y0 = 0;
+            x0 = 1.0f; y0 = 0;
             if (events != null) {
                 EventTracker.Event event;
                 int ppm;
@@ -160,11 +161,11 @@ public class ProfilingGraph {
                     event = events.next();
                     time = event.getTime() - now;
                     ppm = (int) ((Long) event.payload).longValue();
-                    x1 = (int) (time/1000);
+                    x1 = time / 1000.0f;
                     y1 = ppm;
-                    chart.setColor(Long.parseLong("AA8888", 16));
+                    chart.setColor(0xAA8888);
                     if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x0, y0, x1, y1);
-                    chart.setColor(Long.parseLong("AA2222", 16));
+                    chart.setColor(0xAA2222);
                     chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
                     x0 = x1; y0 = y1;
                 }
@@ -173,7 +174,7 @@ public class ProfilingGraph {
             // draw peer ping
             if (showPeers) {
                 events = EventTracker.getHistory(EventTracker.EClass.PEERPING);
-                x0 = 1; y0 = 0;
+                x0 = 1.0f; y0 = 0;
                 if (events != null) {
                     EventTracker.Event event;
                     EventPing ping;
@@ -182,10 +183,10 @@ public class ProfilingGraph {
                         event = events.next();
                         time = event.getTime() - now;
                         ping = (EventPing) event.payload;
-                        x1 = (int) (time/1000);
+                        x1 = time / 1000.0f;
                         y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;
                         pingPeer = ping.outgoing ? "-> " + ping.toPeer.toUpperCase() : "<- " + ping.fromPeer.toUpperCase();
-                        chart.setColor(Long.parseLong("9999AA", 16));
+                        chart.setColor(0x9999AA);
                         chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT2, x1, y1, 2, pingPeer + (ping.newPeers > 0 ? "(+" + ping.newPeers + ")" : ""), 0);
                         x0 = x1; y0 = y1;
                     }

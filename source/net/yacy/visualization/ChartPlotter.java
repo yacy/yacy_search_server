@@ -75,37 +75,57 @@ public class ChartPlotter extends RasterPlotter {
         }
     }
 
+    /**
+     * assign a metric to a graph. The dimension can be left or right (the measure at the side-border of the graph)
+     * @param dimensionType
+     * @param scale is the measure (the number) to be printed on the border per pixelscale
+     * @param pixelperscale is the number of pixel points per scale
+     * @param offset is an offset on the 'scale' number
+     * @param colorNaming the colour of the legend for the scale
+     * @param colorScale the colour of the line drawing for the vertical scale
+     * @param name printed on the vertical bar
+     */
     public void declareDimension(final int dimensionType, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
-        if ((dimensionType == DIMENSION_LEFT) || (dimensionType == DIMENSION_RIGHT)) {
-            drawVerticalScale((dimensionType == DIMENSION_LEFT), scale, pixelperscale, offset, colorNaming, colorScale, name);
-        }
-        if ((dimensionType == DIMENSION_TOP) || (dimensionType == DIMENSION_BOTTOM)) {
-            drawHorizontalScale((dimensionType == DIMENSION_TOP), scale, pixelperscale, offset, colorNaming, colorScale, name);
-        }
         this.scales[dimensionType] = scale;
         this.pixels[dimensionType] = pixelperscale;
         this.offsets[dimensionType] = offset;
         this.colnames[dimensionType] = colorNaming;
         this.colscale[dimensionType] = colorScale;
         this.tablenames[dimensionType] = name;
+        if ((dimensionType == DIMENSION_LEFT) || (dimensionType == DIMENSION_RIGHT)) {
+            drawVerticalScale((dimensionType == DIMENSION_LEFT), scale, pixelperscale, offset, colorNaming, colorScale, name);
+        }
+        if ((dimensionType == DIMENSION_TOP) || (dimensionType == DIMENSION_BOTTOM)) {
+            drawHorizontalScale((dimensionType == DIMENSION_TOP), scale, pixelperscale, offset, colorNaming, colorScale, name);
+        }
     }
 
-    public void chartDot(final int dimension_x, final int dimension_y, final int coord_x, final int coord_y, final int dotsize, final String anot, final int anotAngle) {
-        final int x = (coord_x - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x];
+    public void chartDot(final int dimension_x, final int dimension_y, final float coord_x, final int coord_y, final int dotsize, final String anot, final int anotAngle) {
+        final int x = (int) ((coord_x - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
         final int y = (coord_y - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
         if (dotsize == 1) plot(this.leftborder + x, this.height - this.bottomborder - y, 100);
                       else dot(this.leftborder + x, this.height - this.bottomborder - y, dotsize, true, 100);
         if (anot != null) PrintTool.print(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? (anot.length() * 6 + x > this.width ? 1 : -1) : ((anotAngle == 315) ? 1 : 0));
     }
 
-    public void chartLine(final int dimension_x, final int dimension_y, final int coord_x1, final int coord_y1, final int coord_x2, final int coord_y2) {
-        final int x1 = (coord_x1 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x];
+    public void chartLine(final int dimension_x, final int dimension_y, final float coord_x1, final int coord_y1, final float coord_x2, final int coord_y2) {
+        final int x1 = (int) ((coord_x1 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
         final int y1 = (coord_y1 - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
-        final int x2 = (coord_x2 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x];
+        final int x2 = (int) ((coord_x2 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
         final int y2 = (coord_y2 - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
         line(this.leftborder + x1, this.height - this.bottomborder - y1, this.leftborder + x2, this.height - this.bottomborder - y2, 100);
     }
 
+    /**
+     * draw a horizontal scale border
+     * @param top - if true, this the top-horizontal scale, otherwise it is at the bottom
+     * @param scale is the measure (the number) to be printed on the vertical border per pixelscale
+     * @param pixelperscale is the number of vertical pixel points per scale
+     * @param offset is an offset on the 'scale' number
+     * @param colorNaming the colour of the legend for the scale
+     * @param colorScale the colour of the line drawing for the vertical scale
+     * @param name printed on the vertical bar
+     */
     private void drawHorizontalScale(final boolean top, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
         final int y = (top) ? this.topborder : this.height - this.bottomborder;
         int x = this.leftborder;
@@ -128,6 +148,16 @@ public class ChartPlotter extends RasterPlotter {
         line(this.leftborder - 4, y, this.width - this.rightborder + 4, y, 100);
     }
 
+    /**
+     * draw the vertical scale of the graph
+     * @param left if true this is the vertical bar on the left, otherwise it is the one on the right
+     * @param scale is the measure (the number) to be printed on the vertical border per pixelscale
+     * @param pixelperscale is the number of vertical pixel points per scale
+     * @param offset is an offset on the 'scale' number
+     * @param colorNaming the colour of the legend for the scale
+     * @param colorScale the colour of the line drawing for the vertical scale
+     * @param name printed on the vertical bar
+     */
     private void drawVerticalScale(final boolean left, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
         assert pixelperscale > 0;
         assert scale > 0;

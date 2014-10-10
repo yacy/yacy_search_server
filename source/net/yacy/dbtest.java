@@ -458,8 +458,8 @@ final class memprofiler extends Thread {
     @Override
     public void run() {
         try {
-            int seconds0 = 0, kilobytes0 = 0;
-            int seconds1 = 0, kilobytes1 = 0;
+            float seconds0 = 0, seconds1 = 0;
+            int kilobytes0 = 0, kilobytes1 = 0;
             while (this.run) {
                 this.memChart.setColor(Long.parseLong("FF0000", 16));
                 seconds1 = (int) ((System.currentTimeMillis() - this.start) / 1000);

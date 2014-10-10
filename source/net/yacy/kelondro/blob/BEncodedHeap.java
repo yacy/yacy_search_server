@@ -562,6 +562,18 @@ public class BEncodedHeap implements MapStore {
     public Iterator<byte[]> keys() throws IOException {
         return this.table.keys(true, false);
     }
+    
+    /**
+     * iteratore all keys of the table
+     * 
+     * @param up
+     * @param rotating
+     * @return an iterator of byte[]
+     * @throws IOException
+     */
+    public Iterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
+        return this.table.keys(up, rotating);
+    }
 
     /**
      * the values() method is not implemented in this class because it does not make sense to use such a
