@@ -542,7 +542,7 @@ public final class CrawlStacker {
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;
         final String host = url.getHost();
-        if (host == null) return "url.host is null";
+        if (host == null) return "url.host is null (you must switch to intranet mode to crawl these sources)";
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
