@@ -13,9 +13,18 @@
     <li><a href="#[url]#">#[url]#</a></li>
   #{/links}#</ul>
   #(/similar)#
-  <form action="#" name="" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+  <form action="citation.html?url=#[url]#" name="" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
-    <legend><label>List of Sentences in #[url]#</label></legend>
+    <table width="100%">
+      <tr>
+        <td>
+          <legend><label>List of #(filter)#::Cited#(/filter)# Sentences in #[url]#</label></legend>
+        </td>
+        <td align="right">
+          <button type="submit" name="filter" class="btn btn-default btn-sm" value="#(filter)#true::false#(/filter)#">#(filter)#filter cited sentences::filter off#(/filter)#</button>
+        </td>
+      </tr>
+    </table>
     <dl>#{sentences}#
     <dt>#[dt]#</dt><dd>#[dd]#</dd>
     #{/sentences}#</dl>

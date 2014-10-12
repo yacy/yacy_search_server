@@ -61,6 +61,7 @@ public class citation {
         String url = "";
         String hash = "";
         int ch = 10;
+        boolean filter = false; // show cited sentences only
         if (post != null) {
             if (post.containsKey("url")) {
                 url = post.get("url");
@@ -78,8 +79,9 @@ public class citation {
             if (post.containsKey("ch")) {
                 ch = post.getInt("ch", ch);
             }
+            filter = post.getBoolean("filter");
         }
-        
+        prop.put("filter", filter);
         if (url.length() > 0) {
             try {
                 uri = new DigestURL(url, null);
@@ -152,20 +154,37 @@ public class citation {
         
         // iterate the sentences
         int i = 0;
+        int sentenceNr = 0;
         for (Map.Entry<String, Set<DigestURL>> se: sentenceOcc.entrySet()) {
-            prop.put("sentences_" + i + "_dt", i);
-            StringBuilder dd = new StringBuilder(se.getKey());
             Set<DigestURL> app = se.getValue();
-            if (app != null && app.size() > 0) {
-                dd.append("<br/>appears in:");
-                for (DigestURL u: app) {
-                    if (u != null) {
-                        dd.append(" <a href=\"").append(u.toNormalform(false)).append("\">").append(u.getHost()).append("</a>");
+            if (filter) { // prepare list, only include sentence with citation
+                if (app != null && app.size() > 0) {
+                    StringBuilder dd = new StringBuilder(se.getKey());
+                    prop.put("sentences_" + i + "_dt", sentenceNr);
+                    dd.append("<br/>appears in:");
+                    for (DigestURL u : app) {
+                        if (u != null) {
+                            dd.append(" <a href=\"").append(u.toNormalform(false)).append("\">").append(u.getHost()).append("</a>");
+                        }
+                    }
+                    prop.put("sentences_" + i + "_dd", dd.toString());
+                    i++;
+                }
+            } else { // prepare list, include all sentences
+                StringBuilder dd = new StringBuilder(se.getKey());
+                prop.put("sentences_" + i + "_dt", sentenceNr);
+                if (app != null && app.size() > 0) {
+                    dd.append("<br/>appears in:");
+                    for (DigestURL u : app) {
+                        if (u != null) {
+                            dd.append(" <a href=\"").append(u.toNormalform(false)).append("\">").append(u.getHost()).append("</a>");
+                        }
                     }
                 }
+                prop.put("sentences_" + i + "_dd", dd.toString());
+                i++;
             }
-            prop.put("sentences_" + i + "_dd", dd.toString());
-            i++;
+            sentenceNr++;
         }
         prop.put("sentences", i);
         
