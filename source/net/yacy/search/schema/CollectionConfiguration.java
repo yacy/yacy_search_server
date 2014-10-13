@@ -299,7 +299,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         // coordinates
         if (md.lat() != 0.0 && md.lon() != 0.0) {
-            if (allAttr || contains(CollectionSchema.coordinate_p)) add(doc, CollectionSchema.coordinate_p, Double.toString(md.lat()) + "," + Double.toString(md.lon()));
+            // i.e. from <meta name="geo.position" content="50.78;11.52" /> or <meta name="ICBM" content="52.50695, 13.328348">
+            if (allAttr || contains(CollectionSchema.coordinate_p)) {
+                add(doc, CollectionSchema.coordinate_p, Double.toString(md.lat()) + "," + Double.toString(md.lon()));
+            }
         }
         if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, 200);
 

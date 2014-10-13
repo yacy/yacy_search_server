@@ -61,8 +61,8 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         ttl(new String[]{"ttl"}),
         docs(new String[]{"docs"}),
         size(new String[]{"size","length","yacy:size"}),
-        lon(new String[]{"geo:lon",Geo.Long.getURIref()}),
-        lat(new String[]{Geo.Lat.getURIref()});
+        lon(new String[]{"geo:lon", Geo.Long.getURIref()}),
+        lat(new String[]{"geo:lat", Geo.Lat.getURIref()});
         //point("gml:pos,georss:point,coordinates");
         
         private Set<String> keys;
@@ -70,6 +70,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         private Token(final String[] keylist) {
             this.keys = new HashSet<String>();
             this.keys.addAll(Arrays.asList(keylist));
+            this.keys.add(this.name());
         }
 
         public String valueFrom(final Map<String, String> map, final String dflt) {
@@ -262,7 +263,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public double getLon() {
-        return Double.parseDouble(Token.lon.valueFrom(this.map, "0.0"));
+        return Double.parseDouble(Token.lat.valueFrom(this.map, "0.0"));
     }
 
     @Override
