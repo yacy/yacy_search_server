@@ -377,6 +377,9 @@ url_file_name_s
 ## the file name extension
 url_file_ext_s
 
+## number of all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name
+url_paths_count_i
+    
 ## all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name
 url_paths_sxt
 

@@ -234,7 +234,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         
         if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
         if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURL.getProtocol());
-        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURL.getPaths());
+        if (allAttr || contains(CollectionSchema.url_paths_sxt) || contains(CollectionSchema.url_paths_count_i)) {
+            String[] paths = digestURL.getPaths();
+            if (allAttr || contains(CollectionSchema.url_paths_count_i)) add(doc, CollectionSchema.url_paths_count_i, paths.length);
+            if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, paths);
+        }
         if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filenameStub);
         if (allAttr || contains(CollectionSchema.url_file_name_tokens_t)) add(doc, CollectionSchema.url_file_name_tokens_t, MultiProtocolURL.toTokens(filenameStub));
         if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
