@@ -295,13 +295,14 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         String q = params.get(CommonParams.Q);
         String fq = params.get(CommonParams.FQ);
         String sort = params.get(CommonParams.SORT);
+        String fl = params.get(CommonParams.FL);
         String threadname = Thread.currentThread().getName();
         QueryResponse rsp;
         int retry = 0;
         Throwable error = null;
         while (retry++ < 60) {
             try {
-                if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort) + "; retry = " + retry); // for debugging in Threaddump
+                if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort) + "; retry = " + retry + "; fl = " + fl); // for debugging in Threaddump
                 rsp = this.server.query(params);
                 if (q != null) Thread.currentThread().setName(threadname);
                 if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
