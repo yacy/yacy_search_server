@@ -1326,9 +1326,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                         }
     
                                         if (tagtype == ProcessType.UNIQUE) {
-                                            postprocessing_http_unique(segment, sid, url);
-                                            postprocessing_www_unique(segment, sid, url);
-                                            postprocessing_doublecontent(segment, uniqueURLs, sid, url);
+                                            postprocessing_http_unique(segment, doc, sid, url);
+                                            postprocessing_www_unique(segment, doc, sid, url);
+                                            postprocessing_doublecontent(segment, uniqueURLs, doc, sid, url);
                                         }
                                         
                                     } catch (IllegalArgumentException e) {}
@@ -1398,35 +1398,35 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return allcount.get();
     }
 
-    public void postprocessing_http_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+    public void postprocessing_http_unique(final Segment segment, final SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         if (!this.contains(CollectionSchema.http_unique_b)) return;
         if (!url.isHTTPS() && !url.isHTTP()) return;
         try {
             DigestURL u = new DigestURL((url.isHTTP() ? "https://" : "http://") + url.urlstub(true, true));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.http_unique_b.getSolrFieldName());
-            set_unique_flag(CollectionSchema.http_unique_b, sid, d);
+            set_unique_flag(CollectionSchema.http_unique_b, doc, sid, d);
         } catch (final IOException e) {}
     }
     
-    public void postprocessing_www_unique(Segment segment, SolrInputDocument sid, DigestURL url) {
+    public void postprocessing_www_unique(final Segment segment, final SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         if (!this.contains(CollectionSchema.www_unique_b)) return;
         final String us = url.urlstub(true, true);
         try {
             DigestURL u = new DigestURL(url.getProtocol() + (us.startsWith("www.") ? "://" + us.substring(4) : "://www." + us));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.www_unique_b.getSolrFieldName());
-            set_unique_flag(CollectionSchema.www_unique_b, sid, d);
+            set_unique_flag(CollectionSchema.www_unique_b, doc, sid, d);
         } catch (final IOException e) {}
     }
     
-    private void set_unique_flag(CollectionSchema field, SolrInputDocument sid, SolrDocument d) {
-        Object sb = sid.getFieldValue(field.getSolrFieldName());
+    private void set_unique_flag(CollectionSchema field, final SolrDocument doc, final SolrInputDocument sid, final SolrDocument d) {
+        Object sb = doc.getFieldValue(field.getSolrFieldName());
         boolean sbb = sb != null && ((Boolean) sb).booleanValue();
         Object ob = d == null ? null : d.getFieldValue(field.getSolrFieldName());
         boolean obb = ob != null && ((Boolean) ob).booleanValue();
         if (sbb == obb) sid.setField(field.getSolrFieldName(), !sbb);
     }
     
-    public void postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURL url) {
+    public void postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         String urlhash = ASCII.String(url.hash());
         String hostid = url.hosthash();
@@ -1442,7 +1442,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             if (this.contains(signaturefield) && this.contains(uniquefield) && this.contains(countfield)) {
                 // lookup the document with the same signature
-                Long signature = (Long) sid.getField(signaturefield.getSolrFieldName()).getValue();
+                Long signature = (Long) doc.getFieldValue(signaturefield.getSolrFieldName());
                 if (signature == null) continue uniquecheck;
                 //con.addOperand(new Negation(new Literal(CollectionSchema.id, urlhash)));
                 //con.addOperand(new Literal(CollectionSchema.host_id_s, hostid));
@@ -1468,7 +1468,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             if (this.contains(signaturefield) && this.contains(uniquefield) && this.contains(countfield)) {
                 // lookup the document with the same signature
-                Long signature = (Long) sid.getField(signaturefield.getSolrFieldName()).getValue();
+                Long signature = (Long) doc.getFieldValue(signaturefield.getSolrFieldName());
                 if (signature == null) continue uniquecheck;
                 SolrDocumentList docs = new Literal(signaturefield, signature.toString()).apply(docsAkk);
                 if (docs.getNumFound() == 0) {
@@ -1487,10 +1487,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // in case that the document has no status code 200, has a noindex attribute
         // or a canonical tag which does not point to the document itself,
         // then the unique-field is not written at all!
-        Integer robots_i = this.contains(CollectionSchema.robots_i) ? (Integer) sid.getFieldValue(CollectionSchema.robots_i.getSolrFieldName()) : null;
-        Integer httpstatus_i = this.contains(CollectionSchema.httpstatus_i) ? (Integer) sid.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) : null;
-        String canonical_s = this.contains(CollectionSchema.canonical_s) ? (String) sid.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()) : null;
-        Boolean canonical_equal_sku_b = this.contains(CollectionSchema.canonical_equal_sku_b) ? (Boolean) sid.getFieldValue(CollectionSchema.canonical_equal_sku_b.getSolrFieldName()) : null;
+        Integer robots_i = this.contains(CollectionSchema.robots_i) ? (Integer) doc.getFieldValue(CollectionSchema.robots_i.getSolrFieldName()) : null;
+        Integer httpstatus_i = this.contains(CollectionSchema.httpstatus_i) ? (Integer) doc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) : null;
+        String canonical_s = this.contains(CollectionSchema.canonical_s) ? (String) doc.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()) : null;
+        Boolean canonical_equal_sku_b = this.contains(CollectionSchema.canonical_equal_sku_b) ? (Boolean) doc.getFieldValue(CollectionSchema.canonical_equal_sku_b.getSolrFieldName()) : null;
 
         CollectionSchema[][] metadatacheckschema = new CollectionSchema[][]{
                 {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
@@ -1506,7 +1506,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (this.contains(checkfield) && this.contains(signaturefield) && this.contains(uniquefield)) {
                     // lookup in the index within the same hosts for the same title or description
                     //String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
-                    Long signature = (Long) sid.getFieldValue(signaturefield.getSolrFieldName());
+                    Long signature = (Long) doc.getFieldValue(signaturefield.getSolrFieldName());
                     if (signature == null) {
                         continue uniquecheck;
                     }
