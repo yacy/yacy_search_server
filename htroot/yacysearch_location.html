@@ -26,7 +26,7 @@
     
     // automatically adapt height of map upon window resize
     function adaptHeight() {
-      document.getElementById('map').style.height = (document.documentElement.clientHeight - 130) + "px";
+      document.getElementById('map').style.height = (document.documentElement.clientHeight - 70) + "px";
     }
     window.onresize = adaptHeight;
     
@@ -96,6 +96,7 @@
       //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
       poisfound = 0;
       document.getElementById('resultline').innerHTML = "";
+      document.getElementById('query').select();
     }
     
     function refresh() {
@@ -122,11 +123,12 @@
       
       // update map and result line
       poisfound = mdcount;
-      document.getElementById('resultline').innerHTML = (poisfound == 0) ? "searching..." : poisfound + " <a href=\"" + poisxml + "\">POIs</a> found in region";
+      document.getElementById('resultline').innerHTML = (poisfound == 0) ? "" : poisfound + " <a href=\"" + poisxml + "\">POIs</a> found in region";
       
       // check if any of the markers is visible on the screen.
       // this is only necessary if shallZoom = false since this would set shallZoom = true
       var bounds = searchLayer_md1.getDataExtent();
+      if (bounds == null) searchLayer_co1.getDataExtent();
 	  /*
       if (!shallZoom) {
         // check all markers
@@ -141,8 +143,7 @@
       }
       */
       // zoom to layer bounds
-      if (shallZoom) {
-        if (bounds == null) {return;} //bounds = searchLayer_co1.getDataExtent();
+      if (shallZoom && bounds != null) {
         map.panTo(bounds.getCenterLonLat());
         map.zoomTo(map.getZoomForExtent(bounds));
       }
@@ -150,7 +151,7 @@
   </script>
 
 </head>
-<body id="yacysearch_location" onload="init();">
+<body id="yacysearch_location" onload="init(); #(initsearch)#::search();#(/initsearch)#">
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
@@ -168,18 +169,23 @@ Click the API icon to see the XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
 </div>
 
-<form class="search small" onsubmit="return false;" class="search small" accept-charset="UTF-8">
-  <h2>#[promoteSearchPageGreeting]#</h2>
-  <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
-  <fieldset class="yacys">
-     <input type="text" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" autofocus="autofocus" onFocus="this.select()" />
-     <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
-  </fieldset>
+<div class="row">
+<div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+<form class="search small" name="searchform" action="" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;max-width:500px;">
+  <div class="input-group">
+    <input type="text" class="form-control searchinput typeahead" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" autofocus="autofocus" onFocus="this.select()" />
+    <div class="input-group-btn">
+       <button id="Enter" class="btn btn-default" type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;">search</button>
+    </div>
+  </div>
   <div id="resultline"></div>
-</form><br/>
+</form>
+</div> <!-- close sidebar -->
+</div> <!-- close row -->
 <div id="map" style="clear:both; width:100%; height:720px"></div>
 <script type="text/javascript">
 adaptHeight();
 </script>
+
 </body>
 </html>

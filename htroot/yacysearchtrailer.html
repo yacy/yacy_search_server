@@ -74,12 +74,6 @@
 </div>
 #(/nav-protocols)#
 
-#(cat-location)#::
-<a href="yacysearch_location.html?query=#[queryenc]#">
-<img src="env/grafics/earthsearch.png" width="215" height="159" alt="earthsearchlogo" /></a>
-<a href="yacysearch_location.html?query=#[queryenc]#">Show search results for "#[query]#" on map</a>
-#(/cat-location)#
-
 #(nav-topics)#<p>&nbsp;</p>::
 <div id="tagcloud" style="text-align:justify">#{element}#
 <a rel="#[count]#" href="#[url]#" style="text-decoration:none;font-size:#[size]#px;">#[name]#</a>
@@ -87,6 +81,17 @@
 <script type="text/javascript" charset="utf-8">
 </script>
 #(/nav-topics)#
+
+#(cat-location)#::
+<ul class="nav nav-sidebar menugroup">
+<li><h3>Location</h3></li>
+<li>
+<a href="yacysearch_location.html?query=#[queryenc]#" class="MenuItemLink">
+<img src="env/grafics/earthsearch.png" width="100%" height="86" alt="earthsearchlogo" /><br/>
+show search results for "#[query]#" on map</a>
+</li>
+</ul>
+#(/cat-location)#
 
 #(nav-domains)#::
 <ul class="nav nav-sidebar menugroup">

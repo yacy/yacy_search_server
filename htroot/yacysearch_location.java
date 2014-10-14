@@ -72,8 +72,12 @@ public class yacysearch_location {
                 for (final String qp: query.split(" ")) {
                     locations.addAll(LibraryProvider.geoLoc.find(qp, true));
                 }
+                String ip = sb.peers.mySeed().getIP();
                 for (final GeoLocation location: locations) {
                     // write for all locations a point to this message
+                    double lo = location.lon();
+                    double la = location.lat();
+                    if (lo == 0.0d && la == 0.0d) continue; // bad location
                     prop.put("kml_placemark_" + placemarkCounter + "_location", location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_name", location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_author", "");
@@ -81,10 +85,10 @@ public class yacysearch_location {
                     prop.put("kml_placemark_" + placemarkCounter + "_subject", "");
                     prop.put("kml_placemark_" + placemarkCounter + "_description", "");
                     prop.put("kml_placemark_" + placemarkCounter + "_date", "");
-                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", "http://" + sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()) + "/yacysearch.html?query=" + location.getName());
+                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", "http://" + sb.peers.mySeed().getPublicAddress(ip) + "/yacysearch.html?query=" + location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_pointname", location.getName());
-                    prop.put("kml_placemark_" + placemarkCounter + "_lon", location.lon());
-                    prop.put("kml_placemark_" + placemarkCounter + "_lat", location.lat());
+                    prop.put("kml_placemark_" + placemarkCounter + "_lon", lo);
+                    prop.put("kml_placemark_" + placemarkCounter + "_lat", la);
                     placemarkCounter++;
                 }
             }
@@ -99,6 +103,9 @@ public class yacysearch_location {
                 RSSMessage message;
                 loop: while ((message = results.poll(maximumTime, TimeUnit.MILLISECONDS)) != RSSMessage.POISON) {
                     if (message == null) break loop;
+                    double lo = message.getLon();
+                    double la = message.getLat();
+                    if (lo == 0.0d && la == 0.0d) continue; // bad location
                     prop.put("kml_placemark_" + placemarkCounter + "_location", message.getTitle());
                     prop.put("kml_placemark_" + placemarkCounter + "_name", message.getTitle());
                     prop.put("kml_placemark_" + placemarkCounter + "_author", message.getAuthor());
@@ -108,8 +115,8 @@ public class yacysearch_location {
                     prop.put("kml_placemark_" + placemarkCounter + "_date", message.getPubDate());
                     prop.putXML("kml_placemark_" + placemarkCounter + "_url", message.getLink());
                     prop.put("kml_placemark_" + placemarkCounter + "_pointname", message.getTitle());
-                    prop.put("kml_placemark_" + placemarkCounter + "_lon", message.getLon());
-                    prop.put("kml_placemark_" + placemarkCounter + "_lat", message.getLat());
+                    prop.put("kml_placemark_" + placemarkCounter + "_lon", lo);
+                    prop.put("kml_placemark_" + placemarkCounter + "_lat", la);
                     placemarkCounter++;
                     if (placemarkCounter >= maximumRecords) break loop;
                 }
