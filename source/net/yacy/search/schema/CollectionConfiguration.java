@@ -1148,7 +1148,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     final long count = segment.fulltext().getWebgraphConnector().getCountByQuery(patchquery);
                     int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph, concurrency = " + concurrency);
-                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(patchquery, WebgraphSchema.source_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true);
+                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(
+                            patchquery,
+                            WebgraphSchema.source_chars_i.getSolrFieldName() + " asc",
+                            0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true
+                            // TODO: add field list and do partial updates
+                            );
                     final AtomicInteger proccount = new AtomicInteger(0);
                     Thread[] t = new Thread[concurrency];
                     for (final AtomicInteger i = new AtomicInteger(0); i.get() < t.length; i.incrementAndGet()) {
@@ -1256,7 +1261,25 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
                     CollectionSchema.url_protocol_s.getSolrFieldName() + " asc" // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
                     : null, // null sort is faster!
-                    0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true);
+                    0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true,
+                    CollectionSchema.id.getSolrFieldName(),
+                    CollectionSchema.sku.getSolrFieldName(),
+                    CollectionSchema.harvestkey_s.getSolrFieldName(),
+                    CollectionSchema.process_sxt.getSolrFieldName(),
+                    CollectionSchema.canonical_equal_sku_b.getSolrFieldName(),
+                    CollectionSchema.canonical_s.getSolrFieldName(),
+                    CollectionSchema.exact_signature_l.getSolrFieldName(),
+                    CollectionSchema.fuzzy_signature_l.getSolrFieldName(),
+                    CollectionSchema.title_exact_signature_l.getSolrFieldName(),
+                    CollectionSchema.description_exact_signature_l.getSolrFieldName(),
+                    CollectionSchema.host_id_s.getSolrFieldName(),
+                    CollectionSchema.host_s.getSolrFieldName(),
+                    CollectionSchema.host_subdomain_s.getSolrFieldName(),
+                    CollectionSchema.url_chars_i.getSolrFieldName(),
+                    CollectionSchema.url_protocol_s.getSolrFieldName(),
+                    CollectionSchema.httpstatus_i.getSolrFieldName(),
+                    CollectionSchema.inboundlinkscount_i.getSolrFieldName(),
+                    CollectionSchema.robots_i.getSolrFieldName());
             final AtomicInteger proccount = new AtomicInteger();
             final AtomicInteger proccount_referencechange = new AtomicInteger();
             final AtomicInteger proccount_citationchange = new AtomicInteger();
@@ -1282,8 +1305,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                 try {
                                     DigestURL url = new DigestURL(u, ASCII.getBytes(i));
                                     byte[] id = url.hash();
-                                    SolrInputDocument sid = collection.toSolrInputDocument(doc, omitFields);
-                                    
+                                    SolrInputDocument sid = new SolrInputDocument(); //collection.toSolrInputDocument(doc, omitFields);
+                                    sid.setField(CollectionSchema.id.getSolrFieldName(), i);
                                     for (Object tag: proctags) try {
                                         
                                         // switch over tag types
@@ -1323,17 +1346,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                     }
                                     
                                     // all processing steps checked, remove the processing and harvesting key
-                                    sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
-                                    sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
+                                    sid.setField(CollectionSchema.process_sxt.getSolrFieldName(), null); // setting this to null will cause a removal when doing a partial update
+                                    sid.setField(CollectionSchema.harvestkey_s.getSolrFieldName(), null);
                                     
                                     // send back to index
                                     //collectionConnector.deleteById(i);
-                                    collectionConnector.add(sid);
+                                    collectionConnector.update(sid);
                                     
-                                    int thiscount = proccount.incrementAndGet(); allcount.incrementAndGet();
+                                    long thiscount = proccount.incrementAndGet(); allcount.incrementAndGet();
                                     if (thiscount % 100 == 0) {
                                         postprocessingActivity = "postprocessed " + thiscount + " from " + count + " collection documents; " +
-                                            (thiscount * 60000 / (System.currentTimeMillis() - start)) + " ppm; " +
+                                            (thiscount * 60000L / (System.currentTimeMillis() - start)) + " ppm; " +
                                             ((System.currentTimeMillis() - start) * (count - thiscount) / thiscount / 60000) + " minutes remaining";
                                         ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
                                     }

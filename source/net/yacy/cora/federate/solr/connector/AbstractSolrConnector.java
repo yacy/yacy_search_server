@@ -506,8 +506,11 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         docOut.setField(CollectionSchema.id.name(), docIn.getFieldValue(CollectionSchema.id.name()));
         for (Entry<String, SolrInputField> entry: docIn.entrySet()) {
             if (entry.getKey().equals(CollectionSchema.id.name())) continue;
+            SolrInputField sif = entry.getValue();
             Map<String, Object> partialUpdate = new HashMap<>(1);
-            partialUpdate.put("set", entry.getValue());
+            Object value = sif.getValue();
+            docOut.removeField(entry.getKey());
+            partialUpdate.put("set", value);
             docOut.setField(entry.getKey(), partialUpdate);
         }
         return docOut;

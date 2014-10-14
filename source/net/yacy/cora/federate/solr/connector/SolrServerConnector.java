@@ -208,9 +208,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         if (this.server == null) return;
+        if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
         synchronized (this.server) {
             try {
-                if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
                 this.server.add(solrdoc, -1);
             } catch (final Throwable e) {
                 clearCaches(); // prevent further OOM if this was caused by OOM
@@ -245,11 +245,11 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
         if (this.server == null) return;
+        for (SolrInputDocument solrdoc : solrdocs) {
+            if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
+        }
         synchronized (this.server) {
             try {
-                for (SolrInputDocument solrdoc : solrdocs) {
-                    if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
-                }
                 this.server.add(solrdocs, -1);
             } catch (final Throwable e) {
                 clearCaches(); // prevent further OOM if this was caused by OOM

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
@@ -261,11 +262,26 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return sdl;
     }
     
+    /**
+     * The following schemaFieldCache is a hack-patch of a Solr internal request which is really slow.
+     * The Solr-internal method is flexible because it may respond on a real-time schema change, but that
+     * effectively never happens. In our case the schema declaration against Solr never changes.
+     */
+    private final Map<String, SchemaField> schemaFieldCache = new ConcurrentHashMap<>();
+    private final SchemaField getSchemaField(final String fieldName) {
+        SchemaField sf = schemaFieldCache.get(fieldName);
+        if (sf == null) {
+            sf = this.core.getLatestSchema().getFieldOrNull(fieldName);
+            schemaFieldCache.put(fieldName, sf);
+        }
+        return sf;
+    }
+    
     public SolrDocument doc2SolrDoc(Document doc) {
         SolrDocument solrDoc = new SolrDocument();
         for (IndexableField field : doc) {
             String fieldName = field.name();
-            SchemaField sf = this.core.getLatestSchema().getFieldOrNull(fieldName);
+            SchemaField sf = getSchemaField(fieldName); // hack-patch of this.core.getLatestSchema().getFieldOrNull(fieldName); makes it a lot faster!!
             Object val = null;
             try {
                 FieldType ft = null;
