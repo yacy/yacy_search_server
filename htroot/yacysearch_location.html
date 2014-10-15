@@ -67,13 +67,14 @@
       window.setInterval("refresh()", 1000);
     }
 
-    function zoomChanged () {
+    function zoomChanged() {
       shallZoom = false; // no automatic zoom if user hs zoomed
       refreshsearch();
     } 
       
     // called if a search is submitted
     function search() {
+      shallZoom = true;
       refreshsearch();
     }
     
@@ -128,7 +129,8 @@
       // check if any of the markers is visible on the screen.
       // this is only necessary if shallZoom = false since this would set shallZoom = true
       var bounds = searchLayer_md1.getDataExtent();
-      if (bounds == null) searchLayer_co1.getDataExtent();
+      if (bounds == null) bounds = searchLayer_co1.getDataExtent();
+      
 	  /*
       if (!shallZoom) {
         // check all markers
