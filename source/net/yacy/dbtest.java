@@ -446,11 +446,11 @@ final class memprofiler extends Thread {
     public memprofiler(final int width, final int height, final int expectedTimeSeconds, final File outputFile) {
         this.outputFile = outputFile;
         final int expectedKilobytes = 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
-        this.memChart = new ChartPlotter(width, height, "FFFFFF", "000000", "000000", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date(), null);
+        this.memChart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0x000000l, 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date(), null);
         final int timescale = 10; // steps with each 10 seconds
         final int memscale = 1024;
-        this.memChart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, 0, "FFFFFF", "555555", "SECONDS");
-        this.memChart.declareDimension(ChartPlotter.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes, 0, "FFFFFF", "555555", "KILOBYTES");
+        this.memChart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, 0, 0xFFFFFFl, 0x555555l, "SECONDS");
+        this.memChart.declareDimension(ChartPlotter.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes, 0, 0xFFFFFFl, 0x555555l, "KILOBYTES");
         this.run = true;
         this.start = System.currentTimeMillis();
     }

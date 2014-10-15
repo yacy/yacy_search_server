@@ -74,17 +74,17 @@ public class ProfilingGraph {
         final int vspace = height - topborder - bottomborder;
         final int hspace = width - leftborder - rightborder;
         final int maxtime = 600;
-        ChartPlotter chart = new ChartPlotter(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
-        chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
-        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "WORDS IN INDEXING CACHE");
+        ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
+        chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, 0x000000l, 0xCCCCCCl, "TIME/SECONDS");
+        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, 0x008800l, null , "WORDS IN INDEXING CACHE");
         if (showMemory) {
-            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, 0x0000FFl, 0xCCCCCCl, "MEMORY/MEGABYTE");
         } else {
-            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / Math.max(1, maxppm), 0, "FF0000", "CCCCCC", "INDEXING SPEED/PAGES PER MINUTE");
+            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / Math.max(1, maxppm), 0, 0xFF0000l, 0xCCCCCCl, "INDEXING SPEED/PAGES PER MINUTE");
         }
-        chart.declareDimension(ChartPlotter.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
-        chart.declareDimension(ChartPlotter.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, "888800", null , "URL");
-        chart.declareDimension(ChartPlotter.DIMENSION_ANOT2, 1, 1, 0, "888800", null , "PING");
+        chart.declareDimension(ChartPlotter.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, 0x008800l, null , "PPM [PAGES/MINUTE]");
+        chart.declareDimension(ChartPlotter.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, 0x888800l, null , "URL");
+        chart.declareDimension(ChartPlotter.DIMENSION_ANOT2, 1, 1, 0, 0x888800l, null , "PING");
 
         // draw chart
         long time;

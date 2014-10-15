@@ -50,11 +50,11 @@ public class ChartPlotter extends RasterPlotter {
     private final int[] scales = new int[]{0,0,0,0,0,0,0,0};
     private final int[] pixels = new int[]{0,0,0,0,0,0,0,0};
     private final int[] offsets = new int[]{0,0,0,0,0,0,0,0};
-    private final String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
-    private final String[] colscale = new String[]{null,null,null,null,null,null,null,null};
+    private final Long[] colnames = new Long[]{0xFFFFFFl,0xFFFFFFl,0xFFFFFFl,0xFFFFFFl,0xFFFFFFl,0xFFFFFFl,0xFFFFFFl,0xFFFFFFl};
+    private final Long[] colscale = new Long[]{null,null,null,null,null,null,null,null};
     private final String[] tablenames = new String[]{"","","","","","","",""};
 
-    public ChartPlotter(final int width, final int height, final String backgroundColor, final String foregroundColor, final String lightColor,
+    public ChartPlotter(final int width, final int height, final Long backgroundColor, final Long foregroundColor, final Long lightColor,
                       final int leftborder, final int rightborder, final int topborder, final int bottomborder,
                       final String name, final String subline) {
         super(width, height, RasterPlotter.DrawMode.MODE_REPLACE, backgroundColor);
@@ -66,11 +66,11 @@ public class ChartPlotter extends RasterPlotter {
         //this.backgroundColor = backgroundColor;
         //this.foregroundColor = foregroundColor;
         if (name != null) {
-            if (foregroundColor != null) this.setColor(Long.parseLong(foregroundColor, 16));
+            if (foregroundColor != null) this.setColor(foregroundColor);
             PrintTool.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
         }
         if (subline != null) {
-            if (lightColor != null) this.setColor(Long.parseLong(lightColor, 16));
+            if (lightColor != null) this.setColor(lightColor);
             PrintTool.print(this, width / 2 - subline.length() * 3, 14, 0, subline, -1);
         }
     }
@@ -85,7 +85,7 @@ public class ChartPlotter extends RasterPlotter {
      * @param colorScale the colour of the line drawing for the vertical scale
      * @param name printed on the vertical bar
      */
-    public void declareDimension(final int dimensionType, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
+    public void declareDimension(final int dimensionType, final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
         this.scales[dimensionType] = scale;
         this.pixels[dimensionType] = pixelperscale;
         this.offsets[dimensionType] = offset;
@@ -126,24 +126,22 @@ public class ChartPlotter extends RasterPlotter {
      * @param colorScale the colour of the line drawing for the vertical scale
      * @param name printed on the vertical bar
      */
-    private void drawHorizontalScale(final boolean top, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
+    private void drawHorizontalScale(final boolean top, final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
         final int y = (top) ? this.topborder : this.height - this.bottomborder;
         int x = this.leftborder;
         int s = offset;
-        Long colorScale_l = colorScale == null ? null : Long.parseLong(colorScale, 16);
-        Long colorNaming_l = colorNaming == null ? null : Long.parseLong(colorNaming, 16);
         while (x < this.width - this.rightborder) {
             if ((colorScale != null) && (x > this.leftborder) && (x < (this.width - this.rightborder))) {
-                setColor(colorScale_l);
+                setColor(colorScale);
                 line(x, this.topborder, x, this.height - this.bottomborder, 100);
             }
-            setColor(colorNaming_l);
+            setColor(colorNaming);
             line(x, y - 3, x, y + 3, 100);
             PrintTool.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1);
             x += pixelperscale;
             s += scale;
         }
-        setColor(colorNaming_l);
+        setColor(colorNaming);
         PrintTool.print(this, this.width - this.rightborder, (top) ? y - 9 : y + 15, 0, name, 1);
         line(this.leftborder - 4, y, this.width - this.rightborder + 4, y, 100);
     }
@@ -158,7 +156,7 @@ public class ChartPlotter extends RasterPlotter {
      * @param colorScale the colour of the line drawing for the vertical scale
      * @param name printed on the vertical bar
      */
-    private void drawVerticalScale(final boolean left, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
+    private void drawVerticalScale(final boolean left, final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
         assert pixelperscale > 0;
         assert scale > 0;
         final int x = (left) ? this.leftborder : this.width - this.rightborder;
@@ -166,14 +164,12 @@ public class ChartPlotter extends RasterPlotter {
         int s = offset;
         String s1;
         int s1max = 0;
-        Long colorScale_l = colorScale == null ? null : Long.parseLong(colorScale, 16);
-        Long colorNaming_l = colorNaming == null ? null : Long.parseLong(colorNaming, 16);
         while (y > this.topborder) {
             if ((colorScale != null) && (y > this.topborder) && (y < (this.height - this.bottomborder))) {
-                setColor(colorScale_l);
+                setColor(colorScale);
                 line(this.leftborder, y, this.width - this.rightborder, y, 100);
             }
-            setColor(colorNaming_l);
+            setColor(colorNaming);
             line(x - 3, y, x + 3, y, 100);
             s1 = (s >= 1000000 && s % 10000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
@@ -181,27 +177,27 @@ public class ChartPlotter extends RasterPlotter {
             y -= pixelperscale;
             s += scale;
         }
-        setColor(colorNaming_l);
+        setColor(colorNaming);
         PrintTool.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, this.topborder, 90, name, 1);
         line(x, this.topborder - 4, x, this.height - this.bottomborder + 4, 100);
     }
 
     public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
-        final String bg = "FFFFFF";
-        final String fg = "000000";
-        final String scale = "CCCCCC";
-        final String green = "008800";
-        final String blue = "0000FF";
+        final long bg = 0xFFFFFF;
+        final long fg = 0x000000;
+        final long scale = 0xCCCCCC;
+        final long green = 0x008800;
+        final long blue = 0x0000FF;
         final ChartPlotter ip = new ChartPlotter(660, 240, bg, fg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", "");
         ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, fg, scale, "TIME/SECONDS");
         //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
         ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, green, scale , "PPM [PAGES/MINUTE]");
         ip.declareDimension(DIMENSION_RIGHT, 100, 20, 0, blue, scale, "MEMORY/MEGABYTE");
-        ip.setColor(Long.parseLong(green, 16));
+        ip.setColor(green);
         ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, 5, null, 0);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, -130, 200);
-        ip.setColor(Long.parseLong(blue, 16));
+        ip.setColor(blue);
         ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, -50, 300, 2, null, 0);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_RIGHT, -80, 100, -50, 300);
         //ip.print(100, 100, 0, "TEXT", true);

@@ -106,9 +106,9 @@ public class NetworkHistory {
         final int bottomborder = 20;
         final int vspace = height - topborder - bottomborder;
         final int leftscale = (maxpeers / 100) * 10;
-        ChartPlotter chart = new ChartPlotter(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "YACY NETWORK HISTORY", "IN THE LAST 48 HOURS");
-        chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/HOURS");
-        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxpeers, 0, "008800", null , "PEERS");
+        ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, "YACY NETWORK HISTORY", "IN THE LAST 48 HOURS");
+        chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, 0x000000l, 0xCCCCCCl, "TIME/HOURS");
+        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxpeers, 0, 0x008800l, null , "PEERS");
         
         // write the data
         float x0, x1;

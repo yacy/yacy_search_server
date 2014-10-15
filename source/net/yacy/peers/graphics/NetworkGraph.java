@@ -59,27 +59,27 @@ public class NetworkGraph {
     private static int shortestName = 10;
     private static int longestName = 30;
 
-    public  static final String COL_BACKGROUND     = "FFFFFF";
-    public  static final String COL_DHTCIRCLE      = "004018";
-    private static final String COL_HEADLINE       = "FFFFFF";
-    private static final String COL_ACTIVE_DOT     = "000040";
-    private static final String COL_ACTIVE_LINE    = "113322";
-    private static final String COL_ACTIVE_TEXT    = "226644";
-    private static final String COL_PASSIVE_DOT    = "201010";
-    private static final String COL_PASSIVE_LINE   = "443333";
-    private static final String COL_PASSIVE_TEXT   = "663333";
-    private static final String COL_POTENTIAL_DOT  = "002000";
-    private static final String COL_POTENTIAL_LINE = "224422";
-    private static final String COL_POTENTIAL_TEXT = "336633";
-    private static final String COL_MYPEER_DOT     = "FF0000";
-    private static final String COL_MYPEER_LINE    = "FFAAAA";
-    private static final String COL_MYPEER_TEXT    = "FFCCCC";
-    private static final String COL_DHTOUT         = "440000";
-    private static final String COL_DHTIN          = "008800";
+    public  static final long COL_BACKGROUND     = 0xFFFFFF;
+    public  static final long COL_DHTCIRCLE      = 0x004018;
+    private static final long COL_HEADLINE       = 0xFFFFFF;
+    private static final long COL_ACTIVE_DOT     = 0x000040;
+    private static final long COL_ACTIVE_LINE    = 0x113322;
+    private static final long COL_ACTIVE_TEXT    = 0x226644;
+    private static final long COL_PASSIVE_DOT    = 0x201010;
+    private static final long COL_PASSIVE_LINE   = 0x443333;
+    private static final long COL_PASSIVE_TEXT   = 0x663333;
+    private static final long COL_POTENTIAL_DOT  = 0x002000;
+    private static final long COL_POTENTIAL_LINE = 0x224422;
+    private static final long COL_POTENTIAL_TEXT = 0x336633;
+    private static final long COL_MYPEER_DOT     = 0xFF0000;
+    private static final long COL_MYPEER_LINE    = 0xFFAAAA;
+    private static final long COL_MYPEER_TEXT    = 0xFFCCCC;
+    private static final long COL_DHTOUT         = 0x440000;
+    private static final long COL_DHTIN          = 0x008800;
 
-    private static final String COL_BORDER         = "000000";
-    private static final String COL_NORMAL_TEXT    = "000000";
-    private static final String COL_LOAD_BG        = "F7F7F7";
+    private static final long COL_BORDER         = 0x000000;
+    private static final long COL_NORMAL_TEXT    = 0x000000;
+    private static final long COL_LOAD_BG        = 0xF7F7F7;
 
     /** Private constructor to avoid instantiation of utility class. */
     private NetworkGraph() { }
@@ -176,7 +176,7 @@ public class NetworkGraph {
         return eventPicture;
     }
 
-    public static RasterPlotter getNetworkPicture(final SeedDB seedDB, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final int coronaangle, final long communicationTimeout, final String networkName, final String networkTitle, final String bgcolor, final int cyc) {
+    public static RasterPlotter getNetworkPicture(final SeedDB seedDB, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final int coronaangle, final long communicationTimeout, final String networkName, final String networkTitle, final long bgcolor, final int cyc) {
         return drawNetworkPicture(seedDB, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, networkName, networkTitle, bgcolor, cyc);
     }
 
@@ -185,7 +185,7 @@ public class NetworkGraph {
             final int passiveLimit, final int potentialLimit,
             final int maxCount, final int coronaangle,
             final long communicationTimeout,
-            final String networkName, final String networkTitle, final String color_back,
+            final String networkName, final String networkTitle, final long color_back,
             final int cyc) {
 
         final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
@@ -197,7 +197,7 @@ public class NetworkGraph {
         final int outerradius = maxradius - 20;
 
         // draw network circle
-        networkPicture.setColor(Long.parseLong(COL_DHTCIRCLE, 16));
+        networkPicture.setColor(COL_DHTCIRCLE);
         networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 100);
 
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
@@ -288,7 +288,7 @@ public class NetworkGraph {
         }
 
         // draw description
-        networkPicture.setColor(Long.parseLong(COL_HEADLINE, 16));
+        networkPicture.setColor(COL_HEADLINE);
         PrintTool.print(networkPicture, 2, 6, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
         PrintTool.print(networkPicture, 2, 14, 0, networkTitle.toUpperCase(), -1);
         PrintTool.print(networkPicture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
@@ -300,17 +300,16 @@ public class NetworkGraph {
         return networkPicture;
     }
 
-    private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final Seed mySeed, final Seed otherSeed, final String colorLine, final int coronaangle, final boolean out, final int cyc) {
+    private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final Seed mySeed, final Seed otherSeed, final long colorLine, final int coronaangle, final boolean out, final int cyc) {
         // find positions (== angle) of the two peers
         final int angleMy = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(mySeed.hash)) / DOUBLE_LONG_MAX_VALUE);
         final int angleOther = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(otherSeed.hash)) / DOUBLE_LONG_MAX_VALUE);
-        Long colorLine_l = Long.parseLong(colorLine, 16);
         // paint the line from my peer to the inner border of the network circle
-        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out, colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out, colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
         // paint the line from the other peer to the inner border of the network circle
-        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleOther, out, colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleOther, out, colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
         // paint a line between the two inner border points of my peer and the other peer
-        img.arcConnect(centerX, centerY, innerradius - 20, angleMy, angleOther, out, colorLine_l, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true, otherSeed.getName(), colorLine_l);
+        img.arcConnect(centerX, centerY, innerradius - 20, angleMy, angleOther, out, colorLine, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true, otherSeed.getName(), colorLine);
     }
 
     private static class drawNetworkPicturePeerJob {
@@ -318,14 +317,14 @@ public class NetworkGraph {
         private final RasterPlotter img;
         private final int centerX, centerY, innerradius, outerradius, coronaangle;
         private final Seed seed;
-        private final String colorDot, colorLine, colorText;
+        private final long colorDot, colorLine, colorText;
         private final double cyc;
         //public drawNetworkPicturePeerJob() {} // used to produce a poison pill
         public drawNetworkPicturePeerJob(
                         final RasterPlotter img, final int centerX, final int centerY,
                         final int innerradius, final int outerradius,
                         final Seed seed,
-                        final String colorDot, final String colorLine, final String colorText,
+                        final long colorDot, final long colorLine, final long colorText,
                         final int coronaangle,
                         final double cyc) {
             this.img = img;
@@ -349,15 +348,15 @@ public class NetworkGraph {
             int linelength = 20 + this.outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(this.seed.hash.hashCode() % 20)) / 80;
             if (linelength > this.outerradius) linelength = this.outerradius;
             int dotsize = 2 + (int) (this.seed.getLinkCount() / 2000000L);
-            if (this.colorDot.equals(COL_MYPEER_DOT)) dotsize = dotsize + 4;
+            if (this.colorDot == COL_MYPEER_DOT) dotsize = dotsize + 4;
             if (dotsize > 18) dotsize = 18;
             // draw dot
-            this.img.setColor(Long.parseLong(this.colorDot, 16));
+            this.img.setColor(this.colorDot);
             this.img.arcDot(this.centerX, this.centerY, this.innerradius, angle, dotsize);
             // draw line to text
-            this.img.arcLine(this.centerX, this.centerY, this.innerradius + 18, this.innerradius + linelength, angle, true, Long.parseLong(this.colorLine, 16), Long.parseLong("444444", 16), 12, this.coronaangle / 30, 0, true);
+            this.img.arcLine(this.centerX, this.centerY, this.innerradius + 18, this.innerradius + linelength, angle, true, this.colorLine, 0x444444l, 12, this.coronaangle / 30, 0, true);
             // draw text
-            this.img.setColor(Long.parseLong(this.colorText, 16));
+            this.img.setColor(this.colorText);
             PrintTool.arcPrint(this.img, this.centerX, this.centerY, this.innerradius + linelength, angle, name);
 
             // draw corona around dot for crawling activity
