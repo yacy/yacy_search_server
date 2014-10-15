@@ -240,7 +240,7 @@ public class Table_API_p {
         try {
             tablesize = sb.tables.size(WorkTables.TABLE_API_NAME);
             final Iterator<Tables.Row> plainIterator = sb.tables.iterator(WorkTables.TABLE_API_NAME);
-            final Iterator<Tables.Row> mapIterator = sb.tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
+            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
             Tables.Row r;
             boolean dark = true;
             boolean scheduledactions = false;

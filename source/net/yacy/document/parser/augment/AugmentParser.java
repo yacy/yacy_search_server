@@ -14,6 +14,7 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.rdfa.impl.RDFaParser;
+import net.yacy.kelondro.blob.Tables;
 import net.yacy.search.Switchboard;
 
 
@@ -64,7 +65,7 @@ public class AugmentParser extends AbstractParser implements Parser {
         Iterator<net.yacy.kelondro.blob.Tables.Row> it;
         try {
             it = Switchboard.getSwitchboard().tables.iterator("aggregatedtags");
-            it = Switchboard.getSwitchboard().tables.orderBy(it, -1, "timestamp_creation").iterator();
+            it = Tables.orderBy(it, -1, "timestamp_creation").iterator();
             while (it.hasNext()) {
                 net.yacy.kelondro.blob.Tables.Row r = it.next();
                 if (r.get("url", "").equals(url.toNormalform(false))) {
