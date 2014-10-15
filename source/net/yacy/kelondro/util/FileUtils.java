@@ -403,6 +403,7 @@ public final class FileUtils {
     private final static Pattern escaped_backslash = Pattern.compile(Pattern.quote("\\"), Pattern.LITERAL);
 
     public static void saveMap(final File file, final Map<String, String> props, final String comment) {
+    	boolean err = false;
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
         try {
@@ -428,15 +429,17 @@ public final class FileUtils {
             pw.println("# EOF");
         } catch (final  FileNotFoundException e ) {
             ConcurrentLog.warn("FileUtils", e.getMessage(), e);
+            err = true;
         } catch (final  UnsupportedEncodingException e ) {
             ConcurrentLog.warn("FileUtils", e.getMessage(), e);
+            err = true;
         } finally {
             if ( pw != null ) {
                 pw.close();
             }
             pw = null;
         }
-        try {
+        if (!err) try {
             forceMove(tf, file);
         } catch (final  IOException e ) {
             // ignore
