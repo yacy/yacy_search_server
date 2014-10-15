@@ -1,14 +1,30 @@
-//
-//$LastChangedDate$
-//$LastChangedRevision$
-//$LastChangedBy$
-//
+/**
+ *  osm
+ *  Copyright 2008 by Michael Peter Christen
+ *  First released 13.02.2011 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.OSMTile;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
+import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
+import net.yacy.visualization.RasterPlotter.DrawMode;
 
 public class osm {
 
@@ -29,7 +45,19 @@ public class osm {
         }
 
         final OSMTile.tileCoordinates coord = new OSMTile.tileCoordinates(lat, lon, zoom);
-        return OSMTile.getCombinedTiles(coord, width, height);
+        RasterPlotter map = OSMTile.getCombinedTiles(coord, width, height);
+        map.setDrawMode(DrawMode.MODE_SUB);
+        map.setColor(0xffffff);
+        /*
+         * copyright notice on OSM Tiles
+         * According to http://www.openstreetmap.org/copyright/ the (C) of the map tiles is (CC BY-SA)
+         * while the OpenStreetMap raw data is licensed with (ODbL) http://opendatacommons.org/licenses/odbl/ 
+         * Map tiles shall be underlined with the statement "(C) OpenStreetMap contributors". In our 5-dot character
+         * set the lowercase letters do not look good, so we use uppercase only.
+         * The (C) symbol is not available in our font, so we use the letters (C) instead.
+         */
+        PrintTool.print(map, map.getWidth() - 6, map.getHeight() - 6, 0, "(C) OPENSTREETMAP CONTRIBUTORS", 1);
+        return map;
    }
 
 }
