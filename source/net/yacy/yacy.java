@@ -579,6 +579,7 @@ public final class yacy {
     public static void main(String args[]) {
 
     	try {
+    	    System.setProperty("jsse.enableSNIExtension", "false"); // fix a ssl problem in Java 1.7, see http://teknosrc.com/javax-net-ssl-sslprotocolexception-handshake-alert-unrecognized_name-solved/
 
 	        // check assertion status
 	        //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
