@@ -21,6 +21,7 @@
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Seed;
@@ -59,6 +60,10 @@ public final class seedlist {
             v = new ArrayList<Seed>(1);
             Seed s = sb.peers.get(post.get("id"));
             if (s != null) v.add(s);
+        } else if (post != null && post.containsKey("name")) {
+            v = new ArrayList<Seed>(1);
+            Seed s = sb.peers.lookupByName(post.get("name"));
+            if (s != null) v.add(s);
         } else {
             v= sb.peers.getSeedlist(maxcount, includeme, nodeonly, minversion);
         }
@@ -83,6 +88,8 @@ public final class seedlist {
             for (int i = 0; i < v.size(); i++) {
                 Seed seed = v.get(i);
                 if (peername != null && !peername.equals(seed.getName())) continue;
+                Set<String> ips = seed.getIPs();
+                if (ips == null || ips.size() == 0) continue;
                 prop.putJSON("peers_" + count + "_map_0_k", Seed.HASH);
                 prop.putJSON("peers_" + count + "_map_0_v", seed.hash);
                 prop.put("peers_" + count + "_map_0_c", 1);
@@ -91,13 +98,18 @@ public final class seedlist {
                 if (!addressonly) {
                     for (Map.Entry<String, String> m: map.entrySet()) {
                         prop.putJSON("peers_" + count + "_map_" + c + "_k", m.getKey());
-                        prop.putJSON("peers_" + count + "_map_" + c + "_v", m.getValue());
+                        prop.put("peers_" + count + "_map_" + c + "_v", '"' + serverObjects.toJSON(m.getValue()) + '"');
                         prop.put("peers_" + count + "_map_" + c + "_c", 1);
                         c++;
                     }
                 }
+                // construct a list of ips
+                StringBuilder a = new StringBuilder();
+                a.append('[');
+                for (String ip: ips) a.append('"').append(serverObjects.toJSON(seed.getPublicAddress(ip))).append('"').append(',');
+                a.setCharAt(a.length()-1, ']');
                 prop.putJSON("peers_" + count + "_map_" + c + "_k", "Address");
-                prop.putJSON("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress(seed.getIP()));
+                prop.put("peers_" + count + "_map_" + c + "_v", a.toString());
                 prop.put("peers_" + count + "_map_" + c + "_c", 0);
                 prop.put("peers_" + count + "_map", c + 1);
                 prop.put("peers_" + count + "_c", 1);
@@ -111,9 +123,10 @@ public final class seedlist {
             for (int i = 0; i < v.size(); i++) {
                 Seed seed = v.get(i);
                 if (peername != null && !peername.equals(seed.getName())) continue;
+                Set<String> ips = seed.getIPs();
+                if (ips == null || ips.size() == 0) continue;
                 prop.putXML("peers_" + count + "_map_0_k", Seed.HASH);
                 prop.putXML("peers_" + count + "_map_0_v", seed.hash);
-                prop.put("peers_" + count + "_map_0_c", 1);
                 Map<String, String> map = seed.getMap();
                 int c = 1;
                 if (!addressonly) {
@@ -123,10 +136,12 @@ public final class seedlist {
                         c++;
                     }
                 }
-                prop.putXML("peers_" + count + "_map_" + c + "_k", "Address");
-                prop.putXML("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress(seed.getIP()));
-                prop.put("peers_" + count + "_map_" + c + "_c", 0);
-                prop.put("peers_" + count + "_map", c + 1);
+                for (String ip: ips) {
+                    prop.putXML("peers_" + count + "_map_" + c + "_k", "Address");
+                    prop.putXML("peers_" + count + "_map_" + c + "_v", seed.getPublicAddress(ip));
+                    c++;
+                }
+                prop.put("peers_" + count + "_map", c);
                 count++;
             }
     
