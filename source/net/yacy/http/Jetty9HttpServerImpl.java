@@ -72,6 +72,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         ServerConnector connector = new ServerConnector(server);
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
+        connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
         server.addConnector(connector);
         
         // add ssl/https connector
@@ -95,6 +96,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                         new HttpConnectionFactory(https_config));
                 sslConnector.setPort(sslport);
                 sslConnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
+                sslConnector.setIdleTimeout(9000); // timout in ms when no bytes send / received
 
                 server.addConnector(sslConnector);
                 ConcurrentLog.info("SERVER", "SSL support initialized successfully on port " + sslport);
