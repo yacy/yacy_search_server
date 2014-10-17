@@ -989,7 +989,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.CLEANUP_METHOD_START,
                 SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT,
                 SwitchboardConstants.CLEANUP_METHOD_FREEMEM,
-                60000,
+                30000,
                 Long.MAX_VALUE,
                 10000,
                 Long.MAX_VALUE),
@@ -2312,7 +2312,7 @@ public final class Switchboard extends serverSwitch {
                     if (postprocessing) {
                         // run postprocessing on all profiles
                         ReferenceReportCache rrCache = index.getReferenceReportCache();
-                        proccount += collection1Configuration.postprocessing(index, rrCache, null);
+                        proccount += collection1Configuration.postprocessing(index, rrCache, null, getConfigBool("postprocessing.partialUpdate", true));
                         this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                     }
                     this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
@@ -2325,7 +2325,7 @@ public final class Switchboard extends serverSwitch {
                         if (postprocessing) {
                             // run postprocessing on these profiles
                             ReferenceReportCache rrCache = index.getReferenceReportCache();
-                            for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash);
+                            for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash, getConfigBool("postprocessing.partialUpdate", true));
                             this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                         }
                         this.crawler.cleanProfiles(deletionCandidates);

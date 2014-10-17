@@ -994,7 +994,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param urlCitation
      * @return
      */
-    public int postprocessing(final Segment segment, final ReferenceReportCache rrCache, final String harvestkey) {
+    public int postprocessing(final Segment segment, final ReferenceReportCache rrCache, final String harvestkey, final boolean byPartialUpdate) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
         if (!segment.connectedCitation() && !segment.fulltext().useWebgraph()) return 0;
         final SolrConnector collectionConnector = segment.fulltext().getDefaultConnector();
@@ -1262,6 +1262,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     CollectionSchema.url_protocol_s.getSolrFieldName() + " asc" // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
                     : null, // null sort is faster!
                     0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true,
+                    byPartialUpdate ? 
+                    new String[]{
                     CollectionSchema.id.getSolrFieldName(),
                     CollectionSchema.sku.getSolrFieldName(),
                     CollectionSchema.harvestkey_s.getSolrFieldName(),
@@ -1279,7 +1281,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     CollectionSchema.url_protocol_s.getSolrFieldName(),
                     CollectionSchema.httpstatus_i.getSolrFieldName(),
                     CollectionSchema.inboundlinkscount_i.getSolrFieldName(),
-                    CollectionSchema.robots_i.getSolrFieldName());
+                    CollectionSchema.robots_i.getSolrFieldName()} :
+                    new String[0]);
             final AtomicInteger proccount = new AtomicInteger();
             final AtomicInteger proccount_referencechange = new AtomicInteger();
             final AtomicInteger proccount_citationchange = new AtomicInteger();
@@ -1305,7 +1308,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                 try {
                                     DigestURL url = new DigestURL(u, ASCII.getBytes(i));
                                     byte[] id = url.hash();
-                                    SolrInputDocument sid = new SolrInputDocument(); //collection.toSolrInputDocument(doc, omitFields);
+                                    SolrInputDocument sid = byPartialUpdate ? new SolrInputDocument() : collection.toSolrInputDocument(doc, omitFields);
                                     sid.setField(CollectionSchema.id.getSolrFieldName(), i);
                                     for (Object tag: proctags) try {
                                         
@@ -1346,13 +1349,24 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                     }
                                     
                                     // all processing steps checked, remove the processing and harvesting key
-                                    sid.setField(CollectionSchema.process_sxt.getSolrFieldName(), null); // setting this to null will cause a removal when doing a partial update
-                                    sid.setField(CollectionSchema.harvestkey_s.getSolrFieldName(), null);
+                                    if (byPartialUpdate) {
+                                        sid.setField(CollectionSchema.process_sxt.getSolrFieldName(), null); // setting this to null will cause a removal when doing a partial update
+                                        sid.setField(CollectionSchema.harvestkey_s.getSolrFieldName(), null);
+                                    } else {
+                                        sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
+                                        sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
+                                    }
+                                    // with standard solr fields selected, the sid now contains the fields
+                                    // id, http_unique_b, www_unique_b, references_i, references_internal_i, references_external_i, references_exthosts_i, host_extent_i
+                                    // and the value for host_extent_i is by default 2147483647
                                     
                                     // send back to index
                                     //collectionConnector.deleteById(i);
-                                    collectionConnector.update(sid);
-                                    
+                                    if (byPartialUpdate) {
+                                        collectionConnector.update(sid);
+                                    } else {
+                                        collectionConnector.add(sid);
+                                    }
                                     long thiscount = proccount.incrementAndGet(); allcount.incrementAndGet();
                                     if (thiscount % 100 == 0) {
                                         postprocessingActivity = "postprocessed " + thiscount + " from " + count + " collection documents; " +
