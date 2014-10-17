@@ -58,25 +58,32 @@ public class ErrorCache {
     public ErrorCache(final Fulltext fulltext) {
         this.fulltext = fulltext;
         this.cache = new LinkedHashMap<String, CollectionConfiguration.FailDoc>();
-        try {
-            // fill stack with latest values
-            final SolrQuery params = new SolrQuery();
-            params.setParam("defType", "edismax");
-            params.setStart(0);
-            params.setRows(100);
-            params.setFacet(false);
-            params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
-            params.setFields(CollectionSchema.id.getSolrFieldName());
-            params.setQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
-            params.set(CommonParams.DF, CollectionSchema.id.getSolrFieldName()); // DisMaxParams.QF or CommonParams.DF must be given
-            SolrDocumentList docList =  fulltext.getDefaultConnector().getDocumentListByParams(params);
-            if (docList != null) for (int i = docList.size() - 1; i >= 0; i--) {
-                SolrDocument doc = docList.get(i);
-                String hash = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                this.cache.put(hash, null);
+        // concurrently fill stack with latest values
+        new Thread() {
+            @Override
+            public void run() {
+                final SolrQuery params = new SolrQuery();
+                params.setParam("defType", "edismax");
+                params.setStart(0);
+                params.setRows(1000);
+                params.setFacet(false);
+                params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
+                params.setFields(CollectionSchema.id.getSolrFieldName());
+                params.setQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
+                params.set(CommonParams.DF, CollectionSchema.id.getSolrFieldName()); // DisMaxParams.QF or CommonParams.DF must be given
+                SolrDocumentList docList;
+                try {
+                    docList = fulltext.getDefaultConnector().getDocumentListByParams(params);
+                    if (docList != null) for (int i = docList.size() - 1; i >= 0; i--) {
+                        SolrDocument doc = docList.get(i);
+                        String hash = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                        cache.put(hash, null);
+                    }
+                } catch (IOException e) {
+                    ConcurrentLog.logException(e);
+                }
             }
-        } catch (final Throwable e) {
-        }
+        }.start();
     }
 
     public void clearCache() {
