@@ -91,7 +91,7 @@ public final class seedlist {
                 Set<String> ips = seed.getIPs();
                 if (ips == null || ips.size() == 0) continue;
                 prop.putJSON("peers_" + count + "_map_0_k", Seed.HASH);
-                prop.putJSON("peers_" + count + "_map_0_v", seed.hash);
+                prop.put("peers_" + count + "_map_0_v", '"' + serverObjects.toJSON(seed.hash) + '"');
                 prop.put("peers_" + count + "_map_0_c", 1);
                 Map<String, String> map = seed.getMap();
                 int c = 1;
