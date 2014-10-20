@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <peers>
 #{peers}#
-  <seed>
+<seed>
 #{map}#
-    <#[k]#>#[v]#</#[k]#>
+<#[k]#>#[v]#</#[k]#>
 #{/map}#
-  </seed>
+</seed>
 #{/peers}#
 </peers>
