@@ -289,16 +289,17 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * removes stale connections
      */
     public static void cleanUp() {
-    	cleanup(getAllConnections().iterator());
-    	cleanup(getServerConnections().iterator());
+    	cleanup(getAllConnections());
+    	cleanup(getServerConnections());
     }
     
-    private static void cleanup(final Iterator<ConnectionInfo> iter) {
+    private static void cleanup(final Set<ConnectionInfo> connectionSet) {
+    	final Iterator<ConnectionInfo> iter = connectionSet.iterator();
     	synchronized (iter) { 
             while (iter.hasNext()) try {
                 ConnectionInfo con = iter.next();
                 if(con.getLifetime() > staleAfterMillis) {
-                	getAllConnections().remove(con);
+                	connectionSet.remove(con);
                 }
             } catch (ConcurrentModificationException e) {}
         }
