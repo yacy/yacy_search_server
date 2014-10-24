@@ -33,6 +33,12 @@ public class Conjunction extends AbstractOperations implements Operations {
         super("AND");
     }
 
+    public Conjunction(final Term t1, final Term t2) {
+        super("AND");
+        this.addOperand(t1);
+        this.addOperand(t2);
+    }
+    
     @Override
     public Object clone() {
         Conjunction c = new Conjunction();

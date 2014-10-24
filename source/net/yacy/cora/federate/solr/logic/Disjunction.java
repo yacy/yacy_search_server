@@ -32,6 +32,12 @@ public class Disjunction extends AbstractOperations implements Operations {
     public Disjunction() {
         super("OR");
     }
+    
+    public Disjunction(final Term t1, final Term t2) {
+        super("OR");
+        this.addOperand(t1);
+        this.addOperand(t2);
+    }
 
     @Override
     public Object clone() {

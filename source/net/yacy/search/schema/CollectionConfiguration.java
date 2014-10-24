@@ -61,10 +61,13 @@ import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
+import net.yacy.cora.federate.solr.logic.BooleanLiteral;
+import net.yacy.cora.federate.solr.logic.CatchallLiteral;
 import net.yacy.cora.federate.solr.logic.Conjunction;
 import net.yacy.cora.federate.solr.logic.Disjunction;
-import net.yacy.cora.federate.solr.logic.Literal;
+import net.yacy.cora.federate.solr.logic.LongLiteral;
 import net.yacy.cora.federate.solr.logic.Negation;
+import net.yacy.cora.federate.solr.logic.StringLiteral;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -1442,9 +1445,19 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     
     public void postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
+        // term to describe documents which are indexable:
+        // - no noindex in meta oder x-robots
+        // - no canonical-tag
+        Conjunction ValidDocTermTemplate = new Conjunction();
+        ValidDocTermTemplate.addOperand(new LongLiteral(CollectionSchema.httpstatus_i, 200));
+        ValidDocTermTemplate.addOperand(new Disjunction(new Negation(new CatchallLiteral(CollectionSchema.canonical_equal_sku_b)), new BooleanLiteral(CollectionSchema.canonical_equal_sku_b, true)));
+        ValidDocTermTemplate.addOperand(new Negation(new LongLiteral(CollectionSchema.robots_i, 8))); // bit 3 (noindex)
+        ValidDocTermTemplate.addOperand(new Negation(new LongLiteral(CollectionSchema.robots_i, 24))); // bit 3 + 4 (noindex + nofollow)
+        ValidDocTermTemplate.addOperand(new Negation(new LongLiteral(CollectionSchema.robots_i, 512))); // bit 9 (noindex)
+        ValidDocTermTemplate.addOperand(new Negation(new LongLiteral(CollectionSchema.robots_i, 1536))); // bit 9 + 10 (noindex + nofollow)
+        
         String urlhash = ASCII.String(url.hash());
         String hostid = url.hosthash();
-        Conjunction con = new Conjunction();
         Disjunction dnf = new Disjunction();
         CollectionSchema[][] doccheckschema = new CollectionSchema[][]{
                 {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
@@ -1460,12 +1473,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (signature == null) continue uniquecheck;
                 //con.addOperand(new Negation(new Literal(CollectionSchema.id, urlhash)));
                 //con.addOperand(new Literal(CollectionSchema.host_id_s, hostid));
-                dnf.addOperand(new Literal(signaturefield, signature.toString()));
+                dnf.addOperand(new LongLiteral(signaturefield, signature));
             }
         }
+        Conjunction con = (Conjunction) ValidDocTermTemplate.clone();
         con.addOperand(dnf);
-        con.addOperand(new Negation(new Literal(CollectionSchema.id, urlhash)));
-        con.addOperand(new Literal(CollectionSchema.host_id_s, hostid));
+        con.addOperand(new Negation(new StringLiteral(CollectionSchema.id, urlhash)));
+        con.addOperand(new StringLiteral(CollectionSchema.host_id_s, hostid));
         String query = con.toString();
         SolrDocumentList docsAkk;
         try {
@@ -1484,7 +1498,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // lookup the document with the same signature
                 Long signature = (Long) doc.getFieldValue(signaturefield.getSolrFieldName());
                 if (signature == null) continue uniquecheck;
-                SolrDocumentList docs = new Literal(signaturefield, signature.toString()).apply(docsAkk);
+                SolrDocumentList docs = new StringLiteral(signaturefield, signature.toString()).apply(docsAkk);
                 if (docs.getNumFound() == 0) {
                     sid.setField(uniquefield.getSolrFieldName(), true);
                     sid.setField(countfield.getSolrFieldName(), 1);
@@ -1525,17 +1539,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         continue uniquecheck;
                     }
                     try {
-                        String doccountquery = 
-                                CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hostid + "\" AND " +
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":8 AND " + // bit 3 (noindex)
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":24 AND " + // bit 3 + 4 (noindex + nofollow)
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":512 AND " + // bit 9 (noindex)
-                                "-" + CollectionSchema.robots_i.getSolrFieldName() + ":1536 AND " + // bit 9 + 10 (noindex + nofollow)
-                                "((-" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":" + AbstractSolrConnector.CATCHALL_TERM + ") OR (" + CollectionSchema.canonical_equal_sku_b.getSolrFieldName() + ":true)) AND " +
-                                CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " +
-                                "-" + CollectionSchema.id.getSolrFieldName() + ":\"" + urlhash + "\" AND " +
-                                signaturefield.getSolrFieldName() + ":\"" + signature.toString() + "\"";
-                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery(doccountquery);
+                        Conjunction doccountterm = (Conjunction) ValidDocTermTemplate.clone();
+                        doccountterm.addOperand(new Negation(new StringLiteral(CollectionSchema.id, urlhash)));
+                        doccountterm.addOperand(new StringLiteral(CollectionSchema.host_id_s, hostid));
+                        doccountterm.addOperand(new LongLiteral(signaturefield, signature));
+                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery(doccountterm.toString());
                         sid.setField(uniquefield.getSolrFieldName(), doccount  == 0);
                     } catch (final IOException e) {}
                 }

@@ -20,36 +20,9 @@
 
 package net.yacy.cora.federate.solr.logic;
 
-import org.apache.solr.common.SolrDocument;
+public abstract class Literal extends AbstractTerm implements Term {
 
-import net.yacy.cora.federate.solr.SchemaDeclaration;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
-
-public class Literal extends AbstractTerm implements Term {
-
-    private SchemaDeclaration key;
-    private String value;
-    
-    public Literal(final SchemaDeclaration key, final String value) {
-        this.key = key;
-        this.value = value;
-    }
-
-    @Override
-    public Object clone() {
-        return new Literal(this.key, this.value);
-    }
-
-    @Override
-    public boolean equals(Object otherTerm) {
-        if (!(otherTerm instanceof Literal)) return false;
-        Literal o = (Literal) otherTerm;
-        return this.key.equals(o.key) && this.value.equals(o.value);
-    }
-    
-    @Override
-    public int hashCode() {
-        return key.hashCode() + value.hashCode();
+    public Literal() {
     }
     
     /**
@@ -61,31 +34,6 @@ public class Literal extends AbstractTerm implements Term {
     @Override
     public int weight() {
         return 1;
-    }
-    
-    /**
-     * create a Solr query string from this literal
-     * @return a string which is a Solr query string
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.key.getSolrFieldName());
-        sb.append(':').append('"').append(this.value).append('"');
-        return sb.toString();
-    }
-    
-    /**
-     * check if the key/value pair of this literal occurs in the SolrDocument
-     * @param doc the document to match to this literal
-     * @return true, if the key of this literal is contained in the document and the
-     *   value equals (does not equal) with the value if this literal (if the signature is false)
-     */
-    @Override
-    public boolean matches(SolrDocument doc) {
-        Object v = doc.getFieldValue(this.key.getSolrFieldName());
-        if (v == null) return false;
-        return this.value.equals(AbstractSolrConnector.CATCHALL_TERM) || v.toString().matches(this.value);
     }
     
     @Override

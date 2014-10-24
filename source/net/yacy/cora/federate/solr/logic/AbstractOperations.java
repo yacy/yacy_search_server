@@ -78,7 +78,6 @@ public abstract class AbstractOperations extends AbstractTerm implements Operati
     public Term lightestRewrite() {
         return this;
     }
-    
 
     /**
      * create a Solr query string from this conjunction
@@ -86,12 +85,18 @@ public abstract class AbstractOperations extends AbstractTerm implements Operati
      */
     @Override
     public String toString() {
+        if (this.terms.size() == 0) return "";
         StringBuilder sb = new StringBuilder();
-        for (Term term: this.terms) {
-            if (sb.length() == 0) sb.append('('); else sb.append(") ").append(this.operandName).append(" (");
-            sb.append(term.toString());
+        if (this.terms.size() == 1) {
+            sb.append(terms.iterator().next().toString());
+        } else {
+            sb.append('(');
+            for (Term term: this.terms) {
+                if (sb.length() > 1) sb.append(' ').append(this.operandName).append(' ');
+                sb.append(term.toString());
+            }
+            sb.append(')');
         }
-        sb.append(')');
         return sb.toString();
     }
 }
