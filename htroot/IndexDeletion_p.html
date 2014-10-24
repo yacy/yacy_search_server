@@ -103,7 +103,7 @@
     </fieldset>
     </form>
     
-    <form id="IndexDeletionQuery" action="IndexDeletion_p.html" method="get" accept-charset="UTF-8">
+    <form id="IndexDeletionQuery" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>Delete by Solr Query</legend>
       <p>This is the most generic option: select a set of documents using a solr query.</p>
@@ -118,7 +118,7 @@
         </dd>
         <dt>q=</dt>
         <dd>
-        <input type="text" name="querydelete" id="querydelete" value="#[querydelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-querydelete');d.disabled=true;d.className='btn btn-default';"/>
+          <textarea name="querydelete" id="querydelete" cols="64" rows="3" size="41" onClick="d=document.getElementById('engage-querydelete');d.disabled=true;d.className='btn btn-default';">#[querydelete]#</textarea>
         </dd>
         <dt><input type="submit" name="simulate-querydelete" value="Simulate Deletion" class="btn btn-primary" title="no actual deletion, generates only a deletion count"/></dt>
         <dd><input type="submit" name="engage-querydelete" id="engage-querydelete" value="Engage Deletion" #(querydelete-active)#class="btn btn-default" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="btn btn-warning"::class="btn btn-default" disabled="disabled" title="engaged"#(/querydelete-active)#/>
