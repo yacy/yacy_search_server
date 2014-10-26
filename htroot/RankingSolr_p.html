@@ -83,7 +83,7 @@
       <fieldset>
         <input type="hidden" name="profileNr" value="#[profileNr]#" />
         <legend>Solr Boosts</legend>
-        This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.
+        This is the set of searchable fields (see <a href="IndexSchema_p.html">YaCy Solr Schema</a>). Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.
         <dl style="margin:0;">#{boosts}# 
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="boost_#[field]#">#[field]#</label>
             <input type="checkbox" id="#[field]#" name="#[field]#"#(checked)#:: checked="checked"#(/checked)#

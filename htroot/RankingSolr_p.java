@@ -26,6 +26,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -124,23 +125,26 @@ public class RankingSolr_p {
 
         final serverObjects prop = new serverObjects();
         int i = 0;
-        
-        Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
+
+        CollectionConfiguration colcfg = sb.index.fulltext().getDefaultConfiguration();
+        Ranking ranking = colcfg.getRanking(profileNr);
         for (SchemaDeclaration field: CollectionSchema.values()) {
             if (!field.isSearchable()) continue;
-            prop.put("boosts_" + i + "_field", field.getSolrFieldName());
             Float boost = ranking.getFieldBoost(field);
-            if (boost == null || boost.floatValue() <= 0.0f) {
-                prop.put("boosts_" + i + "_checked", 0);
-                prop.put("boosts_" + i + "_boost", "");
-                prop.put("boosts_" + i + "_notinindexwarning", "0");
-            } else {
-                prop.put("boosts_" + i + "_checked", 1);
-                prop.put("boosts_" + i + "_boost", boost.toString());
-                prop.put("boosts_" + i + "_notinindexwarning", (sb.index.fulltext().getDefaultConfiguration().contains(field.name())? "0" : "1") );
+            if (boost != null || colcfg.contains(field)) { // show only available or configured boost fields
+                prop.put("boosts_" + i + "_field", field.getSolrFieldName());
+                if (boost == null || boost.floatValue() <= 0.0f) {
+                    prop.put("boosts_" + i + "_checked", 0);
+                    prop.put("boosts_" + i + "_boost", "");
+                    prop.put("boosts_" + i + "_notinindexwarning", "0");
+                } else {
+                    prop.put("boosts_" + i + "_checked", 1);
+                    prop.put("boosts_" + i + "_boost", boost.toString());
+                    prop.put("boosts_" + i + "_notinindexwarning", (colcfg.contains(field.name()) ? "0" : "1"));
+                }
+                prop.putHTML("boosts_" + i + "_comment", field.getComment());
+                i++;
             }
-            prop.putHTML("boosts_" + i + "_comment", field.getComment());
-            i++;
         }
         prop.put("boosts", i);
         prop.put(CommonParams.FQ, ranking.getFilterQuery());
