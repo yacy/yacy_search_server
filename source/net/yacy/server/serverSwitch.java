@@ -183,12 +183,12 @@ public class serverSwitch {
 		for (InetAddress i : Domains.myPublicIPv6()) {
 			String s = i.getHostAddress();
 			if (Seed.isProperIP(s))
-				h.add(s);
+				h.add(Domains.chopZoneID(s));
 		}
 		for (InetAddress i : Domains.myPublicIPv4()) {
 			String s = i.getHostAddress();
 			if (Seed.isProperIP(s))
-				h.add(s);
+				h.add(Domains.chopZoneID(s));
 		}
 		return h;
 	}
