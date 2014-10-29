@@ -178,7 +178,7 @@ public class ChartPlotter extends RasterPlotter {
             s += scale;
         }
         setColor(colorNaming);
-        PrintTool.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, this.topborder, 90, name, 1);
+        PrintTool.print(this, (left) ? Math.max(6, x - s1max * 6 - 6) : x + s1max * 6 + 9, this.height - this.bottomborder, 90, name, -1);
         line(x, this.topborder - 4, x, this.height - this.bottomborder + 4, 100);
     }
 

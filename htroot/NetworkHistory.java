@@ -100,7 +100,7 @@ public class NetworkHistory {
                 if (v != null) maxpeers = Math.max(maxpeers, (int) v.longValue());
             }
         }
-        final int leftborder = 40;
+        final int leftborder = 30;
         final int rightborder = 10;
         final int width = post.getInt("width", 768 + leftborder + rightborder);
         final int hspace = width - leftborder - rightborder;
@@ -125,7 +125,7 @@ public class NetworkHistory {
         if (columns.contains("cR")) headline = "YACY INDEX SIZE HISTORY: NUMBER OF RWI ENTRIES";
         ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, headline, "IN THE LAST " + timestr);
         chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, 0x000000l, 0xCCCCCCl, "TIME/HOURS");
-        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxpeers, 0, 0x008800l, null , "PEERS");
+        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxpeers, 0, 0x008800l, null , columns.contains("cI") ? "DOCUMENTS" : columns.contains("cR") ? "RWIs" : "PEERS");
         
         // write the data
         float x0, x1;
