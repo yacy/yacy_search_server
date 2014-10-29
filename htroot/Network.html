@@ -62,6 +62,7 @@
         <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers</a></li>
         <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Senior&nbsp;Peers</a></li>
         <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Junior&nbsp;(fragment)&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=5" class="MenuItemLink">Network History</a></li>
       </ul>
     </div>
     #(/menu)#
@@ -85,6 +86,8 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
     <h2>Junior Peers (a fragment) in '#[networkName]#' Network</h2>
     ::
     <h2>Manually contacting Peer</h2>
+    ::
+    <h2>Network History</h2>
     #(/page)#
     #(regexerror)#
     ::
@@ -319,8 +322,8 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
             </tr>
     </table>
     </div>
-
-    ::
+::
+::
     #(comment)#
     ::
     <p style="color:red;">
@@ -369,6 +372,29 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
           <td><input type="button" value="contact current peer from this peer" onclick="top.location.href='http://' + document.getElementById('otherPeerAddress').value + '/Network.html?peerHash=#[my-hash]#&peerIP=#[my-ip]#&peerPort=#[my-port]#&page=4&addPeer=add+Peer'"/></td>
         </tr>
       </table>
+::
+    <!--
+      possible column values:
+           aM activeLastMonth
+           aW activeLastWeek
+           aD activeLastDay
+           aH activeLastHour
+           cC countConnected (Active Senior)
+           cD countDisconnected (Passive Senior)
+           cP countPotential (Junior)
+           cR count of the RWI entries
+           cI size of the index (number of documents)
+      maxtime: number of hours in the past
+      scale: number of hours per scale unit in the bottom line
+     -->
+    <h3><b>Count of Connected Senior Peers</b> in the last two days, scale = 1h</h3>
+    <img src="/NetworkHistory.png?columns=cC&scale=1&maxtime=24" />
+    <h3><b>Count of all Active Peers Per Day</b> in the last week, scale = 1d</h3>
+    <img src="/NetworkHistory.png?columns=aD&scale=24&maxtime=168" />
+    <h3><b>Count of all Active Peers Per Week</b> in the last 30d, scale = 7d</h3>
+    <img src="/NetworkHistory.png?columns=aW&scale=168&maxtime=720" />
+    <h3><b>Count of all Active Peers Per Month</b> in the last 365d, scale = 30d</h3>
+    <img src="/NetworkHistory.png?columns=aM&scale=720&maxtime=8760" />
     #(/table)#
     #%env/templates/footer.template%#
   </body>
