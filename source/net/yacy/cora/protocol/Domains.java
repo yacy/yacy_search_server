@@ -1043,7 +1043,8 @@ public class Domains {
     }
 
     public static Set<String> myPublicIPs() {
-        Set<String> h = new HashSet<>(publicIPv4HostAddresses.size() + publicIPv6HostAddresses.size());
+        // use a LinkedHashSet to get an order of IPs where the IPv4 are preferred to get a better compatibility with older implementations
+        Set<String> h = new LinkedHashSet<>(publicIPv4HostAddresses.size() + publicIPv6HostAddresses.size());
         for (InetAddress i: publicIPv4HostAddresses) h.add(i.getHostAddress());
         for (InetAddress i: publicIPv6HostAddresses) h.add(i.getHostAddress());
         return h;
