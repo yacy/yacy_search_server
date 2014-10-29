@@ -115,6 +115,25 @@ function updatepage(str) {
     </fieldset>
     #(/hosts)#
     
+    #(hostanalysis)#::
+    <fieldset><legend>Host Analysis</legend>
+      #{facets}#
+      <table class="sortable" border="0" style="float:left">
+      <tr class="TableCellDark">
+        <td align="left" colspan="5" nowrap class="pending">#[facetname]#</td>
+ 	    <td align="right" colspan="5" nowrap class="listingok">#</td>
+      </tr>
+      #{facet}#
+      <tr class="TableCellLight">
+        <td align="left" colspan="5" nowrap class="pending">#[key]#</td>
+ 	    <td align="right" colspan="5" nowrap class="listingok"><a href="#[a]#" target="_blank" class="forceNoExternalIcon">#[count]#</a></td>
+      </tr>
+      #{/facet}#
+      </table>&nbsp;&nbsp;
+      #{/facets}#
+    </fieldset>
+    #(/hostanalysis)#
+    
     #(files)#::
      <fieldset><legend>Browser for <a href="#[path]#" target="_blank">#[path]#</a></legend>
      <p>documents stored for host: #[hostsize]#; documents stored for subpath: #[subpathloadsize]#; unloaded documents detected in subpath: #[subpathdetectedsize]# <!-- #(complete)#;<a href="HostBrowser.html?admin=#[admin]#&complete=true&path=#[path]#">get complete list</a>::<a href="HostBrowser.html?admin=#[admin]#&path=#[path]#">directory view</a>#(/complete)#-->
