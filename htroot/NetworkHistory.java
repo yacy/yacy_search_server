@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -49,7 +51,7 @@ public class NetworkHistory {
 
         final int maxtime = post.getInt("maxtime", 48); // hours
         final int bottomscale = post.getInt("scale", 1); // 1h
-        final String[] columns = post.get("columns", "cC").split("\\|"); // new String[]{"aM", "aW", "aD", "aH", "cC", "cD", "cP", "cR", "cI"};
+        final String[] columnsx = post.get("columns", "cC").split("\\|"); // new String[]{"aM", "aW", "aD", "aH", "cC", "cD", "cP", "cR", "cI"};
         /*
            aM activeLastMonth
            aW activeLastWeek
@@ -61,11 +63,12 @@ public class NetworkHistory {
            cR count of the RWI entries
            cI size of the index (number of documents)
          */
-        
+        final Set<String> columns = new LinkedHashSet<>();
+        for (String col: columnsx) columns.add(col);
         // scan the database and put in values
         List<Map<String, Long>> rows = new ArrayList<>(maxtime * 2);
         long now = System.currentTimeMillis();
-        long timelimit = now - maxtime * 60 * 60 * 1000;
+        long timelimit = now - maxtime * 3600000L;
         try {
             // BEncodedHeap statTable = sb.tables.getHeap("stats");
             // Iterator<byte[]> i = statTable.keys(false, false);
@@ -97,7 +100,7 @@ public class NetworkHistory {
                 if (v != null) maxpeers = Math.max(maxpeers, (int) v.longValue());
             }
         }
-        final int leftborder = 40;
+        final int leftborder = 30;
         final int rightborder = 10;
         final int width = post.getInt("width", 768 + leftborder + rightborder);
         final int hspace = width - leftborder - rightborder;
@@ -105,10 +108,24 @@ public class NetworkHistory {
         final int topborder = 20;
         final int bottomborder = 20;
         final int vspace = height - topborder - bottomborder;
-        final int leftscale = (maxpeers / 100) * 10;
-        ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, "YACY NETWORK HISTORY", "IN THE LAST 48 HOURS");
+        final int leftscale = maxpeers / 10;
+        String timestr = maxtime + " HOURS";
+        if (maxtime > 24 && maxtime % 24 == 0) timestr = (maxtime / 24) + " DAYS";
+        if (maxtime == 168) timestr = "WEEK";
+        if (maxtime > 168 && maxtime % 168 == 0) timestr = (maxtime / 168) + " WEEKS";
+        String headline = "YACY NETWORK HISTORY";
+        if (columns.contains("aM")) headline += ", ACTIVE PEERS WITHIN THE LAST MONTH";
+        if (columns.contains("aW")) headline += ", ACTIVE PEERS WITHIN THE LAST WEEK";
+        if (columns.contains("aD")) headline += ", ACTIVE PEERS WITHIN THE LAST DAY";
+        if (columns.contains("aH")) headline += ", ACTIVE PEERS WITHIN THE LAST HOUR";
+        if (columns.contains("cC")) headline += ", ACTIVE SENIOR PEERS";
+        if (columns.contains("cD")) headline += ", PASSIVE SENIOR PEERS";
+        if (columns.contains("cP")) headline += ", POTENTIAL JUNIOR PEERS";
+        if (columns.contains("cI")) headline = "YACY INDEX SIZE HISTORY: NUMBER OF DOCUMENTS";
+        if (columns.contains("cR")) headline = "YACY INDEX SIZE HISTORY: NUMBER OF RWI ENTRIES";
+        ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, headline, "IN THE LAST " + timestr);
         chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, 0x000000l, 0xCCCCCCl, "TIME/HOURS");
-        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxpeers, 0, 0x008800l, null , "PEERS");
+        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxpeers, 0, 0x008800l, null , columns.contains("cI") ? "DOCUMENTS" : columns.contains("cR") ? "RWIs" : "PEERS");
         
         // write the data
         float x0, x1;

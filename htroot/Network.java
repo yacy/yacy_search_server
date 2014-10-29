@@ -199,7 +199,7 @@ public class Network {
             prop.put("table", 2); // triggers overview
             prop.put("page", 0);
         } else if (post != null && post.getInt("page", 1) == 4) {
-            prop.put("table", 4); // triggers overview
+            prop.put("table", 4); // triggers "Manually contacting Peer"
             prop.put("page", 4);
 
             if (sb.peers.mySeed() != null) {
@@ -258,6 +258,9 @@ public class Network {
 
                 prop.put("table_comment",0);
             }
+        } else if (post != null && post.getInt("page", 1) == 5) {
+            prop.put("page", 5); // triggers stats page
+            prop.put("table", 5);
         } else {
             // generate table
             final int page = (post == null ? 1 : post.getInt("page", 1));

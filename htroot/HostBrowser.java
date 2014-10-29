@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
@@ -41,6 +42,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailType;
+import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -89,6 +91,7 @@ public class HostBrowser {
         prop.put("result", "");
         prop.put("hosts", 0);
         prop.put("files", 0);
+        prop.put("hostanalysis", 0);
         
         prop.put("admin", "false");
         boolean admin = false;
@@ -248,37 +251,71 @@ public class HostBrowser {
         }
         
         if (path.length() > 0) {
-            boolean delete = false;
-            boolean reload404 = false;
-            if (authorized && post.containsKey("delete")) {
-                // delete the complete path!! That includes everything that matches with this prefix.
-                delete = true;
-            }
-            if (authorized && post.containsKey("reload404")) {
-                // try to re-load all urls that have load errors and matches with this prefix.
-                reload404 = true;
-            }
-            int facetcount=post.getInt("facetcount", 0);
-            boolean complete = post.getBoolean("complete");
-            if (complete) { // we want only root paths for complete lists
-                p = path.indexOf('/', 10);
-                if (p > 0) path = path.substring(0, p + 1);
-            }
-            prop.put("files_complete", complete ? 1 : 0);
-            prop.put("files_complete_admin", admin ? "true" : "false");
-            prop.putHTML("files_complete_path", path);
-            p = path.substring(0, path.length() - 1).lastIndexOf('/');
-            if (p < 8) {
-                prop.put("files_root", 1);
-            } else {
-                prop.put("files_root", 0);
-                prop.putHTML("files_root_path", path.substring(0, p + 1));
-                prop.put("files_root_admin", admin ? "true" : "false");
-            }
             try {
-                // generate file list from path
                 DigestURL uri = new DigestURL(path);
                 String host = uri.getHost();
+                
+                // write host analysis if path after host is empty
+                if (uri.getPath().length() <= 1 && host != null && host.length() > 0 && sb.getConfigBool("decoration.hostanalysis", false)) {
+                    //how many documents per crawldepth_i; get crawldepth_i facet for host
+                    ArrayList<String> ff = new ArrayList<>();
+                    for (CollectionSchema csf: CollectionSchema.values()) {
+                        if (csf.getType() != SolrType.num_integer || csf.isMultiValued()) continue;
+                        String facetfield = csf.getSolrFieldName();
+                        if (!fulltext.getDefaultConfiguration().contains(facetfield)) continue;
+                        ff.add(csf.getSolrFieldName());
+                    }
+                    String[] facetfields = ff.toArray(new String[ff.size()]);
+                    Map<String, ReversibleScoreMap<String>> facets = fulltext.getDefaultConnector().getFacets(CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"", 100, facetfields);
+                    int fc = 0;
+                    for (String facetfield: facetfields) {
+                        prop.put("hostanalysis_facets_" + fc + "_facetname", facetfield);
+                        ReversibleScoreMap<String> facetfieldmap = facets.get(facetfield);
+                        TreeMap<Integer, Integer> statMap = new TreeMap<>();
+                        for (String k: facetfieldmap) statMap.put(Integer.parseInt(k), facetfieldmap.get(k));
+                        int c = 0; for (Entry<Integer, Integer> entry: statMap.entrySet()) {
+                            prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_key", entry.getKey());
+                            prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_count", entry.getValue());
+                            prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_a", "http://localhost:" + sb.getConfigInt("port", 8090) + "/solr/collection1/select?q=host_s:" + host + " AND " + facetfield + ":" + entry.getKey() + "&defType=edismax&start=0&rows=1000&fl=sku,crawldepth_i");
+                            c++;
+                        }
+                        prop.put("hostanalysis_facets_" + fc + "_facet", c);
+                        fc++;
+                    }
+                    prop.put("hostanalysis_facets", fc);
+                    prop.put("hostanalysis", 1);
+                }
+            
+            
+                // write file list for subpath
+                boolean delete = false;
+                boolean reload404 = false;
+                if (authorized && post.containsKey("delete")) {
+                    // delete the complete path!! That includes everything that matches with this prefix.
+                    delete = true;
+                }
+                if (authorized && post.containsKey("reload404")) {
+                    // try to re-load all urls that have load errors and matches with this prefix.
+                    reload404 = true;
+                }
+                int facetcount=post.getInt("facetcount", 0);
+                boolean complete = post.getBoolean("complete");
+                if (complete) { // we want only root paths for complete lists
+                    p = path.indexOf('/', 10);
+                    if (p > 0) path = path.substring(0, p + 1);
+                }
+                prop.put("files_complete", complete ? 1 : 0);
+                prop.put("files_complete_admin", admin ? "true" : "false");
+                prop.putHTML("files_complete_path", path);
+                p = path.substring(0, path.length() - 1).lastIndexOf('/');
+                if (p < 8) {
+                    prop.put("files_root", 1);
+                } else {
+                    prop.put("files_root", 0);
+                    prop.putHTML("files_root_path", path.substring(0, p + 1));
+                    prop.put("files_root_admin", admin ? "true" : "false");
+                }
+                // generate file list from path
                 prop.putHTML("outbound_host", host);
                 if (authorized) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
                 prop.putHTML("inbound_host", host);

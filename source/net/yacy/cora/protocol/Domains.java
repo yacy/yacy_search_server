@@ -153,9 +153,7 @@ public class Domains {
 
                 // fill a cache of local host names
                 for (final InetAddress a: myHostAddresses) {
-                    String hostaddressP = a.getHostAddress();
-                    int p = hostaddressP.indexOf('%');
-                    if (p > 0) hostaddressP = hostaddressP.substring(0, p);
+                    String hostaddressP = chopZoneID(a.getHostAddress());
                     Set<String> hns = new LinkedHashSet<>();
                     // generate alternative representations of IPv6 addresses which are needed to check access on the interface (i.e. localhost check)
                     if (hostaddressP.indexOf("::") < 0) {
@@ -1073,7 +1071,7 @@ public class Domains {
      * @return list of all intranet addresses
      */
     public static Set<InetAddress> myIntranetIPs() {
-        if (myHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
+        if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         return localHostAddresses;
     }
 
@@ -1107,7 +1105,7 @@ public class Domains {
     public static boolean isThisHostIP(final InetAddress clientAddress) {
         if (clientAddress == null) return false;
         if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-        return myHostAddresses.contains(clientAddress);
+        return myHostAddresses.contains(clientAddress); // includes localHostAddresses
     }
 
     public static int getDomainID(final String host, final InetAddress hostaddress) {
