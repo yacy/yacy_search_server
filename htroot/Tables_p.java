@@ -36,10 +36,14 @@ import net.yacy.server.serverSwitch;
 
 public class Tables_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
+        final String ext = header.get("EXT", "");
+        final boolean json = ext.equals("json");
+        final boolean xml = ext.equals("xml");
+        
         prop.put("showtable", 0);
         prop.put("showedit", 0);
         prop.put("showselection", 0);
@@ -164,6 +168,7 @@ public class Tables_p {
                     Tables.Row row;
                     boolean dark = true;
                     byte[] cell;
+                    prop.putXML("showtable_" + count + "_table", table); // only used in XML
                     while (mapIterator.hasNext() && count < maxcount) {
                         row = mapIterator.next();
                         if (row == null) continue;
@@ -173,9 +178,20 @@ public class Tables_p {
                         prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
                         prop.put("showtable_list_" + count + "_count", count);
                         prop.put("showtable_list_" + count + "_table", table); // tablename for edit link
-                        for (int i = 0; i < columns.size(); i++) {
-                            cell = row.get(columns.get(i));
-                            prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : UTF8.String(cell));
+                        String col;
+                        if (xml) {
+                            for (int i = 0; i < columns.size(); i++) {
+                                col = columns.get(i);
+                                cell = row.get(col);
+                                prop.putXML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : UTF8.String(cell));
+                                prop.putXML("showtable_list_" + count + "_columns_" + i + "_col", col);
+                            }
+                        } else {
+                            for (int i = 0; i < columns.size(); i++) {
+                                col = columns.get(i);
+                                cell = row.get(col);
+                                prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : UTF8.String(cell));
+                            }
                         }
                         prop.put("showtable_list_" + count + "_columns", columns.size());
                         count++;
