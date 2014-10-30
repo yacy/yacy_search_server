@@ -146,6 +146,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	}
         }
     }
+
+    public String[] allFields() {
+        ArrayList<String> a = new ArrayList<>(this.size());
+        for (CollectionSchema f: CollectionSchema.values()) {
+            if (this.contains(f)) a.add(f.getSolrFieldName());
+        }
+        return a.toArray(new String[a.size()]);
+    }
     
     public Ranking getRanking(final int idx) {
         return this.rankings.get(idx % this.rankings.size()); // simply prevent out of bound exeption (& callers don't check for null)
@@ -1267,6 +1275,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true,
                     byPartialUpdate ? 
                     new String[]{
+                    // the following fields are needed to perform the postprocessing
+                    // and should only be used for partial updates; for full updates use a
+                    // full list of fields to avoid LazyInstantiation which has poor performace
                     CollectionSchema.id.getSolrFieldName(),
                     CollectionSchema.sku.getSolrFieldName(),
                     CollectionSchema.harvestkey_s.getSolrFieldName(),
@@ -1285,7 +1296,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     CollectionSchema.httpstatus_i.getSolrFieldName(),
                     CollectionSchema.inboundlinkscount_i.getSolrFieldName(),
                     CollectionSchema.robots_i.getSolrFieldName()} :
-                    new String[0]);
+                    this.allFields());
             final AtomicInteger proccount = new AtomicInteger();
             final AtomicInteger proccount_referencechange = new AtomicInteger();
             final AtomicInteger proccount_citationchange = new AtomicInteger();

@@ -461,14 +461,15 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         query.clearSorts();
         query.setRows(1);
         query.setStart(0);
-        if (fields.length > 0) query.setFields(fields);
+        if (fields != null && fields.length > 0) query.setFields(fields);
         query.setIncludeScore(false);
 
         // query the server
         try {
             final SolrDocumentList docs = getDocumentListByParams(query);
             if (docs == null || docs.isEmpty()) return null;
-            return docs.get(0);
+            SolrDocument doc = docs.get(0);
+            return doc;
         } catch (final Throwable e) {
             clearCaches(); // we clear the in case that this is caused by OOM
             throw new IOException(e.getMessage(), e);
