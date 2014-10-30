@@ -265,7 +265,7 @@ public class yacysearchtrailer {
                 prop.put("nav-authors", 0); // this navigation is not useful
             }
         }
-        
+
         // collection navigators
         if (theSearch.collectionNavigator == null || theSearch.collectionNavigator.isEmpty()) {
             prop.put("nav-collections", 0);
@@ -349,7 +349,7 @@ public class yacysearchtrailer {
             i--;
             prop.put("nav-topics_element_" + i + "_nl", 0);
         }
-
+        
         // protocol navigators
         if (theSearch.protocolNavigator == null || theSearch.protocolNavigator.isEmpty()) {
             prop.put("nav-protocols", 0);
@@ -393,7 +393,7 @@ public class yacysearchtrailer {
                 i++;
             }
             theSearch.query.modifier.protocol = oldProtocolModifier;
-            if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) theSearch.query.modifier.add(oldProtocolModifier);
+            if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) theSearch.query.modifier.add(oldProtocolModifier.startsWith("/") ? oldProtocolModifier : "/" + oldProtocolModifier);
             theSearch.query.getQueryGoal().query_original = oldQuery;
             prop.put("nav-protocols_element", i);
             prop.put("nav-protocols_activate", neg > 0 || visible ? 1 : 0); // by default off
