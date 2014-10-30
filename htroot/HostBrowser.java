@@ -269,10 +269,11 @@ public class HostBrowser {
                     Map<String, ReversibleScoreMap<String>> facets = fulltext.getDefaultConnector().getFacets(CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"", 100, facetfields);
                     int fc = 0;
                     for (String facetfield: facetfields) {
-                        prop.put("hostanalysis_facets_" + fc + "_facetname", facetfield);
                         ReversibleScoreMap<String> facetfieldmap = facets.get(facetfield);
+                        if (facetfieldmap.size() == 0) continue;
                         TreeMap<Integer, Integer> statMap = new TreeMap<>();
                         for (String k: facetfieldmap) statMap.put(Integer.parseInt(k), facetfieldmap.get(k));
+                        prop.put("hostanalysis_facets_" + fc + "_facetname", facetfield);
                         int c = 0; for (Entry<Integer, Integer> entry: statMap.entrySet()) {
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_key", entry.getKey());
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_count", entry.getValue());
