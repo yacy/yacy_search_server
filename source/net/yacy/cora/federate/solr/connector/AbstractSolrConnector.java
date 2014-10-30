@@ -174,7 +174,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         
                         try {
                             SolrDocument d = getDocumentById(nextID, fields);
-                            try {queue.put(d);} catch (final InterruptedException e) {}
+                            // document may be null if another process has deleted the document meanwhile
+                            // in case that the document is absent then, we silently ignore that case
+                            if (d != null) try {queue.put(d);} catch (final InterruptedException e) {}
                         } catch (final SolrException | IOException e) {
                             ConcurrentLog.logException(e);
                             // fail
