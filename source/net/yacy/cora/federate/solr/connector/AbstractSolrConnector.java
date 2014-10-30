@@ -163,38 +163,38 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             final String ... fields) {
         assert buffersize > 0;
         if (!prefetchIDs) return concurrentDocumentsByQueryNoPrefetch(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency, fields);
-        final BlockingQueue<String> idQueue = concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, Math.min(maxcount, 10000000), 1);
-        final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
+        final BlockingQueue<String> idQueue = concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, Math.min(maxcount, 10000000), concurrency);
+        final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(Math.max(buffersize, concurrency));
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
-        final Thread t = new Thread() {
-            @Override
-            public void run() {
-                this.setName("AbstractSolrConnector:concurrentDocumentsByQueryWithPrefetch(" + querystring + ")");
-                String nextID;
-                try {
-                    while (System.currentTimeMillis() < endtime && (nextID = idQueue.take()) != AbstractSolrConnector.POISON_ID) {
-                        
-                        try {
-                            SolrDocument d = getDocumentById(nextID, fields);
-                            // document may be null if another process has deleted the document meanwhile
-                            // in case that the document is absent then, we silently ignore that case
-                            if (d != null) try {queue.put(d);} catch (final InterruptedException e) {}
-                        } catch (final SolrException | IOException e) {
-                            ConcurrentLog.logException(e);
-                            // fail
-                            ConcurrentLog.severe("AbstractSolrConnector", "aborted concurrentDocumentsByQuery: " + e.getMessage());
-                            break;
+        final Thread[] t = new Thread[concurrency];
+        for (int i = 0; i < concurrency; i++) {
+            t[i] = new Thread() {
+                @Override
+                public void run() {
+                    this.setName("AbstractSolrConnector:concurrentDocumentsByQueryWithPrefetch(" + querystring + ")");
+                    String nextID;
+                    try {
+                        while (System.currentTimeMillis() < endtime && (nextID = idQueue.take()) != AbstractSolrConnector.POISON_ID) {
+                            try {
+                                SolrDocument d = getDocumentById(nextID, fields);
+                                // document may be null if another process has deleted the document meanwhile
+                                // in case that the document is absent then, we silently ignore that case
+                                if (d != null) try {queue.put(d);} catch (final InterruptedException e) {}
+                            } catch (final SolrException | IOException e) {
+                                ConcurrentLog.logException(e);
+                                // fail
+                                ConcurrentLog.severe("AbstractSolrConnector", "aborted concurrentDocumentsByQuery: " + e.getMessage());
+                                break;
+                            }
                         }
+                    } catch (InterruptedException e) {
+                        ConcurrentLog.severe("AbstractSolrConnector", "interrupted concurrentDocumentsByQuery: " + e.getMessage());
                     }
-                } catch (InterruptedException e) {
-                    ConcurrentLog.severe("AbstractSolrConnector", "interrupted concurrentDocumentsByQuery: " + e.getMessage());
-                }
-                for (int i = 0; i < Math.max(1, concurrency); i++) {
                     try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (final InterruptedException e1) {}
                 }
-            }
-        };
-        t.start();
+            };
+            t[i].start();
+        }
         return queue;
     }
 
