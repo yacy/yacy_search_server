@@ -60,7 +60,7 @@ public class LongLiteral extends Literal implements Term {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.key.getSolrFieldName());
-        sb.append(':').append(this.value);
+        sb.append(':').append('"').append(this.value).append('"'); // quotes must be used for negative values
         return sb.toString();
     }
     
