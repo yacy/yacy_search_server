@@ -89,7 +89,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setRows(0);
         catchSuccessQuery.setStart(0);
     }
-    protected final static int pagesize = 100;
+    
+    protected final static int pagesize_docs = 100;
+    protected final static int pagesize_ids = 1000;
     
     protected static LoadTimeURL getLoadTimeURL(final Object doc) {
         if (doc == null) return null;
@@ -208,7 +210,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         assert buffersize > 0;
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
         final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
-        final int ps = Math.min(pagesize, buffersize);
+        final int ps = Math.min(pagesize_docs, buffersize);
         final int maxretries = 60;
         final Thread t = new Thread() {
             @Override
@@ -269,12 +271,14 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {
-                        SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, pagesize), CollectionSchema.id.getSolrFieldName());
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, pagesize_ids), CollectionSchema.id.getSolrFieldName());
+                        int count = 0;
                         for (SolrDocument d: sdl) {
                             try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
+                            count++;
                         }
-                        if (sdl.size() < pagesize) break;
-                        o += sdl.size();
+                        if (count < pagesize_ids) break;
+                        o += pagesize_ids;
                     } catch (final SolrException e) {
                         break;
                     } catch (final IOException e) {
@@ -292,7 +296,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
     @Override
     public Iterator<String> iterator() {
-        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_QUERY, null, 0, Integer.MAX_VALUE, 60000, 2 * pagesize, 1);
+        final BlockingQueue<String> queue = concurrentIDsByQuery(CATCHALL_QUERY, null, 0, Integer.MAX_VALUE, 60000, 2 * pagesize_ids, 1);
         return new LookAheadIterator<String>() {
             @Override
             protected String next0() {

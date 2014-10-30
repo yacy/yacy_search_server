@@ -25,10 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.SolrInstance;
@@ -441,7 +438,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             if (docListSearcher != null) docListSearcher.close();
         }
     }
-    
+    /*
     @Override
     public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final String sort, final int offset, final int maxcount, final long maxtime, final int buffersize, final int concurrency) {
         final BlockingQueue<String> queue = buffersize <= 0 ? new LinkedBlockingQueue<String>() : new ArrayBlockingQueue<String>(buffersize);
@@ -455,7 +452,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                 while (System.currentTimeMillis() < endtime) {
                     try {
                     	responseCount = 0;
-                        docListSearcher = new DocListSearcher(querystring, sort, o, pagesize, CollectionSchema.id.getSolrFieldName());
+                        docListSearcher = new DocListSearcher(querystring, sort, o, pagesize_ids, CollectionSchema.id.getSolrFieldName());
                         responseCount = docListSearcher.response.size();
                         SolrIndexSearcher searcher = docListSearcher.request.getSearcher();
                         DocIterator iterator = docListSearcher.response.iterator();
@@ -469,8 +466,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                     } finally {
                         if (docListSearcher != null) docListSearcher.close();
                     }
-                    if (responseCount < pagesize) break;
-                    o += pagesize;
+                    if (responseCount < pagesize_ids) break;
+                    o += pagesize_ids;
                 }
                 try {queue.put(AbstractSolrConnector.POISON_ID);} catch (final InterruptedException e1) {}
             }
@@ -478,4 +475,5 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         t.start();
         return queue;
     }
+    */
 }
