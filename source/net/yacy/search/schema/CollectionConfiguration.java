@@ -1266,10 +1266,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             String partitioningKey = CollectionSchema.responsetime_i.getSolrFieldName();
             Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets(collection1query, 100000, partitioningKey);
             ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
-            long emptyCount = collectionConnector.getCountByQuery(partitioningKey + ":\"\" AND (" + collection1query + ")");
+            long emptyCount = collectionConnector.getCountByQuery("-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")");
             if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
             for (String partitioningValue: partitioning) {
-                String partitioningQuery = partitioningKey + ":\"" + partitioningValue + "\" AND (" + collection1query + ")";
+                String partitioningQuery = (partitioningValue.length() == 0) ?
+                        "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")" :
+                        partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")";
                 postprocessingActivity = "collecting " + partitioning.get(partitioningValue) + " documents from partition \"" + partitioningValue + "\" (averall " + count + ") from the collection for harvestkey " + harvestkey + ", partitioned by " + partitioningKey;
 
                 // start collection of documents 
