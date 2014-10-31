@@ -300,7 +300,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         QueryResponse rsp;
         int retry = 0;
         Throwable error = null;
-        while (retry++ < 60) {
+        while (retry++ < 10) {
             try {
                 if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort) + "; retry = " + retry + "; fl = " + fl); // for debugging in Threaddump
                 rsp = this.server.query(params);

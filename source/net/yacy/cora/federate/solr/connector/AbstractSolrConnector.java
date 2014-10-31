@@ -269,24 +269,27 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             public void run() {
                 this.setName("AbstractSolrConnector:concurrentIDsByQuery(" + querystring + ")");
                 int o = offset;
-                while (System.currentTimeMillis() < endtime) {
-                    try {
-                        SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, pagesize_ids), CollectionSchema.id.getSolrFieldName());
-                        int count = 0;
-                        for (SolrDocument d: sdl) {
-                            try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
-                            count++;
+                try {
+                    while (System.currentTimeMillis() < endtime) {
+                        try {
+                            SolrDocumentList sdl = getDocumentListByQuery(querystring, sort, o, Math.min(maxcount, pagesize_ids), CollectionSchema.id.getSolrFieldName());
+                            int count = 0;
+                            for (SolrDocument d: sdl) {
+                                try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
+                                count++;
+                            }
+                            if (count < pagesize_ids) break;
+                            o += pagesize_ids;
+                        } catch (final SolrException e) {
+                            break;
+                        } catch (final IOException e) {
+                            break;
                         }
-                        if (count < pagesize_ids) break;
-                        o += pagesize_ids;
-                    } catch (final SolrException e) {
-                        break;
-                    } catch (final IOException e) {
-                        break;
                     }
-                }
-                for (int i = 0; i < concurrency; i++) {
-                    try {queue.put(AbstractSolrConnector.POISON_ID);} catch (final InterruptedException e1) {}
+                } catch (Throwable e) {} finally {
+                    for (int i = 0; i < concurrency; i++) {
+                        try {queue.put(AbstractSolrConnector.POISON_ID);} catch (final InterruptedException e1) {}
+                    }
                 }
             }
         };
