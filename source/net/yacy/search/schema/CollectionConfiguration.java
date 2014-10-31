@@ -1268,6 +1268,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
             long emptyCount = collectionConnector.getCountByQuery("-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")");
             if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
+            final long start = System.currentTimeMillis();
             for (String partitioningValue: partitioning) {
                 String partitioningQuery = (partitioningValue.length() == 0) ?
                         "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")" :
@@ -1275,7 +1276,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 postprocessingActivity = "collecting " + partitioning.get(partitioningValue) + " documents from partition \"" + partitioningValue + "\" (averall " + count + ") from the collection for harvestkey " + harvestkey + ", partitioned by " + partitioningKey;
 
                 // start collection of documents 
-                final long start = System.currentTimeMillis();
                 final int concurrency = Math.max(1, Math.min((int) (MemoryControl.available() / (100L * 1024L * 1024L)), Runtime.getRuntime().availableProcessors()));
                 //final int concurrency = 1;
                 final boolean reference_computation = this.contains(CollectionSchema.references_i) &&
