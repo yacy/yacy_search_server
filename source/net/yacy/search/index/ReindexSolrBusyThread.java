@@ -64,7 +64,7 @@ import org.apache.solr.common.SolrInputDocument;
          * @param query = a solr query to select documents to reindex (like h5_txt:[* TO *])
          */
         public ReindexSolrBusyThread(String query) {
-            super(100,1000,0,500);
+            super(100,0);
             this.esc = Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
             this.colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
 

@@ -990,10 +990,8 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT,
                 SwitchboardConstants.CLEANUP_METHOD_FREEMEM,
                 30000,
-                Long.MAX_VALUE,
-                10000,
-                Long.MAX_VALUE),
-            60000); // all 5 Minutes, wait 1 minute until first run
+                10000),
+            60000); // all 10 minutes, wait 1 minute until first run
         deployThread(
             SwitchboardConstants.SURROGATES,
             "Surrogates",
@@ -1005,9 +1003,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.SURROGATES_METHOD_JOBCOUNT,
                 SwitchboardConstants.SURROGATES_METHOD_FREEMEM,
                 20000,
-                Long.MAX_VALUE,
-                0,
-                Long.MAX_VALUE),
+                0),
             10000);
         deployThread(
             SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL,
@@ -1020,9 +1016,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT,
                 SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM,
                 0,
-                Long.MAX_VALUE,
-                0,
-                Long.MAX_VALUE),
+                0),
             10000);
         deployThread(
             SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER,
@@ -1035,9 +1029,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT,
                 SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM,
                 10000,
-                Long.MAX_VALUE,
-                10000,
-                Long.MAX_VALUE),
+                10000),
             10000); // error here?
         deployThread(
             SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL,
@@ -1050,9 +1042,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT,
                 SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM,
                 0,
-                Long.MAX_VALUE,
-                0,
-                Long.MAX_VALUE),
+                0),
             10000);
         deployThread(
             SwitchboardConstants.SEED_UPLOAD,
@@ -1065,9 +1055,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT,
                 SwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM,
                 600000,
-                Long.MAX_VALUE,
-                300000,
-                Long.MAX_VALUE),
+                300000),
             180000);
         deployThread(
             SwitchboardConstants.PEER_PING,
@@ -1080,9 +1068,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
                 SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
                 30000,
-                Long.MAX_VALUE,
-                30000,
-                Long.MAX_VALUE),
+                30000),
             10000);
         deployThread(
             SwitchboardConstants.INDEX_DIST,
@@ -1095,9 +1081,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT,
                 SwitchboardConstants.INDEX_DIST_METHOD_FREEMEM,
                 10000,
-                Long.MAX_VALUE,
-                1000,
-                Long.MAX_VALUE),
+                1000),
             60000,
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP, "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP, "0")),
@@ -1117,9 +1101,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
                 SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
                 3000,
-                10000,
-                3000,
-                10000),
+                3000),
             2000);
         deployThread(
             "730_ccfilter",
@@ -1132,9 +1114,7 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
                 SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
                 3000,
-                10000,
-                3000,
-                10000),
+                3000),
             2000);
 
         // set network-specific performance attributes

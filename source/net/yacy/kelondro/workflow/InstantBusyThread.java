@@ -44,11 +44,9 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
               final String jobExec,
               final String jobCount,
               final String freemem,
-              final long minIdleSleep,
-              final long maxIdleSleep,
-              final long minBusySleep,
-              final long maxBusySleep) {
-        super(minIdleSleep, maxIdleSleep, minBusySleep, maxBusySleep);
+              final long idleSleep,
+              final long busySleep) {
+        super(idleSleep, busySleep);
 
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
@@ -159,8 +157,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
 
     public static BusyThread oneTimeJob(final Object env, final String jobExec, final long startupDelay) {
         // start the job and execute it once as background process
-        final BusyThread thread = new InstantBusyThread(
-                env, jobExec, null, null, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
+        final BusyThread thread = new InstantBusyThread(env, jobExec, null, null, Long.MIN_VALUE, Long.MIN_VALUE);
         thread.setStartupSleep(startupDelay);
         thread.setIdleSleep(-1);
         thread.setBusySleep(-1);

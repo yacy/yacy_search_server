@@ -41,18 +41,12 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     private boolean intermissionObedient = true;
     private final Object syncObject = new Object();
     
-    private long maxIdleSleep = Long.MAX_VALUE, minIdleSleep = Long.MIN_VALUE;
-    private long maxBusySleep = Long.MAX_VALUE, minBusySleep = Long.MIN_VALUE;
+    private long idleSleep = Long.MIN_VALUE;
+    private long busySleep = Long.MIN_VALUE;
     
-    public AbstractBusyThread(
-            long minIdleSleep,
-            long maxIdleSleep,
-            long minBusySleep,
-            long maxBusySleep) {
-        this.minIdleSleep = minIdleSleep;
-        this.maxIdleSleep = maxIdleSleep;
-        this.minBusySleep = minBusySleep;
-        this.maxBusySleep = maxBusySleep;
+    public AbstractBusyThread(long idleSleep, long busySleep) {
+        this.idleSleep = idleSleep;
+        this.busySleep = busySleep;
     }
 
     @Override
@@ -64,7 +58,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     @Override
     public final long setIdleSleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
-        idlePause = Math.min(this.maxIdleSleep, Math.max(this.minIdleSleep, milliseconds));
+        idlePause = Math.max(this.idleSleep, milliseconds);
         return idlePause;
     }
     
@@ -76,7 +70,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     @Override
     public final long setBusySleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
-        busyPause = Math.min(this.maxBusySleep, Math.max(this.minBusySleep, milliseconds));
+        busyPause = Math.max(this.busySleep, milliseconds);
         return busyPause;
     }
     
