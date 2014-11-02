@@ -330,7 +330,7 @@ public class RemoteSearch extends Thread {
 
         assert solrQuery != null;
         // check own peer status
-        if (event.peers.mySeed() == null || event.peers.mySeed().getIPs().size() == 0) { return null; }
+        if (event.peers.mySeed() == null) { return null; }
         // prepare threads
         Thread solr = new Thread() {
             @Override
