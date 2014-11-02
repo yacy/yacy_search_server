@@ -1,0 +1,13 @@
+<tables>
+#(showtable)#::
+<table name="#[table]#">
+#{list}#
+<row count="#[count]#" pk="#[pk]#">
+#{columns}#
+<cell col="#[col]#">#[cell]#</cell>
+#{/columns}#
+</row>
+#{/list}#
+</table>
+#(/showtable)#
+</tables>
