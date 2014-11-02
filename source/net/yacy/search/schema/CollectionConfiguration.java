@@ -1264,17 +1264,20 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             // partitioning of the index, get a facet for a partitioning key
             final long count = collectionConnector.getCountByQuery(collection1query);
             String partitioningKey = CollectionSchema.responsetime_i.getSolrFieldName();
-            Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets(collection1query, 100000, partitioningKey);
-            ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
-            long emptyCount = collectionConnector.getCountByQuery("-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")");
-            if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
-            final long start = System.currentTimeMillis();
-            for (String partitioningValue: partitioning) {
-                String partitioningQuery = (partitioningValue.length() == 0) ?
-                        "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")" :
-                        partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")";
-                postprocessingActivity = "collecting " + partitioning.get(partitioningValue) + " documents from partition \"" + partitioningValue + "\" (averall " + count + ") from the collection for harvestkey " + harvestkey + ", partitioned by " + partitioningKey;
-
+            postprocessingActivity = "collecting " + count + " documents from the collection for harvestkey " + harvestkey + ", partitioned by " + partitioningKey;
+            if (count > 0) {
+                Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets(collection1query, 100000, partitioningKey);
+                ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
+                long emptyCount = collectionConnector.getCountByQuery("-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")");
+                if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
+                final long start = System.currentTimeMillis();
+                List<String> querystrings = new ArrayList<>(partitioning.size());
+                for (String partitioningValue: partitioning) {
+                    String partitioningQuery = (partitioningValue.length() == 0) ?
+                            "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")" :
+                            partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")";
+                    querystrings.add(partitioningQuery);
+                }
                 // start collection of documents 
                 final int concurrency = Math.max(1, Math.min((int) (MemoryControl.available() / (100L * 1024L * 1024L)), Runtime.getRuntime().availableProcessors()));
                 //final int concurrency = 1;
@@ -1283,8 +1286,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         this.contains(CollectionSchema.references_external_i) &&
                         this.contains(CollectionSchema.references_exthosts_i);
                 ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-                final BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(
-                        partitioningQuery,
+                final BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQueries(
+                        querystrings,
                         (this.contains(CollectionSchema.http_unique_b) || this.contains(CollectionSchema.www_unique_b)) ?
                         CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
                         CollectionSchema.url_protocol_s.getSolrFieldName() + " asc" // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
@@ -1415,18 +1418,16 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 }
                 // wait for termination
                 for (int rewrite_start = 0; rewrite_start < concurrency; rewrite_start++) rewriteThread[rewrite_start].join();
+                
+                if (failids.size() > 0) {
+                    ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: deleting " + failids.size() + " documents which have permanent execution fails");
+                    collectionConnector.deleteByIds(failids);
+                }
+                if (count != countcheck.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck + "; countquery=" + collection1query); // big gap for harvestkey = null
+                ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " +
+                            proccount_referencechange + " reference-count changes, " +
+                            proccount_citationchange + " citation ranking changes.");
             }
-            
-            if (failids.size() > 0) {
-                ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: deleting " + failids.size() + " documents which have permanent execution fails");
-                collectionConnector.deleteByIds(failids);
-            }
-            if (count != countcheck.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck + "; countquery=" + collection1query); // big gap for harvestkey = null
-            ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " +
-                        proccount_referencechange + " reference-count changes, " +
-                        proccount_citationchange + " citation ranking changes.");
-            
-            
             
         } catch (final InterruptedException e2) {
             ConcurrentLog.warn("CollectionConfiguration", e2.getMessage(), e2);
