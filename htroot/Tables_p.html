@@ -43,30 +43,24 @@ document.write("<div id=\"api\"><a href=\"/Tables_p.xml" + window.location.searc
     <form action="Tables_p.html" method="get" accept-charset="UTF-8">
       <fieldset><legend>Table Selection</legend>
       <dl>
-        <dt class="TableCellDark">Select Table:
-          <select name="table" onchange='this.form.submit()'>
+        <dt class="TableCellDark">Select Table:</dt>
+        <dd><select name="table" onchange='this.form.submit()'>
             #{tables}#
             <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
             #{/tables}#
           </select>
-        </dt>
-        <dd>&nbsp;</dd>
-        <dt>
-          show max.
-          <select name="count" onchange='this.form.submit()'>
+        </dd>
+        <dt>show max. </dt>
+        <dd><select name="count" onchange='this.form.submit()'>
             <option value="10">10</option>
             <option value="100" selected="selected">100</option>
             <option value="1000">1000</option>
             <option value="all">all</option>
-          </select>
-          entries,
-        </dt>
-        <dd>&nbsp;</dd>
-        <dt>
-          search rows for
-          <input type="text" name="search" value="#[pattern]#" />
-        </dt>
-        <dd><input type="submit" name="edittable" value="Search" /></dd>
+          </select>entries,</dd>
+        <dt>reverse:</dt>
+        <dd><input type="checkbox" name="reverse" #(reverse)#::checked="check"#(/reverse)# onchange='this.form.submit()'</dd>
+        <dt>search rows for</dt>
+        <dd><input type="text" name="search" value="#[pattern]#" /><input type="submit" name="edittable" value="Search" /></dd>
       </dl>
     </fieldset>
     </form>

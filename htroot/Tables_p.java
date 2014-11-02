@@ -41,7 +41,7 @@ public class Tables_p {
         final serverObjects prop = new serverObjects();
 
         final String ext = header.get("EXT", "");
-        final boolean json = ext.equals("json");
+        //final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
         
         prop.put("showtable", 0);
@@ -64,11 +64,14 @@ public class Tables_p {
         }
         prop.put("showselection_tables", count);
         prop.put("showselection_pattern", "");
+        prop.put("showselection_reverse", 1);
 
         if (post == null) return prop; // return rewrite properties
 
         final String counts = post.get("count", null);
         int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
+        final boolean reverse = post.containsKey("reverse") ? post.getBoolean("reverse") : false;
+        prop.put("showselection_reverse", reverse ? 1 : 0);
         final String pattern = post.get("search", "");
         final Pattern matcher = (pattern.isEmpty() || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
         prop.put("pattern", pattern);
@@ -164,7 +167,7 @@ public class Tables_p {
                 count = 0;
                 try {
                     final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher);
-                    final Iterator<Tables.Row> mapIterator = Tables.orderByPK(plainIterator, maxcount, false).iterator();
+                    final Iterator<Tables.Row> mapIterator = Tables.orderByPK(plainIterator, maxcount, reverse).iterator();
                     Tables.Row row;
                     boolean dark = true;
                     byte[] cell;
