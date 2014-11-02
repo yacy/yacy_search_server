@@ -159,6 +159,7 @@ public class ChartPlotter extends RasterPlotter {
     private void drawVerticalScale(final boolean left, final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
         assert pixelperscale > 0;
         assert scale > 0;
+        if (pixelperscale <= 0) return; // this would not meet the termination condition in the while loop
         final int x = (left) ? this.leftborder : this.width - this.rightborder;
         int y = this.height - this.bottomborder;
         int s = offset;

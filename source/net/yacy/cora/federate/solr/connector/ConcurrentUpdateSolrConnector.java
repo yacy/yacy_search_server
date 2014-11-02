@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -365,9 +366,26 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQueries(
+            List<String> querystrings, String sort, int offset, int maxcount,
+            long maxtime, int buffersize, int concurrency, boolean prefetchIDs,
+            String... fields) {
+        commitDocBuffer();
+        return this.connector.concurrentDocumentsByQueries(querystrings, sort, offset, maxcount, maxtime, buffersize, concurrency, prefetchIDs, fields);
+    }
+
+    @Override
     public BlockingQueue<String> concurrentIDsByQuery(String querystring, String sort, int offset, int maxcount, long maxtime, int buffersize, final int concurrency) {
         commitDocBuffer();
         return this.connector.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
+    }
+    
+    @Override
+    public BlockingQueue<String> concurrentIDsByQueries(
+            List<String> querystrings, String sort, int offset, int maxcount,
+            long maxtime, int buffersize, int concurrency) {
+        commitDocBuffer();
+        return this.connector.concurrentIDsByQueries(querystrings, sort, offset, maxcount, maxtime, buffersize, concurrency);
     }
 
     @Override
@@ -381,4 +399,5 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         commitDocBuffer();
         this.connector.update(solrdoc);        
     }
+
 }

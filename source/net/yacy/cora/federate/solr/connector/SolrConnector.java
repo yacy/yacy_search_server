@@ -22,6 +22,7 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -223,7 +224,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException;
     
     /**
-     * Get a query result from solr as a stream of documents.
+     * Get results from a solr query as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
      * The method returns immediately and feeds the search results into the queue
      * @param querystring the solr query string
@@ -235,7 +236,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param concurrency is the number of AbstractSolrConnector.POISON_DOCUMENT entries to add at the end of the feed
      * @param prefetchIDs if true, then first all IDs are fetched and then all documents are queries by the ID. If false then documents are retrieved directly
      * @param fields list of fields
-     * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
+     * @return a blocking queue which is terminated with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
     public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(
             final String querystring,
@@ -247,7 +248,33 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final int concurrency,
             final boolean prefetchIDs,
             final String ... fields);
-
+    
+    /**
+     * Get results from solr queries as a stream of documents.
+     * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
+     * The method returns immediately and feeds the search results into the queue
+     * @param querystrings the list of solr query strings
+     * @param sort the solr sort string, may be null to be not used
+     * @param offset first result offset
+     * @param maxcount the maximum number of results
+     * @param maxtime the maximum time in milliseconds
+     * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
+     * @param concurrency is the number of AbstractSolrConnector.POISON_DOCUMENT entries to add at the end of the feed
+     * @param prefetchIDs if true, then first all IDs are fetched and then all documents are queries by the ID. If false then documents are retrieved directly
+     * @param fields list of fields
+     * @return a blocking queue which is terminated with AbstractSolrConnector.POISON_DOCUMENT as last element
+     */
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQueries(
+            final List<String> querystrings,
+            final String sort,
+            final int offset,
+            final int maxcount,
+            final long maxtime,
+            final int buffersize,
+            final int concurrency,
+            final boolean prefetchIDs,
+            final String ... fields);
+            
     /**
      * get a document id result stream from a solr query.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.
@@ -258,7 +285,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param maxcount
      * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
      * @param concurrency is the number of AbstractSolrConnector.POISON_ID entries to add at the end of the feed
-     * @return
+     * @return a list of ids in q blocking queue which is terminated with a number of AbstractSolrConnector.POISON_ID
      */
     public BlockingQueue<String> concurrentIDsByQuery(
             final String querystring,
@@ -269,4 +296,24 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final int buffersize,
             final int concurrency);
 
+    /**
+     * get a document id result stream from a set of solr queries.
+     * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.
+     * The method returns immediately and feeds the search results into the queue
+     * @param querystring a list of query strings
+     * @param sort the solr sort string, may be null to be not used
+     * @param offset common offset of all queries
+     * @param maxcount maximum count for each query
+     * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
+     * @param concurrency is the number of AbstractSolrConnector.POISON_ID entries to add at the end of the feed
+     * @return a list of ids in q blocking queue which is terminated with a number of AbstractSolrConnector.POISON_ID
+     */
+    public BlockingQueue<String> concurrentIDsByQueries(
+            final List<String> querystrings,
+            final String sort,
+            final int offset,
+            final int maxcount,
+            final long maxtime,
+            final int buffersize,
+            final int concurrency);
 }
