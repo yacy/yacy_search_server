@@ -260,7 +260,7 @@ public class HostBrowser {
                     //how many documents per crawldepth_i; get crawldepth_i facet for host
                     ArrayList<String> ff = new ArrayList<>();
                     for (CollectionSchema csf: CollectionSchema.values()) {
-                        if (csf.getType() != SolrType.num_integer || csf.isMultiValued()) continue;
+                        if ((csf.getType() != SolrType.num_integer && csf.getType() != SolrType.num_long) || csf.isMultiValued()) continue;
                         String facetfield = csf.getSolrFieldName();
                         if (!fulltext.getDefaultConfiguration().contains(facetfield)) continue;
                         ff.add(csf.getSolrFieldName());
@@ -271,10 +271,10 @@ public class HostBrowser {
                     for (String facetfield: facetfields) {
                         ReversibleScoreMap<String> facetfieldmap = facets.get(facetfield);
                         if (facetfieldmap.size() == 0) continue;
-                        TreeMap<Integer, Integer> statMap = new TreeMap<>();
-                        for (String k: facetfieldmap) statMap.put(Integer.parseInt(k), facetfieldmap.get(k));
+                        TreeMap<Long, Integer> statMap = new TreeMap<>();
+                        for (String k: facetfieldmap) statMap.put(Long.parseLong(k), facetfieldmap.get(k));
                         prop.put("hostanalysis_facets_" + fc + "_facetname", facetfield);
-                        int c = 0; for (Entry<Integer, Integer> entry: statMap.entrySet()) {
+                        int c = 0; for (Entry<Long, Integer> entry: statMap.entrySet()) {
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_key", entry.getKey());
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_count", entry.getValue());
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_a", "http://localhost:" + sb.getConfigInt("port", 8090) + "/solr/collection1/select?q=host_s:" + host + " AND " + facetfield + ":" + entry.getKey() + "&defType=edismax&start=0&rows=1000&fl=sku,crawldepth_i");

@@ -1511,7 +1511,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String query = con.toString();
         SolrDocumentList docsAkk;
         try {
-             docsAkk = segment.fulltext().getDefaultConnector().getDocumentListByQuery(query, null, 0, 200,
+             docsAkk = segment.fulltext().getDefaultConnector().getDocumentListByQuery(query, null, 0, 1000,
                      CollectionSchema.id.getSolrFieldName(), CollectionSchema.exact_signature_l.getSolrFieldName(), CollectionSchema.fuzzy_signature_l.getSolrFieldName());
         } catch (final IOException e) {
             ConcurrentLog.logException(e);

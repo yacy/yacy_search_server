@@ -65,7 +65,7 @@ public class Negation extends AbstractTerm implements Term {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append('-').append(this.term.toString());
+        sb.append('(').append('-').append(this.term.toString()).append(')');
         return sb.toString();
     }
     
