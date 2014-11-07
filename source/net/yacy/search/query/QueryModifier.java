@@ -236,7 +236,7 @@ public class QueryModifier {
         }
         
         if (this.collection != null && this.collection.length() > 0 && fq.indexOf(CollectionSchema.collection_sxt.getSolrFieldName()) < 0) {
-            fq.append(" AND ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(this.collection).append('\"');
+            fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.collection));
         }
         
         if (this.protocol != null && this.protocol.length() > 0 && fq.indexOf(CollectionSchema.url_protocol_s.getSolrFieldName()) < 0) {
