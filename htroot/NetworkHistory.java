@@ -127,8 +127,10 @@ public class NetworkHistory {
         if (columns.contains("cI")) headline = "YACY PEER '" + sb.peers.myName() + "' INDEX SIZE HISTORY: NUMBER OF DOCUMENTS";
         if (columns.contains("cR")) headline = "YACY PEER '" + sb.peers.myName() + "' INDEX SIZE HISTORY: NUMBER OF RWI ENTRIES";
         ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, headline, "IN THE LAST " + timestr);
-        chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, 0x000000l, 0xCCCCCCl, "TIME/HOURS");
-        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, 10 * ((vspace * leftscale / (maxpeers - minpeers)) / 10), minpeers, 0x008800l, null , columns.contains("cI") ? "DOCUMENTS" : columns.contains("cR") ? "RWIs" : "PEERS");
+        int pixelperscale = hspace / (maxtime / bottomscale);
+        if (pixelperscale > 0) chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, pixelperscale, -maxtime, 0x000000l, 0xCCCCCCl, "TIME/HOURS");
+        pixelperscale = 10 * ((vspace * leftscale / (maxpeers - minpeers)) / 10);
+        if (pixelperscale > 0) chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, pixelperscale, minpeers, 0x008800l, null , columns.contains("cI") ? "DOCUMENTS" : columns.contains("cR") ? "RWIs" : "PEERS");
         
         // write the data
         float x0, x1;
