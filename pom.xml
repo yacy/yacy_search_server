@@ -34,7 +34,7 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>4.9.0</solr.version> 
+        <solr.version>4.10.2</solr.version> 
         
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -308,7 +308,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.8</version>
+            <version>1.9</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
