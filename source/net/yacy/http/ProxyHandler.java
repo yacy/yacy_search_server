@@ -112,32 +112,30 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         }
 	}
 	
-	private void storeToCache(final Response response, final byte[] array) {
+    private void storeToCache(final Response yacyResponse, final byte[] cacheArray) {
         final Thread t = new Thread() {
-        	final Response yacyResponse = response;
-        	final byte[] cacheArray = array;
-	        @Override
+	    @Override
             public void run() {
-	           this.setName("ProxyHandler.storeToCache(" + yacyResponse.url() + ")");
-	           if (yacyResponse == null) return;
-	   		
-	           // the cache does either not exist or is (supposed to be) stale
-	           deleteFromCache(yacyResponse.url().hash());
+                if (yacyResponse == null) return;
+	        this.setName("ProxyHandler.storeToCache(" + yacyResponse.url() + ")");
 	           
-	           if (cacheArray == null || cacheArray.length <= 0) return;
+	        // the cache does either not exist or is (supposed to be) stale
+	        deleteFromCache(yacyResponse.url().hash());
 	           
-	           yacyResponse.setContent(cacheArray);
-	           try {
-	               Cache.store(yacyResponse.url(), yacyResponse.getResponseHeader(), cacheArray);
-	               sb.toIndexer(yacyResponse);
-	           } catch (IOException e) {
-	               //log.logWarning("cannot write " + response.url() + " to Cache (1): " + e.getMessage(), e);
-	           }
+	        if (cacheArray == null || cacheArray.length <= 0) return;
+	           
+	        yacyResponse.setContent(cacheArray);
+	        try {
+	            Cache.store(yacyResponse.url(), yacyResponse.getResponseHeader(), cacheArray);
+	            sb.toIndexer(yacyResponse);
+	        } catch (IOException e) {
+	            //log.logWarning("cannot write " + response.url() + " to Cache (1): " + e.getMessage(), e);
 	        }
-	    };
-	    t.setPriority(Thread.MIN_PRIORITY);
-	    t.start();
-	}
+	    }
+	};
+	t.setPriority(Thread.MIN_PRIORITY);
+	t.start();
+    }
 
 	@Override
 	public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
