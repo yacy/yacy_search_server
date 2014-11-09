@@ -131,7 +131,6 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-namespace_element", i);
-            prop.put("nav-namespace_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0)
@@ -173,7 +172,6 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-domains_element", i);
-            prop.put("nav-domains_activate", on(pos, neg, MAXLIMIT_NAV_HIGH) ? 1 : 0);
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0)
@@ -216,7 +214,6 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-languages_element", i);
-            prop.put("nav-languages_activate", on(pos, neg, MAXLIMIT_NAV_HIGH) ? 1 : 0);
             i--;
             prop.put("nav-languages_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0)
@@ -257,7 +254,6 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-authors_element", i);
-            prop.put("nav-authors_activate", neg > 0 ? 1 : 0); // by default off
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0)
@@ -298,7 +294,6 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-collections_element", i);
-            prop.put("nav-collections_activate", neg > 0 ? 1 : 0); // by default off
             i--;
             prop.put("nav-collections_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0)
@@ -396,7 +391,6 @@ public class yacysearchtrailer {
             if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) theSearch.query.modifier.add(oldProtocolModifier.startsWith("/") ? oldProtocolModifier : "/" + oldProtocolModifier);
             theSearch.query.getQueryGoal().query_original = oldQuery;
             prop.put("nav-protocols_element", i);
-            prop.put("nav-protocols_activate", neg > 0 || visible ? 1 : 0); // by default off
             i--;
             prop.put("nav-protocols_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0)
@@ -439,7 +433,6 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-filetypes_element", i);
-            prop.put("nav-filetypes_activate", neg > 0 || visible ? 1 : 0); // by default off
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0)
