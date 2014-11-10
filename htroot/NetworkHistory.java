@@ -21,9 +21,9 @@
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -70,16 +69,13 @@ public class NetworkHistory {
         long now = System.currentTimeMillis();
         long timelimit = now - maxtime * 3600000L;
         try {
-            // BEncodedHeap statTable = sb.tables.getHeap("stats");
-            // Iterator<byte[]> i = statTable.keys(false, false);
-            Collection<Row> rowi = Tables.orderByPK(sb.tables.iterator("stats"), 10000, true); // this is bad, fix the statTable.keys(false, false) method
+            Iterator<Row> rowi = sb.tables.iterator("stats", false);
             Map <String, Long> statrow;
-            for (Row row: rowi) {
+            while (rowi.hasNext()) {
+                Row row = rowi.next();
                 String d = ASCII.String(row.getPK());
                 Date date = GenericFormatter.SHORT_MINUTE_FORMATTER.parse(d);
-                //System.out.println(date);
                 if (date.getTime() < timelimit) break;
-                //Map<String, byte[]> row = statTable.get(pk);
                 statrow = new HashMap<>();
                 for (String key: columns) {
                     byte[] x = row.get(key);

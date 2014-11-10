@@ -437,33 +437,44 @@ public class Tables implements Iterable<String> {
         final BEncodedHeap heap = getHeap(table);
         return heap.keys();
     }
+    
+    public Iterator<byte[]> keys(final String table, final boolean up, final boolean rotating) throws IOException {
+        final BEncodedHeap heap = getHeap(table);
+        return heap.keys(up, rotating);
+    }
 
     public Iterator<Row> iterator(final String table) throws IOException {
-        return new RowIterator(table);
+        return new HeapRowIterator(table);
     }
 
     public Iterator<Row> iterator(final String table, final String whereColumn, final byte[] whereValue) throws IOException {
-        return new RowIterator(table, whereColumn, whereValue);
+        return new HeapRowIterator(table, whereColumn, whereValue);
     }
 
     public Iterator<Row> iterator(final String table, final String whereColumn, final Pattern wherePattern) throws IOException {
-        return new RowIterator(table, whereColumn, wherePattern);
+        return new HeapRowIterator(table, whereColumn, wherePattern);
     }
 
     public Iterator<Row> iterator(final String table, final Pattern wherePattern) throws IOException {
-        return new RowIterator(table, wherePattern);
+        return new HeapRowIterator(table, wherePattern);
     }
 
-    public static Collection<Row> orderByPK(final Iterator<Row> rowIterator, int maxcount, boolean reverse) {
-        final TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
-        Row row;
-        while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
-            row = rowIterator.next();
-            sortTree.put(UTF8.String(row.pk), row);
-        }
-        return reverse ? sortTree.descendingMap().values() : sortTree.values();
+    public Iterator<Row> iterator(final String table, final boolean up) throws IOException {
+        return new OrderedRowIterator(table, up);
     }
 
+    public Iterator<Row> iterator(final String table, final String whereColumn, final byte[] whereValue, final boolean up) throws IOException {
+        return new OrderedRowIterator(table, whereColumn, whereValue, up);
+    }
+
+    public Iterator<Row> iterator(final String table, final String whereColumn, final Pattern wherePattern, final boolean up) throws IOException {
+        return new OrderedRowIterator(table, whereColumn, wherePattern, up);
+    }
+
+    public Iterator<Row> iterator(final String table, final Pattern wherePattern, final boolean up) throws IOException {
+        return new OrderedRowIterator(table, wherePattern, up);
+    }
+    
     public static Collection<Row> orderBy(final Iterator<Row> rowIterator, int maxcount, final String sortColumn) {
         final TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
         Row row;
@@ -485,7 +496,7 @@ public class Tables implements Iterable<String> {
         return heap.columns();
     }
 
-    public class RowIterator extends LookAheadIterator<Row> implements Iterator<Row> {
+    public class HeapRowIterator extends LookAheadIterator<Row> implements Iterator<Row> {
 
         private final String whereColumn;
         private final byte[] whereValue;
@@ -497,7 +508,7 @@ public class Tables implements Iterable<String> {
          * @param table
          * @throws IOException
          */
-        public RowIterator(final String table) throws IOException {
+        public HeapRowIterator(final String table) throws IOException {
             this.whereColumn = null;
             this.whereValue = null;
             this.wherePattern = null;
@@ -513,7 +524,7 @@ public class Tables implements Iterable<String> {
          * @param whereValue
          * @throws IOException
          */
-        public RowIterator(final String table, final String whereColumn, final byte[] whereValue) throws IOException {
+        public HeapRowIterator(final String table, final String whereColumn, final byte[] whereValue) throws IOException {
             assert whereColumn != null || whereValue == null;
             this.whereColumn = whereColumn;
             this.whereValue = whereValue;
@@ -530,7 +541,7 @@ public class Tables implements Iterable<String> {
          * @param wherePattern
          * @throws IOException
          */
-        public RowIterator(final String table, final String whereColumn, final Pattern wherePattern) throws IOException {
+        public HeapRowIterator(final String table, final String whereColumn, final Pattern wherePattern) throws IOException {
             this.whereColumn = whereColumn;
             this.whereValue = null;
             this.wherePattern = wherePattern == null || wherePattern.toString().isEmpty() ? null : wherePattern;
@@ -545,7 +556,7 @@ public class Tables implements Iterable<String> {
          * @param pattern
          * @throws IOException
          */
-        public RowIterator(final String table, final Pattern pattern) throws IOException {
+        public HeapRowIterator(final String table, final Pattern pattern) throws IOException {
             this.whereColumn = null;
             this.whereValue = null;
             this.wherePattern = pattern == null || pattern.toString().isEmpty() ? null : pattern;
@@ -577,9 +588,116 @@ public class Tables implements Iterable<String> {
             }
             return null;
         }
-
     }
 
+    public class OrderedRowIterator extends LookAheadIterator<Row> implements Iterator<Row> {
+
+        private final String whereColumn;
+        private final byte[] whereValue;
+        private final Pattern wherePattern;
+        private final Iterator<byte[]> i;
+        private final BEncodedHeap heap;
+
+        /**
+         * iterator that iterates all elements in the given table
+         * @param table
+         * @param up
+         * @throws IOException
+         */
+        public OrderedRowIterator(final String table, final boolean up) throws IOException {
+            this.whereColumn = null;
+            this.whereValue = null;
+            this.wherePattern = null;
+            this.heap = getHeap(table);
+            this.i = heap.keys(up, false);
+        }
+
+        /**
+         * iterator that iterates all elements in the given table
+         * where a given column is equal to a given value
+         * @param table
+         * @param whereColumn
+         * @param whereValue
+         * @param up
+         * @throws IOException
+         */
+        public OrderedRowIterator(final String table, final String whereColumn, final byte[] whereValue, final boolean up) throws IOException {
+            assert whereColumn != null || whereValue == null;
+            this.whereColumn = whereColumn;
+            this.whereValue = whereValue;
+            this.wherePattern = null;
+            this.heap = getHeap(table);
+            this.i = heap.keys(up, false);
+        }
+
+        /**
+         * iterator that iterates all elements in the given table
+         * where a given column matches with a given value
+         * @param table
+         * @param whereColumn
+         * @param wherePattern
+         * @param up
+         * @throws IOException
+         */
+        public OrderedRowIterator(final String table, final String whereColumn, final Pattern wherePattern, final boolean up) throws IOException {
+            this.whereColumn = whereColumn;
+            this.whereValue = null;
+            this.wherePattern = wherePattern == null || wherePattern.toString().isEmpty() ? null : wherePattern;
+            this.heap = getHeap(table);
+            this.i = heap.keys(up, false);
+        }
+
+        /**
+         * iterator that iterates all elements in the given table
+         * where a given column matches with a given value
+         * @param table
+         * @param wherePattern
+         * @param up
+         * @throws IOException
+         */
+        public OrderedRowIterator(final String table, final Pattern wherePattern, final boolean up) throws IOException {
+            this.whereColumn = null;
+            this.whereValue = null;
+            this.wherePattern = wherePattern == null || wherePattern.toString().isEmpty() ? null : wherePattern;
+            this.heap = getHeap(table);
+            this.i = heap.keys(up, false);
+        }
+
+        @Override
+        protected Row next0() {
+            if (this.i == null) return null;
+            Row r;
+            while (this.i.hasNext()) {
+                byte[] pk = this.i.next();
+                Map<String, byte[]> map;
+                try {
+                    map = this.heap.get(pk);
+                    if (map == null) continue;
+                    r = new Row(pk, map);
+                    if (this.whereValue != null) {
+                        if (ByteBuffer.equals(r.get(this.whereColumn), this.whereValue)) return r;
+                    } else if (this.wherePattern != null) {
+                        if (this.whereColumn == null) {
+                            // shall match any column
+                            for (final byte[] b: r.values()) {
+                                if (this.wherePattern.matcher(UTF8.String(b)).matches()) return r;
+                            }
+                        } else {
+                            // must match the given column
+                            if (this.wherePattern.matcher(UTF8.String(r.get(this.whereColumn))).matches()) return r;
+                        }
+                    } else {
+                        return r;
+                    }
+                } catch (IOException | SpaceExceededException e) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+    }
+    
     public static class Data extends LinkedHashMap<String, byte[]> {
 
         private static final long serialVersionUID = 978426054043749337L;

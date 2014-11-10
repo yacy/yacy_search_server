@@ -360,6 +360,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
 
     @Override
     public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+        this.sort();
         return new keyIterator(up, firstKey);
     }
 
@@ -378,10 +379,10 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
             this.first = firstKey;
             this.bound = RowSet.this.sortBound;
             if (this.first == null) {
-                this.p = 0;
+                this.p = up ? 0 : this.bound - 1;
             } else {
                 assert this.first.length == RowSet.this.rowdef.primaryKeyLength : "first.length = " + this.first.length + ", rowdef.primaryKeyLength = " + RowSet.this.rowdef.primaryKeyLength;
-                this.p = binaryPosition(this.first, 0); // check this to find bug in DHT selection enumeration
+                this.p = up ? binaryPosition(this.first, 0) : this.bound - 1; // check this to find bug in DHT selection enumeration
             }
         }
 

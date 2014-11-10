@@ -564,7 +564,7 @@ public class BEncodedHeap implements MapStore {
     }
     
     /**
-     * iteratore all keys of the table
+     * iterate all keys of the table
      * 
      * @param up
      * @param rotating

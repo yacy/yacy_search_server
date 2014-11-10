@@ -166,14 +166,12 @@ public class Tables_p {
                 }
                 count = 0;
                 try {
-                    final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher);
-                    final Iterator<Tables.Row> mapIterator = Tables.orderByPK(plainIterator, maxcount, reverse).iterator();
-                    Tables.Row row;
+                    final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher, !reverse);
                     boolean dark = true;
-                    byte[] cell;
                     prop.putXML("showtable_" + count + "_table", table); // only used in XML
-                    while (mapIterator.hasNext() && count < maxcount) {
-                        row = mapIterator.next();
+                    byte[] cell;
+                    while (plainIterator.hasNext() && count < maxcount) {
+                        Tables.Row row = plainIterator.next();
                         if (row == null) continue;
 
                         // write table content

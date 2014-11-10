@@ -243,7 +243,7 @@ public class Table_YMark_p {
                     	final String tagsString = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key()));
                     	mapIterator = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagsString);
                     } else {
-                    	mapIterator = Tables.orderByPK(sb.tables.iterator(table, matcher), maxcount, false).iterator();
+                    	mapIterator = sb.tables.iterator(table, matcher, true);
                     }
 
                     Tables.Row row;

@@ -154,8 +154,7 @@ public class table_p {
         }
         int count = 0;
         try {
-            final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher);
-            final Iterator<Tables.Row> mapIterator = Tables.orderByPK(plainIterator, maxcount, false).iterator();
+            final Iterator<Tables.Row> mapIterator = sb.tables.iterator(table, matcher, true);
             Tables.Row trow;
             boolean dark = true;
             String cellName, cellValue;
