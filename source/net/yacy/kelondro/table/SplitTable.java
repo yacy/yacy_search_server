@@ -573,7 +573,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         while (i.hasNext()) {
             c[d++] = i.next().rows();
         }
-        return StackIterator.stack(c);
+        return StackIterator.stack(c, null, true);
     }
 
     @Override

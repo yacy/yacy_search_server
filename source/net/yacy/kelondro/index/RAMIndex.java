@@ -437,7 +437,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         // sort index1 to enable working of the merge iterator
         //index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return new StackIterator<Row.Entry>(this.index0.rows(), this.index1.rows());
+        return new StackIterator<Row.Entry>(this.index0.rows(), this.index1.rows(), null, true);
     }
 
     @Override

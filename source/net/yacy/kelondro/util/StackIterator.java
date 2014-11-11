@@ -23,6 +23,7 @@
 package net.yacy.kelondro.util;
 
 import java.lang.reflect.Array;
+import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 
 import net.yacy.cora.order.CloneableIterator;
@@ -32,32 +33,37 @@ public class StackIterator<E> implements CloneableIterator<E> {
 
     private final CloneableIterator<E> a, b;
     private E na, nb;
-
+    private final Comparator<E> c;
+    
     public StackIterator(
             final CloneableIterator<E> a,
-            final CloneableIterator<E> b) {
+            final CloneableIterator<E> b,
+            final Comparator<E> c, final boolean up) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.b = b;
+        this.c = up ? c : new Comparator<E>() {
+            @Override public int compare(E o1, E o2) {return -c.compare(o1, o2);}
+        };
         nexta();
         nextb();
     }
 
     @Override
     public StackIterator<E> clone(final Object modifier) {
-        return new StackIterator<E>(this.a.clone(modifier), this.b.clone(modifier));
+        return new StackIterator<E>(this.a.clone(modifier), this.b.clone(modifier), this.c, true);
     }
 
     private void nexta() {
         try {
-            if ((this.a != null) && (this.a.hasNext())) this.na = this.a.next(); else this.na = null;
+            if (this.a != null && this.a.hasNext()) this.na = this.a.next(); else this.na = null;
         } catch (final ConcurrentModificationException e) {
             this.na = null;
         }
     }
     private void nextb() {
         try {
-            if ((this.b != null) && (this.b.hasNext())) this.nb = this.b.next(); else this.nb = null;
+            if (this.b != null && this.b.hasNext()) this.nb = this.b.next(); else this.nb = null;
         } catch (final ConcurrentModificationException e) {
             this.nb = null;
         }
@@ -65,7 +71,7 @@ public class StackIterator<E> implements CloneableIterator<E> {
 
     @Override
     public boolean hasNext() {
-        return (this.na != null) || (this.nb != null);
+        return this.na != null || this.nb != null;
     }
 
     @Override
@@ -81,9 +87,14 @@ public class StackIterator<E> implements CloneableIterator<E> {
             nexta();
             return s;
         }
-        // just stack the Objects
-        s = this.na;
-        nexta();
+        // return the object in right order
+        if (this.c == null || this.c.compare(this.na, this.nb) <= 0) {
+            s = this.na;
+            nexta();
+            return s;
+        }
+        s = this.nb;
+        nextb();
         return s;
     }
 
@@ -93,7 +104,7 @@ public class StackIterator<E> implements CloneableIterator<E> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <A> CloneableIterator<A> stack(final CloneableIterator<A>[] iterators) {
+    public static <A> CloneableIterator<A> stack(final CloneableIterator<A>[] iterators, final Comparator<A> c, final boolean up) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
         if (iterators == null || iterators.length == 0) return new CloneableIterator<A>() {
@@ -122,13 +133,13 @@ public class StackIterator<E> implements CloneableIterator<E> {
         if (iterators.length == 2) {
             if (iterators[0] == null) return iterators[1];
             if (iterators[1] == null) return iterators[0];
-            return new StackIterator<A>(iterators[0], iterators[1]);
+            return new StackIterator<A>(iterators[0], iterators[1], c, up);
         }
         CloneableIterator<A> a = iterators[0];
         final CloneableIterator<A>[] iterators0 = (CloneableIterator<A>[]) Array.newInstance(CloneableIterator.class, iterators.length - 1);
         System.arraycopy(iterators, 1, iterators0, 0, iterators.length - 1);
-        if (a == null) return stack(iterators0);
-        return new StackIterator<A>(a, stack(iterators0));
+        if (a == null) return stack(iterators0, c, up);
+        return new StackIterator<A>(a, stack(iterators0, c, up), c, up);
     }
 
     @Override

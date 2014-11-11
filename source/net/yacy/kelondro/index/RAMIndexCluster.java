@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         this.name = name;
         this.cluster = new RAMIndex[clusterSize];
         this.rowdef = rowdef;
-        for (int i = 0; i < clusterSize; i++) {
+        for (int i = 0; i < this.cluster.length; i++) {
             this.cluster[i] = null; // lazy initialization, the actual initialization is at accessArray()
         }
     }
@@ -319,20 +320,29 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
 
     @Override
     @SuppressWarnings("unchecked")
-    public final CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) {
+    public final CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         synchronized (this.cluster) {
-            final List<CloneableIterator<Entry>> col = new ArrayList<CloneableIterator<Entry>>(this.cluster.length);
+            final List<CloneableIterator<Row.Entry>> col = new ArrayList<CloneableIterator<Row.Entry>>(this.cluster.length);
             for (RAMIndex element : this.cluster) {
                 if (element != null) {
                     col.add(element.rows(up, firstKey));
                 }
             }
-            return StackIterator.stack(col.toArray((CloneableIterator<Entry>[]) Array.newInstance(CloneableIterator.class, col.size())));
+            return StackIterator.stack(col.toArray((CloneableIterator<Row.Entry>[]) Array.newInstance(CloneableIterator.class, col.size())), getEntryComparator(), up);
         }
+    }
+    
+    private Comparator<Row.Entry> getEntryComparator() {
+        return new Comparator<Row.Entry>() {
+            @Override
+            public int compare(Row.Entry o1, Row.Entry o2) {
+                return RAMIndexCluster.this.rowdef.objectOrder.compare(o1.getPrimaryKeyBytes(), o2.getPrimaryKeyBytes());
+            }
+        };
     }
 
     @Override
-    public final CloneableIterator<Entry> rows() {
+    public final CloneableIterator<Row.Entry> rows() {
         return rows(true, null);
     }
 
