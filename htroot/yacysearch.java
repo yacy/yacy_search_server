@@ -370,7 +370,7 @@ public class yacysearch {
                 if (querystring.length() == 1) {
                     querystring = Segment.catchallString;
                 } else {
-                    querystring = querystring.replaceAll("* ", Segment.catchallString + " ").replace(" *", " " + Segment.catchallString);
+                    querystring = querystring.replaceAll("\\* ", Segment.catchallString + " ").replace(" \\*", " " + Segment.catchallString);
                 }
             }
             if ( querystring.indexOf("/near", 0) >= 0 ) {
@@ -860,7 +860,7 @@ public class yacysearch {
         }
 
         prop.put("searchagain", global ? "1" : "0");
-        prop.putHTML("former", originalquerystring);
+        prop.putHTML("former", originalquerystring.replaceAll(Segment.catchallString, "*"));
         prop.put("count", itemsPerPage);
         prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
