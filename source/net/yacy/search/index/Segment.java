@@ -73,6 +73,7 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
+import net.yacy.kelondro.table.IndexTable;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
@@ -103,6 +104,7 @@ public class Segment {
     public static final int  writeBufferSize = 4 * 1024 * 1024;
     public static final String termIndexName = "text.index";
     public static final String citationIndexName = "citation.index";
+    public static final String firstseenIndexName = "firstseen.index";
 
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
@@ -114,15 +116,17 @@ public class Segment {
     protected final Fulltext                       fulltext;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
+    protected       IndexTable                     firstSeenIndex;
 
     /**
      * create a new Segment
      * @param log
      * @param segmentPath that should be the path ponting to the directory "SEGMENT"
      * @param collectionSchema
+     * @throws IOException 
      */
     public Segment(final ConcurrentLog log, final File segmentPath, final File archivePath,
-            final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
+            final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) throws IOException {
         log.info("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
@@ -132,6 +136,7 @@ public class Segment {
         this.fulltext = new Fulltext(segmentPath, archivePath, collectionConfiguration, webgraphConfiguration);
         this.termIndex = null;
         this.urlCitationIndex = null;
+        this.firstSeenIndex = new IndexTable(new File(segmentPath, firstseenIndexName), 12, 8, false, false);
     }
     
     public boolean connectedRWI() {
@@ -200,6 +205,10 @@ public class Segment {
 
     public IndexCell<CitationReference> urlCitation() {
         return this.urlCitationIndex;
+    }
+    
+    public IndexTable firstSeen() {
+        return this.firstSeenIndex;
     }
     
     public ReferenceReportCache getReferenceReportCache()  {
@@ -350,6 +359,26 @@ public class Segment {
             return 0;
         }
     }
+    
+    public void setFirstSeenTime(final byte[] urlhash, long time) {
+        if (urlhash == null || time <= 0) return;
+        try {
+            if (this.firstSeenIndex.has(urlhash)) return; // NEVER overwrite, that is the purpose of this index.
+            this.firstSeenIndex.put(urlhash, time);
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+        }
+    }
+    
+    public long getFirstSeenTime(final byte[] urlhash) {
+        if (urlhash == null) return -1;
+        try {
+            return this.firstSeenIndex.get(urlhash);
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+            return -1;
+        }
+    }
 
     /**
      * get the load time of a resource.
@@ -435,6 +464,7 @@ public class Segment {
     	if (this.termIndex != null) this.termIndex.close();
         if (this.fulltext != null) this.fulltext.close();
         if (this.urlCitationIndex != null) this.urlCitationIndex.close();
+        if (this.firstSeenIndex != null) this.firstSeenIndex.close();
     }
 
     private static String votedLanguage(
@@ -517,7 +547,6 @@ public class Segment {
         final long startTime = System.currentTimeMillis();
         
         // CREATE INDEX
-
         // load some document metadata
         final Date loadDate = new Date();
         final String id = ASCII.String(url.hash());
@@ -533,7 +562,7 @@ public class Segment {
         
         // CREATE SOLR DOCUMENT
         final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
-        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
+        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this, collections, responseHeader, document, condenser, referrerURL, language, this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);
@@ -563,6 +592,8 @@ public class Segment {
         
         }
         
+        // REMEMBER FIRST SEEN
+        setFirstSeenTime(url.hash(), Math.min(document.getDate().getTime(), System.currentTimeMillis())); // should exist already in the index at this time, but just to make sure
 
         // write the edges to the citation reference index
         if (this.connectedCitation()) try {

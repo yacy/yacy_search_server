@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -379,6 +380,9 @@ public class ViewFile {
         prop.put("error_url", url.toNormalform(true));
         prop.put("error_hash", urlHash);
         prop.put("error_wordCount", wordCount);
+        prop.put("error_firstSeen", "");
+        long firstseen = sb.index.getFirstSeenTime(ASCII.getBytes(urlHash));
+        prop.put("error_firstSeen", firstseen < 0 ? "" : new Date(firstseen).toString());
         prop.putHTML("error_desc", (descr.isEmpty()) ? "&nbsp;" : descr);
         prop.putNum("error_size", size);
         prop.put("error_mimeTypeAvailable", (response.getMimeType() == null) ? "0" : "1");

@@ -402,6 +402,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     public SolrVector yacy2solr(
+            final Segment segment,
             final Map<String, Pattern> collections, final ResponseHeader responseHeader,
             final Document document, final Condenser condenser, final DigestURL referrerURL, final String language,
             final WebgraphConfiguration webgraph, final String sourceName) {
@@ -486,6 +487,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             Date lastModified = responseHeader == null ? new Date() : responseHeader.lastModified();
             if (lastModified == null) lastModified = new Date();
             if (document.getDate().before(lastModified)) lastModified = document.getDate();
+            long firstSeen = segment.getFirstSeenTime(digestURL.hash());
+            if (firstSeen > 0 && firstSeen < lastModified.getTime()) lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
             add(doc, CollectionSchema.last_modified, lastModified);
         }
         if (allAttr || contains(CollectionSchema.keywords)) {

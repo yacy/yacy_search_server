@@ -507,7 +507,7 @@ public final class Switchboard extends serverSwitch {
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-        this.index = new Segment(this.log, segmentsPath, archivePath, solrCollectionConfigurationWork, solrWebgraphConfigurationWork);
+        try {this.index = new Segment(this.log, segmentsPath, archivePath, solrCollectionConfigurationWork, solrWebgraphConfigurationWork);} catch (IOException e) {ConcurrentLog.logException(e);}
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) try {
             this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
         } catch (final IOException e) {ConcurrentLog.logException(e);}

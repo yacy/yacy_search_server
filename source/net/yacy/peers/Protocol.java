@@ -1088,6 +1088,8 @@ public final class Protocol {
 
             // passed all checks, store url
             if (!localsearch) {
+                event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
+                
                 // put the remote documents to the local index. We must convert the solr document to a solr input document:
                 SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
 

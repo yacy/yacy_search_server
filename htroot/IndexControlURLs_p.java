@@ -160,6 +160,9 @@ public class IndexControlURLs_p {
             if ( post.get("deleteCitation", "").equals("on")) {
                 if (segment.connectedCitation()) try {segment.urlCitation().clear();} catch (final IOException e) {}
             }
+            if ( post.get("deleteFirstSeen", "").equals("on")) {
+                try {segment.firstSeen().clear();} catch (final IOException e) {}
+            }
             if ( post.get("deleteCrawlQueues", "").equals("on") ) {
                 sb.crawlQueues.clear();
                 sb.crawlStacker.clear();
