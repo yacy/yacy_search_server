@@ -79,7 +79,8 @@ public class QueryModifier {
         }
         
         // parse 'common search mistakes' like guessed regular expressions
-        querystring = filetypeParser(querystring, "*");
+        int p = querystring.indexOf('*');
+        if ((p >= 0) && ((p > 0 && querystring.charAt(p - 1) != ' ') || (p < querystring.length() - 1 && querystring.charAt(p + 1) != ' '))) querystring = querystring.substring(0, p - 1) + querystring.substring(p + 1);
         
         // parse filetype
         querystring = filetypeParser(querystring, "filetype:");
@@ -158,7 +159,7 @@ public class QueryModifier {
         }
         
         // check the number of quotes in the string; if there is only one double-quote, add another one. this will prevent error messages in 
-        int p = querystring.indexOf('"');
+        p = querystring.indexOf('"');
         if (p >= 0) {
             int q = querystring.indexOf('"', p + 1);
             if (q < 0) querystring += '"';
