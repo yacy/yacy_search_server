@@ -3,7 +3,7 @@
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td>IP-Number filter:</td>
-    <td><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#" /><br />(requires restart)</td>
+    <td><input name="serverfilter" type="text" size="32" maxlength="1000" value="#[serverfilter]#" /><br />(requires restart)</td>
     <td><strong>Here you can restrict access to the server.</strong>  By default, the access is not limited,
            because this function is needed to spawn the p2p index-sharing function.
            If you block access to your server (setting anything else than '*'), then you will also be blocked
@@ -45,6 +45,14 @@
            ATTENTION: Your current IP is recognized as "#[clientIP]#".
            If the value you enter here does not match with this IP,
            you will not be able to access the server pages anymore.</td>
+  </tr>
+  <tr valign="top">
+    <td>fileHost:</td>
+    <td><input name="fileHost" type="text" size="32" maxlength="80" value="#[fileHost]#" /><br />(requires restart)</td>
+    <td><strong>Set this to avoid error-messages like 'proxy use not allowed / granted' on accessing your Peer by its hostname.</strong>
+			Virtual host for httpdFileServlet access for example http://FILEHOST/ shall access the file servlet and
+			return the defaultFile at rootPath either way, http://FILEHOST/ denotes the same as http://localhost:<port>/
+			for the preconfigured value 'localpeer', the URL is: http://localpeer/.</td>
   </tr>
   <tr valign="top">
     <td colspan="3"><input type="submit" name="serveraccount" value="Submit" /></td>

@@ -169,6 +169,12 @@ public class SettingsAck_p {
 
         // server access
         if (post.containsKey("serveraccount")) {
+        	
+        	// fileHost
+        	String fileHost = (post.get("fileHost")).trim();
+        	if (fileHost != null && !fileHost.isEmpty() && !fileHost.equals(env.getConfig("fileHost", "localpeer"))) {
+        		env.setConfig("fileHost", fileHost);
+        	}
 
             // static IP
             String staticIP =  (post.get("staticIP")).trim();

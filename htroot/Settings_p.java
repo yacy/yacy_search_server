@@ -77,6 +77,7 @@ public final class Settings_p {
         
         prop.putHTML("peerName", sb.peers.mySeed().getName());
         prop.putHTML("staticIP", env.getConfig("staticIP", ""));
+        prop.putHTML("fileHost", env.getConfig("fileHost", "localpeer"));
         String peerLang = env.getConfig("locale.language", "default");
         if (peerLang.equals("default")) peerLang = "en";
         prop.putHTML("peerLang", peerLang);
