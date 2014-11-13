@@ -286,7 +286,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
             CloneableIterator<byte[]> b = this.backend.keys(up, firstKey);
             if (b == null) return a;
             if (a == null) return b;
-            return new MergeIterator<byte[]>(a, b, this.buffer.rowdef.getOrdering(), MergeIterator.simpleMerge, true);
+            return new MergeIterator<byte[]>(a, b, this.buffer.rowdef.getOrdering(), MergeIterator.simpleMerge, up);
         }
     }
 
@@ -308,7 +308,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
                     this.backend.rows(up, firstKey),
                     this.entryComparator,
                     MergeIterator.simpleMerge,
-                    true);
+                    up);
         }
     }
 

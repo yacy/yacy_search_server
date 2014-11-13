@@ -379,7 +379,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
                 k1,
                 this.rowdef.objectOrder,
                 MergeIterator.simpleMerge,
-                true);
+                up);
     }
 
     @Override
@@ -410,7 +410,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
                 k1,
                 this.entryComparator,
                 MergeIterator.simpleMerge,
-                true);
+                up);
     }
 
     @Override
