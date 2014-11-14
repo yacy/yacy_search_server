@@ -142,7 +142,7 @@ public class status_p {
         //postprocessingCollection1Count = 0;
         //postprocessingsWebgraphCount = 0;
         long collectionRemainingCount = 0, webgraphRemainingCount = 0;
-        if (processCollection) try {collectionRemainingCount = sb.index.fulltext().getDefaultConnector().getCountByQuery(CollectionConfiguration.collection1query(sb.index, null));} catch (IOException e) {}
+        if (processCollection) try {collectionRemainingCount = sb.index.fulltext().getDefaultConnector().getCountByQuery("{!cache=false}" + CollectionConfiguration.collection1query(sb.index, null));} catch (IOException e) {}
         if (processWebgraph) try {webgraphRemainingCount = sb.index.fulltext().getWebgraphConnector().getCountByQuery(CollectionConfiguration.webgraphquery(sb.index, null));} catch (IOException e) {}
         long countSinceStart = CollectionConfiguration.postprocessingRunning ? CollectionConfiguration.postprocessingCollection1Count + CollectionConfiguration.postprocessingWebgraphCount - collectionRemainingCount - webgraphRemainingCount : 0;
         int speed = timeSinceStart == 0 ? 0 : (int) (60000 * countSinceStart / timeSinceStart); // pages per minute

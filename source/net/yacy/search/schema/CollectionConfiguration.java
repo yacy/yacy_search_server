@@ -993,13 +993,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
     public static final String collection1query(final Segment segment, final String harvestkey) {
         return (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ?
-                "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-              CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
+                       "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+               CollectionSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
     }
     public static final String webgraphquery(final Segment segment, final String harvestkey) {
         return (harvestkey == null || !segment.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.harvestkey_s) ?
-                "" : WebgraphSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-              WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
+                       "" : WebgraphSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+               WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
     }
     
     /**
@@ -1025,8 +1025,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         postprocessingActivity = "collecting counts";
         ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
         try {
-            postprocessingCollection1Count = (int) collectionConnector.getCountByQuery(collection1query);
-            postprocessingWebgraphCount = segment.fulltext().useWebgraph() ? (int) segment.fulltext().getWebgraphConnector().getCountByQuery(webgraphquery) : 0;
+            postprocessingCollection1Count = (int) collectionConnector.getCountByQuery("{!cache=false}" + collection1query);
+            postprocessingWebgraphCount = segment.fulltext().useWebgraph() ? (int) segment.fulltext().getWebgraphConnector().getCountByQuery("{!cache=false}" + webgraphquery) : 0;
         } catch (IOException e) {
             postprocessingCollection1Count = -1;
             postprocessingWebgraphCount = -1;
@@ -1037,7 +1037,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
         ReversibleScoreMap<String> collection1hosts;
         try {
-            Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets(collection1query, 10000000, CollectionSchema.host_s.getSolrFieldName());
+            Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 10000000, CollectionSchema.host_s.getSolrFieldName());
             collection1hosts = hostfacet.get(CollectionSchema.host_s.getSolrFieldName());
         } catch (final IOException e2) {
             ConcurrentLog.logException(e2);
@@ -1265,20 +1265,20 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         final AtomicInteger proccount_citationchange = new AtomicInteger();
         try {
             // partitioning of the index, get a facet for a partitioning key
-            final long count = collectionConnector.getCountByQuery(collection1query);
+            final long count = collectionConnector.getCountByQuery("{!cache=false}" + collection1query);
             String partitioningKey = CollectionSchema.responsetime_i.getSolrFieldName();
             postprocessingActivity = "collecting " + count + " documents from the collection for harvestkey " + harvestkey + ", partitioned by " + partitioningKey;
             if (count > 0) {
-                Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets(collection1query, 100000, partitioningKey);
+                Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 100000, partitioningKey);
                 ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
-                long emptyCount = collectionConnector.getCountByQuery("-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")");
+                long emptyCount = collectionConnector.getCountByQuery("{!cache=false}" + "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")");
                 if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
                 final long start = System.currentTimeMillis();
                 List<String> querystrings = new ArrayList<>(partitioning.size());
                 for (String partitioningValue: partitioning) {
-                    String partitioningQuery = (partitioningValue.length() == 0) ?
+                    String partitioningQuery = "{!cache=false}" + ((partitioningValue.length() == 0) ?
                             "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")" :
-                            partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")";
+                            partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")");
                     querystrings.add(partitioningQuery);
                 }
                 // start collection of documents 
