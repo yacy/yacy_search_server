@@ -156,6 +156,17 @@ public final class SwitchboardConstants {
     public static final String SEARCHRESULT_METHOD_START         = "searchresultProcess";
     public static final String SEARCHRESULT_METHOD_JOBCOUNT      = "searchresultQueueSize";
     public static final String SEARCHRESULT_METHOD_FREEMEM       = "searchresultFreeMem";
+    // 85_scheduler
+    /**
+     * <p><code>public static final String <strong>SCHEDULER</strong> = "85_scheduler"</code></p>
+     * <p>The cleanup thread which is responsible for the start of scheduled processes from the API table</p>
+     */
+    public static final String SCHEDULER                    = "85_scheduler";
+    public static final String SCHEDULER_METHOD_START       = "schedulerJob";
+    public static final String SCHEDULER_METHOD_JOBCOUNT    = "schedulerJobSize";
+    public static final String SCHEDULER_METHOD_FREEMEM     = null;
+    public static final String SCHEDULER_IDLESLEEP          = "85_scheduler_idlesleep";
+    public static final String SCHEDULER_BUSYSLEEP          = "85_scheduler_busysleep";
     // 90_cleanup
     /**
      * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>

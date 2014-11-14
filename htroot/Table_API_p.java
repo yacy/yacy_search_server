@@ -126,8 +126,8 @@ public class Table_API_p {
                         if (action.equals("selminutes") && time > 0 && time < 10) {
                             row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 10);
                         }
-                        if (action.equals("selminutes") && time > 50) {
-                            row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 50);
+                        if (action.equals("selminutes") && time > 59) {
+                            row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 59);
                         }
                         if (action.equals("selhours") && time > 23) {
                             row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 23);
