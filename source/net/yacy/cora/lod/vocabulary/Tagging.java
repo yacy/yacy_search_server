@@ -22,8 +22,10 @@ package net.yacy.cora.lod.vocabulary;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +36,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
@@ -158,7 +161,8 @@ public class Tagging {
 			    }
 			}
         } else {
-	        BufferedWriter w = new BufferedWriter(new FileWriter(propFile));
+            //
+            BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(propFile), UTF8.charset.name()));
 	        if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
 	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
 	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();

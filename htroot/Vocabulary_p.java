@@ -18,23 +18,26 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.DCTerms;
-import net.yacy.cora.lod.vocabulary.Owl;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.WorkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
@@ -55,23 +58,43 @@ public class Vocabulary_p {
         if (vocabulary == null) vocabularyName = null;
         if (post != null) {
             try {
-                if (vocabulary == null) {
-                    // create a vocabulary
-                    if (discovername != null && discovername.length() > 0) {
-                        String discoverobjectspace = post.get("discoverobjectspace", "");
-                        MultiProtocolURL discoveruri = null;
-                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURL(discoverobjectspace);} catch (final MalformedURLException e) {}
-                        if (discoveruri == null) discoverobjectspace = "";
-                        Map<String, Tagging.SOTuple> table = new TreeMap<String, Tagging.SOTuple>();
-                        File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
-                        boolean discoverNot = post.get("discovermethod", "").equals("none");
-                        boolean discoverFromPath = post.get("discovermethod", "").equals("path");
-                        boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
-                        boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
-                        boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
-                        Segment segment = sb.index;
-                        String t;
-                        if (!discoverNot) {
+                // create a vocabulary
+                if (vocabulary == null && discovername != null && discovername.length() > 0) {
+                    // store this call as api call
+                    sb.tables.recordAPICall(post, "Vocabulary_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "vocabulary creation for " + discovername);
+                    // get details of creation
+                    String discoverobjectspace = post.get("discoverobjectspace", "");
+                    MultiProtocolURL discoveruri = null;
+                    if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURL(discoverobjectspace);} catch (final MalformedURLException e) {}
+                    if (discoveruri == null) discoverobjectspace = "";
+                    Map<String, Tagging.SOTuple> table = new LinkedHashMap<String, Tagging.SOTuple>();
+                    File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
+                    final boolean discoverNot = post.get("discovermethod", "").equals("none");
+                    final boolean discoverFromPath = post.get("discovermethod", "").equals("path");
+                    final boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
+                    final boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
+                    final boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
+                    final boolean discoverFromCSV = post.get("discovermethod", "").equals("csv");
+                    final String discoverFromCSVPath = post.get("discoverpath", "");
+                    final String discoverFromCSVCharset = post.get("charset", "UTF-8");
+                    final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
+                    final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
+                    final File discoverFromCSVFile = discoverFromCSVPath.length() > 0 ? new File(discoverFromCSVPath) : null;
+                    Segment segment = sb.index;
+                    String t;
+                    if (!discoverNot) {
+                        if (discoverFromCSV && discoverFromCSVFile != null && discoverFromCSVFile.exists()) {
+                            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset));
+                            String line = null;
+                            while ((line = r.readLine()) != null) {
+                                String[] l = line.split(";");
+                                String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral];
+                                String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink];
+                                if (literal != null && literal.length() > 0) {
+                                    table.put(literal, new Tagging.SOTuple(Tagging.normalizeTerm(literal), objectlink == null ? "" : objectlink));
+                                }
+                            }
+                        } else {
                             Iterator<DigestURL> ui = segment.urlSelector(discoveruri, Long.MAX_VALUE, 100000);
                             while (ui.hasNext()) {
                                 DigestURL u = ui.next();
@@ -118,11 +141,11 @@ public class Vocabulary_p {
                                 }
                             }
                         }
-                        Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
-                        LibraryProvider.autotagging.addVocabulary(newvoc);
-                        vocabularyName = discovername;
-                        vocabulary = newvoc;
                     }
+                    Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
+                    LibraryProvider.autotagging.addVocabulary(newvoc);
+                    vocabularyName = discovername;
+                    vocabulary = newvoc;
                 } else {
                     // check if objectspace was set
                     vocabulary.setObjectspace(post.get("objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace()));
@@ -186,7 +209,6 @@ public class Vocabulary_p {
         } else {
             prop.put("edit", 1);
             boolean editable = vocabulary.getFile() != null && vocabulary.getFile().exists();
-            String yacyurl = YaCyMetadata.hashURI("[hash]".getBytes());
             prop.put("edit_editable", editable ? 1 : 0);
             prop.putHTML("edit_editable_file", editable ? vocabulary.getFile().getAbsolutePath() : "");
             prop.putHTML("edit_name", vocabulary.getName());
@@ -197,9 +219,6 @@ public class Vocabulary_p {
             prop.putHTML("edit_prefix", Tagging.DEFAULT_PREFIX);
             prop.putHTML("edit_editable_objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace());
             prop.putHTML("edit_editable_objectspacepredicate", DCTerms.references.getPredicate());
-            prop.putXML("edit_triple1", "<" + yacyurl + "> <" + vocabulary.getPredicate() + "> \"[discovered-tags-commaseparated]\"");
-            prop.putXML("edit_triple2", "<" + yacyurl + "> <" + Owl.SameAs.getPredicate() + "> <[document-url]>");
-            prop.putXML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"[object-link]#[tag]\" .");
             int c = 0;
             boolean dark = false;
             int osl = vocabulary.getObjectspace() == null ? 0 : vocabulary.getObjectspace().length();
@@ -231,6 +250,15 @@ public class Vocabulary_p {
 
         }
 
+        // make charset list for import method selector
+        int c = 0;
+        for (String cs: Charset.availableCharsets().keySet()) {
+            prop.putHTML("create_charset_" + c + "_name", cs);
+            prop.put("create_charset_" + c + "_selected", cs.equals("windows-1252") ? 1 : 0);
+            c++;
+        }
+        prop.put("create_charset", c);
+        
         // return rewrite properties
         return prop;
     }

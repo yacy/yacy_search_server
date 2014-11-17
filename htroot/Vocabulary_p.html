@@ -90,7 +90,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <dd>
           <select name="vocabulary" onchange="this.form.submit()">
             #{vocabularyset}#
-            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            <option value="#[name]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>
             #{/vocabularyset}#
           </select>
         </dd>
@@ -107,17 +107,35 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
       This works best with wikis. Try to use a wiki url as objectspace path.
       <dl>
-        <dt>Vocabulary Name</dt><dd><input type="text" name="discovername" value="" size="16" maxlength="128" /></dd>
-        <dt>Objectspace</dt><dd><input type="text" name="discoverobjectspace" value="http://" size="78" maxlength="128" />
-            <div id="searchresults"></div></dd>
-        <dt>Discover Terms:</dt>
+        <dt>Vocabulary Name<br><i>(this will become the name of a search facet)</i></dt>
+        <dd><input type="text" name="discovername" value="" size="78" maxlength="128" onkeydown="for (i=0; i < 6; i++) document.getElementsByName('discovermethod')[i].disabled=''"/></dd>
+        <hr>
+        <dt>Empty Vocabulary&nbsp;<input type="radio" name="discovermethod" value="none" checked="checked" disabled="disabled"/></dt>
+        <dd></dd>
+        <dt>Auto-Discover&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</br>
+            from file name&nbsp;<input type="radio" name="discovermethod" value="path" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
+            from page title&nbsp;<input type="radio" name="discovermethod" value="title" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
+            from page title (splitted)&nbsp;<input type="radio" name="discovermethod" value="titlesplitted" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
+            from page author&nbsp;<input type="radio" name="discovermethod" value="author" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/></dt>
         <dd>
-        <input type="radio" name="discovermethod" value="none" checked="checked" /> no auto-discovery (empty vocabulary)&nbsp;&nbsp;
-        <input type="radio" name="discovermethod" value="path" /> from file name&nbsp;&nbsp;
-        <input type="radio" name="discovermethod" value="title" /> from page title&nbsp;&nbsp;
-        <input type="radio" name="discovermethod" value="titlesplitted" /> from page title (splitted)&nbsp;&nbsp;
-        <input type="radio" name="discovermethod" value="author" /> from page author</dd>
-        <input type="radio" name="discovermethod" value="csv" /> from a csv file</dd>
+            <dl>
+            <dt><i>Objectspace</i></dt>
+            <dd><input type="text" id="discoverobjectspace" name="discoverobjectspace" value="http://" size="78" maxlength="512" disabled="disabled"/><div id="searchresults"></div></dd>
+            </dl>
+        </dd>
+        <dt>Import from a csv file&nbsp;<input type="radio" name="discovermethod" value="csv" disabled="disabled" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';"/></dt>
+        <dd>
+            <dl>
+            <dt><i>File Path</i></dt>
+            <dd><input type="text" id="discoverpath" name="discoverpath" value="" size="78" maxlength="256" disabled="disabled"></dd>
+            <dt><i>Column for Literals</i></dt>
+            <dd><input type="number" id="discovercolumnliteral" name="discovercolumnliteral" min="0" max="99" step="1" size="2" value="0" disabled="disabled" style="width:50px;"> (first has index 0)</dd>
+            <dt><i>Column for Object Link (optional)</i></dt>
+            <dd><input type="number" id="discovercolumnobjectlink" name="discovercolumnobjectlink" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" style="width:50px;"> (first has index 0, if unused set -1)</dd>
+            <dt><i>Charset of Import File</i></dt>
+            <dd><select name="charset">#{charset}#<option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/charset}#</select></dd>
+            </dl>
+        </dd>
         <dt></dt><dd><input type="submit" name="create" value="Create" /></dd>
       </dl>
     </fieldset>
@@ -135,12 +153,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <dt>Predicate</dt><dd>#[predicate]#</dd>
         <dt>Prefix</dt><dd>#[prefix]#</dd>
         <dt>Objectspace</dt><dd>#(editable)##[objectspace]#::<input type="text" name="objectspace" value="#[objectspace]#" size="78" maxlength="128" /><br/>if set, uses the predicate <a href="#[objectspacepredicate]#" target="_blank">#[objectspacepredicate]#</a> for generated objects. Hint: use 'http://dbpedia.org/resource/' as default.#(/editable)#</dd>
-      </dl>
-      <p>This produces the following triples in the triplestore if a term or synonym matches in a document:</p>
-      <dl>
-        <dt>Triple #1</dt><dd>#[triple1]#</dd>
-        <dt>Triple #2</dt><dd>#[triple2]#</dd>
-        <dt>more Triples for linking into objectspace</dt><dd>#[tripleN]#</dd>
       </dl>
       <table class="sortable" border="0">
       <tr class="TableHeader" valign="bottom">
