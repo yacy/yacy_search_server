@@ -53,9 +53,7 @@ public class yacysearchtrailer {
 
     private static final int TOPWORDS_MAXCOUNT = 16;
     private static final int TOPWORDS_MINSIZE = 8;
-    private static final int TOPWORDS_MAXSIZE = 20;
-    private static final int MAXLIMIT_NAV_LOW = 5;
-    private static final int MAXLIMIT_NAV_HIGH = 20;
+    private static final int TOPWORDS_MAXSIZE = 22;
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
@@ -334,7 +332,7 @@ public class yacysearchtrailer {
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
-                int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (maxcount / mincount);
+                int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (maxcount - mincount);
                 fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
                 prop.put("nav-topics_element_" + i + "_size", fontsize); // font size in pixel
                 prop.put("nav-topics_element_" + i + "_nl", 1);
