@@ -200,9 +200,10 @@ public class HTMLResponseWriter implements QueryResponseWriter {
                     kv.put(fieldName, field2string(type, value.stringValue()));
                 }
             } else {
+                int c = 0;
                 for (int i = fidx1; i < fidx2; i++) {
                     String sv = fields.get(i).stringValue();
-                    kv.put(fieldName + "_" + i, field2string(type, sv));
+                    kv.put(fieldName + "_" + c++, field2string(type, sv));
                 }
             }
             
