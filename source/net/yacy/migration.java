@@ -307,7 +307,7 @@ public class migration {
         omitFields.add("_version_"); // exclude internal Solr std. field from obsolete check
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
         for (Tagging v: vocs) { //exclude configured vocabulary index fields (not in CollectionSchema but valid)
-            omitFields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
+            omitFields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
         }        
         CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
         ReindexSolrBusyThread reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all);

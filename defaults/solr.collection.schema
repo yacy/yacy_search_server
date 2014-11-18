@@ -498,3 +498,7 @@ host_extent_i
 
 ## number of matching title expressions
 #ext_title_val
+
+## collection of all vocabulary names that have a matcher in the document - use this to boost with vocabularies
+vocabularies_sxt
+    

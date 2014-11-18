@@ -229,12 +229,16 @@ public enum CollectionSchema implements SchemaDeclaration {
     ext_tracker_txt(SolrType.text_general, true, true, true, false, false, "names of tracker server"),
     ext_tracker_val(SolrType.num_integer, true, true, true, false, false, "number of attribute counts in ext_tracker_txt"),
     ext_title_txt(SolrType.text_general, true, true, true, false, false, "names matching title expressions"),
-    ext_title_val(SolrType.num_integer, true, true, true, false, false, "number of matching title expressions");
-
-    public final static String CORE_NAME = "collection1"; // this was the default core name up to Solr 4.4.0. This default name was stored in CoreContainer.DEFAULT_DEFAULT_CORE_NAME but was removed in Solr 4.5.0
+    ext_title_val(SolrType.num_integer, true, true, true, false, false, "number of matching title expressions"),
+    vocabularies_sxt(SolrType.string, true, true, true, false, false, "collection of all vocabulary names that have a matcher in the document - use this to boost with vocabularies");
     
-    public final static String VOCABULARY_PREFIX = "vocabulary_";
-    public final static String VOCABULARY_SUFFIX = "_sxt";
+    public final static String CORE_NAME = "collection1"; // this was the default core name up to Solr 4.4.0. This default name was stored in CoreContainer.DEFAULT_DEFAULT_CORE_NAME but was removed in Solr 4.5.0
+
+    public final static String VOCABULARY_PREFIX = "vocabulary_"; // collects all terms that appear for each vocabulary
+    public final static String VOCABULARY_TERMS_SUFFIX = "_sxt"; // suffix for the term collector that start with VOCABULARY_PREFIX - middle part is vocabulary name
+    public final static String VOCABULARY_COUNT_SUFFIX = "_i"; // suffix for the term counter (>=1) that start with VOCABULARY_PREFIX - middle part is vocabulary name
+    public final static String VOCABULARY_LOGCOUNT_SUFFIX = "_log_i"; // log2(VOCABULARY_COUNT)] -- can be used for ranking boosts based on the number of occurrences
+    public final static String VOCABULARY_LOGCOUNTS_SUFFIX = "_log_val"; // all integers from [0 to log2(VOCABULARY_COUNT)] -- can be used for ranking boosts based on the number of occurrences
     
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;

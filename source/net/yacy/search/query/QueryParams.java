@@ -230,7 +230,7 @@ public final class QueryParams {
             // handle special field, authors_sxt (add to facet w/o contains check, as authors_sxt is not enabled (is copyfield))
             if (f != null && (solrSchema.contains(f) || f.name().equals("author_sxt"))) this.facetfields.add(f.getSolrFieldName());
         }
-        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
         this.maxfacets = defaultmaxfacets;
         this.cachedQuery = null;
     }
@@ -458,7 +458,7 @@ public final class QueryParams {
         // add vocabulary facets
         if (this.metatags != null) {
             for (Tagging.Metatag tag : this.metatags) {
-                fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
+                fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_TERMS_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
             }
         }
 

@@ -864,7 +864,7 @@ public final class SearchEvent {
         
         // get the vocabulary navigation
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
-            fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
+            fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
             if (fcts != null) {
                 ScoreMap<String> vocNav = this.vocabularyNavigator.get(v.getName());
                 if (vocNav == null) {
@@ -1222,7 +1222,7 @@ public final class SearchEvent {
                 tagloop: for (Tagging.Metatag tag : this.query.metatags) {
                     SolrDocument sdoc = page;
                     if (sdoc != null) {
-                        Collection<Object> tagvalues = sdoc.getFieldValues(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName() + CollectionSchema.VOCABULARY_SUFFIX);
+                        Collection<Object> tagvalues = sdoc.getFieldValues(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
                         if (tagvalues != null && tagvalues.contains(tag.getObject())) {
                             continue tagloop; // metatag exists check next tag (filter may consist of several tags)                            
                         } 

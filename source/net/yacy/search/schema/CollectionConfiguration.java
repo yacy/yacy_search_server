@@ -967,11 +967,24 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // there are no pre-defined solr fields for navigation because the vocabulary is generic
         // we use dynamically allocated solr fields for this.
         // It must be a multi-value string/token field, therefore we use _sxt extensions for the field names
+        List<String> vocabularies = new ArrayList<>();
         for (Map.Entry<String, Set<String>> facet: document.getGenericFacets().entrySet()) {
             String facetName = facet.getKey();
             Set<String> facetValues = facet.getValue();
-            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_SUFFIX, facetValues.toArray(new String[facetValues.size()]));
+            int count = facetValues.size();
+            if (count == 0) continue;
+            int logcount = (int) (Math.log(count) / Math.log(2));
+            Integer[] counts = new Integer[logcount + 1]; for (int i = 0; i <= logcount; i++) counts[i] = i;
+            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_TERMS_SUFFIX, facetValues.toArray(new String[count]));
+            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_COUNT_SUFFIX, facetValues.size());
+            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_LOGCOUNT_SUFFIX, logcount);
+            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_LOGCOUNTS_SUFFIX, counts);
+            vocabularies.add(facetName);
         }
+        if ((allAttr || contains(CollectionSchema.vocabularies_sxt)) && vocabularies.size() > 0) {
+            add(doc, CollectionSchema.vocabularies_sxt, vocabularies);
+        }
+        
 
         if ((allAttr || contains(CollectionSchema.process_sxt)) && processTypes.size() > 0) {
             List<String> p = new ArrayList<String>();
