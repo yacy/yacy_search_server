@@ -134,6 +134,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
             <dd><input type="number" id="discovercolumnobjectlink" name="discovercolumnobjectlink" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" style="width:50px;"> (first has index 0, if unused set -1)</dd>
             <dt><i>Charset of Import File</i></dt>
             <dd><select name="charset">#{charset}#<option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/charset}#</select></dd>
+            <dt><i>Auto-Enrich with Synonyms from Stemming Library</i></dt>
+            <dd><input type="checkbox" name="discoverenrichsynonyms" id="discoverenrichsynonyms" checked="checked" /></dd>
             </dl>
         </dd>
         <dt></dt><dd><input type="submit" name="create" value="Create" /></dd>

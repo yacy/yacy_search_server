@@ -29,9 +29,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
@@ -80,6 +82,7 @@ public class Vocabulary_p {
                     final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
                     final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
                     final File discoverFromCSVFile = discoverFromCSVPath.length() > 0 ? new File(discoverFromCSVPath) : null;
+                    final boolean discoverenrichsynonyms = post.getBoolean("discoverenrichsynonyms");
                     Segment segment = sb.index;
                     String t;
                     if (!discoverNot) {
@@ -88,10 +91,17 @@ public class Vocabulary_p {
                             String line = null;
                             while ((line = r.readLine()) != null) {
                                 String[] l = line.split(";");
-                                String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral];
-                                String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink];
+                                String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
+                                String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink].trim();
                                 if (literal != null && literal.length() > 0) {
-                                    table.put(literal, new Tagging.SOTuple(Tagging.normalizeTerm(literal), objectlink == null ? "" : objectlink));
+                                    String synonyms = Tagging.normalizeTerm(literal);
+                                    if (discoverenrichsynonyms) {
+                                        Set<String> sy = SynonymLibrary.getSynonyms(literal);
+                                        if (sy != null) {
+                                            for (String s: sy) synonyms += "," + s;
+                                        }
+                                    }
+                                    table.put(literal, new Tagging.SOTuple(synonyms, objectlink == null ? "" : objectlink));
                                 }
                             }
                         } else {

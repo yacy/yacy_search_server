@@ -94,7 +94,8 @@ public class SynonymLibrary {
      * @return a list of synonyms bot without the requested word
      */
     public static Set<String> getSynonyms(String word) {
-        word = word.toLowerCase();
+        if (word == null) return null;
+        word = word.toLowerCase().trim();
         if (word.length() < 2) return null;
         String key = word.substring(0, 2);
         List<Set<String>> symsetlist = lib.get(key);
