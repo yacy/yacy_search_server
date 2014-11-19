@@ -86,7 +86,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		}
 
 		//get words from document
-		final Map<String, Word> words = new Condenser(document, true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, false).words();
+		final Map<String, Word> words = new Condenser(document, true, true, LibraryProvider.dymLib, false).words();
 
 		// generate potential tags from document title, description and subject
 		final int bufferSize = document.dc_title().length() + document.dc_description().length + document.dc_subject(' ').length() + 32;

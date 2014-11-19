@@ -18,6 +18,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -25,6 +27,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
+import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -274,6 +277,24 @@ public class DictionaryLoader_p {
             LibraryProvider.initDidYouMean();
             prop.put("drw0ActionActivated", 1);
         }
+        
+        final File synonym_de_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "openthesaurus_de_yacy");
+        final File synonyms_path = new File(sb.dictionariesPath, LibraryProvider.path_to_synonym_dictionaries);
+        final File synonym_de_production = new File(synonyms_path, synonym_de_default.getName());
+        if (post.containsKey("syn0Deactivate")) {
+            synonym_de_production.delete();
+            SynonymLibrary.init(synonyms_path);
+        }
+
+        if (post.containsKey("syn0Activate")) {
+            try {
+                FileUtils.copy(new FileInputStream(synonym_de_default), synonym_de_production);
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
+            }
+            SynonymLibrary.init(synonyms_path);
+        }
+        prop.put("syn0Status", synonym_de_production.exists() ? 1 : 0);
 
         // check status again
         boolean keepPlacesTagging = false;

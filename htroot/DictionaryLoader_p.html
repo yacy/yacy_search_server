@@ -206,6 +206,23 @@
         </dl>
       </fieldset>
     </form>
+    
+    <form action="DictionaryLoader_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Synonyms</legend>
+        Synonyms are used to find not only the searched word but also their synonyms. This is done by adding all synonyms of words in documents to the document and searching the synonyms as well.
+        
+        <h4><a href="http://www.openthesaurus.de" target="_blank">OpenThesaurus - German Thesaurus from http://www.openthesaurus.de</a></h4>
+	    <p>The data from this source was converted to the YaCy synonym file format and part of the YaCy distribution.</p>
+        
+        <dl>
+          <dt><label>Status</label></dt>
+          <dd>#(syn0Status)#<div class="info">Deactivated</div>::<div class="commit">Activated</div>#(/syn0Status)#</dd> 
+          <dt>Action</dt>
+          <dd>#(syn0Status)#<input type="submit" name="syn0Activate" value="Activate" />::<input type="submit" name="syn0Deactivate" value="Deactivate" />#(/syn0Status)#</dd> 
+        </dl>
+      </fieldset>
+    </form>
   #%env/templates/footer.template%#
   </body>
 </html>

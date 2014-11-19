@@ -91,7 +91,6 @@ public final class Condenser {
             final boolean indexText,
             final boolean indexMedia,
             final WordCache meaningLib,
-            final SynonymLibrary synlib,
             final boolean doAutotagging
             ) {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
@@ -221,9 +220,9 @@ public final class Condenser {
         }
 
         // create the synonyms set
-        if (synlib != null && synlib.size() > 0) {
+        if (SynonymLibrary.size() > 0) {
             for (String word: this.words.keySet()) {
-                Set<String> syms = synlib.getSynonyms(word);
+                Set<String> syms = SynonymLibrary.getSynonyms(word);
                 if (syms != null) this.synonyms.addAll(syms);
             }
         }

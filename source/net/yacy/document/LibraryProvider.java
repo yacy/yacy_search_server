@@ -62,7 +62,6 @@ public class LibraryProvider {
 
     public static WordCache dymLib = new WordCache(null);
     public static AutotaggingLibrary autotagging = null;
-    public static SynonymLibrary synonyms = null;
     public static URLRewriterLibrary urlRewriter = null;
     public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;
@@ -187,7 +186,7 @@ public class LibraryProvider {
         if ( !synonymPath.exists() ) {
             synonymPath.mkdirs();
         }
-        synonyms = new SynonymLibrary(synonymPath);
+        SynonymLibrary.init(synonymPath);
     }
     public static void initRewriter() {
         final File rewriterPath = new File(dictRoot, path_to_rewriter_dictionaries);

@@ -744,7 +744,7 @@ public class Segment {
             }
             // get the word set
             Set<String> words = null;
-            words = new Condenser(document, true, true, null, null, false).words().keySet();
+            words = new Condenser(document, true, true, null, false).words().keySet();
 
             // delete all word references
             int count = 0;

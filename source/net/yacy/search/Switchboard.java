@@ -2736,7 +2736,7 @@ public final class Switchboard extends serverSwitch {
                 new Condenser(
                         in.documents[i], in.queueEntry.profile().indexText(),
                         in.queueEntry.profile().indexMedia(),
-                        LibraryProvider.dymLib, LibraryProvider.synonyms, true);
+                        LibraryProvider.dymLib, true);
 
             // update image result list statistics
             // its good to do this concurrently here, because it needs a DNS lookup
@@ -3171,7 +3171,7 @@ public final class Switchboard extends serverSwitch {
                                 if (document.indexingDenied() && (profile == null || profile.obeyHtmlRobotsNoindex())) {
                                     throw new Parser.Failure("indexing is denied", url);
                                 }
-                                final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, true);
+                                final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true);
                                 ResultImages.registerImages(url, document, true);
                                 Switchboard.this.webStructure.generateCitationReference(url, document);
                                 storeDocumentIndex(

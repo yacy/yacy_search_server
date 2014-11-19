@@ -43,10 +43,10 @@ import net.yacy.cora.util.ConcurrentLog;
 public class SynonymLibrary {
 
     private final static ConcurrentLog log = new ConcurrentLog(SynonymLibrary.class.getName());
-    private Map<String, List<Set<String>>> lib;
-    
-    public SynonymLibrary(final File path) {
-        this.lib = new HashMap<String, List<Set<String>>>();
+    private final static Map<String, List<Set<String>>> lib = new HashMap<String, List<Set<String>>>();
+
+    public static void init(final File path) {
+        lib.clear();
         if (!path.exists() || !path.isDirectory()) return;
         final String[] files = path.list();
         for (final String f: files) {
@@ -70,10 +70,10 @@ public class SynonymLibrary {
                         keys.add(t.substring(0, 2));
                     }
                     for (String key: keys) {
-                        List<Set<String>> symsetlist = this.lib.get(key);
+                        List<Set<String>> symsetlist = lib.get(key);
                         if (symsetlist == null) {
                             symsetlist = new ArrayList<Set<String>>();
-                            this.lib.put(key, symsetlist);
+                            lib.put(key, symsetlist);
                         }
                         symsetlist.add(synonyms);
                     }
@@ -83,9 +83,9 @@ public class SynonymLibrary {
             }
         }
     }
-
-    public int size() {
-        return this.lib.size();
+    
+    public static int size() {
+        return lib.size();
     }
     
     /**
@@ -93,11 +93,11 @@ public class SynonymLibrary {
      * @param word
      * @return a list of synonyms bot without the requested word
      */
-    public Set<String> getSynonyms(String word) {
+    public static Set<String> getSynonyms(String word) {
         word = word.toLowerCase();
         if (word.length() < 2) return null;
         String key = word.substring(0, 2);
-        List<Set<String>> symsetlist = this.lib.get(key);
+        List<Set<String>> symsetlist = lib.get(key);
         if (symsetlist == null) return null;
         for (Set<String> symset: symsetlist) {
             if (symset.contains(word)) {
