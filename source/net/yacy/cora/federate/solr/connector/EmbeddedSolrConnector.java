@@ -421,7 +421,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         int responseCount = 0;
         DocListSearcher docListSearcher = null;
         try {
-            docListSearcher = new DocListSearcher("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, null, 0, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
+            docListSearcher = new DocListSearcher("{!cache=false raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id, null, 0, 1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
             responseCount = docListSearcher.response.size();
             if (responseCount == 0) return null;
             SolrIndexSearcher searcher = docListSearcher.request.getSearcher();

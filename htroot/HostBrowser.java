@@ -265,19 +265,29 @@ public class HostBrowser {
                         if (!fulltext.getDefaultConfiguration().contains(facetfield)) continue;
                         ff.add(csf.getSolrFieldName());
                     }
+                    // add also vocabulary counters
+                    Map<String, ReversibleScoreMap<String>> vocabularyFacet = sb.index.fulltext().getDefaultConnector().getFacets(CollectionSchema.vocabularies_sxt.getSolrFieldName() + ":[* TO *]", 100, CollectionSchema.vocabularies_sxt.getSolrFieldName());
+                    if (vocabularyFacet.size() > 0) {
+                        Collection<String> vocnames = vocabularyFacet.values().iterator().next().keyList(true);
+                        for (String vocname: vocnames) {
+                            ff.add(CollectionSchema.VOCABULARY_PREFIX + vocname + CollectionSchema.VOCABULARY_LOGCOUNT_SUFFIX);
+                            ff.add(CollectionSchema.VOCABULARY_PREFIX + vocname + CollectionSchema.VOCABULARY_LOGCOUNTS_SUFFIX);
+                        }
+                    }
+                    // list the facets
                     String[] facetfields = ff.toArray(new String[ff.size()]);
                     Map<String, ReversibleScoreMap<String>> facets = fulltext.getDefaultConnector().getFacets(CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"", 100, facetfields);
                     int fc = 0;
-                    for (String facetfield: facetfields) {
-                        ReversibleScoreMap<String> facetfieldmap = facets.get(facetfield);
+                    for (Map.Entry<String, ReversibleScoreMap<String>> facetentry: facets.entrySet()) {
+                        ReversibleScoreMap<String> facetfieldmap = facetentry.getValue();
                         if (facetfieldmap.size() == 0) continue;
                         TreeMap<Long, Integer> statMap = new TreeMap<>();
                         for (String k: facetfieldmap) statMap.put(Long.parseLong(k), facetfieldmap.get(k));
-                        prop.put("hostanalysis_facets_" + fc + "_facetname", facetfield);
+                        prop.put("hostanalysis_facets_" + fc + "_facetname", facetentry.getKey());
                         int c = 0; for (Entry<Long, Integer> entry: statMap.entrySet()) {
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_key", entry.getKey());
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_count", entry.getValue());
-                            prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_a", "http://localhost:" + sb.getConfigInt("port", 8090) + "/solr/collection1/select?q=host_s:" + host + " AND " + facetfield + ":" + entry.getKey() + "&defType=edismax&start=0&rows=1000&fl=sku,crawldepth_i");
+                            prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_a", "http://localhost:" + sb.getConfigInt("port", 8090) + "/solr/collection1/select?q=host_s:" + host + " AND " + facetentry.getKey() + ":" + entry.getKey() + "&defType=edismax&start=0&rows=1000&fl=sku,crawldepth_i");
                             c++;
                         }
                         prop.put("hostanalysis_facets_" + fc + "_facet", c);

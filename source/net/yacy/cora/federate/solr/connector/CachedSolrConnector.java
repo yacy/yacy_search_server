@@ -22,7 +22,7 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.ARC;
@@ -254,7 +254,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
+    public LinkedHashMap<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
         return this.solr.getFacets(query, maxresults, fields);
     }
     

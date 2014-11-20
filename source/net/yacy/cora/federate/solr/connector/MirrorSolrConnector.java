@@ -22,7 +22,7 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
@@ -383,16 +383,16 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
-        if (this.solr0 == null && this.solr1 == null) return new HashMap<String, ReversibleScoreMap<String>>(0);
+    public LinkedHashMap<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
+        if (this.solr0 == null && this.solr1 == null) return new LinkedHashMap<String, ReversibleScoreMap<String>>(0);
         if (this.solr0 != null && this.solr1 == null) {
             return this.solr0.getFacets(query, maxresults, fields);
         }
         if (this.solr1 != null && this.solr0 == null) {
             return this.solr1.getFacets(query, maxresults, fields);
         }
-        Map<String, ReversibleScoreMap<String>> facets0 = this.solr0.getFacets(query, maxresults, fields);
-        Map<String, ReversibleScoreMap<String>> facets1 = this.solr1.getFacets(query, maxresults, fields);
+        LinkedHashMap<String, ReversibleScoreMap<String>> facets0 = this.solr0.getFacets(query, maxresults, fields);
+        LinkedHashMap<String, ReversibleScoreMap<String>> facets1 = this.solr1.getFacets(query, maxresults, fields);
         for (Map.Entry<String, ReversibleScoreMap<String>> facet0: facets0.entrySet()) {
             ReversibleScoreMap<String> facet1 = facets1.remove(facet0.getKey());
             if (facet1 == null) continue;

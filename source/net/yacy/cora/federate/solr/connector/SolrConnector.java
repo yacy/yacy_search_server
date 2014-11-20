@@ -22,8 +22,8 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -221,7 +221,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @return a map with key = facet field name, value = an ordered map of field values for that field
      * @throws IOException
      */
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException;
+    public LinkedHashMap<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException;
     
     /**
      * Get results from a solr query as a stream of documents.

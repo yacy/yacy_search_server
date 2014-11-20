@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -354,7 +353,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, String... fields) throws IOException {
+    public LinkedHashMap<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, String... fields) throws IOException {
         commitDocBuffer();
         return this.connector.getFacets(query, maxresults, fields);
     }

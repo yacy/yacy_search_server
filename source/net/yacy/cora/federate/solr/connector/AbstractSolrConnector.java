@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -462,7 +463,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         // construct raw query
         final SolrQuery params = new SolrQuery();
         //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
-        String q = "{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id;
+        String q = "{!cache=false raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id;
         params.setQuery(q);
         params.setRows(1);
         params.setStart(0);
@@ -511,7 +512,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException {
+    public LinkedHashMap<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException {
         // construct query
         assert fields.length > 0;
         final SolrQuery params = new SolrQuery();
@@ -530,7 +531,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         
         // query the server
         QueryResponse rsp = getResponseByParams(params);
-        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(fields.length);
+        LinkedHashMap<String, ReversibleScoreMap<String>> facets = new LinkedHashMap<String, ReversibleScoreMap<String>>(fields.length);
         for (String field: fields) {
             FacetField facet = rsp.getFacetField(field);
             ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
@@ -548,7 +549,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final SolrQuery query = new SolrQuery();
         // construct query
         StringBuilder sb = new StringBuilder(23);
-        sb.append("{!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id);
+        sb.append("{!cache=false raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id);
         query.setQuery(sb.toString());
         //query.setQuery("*:*");
         //query.addFilterQuery(sb.toString());
