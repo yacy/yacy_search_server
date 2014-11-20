@@ -36,7 +36,8 @@
             <input type="submit" name="EnterBF" value="Set Boost Function" />
             <input type="submit" name="ResetBF" value="Re-Set to default" />
           </dd>
-        </dl>
+        </dl><br/>
+        #(boosthint)#::You can boost with vocabularies, use the occurrence counters #[vocabulariesvoccount]# and #[vocabulariesvoclogcount]#.#(/boosthint)#
       </fieldset>
     </form>
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
@@ -56,7 +57,24 @@
             <input type="submit" name="EnterBQ" value="Set Boost Query" />
             <input type="submit" name="ResetBQ" value="Re-Set to default" />
           </dd>
-        </dl>
+        </dl><br/>
+        #(boosthint)#::
+        You can boost with vocabularies, use the field '#[vocabulariesfield]#' with values #[vocabulariesavailable]#. You can also boost on logarithmic occurrence counters of the fields #[vocabulariesvoclogcounts]#.<br/>
+      #{facets}#
+      <table class="sortable" border="0" style="float:left">
+      <tr class="TableCellDark">
+        <td align="left" colspan="5" nowrap class="pending">#[facetname]#</td>
+ 	    <td align="right" colspan="5" nowrap class="listingok">#</td>
+      </tr>
+      #{facet}#
+      <tr class="TableCellLight">
+        <td align="left" colspan="5" nowrap class="pending">#[key]#</td>
+ 	    <td align="right" colspan="5" nowrap class="listingok">#[count]#</td>
+      </tr>
+      #{/facet}#
+      </table>&nbsp;&nbsp;
+      #{/facets}#
+        #(/boosthint)#
       </fieldset>
     </form>
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">

@@ -18,11 +18,20 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
@@ -30,6 +39,7 @@ import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
+
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 
@@ -158,6 +168,60 @@ public class RankingSolr_p {
         }
         prop.put("profiles", 4);
         prop.put("profileNr", profileNr);
+        
+        // make boost hints for vocabularies
+        Map<String, ReversibleScoreMap<String>> vocabularyFacet;
+        try {
+            vocabularyFacet = sb.index.fulltext().getDefaultConnector().getFacets(CollectionSchema.vocabularies_sxt.getSolrFieldName() + ":[* TO *]", 100, CollectionSchema.vocabularies_sxt.getSolrFieldName());
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+            vocabularyFacet = new HashMap<>();
+        }
+        if (vocabularyFacet.size() == 0) {
+            prop.put("boosthint", 0);
+        } else {
+            prop.put("boosthint", 1);
+            prop.putHTML("boosthint_vocabulariesfield", CollectionSchema.vocabularies_sxt.getSolrFieldName());
+            ReversibleScoreMap<String> vokcounts = vocabularyFacet.values().iterator().next();
+            Collection<String> vocnames = vokcounts.keyList(true);
+            prop.putHTML("boosthint_vocabulariesavailable", vocnames.toString());
+            ArrayList<String> voccountFields = new ArrayList<>();
+            ArrayList<String> voclogcountFields = new ArrayList<>();
+            ArrayList<String> voclogcountsFields = new ArrayList<>();
+            ArrayList<String> ff = new ArrayList<>();
+            for (String vocname: vocnames) {
+                voccountFields.add(CollectionSchema.VOCABULARY_PREFIX + vocname + CollectionSchema.VOCABULARY_COUNT_SUFFIX);
+                voclogcountFields.add(CollectionSchema.VOCABULARY_PREFIX + vocname + CollectionSchema.VOCABULARY_LOGCOUNT_SUFFIX);
+                voclogcountsFields.add(CollectionSchema.VOCABULARY_PREFIX + vocname + CollectionSchema.VOCABULARY_LOGCOUNTS_SUFFIX);
+            }
+            ff.addAll(voclogcountFields);
+            ff.addAll(voclogcountsFields);
+            prop.putHTML("boosthint_vocabulariesvoccount", voccountFields.toString());
+            prop.putHTML("boosthint_vocabulariesvoclogcount", voclogcountFields.toString());
+            prop.putHTML("boosthint_vocabulariesvoclogcounts", voclogcountsFields.toString());
+            String[] facetfields = ff.toArray(new String[ff.size()]);
+            int fc = 0;
+            try {
+                LinkedHashMap<String, ReversibleScoreMap<String>> facets = sb.index.fulltext().getDefaultConnector().getFacets("*:*", 100, facetfields);
+                facets.put(CollectionSchema.vocabularies_sxt.getSolrFieldName(), vokcounts);
+                for (Map.Entry<String, ReversibleScoreMap<String>> facetentry: facets.entrySet()) {
+                    ReversibleScoreMap<String> facetfieldmap = facetentry.getValue();
+                    if (facetfieldmap.size() == 0) continue;
+                    TreeMap<String, Integer> statMap = new TreeMap<>();
+                    for (String k: facetfieldmap) statMap.put(k, facetfieldmap.get(k));
+                    prop.put("boosthint_facets_" + fc + "_facetname", facetentry.getKey());
+                    int c = 0; for (Entry<String, Integer> entry: statMap.entrySet()) {
+                        prop.put("boosthint_facets_" + fc + "_facet_" + c + "_key", entry.getKey());
+                        prop.put("boosthint_facets_" + fc + "_facet_" + c + "_count", entry.getValue());
+                        c++;
+                    }
+                    prop.put("boosthint_facets_" + fc + "_facet", c);
+                    fc++;
+                }
+            } catch (IOException e) {
+            }
+            prop.put("boosthint_facets", fc);
+        }
         
         return prop;
     }
