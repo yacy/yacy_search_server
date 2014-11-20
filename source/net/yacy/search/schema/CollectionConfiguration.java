@@ -1078,7 +1078,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // If a document A links to B and B contains a 'canonical C', then the citation rank computation shall consider that A links to C and B does not link to C.
                 // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
                 String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
-                long patchquerycount = collectionConnector.getCountByQuery(patchquery);
+                long patchquerycount = collectionConnector.getCountByQuery("{!cache=false}" + patchquery);
                 BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, Long.MAX_VALUE, 20, 1, true,
                         CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
                 SolrDocument doc_B;
@@ -1172,7 +1172,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     postprocessingActivity = "writing cr values to webgraph for host " + host;
                     ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
                     String patchquery = WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + host + "\" AND " + WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
-                    final long count = segment.fulltext().getWebgraphConnector().getCountByQuery(patchquery);
+                    final long count = segment.fulltext().getWebgraphConnector().getCountByQuery("{!cache=false}" + patchquery);
                     int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
                     ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph, concurrency = " + concurrency);
                     final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(
@@ -1587,7 +1587,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         doccountterm.addOperand(new Negation(new StringLiteral(CollectionSchema.id, urlhash)));
                         doccountterm.addOperand(new StringLiteral(CollectionSchema.host_id_s, hostid));
                         doccountterm.addOperand(new LongLiteral(signaturefield, signature));
-                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery(doccountterm.toString());
+                        long doccount = segment.fulltext().getDefaultConnector().getCountByQuery("{!cache=false}" + doccountterm.toString());
                         sid.setField(uniquefield.getSolrFieldName(), doccount  == 0);
                     } catch (final IOException e) {}
                 }
@@ -1682,7 +1682,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             this.crt = new ConcurrentHashMap<String, double[]>();
             try {
                 // select all documents for each host
-                BlockingQueue<String> ids = connector.concurrentIDsByQuery("{!raw f=" + CollectionSchema.host_s.getSolrFieldName() + "}" + host, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, 1);
+                BlockingQueue<String> ids = connector.concurrentIDsByQuery("{!cache=false raw f=" + CollectionSchema.host_s.getSolrFieldName() + "}" + host, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000000, 86400000, 200, 1);
                 String id;
                 while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
                     this.crt.put(id, new double[]{0.0d,0.0d}); //{old value, new value}

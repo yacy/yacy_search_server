@@ -401,7 +401,7 @@ public final class Fulltext {
                 for (String hosthash: subset) {
                     if (query.length() > 0) query.append(" OR ");
                     //query.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append(":\"");
-                    query.append("({!raw f=").append(fieldname).append('}').append(hosthash).append(")");
+                    query.append("({!cache=false raw f=").append(fieldname).append('}').append(hosthash).append(")");
                 }
                 if (constraintQuery == null) connector.deleteByQuery(query.toString()); else connector.deleteByQuery("(" + query.toString() + ") AND " + constraintQuery);
             } catch (final IOException e) {

@@ -161,7 +161,7 @@ public class IndexDeletion_p {
                 String regexquery = CollectionSchema.sku.getSolrFieldName() + ":/" + urldelete + "/";
                 if (simulate) {
                     try {
-                        count = (int) defaultConnector.getCountByQuery(regexquery);
+                        count = (int) defaultConnector.getCountByQuery("{!cache=false}" + regexquery);
                     } catch (final IOException e) {
                     }
                     prop.put("urldelete-active", count == 0 ? 2 : 1);

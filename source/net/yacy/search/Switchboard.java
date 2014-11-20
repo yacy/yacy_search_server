@@ -2558,7 +2558,7 @@ public final class Switchboard extends serverSwitch {
                 throw new Parser.Failure("Parser returned null.", response.url());
             }
         } catch (final Parser.Failure e ) {
-            this.log.warn("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
+            this.log.warn("Unable to parse the resource '" + response.url().toNormalform(true) + "'. " + e.getMessage());
             // create a new errorURL DB entry
             this.crawlQueues.errorURL.push(response.url(), response.depth(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, e.getMessage(), -1);
             return null;
