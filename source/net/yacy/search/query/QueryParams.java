@@ -584,6 +584,7 @@ public final class QueryParams {
             context.append(this.modifier.toString()).append(asterisk);
             context.append(this.siteexcludes).append(asterisk);
             context.append(this.targetlang).append(asterisk);
+            context.append(this.domType).append(asterisk);
             context.append(this.constraint).append(asterisk);
             context.append(this.maxDistance).append(asterisk);
             context.append(this.tld).append(asterisk);
