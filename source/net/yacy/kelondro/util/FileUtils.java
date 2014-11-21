@@ -809,6 +809,8 @@ public final class FileUtils {
             }
         }
 
+        if (path.exists()) path.delete();
+        /*
         int c = 0;
         while ( c++ < 20 ) {
             if ( !path.exists() ) {
@@ -826,6 +828,7 @@ public final class FileUtils {
                 break;
             }
         }
+        */
         if ( path.exists() ) {
             path.deleteOnExit();
             String p = "";
