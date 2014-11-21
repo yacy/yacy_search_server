@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -89,11 +90,17 @@ public class Vocabulary_p {
                         if (discoverFromCSV && discoverFromCSVFile != null && discoverFromCSVFile.exists()) {
                             BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset));
                             String line = null;
+                            Pattern semicolon = Pattern.compile(";");
                             while ((line = r.readLine()) != null) {
-                                String[] l = line.split(";");
+                                if (line.length() == 0) continue;
+                                String[] l = semicolon.split(line);
+                                if (l.length == 0) l = new String[]{line};
                                 String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
+                                if (literal == null) continue;
+                                if (literal.length() > 0 && (literal.charAt(0) == '"' || literal.charAt(0) == '\'')) literal = literal.substring(1);
+                                if (literal.length() > 0 && (literal.charAt(literal.length() - 1) == '"' || literal.charAt(literal.length() - 1) == '\'')) literal = literal.substring(0, literal.length() - 1);
                                 String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink].trim();
-                                if (literal != null && literal.length() > 0) {
+                                if (literal.length() > 0) {
                                     String synonyms = Tagging.normalizeTerm(literal);
                                     if (discoverenrichsynonyms) {
                                         Set<String> sy = SynonymLibrary.getSynonyms(literal);
