@@ -216,7 +216,7 @@ public class HostQueue implements Balancer {
     private Index openStack(File f, int depth) {
         for (int i = 0; i < 10; i++) {
             // we try that again if it fails because it shall not fail
-            if (this.onDemand && depth > 3 && (!f.exists() || f.length() < 10000)) {
+            if (this.onDemand && depth > 2 && (!f.exists() || f.length() < 10000)) {
                 try {
                     return new BufferedObjectIndex(new OnDemandOpenFileIndex(f, Request.rowdef, exceed134217727), objectIndexBufferSize);
                 } catch (kelondroException e) {
