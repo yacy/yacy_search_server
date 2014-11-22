@@ -86,7 +86,7 @@ public class ChartPlotter extends RasterPlotter {
      * @param name printed on the vertical bar
      */
     public void declareDimension(final int dimensionType, final int scale, final int pixelperscale, final int offset, final Long colorNaming, final Long colorScale, final String name) {
-        this.scales[dimensionType] = scale;
+        this.scales[dimensionType] = Math.max(1, scale);
         this.pixels[dimensionType] = pixelperscale;
         this.offsets[dimensionType] = offset;
         this.colnames[dimensionType] = colorNaming;
