@@ -1786,7 +1786,7 @@ public final class SearchEvent {
     protected void addTopics(final ResultEntry resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
-        final String[] descrcomps = MultiProtocolURL.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
+        final String[] descrcomps = MultiProtocolURL.splitpattern.split(resultEntry.title()); // words in the description
 
         // add references
         addTopic(descrcomps);
