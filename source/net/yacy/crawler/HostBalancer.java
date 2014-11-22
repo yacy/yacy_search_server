@@ -49,6 +49,7 @@ import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.index.RowHandleSet;
+import net.yacy.kelondro.util.FileUtils;
 
 /**
  * wrapper for single HostQueue queues; this is a collection of such queues.
@@ -87,7 +88,7 @@ public class HostBalancer implements Balancer {
             HostQueue queue = new HostQueue(queuePath, this.queues.size() > this.onDemandLimit, this.exceed134217727);
             if (queue.size() == 0) {
                 queue.close();
-                queuePath.delete();
+                FileUtils.deletedelete(queuePath);
             } else {
                 this.queues.put(DigestURL.hosthash(queue.getHost(), queue.getPort()), queue);
             }
