@@ -633,9 +633,9 @@ public final class Switchboard extends serverSwitch {
 
         // load badwords (to filter the topwords)
         if ( badwords == null || badwords.isEmpty() ) {
-            File badwordsFile = new File(appPath, "/DATA/SETTINGS/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
+            File badwordsFile = new File(appPath, "DATA/SETTINGS/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             if (!badwordsFile.exists()) {
-                badwordsFile = new File(appPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
+                badwordsFile = new File(appPath, "defaults/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             }
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
 //          badwordHashes = Word.words2hashesHandles(badwords);
@@ -649,7 +649,7 @@ public final class Switchboard extends serverSwitch {
 
         // load stopwords (to filter query and topwords)
         if ( stopwords == null || stopwords.isEmpty() ) {
-            File stopwordsFile = new File(dataPath, "/DATA/SETTINGS/" + SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
+            File stopwordsFile = new File(dataPath, "DATA/SETTINGS/" + SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             if (!stopwordsFile.exists()) {
                 stopwordsFile = new File(appPath, "defaults/"+SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             }
