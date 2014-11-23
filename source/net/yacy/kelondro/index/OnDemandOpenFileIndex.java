@@ -160,6 +160,7 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized Entry get(final byte[] key, final boolean forcecopy) throws IOException {
+        if (this.sizecache == 0) return null;
         Index index = getIndex();
         if (index == null) return null;
         try {
@@ -174,6 +175,7 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
     @Override
     public synchronized Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+        if (this.sizecache == 0) return map;
         Row.Entry entry;
         for (final byte[] key: keys) {
             entry = get(key, forcecopy);
@@ -184,6 +186,7 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized boolean has(final byte[] key) {
+        if (this.sizecache == 0) return false;
         Index index = getIndex();
         if (index == null) return false;
         boolean b = index.has(key);
@@ -193,6 +196,7 @@ public class OnDemandOpenFileIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public synchronized boolean isEmpty() {
+        if (this.sizecache == 0) return true;
         Index index = getIndex();
         if (index == null) return true;
         boolean b = index.isEmpty();
