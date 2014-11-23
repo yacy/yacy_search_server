@@ -131,7 +131,7 @@ public class HostQueue implements Balancer {
             if (s.endsWith(indexSuffix)) try {
                 int depth = Integer.parseInt(s.substring(0, s.length() - indexSuffix.length()));
                 File stackFile = new File(this.hostPath, s);
-                Index depthStack = openStack(stackFile, depth);
+                Index depthStack = openStack(stackFile);
                 if (depthStack != null) {
                     int sz = depthStack.size();
                     if (sz == 0) {
@@ -200,7 +200,7 @@ public class HostQueue implements Balancer {
             if (depthStack != null) return depthStack;
             // now actually create a new stack
             final File f = getFile(depth);
-            depthStack = openStack(f, depth);
+            depthStack = openStack(f);
             if (depthStack != null) this.depthStacks.put(depth, depthStack);
         }
         return depthStack;
@@ -213,10 +213,10 @@ public class HostQueue implements Balancer {
         return f;
     }
     
-    private Index openStack(File f, int depth) {
+    private Index openStack(File f) {
         for (int i = 0; i < 10; i++) {
             // we try that again if it fails because it shall not fail
-            if (this.onDemand && depth > 2 && (!f.exists() || f.length() < 10000)) {
+            if (this.onDemand && (!f.exists() || f.length() < 10000)) {
                 try {
                     return new BufferedObjectIndex(new OnDemandOpenFileIndex(f, Request.rowdef, exceed134217727), objectIndexBufferSize);
                 } catch (kelondroException e) {
