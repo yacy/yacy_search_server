@@ -15,6 +15,7 @@
 # $LastChangedRevision$
 # $LastChangedBy$
 #
+# if list exists in DATA/SETTINGS/ it takes preference otherwise list is loaded from defaults/ directory
 aber
 allen
 alles

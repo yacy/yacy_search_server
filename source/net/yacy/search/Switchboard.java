@@ -633,7 +633,10 @@ public final class Switchboard extends serverSwitch {
 
         // load badwords (to filter the topwords)
         if ( badwords == null || badwords.isEmpty() ) {
-            final File badwordsFile = new File(appPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
+            File badwordsFile = new File(appPath, "/DATA/SETTINGS/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
+            if (!badwordsFile.exists()) {
+                badwordsFile = new File(appPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
+            }
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
 //          badwordHashes = Word.words2hashesHandles(badwords);
             this.log.config("loaded badwords from file "
@@ -644,30 +647,30 @@ public final class Switchboard extends serverSwitch {
                 + ppRamString(badwordsFile.length() / 1024));
         }
 
-        // load stopwords
+        // load stopwords (to filter query and topwords)
         if ( stopwords == null || stopwords.isEmpty() ) {
-            final File stopwordsFile = new File(appPath, SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
+            File stopwordsFile = new File(dataPath, "/DATA/SETTINGS/" + SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
+            if (!stopwordsFile.exists()) {
+                stopwordsFile = new File(appPath, "defaults/"+SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
+            }
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             // append locale language stopwords using setting of interface language (file yacy.stopwords.xx)
-            //TODO: append / share Solr stopwords.txt
-            final File stopwordsFilelocale = new File (stopwordsFile.getAbsolutePath()+"."+this.getConfig("locale.language","default"));
+            String lng = this.getConfig("locale.language", "en");
+            if ("default".equals(lng)) lng="en"; // english is stored as default (needed for locale html file overlay)
+            File stopwordsFilelocale = new File (dataPath, "DATA/SETTINGS/"+stopwordsFile.getName()+"."+lng);
+            if (!stopwordsFilelocale.exists()) stopwordsFilelocale = new File (appPath, "defaults/"+stopwordsFile.getName()+"."+lng);
             if (stopwordsFilelocale.exists()) {
+                // load YaCy locale stopword list
                 stopwords.addAll(SetTools.loadList(stopwordsFilelocale, NaturalOrder.naturalComparator));
-            }
-           
-            if (!stopwords.isEmpty()) {
-                stopwordHashes = new TreeSet<byte[]>(NaturalOrder.naturalOrder);
-                for (final String wordstr : stopwords) {
-                    stopwordHashes.add(Word.word2hash(wordstr));
+                this.log.config("append stopwords from file " + stopwordsFilelocale.getName());
+            } else {
+                // alternatively load/append default solr stopword list
+                stopwordsFilelocale = new File (appPath, "defaults/solr/lang/stopwords_" + lng + ".txt");
+                if (stopwordsFilelocale.exists()) {
+                    stopwords.addAll(SetTools.loadList(stopwordsFilelocale, NaturalOrder.naturalComparator));
+                    this.log.config("append stopwords from file " + stopwordsFilelocale.getName());
                 }
             }
-            
-            this.log.config("loaded stopwords from file "
-                + stopwordsFile.getName()
-                + ", "
-                + stopwords.size()
-                + " entries, "
-                + ppRamString(stopwordsFile.length() / 1024));
         }
 
         // start a cache manager

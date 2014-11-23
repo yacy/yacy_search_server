@@ -1,0 +1,6 @@
+# Default stopword list (always loaded)
+# a configured language specific stopword list is appended (like: yacy.stopwords.de)
+#     (depending on the language of the yacy user interface)
+# Stopwords are excluded from search queries and excluded from the topword (navigation, in addition to yacy.badwords)
+#
+# if list exists in DATA/SETTINGS/ it takes preference otherwise list is loaded from defaults/ directory
