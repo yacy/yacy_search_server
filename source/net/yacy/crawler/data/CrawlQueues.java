@@ -265,14 +265,14 @@ public class CrawlQueues {
 
         // do a local crawl
         Request urlEntry;
-        while (this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) > 0 || this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
+        while (!this.noticeURL.isEmpty(NoticedURL.StackType.LOCAL) || !this.noticeURL.isEmpty(NoticedURL.StackType.NOLOAD)) {
             final String stats = "LOCALCRAWL[" +
                 this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) + ", " +
                 this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " +
                 this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + 
                 ", " + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
             try {
-                if (this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
+                if (!this.noticeURL.isEmpty(NoticedURL.StackType.NOLOAD)) {
                     // get one entry that will not be loaded, just indexed
                     urlEntry = this.noticeURL.pop(NoticedURL.StackType.NOLOAD, true, this.sb.crawler, this.sb.robots);
                     if (urlEntry == null) {

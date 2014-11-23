@@ -86,7 +86,7 @@ public class HostBalancer implements Balancer {
         for (String address: list) try {
             File queuePath = new File(this.hostsPath, address);
             HostQueue queue = new HostQueue(queuePath, this.queues.size() > this.onDemandLimit, this.exceed134217727);
-            if (queue.size() == 0) {
+            if (queue.isEmpty()) {
                 queue.close();
                 FileUtils.deletedelete(queuePath);
             } else {
@@ -127,7 +127,9 @@ public class HostBalancer implements Balancer {
     @Override
     public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException, SpaceExceededException {
         int c = 0;
-        for (HostQueue queue: this.queues.values()) c += queue.removeAllByProfileHandle(profileHandle, timeout);
+        for (HostQueue queue: this.queues.values()) {
+            c += queue.removeAllByProfileHandle(profileHandle, timeout);
+        }
         return c;
     }
     
@@ -187,13 +189,17 @@ public class HostBalancer implements Balancer {
     @Override
     public int size() {
         int c = 0;
-        for (HostQueue queue: this.queues.values()) c += queue.size();
+        for (HostQueue queue: this.queues.values()) {
+            c += queue.size();
+        }
         return c;
     }
 
     @Override
     public boolean isEmpty() {
-        for (HostQueue queue: this.queues.values()) if (!queue.isEmpty()) return false;
+        for (HostQueue queue: this.queues.values()) {
+            if (!queue.isEmpty()) return false;
+        }
         return true;
     }
     
@@ -401,8 +407,7 @@ public class HostBalancer implements Balancer {
                 }
             }
             
-            int size = rhq.size();
-            if (size == 0) {
+            if (rhq.isEmpty()) {
                 synchronized (this) {
                     this.queues.remove(rhh);
                 }

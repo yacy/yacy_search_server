@@ -66,7 +66,7 @@ public class urls {
             DigestURL referrer;
             while ((maxCount > 0) &&
                    (System.currentTimeMillis() < timeout) &&
-                   (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
+                   (!sb.crawlQueues.noticeURL.isEmpty(stackType))) {
                 try {
                     entry = sb.crawlQueues.noticeURL.pop(stackType, false, sb.crawler, sb.robots);
                 } catch (final IOException e) {

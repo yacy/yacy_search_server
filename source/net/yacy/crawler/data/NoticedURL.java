@@ -295,17 +295,28 @@ public class NoticedURL {
         int s;
         Request entry;
         int errors = 0;
-        while ((s = balancer.size()) > 0) {
+        while (!balancer.isEmpty()) {
             entry = balancer.pop(delay, cs, robots);
-            if (entry == null) {
-                if (s > balancer.size()) continue;
-                errors++;
-                if (errors < 100) continue;
-                final int aftersize = balancer.size();
-                balancer.clear(); // the balancer is broken and cannot shrink
-                ConcurrentLog.warn("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
-            }
-            return entry;
+            if (entry != null) return entry;
+
+            // the balancer was supposed to be not empty. Check this again
+            // it may be possible that another process has taken all
+            s = balancer.size(); // this time read the size to find errors
+            if (s == 0) return null; // the balancer is actually empty!
+            
+            // if the balancer is not empty, try again
+            entry = balancer.pop(delay, cs, robots);
+            if (entry != null) return entry;
+            
+            if (s > balancer.size()) continue; // the balancer has shrinked, thats good, it will terminate
+            errors++; // bad, if the size does not shrink we are in danger to not terminate
+            if (errors < 100) continue; // there is the possibility that it is not a bug but concurrency, so just ignore it for some time
+                
+            // at this point we consider the balancer to be broken
+            final int aftersize = balancer.size(); // get the amount of data that we loose
+            balancer.clear(); // the balancer is broken and cannot shrink
+            ConcurrentLog.warn("BALANCER", "balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
+            return null;
         }
         return null;
     }
