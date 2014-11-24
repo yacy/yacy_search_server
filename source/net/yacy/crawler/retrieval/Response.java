@@ -44,6 +44,7 @@ import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.search.Switchboard;
 
 public class Response {
 
@@ -419,6 +420,8 @@ public class Response {
      */
     public boolean isFreshForProxy() {
 
+        if (Switchboard.getSwitchboard().getConfigBool("proxyAlwaysFresh", false)) return true;
+        
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches

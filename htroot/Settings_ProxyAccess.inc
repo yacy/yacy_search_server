@@ -11,6 +11,14 @@
     </td>
   </tr>  
   <tr valign="top">
+    <td><label for="via_header">Always Fresh</label>:</td>
+    <td><input type="checkbox" name="proxyAlwaysFresh" id="proxyAlwaysFresh" #(proxyAlwaysFresh)#::checked="checked" #(/proxyAlwaysFresh)#/></td>
+    <td>
+      If unchecked, the proxy will act using Cache Fresh / Cache Stale rules. If checked, the cache is always fresh which means
+      that a page is never loaded again if it was already stored in the cache. However, if the page does not exist in the cache, it will be loaded in any case.
+    </td>
+  </tr> 
+  <tr valign="top">
     <td><label for="via_header">Send "Via" Header</label>:</td>
     <td><input type="checkbox" name="proxy.sendViaHeader" id="via_header" #(proxy.sendViaHeader)#::checked="checked" #(/proxy.sendViaHeader)#/></td>
     <td>

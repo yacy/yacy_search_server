@@ -244,6 +244,9 @@ proxyCache = DATA/HTCACHE
 # default: 4 Gigabyte
 proxyCacheSize = 4096
 
+# you can use the proxy with fresh/stale rules or in a always-fresh mode
+proxyAlwaysFresh = false
+
 # a path to the surrogate input directory
 surrogates.in = DATA/SURROGATES/in
 

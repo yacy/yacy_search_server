@@ -154,7 +154,12 @@ public class SettingsAck_p {
             boolean isTransparentProxy = post.containsKey("isTransparentProxy");
             env.setConfig("isTransparentProxy", isTransparentProxy);
             prop.put("info_isTransparentProxy", isTransparentProxy ? "on" : "off");
-
+            
+            // set proxyAlwaysFresh flag
+            boolean proxyAlwaysFresh = post.containsKey("proxyAlwaysFresh");
+            env.setConfig("proxyAlwaysFresh", proxyAlwaysFresh);
+            prop.put("info_proxyAlwaysFresh", proxyAlwaysFresh ? "on" : "off");
+            
             // setting via header property
             env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader"));
             prop.put("info_proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")? "on" : "off");
