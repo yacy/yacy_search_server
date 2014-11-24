@@ -117,7 +117,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 	    @Override
             public void run() {
                 if (yacyResponse == null) return;
-	        this.setName("ProxyHandler.storeToCache(" + yacyResponse.url() + ")");
+	        this.setName("ProxyHandler.storeToCache(" + yacyResponse.url().toNormalform(true) + ")");
 	           
 	        // the cache does either not exist or is (supposed to be) stale
 	        deleteFromCache(yacyResponse.url().hash());
