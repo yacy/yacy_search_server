@@ -304,7 +304,7 @@ public final class SearchEvent {
         this.rwiProcess = null;
         if (query.getSegment().connectedRWI() && !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false)) {
             // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
-            rwiProcess = new RWIProcess();
+            rwiProcess = new RWIProcess(this.localsolrsearch);
             rwiProcess.start();
         }
 
@@ -433,8 +433,11 @@ public final class SearchEvent {
 
     private class RWIProcess extends Thread {
     
-        public RWIProcess() {
+        final Thread waitForThread;
+        
+        public RWIProcess(final Thread waitForThread) {
             super();
+            this.waitForThread = waitForThread;
         }
         
         @Override
@@ -462,6 +465,12 @@ public final class SearchEvent {
                 SearchEvent.this.localSearchInclusion = search.inclusion();
                 ReferenceContainer<WordReference> index = search.joined();
                 if ( !index.isEmpty() ) {
+                    // in case that another thread has priority for their results, wait until this is finished
+                    if (this.waitForThread != null && this.waitForThread.isAlive()) {
+                        this.waitForThread.join();
+                    }
+                    
+                    // add the index to the result
                     int successcount = addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), index.size(), SearchEvent.this.maxtime);
                     if (successcount == 0 &&
                         SearchEvent.this.query.getQueryGoal().getIncludeHashes().has(Segment.catchallHash) &&
