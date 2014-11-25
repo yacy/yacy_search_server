@@ -1016,6 +1016,7 @@ public final class Protocol {
                 for (Count ff: values) {
                     int c = (int) ff.getCount();
                     if (c == 0) continue;
+                    if (ff.getName().length() == 0) continue; // facet entry without text is not useful
                     result.set(ff.getName(), c);
                 }
                 if (result.size() > 0) facets.put(field, result);
