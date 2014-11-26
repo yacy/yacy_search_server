@@ -1270,4 +1270,5 @@ crawler.userAgent.clienttimeout = 10000
 decoration.audio = false
 decoration.grafics.linkstructure = true
 decoration.hostanalysis = false
+decoration.simpleheadernavbar = navbar-default
 
