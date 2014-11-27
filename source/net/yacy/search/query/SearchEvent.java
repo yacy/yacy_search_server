@@ -1081,7 +1081,12 @@ public final class SearchEvent {
                 //Log.logWarning("SearchEvent", "bestEntry == null (2)");
                 return null;
             }
-            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(bestEntry);
+            URIMetadataNode node = null;
+            try {
+                node = this.query.getSegment().fulltext().getMetadata(bestEntry);
+            } catch (Throwable e) {
+                ConcurrentLog.logException(e);
+            }
             if (node == null) {
                 if (bestEntry.getElement().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 if (log.isFine()) log.fine("dropped RWI: hash not in metadata");
