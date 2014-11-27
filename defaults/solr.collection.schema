@@ -94,7 +94,7 @@ references_exthosts_i
 crawldepth_i
 
 ## needed (post-)processing steps on this metadata set
-process_sxt
+#process_sxt
 
 ## key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.
 harvestkey_s
