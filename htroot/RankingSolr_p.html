@@ -28,8 +28,8 @@
         Example: to order by date, use "recip(ms(NOW,last_modified),3.16e-11,1,1)", to order by crawldepth, use "div(100,add(crawldepth_i,1))".
         <dl>
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bf" id="bf_label">boost=</label></dt>
-          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="bf_dd">
-            <input name="bf" id="bf" type="text" align="left" size="100" value="#[bf]#" />
+          <dd style="width:360px;margin:0;padding:0;float:left;display:inline;" id="bf_dd">
+            <textarea name="bf" id="bf" align="left" cols="96" rows="1"/>#[bf]#</textarea>
           </dd>
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
           <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
@@ -49,8 +49,8 @@
         To find appropriate fields for this query, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for boolean values (with suffix '_b') or tags inside string fields (with suffix '_s' or '_sxt').
         <dl>
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bq" id="bq_label">bq=</label></dt>
-          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="bq_dd">
-            <input name="bq" id="bq" type="text" align="left" size="100" value="#[bq]#" />
+          <dd style="width:360px;margin:0;padding:0;float:left;display:inline;" id="bq_dd">
+            <textarea name="bq" id="bq" align="left" cols="96" rows="1"/>#[bq]#</textarea>
           </dd>
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
           <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
@@ -86,8 +86,8 @@
         To find appropriate fields for this query, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a>. Warning: bad expressions here will cause that you don't have any search result!
         <dl>
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="fq" id="fq_label">fq=</label></dt>
-          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="fq_dd">
-            <input name="fq" id="fq" type="text" align="left" size="100" value="#[fq]#" />
+          <dd style="width:360px;margin:0;padding:0;float:left;display:inline;" id="fq_dd">
+            <textarea name="fq" id="fq" align="left" cols="96" rows="1"/>#[fq]#</textarea>
           </dd>
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
           <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
