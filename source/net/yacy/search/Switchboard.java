@@ -451,6 +451,7 @@ public final class Switchboard extends serverSwitch {
             // new features are always activated by default (if activated in input-backupScheme)
             solrCollectionConfigurationWork.fill(solrCollectionConfigurationInit, true);
             // switch on some fields which are necessary for ranking and faceting
+            SchemaConfiguration.Entry entry;
             for (CollectionSchema field: new CollectionSchema[]{
                     CollectionSchema.host_s, CollectionSchema.load_date_dt,
                     CollectionSchema.url_file_ext_s, CollectionSchema.last_modified,                      // needed for media search and /date operator
@@ -459,11 +460,19 @@ public final class Switchboard extends serverSwitch {
                     /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_sxt,// needed to enhance the crawler
                     CollectionSchema.httpstatus_i                                                         // used in all search queries to filter out error documents
                 }) {
-                SchemaConfiguration.Entry entry = solrCollectionConfigurationWork.get(field.name()); entry.setEnable(true); solrCollectionConfigurationWork.put(field.name(), entry);
+                entry = solrCollectionConfigurationWork.get(field.name());
+                if (entry != null) {
+                    entry.setEnable(true);
+                    solrCollectionConfigurationWork.put(field.name(), entry);
+                }
             }
             
             // activate some fields that are necessary here
-            solrCollectionConfigurationWork.get(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).setEnable(true);
+            entry = solrCollectionConfigurationWork.get(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
+            if (entry != null) {
+                entry.setEnable(true);
+                solrCollectionConfigurationWork.put(CollectionSchema.images_urlstub_sxt.getSolrFieldName(), entry);
+            }
             solrCollectionConfigurationWork.commit();
         } catch (final IOException e) {ConcurrentLog.logException(e);}
         
@@ -3844,6 +3853,27 @@ public final class Switchboard extends serverSwitch {
             i++;
         }
     }
+    
+    /*
+    public File getPDF(DigestURL url) {
+        String depth = "00";
+        String idstub = ASCII.String(url.hash()).substring(0, 6);
+        if (this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.crawldepth_i)) {
+            try {
+                SolrDocument doc = this.index.fulltext().getDefaultConnector().getDocumentById(ASCII.String(url.hash()), CollectionSchema.crawldepth_i.getSolrFieldName());
+                if (doc != null) {
+                    depth = (String) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
+                    if (depth == null) depth = "00"; else if (depth.length() < 2) depth = "0" + depth;
+                }
+            } catch (IOException e) {
+            }
+        }
+        File pathToPdf = new File(this.htCachePath, url.getHost() + ":" + url.getPort());
+        
+        File pdfFile = new File(pathToPdf, depth + "-" + idstub);
+        
+    }
+     */
 
     public void checkInterruption() throws InterruptedException {
         final Thread curThread = Thread.currentThread();
