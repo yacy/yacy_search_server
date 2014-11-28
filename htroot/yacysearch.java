@@ -845,8 +845,8 @@ public class yacysearch {
                 prop.put("excluded", "0");
             }
 
-            if ( prop == null || prop.isEmpty() ) {
-                if ( post.get("query", post.get("search", "")).length() < 2 ) {
+            if (prop.isEmpty() || querystring.length() == 0) {
+                if ( querystring.length() == 0 ) { // querystring is trimmed originalquerystring
                     prop.put("num-results", "2"); // no results - at least 2 chars
                 } else {
                     prop.put("num-results", "1"); // no results
