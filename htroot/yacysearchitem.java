@@ -25,7 +25,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -42,6 +44,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.data.Cache;
 import net.yacy.data.URLLicense;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
@@ -194,6 +197,7 @@ public class yacysearchitem {
                 prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
                 prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
                 prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
+                prop.put("content_showVocabulary", sb.getConfigBool("search.result.show.vocabulary", true) ? 1 : 0);
 
                 prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
                 prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
@@ -204,6 +208,25 @@ public class yacysearchitem {
                 prop.put("content_showCache_link", resultUrlstring);
                 prop.put("content_showProxy_link", resultUrlstring);
                 prop.put("content_showHostBrowser_link", resultUrlstring);
+                if (sb.getConfigBool("search.result.show.vocabulary", true)) {
+                    URIMetadataNode node = result.getNode();
+                    int c = 0;
+                    for (Map.Entry<String, Object> entry: node.entrySet()) {
+                        String key = entry.getKey();
+                        if (key.startsWith("vocabulary_") && key.endsWith("_sxt")) {
+                            @SuppressWarnings("unchecked")
+                            Collection<String> terms = (Collection<String>) entry.getValue();
+                            prop.putHTML("content_showVocabulary_vocabulary_" + c + "_name", key.substring(11, key.length() - 4));
+                            prop.putHTML("content_showVocabulary_vocabulary_" + c + "_terms", terms.toString());
+                            c++;
+                        }
+                    }
+                    prop.put("content_showVocabulary_vocabulary", c);
+                    prop.put("content_showVocabulary", 1);
+                } else {
+                    prop.put("content_showVocabulary_vocabulary", 0);
+                    prop.put("content_showVocabulary", 0);
+                }
             }
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(urlhash));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
