@@ -80,9 +80,9 @@ public final class Condenser {
     private String fuzzy_signature_text = null; // signatures for double-check detection
     
     public int RESULT_NUMB_WORDS = -1;
-    public int RESULT_DIFF_WORDS = -1;
+    //public int RESULT_DIFF_WORDS = -1;
     public int RESULT_NUMB_SENTENCES = -1;
-    public int RESULT_DIFF_SENTENCES = -1;
+    //public int RESULT_DIFF_SENTENCES = -1;
     public Bitfield RESULT_FLAGS = new Bitfield(4);
     private final Identificator languageIdentificator;
 
@@ -157,9 +157,9 @@ public final class Condenser {
             */
         } else {
             this.RESULT_NUMB_WORDS = 0;
-            this.RESULT_DIFF_WORDS = 0;
+            //this.RESULT_DIFF_WORDS = 0;
             this.RESULT_NUMB_SENTENCES = 0;
-            this.RESULT_DIFF_SENTENCES = 0;
+            //this.RESULT_DIFF_SENTENCES = 0;
         }
 
         if (indexMedia) {
@@ -274,7 +274,7 @@ public final class Condenser {
 	            this.words.put(word.toLowerCase(), wprop);
 	            pip++;
 	            this.RESULT_NUMB_WORDS++;
-	            this.RESULT_DIFF_WORDS++;
+	            //this.RESULT_DIFF_WORDS++;
 	        }
         } finally {
         	wordenum.close();
@@ -330,12 +330,12 @@ public final class Condenser {
         final Word wsp1;
         int wordHandle;
         int wordHandleCount = 0;
-        final int sentenceHandleCount = 0;
+        //final int sentenceHandleCount = 0;
         int allwordcounter = 0;
         final int allsentencecounter = 0;
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
-        final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
+        //final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
         if (LibraryProvider.autotagging.isEmpty()) doAutotagging = false;
 
         // read source
@@ -379,7 +379,7 @@ public final class Condenser {
 
 	            // distinguish punctuation and words
 	            wordlen = word.length();
-	            if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) {
+	            if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) { // TODO: wordlen == 1 never true (see earlier if < wordminsize )
 	                // store sentence
 	                currsentwords.clear();
 	                wordInSentenceCounter = 1;
@@ -404,7 +404,7 @@ public final class Condenser {
 	                } else {
 	                    // word does not yet exist, create new word entry
 	                    wordHandle = wordHandleCount++;
-	                    wsp = new Word(wordHandle, wordInSentenceCounter, sentences.size() + 100);
+	                    wsp = new Word(wordHandle, wordInSentenceCounter, /* sentences.size() + */ 100);
 	                    wsp.flags = this.RESULT_FLAGS.clone();
 	                    this.words.put(word.toLowerCase(), wsp);
 	                }
@@ -446,9 +446,9 @@ public final class Condenser {
         // store result
         //this.RESULT_NUMB_TEXT_BYTES = wordenum.count();
         this.RESULT_NUMB_WORDS = allwordcounter;
-        this.RESULT_DIFF_WORDS = wordHandleCount;
+        //this.RESULT_DIFF_WORDS = wordHandleCount;
         this.RESULT_NUMB_SENTENCES = allsentencecounter;
-        this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
+        //this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
     }
 
     public static Map<String, Word> getWords(final String text, final WordCache meaningLib) {
