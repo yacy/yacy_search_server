@@ -462,6 +462,7 @@ public class Crawler_p {
                             indexMedia,
                             storeHTCache,
                             crawlOrder,
+                            -1, // temporary; stub commit
                             cachePolicy,
                             collection,
                             agentName);

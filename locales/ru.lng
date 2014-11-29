@@ -4143,7 +4143,7 @@ Illegal prefer mask:==Недопустимый предпочтительный 
 Did you mean:==Возможно вы имели ввиду:
 The following words are stop-words and had been excluded from the search:==Следующие слова являются стоп-словами и были исключены из поиска:
 No Results.==Нет результатов.
-length of search words must be at least 2 characters==Длина искомого слова должно быть не менее 2 символов
+length of search words must be at least 1 character==Длина искомого слова должно быть не менее 1 символов
 Searching the web with this peer is disabled for unauthorized users. Please==Поиск с помощью этого узла невозможен для неавторизованных пользователей. Пожалуйста, 
 >log in<==>войдите<
 as administrator to use the search function==под своей учётной записью, для использования поиска.

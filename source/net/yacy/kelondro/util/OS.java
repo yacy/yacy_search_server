@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ConcurrentLog;
@@ -197,13 +196,13 @@ public final class OS {
 		FileUtils.deletedelete(starterFile);
 	}
 
-	public static Vector<String> execSynchronous(final String command) throws IOException {
+	public static List<String> execSynchronous(final String command) throws IOException {
 		// runs a unix/linux command and returns output as Vector of Strings
 		// this method blocks until the command is executed
 		final Process p = Runtime.getRuntime().exec(command);
 		final BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		String text;
-		final Vector<String> output = new Vector<String>();
+		final List<String> output = new ArrayList<String>();
 		while ((text = in.readLine()) != null) {
 			output.add(text);
 		}
@@ -212,9 +211,16 @@ public final class OS {
 	}
 
 	public static void main(final String[] args) {
+        try {
+            List<String> v = execSynchronous("/usr/local/bin/wkhtmltoimage");
+            for (String r: v) java.lang.System.out.println(r);
+        } catch (IOException e) {
+        }
+        /*
 		if (args[0].equals("-m")) {
 			java.lang.System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
 		}
+		*/
 	}
 
 }

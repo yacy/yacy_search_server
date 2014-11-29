@@ -3787,7 +3787,7 @@ Illegal prefer mask:==Ungültige bevorzugte Maske:
 Did you mean:==Meinten Sie vielleicht:
 The following words are stop-words and had been excluded from the search:==Folgende Wörter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
-length of search words must be at least 2 characters==Die Länge der Suchbegriffe muss mindestens 2 Zeichen betragen
+length of search words must be at least 1 character==Die Länge der Suchbegriffe muss mindestens 1 Zeichen betragen
 Searching the web with this peer is disabled for unauthorized users. Please==Die Websuche auf diesem Peer ist für nicht angemeldete Benutzer deaktiviert. Bitte
 >log in<==>loggen Sie sich<
 as administrator to use the search function==als Administrator ein, um die Suchfunktion nutzen zu können.

@@ -122,6 +122,7 @@ import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.data.Snapshots;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ResultImages;
 import net.yacy.crawler.data.ResultURLs;
@@ -243,6 +244,7 @@ public final class Switchboard extends serverSwitch {
     public File queuesRoot;
     public File surrogatesInPath;
     //public File surrogatesOutPath;
+    public Snapshots snapshots;
     public Segment index;
     public LoaderDispatcher loader;
     public CrawlSwitchboard crawler;
@@ -344,6 +346,7 @@ public final class Switchboard extends serverSwitch {
         this.htDocsPath =
             getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
         this.log.config("HTDOCS Path:    " + this.htDocsPath.toString());
+        this.snapshots = new Snapshots(new File(this.htDocsPath, "SNAPSHOTS"));
         this.workPath = getDataPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.workPath.mkdirs();
         // if default work files exist, copy them (don't overwrite existing!)
@@ -3853,27 +3856,6 @@ public final class Switchboard extends serverSwitch {
             i++;
         }
     }
-    
-    /*
-    public File getPDF(DigestURL url) {
-        String depth = "00";
-        String idstub = ASCII.String(url.hash()).substring(0, 6);
-        if (this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.crawldepth_i)) {
-            try {
-                SolrDocument doc = this.index.fulltext().getDefaultConnector().getDocumentById(ASCII.String(url.hash()), CollectionSchema.crawldepth_i.getSolrFieldName());
-                if (doc != null) {
-                    depth = (String) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
-                    if (depth == null) depth = "00"; else if (depth.length() < 2) depth = "0" + depth;
-                }
-            } catch (IOException e) {
-            }
-        }
-        File pathToPdf = new File(this.htCachePath, url.getHost() + ":" + url.getPort());
-        
-        File pdfFile = new File(pathToPdf, depth + "-" + idstub);
-        
-    }
-     */
 
     public void checkInterruption() throws InterruptedException {
         final Thread curThread = Thread.currentThread();

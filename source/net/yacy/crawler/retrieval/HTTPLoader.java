@@ -25,6 +25,7 @@
 package net.yacy.crawler.retrieval;
 
 import java.io.IOException;
+import java.util.Date;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.FailCategory;
@@ -68,10 +69,16 @@ public final class HTTPLoader {
     }
 
     public Response load(final Request entry, CrawlProfile profile, final int maxFileSize, final BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+        // load fulltext of html page
         Latency.updateBeforeLoad(entry.url());
         final long start = System.currentTimeMillis();
         final Response doc = load(entry, profile, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, agent);
         Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
+        
+        // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
+        if (entry.depth() <= profile.loadPreviewMaxdepth() && "html|shtml|php".indexOf(entry.url().getFile()) >= 0) {
+            sb.snapshots.downloadPDFSnapshot(entry.url(), entry.depth(), new Date(), "http://127.0.0.1:" + sb.getConfigInt("port", 8090));
+        }
         return doc;
     }
 
