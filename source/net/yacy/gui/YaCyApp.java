@@ -96,7 +96,7 @@ public class YaCyApp {
         }
     }
 
-    public static void start(String host, int port) {
+    public static void start(final String host, final int port) {
 
         Switchboard.startInfoUpdater();
         operation = new Op(app, host, port);
@@ -137,7 +137,7 @@ public class YaCyApp {
             @Override
             public void run() {
                 Thread.currentThread().setName("YaCyApp");
-                app = new Application("YaCy GUI", operation, menues, new InfoPage("localhost", 8090));
+                app = new Application("YaCy GUI", operation, menues, new InfoPage(host, port));
                 app.setLocationRelativeTo(null);
                 app.setVisible(true);
             }
