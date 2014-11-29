@@ -293,6 +293,7 @@ public final class CrawlSwitchboard {
                 sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_LOCAL_MEDIA, true),
                 true,
                 sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_REMOTE, false),
+                -1,
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_PROXY,
                 ClientIdentification.yacyProxyAgentName);
@@ -322,6 +323,7 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 false,
+                -1,
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_REMOTE,
                 ClientIdentification.yacyInternetCrawlerAgentName);
@@ -351,6 +353,7 @@ public final class CrawlSwitchboard {
                 false,
                 true,
                 false,
+                -1,
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName);
@@ -380,6 +383,7 @@ public final class CrawlSwitchboard {
                 true,
                 true,
                 false,
+                -1,
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName);
@@ -410,6 +414,7 @@ public final class CrawlSwitchboard {
                 false,
                 true,
                 false,
+                -1,
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_GREEDY_LEARNING_TEXT,
                 ClientIdentification.browserAgentName);
@@ -439,6 +444,7 @@ public final class CrawlSwitchboard {
                 false,
                 true,
                 false,
+                -1,
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName);
@@ -468,6 +474,7 @@ public final class CrawlSwitchboard {
                 true,
                 true,
                 false,
+                -1,
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName);
@@ -497,6 +504,7 @@ public final class CrawlSwitchboard {
                 false,
                 false,
                 false,
+                -1,
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_SURROGATE,
                 ClientIdentification.yacyIntranetCrawlerAgentName);
@@ -529,6 +537,7 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 false,
+                -1,
                 CacheStrategy.NOCACHE,
                 collection,
                 ClientIdentification.yacyIntranetCrawlerAgentName);

@@ -58,6 +58,10 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         this.entryComparator = new Row.EntryComparator(backend.row().objectOrder);
     }
 
+    public boolean isOnDemand() {
+        return this.backend instanceof OnDemandOpenFileIndex;
+    }
+    
     @Override
     public byte[] smallestKey() {
         if (this.buffer == null || this.buffer.isEmpty()) return this.backend.smallestKey();
