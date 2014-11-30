@@ -212,13 +212,12 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         return kv;
     }
 
-    @SuppressWarnings("deprecation")
     private static String field2string(final FieldType type, final String value) {
         String typeName = type.getTypeName();
         if (typeName.equals(SolrType.bool.printName())) {
             return "F".equals(value) ? "false" : "true";
         } else if (typeName.equals(SolrType.date.printName())) {
-            return org.apache.solr.schema.DateField.formatExternal(new Date(Long.parseLong(value))); // this is declared deprecated in solr 4.2.1 but is still used as done here
+            return org.apache.solr.schema.TrieDateField.formatExternal(new Date(Long.parseLong(value)));
         }
         return value;
     }
