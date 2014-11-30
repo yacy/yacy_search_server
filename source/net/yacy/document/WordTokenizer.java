@@ -178,9 +178,9 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
      * @param sentence the sentence to be tokenized
      * @return a ordered map containing word hashes as key and positions as value. The map is orderd by the hash ordering
      */
-    public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib, int maxlength) {
+    public static SortedMap<byte[], Integer> hashSentence(final String sentence, int maxlength) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), meaningLib);
+        WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), null);
         try {
 	        int pos = 0;
 	        StringBuilder word;
