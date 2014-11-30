@@ -535,7 +535,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
     private static void removeMatchingHashes(final String sentence, final HandleSet queryhashes) {
         if (queryhashes.size() == 0) return;
-        final Set<byte[]> m = WordTokenizer.hashSentence(sentence, null, 100).keySet();
+        final Set<byte[]> m = WordTokenizer.hashSentence(sentence, 100).keySet();
         //for (byte[] b: m) System.out.println("sentence hash: " + ASCII.String(b));
         //for (byte[] b: queryhashes) System.out.println("queryhash: " + ASCII.String(b));
         ArrayList<byte[]> o = new ArrayList<byte[]>(queryhashes.size());

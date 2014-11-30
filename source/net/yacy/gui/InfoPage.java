@@ -115,7 +115,7 @@ public class InfoPage implements Layout {
         String infotext =
             "This is a YaCy GUI wrappper.\n\n" +
             "The YaCy administration interface is in your browser\n" +
-            "just open http://localhost:8090\n\n" +
+            "just open http://" + this.host + ":" + this.port + "\n\n" +
             "You may also enter a search term and press enter,\n" +
             "then the query will be opened in your browser\n";
         if (OS.isMacArchitecture) infotext += "\nThe application data on Mac is stored at ~Library/YaCy/\n";

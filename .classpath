@@ -16,7 +16,7 @@
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/jsch-0.1.50.jar"/>
+	<classpathentry kind="lib" path="lib/jsch-0.1.51.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
@@ -38,7 +38,7 @@
 	<classpathentry kind="lib" path="lib/noggit-0.5.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar"/>
-	<classpathentry kind="lib" path="lib/guava-16.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/guava-18.0.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.6.jar"/>
 	<classpathentry kind="lib" path="lib/org.restlet.jar"/>
@@ -47,8 +47,8 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.7.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
-	<classpathentry kind="lib" path="lib/poi-3.10-FINAL-20140208.jar"/>
-	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.10.1.jar"/>
+	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.6.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.10.2.jar"/>

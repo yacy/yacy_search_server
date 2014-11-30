@@ -153,6 +153,7 @@ public class Switchboard {
      * this is not reversible.
      */
     public static void shutdown() {
+        if (InfoBox != null) InfoBox.setText("waiting for shutdown process to complete ...");
         shallrun = false;
     }
     
