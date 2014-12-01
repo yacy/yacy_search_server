@@ -3,5 +3,6 @@
   <ul class="SubMenu">
     <li><a href="ConfigBasic.html" class="MenuItemLink">Basic Configuration</a></li>
     <li><a href="ConfigAccounts_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Accounts</a></li>
+    <li><a href="ConfigNetwork_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Network Configuration</a></li>
   </ul>
 </div>
