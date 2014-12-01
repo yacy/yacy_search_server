@@ -231,7 +231,6 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write(lb);
     }
 
-    @SuppressWarnings("deprecation")
     private static void writeField(final Writer writer, final String typeName, final String name, final String value) throws IOException {
         if (typeName.equals(SolrType.text_general.printName()) ||
             typeName.equals(SolrType.string.printName()) ||
@@ -244,7 +243,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         } else if (typeName.equals(SolrType.num_long.printName())) {
             writeTag(writer, "long", name, value, true);
         } else if (typeName.equals(SolrType.date.printName())) {
-            writeTag(writer, "date", name, org.apache.solr.schema.DateField.formatExternal(new Date(Long.parseLong(value))), true); // this is declared deprecated in solr 4.2.1 but is still used as done here
+            writeTag(writer, "date", name, org.apache.solr.schema.TrieDateField.formatExternal(new Date(Long.parseLong(value))), true);
         } else if (typeName.equals(SolrType.num_float.printName())) {
             writeTag(writer, "float", name, value, true);
         } else if (typeName.equals(SolrType.num_double.printName())) {
@@ -262,7 +261,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         } else if (value instanceof Long) {
             writeTag(writer, "long", name, ((Long) value).toString(), true);
         } else if (value instanceof Date) {
-            writeTag(writer, "date", name, ((Date) value).toString(), true); // this is declared deprecated in solr 4.2.1 but is still used as done here
+            writeTag(writer, "date", name, org.apache.solr.schema.TrieDateField.formatExternal((Date) value), true);
         } else if (value instanceof Float) {
             writeTag(writer, "float", name, ((Float) value).toString(), true);
         } else if (value instanceof Double) {
