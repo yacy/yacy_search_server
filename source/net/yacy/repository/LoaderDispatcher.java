@@ -42,6 +42,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -207,6 +208,20 @@ public final class LoaderDispatcher {
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
 
+        // before we return pages from the cache, check if we are requested to produce snapshots which will be generated newly every time
+        if (protocol.equals("http") || protocol.equals("https")) {
+            // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
+            boolean depthok = crawlProfile != null && request.depth() <= crawlProfile.snapshotMaxdepth();
+            boolean extok = request.url().getFile().length() == 0 || "html|shtml|php".indexOf(MultiProtocolURL.getFileExtension(request.url().getFile())) >= 0;
+            if (depthok && extok) {
+                File snapshotFile = sb.snapshots.downloadPDFSnapshot(request.url(), request.depth(), new Date(), crawlProfile.snapshotReplaceold(), sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null);
+                log.info("SNAPSHOT - " + (snapshotFile == null ? "could not generate snapshot for " + request.url().toNormalform(true) : "wrote " + snapshotFile + " for " + request.url().toNormalform(true)));
+            } else {
+                //if (!depthok) log.warn("SNAPSHOT: depth not ok, " + (crawlProfile == null ? "profile = null" : "entry.depth() = " + request.depth() + ", profile.snapshotMaxdepth() = " + crawlProfile.snapshotMaxdepth()));
+                //if (!extok) log.warn("SNAPSHOT: ext not ok, entry.url().getFile() = " + request.url().getFile());
+            }
+        }
+        
         // check if we have the page in the cache
         if (cacheStrategy != CacheStrategy.NOCACHE && crawlProfile != null) {
             // we have passed a first test if caching is allowed
