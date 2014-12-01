@@ -72,7 +72,7 @@ public class Html2Image {
      */
     public static boolean writeWkhtmltopdf(String url, String proxy, File destination) {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
-        String commandline = wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + url + " " + destination.getAbsolutePath();
+        String commandline = wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + "--ignore-load-errors " + url + " " + destination.getAbsolutePath();
         try {
             if (!usexvfb) {
                 OS.execSynchronous(commandline);
