@@ -72,8 +72,16 @@ public class Html2Image {
      * @return
      */
     public static boolean writeWkhtmltopdf(String url, String proxy, File destination) {
+        boolean success = writeWkhtmltopdfInternal(url, proxy, destination);
+        if (success) return true;
+        if (proxy == null) return false;
+        ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
+        return writeWkhtmltopdfInternal(url, null, destination);
+    }
+    
+    private static boolean writeWkhtmltopdfInternal(String url, String proxy, File destination) {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
-        String commandline = wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") + url + " " + destination.getAbsolutePath();
+        String commandline = wkhtmltopdf.getAbsolutePath() + " -q --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") + url + " " + destination.getAbsolutePath();
         try {
             List<String> message;
             if (!usexvfb) {
