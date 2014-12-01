@@ -70,7 +70,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
                 final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
                         null,
                         url,
-                        proxyHeaders.referer() == null ? null : new DigestURL(proxyHeaders.referer().toString()).hash(),
+                        proxyHeaders.referer() == null ? null : new DigestURL(proxyHeaders.referer().toNormalform(true)).hash(),
                         "",
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),

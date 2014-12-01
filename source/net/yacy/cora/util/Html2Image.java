@@ -37,12 +37,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Html2Image {
     
@@ -58,11 +54,11 @@ public class Html2Image {
     private final static File convertDebian = new File("/usr/bin/convert");
 
 
-    public boolean wkhtmltopdfAvailable() {
+    public static boolean wkhtmltopdfAvailable() {
         return wkhtmltopdfMac.exists() || wkhtmltopdfDebian.exists();
     }
     
-    public boolean convertAvailable() {
+    public static boolean convertAvailable() {
         return convertMac.exists() || convertDebian.exists();
     }
     
@@ -77,7 +73,7 @@ public class Html2Image {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
         
         try {
-            OS.execSynchronous(wkhtmltopdf.getAbsolutePath() + (proxy == null ? " " : " --proxy " + proxy + " ") + url + " " + destination.getAbsolutePath());
+            OS.execSynchronous(wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + url + " " + destination.getAbsolutePath());
             return destination.exists();
         } catch (IOException e) {
             e.printStackTrace();

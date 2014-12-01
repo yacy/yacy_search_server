@@ -436,6 +436,11 @@ public class Crawler_p {
                     // check crawlurl was given in sitecrawl
                     if ("url".equals(crawlingMode) && rootURLs.size() == 0) hasCrawlstartDataOK = false;
                 }
+               
+                String snapshotsMaxDepthString = post.get("snapshotsMaxDepth", "-1");
+                int snapshotsMaxDepth = Integer.parseInt(snapshotsMaxDepthString);
+                boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
+                
                 // prepare a new crawling profile
                 final CrawlProfile profile;
                 byte[] handle;
@@ -462,7 +467,8 @@ public class Crawler_p {
                             indexMedia,
                             storeHTCache,
                             crawlOrder,
-                            -1, // temporary; stub commit
+                            snapshotsMaxDepth,
+                            snapshotsReplaceOld,
                             cachePolicy,
                             collection,
                             agentName);

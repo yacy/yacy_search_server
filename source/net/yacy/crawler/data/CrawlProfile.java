@@ -86,7 +86,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String INDEXING_URL_MUSTNOTMATCH     = "indexURLMustNotMatch";
     public static final String INDEXING_CONTENT_MUSTMATCH    = "indexContentMustMatch";
     public static final String INDEXING_CONTENT_MUSTNOTMATCH = "indexContentMustNotMatch";
-    public static final String LOADPREVIEWMAXDEPTH           = "loadpreviewmaxdepth"; // if previews shall be loaded, this is positive and denotes the maximum depth; if not this is -1
+    public static final String SNAPSHOTS_MAXDEPTH            = "snapshotsMaxDepth"; // if previews shall be loaded, this is positive and denotes the maximum depth; if not this is -1
+    public static final String SNAPSHOTS_REPLACEOLD          = "snapshotsReplaceOld"; // if this is set to true, only one version of a snapshot per day is stored, otherwise we store also different versions per day
 
     private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
     private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;
@@ -142,7 +143,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean indexMedia,
                  final boolean storeHTCache,
                  final boolean remoteIndexing,
-                 final int loadPreviewMaxdepth,
+                 final int snapshotsMaxDepth,
+                 final boolean snapshotsReplaceOld,
                  final CacheStrategy cacheStrategy,
                  final String collections,
                  final String userAgentName) {
@@ -178,7 +180,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(INDEX_MEDIA,      indexMedia);
         put(STORE_HTCACHE,    storeHTCache);
         put(REMOTE_INDEXING,  remoteIndexing);
-        put(LOADPREVIEWMAXDEPTH, loadPreviewMaxdepth);
+        put(SNAPSHOTS_MAXDEPTH, snapshotsMaxDepth);
+        put(SNAPSHOTS_REPLACEOLD, snapshotsReplaceOld);
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
         put(COLLECTIONS,      CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
     }
@@ -575,8 +578,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
     
-    public int loadPreviewMaxdepth() {
-        final String r = get(LOADPREVIEWMAXDEPTH);
+    public int snapshotMaxdepth() {
+        final String r = get(SNAPSHOTS_MAXDEPTH);
         if (r == null) return -1;
         try {
             final int i = Integer.parseInt(r);
@@ -586,6 +589,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             ConcurrentLog.logException(e);
             return -1;
         }
+    }
+
+    public boolean snapshotReplaceold() {
+        final String r = get(SNAPSHOTS_REPLACEOLD);
+        if (r == null) return false;
+        return (r.equals(Boolean.TRUE.toString()));
     }
 
     /**

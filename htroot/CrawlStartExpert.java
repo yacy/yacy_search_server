@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.Html2Image;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
@@ -511,6 +512,15 @@ public class CrawlStartExpert {
                 ClientIdentification.yacyInternetCrawlerAgentName);
 
 
+        // ---------- Snapshot generation
+        if (sb.getConfigBool("isTransparentProxy", false) &&
+            sb.getConfigBool("proxyAlwaysFresh", false) &&
+             Html2Image.wkhtmltopdfAvailable() && Html2Image.convertAvailable()) {
+            prop.put("snapshotSelect", 1);
+        } else {
+            prop.put("snapshotSelect", 0);
+        }
+
         // ---------- Index Administration
         // Do Local Indexing
         if (post == null) {
@@ -548,7 +558,7 @@ public class CrawlStartExpert {
                 prop.put("collection", collectionEnabled ? defaultCollection : "");
             }
         }
-
+        
         // return rewrite properties
         return prop;
     }

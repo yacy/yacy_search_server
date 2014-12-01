@@ -152,7 +152,7 @@ public class QuickCrawlLink_p {
                         obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                         indexText, indexMedia,
                         storeHTCache, remoteIndexing,
-                        -1,
+                        -1, true,
                         CacheStrategy.IFFRESH,
                         collection,
                         ClientIdentification.yacyIntranetCrawlerAgentName);

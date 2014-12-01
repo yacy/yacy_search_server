@@ -346,7 +346,6 @@ public final class Switchboard extends serverSwitch {
         this.htDocsPath =
             getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
         this.log.config("HTDOCS Path:    " + this.htDocsPath.toString());
-        this.snapshots = new Snapshots(new File(this.htDocsPath, "SNAPSHOTS"));
         this.workPath = getDataPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.workPath.mkdirs();
         // if default work files exist, copy them (don't overwrite existing!)
@@ -695,7 +694,8 @@ public final class Switchboard extends serverSwitch {
         final long maxCacheSize =
             1024L * 1024L * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
         Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize);
-
+        this.snapshots = new Snapshots(new File(this.htCachePath, "SNAPSHOTS"));
+        
         // create the surrogates directories
         this.surrogatesInPath =
             getDataPath(

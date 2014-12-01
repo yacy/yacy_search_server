@@ -31,6 +31,8 @@ import org.apache.solr.common.SolrDocument;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.util.Html2Image;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -68,13 +70,15 @@ public class Snapshots {
      * @param proxy - a string of the form 'http://<host>:<port>
      * @return
      */
-    public File downloadPDFSnapshot(final DigestURL url, final int depth, final Date date, String proxy) {
+    public File downloadPDFSnapshot(final DigestURL url, final int depth, final Date date, boolean replaceOld, String proxy) {
+        Collection<File> oldPaths = findPaths(url, depth);
+        if (replaceOld) {
+            for (File oldPath: oldPaths) oldPath.delete();
+        }
         File path = definePath(url, "pdf", depth, date);
         path.getParentFile().mkdirs();
-        
-        // STUB
-        
-        return path;
+        boolean success = Html2Image.writeWkhtmltopdf(url.toNormalform(true), proxy, path);
+        return success ? path : null;
     }
     
     /**
@@ -122,9 +126,9 @@ public class Snapshots {
      * @param ext
      * @return a set of files for snapshots of the url
      */
-    public Collection<File> findPaths(final DigestURL url, final String ext) {
+    public Collection<File> findPaths(final DigestURL url) {
         for (int i = 0; i < 100; i++) {
-            Collection<File> paths = findPaths(url, ext, i);
+            Collection<File> paths = findPaths(url, i);
             if (paths.size() > 0) return paths;
         }
         return new ArrayList<>(0);
@@ -138,20 +142,23 @@ public class Snapshots {
      * @param depth
      * @return a set of files for snapshots of the url
      */
-    public Collection<File> findPaths(final DigestURL url, final String ext, final int depth) {
+    public Collection<File> findPaths(final DigestURL url, final int depth) {
         String id = ASCII.String(url.hash());
         File pathToShard = pathToShard(url, depth);
-        String[] list = pathToShard.list();
+        String[] list = pathToShard.exists() && pathToShard.isDirectory() ? pathToShard.list() : null; // may be null if path does not exist
         ArrayList<File> paths = new ArrayList<>();
-        for (String f: list) {
-            if (f.startsWith(id) && f.endsWith(ext)) paths.add(new File(pathToShard, f));
+        if (list != null) {
+            final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
+            for (String f: list) {
+                if (f.startsWith(id) && f.endsWith(ext)) paths.add(new File(pathToShard, f));
+            }
         }
         return paths;
     }
     
     private File pathToShard(final DigestURL url, final int depth) {
         String id = ASCII.String(url.hash());
-        File pathToHostDir = new File(storageLocation, url.getHost() + ":" + url.getPort());
+        File pathToHostDir = new File(storageLocation, url.getHost() + "." + url.getPort());
         File pathToDepthDir = new File(pathToHostDir, depth < 10 ? "0" + depth : Integer.toString(depth));
         File pathToShard = new File(pathToDepthDir, id.substring(0, 2));
         return pathToShard;

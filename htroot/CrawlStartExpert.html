@@ -460,6 +460,28 @@
 	      </dl>
         </fieldset>
 	    #(/agentSelect)#
+        #(snapshotSelect)#<input type="hidden" name="snapshotsMaxDepth" id="snapshotsMaxDepth" value="-1" />::
+        <fieldset>
+          <legend>Snapshot Creation</legend>
+          <dl>
+          <dt><label for="snapshot">Max Depth for Snapshots</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            Snapshots are pictures of web pages that can be created during crawling time. These pictures will be stored as pdf at first into subdirectories
+            of HTCACHE/SNAPSHOTS/ and are computed to jpg from the pdfs later. Snapshot generation can be controlled using a depth parameter; that
+            means a snapshot is only be generated if the crawl depth of a document is smaller or equal to the given number here. If the number is set to -1,
+            no snapshots are generated.
+            </span></span>
+			<input type="text" name="snapshotsMaxDepth" id="snapshotsMaxDepth" size="2" maxlength="2" value="-1" />
+	      </dd>
+          <dt><label for="snapshot">Multiple Snapshot Versions</label></dt>
+          <dd>
+            <input type="radio" name="snapshotsReplaceOld" value="on" checked="checked"/> replace old snapshots with new one&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="snapshotsReplaceOld" value="off" /> add new versions for each crawl
+          </dd>
+	      </dl>
+        </fieldset>
+	    #(/snapshotSelect)#
         <fieldset>
           <legend>Index Administration</legend>
           <dl>

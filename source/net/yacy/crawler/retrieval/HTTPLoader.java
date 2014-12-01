@@ -24,10 +24,12 @@
 
 package net.yacy.crawler.retrieval;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -76,8 +78,11 @@ public final class HTTPLoader {
         Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
         
         // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
-        if (entry.depth() <= profile.loadPreviewMaxdepth() && "html|shtml|php".indexOf(entry.url().getFile()) >= 0) {
-            sb.snapshots.downloadPDFSnapshot(entry.url(), entry.depth(), new Date(), "http://127.0.0.1:" + sb.getConfigInt("port", 8090));
+        boolean depthok = profile != null && entry.depth() <= profile.snapshotMaxdepth();
+        boolean extok = entry.url().getFile().length() == 0 || "html|shtml|php".indexOf(MultiProtocolURL.getFileExtension(entry.url().getFile())) >= 0;
+        if (depthok && extok) {
+            File snapshotFile = sb.snapshots.downloadPDFSnapshot(entry.url(), entry.depth(), new Date(), profile.snapshotReplaceold(), sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null);
+            this.log.info("SNAPSHOT - " + (snapshotFile == null ? "could not generate snapshot for " + entry.url().toNormalform(true) : "wrote " + snapshotFile + " for " + entry.url().toNormalform(true)));
         }
         return doc;
     }
