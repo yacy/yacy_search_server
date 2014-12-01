@@ -39,6 +39,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class Html2Image {
     
@@ -74,16 +75,19 @@ public class Html2Image {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
         String commandline = wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + "--ignore-load-errors " + url + " " + destination.getAbsolutePath();
         try {
+            List<String> message;
             if (!usexvfb) {
-                OS.execSynchronous(commandline);
+                message = OS.execSynchronous(commandline);
                 if (destination.exists()) return true;
                 ConcurrentLog.warn("Html2Image", "failed to create pdf with command: " + commandline);
+                for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
             }
             // if this fails, we should try to wrap the X server with a virtual screen using xvfb, this works on headless servers
             commandline = "xvfb-run -a -s \"-screen 0 640x480x16\" " + commandline;
-            OS.execSynchronous(commandline);
+            message = OS.execSynchronous(commandline);
             if (destination.exists()) {usexvfb = true; return true;}
             ConcurrentLog.warn("Html2Image", "failed to create pdf with command: " + commandline);
+            for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
             return false;
         } catch (IOException e) {
             e.printStackTrace();
