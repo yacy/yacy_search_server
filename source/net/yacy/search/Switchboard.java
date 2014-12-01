@@ -314,6 +314,10 @@ public final class Switchboard extends serverSwitch {
         // set default peer name
         Seed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
 
+        // set timeoutrequests
+        boolean timeoutrequests = getConfigBool("timeoutrequests", true);
+        TimeoutRequest.enable = timeoutrequests;
+        
         // UPnP port mapping
         if ( getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) ) {
             InstantBusyThread.oneTimeJob(UPnP.class, "addPortMappings", 0);

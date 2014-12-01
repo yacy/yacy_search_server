@@ -1266,6 +1266,9 @@ crawler.userAgent.string = yacybot ($$SYSTEM$$) http://yacy.net/bot.html
 crawler.userAgent.minimumdelta = 500
 crawler.userAgent.clienttimeout = 10000
 
+# experiments with timeout requests
+timeoutrequests = true
+
 # interface decorations
 decoration.audio = false
 decoration.grafics.linkstructure = true

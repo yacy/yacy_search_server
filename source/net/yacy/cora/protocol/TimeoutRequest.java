@@ -52,6 +52,8 @@ import jcifs.smb.SmbFile;
  */
 public class TimeoutRequest<E> {
 
+    public static boolean enable = true; // for tests
+    
     private final Callable<E> call;
 
     /**
@@ -68,6 +70,12 @@ public class TimeoutRequest<E> {
      * @throws ExecutionException
      */
     public E call(final long timeout) throws ExecutionException {
+        if (!enable) {try {
+            return this.call.call();
+        } catch (final Exception e1) {
+            throw new ExecutionException(e1);
+        }
+        }
         final ExecutorService service = Executors.newSingleThreadExecutor();
         try {
             final Future<E> taskFuture = service.submit(this.call);
