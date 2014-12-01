@@ -71,12 +71,15 @@ public class Html2Image {
      */
     public static boolean writeWkhtmltopdf(String url, String proxy, File destination) {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
-        
+        String commandline = wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + url + " " + destination.getAbsolutePath();
         try {
-            OS.execSynchronous(wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + url + " " + destination.getAbsolutePath());
-            return destination.exists();
+            OS.execSynchronous(commandline);
+            if (destination.exists()) return true;
+            ConcurrentLog.warn("Html2Image", "failed to create pdf with command: " + commandline);
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
+            ConcurrentLog.warn("Html2Image", "exception while creation of pdf with command: " + commandline);
             return false;
         }
     }
