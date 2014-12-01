@@ -49,10 +49,11 @@ public class Html2Image {
     private final static File convertMac = new File("/opt/local/bin/convert");
     
     // debian
-    // to install: apt-get install wkhtmltopdf imagemagick
+    // to install: apt-get install wkhtmltopdf imagemagick xvfb
     private final static File wkhtmltopdfDebian = new File("/usr/bin/wkhtmltopdf"); // there is no wkhtmltoimage, use convert to create images
     private final static File convertDebian = new File("/usr/bin/convert");
 
+    private static boolean usexvfb = false;
 
     public static boolean wkhtmltopdfAvailable() {
         return wkhtmltopdfMac.exists() || wkhtmltopdfDebian.exists();
@@ -73,8 +74,15 @@ public class Html2Image {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
         String commandline = wkhtmltopdf.getAbsolutePath() + " --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + url + " " + destination.getAbsolutePath();
         try {
+            if (!usexvfb) {
+                OS.execSynchronous(commandline);
+                if (destination.exists()) return true;
+                ConcurrentLog.warn("Html2Image", "failed to create pdf with command: " + commandline);
+            }
+            // if this fails, we should try to wrap the X server with a virtual screen using xvfb, this works on headless servers
+            commandline = "xvfb-run -a -s \"-screen 0 640x480x16\" " + commandline;
             OS.execSynchronous(commandline);
-            if (destination.exists()) return true;
+            if (destination.exists()) {usexvfb = true; return true;}
             ConcurrentLog.warn("Html2Image", "failed to create pdf with command: " + commandline);
             return false;
         } catch (IOException e) {
