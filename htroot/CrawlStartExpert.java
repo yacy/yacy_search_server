@@ -517,6 +517,7 @@ public class CrawlStartExpert {
             sb.getConfigBool("proxyAlwaysFresh", false) &&
              Html2Image.wkhtmltopdfAvailable() && Html2Image.convertAvailable()) {
             prop.put("snapshotSelect", 1);
+            prop.put("snapshotSelect_snapshotsMaxDepth", post == null ? "-1" : post.get("snapshotsMaxDepth", "-1"));
         } else {
             prop.put("snapshotSelect", 0);
         }
