@@ -87,14 +87,14 @@ public class Html2Image {
             if (!usexvfb) {
                 message = OS.execSynchronous(commandline);
                 if (destination.exists()) return true;
-                ConcurrentLog.warn("Html2Image", "failed to create pdf with command: " + commandline);
+                ConcurrentLog.warn("Html2Image", "failed to create pdf " + (proxy == null ? "" : "using proxy " + proxy) + " with command: " + commandline);
                 for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
             }
             // if this fails, we should try to wrap the X server with a virtual screen using xvfb, this works on headless servers
-            commandline = "xvfb-run -a -s \"-screen 0 640x480x16\" " + commandline;
+            commandline = "xvfb-run -a " + commandline;
             message = OS.execSynchronous(commandline);
             if (destination.exists()) {usexvfb = true; return true;}
-            ConcurrentLog.warn("Html2Image", "failed to create pdf with command: " + commandline);
+            ConcurrentLog.warn("Html2Image", "failed to create pdf " + (proxy == null ? "" : "using proxy " + proxy) + " and xvfb with command: " + commandline);
             for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
             return false;
         } catch (IOException e) {
