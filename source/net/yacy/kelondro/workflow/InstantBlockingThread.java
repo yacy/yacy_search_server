@@ -44,6 +44,8 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
     private static final ConcurrentMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
 
     public InstantBlockingThread(final WorkflowProcessor<J> manager) {
+        super();
+        
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
 

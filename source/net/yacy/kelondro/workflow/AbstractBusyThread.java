@@ -45,6 +45,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     private long busySleep = Long.MIN_VALUE;
     
     public AbstractBusyThread(long idleSleep, long busySleep) {
+        super();
         this.idleSleep = idleSleep;
         this.busySleep = busySleep;
     }

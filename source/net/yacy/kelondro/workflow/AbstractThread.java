@@ -48,6 +48,10 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
     private   String monitorURL = null;
     private   long threadBlockTimestamp = System.currentTimeMillis();
 
+    public AbstractThread() {
+        this.setDaemon(true);
+    }
+    
     protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
         // like a socket connect and must renew the timestamp to correct

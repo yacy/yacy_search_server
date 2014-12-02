@@ -32,6 +32,10 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
     private WorkflowProcessor<J> manager = null;
     private final static ConcurrentLog log = new ConcurrentLog("AbstractBlockingThread");
 
+    public AbstractBlockingThread() {
+        super();
+    }
+    
     @Override
     public void setManager(final WorkflowProcessor<J> manager) {
         this.manager = manager;
