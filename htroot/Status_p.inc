@@ -12,6 +12,7 @@
     #(/peerStatistics)#
     <div>Processors: #[processors]#</div>
     <div>Load: #[load]#</div>
+    <div>Threads: #[processesCurrentInclDaemon]#/#[processesCurrentOnlyDaemon]#, peak:#[processesPeak]#, total:#[processesTotal]#</div>
     
     </dd>
     <dt>Protection</dt>

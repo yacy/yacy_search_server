@@ -27,6 +27,8 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.Date;
 import java.util.Set;
 
@@ -322,6 +324,11 @@ public class Status
         prop.put("freeDisk", Formatter.bytesToString(sb.observer.getUsableSpace()));
         prop.put("processors", WorkflowProcessor.availableCPU);
         prop.put("load", Memory.load());
+        ThreadMXBean threadbean = ManagementFactory.getThreadMXBean();
+        prop.put("processesCurrentInclDaemon", threadbean.getThreadCount());
+        prop.put("processesCurrentOnlyDaemon", threadbean.getDaemonThreadCount());
+        prop.put("processesTotal", threadbean.getTotalStartedThreadCount());
+        prop.put("processesPeak", threadbean.getPeakThreadCount());
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
