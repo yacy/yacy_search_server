@@ -28,6 +28,9 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
@@ -106,6 +109,15 @@ public class Threaddump_p {
 
         ThreadDump.bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
 
+
+        ThreadDump.bufferappend(buffer, plain, "");
+        ThreadMXBean threadbean = ManagementFactory.getThreadMXBean();
+        ThreadDump.bufferappend(buffer, plain, "Thread list from ThreadMXBean, " + threadbean.getThreadCount() + " threads:");
+        ThreadInfo[] threadinfo = threadbean.dumpAllThreads(true, true);
+        for (ThreadInfo ti: threadinfo) {
+            ThreadDump.bufferappend(buffer, plain, ti.getThreadName());
+        }
+        
     	prop.put("plain_count", multipleCount);
     	prop.put("plain_content", buffer.toString());
     	prop.put("plain", (plain) ? 1 : 0);
