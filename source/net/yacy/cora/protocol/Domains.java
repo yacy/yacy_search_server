@@ -803,7 +803,7 @@ public class Domains {
         cacheHit_Insert++;
     }
 
-    final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newFixedThreadPool(20));
+    final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool());
 
     /**
      * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,

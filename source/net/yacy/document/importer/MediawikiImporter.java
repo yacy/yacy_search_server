@@ -175,7 +175,7 @@ public class MediawikiImporter extends Thread implements Importer {
             final int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
             final BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
             final BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-            final ExecutorService service = Executors.newFixedThreadPool(threads + 1);
+            final ExecutorService service = Executors.newCachedThreadPool();
             final convertConsumer[] consumers = new convertConsumer[threads];
             final Future<?>[] consumerResults = (Future<?>[]) Array.newInstance(Future.class, threads);
             for (int i = 0; i < threads; i++) {
@@ -325,7 +325,7 @@ public class MediawikiImporter extends Thread implements Importer {
         final PositionAwareReader in = new PositionAwareReader(dumpFile);
         final indexProducer producer = new indexProducer(100, idxFromMediawikiXML(dumpFile));
         final wikiConsumer consumer = new wikiConsumer(100, producer);
-        final ExecutorService service = Executors.newFixedThreadPool(2);
+        final ExecutorService service = Executors.newCachedThreadPool();
         final Future<Integer> producerResult = service.submit(consumer);
         final Future<Integer> consumerResult = service.submit(producer);
         service.shutdown();

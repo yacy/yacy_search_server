@@ -117,7 +117,7 @@ public class HTTPClient {
 	private long upbytes = 0L;
 	private String host = null;
 	private final long timeout;
-	private static ExecutorService executor = Executors.newFixedThreadPool(200);
+	private static ExecutorService executor = Executors.newCachedThreadPool();
 
     public HTTPClient(final ClientIdentification.Agent agent) {
         super();
