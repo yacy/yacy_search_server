@@ -34,6 +34,8 @@ import java.util.TreeSet;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.kelondro.io.CharBuffer;
 
+@Deprecated
+// TODO: delete candidate, because not in use, (noticed 2014-12-02)
 public class ContentTransformer extends AbstractTransformer implements Transformer {
 
     // statics: for initialization of the HTMLFilterAbstractTransformer

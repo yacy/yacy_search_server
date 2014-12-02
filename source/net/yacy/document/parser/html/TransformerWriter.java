@@ -542,30 +542,4 @@ public final class TransformerWriter extends Writer {
         return !this.binaryUnsuspect;
     }
 
-    public static void main(final String[] args) {
-        // takes one argument: a file name
-        if (args.length != 1) return;
-        // TODO: this does not work at the moment
-        System.out.println("this does not work at the moment");
-        System.exit(0);
-        final char[] buffer = new char[512];
-        try {
-            final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost:8090"), 1000);
-            final Transformer transformer = new ContentTransformer();
-            final Reader is = new FileReader(args[0]);
-            final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
-            final Writer os = new TransformerWriter(fos, UTF8.charset, scraper, transformer, false);
-            int i;
-            while ((i = is.read(buffer)) > 0) os.write(buffer, 0, i);
-            os.close();
-            fos.close();
-            is.close();
-            scraper.print();
-        } catch (final MalformedURLException e) {
-            ConcurrentLog.logException(e);
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
-    }
-
 }

@@ -79,14 +79,11 @@ import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.TextParser;
-import net.yacy.document.parser.html.ContentTransformer;
-import net.yacy.document.parser.html.Transformer;
 import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 
 public final class HTTPDProxyHandler {
@@ -103,8 +100,6 @@ public final class HTTPDProxyHandler {
     private static boolean redirectorEnabled = false;
     private static PrintWriter redirectorWriter = null;
     private static BufferedReader redirectorReader = null;
-
-    private static Transformer transformer = null;
 
     //private Properties connectionProperties = null;
     // creating a logger
@@ -167,10 +162,6 @@ public final class HTTPDProxyHandler {
         } catch (final Exception e) {
             log.severe("Unable to configure proxy access logging.",e);
         }
-
-        // load a transformer
-        transformer = new ContentTransformer();
-        transformer.init(new File(sb.getAppPath(), sb.getConfig(SwitchboardConstants.LIST_BLUE, "")).toString());
 
         // load the yellow-list
         final String f = sb.getConfig("proxyYellowList", null);

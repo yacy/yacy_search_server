@@ -26,6 +26,8 @@ package net.yacy.document.parser.html;
 
 import java.util.TreeSet;
 
+@Deprecated
+// TODO: delete candidate, because not in use, (noticed 2014-12-02)
 public abstract class AbstractTransformer implements Transformer {
 
     private TreeSet<String> tags0;
