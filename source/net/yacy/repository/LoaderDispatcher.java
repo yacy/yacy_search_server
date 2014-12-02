@@ -61,6 +61,7 @@ import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.parser.htmlParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -212,7 +213,9 @@ public final class LoaderDispatcher {
         if (protocol.equals("http") || protocol.equals("https")) {
             // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
             boolean depthok = crawlProfile != null && request.depth() <= crawlProfile.snapshotMaxdepth();
-            boolean extok = request.url().getFile().length() == 0 || "html|shtml|php".indexOf(MultiProtocolURL.getFileExtension(request.url().getFile())) >= 0;
+            String file = request.url().getFile();
+            String ext = MultiProtocolURL.getFileExtension(file).toLowerCase();
+            boolean extok = ext.length() == 0 || file.length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext);
             if (depthok && extok) {
                 File snapshotFile = sb.snapshots.downloadPDFSnapshot(request.url(), request.depth(), new Date(), crawlProfile.snapshotReplaceold(), sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null);
                 log.info("SNAPSHOT - " + (snapshotFile == null ? "could not generate snapshot for " + request.url().toNormalform(true) : "wrote " + snapshotFile + " for " + request.url().toNormalform(true)));
