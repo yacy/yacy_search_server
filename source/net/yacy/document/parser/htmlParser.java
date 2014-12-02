@@ -33,7 +33,9 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
@@ -56,22 +58,21 @@ public class htmlParser extends AbstractParser implements Parser {
 
     private static final int maxLinks = 10000;
 
+    public final static String[] htmlExtensions = new String[]{
+        "htm","html","phtml","shtml","shtm","stm","xhtml","phtml","phtm",
+        "tpl","php","php2","php3","php4","php5","cfm","asp","aspx","tex","txt"
+        }; 
+    
+    public final static Set<String> htmlExtensionsSet;
+    
+    static {
+        htmlExtensionsSet = new HashSet<>(htmlExtensions.length);
+        for (String ext: htmlExtensions) htmlExtensionsSet.add(ext);
+    }
+    
     public htmlParser() {
         super("Streaming HTML Parser");
-        this.SUPPORTED_EXTENSIONS.add("htm");
-        this.SUPPORTED_EXTENSIONS.add("html");
-        this.SUPPORTED_EXTENSIONS.add("phtml");
-        this.SUPPORTED_EXTENSIONS.add("shtml");
-        this.SUPPORTED_EXTENSIONS.add("xhtml");
-        this.SUPPORTED_EXTENSIONS.add("php");
-        this.SUPPORTED_EXTENSIONS.add("php3");
-        this.SUPPORTED_EXTENSIONS.add("php4");
-        this.SUPPORTED_EXTENSIONS.add("php5");
-        this.SUPPORTED_EXTENSIONS.add("cfm");
-        this.SUPPORTED_EXTENSIONS.add("asp");
-        this.SUPPORTED_EXTENSIONS.add("aspx");
-        this.SUPPORTED_EXTENSIONS.add("tex");
-        this.SUPPORTED_EXTENSIONS.add("txt");
+        this.SUPPORTED_EXTENSIONS.addAll(htmlExtensionsSet);
         this.SUPPORTED_MIME_TYPES.add("text/html");
         this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
         this.SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
