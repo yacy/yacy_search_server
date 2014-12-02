@@ -70,14 +70,14 @@ public class Snapshots {
      * @param proxy - a string of the form 'http://<host>:<port>
      * @return
      */
-    public File downloadPDFSnapshot(final DigestURL url, final int depth, final Date date, boolean replaceOld, String proxy) {
+    public File downloadPDFSnapshot(final DigestURL url, final int depth, final Date date, boolean replaceOld, String proxy, String userAgent) {
         Collection<File> oldPaths = findPaths(url, depth);
         if (replaceOld) {
             for (File oldPath: oldPaths) oldPath.delete();
         }
         File path = definePath(url, "pdf", depth, date);
         path.getParentFile().mkdirs();
-        boolean success = Html2Image.writeWkhtmltopdf(url.toNormalform(true), proxy, path);
+        boolean success = Html2Image.writeWkhtmltopdf(url.toNormalform(true), proxy, userAgent, path);
         return success ? path : null;
     }
     

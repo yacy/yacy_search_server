@@ -217,7 +217,7 @@ public final class LoaderDispatcher {
             String ext = MultiProtocolURL.getFileExtension(file).toLowerCase();
             boolean extok = ext.length() == 0 || file.length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext);
             if (depthok && extok) {
-                File snapshotFile = sb.snapshots.downloadPDFSnapshot(request.url(), request.depth(), new Date(), crawlProfile.snapshotReplaceold(), sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null);
+                File snapshotFile = sb.snapshots.downloadPDFSnapshot(request.url(), request.depth(), new Date(), crawlProfile.snapshotReplaceold(), sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, agent.userAgent);
                 log.info("SNAPSHOT - " + (snapshotFile == null ? "could not generate snapshot for " + request.url().toNormalform(true) : "wrote " + snapshotFile + " for " + request.url().toNormalform(true)));
             } else {
                 //if (!depthok) log.warn("SNAPSHOT: depth not ok, " + (crawlProfile == null ? "profile = null" : "entry.depth() = " + request.depth() + ", profile.snapshotMaxdepth() = " + crawlProfile.snapshotMaxdepth()));

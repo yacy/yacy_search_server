@@ -71,17 +71,22 @@ public class Html2Image {
      * @param destination
      * @return
      */
-    public static boolean writeWkhtmltopdf(String url, String proxy, File destination) {
-        boolean success = writeWkhtmltopdfInternal(url, proxy, destination);
+    public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, File destination) {
+        boolean success = writeWkhtmltopdfInternal(url, proxy, destination, null, false);
         if (success) return true;
         if (proxy == null) return false;
         ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
-        return writeWkhtmltopdfInternal(url, null, destination);
+        return writeWkhtmltopdfInternal(url, null, destination, userAgent, true);
     }
     
-    private static boolean writeWkhtmltopdfInternal(String url, String proxy, File destination) {
+    private static boolean writeWkhtmltopdfInternal(String url, String proxy, File destination, String userAgent, boolean ignoreErrors) {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
-        String commandline = wkhtmltopdf.getAbsolutePath() + " -q --title " + url + (proxy == null ? " " : " --proxy " + proxy + " ") + (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") + url + " " + destination.getAbsolutePath();
+        String commandline =
+                wkhtmltopdf.getAbsolutePath() + " -q --title " + url +
+                (userAgent == null ? "" : "--custom-header 'User-Agent' '" + userAgent + "' --custom-header-propagation") + 
+                (proxy == null ? " " : " --proxy " + proxy + " ") +
+                (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") +
+                url + " " + destination.getAbsolutePath();
         try {
             List<String> message;
             if (!usexvfb) {
