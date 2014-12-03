@@ -46,8 +46,10 @@ public class Html2Image {
     // Mac
     // to install wkhtmltopdf, download wkhtmltox-0.12.1_osx-cocoa-x86-64.pkg from http://wkhtmltopdf.org/downloads.html
     // to install imagemagick, download from http://cactuslab.com/imagemagick/assets/ImageMagick-6.8.9-9.pkg.zip
+    // the convert command from imagemagick needs ghostscript, if not present on older macs, download a version of gs from http://pages.uoregon.edu/koch/
     private final static File wkhtmltopdfMac = new File("/usr/local/bin/wkhtmltopdf");
-    private final static File convertMac = new File("/opt/local/bin/convert");
+    private final static File convertMac1 = new File("/opt/local/bin/convert");
+    private final static File convertMac2 = new File("/opt/ImageMagick/bin/convert");
     
     // debian
     // to install: apt-get install wkhtmltopdf imagemagick xvfb
@@ -61,7 +63,7 @@ public class Html2Image {
     }
     
     public static boolean convertAvailable() {
-        return convertMac.exists() || convertDebian.exists();
+        return convertMac1.exists() || convertMac2.exists() || convertDebian.exists();
     }
     
     /**
@@ -120,12 +122,13 @@ public class Html2Image {
      * @return
      */
     public static boolean pdf2image(File pdf, File image, int width, int height, int density, int quality) {
-        final File convert = convertMac.exists() ? convertMac : convertDebian;
+        final File convert = convertMac1.exists() ? convertMac1 : convertMac2.exists() ? convertMac2 : convertDebian;
         
         try {
             // i.e. convert -density 300 -trim yacy.pdf[0] -trim -resize 1024x -crop x1024+0+0 -quality 75% yacy-convert-300.jpg
             // note: both -trim are necessary, otherwise it is trimmed only on one side. The [0] selects the first page of the pdf
-            OS.execSynchronous(convert.getAbsolutePath() + " -density " + density + " -trim " + pdf.getAbsolutePath() + "[0] -trim -resize " + width + "x -crop x" + height + "+0+0 -quality " + quality + "% " + image.getAbsolutePath());
+            String command = convert.getAbsolutePath() + " -density " + density + " -trim " + pdf.getAbsolutePath() + "[0] -trim -resize " + width + "x -crop x" + height + "+0+0 -quality " + quality + "% " + image.getAbsolutePath();
+            OS.execSynchronous(command);
             return image.exists();
         } catch (IOException e) {
             e.printStackTrace();
