@@ -71,7 +71,7 @@ public class Snapshots {
      * @return
      */
     public File downloadPDFSnapshot(final DigestURL url, final int depth, final Date date, boolean replaceOld, String proxy, String userAgent) {
-        Collection<File> oldPaths = findPaths(url, depth);
+        Collection<File> oldPaths = findPaths(url, depth, "pdf");
         if (replaceOld) {
             for (File oldPath: oldPaths) oldPath.delete();
         }
@@ -126,9 +126,9 @@ public class Snapshots {
      * @param ext
      * @return a set of files for snapshots of the url
      */
-    public Collection<File> findPaths(final DigestURL url) {
+    public Collection<File> findPaths(final DigestURL url, final String ext) {
         for (int i = 0; i < 100; i++) {
-            Collection<File> paths = findPaths(url, i);
+            Collection<File> paths = findPaths(url, i, ext);
             if (paths.size() > 0) return paths;
         }
         return new ArrayList<>(0);
@@ -142,13 +142,12 @@ public class Snapshots {
      * @param depth
      * @return a set of files for snapshots of the url
      */
-    public Collection<File> findPaths(final DigestURL url, final int depth) {
+    public Collection<File> findPaths(final DigestURL url, final int depth, final String ext) {
         String id = ASCII.String(url.hash());
         File pathToShard = pathToShard(url, depth);
         String[] list = pathToShard.exists() && pathToShard.isDirectory() ? pathToShard.list() : null; // may be null if path does not exist
         ArrayList<File> paths = new ArrayList<>();
         if (list != null) {
-            final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
             for (String f: list) {
                 if (f.startsWith(id) && f.endsWith(ext)) paths.add(new File(pathToShard, f));
             }

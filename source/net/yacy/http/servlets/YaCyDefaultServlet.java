@@ -853,6 +853,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 return;
             }
 
+            if (tmp instanceof InputStream) {
+                final InputStream is = (InputStream) tmp;
+                final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+                response.setContentType(mimeType);
+                response.setStatus(HttpServletResponse.SC_OK);
+                byte[] buffer = new byte[4096];
+                int l, size = 0;
+                while ((l = is.read(buffer)) > 0) {response.getOutputStream().write(buffer, 0, l); size += l;}
+                response.setContentLength(size);
+                is.close();
+                return;
+            }
+
             servletProperties templatePatterns;
             if (tmp == null) {
                 // if no args given, then tp will be an empty Hashtable object (not null)

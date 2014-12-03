@@ -72,7 +72,7 @@ public class Html2Image {
      * @return
      */
     public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, File destination) {
-        boolean success = writeWkhtmltopdfInternal(url, proxy, destination, null, false);
+        boolean success = writeWkhtmltopdfInternal(url, proxy, destination, null, true);
         if (success) return true;
         if (proxy == null) return false;
         ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
