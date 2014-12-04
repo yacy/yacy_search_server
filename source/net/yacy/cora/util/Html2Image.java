@@ -30,10 +30,15 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 
+import net.yacy.document.ImageParser;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.MediaTracker;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -128,8 +133,44 @@ public class Html2Image {
             // i.e. convert -density 300 -trim yacy.pdf[0] -trim -resize 1024x -crop x1024+0+0 -quality 75% yacy-convert-300.jpg
             // note: both -trim are necessary, otherwise it is trimmed only on one side. The [0] selects the first page of the pdf
             String command = convert.getAbsolutePath() + " -density " + density + " -trim " + pdf.getAbsolutePath() + "[0] -trim -resize " + width + "x -crop x" + height + "+0+0 -quality " + quality + "% " + image.getAbsolutePath();
-            OS.execSynchronous(command);
-            return image.exists();
+            List<String> message = OS.execSynchronous(command);
+            if (image.exists()) return true;
+            ConcurrentLog.warn("Html2Image", "failed to create image with command: " + command);
+            for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
+            
+            // another try for mac: use Image Events using AppleScript in osacript commands...
+            // the following command overwrites a pdf with an png, so we must make a copy first
+            if (!OS.isMacArchitecture) return false;
+            File pngFile = new File(pdf.getAbsolutePath() + ".tmp.pdf");
+            org.apache.commons.io.FileUtils.copyFile(pdf, pngFile);
+            String[] commandx = {"osascript",
+                    "-e", "set ImgFile to \"" + pngFile.getAbsolutePath() + "\"",
+                    "-e", "tell application \"Image Events\"",
+                    "-e", "set Img to open file ImgFile",
+                    "-e", "save Img as PNG",
+                    "-e", "end tell"};
+            //ConcurrentLog.warn("Html2Image", "failed to create image with command: " + commandx);
+            message = OS.execSynchronous(commandx);
+            for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
+            // now we must read and convert this file to a jpg with the target size 1024x1024
+            try {
+                File newPngFile = new File(pngFile.getAbsolutePath() + ".png");
+                pngFile.renameTo(newPngFile);
+                Image img = ImageParser.parse(pngFile.getAbsolutePath(), FileUtils.read(newPngFile));
+                final Image scaled = img.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
+                final MediaTracker mediaTracker = new MediaTracker(new Container());
+                mediaTracker.addImage(scaled, 0);
+                try {mediaTracker.waitForID(0);} catch (final InterruptedException e) {}
+                // finally write the image
+                final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                bi.createGraphics().drawImage(scaled, 0, 0, width, height, null);
+                ImageIO.write(bi, "jpg", image);
+                newPngFile.delete();
+                return image.exists();
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
+                return false;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return false;

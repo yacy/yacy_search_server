@@ -196,19 +196,31 @@ public final class OS {
 		FileUtils.deletedelete(starterFile);
 	}
 
-	public static List<String> execSynchronous(final String command) throws IOException {
-		// runs a unix/linux command and returns output as Vector of Strings
-		// this method blocks until the command is executed
-		final Process p = Runtime.getRuntime().exec(command);
-		final BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		String text;
-		final List<String> output = new ArrayList<String>();
-		while ((text = in.readLine()) != null) {
-			output.add(text);
-		}
-		in.close();
-		return output;
-	}
+    public static List<String> execSynchronous(final String command) throws IOException {
+        // runs a unix/linux command and returns output as Vector of Strings
+        // this method blocks until the command is executed
+        final Process p = Runtime.getRuntime().exec(command);
+        return execSynchronousProcess(p);
+    }
+    
+    public static List<String> execSynchronous(final String[] command) throws IOException {
+        // runs a unix/linux command and returns output as Vector of Strings
+        // this method blocks until the command is executed
+        final Process p = Runtime.getRuntime().exec(command);
+        return execSynchronousProcess(p);
+    }
+
+    private static List<String> execSynchronousProcess(Process p) throws IOException {
+        String line;
+        BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        final List<String> output = new ArrayList<String>();
+        while ((line = in.readLine()) != null) output.add(line);
+        in.close();
+        in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        while ((line = in.readLine()) != null) output.add(line);
+        in.close();
+        return output;
+    }
 
 	public static void main(final String[] args) {
         try {
