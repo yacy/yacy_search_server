@@ -65,9 +65,9 @@ public class Request extends WorkflowJob
         "Cardinal depth-2 {b256}, "
         + // the prefetch depth so far, starts at 0
         "Cardinal parentbr-3 {b256}, "
-        + // number of anchors of the parent
+        + // number of anchors of the parent (NOT USED)
         "Cardinal forkfactor-4 {b256}, "
-        + // sum of anchors of all ancestors
+        + // sum of anchors of all ancestors (NOT USED)
         "byte[] flags-4, "
         + // flags
         "Cardinal handle-4 {b256}, "
@@ -89,8 +89,6 @@ public class Request extends WorkflowJob
     private long appdate; // the time when the url was first time appeared.
     private String profileHandle; // the name of the fetch profile
     private int depth; // the prefetch depth so far, starts at 0
-    private int anchors; // number of anchors of the parent
-    private int forkfactor; // sum of anchors of all ancestors
     private Bitfield flags;
     private String statusMessage;
     private int initialHash; // to provide a object hash that does not change even if the url changes because of redirection
@@ -104,8 +102,6 @@ public class Request extends WorkflowJob
         this.appdate = 0;
         this.profileHandle = null;
         this.depth = 0;
-        this.anchors = 0;
-        this.forkfactor = 0;
         this.flags = null;
         this.statusMessage = null;
         this.initialHash = 0;
@@ -154,8 +150,6 @@ public class Request extends WorkflowJob
         this.appdate = (appdate == null) ? 0 : appdate.getTime();
         this.profileHandle = profileHandle; // must not be null
         this.depth = depth;
-        this.anchors = anchors;
-        this.forkfactor = forkfactor;
         this.flags = new Bitfield(rowdef.width(10));
         this.statusMessage = "loaded(args)";
         this.initialHash = url.hashCode();
@@ -182,8 +176,8 @@ public class Request extends WorkflowJob
             this.appdate = entry.getColLong(5);
             this.profileHandle = (entry.empty(6)) ? null : entry.getColASCII(6).trim();
             this.depth = (int) entry.getColLong(7);
-            this.anchors = (int) entry.getColLong(8);
-            this.forkfactor = (int) entry.getColLong(9);
+            //this.anchors = (int) entry.getColLong(8);
+            //this.forkfactor = (int) entry.getColLong(9);
             this.flags = new Bitfield(entry.getColBytes(10, true));
             //this.loaddate = entry.getColLong(12);
             //this.lastmodified = entry.getColLong(13);
@@ -227,8 +221,8 @@ public class Request extends WorkflowJob
                 appdatestr,
                 (this.profileHandle == null) ? null : ASCII.getBytes(this.profileHandle),
                 NaturalOrder.encodeLong(this.depth, rowdef.width(7)),
-                NaturalOrder.encodeLong(this.anchors, rowdef.width(8)),
-                NaturalOrder.encodeLong(this.forkfactor, rowdef.width(9)),
+                NaturalOrder.encodeLong(0, rowdef.width(8)), // anchors
+                NaturalOrder.encodeLong(0, rowdef.width(9)), // forkfactor
                 this.flags.bytes(),
                 NaturalOrder.encodeLong(0, rowdef.width(11)),
                 loaddatestr,
