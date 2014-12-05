@@ -513,9 +513,11 @@ public class CrawlStartExpert {
 
 
         // ---------- Snapshot generation
+        boolean wkhtmltopdfAvailable = Html2Image.wkhtmltopdfAvailable();
+        boolean convertAvailable = Html2Image.convertAvailable();
         if (sb.getConfigBool("isTransparentProxy", false) &&
             sb.getConfigBool("proxyAlwaysFresh", false) &&
-             Html2Image.wkhtmltopdfAvailable() && Html2Image.convertAvailable()) {
+             wkhtmltopdfAvailable && convertAvailable) {
             prop.put("snapshotSelect", 1);
             prop.put("snapshotSelect_snapshotsMaxDepth", post == null ? "-1" : post.get("snapshotsMaxDepth", "-1"));
         } else {
