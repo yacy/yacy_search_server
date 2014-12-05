@@ -1941,8 +1941,6 @@ public final class Switchboard extends serverSwitch {
                     "",
                     surrogate.getDate(),
                     this.crawler.defaultSurrogateProfile.handle(),
-                    0,
-                    0,
                     0);
             response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false, null);
             final IndexingQueueEntry queueEntry =
@@ -2673,9 +2671,7 @@ public final class Switchboard extends serverSwitch {
                         nextEntry.getValue(),
                         new Date(),
                         response.profile().handle(),
-                        nextdepth,
-                        0,
-                        0));
+                        nextdepth));
                 } catch (final MalformedURLException e ) {
                     ConcurrentLog.logException(e);
                 }
@@ -3078,8 +3074,6 @@ public final class Switchboard extends serverSwitch {
                 "CRAWLING-ROOT",
                 new Date(),
                 profile.handle(),
-                0,
-                0,
                 0
                 ));
         

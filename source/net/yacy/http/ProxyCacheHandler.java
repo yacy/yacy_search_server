@@ -74,8 +74,6 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
                         "",
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
-                        0,
-                        0,
                         0);
 
                 final Response cachedResponse = new Response(

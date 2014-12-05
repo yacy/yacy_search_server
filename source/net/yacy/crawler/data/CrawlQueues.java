@@ -530,8 +530,6 @@ public class CrawlQueues {
                         item.getDescriptions().size() > 0 ? item.getDescriptions().get(0) : "",
                         loaddate,
                         this.sb.crawler.defaultRemoteProfile.handle(),
-                        0,
-                        0,
                         0
                 ));
             } else {

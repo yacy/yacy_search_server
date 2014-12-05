@@ -108,8 +108,6 @@ public class SitemapImporter extends Thread {
                 entry.url(),
                 entry.lastmod(new Date()),
                 this.crawlingProfile.handle(),
-                0,
-                0,
                 0
                 ));
         logger.info("New URL '" + entry.url() + "' added for loading.");

@@ -174,8 +174,6 @@ public class QuickCrawlLink_p {
                     (title==null)?"CRAWLING-ROOT":title,
                     new Date(),
                     pe.handle(),
-                    0,
-                    0,
                     0
                 ));
 

@@ -180,8 +180,6 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                     "", 
                     responseHeaderLegacy.lastModified(),
                     sb.crawler.defaultProxyProfile.handle(),
-                    0, 
-                    0, 
                     0); //sizeBeforeDelete < 0 ? 0 : sizeBeforeDelete);
             final Response yacyResponse = new Response(
                     yacyRequest,

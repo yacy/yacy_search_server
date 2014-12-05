@@ -197,7 +197,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
         null,
         "CRAWLING-ROOT",
         new Date(),
-        pe.handle(), 0, 0, 0
+        pe.handle(), 0
         ));
 	}
 }

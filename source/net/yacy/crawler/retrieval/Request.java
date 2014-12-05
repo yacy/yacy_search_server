@@ -119,7 +119,7 @@ public class Request extends WorkflowJob
      * @param referrerhash
      */
     public Request(final DigestURL url, final byte[] referrerhash) {
-        this(null, url, referrerhash, null, null, null, 0, 0, 0);
+        this(null, url, referrerhash, null, null, null, 0);
     }
 
     /**
@@ -132,8 +132,6 @@ public class Request extends WorkflowJob
      * @param appdate the time when the url was first time appeared
      * @param profileHandle the name of the prefetch profile. This must not be null!
      * @param depth the crawling depth of the entry
-     * @param anchors number of anchors of the parent
-     * @param forkfactor sum of anchors of all ancestors
      */
     public Request(
         final byte[] initiator,
@@ -142,9 +140,7 @@ public class Request extends WorkflowJob
         final String name,
         final Date appdate,
         final String profileHandle,
-        final int depth,
-        final int anchors,
-        final int forkfactor) {
+        final int depth) {
         // create new entry and store it into database
         assert url != null;
         assert profileHandle == null || profileHandle.length() == Word.commonHashLength : profileHandle

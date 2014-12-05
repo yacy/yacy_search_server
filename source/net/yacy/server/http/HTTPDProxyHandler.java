@@ -357,8 +357,6 @@ public final class HTTPDProxyHandler {
                         "",
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
-                        0,
-                        0,
                         0);
                 final Response response = new Response(
                 		request,
@@ -474,8 +472,6 @@ public final class HTTPDProxyHandler {
                         "",
                         responseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
-                        0,
-                        0,
                         0);
 
 

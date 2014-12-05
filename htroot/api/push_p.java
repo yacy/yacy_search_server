@@ -102,8 +102,6 @@ public class push_p {
                         "",               // the name of the document to crawl
                         new Date(),       // current date
                         profile.handle(), // the name of the prefetch profile. This must not be null!
-                        0,                // depth the crawling depth of the entry
-                        0,                // anchors number of anchors of the parent
                         0);               // forkfactor sum of anchors of all ancestors
                 Response response = new Response(
                         request,

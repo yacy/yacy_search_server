@@ -209,8 +209,6 @@ public final class CrawlStacker {
                         url.getNameProperty(),
                         new Date(),
                         profileHandle,
-                        0,
-                        0,
                         0
                         ));
             }
@@ -250,8 +248,6 @@ public final class CrawlStacker {
                                 MultiProtocolURL.unescape(entry.name),
                                 entry.date,
                                 profileHandle,
-                                0,
-                                0,
                                 0));
                     }
                 } catch (final IOException e1) {
@@ -276,8 +272,6 @@ public final class CrawlStacker {
                 "CRAWLING-ROOT",
                 new Date(),
                 pe.handle(),
-                0,
-                0,
                 0));
     }
 

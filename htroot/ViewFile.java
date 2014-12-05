@@ -178,7 +178,8 @@ public class ViewFile {
         Response response = null;
         try {
             ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null, agent);
+            // use sb.loader.requst( , , global=true) to use crawlprofile to allow index update
+            response = sb.loader.load(sb.loader.request(url, true, true), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null, agent);
         } catch (final IOException e) {
             prop.put("error", "4");
             prop.put("error_errorText", "error loading resource: " + e.getMessage());
@@ -373,6 +374,10 @@ public class ViewFile {
                 prop.put("showSnippet_headline", titlestr);
                 prop.put("showSnippet_teasertext", desc);
                 prop.put("showSnippet", 1);
+            }
+            // update index with parsed resouce if index entry is older
+            if (urlEntry.loaddate().before(response.lastModified())) {
+                Switchboard.getSwitchboard().toIndexer(response);
             }
             if (document != null) document.close();
         }
