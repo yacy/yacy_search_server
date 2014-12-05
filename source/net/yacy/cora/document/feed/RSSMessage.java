@@ -273,7 +273,19 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public String toString() {
-        return this.map.toString();
+        return this.toString(true);
+    }
+    
+    public String toString(boolean withItemTag) {
+        StringBuilder sb = new StringBuilder();
+        if (withItemTag) sb.append("<item>\n");
+        if (this.map.containsKey(Token.title.name())) sb.append("<title>").append(this.map.get(Token.title.name())).append("</title>\n");
+        if (this.map.containsKey(Token.link.name())) sb.append("<link>").append(this.map.get(Token.link.name())).append("</link>\n");
+        if (this.map.containsKey(Token.description.name())) sb.append("<description>").append(this.map.get(Token.description.name())).append("</description>\n");
+        if (this.map.containsKey(Token.pubDate.name())) sb.append("<pubDate>").append(this.map.get(Token.pubDate.name())).append("</pubDate>\n");
+        if (this.map.containsKey(Token.guid.name())) sb.append("<guid isPermaLink=\"false\">").append(this.map.get(Token.guid.name())).append("</guid>\n");
+        if (withItemTag) sb.append("</item>\n");
+        return sb.toString();
     }
 
     @Override

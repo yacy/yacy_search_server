@@ -36,10 +36,33 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public static final int DEFAULT_MAXSIZE = 10000;
 
     // class variables
-    private RSSMessage channel;
+    private RSSMessage channel = null;
     private final Map<String, RSSMessage> messages; // a guid:Item map
     private final int maxsize;
 
+    
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<rss version=\"2.0\"\n");
+        sb.append("  xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\"\n");
+        sb.append("  xmlns:atom=\"http://www.w3.org/2005/Atom\"\n");
+        sb.append(">\n");
+        sb.append("<channel>\n");
+        if (this.channel != null) sb.append(this.channel.toString(false));
+        sb.append("<opensearch:startIndex>0</opensearch:startIndex>\n");
+        sb.append("<opensearch:itemsPerPage>" + this.size() + "</opensearch:itemsPerPage>\n");
+        sb.append("<opensearch:totalResults>" + this.size() + "</opensearch:totalResults>\n");
+        for (RSSMessage item: messages.values()) {
+            sb.append(item.toString());
+        }
+        sb.append("</channel>\n");
+        sb.append("</rss>\n");
+        return sb.toString();
+    }
+    
     public RSSFeed(final int maxsize) {
         this.messages = Collections.synchronizedMap(new LinkedHashMap<String, RSSMessage>());
         this.channel = null;
