@@ -57,19 +57,18 @@ public class snapshot {
     public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
-        if (post == null) return null;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final String ext = header.get("EXT", "");
         
         if (ext.equals("rss")) {
             // create a report about the content of the snapshot directory
             if (!authenticated) return null;
-            int maxcount = post.getInt("maxcount", 10);
-            int depthx = post.getInt("depth", -1);
+            int maxcount = post == null ? 10 : post.getInt("maxcount", 10);
+            int depthx = post == null ? -1 : post.getInt("depth", -1);
             Integer depth = depthx == -1 ? null : depthx;
-            String orderx = post.get("order", "ANY");
+            String orderx = post == null ? "ANY" : post.get("order", "ANY");
             Snapshots.Order order = Snapshots.Order.valueOf(orderx);
-            String host = post.get("host");
+            String host = post == null ? null : post.get("host");
             Map<String, Date> iddate = sb.snapshots.select(host, depth, order, maxcount);
             // now select the URL from the index for these ids in iddate and make an RSS feed
             RSSFeed rssfeed = new RSSFeed(Integer.MAX_VALUE);
@@ -77,6 +76,7 @@ public class snapshot {
             for (Map.Entry<String, Date> e: iddate.entrySet()) {
                 try {
                     DigestURL u = sb.index.fulltext().getURL(e.getKey());
+                    if (u == null) continue;
                     RSSMessage message = new RSSMessage(u.toNormalform(true), "", u, e.getKey());
                     message.setPubDate(e.getValue());
                     rssfeed.addMessage(message);
@@ -87,7 +87,8 @@ public class snapshot {
             byte[] rssBinary = UTF8.getBytes(rssfeed.toString());
             return new ByteArrayInputStream(rssBinary);
         }
-        
+
+        if (post == null) return null;
         final boolean pdf = ext.equals("pdf");
         if (pdf && !authenticated) return null;
         final boolean pngjpg = ext.equals("png") || ext.equals("jpg");
