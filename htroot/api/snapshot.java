@@ -27,13 +27,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;
+import net.yacy.crawler.data.Snapshots;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
@@ -52,10 +57,39 @@ public class snapshot {
     public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
-        if (post == null) return null;
-        final String ext = header.get("EXT", "");
-        final boolean pdf = ext.equals("pdf");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final String ext = header.get("EXT", "");
+        
+        if (ext.equals("rss")) {
+            // create a report about the content of the snapshot directory
+            if (!authenticated) return null;
+            int maxcount = post == null ? 10 : post.getInt("maxcount", 10);
+            int depthx = post == null ? -1 : post.getInt("depth", -1);
+            Integer depth = depthx == -1 ? null : depthx;
+            String orderx = post == null ? "ANY" : post.get("order", "ANY");
+            Snapshots.Order order = Snapshots.Order.valueOf(orderx);
+            String host = post == null ? null : post.get("host");
+            Map<String, Date> iddate = sb.snapshots.select(host, depth, order, maxcount);
+            // now select the URL from the index for these ids in iddate and make an RSS feed
+            RSSFeed rssfeed = new RSSFeed(Integer.MAX_VALUE);
+            rssfeed.setChannel(new RSSMessage("Snapshot list for host = " + host + ", depth = " + depth + ", order = " + order + ", maxcount = " + maxcount, "", ""));
+            for (Map.Entry<String, Date> e: iddate.entrySet()) {
+                try {
+                    DigestURL u = sb.index.fulltext().getURL(e.getKey());
+                    if (u == null) continue;
+                    RSSMessage message = new RSSMessage(u.toNormalform(true), "", u, e.getKey());
+                    message.setPubDate(e.getValue());
+                    rssfeed.addMessage(message);
+                } catch (IOException ee) {
+                    ConcurrentLog.logException(ee);
+                }
+            }
+            byte[] rssBinary = UTF8.getBytes(rssfeed.toString());
+            return new ByteArrayInputStream(rssBinary);
+        }
+
+        if (post == null) return null;
+        final boolean pdf = ext.equals("pdf");
         if (pdf && !authenticated) return null;
         final boolean pngjpg = ext.equals("png") || ext.equals("jpg");
         String urlhash = post.get("urlhash", "");
@@ -131,6 +165,7 @@ public class snapshot {
             }
 
         }
+        
         
         return null;
     }
