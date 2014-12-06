@@ -698,8 +698,10 @@ public final class Switchboard extends serverSwitch {
         final long maxCacheSize =
             1024L * 1024L * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
         Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize);
-        this.snapshots = new Snapshots(new File(this.htCachePath, "SNAPSHOTS"));
-        
+        final File snapshotdir = new File(this.htCachePath, "SNAPSHOTS");
+        snapshotdir.mkdirs(); // create directory if missing
+        this.snapshots = new Snapshots(snapshotdir);
+
         // create the surrogates directories
         this.surrogatesInPath =
             getDataPath(
