@@ -1049,12 +1049,12 @@ public final class HTTPDProxyHandler {
         } else if (orgHostName.startsWith("www.")) {
             testHostName = orgHostName.substring(4);
             final InetAddress addr = Domains.dnsResolve(testHostName);
-            if (addr != null) if (addr != null) testHostNames.add(testHostName);
+            if (addr != null) testHostNames.add(testHostName);
         }
         if (orgHostName.length()>4 && orgHostName.startsWith("www") && (orgHostName.charAt(3) != '.')) {
             testHostName = orgHostName.substring(0,3) + "." + orgHostName.substring(3);
             final InetAddress addr = Domains.dnsResolve(testHostName);
-            if (addr != null) if (addr != null) testHostNames.add(testHostName);
+            if (addr != null) testHostNames.add(testHostName);
         }
 
         int pos = orgHostName.lastIndexOf('.');
@@ -1064,7 +1064,7 @@ public final class HTTPDProxyHandler {
                 final String topLevelDomain = iter.next();
                 testHostName = orgHostName.substring(0,pos) + "." + topLevelDomain;
                 final InetAddress addr = Domains.dnsResolve(testHostName);
-                if (addr != null) if (addr != null) testHostNames.add(testHostName);
+                if (addr != null) testHostNames.add(testHostName);
             }
         }
 

@@ -159,11 +159,15 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return this.rankings.get(idx % this.rankings.size()); // simply prevent out of bound exeption (& callers don't check for null)
     }
     
+    /**
+     * @param name The name of the ranking to get.
+     * @return The corresponding Ranking-object.
+     */
     public Ranking getRanking(final String name) {
         if (name == null) return null;
         for (int i = 0; i < this.rankings.size(); i++) {
-            Ranking r = this.rankings.get(i);
-            if (name.equals(r)) return r;
+            Ranking currentRanking = this.rankings.get(i);
+            if (name.equals(currentRanking.getName())) return currentRanking;
         }
         return null;
     }
