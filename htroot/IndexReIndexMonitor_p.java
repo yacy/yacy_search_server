@@ -18,6 +18,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.migration;
 
@@ -54,15 +55,17 @@ public class IndexReIndexMonitor_p {
                 prop.put("docsprocessed", ((ReindexSolrBusyThread) bt).getProcessed());
                 prop.put("currentselectquery","q="+((ReindexSolrBusyThread) bt).getCurrentQuery());
                 // prepare list of fields in queue
-                final String[] querylist = ((ReindexSolrBusyThread) bt).getQueryList();
+                final OrderedScoreMap<String> querylist = ((ReindexSolrBusyThread) bt).getQueryList();
                 if (querylist != null) {
-                    String allfieldnames = "";
+                    int i = 0;
                     for (String oneqs : querylist) { // just use fieldname from query (fieldname:[* TO *])
-                        allfieldnames = allfieldnames + oneqs.substring(0, oneqs.indexOf(':')) + "<br> ";
+                        prop.put("reindexjobrunning_fieldlist_"+i+"_fieldname", oneqs.substring(0, oneqs.indexOf(':')));
+                        prop.put("reindexjobrunning_fieldlist_"+i+"_fieldscore", querylist.get(oneqs));
+                        i++;
                     }
-                    prop.put("reindexjobrunning_fieldlist", allfieldnames);
+                    prop.put("reindexjobrunning_fieldlist", querylist.size());
                 } else {
-                    prop.put("reindexjobrunning_fieldlist", "");
+                    prop.put("reindexjobrunning_fieldlist", 0);
                 }
             }
             

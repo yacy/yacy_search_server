@@ -45,7 +45,14 @@
             #(reindexjobrunning)#::
             <fieldset><legend>Remaining field list</legend>
               <p>reindex documents containing these fields: </p>
-              <p>#[fieldlist]#</p>
+              <table>
+                <tr><th>Field</th><th>count</th></tr>
+                #{fieldlist}#
+                <tr>
+                  <td>#[fieldname]#</td> <td align="right">#[fieldscore]#</td>
+                </tr>
+                #{/fieldlist}#
+              </table>
             </fieldset>
             #(/reindexjobrunning)#
           </td></tr></table>

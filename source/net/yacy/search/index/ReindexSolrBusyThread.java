@@ -21,15 +21,14 @@ package net.yacy.search.index;
 
 import java.io.IOException;
 
-import net.yacy.search.Switchboard;
-
-import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
+import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionConfiguration;
 
 import org.apache.solr.common.SolrDocument;
@@ -47,7 +46,10 @@ import org.apache.solr.common.SolrInputDocument;
      * If queue is empty this removes itself from list of servers workerthreads list
      * Process:  - initialize with one or more select queries
      *           - deploy as BusyThread (or call job repeatedly until it returns false)
-     *              - job reindexes on each call chunk of 100 documents       
+     *              - job reindexes on each call chunk of 100 documents
+     *
+     * The thread uses internally a score map for the reindex queries this promotes fields with a low
+     * number of documents to get reindexed first.
      */
      public class ReindexSolrBusyThread extends AbstractBusyThread {
 
@@ -56,7 +58,8 @@ import org.apache.solr.common.SolrInputDocument;
         int processed = 0; // total number of reindexed documents
         int docstoreindex = 0; // documents found to reindex for current query
         Semaphore sem = new Semaphore(1);
-        ArrayList<String> querylist = new ArrayList<String>(); // list of select statements to reindex
+        OrderedScoreMap<String> querylist = new OrderedScoreMap<String>(null); // list of select statements to reindex with number of documents as score
+        String currentquery = null;
         int start = 0; // startindex
         int chunksize = 100; // number of documents to reindex per cycle
         
@@ -72,7 +75,7 @@ import org.apache.solr.common.SolrInputDocument;
                 this.interrupt(); // only one active reindex job should exist
             } else {
                 if (query != null) {
-                    this.querylist.add(query);
+                    this.querylist.set(query, 0);
                 }
             }   
             setName("reindexSolr");
@@ -85,7 +88,7 @@ import org.apache.solr.common.SolrInputDocument;
          */
         public void addSelectQuery(String query) {
             if (query != null && !query.isEmpty()) {
-                querylist.add(query);
+                querylist.set(query, 0);
             }
         }
        
@@ -97,7 +100,7 @@ import org.apache.solr.common.SolrInputDocument;
          */
         public void addSelectFieldname(String field) {
             if (field != null && !field.isEmpty()) {
-                querylist.add(field + AbstractSolrConnector.CATCHALL_DTERM);
+                querylist.set(field + AbstractSolrConnector.CATCHALL_DTERM, 0);
             }
         }
        
@@ -108,29 +111,30 @@ import org.apache.solr.common.SolrInputDocument;
         @Override
         public boolean job() {
             boolean ret = true;
-            if (esc != null && colcfg != null && querylist.size() > 0) {
+            if (esc != null && colcfg != null && !querylist.isEmpty()) {
 
-                if (sem.tryAcquire()) {
+                if (sem.tryAcquire()) { // allow only one working cycle
                     try {
-                        String query = querylist.get(0);
-                        SolrDocumentList xdocs = esc.getDocumentListByQuery(query, null, start, chunksize);
-                        docstoreindex = (int) xdocs.getNumFound();
+                        currentquery = querylist.keys(true).next(); // get next query with lowest number of documents found
+                        SolrDocumentList xdocs = esc.getDocumentListByQuery(currentquery, null, start, chunksize);
                         
                         if (xdocs.size() == 0) { // no documents returned = all of current query reindexed (or eventual start to large)                                                       
-                            querylist.remove(0); // consider normal case and remove current query                           
-                            
+
                             if (start > 0) { // if previous cycle reindexed, commit to prevent reindex of same documents
                                 esc.commit(true);
                                 start = 0;
+                            } else { // if start == 0 and nothing found, query can be deleted for sure
+                               querylist.delete(currentquery); // remove current query
                             }
                             
                             if (chunksize < 100) { // try to increase chunksize (if reduced by freemem)
                                 chunksize = chunksize + 10;
                             }
                         } else {
-                            ConcurrentLog.info("MIGRATION-REINDEX", "reindex docs with query=" + query + " found=" + docstoreindex + " start=" + start);
+                            docstoreindex = (int) xdocs.getNumFound();
+                            ConcurrentLog.info("MIGRATION-REINDEX", "reindex docs with query=" + currentquery + " found=" + docstoreindex + " start=" + start);
                             start = start + chunksize;
-                            
+                            querylist.set(currentquery, docstoreindex);
                             for (SolrDocument doc : xdocs) {
                                 SolrInputDocument idoc = colcfg.toSolrInputDocument(doc);
                                 Switchboard.getSwitchboard().index.putDocument(idoc);
@@ -138,7 +142,8 @@ import org.apache.solr.common.SolrInputDocument;
                             }
                         }                        
                     } catch (final IOException ex) {
-                        ConcurrentLog.warn("MIGRATION-REINDEX", "remove following query from list due to error, q=" + querylist.remove(0));
+                        ConcurrentLog.warn("MIGRATION-REINDEX", "remove following query from list due to error, q=" + currentquery);
+                        querylist.delete(currentquery);
                         ConcurrentLog.logException(ex);
                     } finally {
                         sem.release();
@@ -177,19 +182,14 @@ import org.apache.solr.common.SolrInputDocument;
          * @return the currently processed Solr select query 
          */
         public String getCurrentQuery() {            
-            return querylist.isEmpty() ? "" : querylist.get(0);
+            return querylist.isEmpty() ? "" : currentquery;
         }
 
         /**          
          * @return copy of all Solr select queries in the queue or null if empty
          */
-        public String[] getQueryList() {
-            if (querylist != null) {
-                String[] list = new String[querylist.size()];
-                list = querylist.toArray(list);
-                return list;
-            }
-            return null;
+        public OrderedScoreMap<String> getQueryList() {
+            return querylist;
         }
         
         /**
