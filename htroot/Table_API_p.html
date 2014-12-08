@@ -172,12 +172,12 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <p>
       <div class="form-horizontal">
         <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>&nbsp;&nbsp;&nbsp;
-        <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger"/>&nbsp;&nbsp;&nbsp;
+        <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
       </div>
       </p>
       <p>
       <div class="form-group">
-        <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;"/>
+        <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
         <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
           <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
           <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
