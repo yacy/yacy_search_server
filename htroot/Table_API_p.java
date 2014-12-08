@@ -245,29 +245,27 @@ public class Table_API_p {
             boolean dark = true;
             boolean scheduledactions = false;
             int c = 0;
+            byte[] typeb, commentb, urlb;
             String type, comment, url;
             // first prepare a list
             while (mapIterator.hasNext()) {
                 r = mapIterator.next();
-                if (r == null) {
-                    continue;
-                }
-                type = UTF8.String(r.get(WorkTables.TABLE_API_COL_TYPE));
-                if (!typefilter.matcher(type).matches()) {
-                    continue;
-                }
-                comment = UTF8.String(r.get(WorkTables.TABLE_API_COL_COMMENT));
-                url = UTF8.String(r.get(WorkTables.TABLE_API_COL_URL));
-                if (!(query.matcher(comment).matches() || query.matcher(url).matches())) {
-                    continue;
-                }
-                if (c >= startRecord) {
-                    table.add(r);
-                }
+                if (r == null) continue;
+                typeb = r.get(WorkTables.TABLE_API_COL_TYPE);
+                if (typeb == null) continue;
+                type = UTF8.String(typeb);
+                if (!typefilter.matcher(type).matches()) continue;
+                commentb = r.get(WorkTables.TABLE_API_COL_COMMENT);
+                if (commentb == null) continue;
+                comment = UTF8.String(commentb);
+                if (!query.matcher(comment).matches()) continue;
+                urlb = r.get(WorkTables.TABLE_API_COL_URL);
+                if (urlb == null) continue;
+                url = UTF8.String(urlb);
+                if (!query.matcher(url).matches()) continue;
+                if (c >= startRecord) table.add(r);
                 c++;
-                if (table.size() >= maximumRecords) {
-                    break;
-                }
+                if (table.size() >= maximumRecords) break;
             }
             // then work on the list
             for (final Tables.Row row : table) {
