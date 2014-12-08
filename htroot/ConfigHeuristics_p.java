@@ -101,8 +101,8 @@ public class ConfigHeuristics_p {
                         OpenSearchConnector osc = new OpenSearchConnector(sb,false);
                         osc.add (tmpname,tmpurl,false,tmpcomment);
                     } else osderrmsg = "Url template must contain '{searchTerms}'";
+                    }
                 }
-            }
 
             if (post.containsKey("setopensearch")) {
                 // read index schema table flags
@@ -177,14 +177,17 @@ public class ConfigHeuristics_p {
 
                 String tmps = e.getValue();
                 prop.putHTML("osdcfg_" + c + "_url", tmps);
-                tmps = tmps.substring(0,tmps.lastIndexOf("/"));
-                prop.putHTML("osdcfg_" + c + "_urlhostlink", tmps);
+                final int lastpos = tmps.lastIndexOf("/");
+                if (lastpos > 6) { // after http://x or ftp://x
+                    tmps = tmps.substring(0, lastpos);
+                    prop.putHTML("osdcfg_" + c + "_urlhostlink", tmps);
+                } else prop.putHTML("osdcfg_" + c + "_urlhostlink", "#");
 
                 c++;
             }
             prop.put("osdcfg", c);
         } catch (final IOException e1) {
-            ConcurrentLog.logException(e1);
+            ConcurrentLog.warn("OpenSearchConnector", "file not found " + f.getAbsolutePath());
             prop.put("osdcfg", 0);
         }
         prop.putHTML("osderrmsg",osderrmsg);
@@ -208,7 +211,7 @@ public class ConfigHeuristics_p {
                     if (!sfn.equals(entry.getValue())) {
                         entry.setValue(sfn);
                         modified = true;
-    }
+                    }
                 }
                 // set enable flag
                 String v = post.get("ossys_" + entry.key());
@@ -232,7 +235,7 @@ public class ConfigHeuristics_p {
                 }
             }
         } catch (final IOException e) {
-            ConcurrentLog.logException(e);
+            ConcurrentLog.warn("OpenSearchConnector", "file not found " + f.getAbsolutePath());
         }
         
         // re-read config (and create/update work table)
