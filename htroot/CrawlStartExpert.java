@@ -515,13 +515,14 @@ public class CrawlStartExpert {
         // ---------- Snapshot generation
         boolean wkhtmltopdfAvailable = Html2Image.wkhtmltopdfAvailable();
         boolean convertAvailable = Html2Image.convertAvailable();
+        prop.put("snapshotsMaxDepth", post == null ? "-1" : post.get("snapshotsMaxDepth", "-1"));
         if (sb.getConfigBool("isTransparentProxy", false) &&
             sb.getConfigBool("proxyAlwaysFresh", false) &&
              wkhtmltopdfAvailable && convertAvailable) {
-            prop.put("snapshotSelect", 1);
-            prop.put("snapshotSelect_snapshotsMaxDepth", post == null ? "-1" : post.get("snapshotsMaxDepth", "-1"));
+            prop.put("snapshotEnableImages", 1);
+            prop.put("snapshotEnableImages_snapshotsLoadImageChecked", post == null ? 0 : post.getBoolean("snapshotsLoadImage") ? 1 : 0);
         } else {
-            prop.put("snapshotSelect", 0);
+            prop.put("snapshotEnableImages", 0);
         }
 
         // ---------- Index Administration

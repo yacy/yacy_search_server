@@ -122,12 +122,12 @@ import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
-import net.yacy.crawler.data.Snapshots;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ResultImages;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
+import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxt;
@@ -244,7 +244,6 @@ public final class Switchboard extends serverSwitch {
     public File queuesRoot;
     public File surrogatesInPath;
     //public File surrogatesOutPath;
-    public Snapshots snapshots;
     public Segment index;
     public LoaderDispatcher loader;
     public CrawlSwitchboard crawler;
@@ -698,9 +697,8 @@ public final class Switchboard extends serverSwitch {
         final long maxCacheSize =
             1024L * 1024L * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
         Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize);
-        final File snapshotdir = new File(this.htCachePath, "SNAPSHOTS");
-        snapshotdir.mkdirs(); // create directory if missing
-        this.snapshots = new Snapshots(snapshotdir);
+        final File transactiondir = new File(this.htCachePath, "snapshots");
+        Transactions.init(transactiondir);
 
         // create the surrogates directories
         this.surrogatesInPath =
@@ -2848,12 +2846,14 @@ public final class Switchboard extends serverSwitch {
                 url,
                 referrerURL,
                 collections,
+                profile,
                 queueEntry.getResponseHeader(),
                 document,
                 condenser,
                 searchEvent,
                 sourceName,
-                getConfigBool(SwitchboardConstants.DHT_ENABLED, false));
+                getConfigBool(SwitchboardConstants.DHT_ENABLED, false),
+                sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null);
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
                 ? EventChannel.PROXY

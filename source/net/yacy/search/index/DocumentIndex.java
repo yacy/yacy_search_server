@@ -165,11 +165,13 @@ public class DocumentIndex extends Segment {
                     null,
                     null,
                     null,
+                    null,
                     document,
                     condenser,
                     null,
                     DocumentIndex.class.getName() + ".add",
-                    false);
+                    false,
+                    null);
         }
         return rows;
     }

@@ -31,23 +31,15 @@
 
 package net.yacy.document.parser.html;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Stack;
 
-import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.io.CharBuffer;
 
 

@@ -88,7 +88,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String INDEXING_CONTENT_MUSTNOTMATCH = "indexContentMustNotMatch";
     public static final String SNAPSHOTS_MAXDEPTH            = "snapshotsMaxDepth"; // if previews shall be loaded, this is positive and denotes the maximum depth; if not this is -1
     public static final String SNAPSHOTS_REPLACEOLD          = "snapshotsReplaceOld"; // if this is set to true, only one version of a snapshot per day is stored, otherwise we store also different versions per day
-
+    public static final String SNAPSHOTS_LOADIMAGE           = "snapshotsLoadImage"; // if true, an image is loaded
+    
     private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
     private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;
     private Pattern crawlernodepthlimitmatch = null;
@@ -144,6 +145,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean storeHTCache,
                  final boolean remoteIndexing,
                  final int snapshotsMaxDepth,
+                 final boolean snapshotsLoadImage,
                  final boolean snapshotsReplaceOld,
                  final CacheStrategy cacheStrategy,
                  final String collections,
@@ -181,6 +183,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(STORE_HTCACHE,    storeHTCache);
         put(REMOTE_INDEXING,  remoteIndexing);
         put(SNAPSHOTS_MAXDEPTH, snapshotsMaxDepth);
+        put(SNAPSHOTS_LOADIMAGE, snapshotsLoadImage);
         put(SNAPSHOTS_REPLACEOLD, snapshotsReplaceOld);
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
         put(COLLECTIONS,      CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
@@ -589,6 +592,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             ConcurrentLog.logException(e);
             return -1;
         }
+    }
+    
+    public boolean snapshotLoadImage() {
+        final String r = get(SNAPSHOTS_LOADIMAGE);
+        if (r == null) return false;
+        return (r.equals(Boolean.TRUE.toString()));
     }
 
     public boolean snapshotReplaceold() {

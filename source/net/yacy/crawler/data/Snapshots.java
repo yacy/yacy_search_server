@@ -37,7 +37,6 @@ import org.apache.solr.common.SolrDocument;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.util.Html2Image;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -65,6 +64,7 @@ public class Snapshots {
     
     public Snapshots(File location) {
         this.storageLocation = location;
+        this.storageLocation.mkdirs();
         // scan the location to fill the directory
         this.directory = new HashMap<>();
         for (String domain: location.list()) {
@@ -98,31 +98,6 @@ public class Snapshots {
             }
         }
     }
-
-    /**
-     * Load a pdf snapshot of a document.
-     * A proxy must be given to ensure that multiple loads containing i.e. image are cached
-     * Use http://localhost:<thisport> as proxy.
-     * @param url
-     * @param depth
-     * @param date
-     * @param proxy - a string of the form 'http://<host>:<port>
-     * @return
-     */
-    public File downloadPDFSnapshot(final DigestURL url, final int depth, final Date date, boolean replaceOld, String proxy, String userAgent) {
-        Collection<File> oldPaths = findPaths(url, depth, "pdf");
-        if (replaceOld) {
-            for (File oldPath: oldPaths) oldPath.delete();
-        }
-        File path = definePath(url, depth, date, "pdf");
-        path.getParentFile().mkdirs();
-        boolean success = Html2Image.writeWkhtmltopdf(url.toNormalform(true), proxy, userAgent, path);
-        if (success) {
-            announceStorage(url, depth, date);
-            return path;
-        }
-        return null;
-    }
     
     /**
      * Compute the path of a snapshot. This does not create the snapshot, only gives a path.
@@ -140,7 +115,7 @@ public class Snapshots {
         return path;
     }
     
-    private void announceStorage(final DigestURL url, final int depth, final Date date) {
+    public void announceStorage(final DigestURL url, final int depth, final Date date) {
         String id = ASCII.String(url.hash());
         String ds = GenericFormatter.SHORT_MINUTE_FORMATTER.format(date);
         TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(pathToHostDir(url));

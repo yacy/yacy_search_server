@@ -442,6 +442,7 @@ public class Crawler_p {
                
                 String snapshotsMaxDepthString = post.get("snapshotsMaxDepth", "-1");
                 int snapshotsMaxDepth = Integer.parseInt(snapshotsMaxDepthString);
+                boolean snapshotsLoadImage = post.getBoolean("snapshotsLoadImage");
                 boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
                 
                 // prepare a new crawling profile
@@ -471,6 +472,7 @@ public class Crawler_p {
                             storeHTCache,
                             crawlOrder,
                             snapshotsMaxDepth,
+                            snapshotsLoadImage,
                             snapshotsReplaceOld,
                             cachePolicy,
                             collection,

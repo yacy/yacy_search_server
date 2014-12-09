@@ -460,28 +460,34 @@
 	      </dl>
         </fieldset>
 	    #(/agentSelect)#
-        #(snapshotSelect)#<input type="hidden" name="snapshotsMaxDepth" id="snapshotsMaxDepth" value="-1" />::
         <fieldset>
           <legend>Snapshot Creation</legend>
           <dl>
-          <dt><label for="snapshot">Max Depth for Snapshots</label></dt>
+          <dt><label for="snapshotMaxdepth">Max Depth for Snapshots</label></dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            Snapshots are pictures of web pages that can be created during crawling time. These pictures will be stored as pdf at first into subdirectories
-            of HTCACHE/SNAPSHOTS/ and are computed to jpg from the pdfs later. Snapshot generation can be controlled using a depth parameter; that
+            Snapshots are xml metadata and pictures of web pages that can be created during crawling time.
+            The xml data is stored in the same way as a Solr search result with one hit and the pictures will be stored as pdf into subdirectories
+            of HTCACHE/snapshots/. From the pdfs the jpg thumbnails are computed. Snapshot generation can be controlled using a depth parameter; that
             means a snapshot is only be generated if the crawl depth of a document is smaller or equal to the given number here. If the number is set to -1,
             no snapshots are generated.
             </span></span>
 			<input type="text" name="snapshotsMaxDepth" id="snapshotsMaxDepth" size="2" maxlength="2" value="#[snapshotsMaxDepth]#" />
 	      </dd>
-          <dt><label for="snapshot">Multiple Snapshot Versions</label></dt>
+          <dt><label for="snapshotVersion">Multiple Snapshot Versions</label></dt>
           <dd>
             <input type="radio" name="snapshotsReplaceOld" value="on" checked="checked"/> replace old snapshots with new one&nbsp;&nbsp;&nbsp;
 			<input type="radio" name="snapshotsReplaceOld" value="off" /> add new versions for each crawl
           </dd>
+          #(snapshotEnableImages)#
+          <input type="hidden" name="snapshotsLoadImage" id="snapshotsLoadImage" value="false"/>::
+          <dt><label for="snapshotImage">Image Creation</label></dt>
+          <dd>
+            <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage" #(snapshotsLoadImageChecked)#::checked="checked"#(/snapshotsLoadImageChecked)# />
+          </dd>
+	      #(/snapshotEnableImages)#
 	      </dl>
         </fieldset>
-	    #(/snapshotSelect)#
         <fieldset>
           <legend>Index Administration</legend>
           <dl>

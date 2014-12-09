@@ -42,7 +42,6 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -61,7 +60,6 @@ import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.parser.htmlParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -205,22 +203,6 @@ public final class LoaderDispatcher {
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
-        }
-
-        // before we return pages from the cache, check if we are requested to produce snapshots which will be generated newly every time
-        if (protocol.equals("http") || protocol.equals("https")) {
-            // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
-            boolean depthok = crawlProfile != null && request.depth() <= crawlProfile.snapshotMaxdepth();
-            String file = request.url().getFile();
-            String ext = MultiProtocolURL.getFileExtension(file).toLowerCase();
-            boolean extok = ext.length() == 0 || file.length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext);
-            if (depthok && extok) {
-                File snapshotFile = sb.snapshots.downloadPDFSnapshot(request.url(), request.depth(), new Date(), crawlProfile.snapshotReplaceold(), sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, agent.userAgent);
-                log.info("SNAPSHOT - " + (snapshotFile == null ? "could not generate snapshot for " + request.url().toNormalform(true) : "wrote " + snapshotFile + " for " + request.url().toNormalform(true)));
-            } else {
-                //if (!depthok) log.warn("SNAPSHOT: depth not ok, " + (crawlProfile == null ? "profile = null" : "entry.depth() = " + request.depth() + ", profile.snapshotMaxdepth() = " + crawlProfile.snapshotMaxdepth()));
-                //if (!extok) log.warn("SNAPSHOT: ext not ok, entry.url().getFile() = " + request.url().getFile());
-            }
         }
         
         // check if we have the page in the cache

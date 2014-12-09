@@ -35,6 +35,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
@@ -181,7 +183,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             while (fidx2 < sz && fieldName.equals(fields.get(fidx2).name())) {
                 fidx2++;
             }
-            SchemaField sf = schema.getFieldOrNull(fieldName);
+            SchemaField sf = schema == null ? null : schema.getFieldOrNull(fieldName);
             if (sf == null) {
                 sf = new SchemaField(fieldName, new TextField());
             }
@@ -189,6 +191,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             if (fidx1 + 1 == fidx2) {
                 if (sf.multiValued()) {
                     startTagOpen(writer, "arr", fieldName);
+                    writer.write(lb);
                     String sv = value.stringValue();
                     writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, f1);
                     writer.write("</arr>");
@@ -197,6 +200,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
                 }
             } else {
                 startTagOpen(writer, "arr", fieldName);
+                writer.write(lb);
                 for (int i = fidx1; i < fidx2; i++) {
                     String sv = fields.get(i).stringValue();
                     writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, (Fieldable)this.tlst.get(i));
@@ -209,8 +213,29 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write("</doc>");
         writer.write(lb);
     }
+
+    public static final void writeDoc(final Writer writer, final SolrInputDocument sid) throws IOException {
+        startTagOpen(writer, "doc", null);
+        for (String key: sid.getFieldNames()) {
+            SolrInputField sif = sid.getField(key);
+            Object value = sif.getValue();
+            if (value == null) {
+            } else if (value instanceof Collection<?>) {
+                startTagOpen(writer, "arr", key);
+                writer.write(lb);
+                for (Object o: (Collection<?>) value) {
+                    writeField(writer, null, o);
+                }
+                writer.write("</arr>"); writer.write(lb);
+            } else {
+                writeField(writer, key, value);
+            }
+        }
+        writer.write("</doc>");
+        writer.write(lb);
+    }
     
-    private static final void writeDoc(final Writer writer, final SolrDocument doc) throws IOException {
+    public static final void writeDoc(final Writer writer, final SolrDocument doc) throws IOException {
         startTagOpen(writer, "doc", null);
         final Map<String, Object> fields = doc.getFieldValueMap();
         for (String key: fields.keySet()) {
@@ -219,6 +244,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             if (value == null) {
             } else if (value instanceof Collection<?>) {
                 startTagOpen(writer, "arr", key);
+                writer.write(lb);
                 for (Object o: ((Collection<?>) value)) {
                     writeField(writer, null, o);
                 }

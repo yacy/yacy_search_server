@@ -80,10 +80,16 @@ public class Html2Image {
      */
     public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, File destination) {
         boolean success = writeWkhtmltopdfInternal(url, proxy, destination, null, true);
-        if (success) return true;
-        if (proxy == null) return false;
-        ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
-        return writeWkhtmltopdfInternal(url, null, destination, userAgent, true);
+        if (!success && proxy != null) {
+            ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
+            success = writeWkhtmltopdfInternal(url, null, destination, userAgent, true);
+        }
+        if (success) {
+            ConcurrentLog.info("Html2Image", "wrote " + destination.toString() + " for " + url);
+        } else {
+            ConcurrentLog.warn("Html2Image", "could not generate snapshot for " + url);
+        }
+        return success;
     }
     
     private static boolean writeWkhtmltopdfInternal(String url, String proxy, File destination, String userAgent, boolean ignoreErrors) {
