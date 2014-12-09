@@ -32,10 +32,11 @@ public class ResponseHeader extends HeaderFramework {
 
     private static final long serialVersionUID = 0L;
 
+    // cached values for quicker repeated access
     private Date date_cache_Date = null;
     private Date date_cache_Expires = null;
     private Date date_cache_LastModified = null;
-    
+
     public ResponseHeader(final int statusCode) {
         super();
         this.put(HeaderFramework.STATUS_CODE, Integer.toString(statusCode));
@@ -67,7 +68,11 @@ public class ResponseHeader extends HeaderFramework {
             return 200;
         }
     }
-    
+
+    /**
+     * Get the http field Date or now (if header date missing)
+     * @return date message was created or now
+     */
     public Date date() {
         if (this.date_cache_Date != null) return this.date_cache_Date;
         final Date d = headerDate(HeaderFramework.DATE);
@@ -76,26 +81,36 @@ public class ResponseHeader extends HeaderFramework {
         return this.date_cache_Date;
     }
 
+    /**
+     * get http field Expires if available
+     * @return date or null
+     */
     public Date expires() {
         if (this.date_cache_Expires != null) return this.date_cache_Expires;
         this.date_cache_Expires = headerDate(HeaderFramework.EXPIRES);
         return this.date_cache_Expires;
     }
 
+    /**
+     * get http field Last-Modified or now (if header field is missing)
+     * @return valid date (always != null)
+     */
     public Date lastModified() {
         if (this.date_cache_LastModified != null) return this.date_cache_LastModified;
         Date d = headerDate(HeaderFramework.LAST_MODIFIED);
-        if (d == null) d = date();
         final Date now = new Date();
         this.date_cache_LastModified = (d == null) ? date() : d.after(now) ? now : d;
         return this.date_cache_LastModified;
     }
 
+    /**
+     * age in milliseconds (difference between now and last_modified)
+     * @return age in milliseconds
+     */
     public long age() {
         final Date lm = lastModified();
-        final Date sd = date();
-        if (lm == null) return Long.MAX_VALUE;
-        return ((sd == null) ? new Date() : sd).getTime() - lm.getTime();
+        final Date now = new Date();
+        return now.getTime() - lm.getTime();
     }
 
     public boolean gzip() {
