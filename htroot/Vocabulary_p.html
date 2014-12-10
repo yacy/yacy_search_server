@@ -103,12 +103,12 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <!--<form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">-->
     <form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" >
       <fieldset><legend>Vocabulary Production</legend>
-      It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
-      This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
-      This works best with wikis. Try to use a wiki url as objectspace path.
+      
       <dl>
-        <dt>Vocabulary Name<br><i>(this will become the name of a search facet)</i></dt>
+        <dt>Vocabulary Name</dt>
         <dd><input type="text" name="discovername" value="" size="78" maxlength="128" onkeydown="for (i=0; i < 6; i++) document.getElementsByName('discovermethod')[i].disabled=''"/></dd>
+        <dt></dt>
+        <dd><input type="checkbox" name="isFacet" checked="checked"/> this shall be a search facet (disable this for large vocabularies!)</dd>
         <hr>
         <dt>Empty Vocabulary&nbsp;<input type="radio" name="discovermethod" value="none" checked="checked" disabled="disabled"/></dt>
         <dd></dd>
@@ -119,23 +119,31 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
             from page author&nbsp;<input type="radio" name="discovermethod" value="author" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/></dt>
         <dd>
             <dl>
+            <dt></dt>
+            <dd>It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
+                This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
+                This works best with wikis. Try to use a wiki url as objectspace path.</dd>
             <dt><i>Objectspace</i></dt>
             <dd><input type="text" id="discoverobjectspace" name="discoverobjectspace" value="http://" size="78" maxlength="512" disabled="disabled"/><div id="searchresults"></div></dd>
             </dl>
         </dd>
-        <dt>Import from a csv file&nbsp;<input type="radio" name="discovermethod" value="csv" disabled="disabled" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';"/></dt>
+        <dt>Import from a csv file&nbsp;<input type="radio" name="discovermethod" value="csv" disabled="disabled" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnsynonyms').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';"/></dt>
         <dd>
             <dl>
             <dt><i>File Path</i></dt>
             <dd><input type="text" id="discoverpath" name="discoverpath" value="" size="78" maxlength="256" disabled="disabled"></dd>
             <dt><i>Column for Literals</i></dt>
             <dd><input type="number" id="discovercolumnliteral" name="discovercolumnliteral" min="0" max="99" step="1" size="2" value="0" disabled="disabled" style="width:50px;"> (first has index 0)</dd>
+            <dt><i>Synonyms</i></dt>
+            <dd><input type="radio" name="discoversynonymsmethod" id="discoversynonymsmethod" value="none" checked="checked"/> <i>no Synonyms</i><br/>
+                <input type="radio" name="discoversynonymsmethod" id="discoversynonymsmethod" value="enrichsynonyms"/> <i>Auto-Enrich with Synonyms from Stemming Library</i><br/>
+                <input type="radio" name="discoversynonymsmethod" id="discoversynonymsmethod" value="readcolumn" onclick="document.getElementById('discovercolumnsynonyms').value=parseInt(document.getElementById('discovercolumnliteral').value)+1;"/> <i>Read Column</i><br/>
+                <input type="number" id="discovercolumnsynonyms" name="discovercolumnsynonyms" min="-1" max="99" step="1" size="2" value="-1" style="width:50px;"> (first has index 0)
+            </dd>
             <dt><i>Column for Object Link (optional)</i></dt>
             <dd><input type="number" id="discovercolumnobjectlink" name="discovercolumnobjectlink" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" style="width:50px;"> (first has index 0, if unused set -1)</dd>
             <dt><i>Charset of Import File</i></dt>
             <dd><select name="charset">#{charset}#<option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/charset}#</select></dd>
-            <dt><i>Auto-Enrich with Synonyms from Stemming Library</i></dt>
-            <dd><input type="checkbox" name="discoverenrichsynonyms" id="discoverenrichsynonyms" checked="checked" /></dd>
             </dl>
         </dd>
         <dt></dt><dd><input type="submit" name="create" value="Create" /></dd>
@@ -155,6 +163,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <dt>Predicate</dt><dd>#[predicate]#</dd>
         <dt>Prefix</dt><dd>#[prefix]#</dd>
         <dt>Objectspace</dt><dd>#(editable)##[objectspace]#::<input type="text" name="objectspace" value="#[objectspace]#" size="78" maxlength="128" /><br/>if set, uses the predicate <a href="#[objectspacepredicate]#" target="_blank">#[objectspacepredicate]#</a> for generated objects. Hint: use 'http://dbpedia.org/resource/' as default.#(/editable)#</dd>
+        <dt>Is Facet?</dt><dd><input type="checkbox" name="isFacet"#(isFacet)#:: checked="checked"#(/isFacet)#/> (If checked, this vocabulary is used for search facets. Not feasible for large vocabularies!)</dd>
       </dl>
       <table class="sortable" border="0">
       <tr class="TableHeader" valign="bottom">

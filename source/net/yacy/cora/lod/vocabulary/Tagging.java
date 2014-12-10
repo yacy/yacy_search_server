@@ -53,6 +53,7 @@ public class Tagging {
     private final Map<String, String> term2objectlink;
     private final Map<String, Set<String>> synonym2synonyms;
     private File propFile;
+    private boolean isFacet; // true if the vocabulary shall generate a navigation facet
 
     private String predicate, namespace, objectspace;
 
@@ -99,6 +100,7 @@ public class Tagging {
         this.predicate = this.namespace + name;
         this.objectspace = null;
         this.propFile = null;
+        this.isFacet = true;
     }
 
     public Tagging(String name, File propFile) throws IOException {
@@ -263,6 +265,14 @@ public class Tagging {
         }
     }
 
+    public boolean isFacet() {
+        return this.isFacet;
+    }
+    
+    public void setFacet(boolean isFacet) {
+        this.isFacet = isFacet;
+    }
+    
     public int size() {
         return this.term2objectlink.size();
     }
@@ -346,7 +356,7 @@ public class Tagging {
 
     public void setObjectspace(String os) throws IOException {
         if (this.propFile == null) return;
-        if (os == null || (this.objectspace != null && this.objectspace.equals(os))) return;
+        if (os == null || os.length() == 0 || (this.objectspace != null && this.objectspace.equals(os))) return;
         this.objectspace = os;
         File tmp = tmpFile();
         BufferedWriter w = new BufferedWriter(new FileWriter(tmp));

@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -72,18 +73,21 @@ public class Vocabulary_p {
                     if (discoveruri == null) discoverobjectspace = "";
                     Map<String, Tagging.SOTuple> table = new LinkedHashMap<String, Tagging.SOTuple>();
                     File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
+                    final boolean isFacet = post.getBoolean("isFacet");
                     final boolean discoverNot = post.get("discovermethod", "").equals("none");
                     final boolean discoverFromPath = post.get("discovermethod", "").equals("path");
                     final boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
                     final boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
                     final boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
                     final boolean discoverFromCSV = post.get("discovermethod", "").equals("csv");
-                    final String discoverFromCSVPath = post.get("discoverpath", "");
+                    final String discoverFromCSVPath = post.get("discoverpath", "").replaceAll("%20", " ");
                     final String discoverFromCSVCharset = post.get("charset", "UTF-8");
                     final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
+                    final int discovercolumnsynonyms = post.getInt("discovercolumnsynonyms", -1);
                     final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
                     final File discoverFromCSVFile = discoverFromCSVPath.length() > 0 ? new File(discoverFromCSVPath) : null;
-                    final boolean discoverenrichsynonyms = post.getBoolean("discoverenrichsynonyms");
+                    final boolean discoverenrichsynonyms = post.get("discoversynonymsmethod", "none").equals("enrichsynonyms");
+                    final boolean discoverreadcolumn = post.get("discoversynonymsmethod", "none").equals("readcolumn");
                     Segment segment = sb.index;
                     String t;
                     if (!discoverNot) {
@@ -91,23 +95,40 @@ public class Vocabulary_p {
                             BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset));
                             String line = null;
                             Pattern semicolon = Pattern.compile(";");
+                            Map<String, String> synonym2literal = new HashMap<>(); // helper map to check if there are double synonyms
                             while ((line = r.readLine()) != null) {
                                 if (line.length() == 0) continue;
                                 String[] l = semicolon.split(line);
                                 if (l.length == 0) l = new String[]{line};
                                 String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
                                 if (literal == null) continue;
-                                if (literal.length() > 0 && (literal.charAt(0) == '"' || literal.charAt(0) == '\'')) literal = literal.substring(1);
-                                if (literal.length() > 0 && (literal.charAt(literal.length() - 1) == '"' || literal.charAt(literal.length() - 1) == '\'')) literal = literal.substring(0, literal.length() - 1);
+                                literal = normalizeLiteral(literal);
                                 String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink].trim();
                                 if (literal.length() > 0) {
-                                    String synonyms = Tagging.normalizeTerm(literal);
+                                    String synonyms = "";
                                     if (discoverenrichsynonyms) {
                                         Set<String> sy = SynonymLibrary.getSynonyms(literal);
                                         if (sy != null) {
                                             for (String s: sy) synonyms += "," + s;
                                         }
+                                    } else if (discoverreadcolumn) {
+                                        synonyms = discovercolumnsynonyms < 0 || l.length <= discovercolumnsynonyms ? null : l[discovercolumnsynonyms].trim();
+                                        synonyms = normalizeLiteral(synonyms);
+                                    } else {
+                                        synonyms = Tagging.normalizeTerm(literal);
                                     }
+                                    // check double synonyms
+                                    if (synonyms.length() > 0) {
+                                        String oldliteral = synonym2literal.get(synonyms);
+                                        if (oldliteral != null) {
+                                            // replace old entry with combined new
+                                            table.remove(oldliteral);
+                                            String newliteral = oldliteral + "," + literal;
+                                            literal = newliteral;
+                                        }
+                                        synonym2literal.put(synonyms, literal);
+                                    }
+                                    // store term
                                     table.put(literal, new Tagging.SOTuple(synonyms, objectlink == null ? "" : objectlink));
                                 }
                             }
@@ -160,6 +181,7 @@ public class Vocabulary_p {
                         }
                     }
                     Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
+                    newvoc.setFacet(isFacet);
                     LibraryProvider.autotagging.addVocabulary(newvoc);
                     vocabularyName = discovername;
                     vocabulary = newvoc;
@@ -205,6 +227,11 @@ public class Vocabulary_p {
                         vocabulary = null;
                         vocabularyName = null;
                     }
+                    
+                    // check the isFacet property
+                    if (vocabulary != null && post.containsKey("isFacet")) {
+                        vocabulary.setFacet(post.getBoolean("isFacet"));
+                    }
                 }
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
@@ -231,6 +258,7 @@ public class Vocabulary_p {
             prop.putHTML("edit_name", vocabulary.getName());
             prop.putXML("edit_namexml", vocabulary.getName());
             prop.putHTML("edit_namespace", vocabulary.getNamespace());
+            prop.put("edit_isFacet", vocabulary.isFacet() ? 1 : 0);
             prop.put("edit_size", vocabulary.size());
             prop.putHTML("edit_predicate", vocabulary.getPredicate());
             prop.putHTML("edit_prefix", Tagging.DEFAULT_PREFIX);
@@ -278,5 +306,12 @@ public class Vocabulary_p {
         
         // return rewrite properties
         return prop;
+    }
+    
+    private static String normalizeLiteral(String literal) {
+        if (literal == null) return "";
+        if (literal.length() > 0 && (literal.charAt(0) == '"' || literal.charAt(0) == '\'')) literal = literal.substring(1);
+        if (literal.length() > 0 && (literal.charAt(literal.length() - 1) == '"' || literal.charAt(literal.length() - 1) == '\'')) literal = literal.substring(0, literal.length() - 1);
+        return literal;
     }
 }
