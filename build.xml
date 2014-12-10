@@ -164,6 +164,7 @@
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-1.46.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-1.46.jar" />
+    	<pathelement location="${lib}/chardet.jar" />
     	<pathelement location="${lib}/commons-codec-1.9.jar" />
     	<pathelement location="${lib}/commons-compress-1.8.1.jar" />
     	<pathelement location="${lib}/commons-fileupload-1.2.2.jar" />

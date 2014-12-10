@@ -24,6 +24,7 @@
 
 package net.yacy.kelondro.util;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -49,9 +50,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+
+import org.mozilla.intl.chardet.nsDetector;
+import org.mozilla.intl.chardet.nsPSMDetector;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.storage.Files;
@@ -881,6 +886,65 @@ public final class FileUtils {
         }
         
         return inDirectory;
+    }
+    
+    /**
+     * auto-detect the charset of a file
+     * used code from http://jchardet.sourceforge.net/;
+     * see also: http://www-archive.mozilla.org/projects/intl/chardet.html
+     * @param file
+     * @return a set of probable charsets
+     * @throws IOException
+     */
+    public static Set<String> detectCharset(File file) throws IOException {
+        // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
+        nsDetector det = new nsDetector(nsPSMDetector.ALL);
+        BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file));
+
+        byte[] buf = new byte[1024] ;
+        int len;
+        boolean done = false ;
+        boolean isAscii = true ;
+
+        while ((len = imp.read(buf,0,buf.length)) != -1) {
+            if (isAscii) isAscii = det.isAscii(buf,len);
+            if (!isAscii && !done) done = det.DoIt(buf,len, false);
+        }
+        det.DataEnd();
+        Set<String> result = new HashSet<>();
+        if (isAscii) {
+            result.add("ASCII");
+        } else {
+            for (String c: det.getProbableCharsets()) result.add(c);
+        }
+
+        return result;
+    }
+    
+    /**
+     * Because the checking of very large files for their charset may take some time, we do this concurrently in this method
+     * This method does not return anything but it logs an info line if the charset is a good choice
+     * and it logs a warning line if the choice was bad.
+     * @param file the file to be checked
+     * @param givenCharset the charset that we consider to be valid
+     * @param concurrent if this shall run concurrently
+     */
+    public static void checkCharset(final File file, final String givenCharset, final boolean concurrent) {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Set<String> charsets = FileUtils.detectCharset(file);
+                    if (charsets.contains(givenCharset)) {
+                        ConcurrentLog.info("checkCharset", "appropriate charset '" + givenCharset + "' for import of " + file + ", is part one detected " + charsets);
+                    } else {
+                        ConcurrentLog.warn("checkCharset", "possibly wrong charset '" + givenCharset + "' for import of " + file + ", use one of " + charsets);
+                    }
+                } catch (IOException e) {}
+                
+            }
+        };
+        if (concurrent) t.start(); else t.run();
     }
 
 }

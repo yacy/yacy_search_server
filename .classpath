@@ -68,6 +68,7 @@
 	<classpathentry kind="lib" path="lib/lucene-suggest-4.10.2.jar"/>
 	<classpathentry kind="lib" path="lib/solr-core-4.10.2.jar"/>
 	<classpathentry kind="lib" path="lib/solr-solrj-4.10.2.jar"/>
+	<classpathentry kind="lib" path="lib/chardet.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
