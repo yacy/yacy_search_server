@@ -124,7 +124,7 @@ public class Vocabulary_p {
                                     // check double synonyms
                                     if (synonyms.length() > 0) {
                                         String oldliteral = synonym2literal.get(synonyms);
-                                        if (oldliteral != null) {
+                                        if (oldliteral != null && !literal.equals(oldliteral)) {
                                             // replace old entry with combined new
                                             table.remove(oldliteral);
                                             String newliteral = oldliteral + "," + literal;
@@ -212,14 +212,6 @@ public class Vocabulary_p {
                         }
                     }
 
-                    // check if a term shall be deleted
-                    for (Map.Entry<String, String> e : post.entrySet()) {
-                        if (e.getKey().startsWith("delete_") && e.getValue().equals("checked")) {
-                            String term = e.getKey().substring(7);
-                            vocabulary.delete(term);
-                        }
-                    }
-
                     // check if the vocabulary shall be cleared
                     if (post.get("clear_table", "").equals("checked") ) {
                         vocabulary.clear();
@@ -230,6 +222,14 @@ public class Vocabulary_p {
                         LibraryProvider.autotagging.deleteVocabulary(vocabularyName);
                         vocabulary = null;
                         vocabularyName = null;
+                    }
+
+                    // check if a term shall be deleted
+                    if (vocabulary != null && vocabulary.size() > 0) for (Map.Entry<String, String> e : post.entrySet()) {
+                        if (e.getKey().startsWith("delete_") && e.getValue().equals("checked")) {
+                            String term = e.getKey().substring(7);
+                            vocabulary.delete(term);
+                        }
                     }
                     
                     // check the isFacet property
