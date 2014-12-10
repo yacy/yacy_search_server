@@ -30,6 +30,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.solr.common.SolrInputDocument;
 
@@ -56,6 +59,8 @@ public class Transactions {
     private final static String SNAPSHOT_ARCHIVE_DIR = "archive";
     private static File transactionDir = null, inventoryDir = null, archiveDir = null;
     private static Snapshots inventory = null, archive = null;
+    private static ExecutorService executor = Executors.newCachedThreadPool();
+    private static AtomicInteger executorRunning = new AtomicInteger(0);
     
     static {
         for (int i = 0; i < WHITESPACE.length; i++) WHITESPACE[i] = 32;
@@ -74,12 +79,12 @@ public class Transactions {
         archive = new Snapshots(archiveDir);
     }
 
-    public static boolean store(SolrInputDocument doc, boolean loadImage, boolean replaceOld, String proxy, ClientIdentification.Agent agent) {
+    public static boolean store(final SolrInputDocument doc, final boolean loadImage, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent) {
 
         // GET METADATA FROM DOC
-        String urls = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-        Date date = (Date) doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-        int depth = (Integer) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
+        final String urls = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+        final Date date = (Date) doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+        final int depth = (Integer) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
         DigestURL url;
         try {
             url = new DigestURL(urls);
@@ -88,21 +93,18 @@ public class Transactions {
             return false;
         }
         
-        // STORE AN IMAGE
-        Collection<File> oldPaths = Transactions.findPaths(url, depth, "pdf", Transactions.State.INVENTORY);
+        // CLEAN UP OLD DATA (if wanted)
+        Collection<File> oldPaths = Transactions.findPaths(url, depth, null, Transactions.State.INVENTORY);
         if (replaceOld) {
             for (File oldPath: oldPaths) oldPath.delete();
         }
+        
+        
+        // STORE METADATA FOR THE IMAGE
         File metadataPath = Transactions.definePath(url, depth, date, "xml", Transactions.State.INVENTORY);
         metadataPath.getParentFile().mkdirs();
         boolean success = true;
-        if (loadImage) {
-            File pdfPath = Transactions.definePath(url, depth, date, "pdf", Transactions.State.INVENTORY);
-            success = Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, pdfPath);
-        }
-        
-        // STORE METADATA FOR THE IMAGE
-        if (success) try {
+        try {
             if (doc != null) {
                 FileOutputStream fos = new FileOutputStream(metadataPath);
                 OutputStreamWriter osw = new OutputStreamWriter(fos);
@@ -116,12 +118,33 @@ public class Transactions {
                 fos.close();
                 Transactions.announceStorage(url, depth, date);
             }
-            return true;
         } catch (IOException e) {
             ConcurrentLog.logException(e);
-            return false;
+            success = false;
         }
-        return false;
+        
+        // STORE AN IMAGE
+        if (success && loadImage) {
+            final File pdfPath = Transactions.definePath(url, depth, date, "pdf", Transactions.State.INVENTORY);
+            if (executorRunning.intValue() < Runtime.getRuntime().availableProcessors()) {
+                Thread t = new Thread(){
+                    @Override
+                    public void run() {
+                        executorRunning.incrementAndGet();
+                        try {
+                            Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, pdfPath);
+                        } catch (Throwable e) {} finally {
+                        executorRunning.decrementAndGet();
+                        }
+                    }
+                };
+                executor.execute(t);
+            } else {
+                success = Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, pdfPath);
+            }
+        }
+        
+        return success;
     }
     
     
@@ -185,7 +208,7 @@ public class Transactions {
      * for a given url, get all paths for storage locations.
      * The locations are all for the single url but may represent different storage times.
      * @param url
-     * @param ext
+     * @param ext required extension or null if the extension must not be checked
      * @param depth
      * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
      * @return a set of files for snapshots of the url

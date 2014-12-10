@@ -234,7 +234,7 @@ public class Snapshots {
      * for a given url, get all paths for storage locations.
      * The locations are all for the single url but may represent different storage times.
      * @param url
-     * @param ext
+     * @param ext required extension or null if the extension must not be checked
      * @param depth
      * @return a set of files for snapshots of the url
      */
@@ -245,7 +245,7 @@ public class Snapshots {
         ArrayList<File> paths = new ArrayList<>();
         if (list != null) {
             for (String f: list) {
-                if (f.startsWith(id) && f.endsWith(ext)) paths.add(new File(pathToShard, f));
+                if (f.startsWith(id) && (ext == null || f.endsWith(ext))) paths.add(new File(pathToShard, f));
             }
         }
         return paths;
