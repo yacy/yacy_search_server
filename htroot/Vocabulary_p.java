@@ -44,6 +44,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
@@ -92,6 +93,9 @@ public class Vocabulary_p {
                     String t;
                     if (!discoverNot) {
                         if (discoverFromCSV && discoverFromCSVFile != null && discoverFromCSVFile.exists()) {
+                            // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
+                            FileUtils.checkCharset(discoverFromCSVFile, discoverFromCSVCharset, true);
+                            // read file
                             BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset));
                             String line = null;
                             Pattern semicolon = Pattern.compile(";");
