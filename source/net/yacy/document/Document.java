@@ -94,7 +94,7 @@ public class Document {
     private final double lon, lat;
     private final Object parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
-    private final Date date;
+    private final Date lastModified;
     private int crawldepth;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
@@ -110,7 +110,7 @@ public class Document {
                     final LinkedHashMap<DigestURL, String> rss,
                     final LinkedHashMap<DigestURL, ImageEntry> images,
                     final boolean indexingDenied,
-                    final Date date) {
+                    final Date lastModified) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
@@ -146,7 +146,7 @@ public class Document {
         this.indexingDenied = indexingDenied;
         this.text = text == null ? "" : text;
         this.generic_facets = new HashMap<String, Set<String>>();
-        this.date = date == null ? new Date() : date;
+        this.lastModified = lastModified == null ? new Date() : lastModified;
         this.crawldepth = 999; // unknown yet
     }
     
@@ -476,8 +476,8 @@ dc_rights
         return this.emaillinks;
     }
 
-    public Date getDate() {
-        return this.date;
+    public Date getLastModified() {
+        return this.lastModified;
     }
 
     public double lon() {
@@ -868,7 +868,7 @@ dc_rights
             rss.putAll(doc.getRSS());
             images.putAll(doc.getImages());
             if (doc.lon() != 0.0 && doc.lat() != 0.0) { lon = doc.lon(); lat = doc.lat(); }
-            if (doc.date.before(date)) date = doc.date;
+            if (doc.lastModified.before(date)) date = doc.lastModified;
             
             if (doc.getDepth() < mindepth) mindepth = doc.getDepth();
             if (doc.dc_language() != null) languages.add(doc.dc_language());

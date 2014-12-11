@@ -547,7 +547,8 @@ public class Segment {
             final SearchEvent searchEvent,
             final String sourceName, // contains the crawl profile hash if this comes from a web crawl
             final boolean storeToRWI,
-            final String proxy
+            final String proxy,
+            final String acceptLanguage
             ) {
         final long startTime = System.currentTimeMillis();
         
@@ -579,7 +580,7 @@ public class Segment {
             String ext = MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase();
             if (ext.length() == 0 || url.getFile().length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext)) {
                 // STORE IMAGE AND METADATA
-                Transactions.store(vector, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, crawlProfile.getAgent());
+                Transactions.store(vector, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, crawlProfile.getAgent(), acceptLanguage);
             }
         }
         
@@ -609,7 +610,7 @@ public class Segment {
         }
         
         // REMEMBER FIRST SEEN
-        setFirstSeenTime(url.hash(), Math.min(document.getDate().getTime(), System.currentTimeMillis())); // should exist already in the index at this time, but just to make sure
+        setFirstSeenTime(url.hash(), Math.min(document.getLastModified().getTime(), System.currentTimeMillis())); // should exist already in the index at this time, but just to make sure
 
         // write the edges to the citation reference index
         if (this.connectedCitation()) try {

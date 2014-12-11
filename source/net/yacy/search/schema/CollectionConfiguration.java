@@ -490,7 +490,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.last_modified)) {
             Date lastModified = responseHeader == null ? new Date() : responseHeader.lastModified();
             if (lastModified == null) lastModified = new Date();
-            if (document.getDate().before(lastModified)) lastModified = document.getDate();
+            if (document.getLastModified().before(lastModified)) lastModified = document.getLastModified();
             long firstSeen = segment.getFirstSeenTime(digestURL.hash());
             if (firstSeen > 0 && firstSeen < lastModified.getTime()) lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
             add(doc, CollectionSchema.last_modified, lastModified);
