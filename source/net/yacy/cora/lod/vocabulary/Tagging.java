@@ -480,14 +480,21 @@ public class Tagging {
     public String getObjectspace() {
         return this.objectspace;
     }
-
+    
+    private final static Pattern PATTERN_SPACEPLUS = Pattern.compile(" \\+");
+    private final static Pattern PATTERN_SPACESLASH= Pattern.compile(" /");
+    private final static Pattern PATTERN_PLUS = Pattern.compile("\\+");
+    private final static Pattern PATTERN_SLASH = Pattern.compile("/");
+    private final static Pattern PATTERN_SPACESPACE = Pattern.compile("  ");
+    
     private final String normalizeKey(String k) {
         k = k.trim();
-        k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
-        k = k.replaceAll(" /", ", ");
-        k = k.replaceAll("\\+", ",");
-        k = k.replaceAll("/", ",");
-        k = k.replaceAll("  ", " ");
+        // remove symbols that are bad in a query attribute
+        k = PATTERN_SPACEPLUS.matcher(k).replaceAll(", ");
+        k = PATTERN_SPACESLASH.matcher(k).replaceAll(", ");
+        k = PATTERN_PLUS.matcher(k).replaceAll(",");
+        k = PATTERN_SLASH.matcher(k).replaceAll(",");
+        k = PATTERN_SPACESPACE.matcher(k).replaceAll(" ");
         return k;
     }
 
@@ -537,6 +544,7 @@ public class Tagging {
     private final static Pattern PATTERN_OE = Pattern.compile("\u00F6");
     private final static Pattern PATTERN_UE = Pattern.compile("\u00FC");
     private final static Pattern PATTERN_SZ = Pattern.compile("\u00DF");
+    private final static Pattern PATTERN_COMMA = Pattern.compile(",");
 
     public static final String normalizeTerm(String term) {
         term = term.trim().toLowerCase();
@@ -544,11 +552,7 @@ public class Tagging {
         term = PATTERN_OE.matcher(term).replaceAll("oe");
         term = PATTERN_UE.matcher(term).replaceAll("ue");
         term = PATTERN_SZ.matcher(term).replaceAll("ss");
-        // remove comma
-        int p;
-        while ((p = term.indexOf(',')) >= 0) {
-            term = term.substring(p + 1).trim() + " " + term.substring(0, p);
-        }
+        term = PATTERN_COMMA.matcher(term).replaceAll(" ");
         return term;
     }
 
