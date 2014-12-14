@@ -78,11 +78,11 @@ public class Html2Image {
      * @param destination
      * @return
      */
-    public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, File destination) {
-        boolean success = writeWkhtmltopdfInternal(url, proxy, destination, null, true);
+    public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, final String acceptLanguage, File destination) {
+        boolean success = writeWkhtmltopdfInternal(url, proxy, destination, null, acceptLanguage, true);
         if (!success && proxy != null) {
             ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
-            success = writeWkhtmltopdfInternal(url, null, destination, userAgent, true);
+            success = writeWkhtmltopdfInternal(url, null, destination, userAgent, acceptLanguage, true);
         }
         if (success) {
             ConcurrentLog.info("Html2Image", "wrote " + destination.toString() + " for " + url);
@@ -92,12 +92,13 @@ public class Html2Image {
         return success;
     }
     
-    private static boolean writeWkhtmltopdfInternal(String url, String proxy, File destination, String userAgent, boolean ignoreErrors) {
+    private static boolean writeWkhtmltopdfInternal(final String url, final String proxy, final File destination, final String userAgent, final String acceptLanguage, final boolean ignoreErrors) {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
         String commandline =
-                wkhtmltopdf.getAbsolutePath() + " -q --title " + url +
-                (userAgent == null ? "" : "--custom-header 'User-Agent' '" + userAgent + "' --custom-header-propagation") + 
-                (proxy == null ? " " : " --proxy " + proxy + " ") +
+                wkhtmltopdf.getAbsolutePath() + " -q --title " + url + " " +
+                //acceptLanguage == null ? "" : "--custom-header 'Accept-Language' '" + acceptLanguage + "' " + 
+                (userAgent == null ? "" : "--custom-header 'User-Agent' '" + userAgent + "' --custom-header-propagation ") + 
+                (proxy == null ? "" : "--proxy " + proxy + " ") +
                 (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") +
                 url + " " + destination.getAbsolutePath();
         try {

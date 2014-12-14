@@ -144,7 +144,7 @@ public class snapshot {
                 if (!authenticated) return null;
                 SolrDocument sd = sb.index.fulltext().getMetadata(durl.hash());
                 SolrInputDocument sid = sb.index.fulltext().getDefaultConfiguration().toSolrInputDocument(sd);
-                boolean success = Transactions.store(sid, true, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, ClientIdentification.yacyProxyAgent);
+                boolean success = Transactions.store(sid, true, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, ClientIdentification.yacyProxyAgent, sb.getConfig("crawler.http.acceptLanguage", null));
                 if (success) {
                     pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.INVENTORY);
                     if (pdfSnapshots.size() != 0) pdfFile = pdfSnapshots.iterator().next();
