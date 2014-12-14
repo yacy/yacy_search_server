@@ -838,7 +838,7 @@ search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,lang
 # cacheonly: never go online, use all content from cache. If no cache entry exist,
 #            consider content nevertheless as available and show result without snippet
 # false:     no link verification and not snippet generation:
-             all search results are valid without verification
+#            all search results are valid without verification
 search.verify = ifexist
 
 search.excludehosts=
