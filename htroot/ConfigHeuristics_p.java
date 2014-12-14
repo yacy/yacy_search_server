@@ -138,7 +138,7 @@ public class ConfigHeuristics_p {
             // copy default opensearch heuristic config with sample entries
             if (post.containsKey("copydefaultosdconfig") || post.containsKey("resettodefaultosdlist")) {
                 // prepare a solr index profile switch list
-                final File osdDefaultConfig = new File(sb.getDataPath(), "defaults/heuristicopensearch.conf");
+                final File osdDefaultConfig = new File(sb.getAppPath(), "defaults/heuristicopensearch.conf");
                 final File osdConfig = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
                 if ((post.containsKey("resettodefaultosdlist") || !osdConfig.exists()) && osdDefaultConfig.exists()) {
                     try {

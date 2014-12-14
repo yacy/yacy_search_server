@@ -54,8 +54,10 @@ import org.eclipse.jetty.proxy.ProxyServlet;
  * later improvemnts should/could use implementation to avoid back and forth converting
  * between YaCy and Servlet header/parameter style and use proxy implementation within
  * servlet specification or a existing reverse-proxy library.
- * 
+ *
+ * @deprecated since 1.81 use {@link UrlProxyServlet} instead.
  */
+@Deprecated //use UrlProxyServlet instead
 public class YaCyProxyServlet extends ProxyServlet implements Servlet {
     private static final long serialVersionUID = 4900000000000001120L;
     
