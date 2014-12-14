@@ -158,7 +158,7 @@ public class DocumentIndex extends Segment {
         int c = 0;
         for ( final Document document : documents ) {
         	if (document == null) continue;
-            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true);
+            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true, true);
             rows[c++] =
                 super.storeDocument(
                     url,
@@ -171,6 +171,7 @@ public class DocumentIndex extends Segment {
                     null,
                     DocumentIndex.class.getName() + ".add",
                     false,
+                    null,
                     null);
         }
         return rows;

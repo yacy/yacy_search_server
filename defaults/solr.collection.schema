@@ -18,16 +18,16 @@ sku
 ## last-modified from http header, date (mandatory field)
 last_modified
 
-## if date expressions can be found in the content, these dates are listed here in order of the appearances"),
+## if date expressions can be found in the content, these dates are listed here in order of the appearances
 #dates_in_content_sxt
 
 ## the number of entries in dates_in_content_sxt
 #dates_in_content_count_i    
 
-## if dates_in_content_sxt is filled, this contains the oldest date from the list of available dates"),
+## if dates_in_content_sxt is filled, this contains the oldest date from the list of available dates
 #date_in_content_min_dt
 
-## if dates_in_content_sxt is filled, this contains the youngest date from the list of available dates, that may also be possibly in the future"),
+## if dates_in_content_sxt is filled, this contains the youngest date from the list of available dates, that may also be possibly in the future
 #date_in_content_max_dt
     
 ## mime-type of document, string (mandatory field)

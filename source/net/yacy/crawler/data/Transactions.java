@@ -79,7 +79,7 @@ public class Transactions {
         archive = new Snapshots(archiveDir);
     }
 
-    public static boolean store(final SolrInputDocument doc, final boolean loadImage, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent) {
+    public static boolean store(final SolrInputDocument doc, final boolean loadImage, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent, final String acceptLanguage) {
 
         // GET METADATA FROM DOC
         final String urls = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
@@ -132,7 +132,7 @@ public class Transactions {
                     public void run() {
                         executorRunning.incrementAndGet();
                         try {
-                            Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, pdfPath);
+                            Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
                         } catch (Throwable e) {} finally {
                         executorRunning.decrementAndGet();
                         }
@@ -140,7 +140,7 @@ public class Transactions {
                 };
                 executor.execute(t);
             } else {
-                success = Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, pdfPath);
+                success = Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
             }
         }
         

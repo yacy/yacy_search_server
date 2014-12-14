@@ -35,6 +35,10 @@ public enum CollectionSchema implements SchemaDeclaration {
     sku(SolrType.string, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
     //sku(SolrType.text_en_splitting_tight, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
     last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"),
+    dates_in_content_sxt(SolrType.string, true, true, true, false, true, "if date expressions can be found in the content, these dates are listed here in order of the appearances"),
+    dates_in_content_count_i(SolrType.num_integer, true, true, false, false, false, "the number of entries in dates_in_content_sxt"),
+    date_in_content_min_dt(SolrType.date, true, true, false, false, false, "if dates_in_content_sxt is filled, this contains the oldest date from the list of available dates"),
+    date_in_content_max_dt(SolrType.date, true, true, false, false, false, "if dates_in_content_sxt is filled, this contains the youngest date from the list of available dates, that may also be possibly in the future"),
     content_type(SolrType.string, true, true, true, false, false, "mime-type of document"),
     http_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false"),
     www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false"),

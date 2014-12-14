@@ -136,9 +136,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
         if (tag == null) return;
         tag = tag.toLowerCase();
-        if ("record".equals(tag) || "document".equals(tag)) {
+        if ("record".equals(tag) || "document".equals(tag) || "doc".equals(tag)) {
             this.surrogate = new DCEntry();
-        } else if ("element".equals(tag)) {
+        } else if ("element".equals(tag) || "str".equals(tag) || "int".equals(tag) || "bool".equals(tag) || "long".equals(tag)) {
             this.elementName = atts.getValue("name");
         } else if ("value".equals(tag)) {
             this.buffer.setLength(0);
@@ -154,7 +154,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public void endElement(final String uri, final String name, String tag) {
         if (tag == null) return;
         tag = tag.toLowerCase();
-        if ("record".equals(tag) || "document".equals(tag)) {
+        if ("record".equals(tag) || "document".equals(tag) || "doc".equals(tag)) {
             //System.out.println("A Title: " + this.surrogate.title());
             try {
                 this.surrogates.put(this.surrogate);
@@ -168,6 +168,12 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             }
         } else if ("element".equals(tag)) {
             this.buffer.setLength(0);
+            this.parsingValue = false;
+        } else if ("str".equals(tag) || "int".equals(tag) || "bool".equals(tag) || "long".equals(tag)){
+            final String value = buffer.toString().trim();
+            if (this.elementName != null) {
+                this.surrogate.getMap().put(this.elementName, new String[]{value});
+            }
             this.parsingValue = false;
         } else if ("value".equals(tag)) {
             //System.out.println("BUFFER-SIZE=" + buffer.length());

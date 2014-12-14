@@ -2751,7 +2751,7 @@ public final class Switchboard extends serverSwitch {
                 new Condenser(
                         in.documents[i], in.queueEntry.profile().indexText(),
                         in.queueEntry.profile().indexMedia(),
-                        LibraryProvider.dymLib, true);
+                        LibraryProvider.dymLib, true, this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_sxt));
 
             // update image result list statistics
             // its good to do this concurrently here, because it needs a DNS lookup
@@ -2853,7 +2853,8 @@ public final class Switchboard extends serverSwitch {
                 searchEvent,
                 sourceName,
                 getConfigBool(SwitchboardConstants.DHT_ENABLED, false),
-                sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null);
+                this.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null,
+                this.getConfig("crawler.http.acceptLanguage", null));
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
                 ? EventChannel.PROXY
@@ -3186,7 +3187,9 @@ public final class Switchboard extends serverSwitch {
                                 if (document.indexingDenied() && (profile == null || profile.obeyHtmlRobotsNoindex())) {
                                     throw new Parser.Failure("indexing is denied", url);
                                 }
-                                final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true);
+                                final Condenser condenser = new Condenser(
+                                        document, true, true, LibraryProvider.dymLib, true, 
+                                        Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_sxt));
                                 ResultImages.registerImages(url, document, true);
                                 Switchboard.this.webStructure.generateCitationReference(url, document);
                                 storeDocumentIndex(

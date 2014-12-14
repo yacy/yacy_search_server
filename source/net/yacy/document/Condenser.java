@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -85,13 +86,15 @@ public final class Condenser {
     //public int RESULT_DIFF_SENTENCES = -1;
     public Bitfield RESULT_FLAGS = new Bitfield(4);
     private final Identificator languageIdentificator;
-
+    public LinkedHashSet<Date> dates_in_content;
+    
     public Condenser(
             final Document document,
             final boolean indexText,
             final boolean indexMedia,
             final WordCache meaningLib,
-            final boolean doAutotagging
+            final boolean doAutotagging,
+            final boolean findDatesInContent
             ) {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
@@ -99,7 +102,8 @@ public final class Condenser {
         this.words = new HashMap<String, Word>();
         this.synonyms = new LinkedHashSet<String>();
         this.RESULT_FLAGS = new Bitfield(4);
-
+        this.dates_in_content = new LinkedHashSet<Date>();
+        
         // construct flag set for document
         ContentDomain contentDomain = document.getContentDomain();
         if (contentDomain == ContentDomain.IMAGE || !document.getImages().isEmpty())     this.RESULT_FLAGS.set(flag_cat_hasimage, true);
@@ -115,7 +119,9 @@ public final class Condenser {
 
         Map.Entry<AnchorURL, String> entry;
         if (indexText) {
-            createCondensement(document.getTextString(), meaningLib, doAutotagging);
+            String text = document.getTextString();
+            if (findDatesInContent) this.dates_in_content = DateDetection.parse(text);
+            createCondensement(text, meaningLib, doAutotagging);
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle

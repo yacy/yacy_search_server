@@ -88,7 +88,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
      * Note: The short day format doesn't include any timezone information. This method
      * transforms the date into the GMT/UTC timezone. Example: If the local system time is,
      * 2007-12-18 01:15:00 +0200, then the resulting String will be "2007-12-17".
-     * In case you need a format with a timezon offset, use {@link #formatShortDay(TimeZone)}
+     * In case you need a format with a timezone offset, use {@link #formatShortDay(TimeZone)}
      * @return a String representation of the current system date in GMT using the
      *         short day format, e.g. "20071218".
      */

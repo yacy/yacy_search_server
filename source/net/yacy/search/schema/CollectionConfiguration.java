@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -494,6 +495,34 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             long firstSeen = segment.getFirstSeenTime(digestURL.hash());
             if (firstSeen > 0 && firstSeen < lastModified.getTime()) lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
             add(doc, CollectionSchema.last_modified, lastModified);
+        }
+        if (allAttr ||
+                contains(CollectionSchema.dates_in_content_sxt) || contains(CollectionSchema.dates_in_content_count_i) ||
+                contains(CollectionSchema.date_in_content_min_dt) || contains(CollectionSchema.date_in_content_max_dt)) {
+            LinkedHashSet<Date> dates_in_content = condenser.dates_in_content;
+            if (allAttr || contains(CollectionSchema.dates_in_content_count_i)) {
+                add(doc, CollectionSchema.dates_in_content_count_i, dates_in_content.size());
+            }
+            if (dates_in_content.size() > 0) {
+                if (allAttr || contains(CollectionSchema.dates_in_content_sxt)) {
+                    String[] dates = new String[dates_in_content.size()];   
+                    int i = 0; for (Date d: dates_in_content) dates[i++] = org.apache.solr.schema.TrieDateField.formatExternal(d);
+                    add(doc, CollectionSchema.dates_in_content_sxt, dates);
+                }
+                // order the dates to get the oldest and youngest
+                TreeSet<Date> ordered_dates = new TreeSet<>();
+                ordered_dates.addAll(dates_in_content);
+                if (allAttr || contains(CollectionSchema.date_in_content_min_dt)) {
+                    Date date_in_content_min_dt = ordered_dates.iterator().next();
+                    add(doc, CollectionSchema.date_in_content_min_dt, date_in_content_min_dt);
+                }
+                if (allAttr || contains(CollectionSchema.date_in_content_max_dt)) {
+                    Date date_in_content_max_dt = ordered_dates.descendingIterator().next();
+                    add(doc, CollectionSchema.date_in_content_max_dt, date_in_content_max_dt);
+                }
+            }
+            
+            
         }
         if (allAttr || contains(CollectionSchema.keywords)) {
             String keywords = document.dc_subject(' ');
