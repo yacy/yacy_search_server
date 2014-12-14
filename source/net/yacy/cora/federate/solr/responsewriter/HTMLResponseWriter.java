@@ -168,7 +168,11 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             writer.write("<dt>");
             writer.write(entry.getKey());
             writer.write("</dt><dd>");
-            XML.escapeAttributeValue(entry.getValue(), writer);
+            if (entry.getKey().equals("sku")) {
+                writer.write("<a href=\"" + entry.getValue() + "\">" + entry.getValue() + "</a>");
+            } else {
+                XML.escapeAttributeValue(entry.getValue(), writer);
+            }
             writer.write("</dd>\n");
         }
         writer.write("</dl>\n");
