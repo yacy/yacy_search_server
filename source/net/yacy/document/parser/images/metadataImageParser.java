@@ -96,7 +96,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
         StringBuilder imgInfotxt = new StringBuilder();
 
         try {
-            final Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(sourceStream), false);
+            final Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(sourceStream));
 
             final Iterator<Directory> directories = metadata.getDirectories().iterator();
             final HashMap<String, String> props = new HashMap<String, String>();

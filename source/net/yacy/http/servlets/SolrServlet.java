@@ -70,8 +70,9 @@ public class SolrServlet extends HttpServlet {
         if (connector == null) throw new ServletException("no core");
 
         SolrQueryResponse solrRsp = new SolrQueryResponse();
+        SolrQueryRequest solrReq = null;
         try {
-            SolrQueryRequest solrReq = connector.request(mmsp); // SolrRequestParsers.DEFAULT.parse(null, hrequest.getServletPath(), hrequest);
+            solrReq = connector.request(mmsp); // SolrRequestParsers.DEFAULT.parse(null, hrequest.getServletPath(), hrequest);
             solrReq.getContext().put("webapp", hrequest.getContextPath());
             SolrRequestHandler handler = sb.index.fulltext().getEmbeddedInstance().getCoreContainer().getMultiCoreHandler();
             connector.getCore().execute( handler, solrReq, solrRsp );
@@ -101,6 +102,8 @@ public class SolrServlet extends HttpServlet {
 
         } catch (Exception e) {
             ConcurrentLog.logException(e);
+        } finally {
+            if (solrReq != null) solrReq.close();
         }
         
     }

@@ -57,16 +57,13 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.util.FileUtils;
 
+import com.drew.imaging.jpeg.JpegMetadataReader;
 import com.drew.imaging.jpeg.JpegProcessingException;
-import com.drew.imaging.jpeg.JpegSegmentReader;
-import com.drew.lang.ByteArrayReader;
 import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
-import com.drew.metadata.exif.ExifReader;
 import com.drew.metadata.exif.GpsDirectory;
-import com.drew.metadata.iptc.IptcReader;
 
 public class genericImageParser extends AbstractParser implements Parser {
 
@@ -133,20 +130,8 @@ public class genericImageParser extends AbstractParser implements Parser {
 
             ii = parseJavaImage(location, new ByteArrayInputStream(b));
 
-            JpegSegmentReader segmentReader;
             try {
-                /**/
-                segmentReader = new JpegSegmentReader(b);
-
-                final byte[] exifSegment = segmentReader.readSegment(JpegSegmentReader.SEGMENT_APP1);
-                final byte[] iptcSegment = segmentReader.readSegment(JpegSegmentReader.SEGMENT_APPD);
-                final Metadata metadata = new Metadata();
-                if (exifSegment != null) new ExifReader().extract(new ByteArrayReader(exifSegment),metadata);
-                if (iptcSegment != null) new IptcReader().extract(new ByteArrayReader(iptcSegment),metadata);
-                /**/
-                // alternative to above: to read all included jpeg tags and metadata 
-                // final Metadata metadata = JpegMetadataReader.readMetadata(new ByteArrayInputStream(b));                
-                
+                final Metadata metadata = JpegMetadataReader.readMetadata(new ByteArrayInputStream(b));                   
                 final Iterator<Directory> directories = metadata.getDirectories().iterator();
                 final HashMap<String, String> props = new HashMap<String, String>();
                 while (directories.hasNext()) {
@@ -188,7 +173,7 @@ public class genericImageParser extends AbstractParser implements Parser {
                 description = props.get("Province/State"); if (description != null && description.length() > 0) descriptions.add("State: " + description);
                 description = props.get("Copyright Notice"); if (description != null && description.length() > 0) descriptions.add("Copyright: " + description);
                 
-            } catch (final JpegProcessingException e) {
+            } catch (final JpegProcessingException | IOException e) {
                 //Log.logException(e);
                 // just ignore
             }
