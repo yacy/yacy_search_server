@@ -71,6 +71,8 @@ import org.jsoup.select.Elements;
  * Hint: a browser favorite of
  *         javascript: window.location.href = ('http://localhost:9090/proxy.html?url=' + location.href);
  * will start the urlproxy with the current browser address.
+ * 
+ * This class is linked to YaCy within jetty using the defaults/web.xml configuration
  */
 public class UrlProxyServlet extends ProxyServlet implements Servlet {
     private static final long serialVersionUID = 4900000000000001121L;
