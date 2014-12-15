@@ -220,7 +220,7 @@
     	<pathelement location="${lib}/lucene-queryparser-4.10.2.jar" />
     	<pathelement location="${lib}/lucene-spatial-4.10.2.jar" />
     	<pathelement location="${lib}/lucene-suggest-4.10.2.jar" />
-    	<pathelement location="${lib}/metadata-extractor-2.6.2.jar" />
+    	<pathelement location="${lib}/metadata-extractor-2.7.0.jar" />
     	<pathelement location="${lib}/noggit-0.5.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
         <pathelement location="${lib}/pdfbox-1.8.7.jar" />
