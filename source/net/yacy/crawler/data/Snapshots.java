@@ -20,15 +20,21 @@
 
 package net.yacy.crawler.data;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -60,17 +66,17 @@ public class Snapshots {
 
     private File storageLocation;
     
-    private Map<String, TreeMap<Integer, TreeSet<String>>> directory; // a TreeMap for each domain where the key is the depth and the value is a Set containing a key/urlhash id to get all files into a specific order to provide a recent view on the documents
+    private Map<String, TreeMap<Integer, TreeSet<String>>> directory; // a TreeMap for each domain (host.port) where the key is the depth and the value is a Set containing a key/urlhash id to get all files into a specific order to provide a recent view on the documents
     
-    public Snapshots(File location) {
+    public Snapshots(final File location) {
         this.storageLocation = location;
         this.storageLocation.mkdirs();
         // scan the location to fill the directory
         this.directory = new HashMap<>();
-        for (String domain: location.list()) {
+        for (String hostport: location.list()) {
             TreeMap<Integer, TreeSet<String>> domaindepth = new TreeMap<>();
-            this.directory.put(domain, domaindepth);
-            File domaindir = new File(location, domain);
+            this.directory.put(hostport, domaindepth);
+            File domaindir = new File(location, hostport);
             if (domaindir.isDirectory()) domainscan: for (String depth: domaindir.list()) {
                 TreeSet<String> dateid = new TreeSet<>();
                 Integer depthi = -1;
@@ -83,20 +89,116 @@ public class Snapshots {
                 File sharddir = new File(domaindir, depth);
                 if (sharddir.isDirectory()) for (String shard: sharddir.list()) {
                     File snapshotdir = new File(sharddir, shard);
-                    if (snapshotdir.isDirectory()) for (String snapshotfile: snapshotdir.list()) {
-                        if (snapshotfile.endsWith(".pdf")) {
-                            String s = snapshotfile.substring(0, snapshotfile.length() - 4);
-                            int p = s.indexOf('.');
-                            assert p == 12;
-                            if (p > 0) {
-                                String key = s.substring(p + 1) + '.' + s.substring(0, p);
-                                dateid.add(key);
+                    if (snapshotdir.isDirectory()) {
+                        for (String snapshotfile: snapshotdir.list()) {
+                            if (snapshotfile.endsWith(".xml")) {
+                                String s = snapshotfile.substring(0, snapshotfile.length() - 4);
+                                int p = s.indexOf('.');
+                                assert p == 12;
+                                if (p > 0) {
+                                    String key = s.substring(p + 1) + '.' + s.substring(0, p);
+                                    dateid.add(key);
+                                }
                             }
                         }
                     }
                 }
+                if (dateid.size() == 0) domaindepth.remove(depthi);
+            }
+            if (domaindepth.size() == 0) this.directory.remove(hostport);
+        }
+    }
+
+    /**
+     * get the number of entries in the snapshot directory
+     * @return the total number of different documents
+     */
+    public int size() {
+        int c = 0;
+        for (Map<Integer, TreeSet<String>> m: directory.values()) {
+            for (TreeSet<String> n: m.values()) {
+                c += n.size();
             }
         }
+        return c;
+    }
+
+    /**
+     * get a list of host names in the snapshot directory
+     * @return
+     */
+    public Set<String> listHosts() {
+        return directory.keySet();
+    }
+    
+    public final class Revisions {
+        public final int depth;
+        public final Date[] dates;
+        public final String urlhash;
+        public final String url;
+        public final File[] pathtoxml;
+        public Revisions(final String hostport, final int depth, final String datehash) {
+            this.depth = depth;
+            int p = datehash.indexOf('.');
+            this.dates = new Date[1];
+            String datestring = datehash.substring(0, p);
+            this.dates[0] = parseDate(datestring);
+            this.urlhash = datehash.substring(p + 1);
+            this.pathtoxml = new File[1];
+            this.pathtoxml[0] = new File(pathToShard(hostport, urlhash, depth), this.urlhash + "." + datestring + ".xml");
+            String u = null;
+            if (this.pathtoxml[0].exists()) {
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.pathtoxml[0])));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.startsWith("<str name=\"sku\">")) {
+                            u = line.substring(16, line.length() - 6);
+                            break;
+                        }
+                    }
+                    reader.close();
+                } catch (IOException e) {}
+            }
+            this.url = u; 
+        }
+    }
+    
+    public Revisions getRevisions(String urlhash) {
+        if (urlhash == null || urlhash.length() == 0) return null;
+        // search for the hash, we must iterate through all entries
+        for (Map.Entry<String, TreeMap<Integer, TreeSet<String>>> hostportDomaindepth: this.directory.entrySet()) {
+            String hostport = hostportDomaindepth.getKey();
+            for (Map.Entry<Integer, TreeSet<String>> depthDateHash: hostportDomaindepth.getValue().entrySet()) {
+                int depth = depthDateHash.getKey();
+                for (String dateHash: depthDateHash.getValue()) {
+                    if (dateHash.endsWith(urlhash)) {
+                        return new Revisions(hostport, depth, dateHash);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * list the snapshots for a given host name
+     * @param host the host for the domain
+     * @return a map with a set for each depth in the domain of the host name
+     */
+    public TreeMap<Integer, Collection<Revisions>> listIDs(final String hostport) {
+        TreeMap<Integer, Collection<Revisions>> result = new TreeMap<>();
+        TreeMap<Integer, TreeSet<String>> list = directory.get(hostport);
+        if (list != null) {
+            for (Map.Entry<Integer, TreeSet<String>> entry: list.entrySet()) {
+                Collection<Revisions> r = new ArrayList<>(entry.getValue().size());
+                for (String datehash: entry.getValue()) {
+                    r.add(new Revisions(hostport, entry.getKey(), datehash));
+                }
+                result.put(entry.getKey(), r);
+            }
+        }
+        return result;
     }
     
     /**
@@ -114,17 +216,58 @@ public class Snapshots {
         File path = new File(pathToShard(url, depth), id + "." + ds + "." + ext);
         return path;
     }
-    
+
+    /**
+     * Write information about the storage of a snapshot to the Snapshot-internal index.
+     * The actual writing of files to the target directory must be done elsewehre, this method does not store the snapshot files.
+     * @param url
+     * @param depth
+     * @param date
+     */
     public void announceStorage(final DigestURL url, final int depth, final Date date) {
         String id = ASCII.String(url.hash());
         String ds = GenericFormatter.SHORT_MINUTE_FORMATTER.format(date);
-        TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(pathToHostDir(url));
-        if (domaindepth == null) {domaindepth = new TreeMap<Integer, TreeSet<String>>(); this.directory.put(pathToHostDir(url), domaindepth);}
+        String pathToHostPortDir = pathToHostPortDir(url.getHost(), url.getPort());
+        TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(pathToHostPortDir);
+        if (domaindepth == null) {domaindepth = new TreeMap<Integer, TreeSet<String>>(); this.directory.put(pathToHostPortDir(url.getHost(), url.getPort()), domaindepth);}
         TreeSet<String> dateid = domaindepth.get(depth);
         if (dateid == null) {dateid = new TreeSet<String>(); domaindepth.put(depth, dateid);}
-        dateid.add(ds + '.' + id);        
+        dateid.add(ds + '.' + id);
+    }
+
+    /**
+     * Delete information about the storage of a snapshot to the Snapshot-internal index.
+     * The actual deletion of files in the target directory must be done elsewehre, this method does not store the snapshot files.
+     * @param url
+     * @param depth
+     * @param date
+     */
+    public Set<Date> announceDeletion(final DigestURL url, final int depth) {
+        HashSet<Date> dates = new HashSet<>();
+        String id = ASCII.String(url.hash());
+        String pathToHostPortDir = pathToHostPortDir(url.getHost(), url.getPort());
+        TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(pathToHostPortDir);
+        if (domaindepth == null) return dates;
+        TreeSet<String> dateid = domaindepth.get(depth);
+        if (dateid == null) return dates;
+        Iterator<String> i = dateid.iterator();
+        while (i.hasNext()) {
+            String dis = i.next();
+            if (dis.endsWith("." + id)) {
+                String d = dis.substring(0, dis.length() - id.length() - 1);
+                Date date = parseDate(d);
+                if (date != null) dates.add(date);
+                i.remove();
+            }
+        }
+        if (dateid.size() == 0) domaindepth.remove(depth);
+        if (domaindepth.size() == 0) this.directory.remove(pathToHostPortDir);
+        return dates;
     }
     
+    /**
+     * Order enum class for the select method
+     */
     public static enum Order {
         ANY, OLDESTFIRST, LATESTFIRST;
     }
@@ -139,59 +282,72 @@ public class Snapshots {
      * @param maxcount the maximum number of hosthashes. If unlimited, submit Integer.MAX_VALUE
      * @return a map of hosthashes with the associated creation date
      */
-    public Map<String, Date> select(String host, Integer depth, final Order order, int maxcount) {
-        TreeSet<String> dateIdResult = new TreeSet<>();
+    public LinkedHashMap<String, Revisions> select(final String host, final Integer depth, final Order order, int maxcount) {
+        TreeMap<String, String[]> dateIdResult = new TreeMap<>();
         if (host == null && depth == null) {
-            loop: for (TreeMap<Integer, TreeSet<String>> domaindepth: this.directory.values()) {
-                for (TreeSet<String> keys: domaindepth.values()) {
-                    dateIdResult.addAll(keys);
-                    if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop; 
+            loop: for (Map.Entry<String, TreeMap<Integer, TreeSet<String>>> hostportDepths: this.directory.entrySet()) {
+                for (Map.Entry<Integer, TreeSet<String>> depthIds: hostportDepths.getValue().entrySet()) {
+                    for (String id: depthIds.getValue()) {
+                        dateIdResult.put(id, new String[]{hostportDepths.getKey(), Integer.toString(depthIds.getKey())});
+                        if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
+                    }
                 }
             }
         }
         if (host == null && depth != null) {
-            loop: for (TreeMap<Integer, TreeSet<String>> domaindepth: this.directory.values()) {
-                TreeSet<String> keys = domaindepth.get(depth);
-                if (keys != null) dateIdResult.addAll(keys);
-                if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
+            loop: for (Map.Entry<String, TreeMap<Integer, TreeSet<String>>> hostportDepths: this.directory.entrySet()) {
+                TreeSet<String> ids = hostportDepths.getValue().get(depth);
+                if (ids != null) for (String id: ids) {
+                    dateIdResult.put(id, new String[]{hostportDepths.getKey(), Integer.toString(depth)});
+                    if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
+                }
             }
         }
         if (host != null && depth == null) {
-            TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(pathToHostDir(host,80));
-            if (domaindepth != null) loop: for (TreeSet<String> keys: domaindepth.values()) {
-                dateIdResult.addAll(keys);
-                if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
+            String hostport = pathToHostPortDir(host,80);
+            TreeMap<Integer, TreeSet<String>> depthIdsMap = this.directory.get(hostport);
+            if (depthIdsMap != null) loop: for (Map.Entry<Integer, TreeSet<String>> depthIds: depthIdsMap.entrySet()) {
+                for (String id: depthIds.getValue()) {
+                    dateIdResult.put(id, new String[]{hostport, Integer.toString(depthIds.getKey())});
+                    if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
+                }
             }
         }
         if (host != null && depth != null) {
-            TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(pathToHostDir(host,80));
+            String hostport = pathToHostPortDir(host,80);
+            TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(hostport);
             if (domaindepth != null) {
-                TreeSet<String> keys = domaindepth.get(depth);
-                if (keys != null) dateIdResult.addAll(keys);
-            }
-        }
-        Map<String, Date> result = new HashMap<>();
-        Iterator<String> i = order == Order.LATESTFIRST ? dateIdResult.descendingIterator() : dateIdResult.iterator();
-        while (i.hasNext() && result.size() < maxcount) {
-            String di = i.next();
-            int p = di.indexOf('.');
-            assert p >= 0;
-            String d = di.substring(0, p);
-            Date date;
-            try {
-                date = GenericFormatter.SHORT_MINUTE_FORMATTER.parse(d);
-            } catch (ParseException e) {
-                try {
-                    date = GenericFormatter.SHORT_DAY_FORMATTER.parse(d);
-                } catch (ParseException ee) {
-                    date = new Date();
+                TreeSet<String> ids = domaindepth.get(depth);
+                if (ids != null) loop: for (String id: ids) {
+                    dateIdResult.put(id, new String[]{hostport, Integer.toString(depth)});
+                    if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
                 }
             }
-            result.put(di.substring(p + 1), date);
+        }
+        LinkedHashMap<String, Revisions> result = new LinkedHashMap<>();
+        Iterator<Map.Entry<String, String[]>> i = order == Order.LATESTFIRST ? dateIdResult.descendingMap().entrySet().iterator() : dateIdResult.entrySet().iterator();
+        while (i.hasNext() && result.size() < maxcount) {
+            Map.Entry<String, String[]> entry = i.next();
+            String datehash = entry.getKey();
+            int p = datehash.indexOf('.');
+            assert p >= 0;
+            Revisions r = new Revisions(entry.getValue()[0], Integer.parseInt(entry.getValue()[1]), datehash);
+            result.put(datehash.substring(p + 1), r);
         }
         return result;
     }
     
+    private static Date parseDate(String d) {
+        try {
+            return GenericFormatter.SHORT_MINUTE_FORMATTER.parse(d);
+        } catch (ParseException e) {
+            try {
+                return GenericFormatter.SHORT_DAY_FORMATTER.parse(d);
+            } catch (ParseException ee) {
+                return null;
+            }
+        }
+    }
     
     /**
      * get the depth to a document, helper method for definePath to determine the depth value
@@ -230,6 +386,8 @@ public class Snapshots {
         return new ArrayList<>(0);
     }
     
+    // pathtoxml = <storageLocation>/<host>.<port>/<depth>/<shard>/<urlhash>.<date>.xml
+    
     /**
      * for a given url, get all paths for storage locations.
      * The locations are all for the single url but may represent different storage times.
@@ -250,20 +408,19 @@ public class Snapshots {
         }
         return paths;
     }
-    
+
     private File pathToShard(final DigestURL url, final int depth) {
-        String id = ASCII.String(url.hash());
-        File pathToHostDir = new File(storageLocation, pathToHostDir(url));
+        return pathToShard(pathToHostPortDir(url.getHost(), url.getPort()), ASCII.String(url.hash()), depth);
+    }
+    
+    private File pathToShard(final String hostport, final String urlhash, final int depth) {
+        File pathToHostDir = new File(storageLocation, hostport);
         File pathToDepthDir = new File(pathToHostDir, pathToDepthDir(depth));
-        File pathToShard = new File(pathToDepthDir, pathToShard(id));
+        File pathToShard = new File(pathToDepthDir, pathToShard(urlhash));
         return pathToShard;
     }
 
-    private String pathToHostDir(final DigestURL url) {
-        return pathToHostDir(url.getHost(), url.getPort());
-    }
-    
-    private String pathToHostDir(final String host, final int port) {
+    private String pathToHostPortDir(final String host, final int port) {
         return host + "." + port;
     }
     

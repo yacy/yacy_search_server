@@ -26,8 +26,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -41,8 +41,11 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;
+import net.yacy.cora.util.JSONException;
+import net.yacy.cora.util.JSONObject;
 import net.yacy.crawler.data.Snapshots;
 import net.yacy.crawler.data.Transactions;
+import net.yacy.crawler.data.Snapshots.Revisions;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
@@ -64,6 +67,7 @@ public class snapshot {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final String ext = header.get("EXT", "");
         
+        
         if (ext.equals("rss")) {
             // create a report about the content of the snapshot directory
             if (!authenticated) return null;
@@ -75,16 +79,16 @@ public class snapshot {
             String statex = post == null ? Transactions.State.INVENTORY.name() : post.get("state", Transactions.State.INVENTORY.name());
             Transactions.State state = Transactions.State.valueOf(statex);
             String host = post == null ? null : post.get("host");
-            Map<String, Date> iddate = Transactions.select(host, depth, order, maxcount, state);
+            Map<String, Revisions> iddate = Transactions.select(host, depth, order, maxcount, state);
             // now select the URL from the index for these ids in iddate and make an RSS feed
             RSSFeed rssfeed = new RSSFeed(Integer.MAX_VALUE);
             rssfeed.setChannel(new RSSMessage("Snapshot list for host = " + host + ", depth = " + depth + ", order = " + order + ", maxcount = " + maxcount, "", ""));
-            for (Map.Entry<String, Date> e: iddate.entrySet()) {
+            for (Map.Entry<String, Revisions> e: iddate.entrySet()) {
                 try {
-                    DigestURL u = sb.index.fulltext().getURL(e.getKey());
+                    DigestURL u = e.getValue().url == null ? sb.index.fulltext().getURL(e.getKey()) : new DigestURL(e.getValue().url);
                     if (u == null) continue;
                     RSSMessage message = new RSSMessage(u.toNormalform(true), "", u, e.getKey());
-                    message.setPubDate(e.getValue());
+                    message.setPubDate(e.getValue().dates[0]);
                     rssfeed.addMessage(message);
                 } catch (IOException ee) {
                     ConcurrentLog.logException(ee);
@@ -94,6 +98,7 @@ public class snapshot {
             return new ByteArrayInputStream(rssBinary);
         }
 
+        // for the following methods we (mostly) need an url or a url hash
         if (post == null) return null;
         final boolean xml = ext.equals("xml");
         final boolean pdf = ext.equals("pdf");
@@ -101,24 +106,128 @@ public class snapshot {
         final boolean pngjpg = ext.equals("png") || ext.equals("jpg");
         String urlhash = post.get("urlhash", "");
         String url = post.get("url", "");
-        if (url.length() == 0 && urlhash.length() == 0) return null;
         DigestURL durl = null;
-        if (urlhash.length() == 0) {
+        if (urlhash.length() == 0 && url.length() > 0) {
             try {
                 durl = new DigestURL(url);
                 urlhash = ASCII.String(durl.hash());
             } catch (MalformedURLException e) {
             }
         }
-        if (durl == null) {
+        if (durl == null && urlhash.length() > 0) {
             try {
                 durl = sb.index.fulltext().getURL(urlhash);
             } catch (IOException e) {
                 ConcurrentLog.logException(e);
             }
         }
+        if (url.length() == 0 && durl != null) url = durl.toNormalform(true);
+
+        if (ext.equals("json")) {
+            // command interface: view and change a transaction state, get metadata about transactions in the past
+            String command = post.get("command", "metadata");
+            String statename = post.get("state");
+            JSONObject result = new JSONObject();
+            try {
+                if (command.equals("status")) {
+                    // return a status of the transaction archive
+                    JSONObject sizes = new JSONObject();
+                    for (Map.Entry<String, Integer> state: Transactions.sizes().entrySet()) sizes.put(state.getKey(), state.getValue());
+                    result.put("size", sizes);
+                } else if (command.equals("list")) {
+                    if (!authenticated) return null;
+                    // return a status of the transaction archive
+                    String host = post.get("host");
+                    String depth = post.get("depth");
+                    for (Transactions.State state: statename == null ?
+                            new Transactions.State[]{Transactions.State.INVENTORY, Transactions.State.ARCHIVE} :
+                            new Transactions.State[]{Transactions.State.valueOf(statename)}) {
+                        if (host == null) {
+                            JSONObject hostCountInventory = new JSONObject();
+                            for (String h: Transactions.listHosts(state)) {
+                                hostCountInventory.put(h, Transactions.listIDs(state, h).size());
+                            }
+                            result.put("count." + state.name(), hostCountInventory);
+                        } else {
+                            TreeMap<Integer, Collection<Revisions>> ids = Transactions.listIDs(state, host);
+                            if (ids == null) {
+                                result.put("error", "no host " + host + " found");
+                            } else {
+                                for (Map.Entry<Integer, Collection<Revisions>> entry: ids.entrySet()) {
+                                    if (depth != null && Integer.parseInt(depth) != entry.getKey()) continue;
+                                    for (Revisions r: entry.getValue()) {
+                                        try {
+                                            JSONObject metadata = new JSONObject();
+                                            DigestURL u = r.url != null ? new DigestURL(r.url) : sb.index.fulltext().getURL(r.urlhash);
+                                            metadata.put("url", u == null ? "unknown" : u.toNormalform(true));
+                                            metadata.put("dates", r.dates);
+                                            assert r.depth == entry.getKey().intValue();
+                                            metadata.put("depth", entry.getKey().intValue());
+                                            result.put(r.urlhash, metadata);
+                                        } catch (IOException e) {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (command.equals("commit")) {
+                    if (!authenticated) return null;
+                    Revisions r = Transactions.commit(urlhash);
+                    if (r != null) {
+                        result.put("result", "success");
+                        result.put("depth", r.depth);
+                        result.put("url", r.url);
+                        result.put("dates", r.dates);
+                    } else {
+                        result.put("result", "fail");
+                    }
+                    result.put("urlhash", urlhash);
+                } else if (command.equals("rollback")) {
+                    if (!authenticated) return null;
+                    Revisions r = Transactions.rollback(urlhash);
+                    if (r != null) {
+                        result.put("result", "success");
+                        result.put("depth", r.depth);
+                        result.put("url", r.url);
+                        result.put("dates", r.dates);
+                    } else {
+                        result.put("result", "fail");
+                    }
+                    result.put("urlhash", urlhash);
+                } else if (command.equals("metadata")) {
+                    try {
+                        Revisions r;
+                        Transactions.State state = statename == null || statename.length() == 0 ? null : Transactions.State.valueOf(statename);
+                        if (state == null) {
+                            r = Transactions.getRevisions(Transactions.State.INVENTORY, urlhash);
+                            if (r != null) state = Transactions.State.INVENTORY;
+                            r = Transactions.getRevisions(Transactions.State.ARCHIVE, urlhash);
+                            if (r != null) state = Transactions.State.ARCHIVE;
+                        } else {
+                            r = Transactions.getRevisions(state, urlhash);
+                        }
+                        if (r != null) {
+                            JSONObject metadata = new JSONObject();
+                            DigestURL u;
+                            u = r.url != null ? new DigestURL(r.url) : sb.index.fulltext().getURL(r.urlhash);
+                            metadata.put("url", u == null ? "unknown" : u.toNormalform(true));
+                            metadata.put("dates", r.dates);
+                            metadata.put("depth", r.depth);
+                            metadata.put("state", state.name());
+                            result.put(r.urlhash, metadata);
+                        }
+                    } catch (IOException |IllegalArgumentException e) {}
+                }
+            } catch (JSONException e) {
+                ConcurrentLog.logException(e);
+            }
+            String json = result.toString();
+            if (post.containsKey("callback")) json = post.get("callback") + "([" + json + "]);";
+            return new ByteArrayInputStream(UTF8.getBytes(json));
+        }
+        
+        // for the following methods we always need the durl to fetch data
         if (durl == null) return null;
-        url = durl.toNormalform(true);
         
         if (xml) {
             Collection<File> xmlSnapshots = Transactions.findPaths(durl, "xml", Transactions.State.ANY);

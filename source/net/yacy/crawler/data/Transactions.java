@@ -29,7 +29,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +45,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;
 import net.yacy.crawler.data.Snapshots.Order;
+import net.yacy.crawler.data.Snapshots.Revisions;
 import net.yacy.search.schema.CollectionSchema;
 
 /**
@@ -55,8 +59,6 @@ public class Transactions {
     private final static char[] WHITESPACE = new char[132];
     private final static int WHITESPACE_START = XML_PREFIX.length();
     private final static int WHITESPACE_LENGTH = WHITESPACE.length;
-    private final static String SNAPSHOT_INVENTORY_DIR = "inventory";
-    private final static String SNAPSHOT_ARCHIVE_DIR = "archive";
     private static File transactionDir = null, inventoryDir = null, archiveDir = null;
     private static Snapshots inventory = null, archive = null;
     private static ExecutorService executor = Executors.newCachedThreadPool();
@@ -67,18 +69,66 @@ public class Transactions {
     }
     
     public static enum State {
-        INVENTORY, ARCHIVE, ANY;
+        INVENTORY("inventory"), ARCHIVE("archive"), ANY(null);
+        public String dirname;
+        State(String dirname) {
+            this.dirname = dirname;
+        }
     }
     
     public static void init(File dir) {
         transactionDir = dir;
         transactionDir.mkdirs();
-        inventoryDir = new File(transactionDir, SNAPSHOT_INVENTORY_DIR);
+        inventoryDir = new File(transactionDir, State.INVENTORY.dirname);
         inventory = new Snapshots(inventoryDir);
-        archiveDir = new File(transactionDir, SNAPSHOT_ARCHIVE_DIR);
+        archiveDir = new File(transactionDir, State.ARCHIVE.dirname);
         archive = new Snapshots(archiveDir);
     }
 
+    /**
+     * get the number of entries for each of the transaction states
+     * @return the total number of different documents for each transaction state
+     */
+    public static Map<String, Integer> sizes() {
+        HashMap<String, Integer> m = new HashMap<>();
+        m.put(State.INVENTORY.name(), inventory.size());
+        m.put(State.ARCHIVE.name(), archive.size());
+        return m;
+    }
+
+    public static Revisions getRevisions(final State state, final String urlhash) {
+        switch (state) {
+            case INVENTORY : return inventory.getRevisions(urlhash);
+            case ARCHIVE : return archive.getRevisions(urlhash);
+            default : Revisions a = inventory.getRevisions(urlhash); return a == null ? archive.getRevisions(urlhash) : a;
+        }
+    }
+    
+    /**
+     * get a list of host names in the snapshot directory
+     * @return the list of the given state. if the state is ALL or unknown, all lists are combined
+     */
+    public static Set<String> listHosts(final State state) {
+        switch (state) {
+            case INVENTORY : return inventory.listHosts();
+            case ARCHIVE : return archive.listHosts();
+            default : Set<String> a = inventory.listHosts(); a.addAll(archive.listHosts()); return a;
+        }
+    }
+    
+    /**
+     * list the snapshots for a given host name
+     * @param host the host for the domain
+     * @return a map with a set for each depth in the domain of the host name
+     */
+    public static TreeMap<Integer, Collection<Revisions>> listIDs(final State state, final String host) {
+        switch (state) {
+            case INVENTORY : return inventory.listIDs(host);
+            case ARCHIVE : return archive.listIDs(host);
+            default : TreeMap<Integer, Collection<Revisions>> a = inventory.listIDs(host); a.putAll(archive.listIDs(host)); return a;
+        }
+    }
+    
     public static boolean store(final SolrInputDocument doc, final boolean loadImage, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent, final String acceptLanguage) {
 
         // GET METADATA FROM DOC
@@ -116,7 +166,7 @@ public class Transactions {
                 osw.write("</response>\n");
                 osw.close();
                 fos.close();
-                Transactions.announceStorage(url, depth, date);
+                Transactions.announceStorage(url, depth, date, State.INVENTORY);
             }
         } catch (IOException e) {
             ConcurrentLog.logException(e);
@@ -146,7 +196,62 @@ public class Transactions {
         
         return success;
     }
+
+    /**
+     * Announce the commit of a snapshot: this will move all data for the given urlhash from the inventory to the archive
+     * The index within the snapshot management will update also.
+     * @param urlhash
+     * @return a revision object from the moved document if the commit has succeeded, null if something went wrong
+     */
+    public static Revisions commit(String urlhash) {
+        return transact(urlhash, State.INVENTORY, State.ARCHIVE);
+    }
+
+    /**
+     * Announce the rollback of a snapshot: this will move all data for the given urlhash from the archive to the inventory
+     * The index within the snapshot management will update also.
+     * @param urlhash
+     * @return a revision object from the moved document if the commit has succeeded, null if something went wrong
+     */
+    public static Revisions rollback(String urlhash) {
+        return transact(urlhash, State.ARCHIVE, State.INVENTORY);
+    }
     
+    private static Revisions transact(final String urlhash, final State from, final State to) {
+        Revisions r = Transactions.getRevisions(from, urlhash);
+        if (r == null) return null;
+        // we take all pathtoxml and move that to archive
+        for (File f: r.pathtoxml) {
+            String name = f.getName();
+            String nameStub = name.substring(0, name.length() - 4);
+            File sourceParent = f.getParentFile();
+            File targetParent = new File(sourceParent.getAbsolutePath().replace("/" + from.dirname + "/", "/" + to.dirname + "/"));
+            targetParent.mkdirs();
+            // list all files in the parent directory
+            for (String a: sourceParent.list()) {
+                if (a.startsWith(nameStub)) {
+                    new File(sourceParent, a).renameTo(new File(targetParent, a));
+                }
+            }
+            // delete empty directories
+            while (sourceParent.list().length == 0) {
+                sourceParent.delete();
+                sourceParent = sourceParent.getParentFile();
+            }
+        }
+        // announce the movement
+        DigestURL durl;
+        try {
+            durl = new DigestURL(r.url);
+            Transactions.announceDeletion(durl, r.depth, from);
+            Transactions.announceStorage(durl, r.depth, r.dates[0], to);
+            return r;
+        } catch (MalformedURLException e) {
+            ConcurrentLog.logException(e);
+        }
+    
+        return null;
+    }
     
     /**
      * select a set of urlhashes from the snapshot directory. The selection either ordered
@@ -159,8 +264,8 @@ public class Transactions {
      * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
      * @return a map of hosthashes with the associated creation date
      */
-    public static Map<String, Date> select(String host, Integer depth, final Order order, int maxcount, State state) {
-        Map<String, Date> result = new HashMap<>();
+    public static LinkedHashMap<String, Revisions> select(String host, Integer depth, final Order order, int maxcount, State state) {
+        LinkedHashMap<String, Revisions> result = new LinkedHashMap<>();
         if (state == State.INVENTORY || state == State.ANY) result.putAll(inventory.select(host, depth, order, maxcount));
         if (state == State.ARCHIVE || state == State.ANY) result.putAll(archive.select(host, depth, order, maxcount));
         return result;
@@ -182,9 +287,31 @@ public class Transactions {
         if (state == State.ARCHIVE) return archive.definePath(url, depth, date, ext);
         return null;
     }
-    
-    public static void announceStorage(final DigestURL url, final int depth, final Date date) {
-        inventory.announceStorage(url, depth, date); 
+
+    /**
+     * Write information about the storage of a snapshot to the Snapshot-internal index.
+     * The actual writing of files to the target directory must be done elsewehre, this method does not store the snapshot files.
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param url
+     * @param depth
+     * @param date
+     */
+    public static void announceStorage(final DigestURL url, final int depth, final Date date, State state) {
+        if (state == State.INVENTORY || state == State.ANY) inventory.announceStorage(url, depth, date); 
+        if (state == State.ARCHIVE || state == State.ANY) archive.announceStorage(url, depth, date);
+    }
+
+    /**
+     * Delete information about the storage of a snapshot to the Snapshot-internal index.
+     * The actual deletion of files in the target directory must be done elsewehre, this method does not store the snapshot files.
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @param url
+     * @param depth
+     * @param date
+     */
+    public static void announceDeletion(final DigestURL url, final int depth, final State state) {
+        if (state == State.INVENTORY || state == State.ANY) inventory.announceDeletion(url, depth); 
+        if (state == State.ARCHIVE || state == State.ANY) archive.announceDeletion(url, depth);
     }
 
     /**
