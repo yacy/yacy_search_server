@@ -124,7 +124,7 @@ public class Snapshots {
     }
 
     /**
-     * get a list of host names in the snapshot directory
+     * get a list of <host>.<port> names in the snapshot directory
      * @return
      */
     public Set<String> listHosts() {
@@ -183,14 +183,16 @@ public class Snapshots {
     
     /**
      * list the snapshots for a given host name
-     * @param host the host for the domain
+     * @param hostport the <host>.<port> identifier for the domain
+     * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
      * @return a map with a set for each depth in the domain of the host name
      */
-    public TreeMap<Integer, Collection<Revisions>> listIDs(final String hostport) {
+    public TreeMap<Integer, Collection<Revisions>> listIDs(final String hostport, final int depth) {
         TreeMap<Integer, Collection<Revisions>> result = new TreeMap<>();
         TreeMap<Integer, TreeSet<String>> list = directory.get(hostport);
         if (list != null) {
             for (Map.Entry<Integer, TreeSet<String>> entry: list.entrySet()) {
+                if (depth != -1 && entry.getKey() != depth) continue;
                 Collection<Revisions> r = new ArrayList<>(entry.getValue().size());
                 for (String datehash: entry.getValue()) {
                     r.add(new Revisions(hostport, entry.getKey(), datehash));
@@ -199,6 +201,24 @@ public class Snapshots {
             }
         }
         return result;
+    }
+
+    /**
+     * get the number of snapshots for the given host name
+     * @param hostport the <host>.<port> identifier for the domain
+     * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
+     * @return a count, the total number of documents for the domain and depth
+     */
+    public int listIDsSize(final String hostport, final int depth) {
+        int count = 0;
+        TreeMap<Integer, TreeSet<String>> list = directory.get(hostport);
+        if (list != null) {
+            for (Map.Entry<Integer, TreeSet<String>> entry: list.entrySet()) {
+                if (depth != -1 && entry.getKey() != depth) continue;
+                count += entry.getValue().size();
+            }
+        }
+        return count;
     }
     
     /**

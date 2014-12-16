@@ -139,22 +139,24 @@ public class snapshot {
                     // return a status of the transaction archive
                     String host = post.get("host");
                     String depth = post.get("depth");
+                    int depthi = depth == null ? -1 : Integer.parseInt(depth);
                     for (Transactions.State state: statename == null ?
                             new Transactions.State[]{Transactions.State.INVENTORY, Transactions.State.ARCHIVE} :
                             new Transactions.State[]{Transactions.State.valueOf(statename)}) {
                         if (host == null) {
                             JSONObject hostCountInventory = new JSONObject();
                             for (String h: Transactions.listHosts(state)) {
-                                hostCountInventory.put(h, Transactions.listIDs(state, h).size());
+                                int size = Transactions.listIDsSize(h, depthi, state);
+                                if (size > 0) hostCountInventory.put(h, size);
                             }
                             result.put("count." + state.name(), hostCountInventory);
                         } else {
-                            TreeMap<Integer, Collection<Revisions>> ids = Transactions.listIDs(state, host);
+                            TreeMap<Integer, Collection<Revisions>> ids = Transactions.listIDs(host, depthi, state);
                             if (ids == null) {
-                                result.put("error", "no host " + host + " found");
+                                result.put("result", "fail");
+                                result.put("comment", "no entries for host " + host + " found");
                             } else {
                                 for (Map.Entry<Integer, Collection<Revisions>> entry: ids.entrySet()) {
-                                    if (depth != null && Integer.parseInt(depth) != entry.getKey()) continue;
                                     for (Revisions r: entry.getValue()) {
                                         try {
                                             JSONObject metadata = new JSONObject();

@@ -105,7 +105,7 @@ public class Transactions {
     }
     
     /**
-     * get a list of host names in the snapshot directory
+     * get a list of <host>.<port> names in the snapshot directory
      * @return the list of the given state. if the state is ALL or unknown, all lists are combined
      */
     public static Set<String> listHosts(final State state) {
@@ -118,14 +118,31 @@ public class Transactions {
     
     /**
      * list the snapshots for a given host name
-     * @param host the host for the domain
+     * @param hostport the <host>.<port> identifier for the domain
+     * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
      * @return a map with a set for each depth in the domain of the host name
      */
-    public static TreeMap<Integer, Collection<Revisions>> listIDs(final State state, final String host) {
+    public static TreeMap<Integer, Collection<Revisions>> listIDs(final String hostport, final int depth, final State state) {
         switch (state) {
-            case INVENTORY : return inventory.listIDs(host);
-            case ARCHIVE : return archive.listIDs(host);
-            default : TreeMap<Integer, Collection<Revisions>> a = inventory.listIDs(host); a.putAll(archive.listIDs(host)); return a;
+            case INVENTORY : return inventory.listIDs(hostport, depth);
+            case ARCHIVE : return archive.listIDs(hostport, depth);
+            default : TreeMap<Integer, Collection<Revisions>> a = inventory.listIDs(hostport, depth); a.putAll(archive.listIDs(hostport, depth)); return a;
+        }
+    }
+    
+    /**
+     * get the number of snapshots for the given host name
+     * @param hostport the <host>.<port> identifier for the domain
+     * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
+     * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
+     * @return a count, the total number of documents for the domain and depth
+     */
+    public static int listIDsSize(final String hostport, final int depth, final State state) {
+        switch (state) {
+            case INVENTORY : return inventory.listIDsSize(hostport, depth);
+            case ARCHIVE : return archive.listIDsSize(hostport, depth);
+            default : return inventory.listIDsSize(hostport, depth) + archive.listIDsSize(hostport, depth);
         }
     }
     
