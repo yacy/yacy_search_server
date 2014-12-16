@@ -30,6 +30,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
@@ -44,6 +45,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 public class Html2Image {
@@ -95,11 +97,12 @@ public class Html2Image {
     private static boolean writeWkhtmltopdfInternal(final String url, final String proxy, final File destination, final String userAgent, final String acceptLanguage, final boolean ignoreErrors) {
         final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
         String commandline =
-                wkhtmltopdf.getAbsolutePath() + " -q --title " + url + " " +
+                wkhtmltopdf.getAbsolutePath() + " -q --title '" + url + "' " +
                 //acceptLanguage == null ? "" : "--custom-header 'Accept-Language' '" + acceptLanguage + "' " + 
                 (userAgent == null ? "" : "--custom-header 'User-Agent' '" + userAgent + "' --custom-header-propagation ") + 
                 (proxy == null ? "" : "--proxy " + proxy + " ") +
                 (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") +
+                "--footer-font-name 'Courier' --footer-font-size 9 --footer-left [webpage] --footer-right [date]/[time]([page]) " +
                 url + " " + destination.getAbsolutePath();
         try {
             List<String> message;
