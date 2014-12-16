@@ -1343,6 +1343,16 @@ never use the cache, all content from fresh internet source;==Никогда н�
 use the cache if the cache exists and is fresh using the proxy-fresh rules;==использовать кэш, если кэш существует и это новое использование правил прокси
 use the cache if the cache exist. Do no check freshness. Otherwise use online source;==использовать кэш, если кэш существует. Не проверять на обновления. Иначе использовать интернет-источник;
 never go online, use all content from cache. If no cache exist, treat content as unavailable==всегда оффлайн, использовать весь контент из кэша. Если кэш не существует, то считать что контент недоступен.
+>Snapshot Creation<==>Создание снимка<
+Max Depth for Snapshots==Максимальная глубина снимка
+Multiple Snapshot Versions==Версии снимков
+replace old snapshots with new one==заменить старые снимки новыми
+add new versions for each crawl==добавить новые версии для каждого индексирования
+Snapshots are xml metadata and pictures of web pages that can be created during crawling time.==Снимки состоят их XML-данных  и изображений вэб-страниц и могут быть созданы во время индексирования.
+The xml data is stored in the same way as a Solr search result with one hit and the pictures will be stored as pdf into subdirectories==XML-данные хранятся таким же образом, как и результаты поиска Solr; изображения сохраняются в формате pdf в директории
+of HTCACHE/snapshots/. From the pdfs the jpg thumbnails are computed. Snapshot generation can be controlled using a depth parameter; that==HTCACHE/snapshots/. Из pdf создаются эскизы в формате jpg. Создание снимков регулируется параметром "глубина снимка".
+means a snapshot is only be generated if the crawl depth of a document is smaller or equal to the given number here. If the number is set to -1,==Это означает, что снимки создаются только, если глубина индексирования документов низкая или равна заданному здесь значению. Если значение "-1",
+no snapshots are generated.==то снимки не создаются.
 >Crawler Filter<==>Фильтр индексатора<
 These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.==Ограничения работы индексатора. Фильтры применяются до загрузки страницы.
 Crawling Depth<==Глубина индексирования<
@@ -1828,6 +1838,7 @@ Delete local search index \(embedded Solr and old Metadata\)==Удалить л�
 Delete remote solr index==Удалить удалённый индекс базы Solr
 Delete RWI Index \(DHT transmission words\)==Удалить индекс RWI (передача слов в виде DHT)
 Delete Citation Index \(linking between URLs\)==Удалить индекс цитат (перекрестные ссылки)
+Delete First-Seen Date Table==Delete First-Seen Date Table
 Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
 Stop Crawler and delete Crawl Queues==Остановить индексатор и удалить очередь запросов
 Delete robots.txt Cache==Удалить кэш robots.txt
@@ -2248,7 +2259,7 @@ Records==
 #File: IndexReIndexMonitor_p.html
 #---------------------------
 Field Re-Indexing<==Перестроение индекса<
-In case that an index schema has changed, all documents with missing field entries can be indexed again with a reindex job.==В случае, если схема индекса была изменена, все документы c потерянными значениями полей могут быть проиндексированы опять с помощью переиндексации.
+In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.==В случае, если схема встроенного или локального индекса была изменена, все документы c потерянными значениями полей могут быть проиндексированы опять с помощью переиндексации.
 "refresh page"=="Обновить страницу"
 Documents in current queue<==Документы в текущей очереди:<
 Documents processed<==Документы выполняются:<
@@ -2457,6 +2468,11 @@ Network Overview==Обзор сети
 Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers==Активные главные и старшие узлы
 Passive&nbsp;Senior&nbsp;Peers==Пассивные старшие узлы
 Junior&nbsp;\(fragment\)&nbsp;Peers==Младшие узлы
+Network History==История сети
+<b>Count of Connected Senior Peers</b> in the last two days, scale = 1h==<b>Число подключенных старших узлов</b> за последние 2 дня, масштаб = 1 час
+<b>Count of all Active Peers Per Day</b> in the last week, scale = 1d==<b>Число всех активных узлов в день</b> за последнюю неделю, масштаб = 1 день
+<b>Count of all Active Peers Per Week</b> in the last 30d, scale = 7d==<b>Число всех активных узлов в неделю</b> за последние 30 дней, масштаб = 7 дней
+<b>Count of all Active Peers Per Month</b> in the last 365d, scale = 30d==<b>Число всех активных узлов в месяц</b> за последний год, масштаб = 30 дней
 Active Principal and Senior Peers in \'\#\[networkName\]\#\' Network==Активные главные и старшие узлы в сети
 Passive Senior Peers in \'\#\[networkName\]\#\' Network==Пассивные старшие узлы в сети
 Junior Peers \(a fragment\) in \'\#\[networkName\]\#\' Network==Младшие узлы в сети
@@ -3081,6 +3097,9 @@ Transparent Proxy==Прозрачный прокси
 With this you can specify if YaCy can be used as transparent proxy.==Включите эту опцию, если вам нужно использовать YaCy в качестве прозрачного прокси.
 Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Совет: В линукс-системах вы можете настроить фаервол на прозрачное перенаправление всего трафика через YaCy с этими правилами iptables
 With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Включите эту опцию, если вам необходимо постоянное соединение с YaCy.
+Always Fresh==Обновлять кэш
+If unchecked, the proxy will act using Cache Fresh / Cache Stale rules. If checked, the cache is always fresh which means==Если не отмечено, то прокси будет использовать правила обновления кэша "новый/старый". Если отмечено, то кэш всегда будет обновляться, и
+that a page is never loaded again if it was already stored in the cache. However, if the page does not exist in the cache, it will be loaded in any case.==страница не будет загружаться снова, если сохранен в кэше ранее. Однако, если страница не находится в кэше, то она будет загружена в любом случае.
 Send "Via" Header==Отправлять заголовок "Via"
 Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Отметьте, если прокси должен отправлять заголовок <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
 http header according to RFC 2616 Sect 14.45.==, описанный в RFC 2616 раздел 14.45.
@@ -3203,6 +3222,7 @@ company's own web pages.==вэб-страниц компаний.
 Filter have to be entered as IP, IP range or first part of allowed IP's separated by comma \(e.g. 10.100.0-100.0-100, 127. \)== Фильтр возможен по ip-адресу, по диапазону ip-адресов или по первым числам ip-адреса через запятую, (например  10.100.0-100.0-100, 127.)
 further details on format see Jetty ==Подробную информацию об IPAccessHandler смотрите
 <a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.==<a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">здесь</a>.
+fileHost:==Размещение файлов:
 staticIP \(optional\):==Постоянный IP-адрес (необязательно):
 <strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>Использование постоянного IP-адреса может помочь вашему узлу соединиться с другиму узлами
 peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==в случае, если вы используете фаервол или прокси.</strong> Вы можете создать туннель через фаервол или прокси
@@ -3374,6 +3394,9 @@ Unknown==неизвестная
 Uptime==Время работы
 Processors:==Процессоры:
 Load:==Загрузка процессора:
+Threads:==Потоки:
+peak:==максимум:
+total:==всего:
 Protection==Защита
 Password is missing==Пароль не используется
 password-protected==Пароль используется
@@ -3489,22 +3512,22 @@ provided by YaCy peers with an URL in their profile. This shows only URLs from p
 
 #File: Surftips.html
 #---------------------------
-Surftips</title>==Советы</title>
-Surftips</h2>==Surftipps</h2>
-Surftips are switched off==Surftipps sind ausgeschaltet
+Surftips</title>==Подсказки</title>
+Surftips</h2>==Подсказки</h2>
+Surftips are switched off==Подсказки выключены
 title="bookmark"==title="Закладка"
 alt="Add to bookmarks"==alt="Добавить в закладки"
 title="positive vote"==title="Понравилось"
 alt="Give positive vote"==alt="Ссылка понравилась"
 title="negative vote"==title="Не понравилось"
 alt="Give negative vote"==alt="Ссылка не понравилась"
-YaCy Supporters<==Сторонники YaCy<
+YaCy Supporters<==Спонсоры YaCy<
 >a list of home pages of yacy users<==>Список домашних страниц пользователей YaCy<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
-#"authentication required"=="Autorisierung erforderlich"
-Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
-Show surftips to everyone==Zeige Surftipps allen Benutzern
+#"authentication required"=="Запрос авторизации"
+Hide surftips for users without autorization==Скрыть подсказки для неавторизованных пользователей
+Show surftips to everyone==Разрешить подсказки всем
 #-----------------------------
 
 #File: Table_API_p.html
@@ -3897,6 +3920,19 @@ Vocabulary Selection==Выбор словаря
 Vocabulary Name==Название словаря
 "View"=="Показать"
 Vocabulary Production==Создание словаря
+this shall be a search facet \(disable this for large vocabularies!\)==сделать параметром поиска (не использовать для больших словарей!)
+Empty Vocabulary==Пустой словарь
+Auto-Discover==Авто-обнаружение
+Import from a csv file==Импорт из csv-файла
+File Path==Путь к файлу
+Column for Literals==Столбец литералов
+no Synonyms==нет синонимов
+Auto-Enrich with Synonyms from Stemming Library==авто-наполнение синонимами с помощью стемминга
+Read Column==читать столбец
+first has index==сначала индекс
+if unused set==если не используется, то установить
+Column for Object Link \(optional\)==Столец для ссылки на объект (необязательно)
+Charset of Import File==Кодировка импортируемого файла
 It is possible to produce a vocabulary out of the existing search index. This is done using a given \'objectspace\' which you can enter as a URL Stub.==Возможно создание словаря из существующего индекса поиска. Это делается через использование заданного 'объекта', который может быть введён как законченная ссылка.
 This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.==Это используется для поиска всех совпадающих ссылок. Если оставшийся путь из совпадающих ссылок обозначает один файл, то имя файла используется в качестве значения словаря.
 This works best with wikis. Try to use a wiki url as objectspace path.==Это лучше работает с Wiki . Попробуйте использовать wiki-ссылку в качестве объекта.
@@ -4398,7 +4434,7 @@ Thread Dump==Дамп потока
 >Published&nbsp;News<==>Опубликованные&nbsp;сообщения<
 ## Community Data Submenu
 >Community Data<==>Ресурсы сообщества<
->Surftips<==>Советы<
+>Surftips<==>Подсказки<
 >Local Peer Wiki<==>Wiki локального узла<
 #-----------------------------
 
@@ -4447,6 +4483,7 @@ Portal Configuration==Интеграция поиска
 Use Case &amp; Accounts==Учётные записи и варианты использования YaCy
 Basic Configuration==Основные настройки
 >Accounts<==>Учётные записи<
+Network Configuration==Настройка сети
 #---------------------------
 
 
