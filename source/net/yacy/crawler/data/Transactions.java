@@ -146,7 +146,7 @@ public class Transactions {
         }
     }
     
-    public static boolean store(final SolrInputDocument doc, final boolean loadImage, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent, final String acceptLanguage) {
+    public static boolean store(final SolrInputDocument doc, final boolean concurrency, final boolean loadImage, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent, final String acceptLanguage) {
 
         // GET METADATA FROM DOC
         final String urls = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
@@ -160,55 +160,66 @@ public class Transactions {
             return false;
         }
         
-        // CLEAN UP OLD DATA (if wanted)
-        Collection<File> oldPaths = Transactions.findPaths(url, depth, null, Transactions.State.INVENTORY);
-        if (replaceOld) {
-            for (File oldPath: oldPaths) oldPath.delete();
+        boolean success = loadImage ? store(url, date, depth, concurrency, replaceOld, proxy, agent, acceptLanguage) : true;
+        if (success) {
+            // STORE METADATA FOR THE IMAGE
+            File metadataPath = Transactions.definePath(url, depth, date, "xml", Transactions.State.INVENTORY);
+            metadataPath.getParentFile().mkdirs();
+            try {
+                if (doc != null) {
+                    FileOutputStream fos = new FileOutputStream(metadataPath);
+                    OutputStreamWriter osw = new OutputStreamWriter(fos);
+                    osw.write(XML_PREFIX);
+                    osw.write(WHITESPACE); osw.write("\n-->\n"); // placeholder for transaction information properties (a hack to attach metadata to metadata)
+                    osw.write("<result name=\"response\" numFound=\"1\" start=\"0\">\n");
+                    EnhancedXMLResponseWriter.writeDoc(osw, doc);
+                    osw.write("</result>\n");
+                    osw.write("</response>\n");
+                    osw.close();
+                    fos.close();
+                    Transactions.announceStorage(url, depth, date, State.INVENTORY);
+                }
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
+                success = false;
+            }
         }
         
+        return success;
+    }
+    
+
+    public static boolean store(final DigestURL url, final Date date, final int depth, final boolean concurrency, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent, final String acceptLanguage) {
+
+        // CLEAN UP OLD DATA (if wanted)
+        Collection<File> oldPaths = Transactions.findPaths(url, depth, null, Transactions.State.INVENTORY);
+        if (replaceOld && oldPaths != null) {
+            for (File oldPath: oldPaths) oldPath.delete();
+        }
         
         // STORE METADATA FOR THE IMAGE
         File metadataPath = Transactions.definePath(url, depth, date, "xml", Transactions.State.INVENTORY);
         metadataPath.getParentFile().mkdirs();
         boolean success = true;
-        try {
-            if (doc != null) {
-                FileOutputStream fos = new FileOutputStream(metadataPath);
-                OutputStreamWriter osw = new OutputStreamWriter(fos);
-                osw.write(XML_PREFIX);
-                osw.write(WHITESPACE); osw.write("\n-->\n"); // placeholder for transaction information properties (a hack to attach metadata to metadata)
-                osw.write("<result name=\"response\" numFound=\"1\" start=\"0\">\n");
-                EnhancedXMLResponseWriter.writeDoc(osw, doc);
-                osw.write("</result>\n");
-                osw.write("</response>\n");
-                osw.close();
-                fos.close();
-                Transactions.announceStorage(url, depth, date, State.INVENTORY);
-            }
-        } catch (IOException e) {
-            ConcurrentLog.logException(e);
-            success = false;
-        }
         
         // STORE AN IMAGE
-        if (success && loadImage) {
-            final File pdfPath = Transactions.definePath(url, depth, date, "pdf", Transactions.State.INVENTORY);
-            if (executorRunning.intValue() < Runtime.getRuntime().availableProcessors()) {
-                Thread t = new Thread(){
-                    @Override
-                    public void run() {
-                        executorRunning.incrementAndGet();
-                        try {
-                            Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
-                        } catch (Throwable e) {} finally {
-                        executorRunning.decrementAndGet();
-                        }
+        final String urls = url.toNormalform(true);
+        final File pdfPath = Transactions.definePath(url, depth, date, "pdf", Transactions.State.INVENTORY);
+        if (concurrency && executorRunning.intValue() < Runtime.getRuntime().availableProcessors()) {
+            Thread t = new Thread(){
+                @Override
+                public void run() {
+                    executorRunning.incrementAndGet();
+                    try {
+                        Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
+                    } catch (Throwable e) {} finally {
+                    executorRunning.decrementAndGet();
                     }
-                };
-                executor.execute(t);
-            } else {
-                success = Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
-            }
+                }
+            };
+            executor.execute(t);
+        } else {
+            success = Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
         }
         
         return success;

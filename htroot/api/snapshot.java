@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -248,16 +249,21 @@ public class snapshot {
         }
         
         if (pdf || pngjpg) {
-            Collection<File> pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.ANY);
+            Collection<File> pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.INVENTORY);
             File pdfFile = null;
             if (pdfSnapshots.size() == 0) {
                 // if the client is authenticated, we create the pdf on the fly!
                 if (!authenticated) return null;
                 SolrDocument sd = sb.index.fulltext().getMetadata(durl.hash());
-                SolrInputDocument sid = sb.index.fulltext().getDefaultConfiguration().toSolrInputDocument(sd);
-                boolean success = Transactions.store(sid, true, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, ClientIdentification.yacyProxyAgent, sb.getConfig("crawler.http.acceptLanguage", null));
+                boolean success = false;
+                if (sd == null) {
+                    success = Transactions.store(durl, new Date(), 99, false, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, ClientIdentification.yacyProxyAgent, sb.getConfig("crawler.http.acceptLanguage", null));
+                } else {
+                    SolrInputDocument sid = sb.index.fulltext().getDefaultConfiguration().toSolrInputDocument(sd);
+                    success = Transactions.store(sid, false, true, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, ClientIdentification.yacyProxyAgent, sb.getConfig("crawler.http.acceptLanguage", null));
+                }
                 if (success) {
-                    pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.INVENTORY);
+                    pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.ANY);
                     if (pdfSnapshots.size() != 0) pdfFile = pdfSnapshots.iterator().next();
                 }
             } else {
