@@ -35,6 +35,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.date.GenericFormatter;
+
 /**
  * The purpose of this class exceeds the demands on simple date parsing using a SimpleDateFormat
  * because it tries to 
@@ -492,6 +494,20 @@ public class DateDetection {
             }
         }
         return dates;
+    }
+    
+    public static Date parseLine(String text) {
+        Date d = null;
+        try {d = CONFORM.parse(text);} catch (ParseException e) {}
+        if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {}
+        if (d == null) try {d = GenericFormatter.FORMAT_RFC1123_SHORT.parse(text);} catch (ParseException e) {}
+        if (d == null) try {d = GenericFormatter.FORMAT_ANSIC.parse(text);} catch (ParseException e) {}
+            
+        if (d == null) {
+            Set<Date> dd = parse(text);
+            if (dd.size() >= 1) d = dd.iterator().next();
+        }
+        return d;
     }
     
     private static LinkedHashSet<Date> parseRawDate(String text) {

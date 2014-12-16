@@ -481,6 +481,10 @@ public final class QueryParams {
             fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.modifier.collection));
         }
         
+        if (this.modifier.on != null && this.modifier.on.length() > 0 && this.solrSchema.contains(CollectionSchema.dates_in_content_sxt)) {
+            fq.append(" AND ").append(QueryModifier.parseOnExpression(this.modifier.on));
+        }
+        
         if (this.modifier.protocol != null) {
             fq.append(" AND {!tag=").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append("}").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
         }

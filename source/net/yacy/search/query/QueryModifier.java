@@ -22,6 +22,7 @@ package net.yacy.search.query;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
@@ -29,6 +30,7 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.DateDetection;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
@@ -37,7 +39,7 @@ import net.yacy.server.serverObjects;
 public class QueryModifier {
 
     private final StringBuilder modifier;
-    public String sitehost, sitehash, filetype, protocol, language, author, collection;
+    public String sitehost, sitehash, filetype, protocol, language, author, collection, on;
     
     public QueryModifier() {
         this.sitehash = null;
@@ -47,6 +49,7 @@ public class QueryModifier {
         this.language = null;
         this.author = null;
         this.collection = null;
+        this.on = null;
         this.modifier = new StringBuilder(20);
     }
     
@@ -141,6 +144,18 @@ public class QueryModifier {
             this.collection = querystring.substring(collectioni + 11, ftb);
             querystring = querystring.replace("collection:" + this.collection, "");
             add("collection:" + this.collection);
+        }
+        
+        // parse on-date
+        final int oni = querystring.indexOf("on:", 0);
+        if ( oni >= 0 ) {
+            int ftb = querystring.indexOf(' ', oni);
+            if ( ftb == -1 ) {
+                ftb = querystring.length();
+            }
+            this.on = querystring.substring(oni + 3, ftb);
+            querystring = querystring.replace("on:" + this.on, "");
+            add("on:" + this.on);
         }
 
         // parse language
@@ -240,6 +255,10 @@ public class QueryModifier {
             fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.collection));
         }
         
+        if (this.on != null && this.on.length() > 0 && fq.indexOf(CollectionSchema.dates_in_content_sxt.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(QueryModifier.parseOnExpression(this.on));
+        }
+        
         if (this.protocol != null && this.protocol.length() > 0 && fq.indexOf(CollectionSchema.url_protocol_s.getSolrFieldName()) < 0) {
             fq.append(" AND ").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(":\"").append(this.protocol).append('\"');
         }
@@ -293,6 +312,15 @@ public class QueryModifier {
             filterQuery.append(')');
         } else if (sites.size() == 1) {
             filterQuery.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(0)).append('\"');
+        }
+        return filterQuery.toString();
+    }
+    
+    public static String parseOnExpression(String onDescription) {
+        Date onDate = DateDetection.parseLine(onDescription);
+        StringBuilder filterQuery = new StringBuilder(20);
+        if (onDate != null) {
+            filterQuery.append(CollectionSchema.dates_in_content_sxt.getSolrFieldName()).append(":\"").append(org.apache.solr.schema.TrieDateField.formatExternal(onDate)).append('\"');
         }
         return filterQuery.toString();
 
