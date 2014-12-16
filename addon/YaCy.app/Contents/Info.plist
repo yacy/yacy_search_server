@@ -112,6 +112,7 @@
 			<string>$JAVAROOT/lib/wstx-asl-3.2.9.jar</string>
 			<string>$JAVAROOT/lib/xercesImpl.jar</string>
 			<string>$JAVAROOT/lib/xml-apis.jar</string>
+                        <string>$JAVAROOT/lib/xmpcore-5.1.2.jar</string>
 			<string>$JAVAROOT/lib/yacycore.jar</string>
 			<string>$JAVAROOT/lib/zookeeper-3.4.6.jar</string>
 			</array>
