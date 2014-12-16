@@ -52,7 +52,7 @@ import org.apache.solr.search.SolrIndexSearcher;
 public class HTMLResponseWriter implements QueryResponseWriter {
 
     private static final Set<String> DEFAULT_FIELD_LIST = null;
-    private static final Pattern dqp = Pattern.compile("\"");
+    public static final Pattern dqp = Pattern.compile("\"");
     
     public HTMLResponseWriter() {
         super();
@@ -180,7 +180,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("</form>\n");
     }
     
-    static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc) {
+    public static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc) {
         List<IndexableField> fields = doc.getFields();
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;

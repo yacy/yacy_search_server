@@ -49,6 +49,7 @@ import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.SnapshotImagesReponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -98,6 +99,7 @@ public class SolrSelectServlet extends HttpServlet {
         RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
         RESPONSE_WRITER.put("html", new HTMLResponseWriter());
+        RESPONSE_WRITER.put("snapshots", new SnapshotImagesReponseWriter());
         RESPONSE_WRITER.put("grephtml", new GrepHTMLResponseWriter());
         RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
