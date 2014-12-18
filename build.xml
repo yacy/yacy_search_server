@@ -236,6 +236,7 @@
     	<pathelement location="${lib}/wstx-asl-3.2.9.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
+        <pathelement location="${lib}/xmpcore-5.1.2.jar" />
     	<pathelement location="${lib}/zookeeper-3.4.6.jar" />
     </path>
 
