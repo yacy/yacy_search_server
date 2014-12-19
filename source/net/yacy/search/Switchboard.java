@@ -3766,7 +3766,7 @@ public final class Switchboard extends serverSwitch {
                     //final long start = System.currentTimeMillis();
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
-                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
+                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
                     final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                     client.setHeader(reqHeader.entrySet());
 

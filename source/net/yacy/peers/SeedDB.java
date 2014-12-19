@@ -866,7 +866,7 @@ public final class SeedDB implements AlternativeDomainNames {
         // Configure http headers
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
-        reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
+        reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store"); // httpc uses HTTP/1.0 is this necessary?
         reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);

@@ -480,7 +480,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         byte[] data = dir.getBytes("UTF-8");
         response.setContentType(TEXT_HTML_UTF_8.asString());
         response.setContentLength(data.length);
-        response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache");
+        response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
         response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 10000); // consider that directories are not modified that often
         response.setDateHeader(HeaderFramework.LAST_MODIFIED, resource.lastModified());
         response.getOutputStream().write(data);
@@ -790,7 +790,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
             response.setDateHeader(HeaderFramework.EXPIRES, now + 1000); // expires in 1 seconds (reduce heavy image creation load)
         } else {
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
-            response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache");
         }
         
         if ((targetClass != null)) {
@@ -843,6 +842,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else if (tmp instanceof EncodedImage) {
                     final EncodedImage yp = (EncodedImage) tmp;
                     result = yp.getImage();
+                    if (yp.isStatic()) {
+                        response.setDateHeader(HeaderFramework.EXPIRES, now + 600000); // expires in ten minutes
+                    }
                 } else if (tmp instanceof Image) {
                     final Image i = (Image) tmp;
 

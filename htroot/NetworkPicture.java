@@ -135,7 +135,7 @@ public class NetworkPicture {
                 env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"),
                 env.getConfig("network.unit.description", "unspecified"),
                 Long.parseLong(bgcolor, 16),
-                cyc), "png");
+                cyc), "png", false);
         lastAccessSeconds = System.currentTimeMillis() / 1000;
 
         sync.release();

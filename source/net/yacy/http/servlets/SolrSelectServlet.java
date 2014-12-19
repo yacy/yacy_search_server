@@ -241,7 +241,7 @@ public class SolrSelectServlet extends HttpServlet {
                 rsp = ((EmbeddedSolrConnector) connector).query(req);
 
                 // prepare response
-                hresponse.setHeader("Cache-Control", "no-cache");
+                hresponse.setHeader("Cache-Control", "no-cache, no-store");
                 HttpCacheHeaderUtil.checkHttpCachingVeto(rsp, hresponse, reqMethod);
 
                 // check error

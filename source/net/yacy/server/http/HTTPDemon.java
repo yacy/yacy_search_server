@@ -228,7 +228,7 @@ public final class HTTPDemon {
             header.put(HeaderFramework.DATE, systemDate);
             header.put(HeaderFramework.CONTENT_TYPE, "text/html");
             header.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(result.length));
-            header.put(HeaderFramework.PRAGMA, "no-cache");
+            header.put(HeaderFramework.PRAGMA, "no-cache, no-store");
             sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,header);
 
             if (! method.equals(HeaderFramework.METHOD_HEAD)) {

@@ -354,7 +354,7 @@ public class Response {
             // if we have a pragma non-cache, we don't cache. usually if this is wanted from
             // the server, it makes sense
             String cacheControl = this.responseHeader.get(HeaderFramework.PRAGMA);
-            if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return "controlled_no_cache"; }
+            if (cacheControl != null && cacheControl.trim().toUpperCase().contains("NO-CACHE")) { return "controlled_no_cache"; }
 
             // -expires in response
             // we do not care about expires, because at the time this is called the data is
@@ -443,12 +443,12 @@ public class Response {
 
             // if the client requests a un-cached copy of the resource ...
             cacheControl = this.requestHeader.get(HeaderFramework.PRAGMA);
-            if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
+            if (cacheControl != null && cacheControl.trim().toUpperCase().contains("NO-CACHE")) { return false; }
 
             cacheControl = this.requestHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
-                if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
+                if (cacheControl.contains("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
             }
 
             // -if-modified-since in request
@@ -487,7 +487,7 @@ public class Response {
             // because they cannot exist since they are not written to the cache.
             // So this IF should always fail..
             cacheControl = this.responseHeader.get(HeaderFramework.PRAGMA);
-            if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
+            if (cacheControl != null && cacheControl.trim().toUpperCase().contains("NO-CACHE")) { return false; }
 
             // see for documentation also:
             // http://www.web-caching.com/cacheability.html
@@ -529,9 +529,9 @@ public class Response {
             // the cache-control has many value options.
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
-                if (cacheControl.startsWith("PRIVATE") ||
-                    cacheControl.startsWith("NO-CACHE") ||
-                    cacheControl.startsWith("NO-STORE")) {
+                if (cacheControl.contains("PRIVATE") ||
+                    cacheControl.contains("NO-CACHE") ||
+                    cacheControl.contains("NO-STORE")) {
                     // easy case
                     return false;
     //          } else if (cacheControl.startsWith("PUBLIC")) {
@@ -640,7 +640,7 @@ public class Response {
 
             // -pragma in cached response
             if (this.responseHeader.containsKey(HeaderFramework.PRAGMA) &&
-                (this.responseHeader.get(HeaderFramework.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
+                (this.responseHeader.get(HeaderFramework.PRAGMA)).toUpperCase().contains("NO-CACHE")) {
                 return "Denied_(pragma_no_cache)";
             }
 
@@ -672,9 +672,9 @@ public class Response {
                    "private", "no-cache", "no-store" -- cannot be indexed
                    "max-age=<delta-seconds>" -- stale/fresh dependent on date
                  */
-                if (cacheControl.startsWith("PRIVATE") ||
-                    cacheControl.startsWith("NO-CACHE") ||
-                    cacheControl.startsWith("NO-STORE")) {
+                if (cacheControl.contains("PRIVATE") ||
+                    cacheControl.contains("NO-CACHE") ||
+                    cacheControl.contains("NO-STORE")) {
                     // easy case
                     return "Stale_(denied_by_cache-control=" + cacheControl + ")";
 //              } else if (cacheControl.startsWith("PUBLIC")) {
