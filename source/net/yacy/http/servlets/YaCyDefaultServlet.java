@@ -480,6 +480,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
         byte[] data = dir.getBytes("UTF-8");
         response.setContentType(TEXT_HTML_UTF_8.asString());
         response.setContentLength(data.length);
+        response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache");
+        response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 10000); // consider that directories are not modified that often
+        response.setDateHeader(HeaderFramework.LAST_MODIFIED, resource.lastModified());
         response.getOutputStream().write(data);
     }
 
@@ -511,6 +514,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             out = new WriterOutputStream(response.getWriter());
         }
 
+        response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 600000); // expires ten minutes in the future
+        response.setDateHeader(HeaderFramework.LAST_MODIFIED, resource.lastModified());
+        
         if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
             //  if there were no ranges, send entire entity
             if (include) {
@@ -776,6 +782,17 @@ public class YaCyDefaultServlet extends HttpServlet  {
         File targetClass = rewriteClassFile(_resourceBase.addPath(target).getFile());
         String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
+        long now = System.currentTimeMillis();
+        response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
+        if (target.endsWith(".css")) {
+            response.setDateHeader(HeaderFramework.EXPIRES, now + 4000); // expires in 4 seconds (which is still too often)
+        } else if (target.endsWith(".png")) {
+            response.setDateHeader(HeaderFramework.EXPIRES, now + 1000); // expires in 1 seconds (reduce heavy image creation load)
+        } else {
+            response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
+            response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache");
+        }
+        
         if ((targetClass != null)) {
             serverObjects args = new serverObjects();
             Enumeration<String> argNames = request.getParameterNames();
