@@ -46,6 +46,7 @@ import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -63,7 +64,7 @@ public class ViewImage {
         }
     }
 
-    public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final Switchboard sb = (Switchboard)env;
 
@@ -73,6 +74,8 @@ public class ViewImage {
 
         String urlString = post.get("url", "");
         final String urlLicense = post.get("code", "");
+        boolean isStatic = post.getBoolean("isStatic");
+        String ext = header.get("EXT", null);
         final boolean quadratic = post.containsKey("quadratic");
         final boolean auth = Domains.isLocalhost(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")) || sb.verifyAuthentication(header); // handle access rights
 
@@ -144,7 +147,7 @@ public class ViewImage {
             // read image
             image = ImageParser.parse(urlString, imgb);
 
-            if (image == null || (auth && (width == 0 || height == 0) && maxwidth == 0 && maxheight == 0)) return image;
+            if (image == null || (auth && (width == 0 || height == 0) && maxwidth == 0 && maxheight == 0)) return ext == null ? image : new EncodedImage(image, ext, isStatic);
 
             // find original size
             final int h = image.getHeight(null);
@@ -229,7 +232,7 @@ public class ViewImage {
             }
         }
 
-        return image;
+        return ext == null ? image : new EncodedImage(image, ext, isStatic);
     }
 
 }

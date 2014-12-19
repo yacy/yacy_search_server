@@ -230,7 +230,7 @@ public final class QueryParams {
             // handle special field, authors_sxt (add to facet w/o contains check, as authors_sxt is not enabled (is copyfield))
             if (f != null && (solrSchema.contains(f) || f.name().equals("author_sxt"))) this.facetfields.add(f.getSolrFieldName());
         }
-        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
+        if (LibraryProvider.autotagging != null) for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
             if (v.isFacet()) {
                 this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
             }
