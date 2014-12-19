@@ -717,7 +717,7 @@ public final class Switchboard extends serverSwitch {
         // copy opensearch heuristic config (if not exist)
         final File osdConfig = new File(getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
         if (!osdConfig.exists()) {
-            final File osdDefaultConfig = new File("defaults/heuristicopensearch.conf");
+            final File osdDefaultConfig = new File(getAppPath(), "defaults/heuristicopensearch.conf");
             this.log.info("heuristic.opensearch list Path = " + osdDefaultConfig.getAbsolutePath());
             try {
                 Files.copy(osdDefaultConfig, osdConfig);
