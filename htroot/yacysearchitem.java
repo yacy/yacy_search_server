@@ -303,7 +303,7 @@ public class yacysearchitem {
 
                 final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
                 //sb.loader.loadIfNotExistBackground(image.imageUrl, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
-                prop.putHTML("content_item_hrefCache", "/ViewImage.png?maxwidth=128&maxheight=128&quadratic=&url=" + imageUrlstring);
+                prop.putHTML("content_item_hrefCache", "/ViewImage.png?maxwidth=128&maxheight=128&isStatic=true&quadratic=&url=" + imageUrlstring);
                 prop.putHTML("content_item_href", imageUrlstring);
                 prop.putHTML("content_item_target", target);
                 prop.put("content_item_code", license);

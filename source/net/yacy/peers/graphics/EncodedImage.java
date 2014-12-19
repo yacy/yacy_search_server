@@ -20,6 +20,8 @@
 
 package net.yacy.peers.graphics;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -30,13 +32,63 @@ import net.yacy.visualization.RasterPlotter;
 public class EncodedImage {
     private ByteBuffer image;
     private String extension;
+    private boolean isStatic;
 
-    public EncodedImage(final RasterPlotter sourceImage, final String targetExt) {
+    /**
+     * set an encoded image; prefer this over methods with Image-source objects because png generation is faster when done from RasterPlotter sources
+     * @param sourceImage the image
+     * @param targetExt the target extension of the image when converted into a file
+     * @param isStatic shall be true if the image will never change, false if not
+     */
+    public EncodedImage(final RasterPlotter sourceImage, final String targetExt, final boolean isStatic) {
         this.image = "png".equals(targetExt) ? sourceImage.exportPng() : RasterPlotter.exportImage(sourceImage.getImage(), targetExt);
         this.extension = targetExt;
+        this.isStatic = isStatic;
     }
     
-    public EncodedImage(final AnimationGIF sourceImage) {
+    /**
+     * set an encoded image from a buffered image
+     * @param sourceImage the image
+     * @param targetExt the target extension of the image when converted into a file
+     * @param isStatic shall be true if the image will never change, false if not
+     */
+    public EncodedImage(final BufferedImage bi, final String targetExt, final boolean isStatic) {
+        this.extension = targetExt;
+        this.image = RasterPlotter.exportImage(bi, targetExt);
+        this.isStatic = isStatic;
+        
+    }
+    
+    /**
+     * set an encoded image from a buffered image
+     * @param sourceImage the image
+     * @param targetExt the target extension of the image when converted into a file
+     * @param isStatic shall be true if the image will never change, false if not
+     */
+    public EncodedImage(final Image i, final String targetExt, final boolean isStatic) {
+        this.extension = targetExt;
+        this.isStatic = isStatic;
+        
+        // generate an byte array from the generated image
+        int width = i.getWidth(null);
+        if (width < 0) {
+            width = 96; // bad hack
+        }
+        int height = i.getHeight(null);
+        if (height < 0) {
+            height = 96; // bad hack
+        }
+        final BufferedImage sourceImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        sourceImage.createGraphics().drawImage(i, 0, 0, width, height, null);
+        this.image = RasterPlotter.exportImage(sourceImage, targetExt);
+    }
+    
+    /**
+     * set an encoded image from an animated GIF. The target extension will be "gif"
+     * @param sourceImage the image
+     * @param isStatic shall be true if the image will never change, false if not
+     */
+    public EncodedImage(final AnimationGIF sourceImage, final boolean isStatic) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             bos.write(sourceImage.get());
@@ -45,13 +97,30 @@ public class EncodedImage {
         }
         this.image = new ByteBuffer(bos.toByteArray());
         this.extension = "gif";
+        this.isStatic = isStatic;
     }
     
+    /**
+     * get the encoded image
+     * @return the bytes of the image encoded into the target extension format
+     */
     public ByteBuffer getImage() {
         return this.image;
     }
     
+    /**
+     * get the extension of the image
+     * @return the target extension of the encoded image
+     */
     public String getExtension() {
         return this.extension;
+    }
+    
+    /**
+     * get information if the information changes in the future or not if it does not change, it is static
+     * @return true if the image will never change, false if not
+     */
+    public boolean isStatic() {
+        return this.isStatic;
     }
 }

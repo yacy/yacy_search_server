@@ -49,6 +49,7 @@ import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.data.Snapshots.Revisions;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -306,7 +307,7 @@ public class snapshot {
                     final MediaTracker mediaTracker = new MediaTracker(new Container());
                     mediaTracker.addImage(scaled, 0);
                     try {mediaTracker.waitForID(0);} catch (final InterruptedException e) {}
-                    return scaled;
+                    return new EncodedImage(scaled, ext, true);
                 } catch (IOException e) {
                     ConcurrentLog.logException(e);
                     return null;

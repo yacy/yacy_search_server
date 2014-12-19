@@ -19,6 +19,7 @@
  */
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.graphics.OSMTile;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -28,7 +29,7 @@ import net.yacy.visualization.RasterPlotter.DrawMode;
 
 public class osm {
 
-    public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+    public static EncodedImage respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
         int zoom = 10;
         double lat = 50.11670d;
@@ -57,7 +58,7 @@ public class osm {
          * The (C) symbol is not available in our font, so we use the letters (C) instead.
          */
         PrintTool.print(map, map.getWidth() - 6, map.getHeight() - 6, 0, "(C) OPENSTREETMAP CONTRIBUTORS", 1);
-        return map;
+        return new EncodedImage(map, header.get("EXT", null), true);
    }
 
 }
