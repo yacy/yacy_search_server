@@ -155,7 +155,7 @@ public final class hello {
         ConcurrentLog.info("**hello-DEBUG**", "peer " + remoteSeed.getName() + " challenged us with IPs " + reportedips);
         int callbackRemain = Math.min(5, reportedips.size());
         long callbackStart = System.currentTimeMillis();
-        if (reportedips.size() > 0) { 
+        if (callbackRemain > 0 && reportedips.size() > 0) { 
             for (String reportedip: reportedips) {
                 int partialtimeout = ((int) (callbackStart + 6500 - System.currentTimeMillis())) / callbackRemain; // bad hack until a concurrent version is implemented
                 if (partialtimeout <= 0) break;
