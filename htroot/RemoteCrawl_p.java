@@ -114,8 +114,9 @@ public class RemoteCrawl_p {
                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                 String shortname = seed.get(Seed.NAME, "deadlink");
                 if (shortname.length() > 20) shortname = shortname.substring(0, 20) + "...";
+                final String peeradr =   seed.getPublicAddress(seed.getIPs().iterator().next());
                 prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
-                prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_peeraddress", peeradr);
                 prop.put(STR_TABLE_LIST + conCount + "_age", seed.getAge());
                 String[] yv = yacyVersion.combined2prettyVersion(seed.get(Seed.VERSION, "0.1"), shortname);
                 prop.putHTML(STR_TABLE_LIST + conCount + "_version", yv[0] + "/" + yv[1]);
