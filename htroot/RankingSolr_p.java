@@ -201,7 +201,7 @@ public class RankingSolr_p {
             prop.putHTML("boosthint_vocabulariesvoclogcounts", voclogcountsFields.toString());
             String[] facetfields = ff.toArray(new String[ff.size()]);
             int fc = 0;
-            try {
+            if (facetfields.length > 0) try {
                 LinkedHashMap<String, ReversibleScoreMap<String>> facets = sb.index.fulltext().getDefaultConnector().getFacets("*:*", 100, facetfields);
                 facets.put(CollectionSchema.vocabularies_sxt.getSolrFieldName(), vokcounts);
                 for (Map.Entry<String, ReversibleScoreMap<String>> facetentry: facets.entrySet()) {
