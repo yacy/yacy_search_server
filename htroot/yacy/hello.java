@@ -36,7 +36,6 @@ import java.util.concurrent.ConcurrentMap;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Network;
 import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
@@ -59,7 +58,7 @@ public final class hello {
         final long start = System.currentTimeMillis();
         prop.put("message", "none");
         final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
-        ConcurrentLog.info("**hello-DEBUG**", "client request from = " + clientip);
+        //ConcurrentLog.info("**hello-DEBUG**", "client request from = " + clientip);
         final InetAddress ias = Domains.dnsResolve(clientip);
         long time = System.currentTimeMillis();
         final long time_dnsResolve = System.currentTimeMillis() - time;
@@ -152,21 +151,21 @@ public final class hello {
             reportedips.add(ias.getHostAddress());
         }
         final int connectedBefore = sb.peers.sizeConnected();
-        ConcurrentLog.info("**hello-DEBUG**", "peer " + remoteSeed.getName() + " challenged us with IPs " + reportedips);
+        //ConcurrentLog.info("**hello-DEBUG**", "peer " + remoteSeed.getName() + " challenged us with IPs " + reportedips);
         int callbackRemain = Math.min(5, reportedips.size());
         long callbackStart = System.currentTimeMillis();
         if (callbackRemain > 0 && reportedips.size() > 0) { 
             for (String reportedip: reportedips) {
                 int partialtimeout = ((int) (callbackStart + 6500 - System.currentTimeMillis())) / callbackRemain; // bad hack until a concurrent version is implemented
                 if (partialtimeout <= 0) break;
-                ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " is handled");
+                //ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " is handled");
                 if (Seed.isProperIP(reportedip)) {
-                    ConcurrentLog.info("**hello-DEBUG**", "starting callback to reportedip = " + reportedip + ", timeout = " + partialtimeout);
+                    //ConcurrentLog.info("**hello-DEBUG**", "starting callback to reportedip = " + reportedip + ", timeout = " + partialtimeout);
                     prop.put("yourip", reportedip);
                     remoteSeed.setIP(reportedip);
                     time = System.currentTimeMillis();
                     callback = Protocol.queryRWICount(remoteSeed.getPublicAddress(reportedip), remoteSeed.hash, partialtimeout);
-                    ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " returns callback " + (callback == null ? "NULL" : callback[0]));
+                    //ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " returns callback " + (callback == null ? "NULL" : callback[0]));
                     time_backping = System.currentTimeMillis() - time;
                     backping_method = "reportedip=" + reportedip;
                     if (callback[0] >= 0) { success = true; break; }
@@ -175,7 +174,7 @@ public final class hello {
             }
         }
         if (success) {
-            ConcurrentLog.info("**hello-DEBUG**", "success for IP(s) " + remoteSeed.getIPs() + ", port " + remoteSeed.getPort());
+            //ConcurrentLog.info("**hello-DEBUG**", "success for IP(s) " + remoteSeed.getIPs() + ", port " + remoteSeed.getPort());
             if (remoteSeed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) == null) {
                 prop.put(Seed.YOURTYPE, Seed.PEERTYPE_SENIOR);
                 remoteSeed.put(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR);
@@ -189,7 +188,7 @@ public final class hello {
             Network.log.info("hello/server: responded remote " + reportedPeerType + " peer '" + remoteSeed.getName() + "' from " + reportedips + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         } else {
-            ConcurrentLog.info("**hello-DEBUG**", "fail for IP(s) " + remoteSeed.getIPs() + ", port " + remoteSeed.getPort());
+            //ConcurrentLog.info("**hello-DEBUG**", "fail for IP(s) " + remoteSeed.getIPs() + ", port " + remoteSeed.getPort());
             prop.put("yourip", ias.getHostAddress());
             remoteSeed.setIP(ias.getHostAddress());
             prop.put(Seed.YOURTYPE, Seed.PEERTYPE_JUNIOR);
