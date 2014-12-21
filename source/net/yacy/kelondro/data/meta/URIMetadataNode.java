@@ -153,7 +153,7 @@ public class URIMetadataNode extends SolrDocument {
         this.snippet = "";
         Float scorex = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
         this.score = scorex == null ? 0.0f : scorex.floatValue();
-        final byte[] hash = ASCII.getBytes(getString(CollectionSchema.id)); // TODO: can we thrust this id ?
+        final byte[] hash = ASCII.getBytes(getString(CollectionSchema.id)); // TODO: can we trust this id ?
         final String urlRaw = getString(CollectionSchema.sku);
         try {
             this.url = new DigestURL(urlRaw, hash);
@@ -329,8 +329,11 @@ public class URIMetadataNode extends SolrDocument {
         return ASCII.getBytes(referrer);
     }
 
-    @Override
-    public int size() {
+    /**
+     * gives the size in byte of the original url document
+     * @return filesize of url
+     */
+    public int filesize() {
         return getInt(CollectionSchema.size_i);
     }
 
@@ -496,7 +499,7 @@ public class URIMetadataNode extends SolrDocument {
             s.append(",fresh=").append(formatter.format(this.freshdate()));
             s.append(",referrer=").append(this.referrerHash() == null ? "" : ASCII.String(this.referrerHash()));
             s.append(",md5=").append(this.md5());
-            s.append(",size=").append(this.size());
+            s.append(",size=").append(this.filesize());
             s.append(",wc=").append(this.wordCount());
             s.append(",dt=").append(this.doctype());
             s.append(",flags=").append(this.flags().exportB64());

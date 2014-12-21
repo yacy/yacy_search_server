@@ -158,7 +158,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return this.urlentry.moddate();
     }
     public int filesize() {
-        return this.urlentry.size();
+        return this.urlentry.filesize();
     }
     public int referencesCount() {
         // urlCitationIndex index might be null (= configuration option)

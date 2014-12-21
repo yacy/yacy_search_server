@@ -156,7 +156,7 @@ public class ViewFile {
             url = urlEntry.url();
             descr = urlEntry.dc_title();
             //urlEntry.wordCount();
-            size = urlEntry.size();
+            size = urlEntry.filesize();
             pre = urlEntry.flags().get(Condenser.flag_cat_indexof);
             prop.put("moar", 1);
             prop.putHTML("moar_search", post.get("search",""));
