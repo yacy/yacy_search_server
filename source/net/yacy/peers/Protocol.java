@@ -392,14 +392,14 @@ public final class Protocol {
             parts.put("object", UTF8.StringBody("rwicount"));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("env", UTF8.StringBody(""));
-            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetAddress);
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetAddress);
             final Post post = new Post(targetAddress, targetHash, "/yacy/query.html", parts, timeout);
-            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received CONTENT from requesting " + targetAddress + (post.result == null ? "NULL" : (": length = " + post.result.length)));
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received CONTENT from requesting " + targetAddress + (post.result == null ? "NULL" : (": length = " + post.result.length)));
             final Map<String, String> result = FileUtils.table(post.result);
             if (result == null || result.isEmpty()) return new long[] {-1, -1};
-            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESULT from requesting " + targetAddress + " : result = " + result.toString());
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESULT from requesting " + targetAddress + " : result = " + result.toString());
             final String resp = result.get("response");
-            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESPONSE from requesting " + targetAddress + " : response = " + resp);
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESPONSE from requesting " + targetAddress + " : response = " + resp);
             if (resp == null) return new long[] {-1, -1};
             String magic = result.get("magic");
             if (magic == null) magic = "0";
@@ -409,7 +409,7 @@ public final class Protocol {
                 return new long[] {-1, -1};
             }
         } catch (final Exception e ) {
-            ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received EXCEPTION from requesting " + targetAddress + ": " + e.getMessage());
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received EXCEPTION from requesting " + targetAddress + ": " + e.getMessage());
             if (Network.log.isFine()) Network.log.fine("yacyClient.queryRWICount error:" + e.getMessage());
             return new long[] {-1, -1};
         }

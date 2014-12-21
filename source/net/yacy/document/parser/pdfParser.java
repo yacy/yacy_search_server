@@ -36,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.pdfbox.exceptions.CryptographyException;
@@ -51,6 +52,7 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.util.PDFTextStripper;
 
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
@@ -64,6 +66,9 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class pdfParser extends AbstractParser implements Parser {
 
+    public static boolean individualPages = false;
+    public static String individualPagePropertyname = "page";
+    
     public pdfParser() {
         super("Acrobat Portable Document Parser");
         this.SUPPORTED_EXTENSIONS.add("pdf");
@@ -78,7 +83,7 @@ public class pdfParser extends AbstractParser implements Parser {
     static {
         clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // must be called here to get that into the class loader; it will block other threads otherwise;
     }
-    
+
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
@@ -141,51 +146,117 @@ public class pdfParser extends AbstractParser implements Parser {
         if (docTitle == null || docTitle.isEmpty()) {
             docTitle = MultiProtocolURL.unescape(location.getFileName());
         }
-        final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
-        byte[] contentBytes = new byte[0];
-        Collection<AnchorURL> pdflinks = null;
+        if (docTitle == null) {
+            docTitle = docSubject;
+        }
+        String[] docKeywords = null;
+        if (docKeywordStr != null) {
+            docKeywords = docKeywordStr.split(" |,");
+        }
+        
+        Collection<AnchorURL>[] pdflinks = null;
+        Document[] result = null;
         try {
-            // create a writer for output
-            final PDFTextStripper  stripper = new PDFTextStripper("UTF-8");
-
-            stripper.setEndPage(3); // get first 3 pages (always)
-            writer.append(stripper.getText(pdfDoc));
-            contentBytes = writer.getBytes(); // remember text in case of interrupting thread
-
-            if (pdfDoc.getNumberOfPages() > 3) { // spare creating/starting thread if all pages read
-                stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
-                stripper.setEndPage(Integer.MAX_VALUE); // set to default
-                // we start the pdf parsing in a separate thread to ensure that it can be terminated
-                final PDDocument pdfDocC = pdfDoc;
-                final Thread t = new Thread() {
-                    @Override
-                    public void run() {
-                        Thread.currentThread().setName("pdfParser.getText:" + location);
-                        try {
-                            writer.append(stripper.getText(pdfDocC));
-                        } catch (final Throwable e) {}
-                    }
-                };
-                t.start();
-                t.join(3000);
-                if (t.isAlive()) t.interrupt();
-            }
-            contentBytes = writer.getBytes(); // get final text before closing writer
+            // get the links
             pdflinks = extractPdfLinks(pdfDoc);
+            
+            // get the fulltext (either per document or for each page)
+            final PDFTextStripper stripper = new PDFTextStripper("UTF-8");
+
+            if (individualPages) {
+                // this is a hack which stores individual pages of the source pdf into individual index documents
+                // the new documents will get a virtual link with a post argument page=X appended to the original url
+                
+                // collect text
+                int pagecount = pdfDoc.getNumberOfPages();
+                String[] pages = new String[pagecount];
+                for (int page = 1; page <= pagecount; page++) {
+                    stripper.setStartPage(page);
+                    stripper.setEndPage(page);
+                    pages[page - 1] = stripper.getText(pdfDoc);
+                    System.out.println("PAGE " + page + ": " + pages[page - 1]);
+                }
+                
+                // create individual documents for each page
+                assert pages.length == pdflinks.length : "pages.length = " + pages.length + ", pdflinks.length = " + pdflinks.length;
+                result = new Document[Math.min(pages.length, pdflinks.length)];
+                String loc = location.toNormalform(true);
+                for (int page = 0; page < result.length; page++) {                    
+                    result[page] = new Document(
+                            new AnchorURL(loc + (loc.indexOf('?') > 0 ? '&' : '?') + individualPagePropertyname + '=' + (page + 1)), // these are virtual new pages; we cannot combine them with '#' as that would be removed when computing the urlhash
+                            mimeType,
+                            "UTF-8",
+                            this,
+                            null,
+                            docKeywords,
+                            singleList(docTitle),
+                            docAuthor,
+                            docPublisher,
+                            null,
+                            null,
+                            0.0f, 0.0f,
+                            pages == null || page > pages.length ? new byte[0] : UTF8.getBytes(pages[page]),
+                            pdflinks == null || page >= pdflinks.length ? null : pdflinks[page],
+                            null,
+                            null,
+                            false,
+                            docDate);
+                }
+            } else {
+                // collect the whole text at once
+                final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
+                byte[] contentBytes = new byte[0];
+                stripper.setEndPage(3); // get first 3 pages (always)
+                writer.append(stripper.getText(pdfDoc));
+                contentBytes = writer.getBytes(); // remember text in case of interrupting thread
+
+                if (pdfDoc.getNumberOfPages() > 3) { // spare creating/starting thread if all pages read
+                    stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
+                    stripper.setEndPage(Integer.MAX_VALUE); // set to default
+                    // we start the pdf parsing in a separate thread to ensure that it can be terminated
+                    final PDDocument pdfDocC = pdfDoc;
+                    final Thread t = new Thread() {
+                        @Override
+                        public void run() {
+                            Thread.currentThread().setName("pdfParser.getText:" + location);
+                            try {
+                                writer.append(stripper.getText(pdfDocC));
+                            } catch (final Throwable e) {}
+                        }
+                    };
+                    t.start();
+                    t.join(3000); // pdfbox likes to forget to terminate ... (quite often)
+                    if (t.isAlive()) t.interrupt();
+                }
+                contentBytes = writer.getBytes(); // get final text before closing writer
+
+                Collection<AnchorURL> pdflinksCombined = new HashSet<AnchorURL>();
+                for (Collection<AnchorURL> pdflinksx: pdflinks) if (pdflinksx != null) pdflinksCombined.addAll(pdflinksx);
+                result = new Document[]{new Document(
+                        location,
+                        mimeType,
+                        "UTF-8",
+                        this,
+                        null,
+                        docKeywords,
+                        singleList(docTitle),
+                        docAuthor,
+                        docPublisher,
+                        null,
+                        null,
+                        0.0f, 0.0f,
+                        contentBytes,
+                        pdflinksCombined,
+                        null,
+                        null,
+                        false,
+                        docDate)};
+            }         
         } catch (final Throwable e) {
             //close the writer (in finally)
             //throw new Parser.Failure(e.getMessage(), location);
         } finally {
             try {pdfDoc.close();} catch (final Throwable e) {}
-            writer.close();
-        }
-
-        String[] docKeywords = null;
-        if (docKeywordStr != null) {
-            docKeywords = docKeywordStr.split(" |,");
-        }
-        if (docTitle == null) {
-            docTitle = docSubject;
         }
 
         // clear resources in pdfbox. they say that is resolved but it's not. see:
@@ -201,25 +272,7 @@ public class pdfParser extends AbstractParser implements Parser {
         pdfDoc = null;
         clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes();
         
-        return new Document[]{new Document(
-                location,
-                mimeType,
-                "UTF-8",
-                this,
-                null,
-                docKeywords,
-                singleList(docTitle),
-                docAuthor,
-                docPublisher,
-                null,
-                null,
-                0.0f, 0.0f,
-                contentBytes,
-                (pdflinks == null || pdflinks.isEmpty()) ? null : pdflinks,
-                null,
-                null,
-                false,
-                docDate)};
+        return result;
     }
 
     /**
@@ -227,11 +280,14 @@ public class pdfParser extends AbstractParser implements Parser {
      * @param pdf the document to parse
      * @return all detected links
      */
-    private Collection<AnchorURL> extractPdfLinks(final PDDocument pdf) {
-        final Collection<AnchorURL> pdflinks = new ArrayList<AnchorURL>();
+    private Collection<AnchorURL>[] extractPdfLinks(final PDDocument pdf) {
         @SuppressWarnings("unchecked")
         List<PDPage> allPages = pdf.getDocumentCatalog().getAllPages();
+        @SuppressWarnings("unchecked")
+        Collection<AnchorURL>[] linkCollections = (Collection<AnchorURL>[]) new Collection<?>[allPages.size()];
+        int pagecount = 0;
         for (PDPage page : allPages) {
+            final Collection<AnchorURL> pdflinks = new ArrayList<AnchorURL>();
             try {
                 List<PDAnnotation> annotations = page.getAnnotations();
                 if (annotations != null) {
@@ -248,8 +304,9 @@ public class pdfParser extends AbstractParser implements Parser {
                     }
                 }
             } catch (IOException ex) {}
+            linkCollections[pagecount++] = pdflinks;
         }
-        return pdflinks;
+        return linkCollections;
     }
 
     public static void clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes() {

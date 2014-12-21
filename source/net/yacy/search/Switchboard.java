@@ -833,6 +833,8 @@ public final class Switchboard extends serverSwitch {
                 
     	TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
         TextParser.setDenyExtension(getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
+        pdfParser.individualPages = getConfigBool(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES, false);
+        pdfParser.individualPagePropertyname = getConfig(SwitchboardConstants.PARSER_PDF_INDIVIDUALPAGES_KEY, "page");
 
         // start a loader
         this.log.config("Starting Crawl Loader");

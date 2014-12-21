@@ -27,6 +27,7 @@
 package net.yacy.search.snippet;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -36,6 +37,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
+import net.yacy.document.parser.pdfParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -126,16 +128,28 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return this.urlentry.flags();
     }
     public String urlstring() {
-        return (this.alternative_urlstring == null) ? this.urlentry.url().toNormalform(true) : this.alternative_urlstring;
+        if (this.alternative_urlstring != null) return this.alternative_urlstring;
+        
+        if (!pdfParser.individualPages) return this.url().toNormalform(true);
+        if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.urlentry.url().getFileName()).toLowerCase())) return this.url().toNormalform(true);
+        // for pdf links we rewrite the url
+        // this is a special treatment of pdf files which can be splitted into subpages
+        String pageprop = pdfParser.individualPagePropertyname;
+        String resultUrlstring = this.urlentry.url().toNormalform(true);
+        int p = resultUrlstring.lastIndexOf(pageprop + "=");
+        if (p > 0) {
+          return resultUrlstring.substring(0, p - 1) + "#page=" + resultUrlstring.substring(p + pageprop.length() + 1);
+        }
+        return resultUrlstring;
     }
     public String urlname() {
-        return (this.alternative_urlname == null) ? MultiProtocolURL.unescape(this.urlentry.url().toNormalform(true)) : this.alternative_urlname;
+        return (this.alternative_urlname == null) ? MultiProtocolURL.unescape(urlstring()) : this.alternative_urlname;
     }
     public String title() {
         String titlestr = this.urlentry.dc_title();
         // if title is empty use filename as title
         if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
-            titlestr = this.urlentry.url() != null ? this.urlentry.url().getFileName() : "";
+            titlestr = this.url() != null ? this.url().getFileName() : "";
         }
         return titlestr;
     }

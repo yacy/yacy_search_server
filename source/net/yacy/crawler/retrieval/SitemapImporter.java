@@ -57,7 +57,7 @@ public class SitemapImporter extends Thread {
     @Override
     public void run() {
         try {
-            logger.info("Start parsing sitemap file " + this.siteMapURL);
+            logger.info("Start parsing sitemap file " + this.siteMapURL.toNormalform(true));
             sitemapParser.SitemapReader parser = sitemapParser.parse(this.siteMapURL, this.crawlingProfile.getAgent());
             parser.start();
             URLEntry item;

@@ -284,6 +284,8 @@ public final class SwitchboardConstants {
     public static final String INDEX_TRANSFER_GZIP_BODY         = "indexTransfer.gzipBody";
     public static final String PARSER_MIME_DENY                 = "parser.mime.deny";
     public static final String PARSER_EXTENSIONS_DENY           = "parser.extensions.deny";
+    public static final String PARSER_PDF_INDIVIDUALPAGES       = "parser.pdf.individualpages";
+    public static final String PARSER_PDF_INDIVIDUALPAGES_KEY   = "parser.pdf.individualpages.key";
     /**
      * <p><code>public static final String <strong>PROXY_ONLINE_CAUTION_DELAY</strong> = "onlineCautionDelay"</code></p>
      * <p>Name of the setting how long indexing should pause after the last time the proxy was used in milliseconds</p>
