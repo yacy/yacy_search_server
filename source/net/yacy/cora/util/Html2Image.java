@@ -102,9 +102,11 @@ public class Html2Image {
                 (userAgent == null ? "" : "--custom-header 'User-Agent' '" + userAgent + "' --custom-header-propagation ") + 
                 (proxy == null ? "" : "--proxy " + proxy + " ") +
                 (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") +
-                "--footer-font-name 'Courier' --footer-font-size 9 --footer-left [webpage] --footer-right [date]/[time]([page]) " +
+                //"--footer-font-name 'Courier' --footer-font-size 9 --footer-left [webpage] --footer-right [date]/[time]([page]/[topage]) " +
+                "--footer-left [webpage] --footer-right [date]/[time]([page]/[topage]) " +
                 url + " " + destination.getAbsolutePath();
         try {
+            ConcurrentLog.info("Html2Pdf", "creating pdf from url " + url + " with command: " + commandline); 
             List<String> message;
             if (!usexvfb) {
                 message = OS.execSynchronous(commandline);
@@ -116,16 +118,16 @@ public class Html2Image {
             commandline = "xvfb-run -a " + commandline;
             message = OS.execSynchronous(commandline);
             if (destination.exists()) {usexvfb = true; return true;}
-            ConcurrentLog.warn("Html2Image", "failed to create pdf " + (proxy == null ? "" : "using proxy " + proxy) + " and xvfb with command: " + commandline);
+            ConcurrentLog.warn("Html2Pdf", "failed to create pdf " + (proxy == null ? "" : "using proxy " + proxy) + " and xvfb with command: " + commandline);
             for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
             return false;
         } catch (IOException e) {
             e.printStackTrace();
-            ConcurrentLog.warn("Html2Image", "exception while creation of pdf with command: " + commandline);
+            ConcurrentLog.warn("Html2Pdf", "exception while creation of pdf with command: " + commandline);
             return false;
         }
     }
-
+    
     /**
      * convert a pdf to an image. proper values are i.e. width = 1024, height = 1024, density = 300, quality = 75
      * @param pdf
