@@ -141,14 +141,14 @@
                         <id>compile-htroot</id>
                         <phase>compile</phase>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <javac fork="true"  srcdir="htroot/"
                                        excludes="processing/**"
                                        includeantruntime="false">
                                     <classpath refid="maven.compile.classpath"/>
                                     <compilerarg value="-Xlint"/>
                                 </javac>
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
