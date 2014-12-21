@@ -29,9 +29,7 @@ import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.ARC;
-import net.yacy.cora.storage.ARH;
 import net.yacy.cora.storage.ConcurrentARC;
-import net.yacy.cora.storage.ConcurrentARH;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.MemoryControl;
@@ -73,7 +71,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     private SolrConnector connector;
     private ARC<String, LoadTimeURL> metadataCache;
-    private final ARH<String> missCache;
+    //private final ARH<String> missCache;
     private final LinkedHashMap<String, SolrInputDocument> docBuffer;
     private CommitHandler processHandler;
     private final int updateCapacity;
@@ -83,7 +81,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         this.connector = connector;
         this.updateCapacity = updateCapacity;
         this.metadataCache = new ConcurrentARC<>(idCacheCapacity, concurrency);
-        this.missCache = new ConcurrentARH<>(idCacheCapacity, concurrency);
+        //this.missCache = new ConcurrentARH<>(idCacheCapacity, concurrency);
         this.docBuffer = new LinkedHashMap<>();
         this.processHandler = null;
         this.commitProcessRunning = true;
@@ -130,17 +128,17 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     public void clearCaches() {
         this.connector.clearCaches();
         this.metadataCache.clear();
-        this.missCache.clear();
+        //this.missCache.clear();
     }
 
     private void updateCache(final String id, final LoadTimeURL md) {
         if (id == null) return;
         if (MemoryControl.shortStatus()) {
             this.metadataCache.clear();
-            this.missCache.clear();
+            //this.missCache.clear();
         }
         this.metadataCache.put(id, md);
-        this.missCache.delete(id);
+        //this.missCache.delete(id);
     }
     
     public void ensureAliveProcessHandler() {
@@ -200,13 +198,13 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         this.docBuffer.clear();
         this.connector.clear();
         this.metadataCache.clear();
-        this.missCache.clear();
+        //this.missCache.clear();
     }
 
     @Override
     public synchronized void deleteById(String id) throws IOException {
         this.metadataCache.remove(id);
-        this.missCache.add(id);
+        //this.missCache.add(id);
         synchronized (this.docBuffer) {
             this.docBuffer.remove(id);
         }
@@ -217,7 +215,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     public synchronized void deleteByIds(Collection<String> ids) throws IOException {
         for (String id: ids) {
             this.metadataCache.remove(id);
-            this.missCache.add(id);
+            //this.missCache.add(id);
         }
         synchronized (this.docBuffer) {
             for (String id: ids) {
@@ -240,7 +238,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     @Override
     public LoadTimeURL getLoadTimeURL(String id) throws IOException {
-        if (this.missCache.contains(id)) return null;
+        //if (this.missCache.contains(id)) return null;
         LoadTimeURL md = this.metadataCache.get(id);
         if (md != null) {
             //System.out.println("*** metadata cache hit; metadataCache.size() = " + metadataCache.size());
@@ -254,7 +252,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             return AbstractSolrConnector.getLoadTimeURL(doc);
         }
         md = this.connector.getLoadTimeURL(id);
-        if (md == null) {this.missCache.add(id); return null;}
+        if (md == null) {/*this.missCache.add(id);*/ return null;}
         updateCache(id, md);
         return md;
     }
@@ -296,7 +294,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     @Override
     public SolrDocument getDocumentById(final String id, String... fields) throws IOException {
         assert id.length() == Word.commonHashLength : "wrong id: " + id;
-        if (this.missCache.contains(id)) return null;
+        //if (this.missCache.contains(id)) return null;
         SolrInputDocument idoc = this.docBuffer.get(id);
         if (idoc != null) {
             //System.out.println("*** docBuffer cache hit; docBuffer.size() = " + docBuffer.size());
@@ -305,7 +303,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         }
         SolrDocument solrdoc = this.connector.getDocumentById(id, AbstractSolrConnector.ensureEssentialFieldsIncluded(fields));
         if (solrdoc == null) {
-            this.missCache.add(id);
+            //this.missCache.add(id);
             this.metadataCache.remove(id);
         } else {
             updateCache(id, AbstractSolrConnector.getLoadTimeURL(solrdoc));

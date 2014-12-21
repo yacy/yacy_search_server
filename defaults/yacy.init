@@ -266,6 +266,12 @@ parser.mime.deny=
 parser.extensions.deny=
 parser.enableAudioTags=false
 
+# experimental single-page parser for pdf files: split one pdf into individual pages;
+# the key is the property name in the post arguments that gets a page number assigned,
+# page numbers start with 1
+parser.pdf.individualpages=false
+parser.pdf.individualpages.key=page
+
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client
 # Set these Strings to cusomize your peer and give any message to
