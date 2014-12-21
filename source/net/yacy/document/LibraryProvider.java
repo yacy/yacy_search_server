@@ -61,7 +61,7 @@ public class LibraryProvider {
     public static final String disabledExtension = ".disabled";
 
     public static WordCache dymLib = new WordCache(null);
-    public static AutotaggingLibrary autotagging = null;
+    public static AutotaggingLibrary autotagging = new AutotaggingLibrary(null); // initialize empty to prevent NPE during initialization
     public static URLRewriterLibrary urlRewriter = null;
     public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;

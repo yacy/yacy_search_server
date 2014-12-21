@@ -127,7 +127,7 @@ public class yacysearch {
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
 
         // produce vocabulary navigation sidebars
-        Collection<Tagging> vocabularies = LibraryProvider.autotagging == null ? new ArrayList<Tagging>(0) : LibraryProvider.autotagging.getVocabularies();
+        Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
         int j = 0;
         for (Tagging v: vocabularies) {
             prop.put("sidebarVocabulary_" + j + "_vocabulary", v.getName());
