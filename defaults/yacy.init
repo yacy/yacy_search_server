@@ -1033,7 +1033,7 @@ search.ranking.solr.doubledetection.quantrate=0.5f
 # Another attribute for double content is a 'greedy' ignoring of a http url is present for each https and vice versa
 # The same may be true for documents with leading 'www.' subdomain and without.
 # The following attributes will cause that https is preferred over http and with-www is preferred over without-www
-search.ranking.uniqueheuristic.preferhttps = true
+search.ranking.uniqueheuristic.preferhttps = false
 search.ranking.uniqueheuristic.preferwwwprefix = true
 
 #optional extern thumbnail program.

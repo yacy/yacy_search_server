@@ -108,7 +108,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
     private static final long serialVersionUID=-499100932212840385L;
 
-    public static boolean UNIQUE_HEURISTIC_PREFER_HTTPS = true;
+    public static boolean UNIQUE_HEURISTIC_PREFER_HTTPS = false;
     public static boolean UNIQUE_HEURISTIC_PREFER_WWWPREFIX = true;
     
     private final ArrayList<Ranking> rankings;
