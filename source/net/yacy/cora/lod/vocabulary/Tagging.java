@@ -208,7 +208,9 @@ public class Tagging {
         String[] tags;
         int p;
         String line;
+        Pattern kommapattern = Pattern.compile(",");
         try {
+            String[] pl;
             vocloop: while ((line = list.take()) != Files.POISON_LINE) {
                 line = line.trim();
                 p = line.indexOf('#');
@@ -226,10 +228,8 @@ public class Tagging {
                         continue vocloop;
                     }
                 }
-                String[] pl = parseLine(line);
-                if (pl == null) {
-                    continue vocloop;
-                }
+                pl = parseLine(line);
+                if (pl == null) continue vocloop;
                 if (pl[1] == null) {
                     term = normalizeKey(pl[0]);
                     v = normalizeTerm(pl[0]);
@@ -240,7 +240,7 @@ public class Tagging {
                 }
                 term = normalizeKey(pl[0]);
                 v = pl[1];
-                tags = v.split(",");
+                tags = kommapattern.split(v);
                 Set<String> synonyms = new HashSet<String>();
                 synonyms.add(term);
                 tagloop: for (String synonym: tags) {
