@@ -746,7 +746,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public static String getFileExtension(final String fileName) {
         final int p = fileName.lastIndexOf('.');
         if (p < 0) return "";
-        return fileName.substring(p + 1).toLowerCase();
+        final int q = fileName.lastIndexOf('?');
+        return q < 0 ? fileName.substring(p + 1).toLowerCase() : fileName.substring(p + 1, q).toLowerCase();
     }
 
     public String getPath() {

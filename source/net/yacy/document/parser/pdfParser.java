@@ -174,7 +174,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     stripper.setStartPage(page);
                     stripper.setEndPage(page);
                     pages[page - 1] = stripper.getText(pdfDoc);
-                    System.out.println("PAGE " + page + ": " + pages[page - 1]);
+                    //System.out.println("PAGE " + page + ": " + pages[page - 1]);
                 }
                 
                 // create individual documents for each page
