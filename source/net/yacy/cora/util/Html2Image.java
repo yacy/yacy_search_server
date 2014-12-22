@@ -30,7 +30,6 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 
-import net.yacy.cora.date.GenericFormatter;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
@@ -45,7 +44,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 public class Html2Image {
@@ -81,10 +79,15 @@ public class Html2Image {
      * @return
      */
     public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, final String acceptLanguage, File destination) {
-        boolean success = writeWkhtmltopdfInternal(url, proxy, destination, null, acceptLanguage, true);
-        if (!success && proxy != null) {
-            ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
-            success = writeWkhtmltopdfInternal(url, null, destination, userAgent, acceptLanguage, true);
+        boolean success = false;
+        for (boolean ignoreErrors: new boolean[]{false, true}) {
+            success = writeWkhtmltopdfInternal(url, proxy, destination, null, acceptLanguage, ignoreErrors);
+            if (success) break;
+            if (!success && proxy != null) {
+                ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
+                success = writeWkhtmltopdfInternal(url, null, destination, userAgent, acceptLanguage, ignoreErrors);
+                if (success) break;
+            }
         }
         if (success) {
             ConcurrentLog.info("Html2Image", "wrote " + destination.toString() + " for " + url);
@@ -101,9 +104,9 @@ public class Html2Image {
                 //acceptLanguage == null ? "" : "--custom-header 'Accept-Language' '" + acceptLanguage + "' " + 
                 (userAgent == null ? "" : "--custom-header 'User-Agent' '" + userAgent + "' --custom-header-propagation ") + 
                 (proxy == null ? "" : "--proxy " + proxy + " ") +
-                (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") +
+                (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") + // some versions do not have that flag and fail if attempting to use it...
                 //"--footer-font-name 'Courier' --footer-font-size 9 --footer-left [webpage] --footer-right [date]/[time]([page]/[topage]) " +
-                "--footer-left [webpage] --footer-right [date]/[time]([page]/[topage]) " +
+                "--footer-left [webpage] --footer-right '[date]/[time]([page]/[topage])' " +
                 url + " " + destination.getAbsolutePath();
         try {
             ConcurrentLog.info("Html2Pdf", "creating pdf from url " + url + " with command: " + commandline); 
