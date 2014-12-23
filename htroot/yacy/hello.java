@@ -169,7 +169,7 @@ public final class hello {
                     time_backping = System.currentTimeMillis() - time;
                     backping_method = "reportedip=" + reportedip;
                     if (callback[0] >= 0) { success = true; break; }
-                    if (callbackRemain-- <= 0) break; // no more tries left / restrict to a limited number of ips
+                    if (--callbackRemain <= 0) break; // no more tries left / restrict to a limited number of ips
                 }
             }
         }
