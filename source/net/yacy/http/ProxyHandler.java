@@ -219,19 +219,22 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             } else {
                 // no caching
                 /*if (log.isFine()) log.logFine(reqID +" "+ url.toString() + " not cached." +
-                        " StoreError=" + ((storeError==null)?"None":storeError) +
-                        " StoreHTCache=" + storeHTCache +
-                        " SupportError=" + supportError);*/
-    			convertHeaderToJetty(clientresponse, response);
-    			response.setStatus(statusCode);
-    			
-    			client.writeTo(response.getOutputStream());
+                 " StoreError=" + ((storeError==null)?"None":storeError) +
+                 " StoreHTCache=" + storeHTCache +
+                 " SupportError=" + supportError);*/
+                convertHeaderToJetty(clientresponse, response);
+                response.setStatus(statusCode);
+                
+                if (statusCode == HttpServletResponse.SC_OK) { // continue to serve header to client e.g. HttpStatus = 302 (while skiping content)
+                    client.writeTo(response.getOutputStream()); // may throw exception on httpStatus=302 while gzip encoded inputstream
+                }
+
             }
-		} catch(final SocketException se) {
-			throw new ServletException("Socket Exception: " + se.getMessage());
-		} finally {
-			client.finish();
-		}
+            } catch (final SocketException se) {
+                throw new ServletException("Socket Exception: " + se.getMessage());
+            } finally {
+                client.finish();
+            }
         
         // we handled this request, break out of handler chain
         logProxyAccess(request);
