@@ -66,6 +66,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -572,8 +573,9 @@ public final class HTTPDProxyHandler {
                                 " StoreHTCache=" + storeHTCache +
                                 " SupportError=" + supportError);
 
-//                        FileUtils.copy(res.getDataAsStream(), outStream);
-                        client.writeTo(outStream);
+                        if (statusCode == HttpServletResponse.SC_OK) { // continue to serve header to client e.g. HttpStatus = 302 (while skiping content)
+                            client.writeTo(outStream); // may throw exception on httpStatus=302 while gzip encoded inputstream
+                        }
 
                         conProp.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     }

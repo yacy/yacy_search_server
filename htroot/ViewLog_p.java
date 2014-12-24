@@ -102,6 +102,7 @@ public class ViewLog_p {
         int level = 0;
         int lc = 0;
         for (final String logLine : log) {
+            if (logLine == null) break;
             final String nextLogLine = logLine.trim();
 
             if (filterMatcher != null) {
