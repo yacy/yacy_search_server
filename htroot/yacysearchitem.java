@@ -146,37 +146,34 @@ public class yacysearchitem {
             //prop.putHTML("content_link", resultUrlstring);
 
 // START interaction
-            String modifyURL = resultUrlstring;
-			if (sb.getConfigBool("proxyURL.useforresults", false) && sb.getConfigBool("proxyURL", false)) {
-				// check if url is allowed to view
-				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("all")) {
-					modifyURL = "./proxy.html?url="+modifyURL;
-				}
-
-				// check if url is allowed to view
-				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
-					try {
-						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL (modifyURL)) == null) {
-							modifyURL = "./proxy.html?url="+modifyURL;
-						}
-					} catch (final MalformedURLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
-				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("yacy")) {
-					try {
-						if ((new DigestURL (modifyURL).getHost().endsWith(".yacy"))) {
-							modifyURL = "./proxy.html?url="+modifyURL;
-						}
-					} catch (final MalformedURLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-            prop.putXML("content_link", modifyURL); // putXML for rss
+            if (sb.getConfigBool("proxyURL.useforresults", false) && sb.getConfigBool("proxyURL", false)) {
+                String modifyURL = resultUrlstring;
+                // check if url is allowed to view
+                final String tmprewritecfg = sb.getConfig("proxyURL.rewriteURLs", "all");
+                if (tmprewritecfg.equals("all")) {
+                    modifyURL = "./proxy.html?url=" + resultUrlstring;
+                } else if (tmprewritecfg.equals("domainlist")) { // check if url is allowed to view
+                    try {
+                        if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(resultUrlstring)) == null) {
+                            modifyURL = "./proxy.html?url=" + resultUrlstring;
+                        }
+                    } catch (final MalformedURLException e) {
+                        ConcurrentLog.logException(e);
+                    }
+                } else if (tmprewritecfg.equals("yacy")) {
+                    try {
+                        if ((new DigestURL(resultUrlstring).getHost().endsWith(".yacy"))) {
+                            modifyURL = "./proxy.html?url=" + resultUrlstring;
+                        }
+                    } catch (final MalformedURLException e) {
+                        ConcurrentLog.logException(e);
+                    }
+                }
+                prop.putXML("content_link", modifyURL); // putXML for rss
+            } else {
+                prop.putXML("content_link", resultUrlstring); // putXML for rss
+            }
+            
 //            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
 // END interaction
 
