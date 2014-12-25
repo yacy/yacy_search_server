@@ -158,19 +158,6 @@ public final class HTTPDemon {
 
             String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = Domains.LOCALHOST;
 
-            // check if ip is local ip address
-            final InetAddress hostAddress = Domains.dnsResolve(clientIP);
-            if (hostAddress == null) {
-                tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", switchboard.getLocalPort("port", 8090));
-            } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
-                tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", switchboard.getLocalPort("port", 8090));
-            } else {
-                tp.put("host", switchboard.myPublicIP());
-                tp.put("port", switchboard.getPublicPort("port", 8090));
-            }
-
             tp.put("peerName", (switchboard.peers == null) ? "" : switchboard.peers.myName());
             tp.put("errorMessageType", Integer.toString(errorcase));
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);

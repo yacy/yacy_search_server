@@ -21,6 +21,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
+import static net.yacy.cora.protocol.HeaderFramework.http1_1;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -156,6 +157,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
         prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
         prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
+        prop.put(HeaderFramework.CONNECTION_PROP_METHOD, request.getMethod()); // only needed for HTTPDeamon errormsg in case of blacklisted url
         if (proxyurl.getQuery() != null) prop.put(HeaderFramework.CONNECTION_PROP_ARGS, proxyurl.getQuery());
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
@@ -278,7 +280,13 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
 
         } else {
             if (httpStatus >= HttpServletResponse.SC_BAD_REQUEST) {
-                response.sendError(httpStatus,"Site " + proxyurl + " returned with status");
+                if (HeaderFramework.http1_1.containsKey(Integer.toString(httpStatus))) {
+                    //http1_1 includes http1_0 messages
+                    final String httpStatusText = HeaderFramework.http1_1.get(Integer.toString(httpStatus));
+                    response.sendError(httpStatus, "Site " + proxyurl + " returned with status " + httpStatus + " (" + httpStatusText + ")");
+                } else {
+                    response.sendError(httpStatus, "Site " + proxyurl + " returned with status " + httpStatus);
+                }
                 return;
             }
             if ((response.getHeader(HeaderFramework.CONTENT_LENGTH) == null) && prop.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE)) {
