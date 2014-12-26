@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     
     <!-- Default YaCy web.xml
-         Note: if DATA/SETTINGS/web.xml exists, it takes preference
+         Note: if DATA/SETTINGS/web.xml exists, it is applied after defaults/web.xml
     -->
     <display-name>YaCy</display-name>
     <description>Decentralized Web Search</description>

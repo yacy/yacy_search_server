@@ -116,13 +116,13 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
             // set web.xml to use
             // make use of Jetty feature to define web.xml other as default WEB-INF/web.xml
-            // look in DATA/SETTINGS or use the one in DEFAULTS
+            // and to use a DefaultsDescriptor merged with a individual web.xml
+            // use defaults/web.xml as default and look in DATA/SETTINGS for local addition/changes
+            htrootContext.setDefaultsDescriptor(sb.appPath + "/defaults/web.xml");
             Resource webxml = Resource.newResource(sb.dataPath + "/DATA/SETTINGS/web.xml");
             if (webxml.exists()) {
                 htrootContext.setDescriptor(webxml.getName());
-            } else {
-                htrootContext.setDescriptor(sb.appPath + "/defaults/web.xml");
-            }
+            } 
 
         } catch (IOException ex) {
             if (htrootContext.getBaseResource() == null) {
