@@ -58,7 +58,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     failreason_s(SolrType.string, true, true, false, false, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
     failtype_s(SolrType.string, true, true, false, false, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),
     httpstatus_i(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
-    httpstatus_redirect_s(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
+/**/httpstatus_redirect_s(SolrType.string, true, true, false, false, false, "redirect url if the error code is 299 < httpstatus_i < 310"), // TODO: delete candidate, not used so far (2014-12-26)
     references_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references, should be equal to references_internal_i + references_external_i"),
     references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host to referenced url"),
     references_external_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from external hosts"),
