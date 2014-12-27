@@ -307,7 +307,7 @@ public class serverObjects implements Serializable, Cloneable {
      * @see CharacterCoding#encodeUnicode2html(String, boolean)
      */
     public void putHTML(final String key, final String value) {
-        put(key, value == null ? "" : CharacterCoding.unicode2html(value, true));
+        put(key, value == null ? "" : CharacterCoding.unicode2html(UTF8.decodeURL(value), true));
     }
 
     public void putHTML(final String key, final byte[] value) {
