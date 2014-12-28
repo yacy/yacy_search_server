@@ -128,7 +128,6 @@ public class Crawler_p {
         if (post != null && post.containsKey("queues_terminate_all")) {
             // terminate crawls individually
             sb.crawlQueues.noticeURL.clear();
-            /*
             for (final byte[] h: sb.crawler.getActive()) {
                 CrawlProfile p = sb.crawler.getActive(h);
                 if (CrawlSwitchboard.DEFAULT_PROFILES.contains(p.name())) continue;
@@ -137,7 +136,6 @@ public class Crawler_p {
                 sb.crawler.removePassive(h);
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(p.handle(), 10000);} catch (SpaceExceededException e) {}
             }
-            */
             
             // clear stacks
             for (StackType stackType: StackType.values()) sb.crawlQueues.noticeURL.clear(stackType);
