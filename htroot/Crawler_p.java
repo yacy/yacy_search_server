@@ -36,6 +36,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -314,9 +315,6 @@ public class Crawler_p {
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
 
-                boolean crawlingQ = "on".equals(post.get("crawlingQ", "off")); // on unchecked checkbox "crawlingQ" not contained in post
-                env.setConfig("crawlingQ", crawlingQ);
-                
                 boolean followFrames = "on".equals(post.get("followFrames", "false"));
                 env.setConfig("followFrames", followFrames);
                 
@@ -354,7 +352,6 @@ public class Crawler_p {
                     newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
                     newcrawlingdepth = 0;
                     directDocByURL = false;
-                    crawlingQ = true;
                 }
                 
                 if ("sitelist".equals(crawlingMode)) {
@@ -381,12 +378,17 @@ public class Crawler_p {
                 // delete all error urls for that domain
                 // and all urls for that host from the crawl queue
                 Set<String> hosthashes = new HashSet<String>();
+                boolean anysmbftporpdf = false;
                 for (DigestURL u : rootURLs) {
                     sb.index.fulltext().remove(u.hash());
                     hosthashes.add(u.hosthash());
+                    if ("smb.ftp".indexOf(u.getProtocol()) >= 0 || "pdf".equals(MultiProtocolURL.getFileExtension(u.getFileName()))) anysmbftporpdf = true;
                 }
                 sb.crawlQueues.removeHosts(hosthashes);
                 sb.index.fulltext().commit(true);
+                
+                boolean crawlingQ = anysmbftporpdf || "on".equals(post.get("crawlingQ", "off")) || "sitemap".equals(crawlingMode);
+                env.setConfig("crawlingQ", crawlingQ);
                 
                 // compute mustmatch filter according to rootURLs
                 if ((fullDomain || subPath) && newcrawlingdepth > 0) {
