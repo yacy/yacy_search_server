@@ -34,6 +34,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
@@ -143,7 +144,12 @@ public class ViewImage {
                     } catch (final Exception e) {}
                 }
             }
-
+            
+            // gif images are not loaded because of an animated gif bug within jvm which sends java into an endless loop with high CPU
+            if (ext.equals("gif") && "gif".equals(MultiProtocolURL.getFileExtension(url.getFileName()))) {
+                return new ByteArrayInputStream(imgb);
+            }
+            
             // read image
             image = ImageParser.parse(urlString, imgb);
 

@@ -320,7 +320,7 @@ public class QueryModifier {
         Date onDate = DateDetection.parseLine(onDescription);
         StringBuilder filterQuery = new StringBuilder(20);
         if (onDate != null) {
-            filterQuery.append(CollectionSchema.dates_in_content_sxt.getSolrFieldName()).append(":\"").append(org.apache.solr.schema.TrieDateField.formatExternal(onDate)).append('\"');
+            filterQuery.append(CollectionSchema.dates_in_content_sxt.getSolrFieldName()).append(":\"").append(org.apache.solr.schema.TrieDateField.formatExternal(onDate)).append('\"'); 
         }
         return filterQuery.toString();
 
