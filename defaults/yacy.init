@@ -498,7 +498,6 @@ allowDistributeIndexWhileCrawling=false
 allowDistributeIndexWhileIndexing=true
 allowReceiveIndex=true
 allowReceiveIndex.search=true
-allowUnlimitedReceiveIndexFrom=
 indexReceiveBlockBlacklist=true
 
 # the frequency is the number of links per minute, that the peer allowes
@@ -1222,7 +1221,6 @@ interaction.feedback.url =
 interaction.feedback.accept = false
 interaction.usertracking.enabled = true
 interaction.addcontent.enabled = false
-interaction.userlogon.enabled = false
 interaction.approvelist.enabled = false
 interaction.suggestrejected.enabled = false
 
