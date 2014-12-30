@@ -89,7 +89,6 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.PUBLIC_SEARCHPAGE, !post.containsKey(SwitchboardConstants.PUBLIC_SEARCHPAGE) || post.getBoolean(SwitchboardConstants.PUBLIC_SEARCHPAGE));
                 sb.setConfig("search.options", post.getBoolean("search.options"));
 
-                sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon"));
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, post.getBoolean(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
@@ -144,7 +143,6 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.PUBLIC_SEARCHPAGE, config.getProperty(SwitchboardConstants.PUBLIC_SEARCHPAGE,"true"));
                 sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
-                sb.setConfig("interaction.userlogon.enabled", config.getProperty("interaction.userlogon.enabled","false"));
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, config.getProperty(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, config.getProperty(SwitchboardConstants.SEARCH_VERIFY,"iffresh"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, config.getProperty(SwitchboardConstants.SEARCH_VERIFY_DELETE,"true"));
@@ -164,7 +162,6 @@ public class ConfigPortal {
         prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
 
-        prop.put("interaction.userlogon", sb.getConfigBool("interaction.userlogon.enabled", false) ? 1 : 0);
         prop.put(SwitchboardConstants.GREEDYLEARNING_ACTIVE, sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) ? 1 : 0);
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));
         
