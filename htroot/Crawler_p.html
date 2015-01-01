@@ -171,10 +171,16 @@
 </fieldset>
 
 <script>
-var maxh = Math.max(document.getElementById("progress").clientHeight, document.getElementById("indexsize").clientHeight, document.getElementById("queues").clientHeight);
-document.getElementById("indexsize").style.height = maxh + "px";
-document.getElementById("progress").style.height = maxh + "px";
-document.getElementById("queues").style.height = maxh + "px"; 
+function setTableSize() {
+	var maxh = Math.max(document.getElementById("progress").children[1].clientHeight, document.getElementById("indexsize").children[1].clientHeight, document.getElementById("queues").children[1].clientHeight) + 42;
+	if(lastMaxh !== maxh) {
+		var lastMaxh = maxh;
+		document.getElementById("indexsize").style.height = maxh + "px";
+		document.getElementById("progress").style.height = maxh + "px";
+		document.getElementById("queues").style.height = maxh + "px";
+	}
+}
+window.setInterval("setTableSize()", 1000);
 </script>
 <p class="watchCrawler" style="clear:both;">
 #(info)#
