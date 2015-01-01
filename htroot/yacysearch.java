@@ -55,6 +55,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
@@ -590,6 +591,14 @@ public class yacysearch {
                     final DigestURL url = indexSegment.fulltext().getURL(bookmarkHash);
                     if ( url != null ) {
                         try {
+                            final Bookmark bmk = sb.bookmarksDB.createBookmark(url.toNormalform(true), YMarkTables.USER_ADMIN);
+                            bmk.setProperty(Bookmark.BOOKMARK_DESCRIPTION, querystring);
+                            //bmk.setProperty(Bookmark.BOOKMARK_QUERY, originalquerystring);
+                            bmk.addTag("/search"); // add to bookmark folder
+                            bmk.addTag("searchresult"); // add tag
+                            sb.bookmarksDB.saveBookmark(bmk);
+
+                            // do the same for YMarks ?
                             sb.tables.bookmarks.createBookmark(
                                 sb.loader,
                                 url,
