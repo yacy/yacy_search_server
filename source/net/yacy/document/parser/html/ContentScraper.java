@@ -170,9 +170,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     // class variables: collectors for links
     private final List<AnchorURL> anchors;
     private final LinkedHashMap<DigestURL, String> rss, css;
-    private final LinkedHashMap<DigestURL, EmbedEntry> embeds; // urlhash/embed relation
+    private final LinkedHashMap<AnchorURL, EmbedEntry> embeds; // urlhash/embed relation
     private final List<ImageEntry> images; 
-    private final Set<DigestURL> script, frames, iframes;
+    private final Set<AnchorURL> script, frames, iframes;
     private final Map<String, String> metas;
     private final Map<String, DigestURL> hreflang, navigation;
     private LinkedHashSet<String> titles;
@@ -216,13 +216,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.css = new SizeLimitedMap<DigestURL, String>(maxLinks);
         this.anchors = new ArrayList<AnchorURL>();
         this.images = new ArrayList<ImageEntry>();
-        this.embeds = new SizeLimitedMap<DigestURL, EmbedEntry>(maxLinks);
-        this.frames = new SizeLimitedSet<DigestURL>(maxLinks);
-        this.iframes = new SizeLimitedSet<DigestURL>(maxLinks);
+        this.embeds = new SizeLimitedMap<AnchorURL, EmbedEntry>(maxLinks);
+        this.frames = new SizeLimitedSet<AnchorURL>(maxLinks);
+        this.iframes = new SizeLimitedSet<AnchorURL>(maxLinks);
         this.metas = new SizeLimitedMap<String, String>(maxLinks);
         this.hreflang = new SizeLimitedMap<String, DigestURL>(maxLinks);
         this.navigation = new SizeLimitedMap<String, DigestURL>(maxLinks);
-        this.script = new SizeLimitedSet<DigestURL>(maxLinks);
+        this.script = new SizeLimitedSet<AnchorURL>(maxLinks);
         this.titles = new LinkedHashSet<String>();
         this.headlines = (List<String>[]) Array.newInstance(ArrayList.class, 6);
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
@@ -478,7 +478,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                         final EmbedEntry ie = new EmbedEntry(url, width, height, tag.opts.getProperty("type", EMPTY_STRING), tag.opts.getProperty("pluginspage", EMPTY_STRING));
                         this.embeds.put(url, ie);
                         url.setAll(tag.opts);
-                        this.anchors.add(url);
+                        // this.anchors.add(url); // don't add the embed to the anchors because the webgraph should not contain such links (by definition)
                     }
                 }
             } catch (final NumberFormatException e) {}
@@ -494,7 +494,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
             tag.opts.put("src", src.toNormalform(true));
             src.setAll(tag.opts);
-            this.anchors.add(src);
+            //this.anchors.add(src); // don't add the iframe to the anchors because the webgraph should not contain such links (by definition)
             this.iframes.add(src);
             this.evaluationScores.match(Element.iframepath, src.toNormalform(true));
         } else if (tag.name.equalsIgnoreCase("html")) {
@@ -766,17 +766,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return this.css;
     }
 
-    public Set<DigestURL> getFrames() {
+    public Set<AnchorURL> getFrames() {
         // returns a url (String) / name (String) relation
         return this.frames;
     }
 
-    public Set<DigestURL> getIFrames() {
+    public Set<AnchorURL> getIFrames() {
         // returns a url (String) / name (String) relation
         return this.iframes;
     }
 
-    public Set<DigestURL> getScript() {
+    public Set<AnchorURL> getScript() {
         return this.script;
     }
 
@@ -804,7 +804,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return this.images;
     }
 
-    public Map<DigestURL, EmbedEntry> getEmbeds() {
+    public Map<AnchorURL, EmbedEntry> getEmbeds() {
         return this.embeds;
     }
 

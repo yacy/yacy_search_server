@@ -732,10 +732,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // Scripts
             if (allAttr || contains(CollectionSchema.scripts_sxt)) {
-                final Set<DigestURL> scriptss = html.getScript();
+                final Set<AnchorURL> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
-                for (final DigestURL u: scriptss) {
+                for (final AnchorURL u: scriptss) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     scripts[c++] = u.toNormalform(false);
@@ -746,10 +746,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // Frames
             if (allAttr || contains(CollectionSchema.frames_sxt)) {
-                final Set<DigestURL> framess = html.getFrames();
+                final Set<AnchorURL> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
-                for (final DigestURL u: framess) {
+                for (final AnchorURL u: framess) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     frames[c++] = u.toNormalform(false);
@@ -763,10 +763,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // IFrames
             if (allAttr || contains(CollectionSchema.iframes_sxt)) {
-                final Set<DigestURL> iframess = html.getIFrames();
+                final Set<AnchorURL> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
-                for (final DigestURL u: iframess) {
+                for (final AnchorURL u: iframess) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     iframes[c++] = u.toNormalform(false);
