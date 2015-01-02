@@ -25,6 +25,7 @@ package net.yacy.document;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +34,9 @@ import net.yacy.cora.util.ConcurrentLog;
 public abstract class AbstractParser implements Parser {
 
     public final static ConcurrentLog log = new ConcurrentLog("PARSER");
-    protected final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    // use LinkedHashSet to maintain order, as in TextParser.initParser() supported_Extensions are mapped to 1. mime-type
+    // means also, add the most common mime first, which is mapped to all extension
+    protected final Set<String> SUPPORTED_MIME_TYPES = new LinkedHashSet<String>(); 
     protected final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     private   final String name;
 
