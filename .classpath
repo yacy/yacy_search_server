@@ -52,23 +52,23 @@
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.9.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-classification-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-codecs-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-core-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-facet-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-grouping-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-highlighter-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-join-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-memory-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-misc-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queries-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queryparser-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-spatial-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-suggest-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/solr-core-4.10.2.jar"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-4.10.2.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-classification-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-codecs-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-facet-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-grouping-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-highlighter-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-join-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-memory-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-misc-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queries-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queryparser-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-spatial-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-suggest-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/solr-core-4.10.3.jar"/>
+	<classpathentry kind="lib" path="lib/solr-solrj-4.10.3.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>

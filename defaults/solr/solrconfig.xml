@@ -35,7 +35,7 @@
        that you fully re-index after changing this setting as it can
        affect both how text is indexed and queried.
   -->
-  <luceneMatchVersion>4.10.2</luceneMatchVersion>
+  <luceneMatchVersion>4.10.3</luceneMatchVersion>
 
   <!-- <lib/> directives can be used to instruct Solr to load any Jars
        identified and use them to resolve any "plugins" specified in
@@ -224,7 +224,6 @@
           <int name="segmentsPerTier">10</int>
         </mergePolicy>
       -->
-
        
     <!-- Merge Factor
          The merge factor controls how many segments will get merged at a time.
@@ -446,7 +445,6 @@
       -->
 
   </updateHandler>
-
   
   <!-- IndexReaderFactory
 
@@ -600,6 +598,7 @@
               />
       -->
 
+
     <!-- Lazy Field Loading
 
          If true, stored fields that are not requested will be loaded
@@ -636,13 +635,13 @@
         then documents 0 through 49 will be collected and cached.  Any further
         requests in that range can be satisfied via the cache.  
      -->
-   <queryResultWindowSize>1</queryResultWindowSize>
+   <queryResultWindowSize>20</queryResultWindowSize>
 
    <!-- Maximum number of documents to cache for any entry in the
         queryResultCache. 
      -->
-   <queryResultMaxDocsCached>100</queryResultMaxDocsCached>
-        
+   <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+
    <!-- Query Related Event Listeners
 
         Various IndexSearcher related events can trigger Listeners to
@@ -722,6 +721,7 @@
     -->
   <requestDispatcher handleSelect="false" >
     <!-- Request Parsing
+
          These settings indicate how Solr Requests may be parsed, and
          what restrictions may be placed on the ContentStreams from
          those requests
@@ -748,6 +748,7 @@
          The settings below authorize Solr to fetch remote files, You
          should make sure your system has some authentication before
          using enableRemoteStreaming="true"
+
       --> 
     <requestParsers enableRemoteStreaming="true" 
                     multipartUploadLimitInKB="2048000"
