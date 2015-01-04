@@ -148,6 +148,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             }
         } else {
             writer.write("<title>No Document Found</title>\n</head><body>\n");
+            writer.write("<div class='alert alert-info'>No documents found</div>\n");
         }
         
         writer.write("</body></html>\n");
