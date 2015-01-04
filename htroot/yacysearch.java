@@ -118,7 +118,7 @@ public class yacysearch {
         if (authenticated && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 0) {
             sb.index.fulltext().commit(true);
         }
-        
+        final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring = originalquerystring.replace('+', ' ').trim();
@@ -867,7 +867,7 @@ public class yacysearch {
             prop.put("depth", "0");
 
         }
-
+        prop.put("focus", focus ? 1 : 0); // focus search field
         prop.put("searchagain", global ? "1" : "0");
         prop.putHTML("former", originalquerystring.replaceAll(Segment.catchallString, "*"));
         prop.put("count", itemsPerPage);
