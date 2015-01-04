@@ -652,7 +652,13 @@ public final class Protocol {
 
         // insert results to containers
         int term = count;
-        Collection<URIMetadataNode> storeDocs = new ArrayList<URIMetadataNode>(result.links.size());
+        Map<String, LinkedHashSet<String>> snip;
+        if (event.addResultsToLocalIndex) {
+            snip = null;
+        } else {
+            snip = new HashMap<String, LinkedHashSet<String>>(); // needed to display nodestack results
+        }
+        List<URIMetadataNode> storeDocs = new ArrayList<URIMetadataNode>(result.links.size());
         for ( final URIMetadataNode urlEntry : result.links ) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
@@ -713,6 +719,13 @@ public final class Protocol {
                 // instead, they are placed in a snipped-search cache.
                 // System.out.println("--- RECEIVED SNIPPET '" + urlEntry.snippet() + "'");
                 TextSnippet.snippetsCache.put(wordhashes, ASCII.String(urlEntry.hash()), urlEntry.snippet());
+                // add snippet for snippethandling for nodestack entries (used if not stored to index)
+                if (!event.addResultsToLocalIndex) {
+                    // TODO: must have a snippet even to get the snippetcache entry back when adding to nodestack
+                    LinkedHashSet<String> sniptxt = new LinkedHashSet<String>();
+                    sniptxt.add(urlEntry.snippet());
+                    snip.put(ASCII.String(urlEntry.hash()), sniptxt);
+                }
             }
 
             // add the url entry to the word indexes
@@ -725,19 +738,25 @@ public final class Protocol {
                 }
             }
         }
-        
-        for (URIMetadataNode entry: storeDocs) {
-            try {
-                event.query.getSegment().fulltext().putMetadata(entry);
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-            }
-        }
 
         // store remote result to local result container
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
-        event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
+        if (event.addResultsToLocalIndex) {
+            for (URIMetadataNode entry : storeDocs) {
+                try {
+                    event.query.getSegment().fulltext().putMetadata(entry);
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
+                }
+            }
+            event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
+        } else {
+            // feed results as nodes (SolrQuery results) which carry metadata,
+            // to prevent a call to getMetaData for RWI results, which would fail (if no metadata in index and no display of these results)
+            Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>();
+            event.addNodes(storeDocs, facets, snip, false, target.getName() + "/" + target.hash, count);
+        }
         event.addFinalize();
         event.addExpectedRemoteReferences(-count);
 
@@ -1053,7 +1072,10 @@ public final class Protocol {
         List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
         Network.log.info("SEARCH (solr), returned " + docList[0].size() + " out of " + docList[0].getNumFound() + " documents and " + facets.size() + " facets " + facets.keySet().toString() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
-        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList[0].size());
+        Collection<SolrInputDocument> docs;
+        if (event.addResultsToLocalIndex) { // only needed to store remote results
+            docs = new ArrayList<SolrInputDocument>(docList[0].size());
+        } else docs = null;
         for (final SolrDocument doc: docList[0]) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
@@ -1092,15 +1114,18 @@ public final class Protocol {
                 event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
                 
                 // put the remote documents to the local index. We must convert the solr document to a solr input document:
-                SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+                if (event.addResultsToLocalIndex) {
+                    final SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+
+                    // the input document stays untouched because it contains top-level cloned objects
+                    if (event.addResultsToLocalIndex) docs.add(sid);
+                }
 
                 // after this conversion we can remove the largest and not used field text_t and synonyms_sxt from the document
                 // because that goes into a search cache and would take a lot of memory in the search cache
                 //doc.removeFields(CollectionSchema.text_t.getSolrFieldName());
                 doc.removeFields(CollectionSchema.synonyms_sxt.getSolrFieldName());
                 
-                // the input document stays untouched because it contains top-level cloned objects
-                docs.add(sid);
                 ResultURLs.stack(
                     ASCII.String(urlEntry.url().hash()),
                     urlEntry.url().getHost(),
@@ -1122,10 +1147,12 @@ public final class Protocol {
             event.addExpectedRemoteReferences(-count);
             Network.log.info("local search (solr): localpeer sent " + container.size() + "/" + numFound + " references");
         } else {
-            for (SolrInputDocument doc: docs) {
-                event.query.getSegment().putDocument(doc);
+            if (event.addResultsToLocalIndex) {
+                for (SolrInputDocument doc: docs) {
+                    event.query.getSegment().putDocument(doc);
+                }
+                docs.clear(); docs = null;
             }
-            docs.clear(); docs = null;
             event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, numFound);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);

@@ -826,6 +826,8 @@ search.result.show.proxy = false
 search.result.show.hostbrowser = true
 search.result.show.vocabulary = false
 
+search.result.useclickservlet = true
+
 # search navigators: comma-separated list of default values for search navigation.
 # can be temporary different if search string is given with differen navigation values
 # assigning no value(s) means that no navigation is shown
@@ -857,6 +859,7 @@ search.verify.delete = true
 # remote search details
 remotesearch.maxcount = 10
 remotesearch.maxtime = 3000
+remotesearch.result.store=true
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.

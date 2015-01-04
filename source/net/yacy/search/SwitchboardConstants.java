@@ -331,6 +331,8 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
 
+    public static final String REMOTESEARCH_RESULT_STORE        = "remotesearch.result.store"; // add remote results to local index
+
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING     = "federated.service.solr.indexing.sharding";
@@ -523,6 +525,8 @@ public final class SwitchboardConstants {
     public static final String SEARCH_TARGET_SPECIAL_PATTERN  = "search.target.special.pattern"; // ie 'own' addresses in topframe, 'other' in iframe
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
+
+    public static final String SEARCH_USECLICKSERVLET = "search.result.useclickservlet"; // resultlink via click servlet
 
     /**
      * ranking+evaluation

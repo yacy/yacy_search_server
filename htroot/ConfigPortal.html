@@ -51,18 +51,30 @@
           <dt>Snippet Fetch Strategy &amp; Link Verification</dt>
           <dd>
           <img src="env/grafics/idea.png" width="32" height="32" alt="idea" align="center"/>Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)<br/>
-          <input type="radio" name="search.verify" value="nocache" #(search.verify.nocache)#::checked="checked"#(/search.verify.nocache)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/>NOCACHE: no use of web cache, load all snippets online<br/>
-          <input type="radio" name="search.verify" value="iffresh" #(search.verify.iffresh)#::checked="checked"#(/search.verify.iffresh)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/>IFFRESH: use the cache if the cache exists and is fresh otherwise load online<br/>
-          <input type="radio" name="search.verify" value="ifexist" #(search.verify.ifexist)#::checked="checked"#(/search.verify.ifexist)# />IFEXIST: use the cache if the cache exist or load online<br/>
-          <input type="checkbox" name="search.verify.delete" id="search_verify_delete" value="true" #(search.verify.delete)#::checked="checked"#(/search.verify.delete)# />If verification fails, delete index reference<br/><br/>
-          <input type="radio" name="search.verify" value="cacheonly" #(search.verify.cacheonly)#::checked="checked"#(/search.verify.cacheonly)# onclick="document.getElementById('search_verify_delete').disabled=true;document.getElementById('search_verify_delete').checked=false;"/>CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet<br/>
-          <input type="radio" name="search.verify" value="false" #(search.verify.false)#::checked="checked"#(/search.verify.false)# onclick="document.getElementById('search_verify_delete').disabled=true;document.getElementById('search_verify_delete').checked=false;"/>FALSE: no link verification and not snippet generation: all search results are valid without verification
+          <input type="radio" name="search.verify" value="nocache" #(search.verify.nocache)#::checked="checked"#(/search.verify.nocache)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/> NOCACHE: no use of web cache, load all snippets online<br/>
+          <input type="radio" name="search.verify" value="iffresh" #(search.verify.iffresh)#::checked="checked"#(/search.verify.iffresh)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/> IFFRESH: use the cache if the cache exists and is fresh otherwise load online<br/>
+          <input type="radio" name="search.verify" value="ifexist" #(search.verify.ifexist)#::checked="checked"#(/search.verify.ifexist)# /> IFEXIST: use the cache if the cache exist or load online<br/>
+          <input type="checkbox" name="search.verify.delete" id="search_verify_delete" value="true" #(search.verify.delete)#::checked="checked"#(/search.verify.delete)# /> If verification fails, delete index reference<br/><br/>
+          <input type="radio" name="search.verify" value="cacheonly" #(search.verify.cacheonly)#::checked="checked"#(/search.verify.cacheonly)# onclick="document.getElementById('search_verify_delete').disabled=true;document.getElementById('search_verify_delete').checked=false;"/> CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet<br/>
+          <input type="radio" name="search.verify" value="false" #(search.verify.false)#::checked="checked"#(/search.verify.false)# onclick="document.getElementById('search_verify_delete').disabled=true;document.getElementById('search_verify_delete').checked=false;"/> FALSE: no link verification and not snippet generation: all search results are valid without verification
           </dd>
           
           <dt>Greedy Learning Mode</dt>
           <dd>
-              <input type="checkbox" name="greedylearning.active" value="true" #(greedylearning.active)#::checked="checked"#(/greedylearning.active)# />load documents linked in search results, will be deactivated automatically when index size &gt; #[greedylearning.limit.doccount]#  <small> (see <a href="ConfigHeuristics_p.html">Heuristics: search-result</a> to use this permanent)</small>
+              <input type="checkbox" name="greedylearning.active" value="true" #(greedylearning.active)#::checked="checked"#(/greedylearning.active)# /> load documents linked in search results, will be deactivated automatically when index size &gt; #[greedylearning.limit.doccount]#  <small> (see <a href="ConfigHeuristics_p.html">Heuristics: search-result</a> to use this permanent)</small>
           </dd>
+          
+          <dt>Index remote results</dt>
+          <dd>
+              <input type="checkbox" name="remotesearch.result.store" value="true" #(remotesearch.result.store)#::checked="checked"#(/remotesearch.result.store)# /> add remote search results to the local index <b>( default=on, it is recommended to enable this option ! )</b>                     
+          </dd>
+          
+          #(remotesearch.result.store)#
+          <dt>Use Click-Servlet for search result links</dt>
+          <dd>
+              <input type="checkbox" name="search.result.useclickservlet" value="true" #(search.result.useclickservlet)#::checked="checked"#(/search.result.useclickservlet)# /> allows YaCy to perform some actions if user clicks on a search result (by default add the clicked link to the index)
+          </dd>
+          ::#(/remotesearch.result.store)#
           
           <dt>Default Pop-Up Page</dt>
           <dd>

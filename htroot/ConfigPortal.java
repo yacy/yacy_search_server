@@ -90,6 +90,11 @@ public class ConfigPortal {
                 sb.setConfig("search.options", post.getBoolean("search.options"));
 
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, post.getBoolean(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
+                
+                final boolean storeresult = post.getBoolean(SwitchboardConstants.REMOTESEARCH_RESULT_STORE);
+                sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, storeresult);
+                // click servlet only meaningful if result not stored (currently)
+                sb.setConfig(SwitchboardConstants.SEARCH_USECLICKSERVLET, !storeresult && post.getBoolean(SwitchboardConstants.SEARCH_USECLICKSERVLET));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete"));
@@ -144,6 +149,8 @@ public class ConfigPortal {
                 sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, config.getProperty(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
+                sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE));
+                sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE+"_"+SwitchboardConstants.SEARCH_USECLICKSERVLET, config.getProperty(SwitchboardConstants.SEARCH_USECLICKSERVLET));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, config.getProperty(SwitchboardConstants.SEARCH_VERIFY,"iffresh"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, config.getProperty(SwitchboardConstants.SEARCH_VERIFY_DELETE,"true"));
                 sb.setConfig("about.headline", config.getProperty("about.headline",""));
@@ -165,6 +172,9 @@ public class ConfigPortal {
         prop.put(SwitchboardConstants.GREEDYLEARNING_ACTIVE, sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) ? 1 : 0);
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));
         
+        prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, true) ? 1 : 0);
+        prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE+"_"+SwitchboardConstants.SEARCH_USECLICKSERVLET, sb.getConfigBool(SwitchboardConstants.SEARCH_USECLICKSERVLET, false) ? 1 : 0);
+
         prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.collections", sb.getConfig("search.navigation", "").indexOf("collections",0) >= 0 ? 1 : 0);

@@ -158,6 +158,7 @@ public final class SearchEvent {
     private long                                          snippetComputationAllTime;
     private ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
     private final boolean remote;
+    public final boolean addResultsToLocalIndex; // add received results to local index (defult=true)
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
     private final long maxtime;
@@ -204,7 +205,8 @@ public final class SearchEvent {
         final LoaderDispatcher loader,
         final int remote_maxcount,
         final long remote_maxtime,
-        final boolean deleteIfSnippetFail) {
+        final boolean deleteIfSnippetFail,
+        final boolean addResultsToLocalIdx) {
 
         long ab = MemoryControl.available();
         if (ab < 1024 * 1024 * 200) {
@@ -255,6 +257,7 @@ public final class SearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false)));
+        this.addResultsToLocalIndex = addResultsToLocalIdx;
         this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
         this.local_rwi_stored     = new AtomicInteger(0);
         this.local_solr_available = new AtomicInteger(0);
