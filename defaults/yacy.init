@@ -826,7 +826,7 @@ search.result.show.proxy = false
 search.result.show.hostbrowser = true
 search.result.show.vocabulary = false
 
-search.result.useclickservlet = true
+search.result.useclickservlet = false
 
 # search navigators: comma-separated list of default values for search navigation.
 # can be temporary different if search string is given with differen navigation values
