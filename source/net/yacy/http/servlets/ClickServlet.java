@@ -1,6 +1,7 @@
 /**
- * ClickServlet Copyright 2014 by Michael Peter Christen First released
- * 25.12.2014 at http://yacy.net
+ * ClickServlet 
+ * Copyright 2014 by reger
+ * First released 04.01.2015 at http://yacy.net
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +17,7 @@
  * along with this program in the file lgpl21.txt If not, see
  * <http://www.gnu.org/licenses/>.
  */
+
 package net.yacy.http.servlets;
 
 import java.io.IOException;
