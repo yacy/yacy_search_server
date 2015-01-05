@@ -181,8 +181,6 @@ public class yacysearchitem {
                     }
                 }
                 prop.putXML("content_link", modifyURL); // putXML for rss
-            } else if (sb.getConfigBool(SwitchboardConstants.SEARCH_USECLICKSERVLET, false)) {
-                prop.putXML("content_link", "click?url="+resultUrlstring); // putXML for rss
             } else {
                 prop.putXML("content_link", resultUrlstring); // putXML for rss
             }

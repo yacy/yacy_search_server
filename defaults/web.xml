@@ -55,23 +55,7 @@
             <param-value>YaCy stop proxy</param-value> 
         </init-param>
     </servlet>
-    <servlet>
-        <servlet-name>ClickServlet</servlet-name>
-        <servlet-class>net.yacy.http.servlets.ClickServlet</servlet-class>
-        <init-param>
-            <param-name>clickaction</param-name>
-            <param-value>index</param-value> <!-- options:  index  crawl crawllinks -->
-            <description>defines the action to perform with supplied url</description>
-        </init-param>
-    </servlet>
-
     
-    
-    
-    <servlet-mapping>
-        <servlet-name>ClickServlet</servlet-name>
-        <url-pattern>/click</url-pattern>
-    </servlet-mapping>
     <!-- mappings activated by the application - hardcoded (added here for completness) -->
     <servlet-mapping>
         <servlet-name>SolrSelectServlet</servlet-name>

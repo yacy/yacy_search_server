@@ -69,13 +69,6 @@
               <input type="checkbox" name="remotesearch.result.store" value="true" #(remotesearch.result.store)#::checked="checked"#(/remotesearch.result.store)# /> add remote search results to the local index <b>( default=on, it is recommended to enable this option ! )</b>                     
           </dd>
           
-          #(remotesearch.result.store)#
-          <dt>Use Click-Servlet for search result links</dt>
-          <dd>
-              <input type="checkbox" name="search.result.useclickservlet" value="true" #(search.result.useclickservlet)#::checked="checked"#(/search.result.useclickservlet)# /> allows YaCy to perform some actions if user clicks on a search result (by default add the clicked link to the index)
-          </dd>
-          ::#(/remotesearch.result.store)#
-          
           <dt>Default Pop-Up Page</dt>
           <dd>
           <input type="radio" name="popup" value="status" #(popupStatus)#::checked="checked"#(/popupStatus)# />Status Page&nbsp;

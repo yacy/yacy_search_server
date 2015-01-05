@@ -526,8 +526,6 @@ public final class SwitchboardConstants {
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
 
-    public static final String SEARCH_USECLICKSERVLET = "search.result.useclickservlet"; // resultlink via click servlet
-
     /**
      * ranking+evaluation
      */
