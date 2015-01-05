@@ -88,6 +88,7 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
+import net.yacy.utils.crypt;
 
 public class yacysearch {
 
@@ -586,32 +587,27 @@ public class yacysearch {
                 	prop.authenticationRequired();
                     return prop;
                 }
-                final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                try {
-                    final DigestURL url = indexSegment.fulltext().getURL(bookmarkHash);
-                    if ( url != null ) {
-                        try {
-                            final Bookmark bmk = sb.bookmarksDB.createBookmark(url.toNormalform(true), YMarkTables.USER_ADMIN);
-                            bmk.setProperty(Bookmark.BOOKMARK_DESCRIPTION, querystring);
-                            //bmk.setProperty(Bookmark.BOOKMARK_QUERY, originalquerystring);
-                            bmk.addTag("/search"); // add to bookmark folder
-                            bmk.addTag("searchresult"); // add tag
-                            sb.bookmarksDB.saveBookmark(bmk);
+                //final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
+                final String urlstr = crypt.simpleDecode(post.get("bookmarkurl"));
+                if (urlstr != null) {
+                    try {
+                        final Bookmark bmk = sb.bookmarksDB.createBookmark(urlstr, YMarkTables.USER_ADMIN);
+                        bmk.setProperty(Bookmark.BOOKMARK_DESCRIPTION, "query="+querystring);
+                        //bmk.setProperty(Bookmark.BOOKMARK_QUERY, originalquerystring);
+                        bmk.addTag("/search"); // add to bookmark folder
+                        bmk.addTag("searchresult"); // add tag
+                        sb.bookmarksDB.saveBookmark(bmk);
 
-                            // do the same for YMarks ?
-                            sb.tables.bookmarks.createBookmark(
+                        // do the same for YMarks ?
+                        sb.tables.bookmarks.createBookmark(
                                 sb.loader,
-                                url,
+                                urlstr,
                                 ClientIdentification.yacyInternetCrawlerAgent,
                                 YMarkTables.USER_ADMIN,
                                 true,
                                 "searchresult",
                                 "/search");
-                        } catch (final Throwable e ) {
-                        }
-                    }
-                } catch (IOException e) {
-                    ConcurrentLog.logException(e);
+                    } catch (final Throwable e) { }
                 }
             }
 
