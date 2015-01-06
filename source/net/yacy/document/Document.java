@@ -62,7 +62,6 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.ContentScraper;
-import net.yacy.document.parser.html.EmbedEntry;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -914,6 +913,7 @@ dc_rights
 
     public final static String CANONICAL_MARKER = "canonical";
     public final static String IFRAME_MARKER = "iframe";
+    public final static String FRAME_MARKER = "frame";
     public final static String EMBED_MARKER = "embed";
     
     public static Map<AnchorURL, String> getHyperlinks(final Document[] documents, boolean includeNofollow) {
@@ -935,6 +935,7 @@ dc_rights
                 if (canonical != null) {
                     result.put(canonical, CANONICAL_MARKER);
                 }
+                for (AnchorURL u: html.getFrames()) result.put(u, FRAME_MARKER);
                 for (AnchorURL u: html.getIFrames()) result.put(u, IFRAME_MARKER);
                 for (AnchorURL u: html.getEmbeds().keySet()) result.put(u, EMBED_MARKER);
             }

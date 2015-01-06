@@ -388,7 +388,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
             tag.opts.put("src", src.toNormalform(true));
             src.setAll(tag.opts);
-            this.anchors.add(src);
+            //this.anchors.add(src); // don't add the frame to the anchors because the webgraph should not contain such links (by definition)
             this.frames.add(src);
             this.evaluationScores.match(Element.framepath, src.toNormalform(true));
         } else if (tag.name.equalsIgnoreCase("body")) {
