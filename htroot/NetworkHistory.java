@@ -123,9 +123,9 @@ public class NetworkHistory {
         if (columns.contains("cI")) headline = "YACY PEER '" + sb.peers.myName() + "' INDEX SIZE HISTORY: NUMBER OF DOCUMENTS";
         if (columns.contains("cR")) headline = "YACY PEER '" + sb.peers.myName() + "' INDEX SIZE HISTORY: NUMBER OF RWI ENTRIES";
         ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, headline, "IN THE LAST " + timestr);
-        int pixelperscale = Math.max(1, hspace / (maxtime / bottomscale));
+        int pixelperscale = Math.max(16, hspace / (maxtime / bottomscale));
         chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, pixelperscale, -maxtime, 0x000000l, 0xCCCCCCl, "TIME/HOURS");
-        pixelperscale = Math.max(1, 10 * ((vspace * leftscale / (maxpeers - minpeers)) / 10));
+        pixelperscale = Math.max(16, 10 * ((vspace * leftscale / (maxpeers - minpeers)) / 10));
         chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, pixelperscale, minpeers, 0x008800l, null , columns.contains("cI") ? "DOCUMENTS" : columns.contains("cR") ? "RWIs" : "PEERS");
         
         // write the data
