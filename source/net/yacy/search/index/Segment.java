@@ -568,7 +568,7 @@ public class Segment {
         
         // CREATE SOLR DOCUMENT
         final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
-        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this, collections, responseHeader, document, condenser, referrerURL, language, this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
+        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this, collections, responseHeader, document, condenser, referrerURL, language, crawlProfile.isPushCrawlProfile(), this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);

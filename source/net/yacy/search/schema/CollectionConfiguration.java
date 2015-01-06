@@ -409,7 +409,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     public SolrVector yacy2solr(
             final Segment segment,
             final Map<String, Pattern> collections, final ResponseHeader responseHeader,
-            final Document document, final Condenser condenser, final DigestURL referrerURL, final String language,
+            final Document document, final Condenser condenser, final DigestURL referrerURL, final String language, final boolean setUnique,
             final WebgraphConfiguration webgraph, final String sourceName) {
         // we use the SolrCell design as index schema
         SolrVector doc = new SolrVector();
@@ -521,8 +521,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     add(doc, CollectionSchema.date_in_content_max_dt, date_in_content_max_dt);
                 }
             }
-            
-            
         }
         if (allAttr || contains(CollectionSchema.keywords)) {
             String keywords = document.dc_subject(' ');
@@ -537,8 +535,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
 
         // unique-fields; these values must be corrected during postprocessing. (the following logic is !^ (not-xor) but I prefer to write it that way as it is)
-        add(doc, CollectionSchema.http_unique_b, UNIQUE_HEURISTIC_PREFER_HTTPS ? digestURL.isHTTPS() : digestURL.isHTTP()); // this must be corrected afterwards during storage!
-        add(doc, CollectionSchema.www_unique_b, host != null && (UNIQUE_HEURISTIC_PREFER_WWWPREFIX ? host.startsWith("www.") : !host.startsWith("www."))); // this must be corrected afterwards during storage!
+        add(doc, CollectionSchema.http_unique_b, setUnique || UNIQUE_HEURISTIC_PREFER_HTTPS ? digestURL.isHTTPS() : digestURL.isHTTP()); // this must be corrected afterwards during storage!
+        add(doc, CollectionSchema.www_unique_b, setUnique || host != null && (UNIQUE_HEURISTIC_PREFER_WWWPREFIX ? host.startsWith("www.") : !host.startsWith("www."))); // this must be corrected afterwards during storage!
         
         add(doc, CollectionSchema.exact_signature_l, condenser.exactSignature());
         add(doc, CollectionSchema.exact_signature_unique_b, true); // this must be corrected afterwards during storage!

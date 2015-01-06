@@ -67,7 +67,6 @@ public final class CrawlSwitchboard {
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA = "snippetLocalMedia";
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA = "snippetGlobalMedia";
     public static final String CRAWL_PROFILE_SURROGATE = "surrogates";
-    public static final String CRAWL_PROFILE_PUSH_STUB = "push_";
 
     public static Set<String> DEFAULT_PROFILES = new HashSet<String>();
     static {
@@ -517,7 +516,7 @@ public final class CrawlSwitchboard {
         CrawlProfile genericPushProfile = this.defaultPushProfiles.get(collection);
         if (genericPushProfile != null) return genericPushProfile;
         genericPushProfile = new CrawlProfile(
-                CRAWL_PROFILE_PUSH_STUB + collection,
+                CrawlProfile.CRAWL_PROFILE_PUSH_STUB + collection,
                 CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
@@ -545,7 +544,7 @@ public final class CrawlSwitchboard {
         this.defaultPushProfiles.put(collection, genericPushProfile);
         return genericPushProfile;
     }
-
+    
     private void resetProfiles() {
         this.profilesActiveCrawlsCache.clear();
         final File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);

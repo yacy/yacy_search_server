@@ -58,6 +58,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final Pattern MATCH_ALL_PATTERN   = Pattern.compile(MATCH_ALL_STRING);
     public static final Pattern MATCH_NEVER_PATTERN = Pattern.compile(MATCH_NEVER_STRING);
 
+    public static final String CRAWL_PROFILE_PUSH_STUB = "push_";
+    
     // this is a simple record structure that hold all properties of a single crawl start
     private static final String HANDLE          = "handle";
     public static final String AGENT_NAME       = "agentName";
@@ -647,6 +649,10 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         String protocol = url.getProtocol();
         if ("http".equals(protocol) || "https".equals(protocol)) protocol = "https?+";
         return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host)).append(url.getPath()).append(".*").toString();
+    }
+    
+    public boolean isPushCrawlProfile() {
+        return this.name().startsWith(CrawlProfile.CRAWL_PROFILE_PUSH_STUB);
     }
 
     public void putProfileEntry(
