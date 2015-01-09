@@ -144,10 +144,9 @@ public class AutoSearch extends AbstractBusyThread {
         }
         // TODO: DHT peers could be excluded
         Iterator<Seed> it = Switchboard.getSwitchboard().peers.seedsConnected(true, false, null, 0);
-        int i=0;
-        while (it.hasNext() && i<5) {
+        while (it.hasNext()) {
             Seed s = it.next();
-            currentTargets.add(s.hash); i++;
+            currentTargets.add(s.hash);
         }
     }
 
