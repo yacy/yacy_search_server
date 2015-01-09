@@ -202,13 +202,40 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 						#{optlist}#<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
 						#{/optlist}#
 					</select>
-					<input type="submit" value=" ... " />
+					<input type="submit" class="btn btn-xs btn-primary" value=" ... " />
 				</div></form>
 				<p>
 					#{taglist}#<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[name]#">#[name]#</a></span>
 					#{/taglist}#
 				</p>
 			</fieldset>
+                <!-- show AutoSearch infobox -->
+                <fieldset>
+                    <legend>Auto Search</legend>
+                    #(autosearchrunning)#
+                    <p>
+                     <form action="Bookmarks.html" method="post">start autosearch of new bookmarks <input type="submit" name="startautosearch" class="btn btn-primary btn-xs" value="start it"/>
+                    </p>
+                    <div class="info">#[msg]#</div>
+                    ::
+                    <table>
+                      <tr>
+                          <td>autosearch queue:</td><td>#[jobcount]#</td><td><form action="Bookmarks.html" method="post"><input type="submit" name="stopautosearch" class="btn btn-danger btn-xs" value="stop it"/></form></td>
+                      </tr>
+                      <tr>
+                          <td>received results:</td><td>#[totalcount]#</td><td></td>
+                      </tr>
+                      <tr>
+                          <td>current query:</td><td colspan="2">#[query]#</td>
+                      </tr>                        
+                    </table>
+                    #(/autosearchrunning)#
+                    <br />
+                    <p>This starts a serach of new or modified bookmarks since startup
+                        in folder "search" with description "query="<br />
+                        Every peer online will be ask for results.                        
+                    </p>
+                </fieldset>
 		</div>
 		<!-- show BookmarkList -->		
 		<div class="bookmarkList">			

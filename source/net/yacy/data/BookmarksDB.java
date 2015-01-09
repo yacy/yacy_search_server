@@ -208,6 +208,15 @@ public class BookmarksDB {
         return set.iterator();
     }
 
+    public Iterator<Bookmark> getBookmarksIterator() {
+        try {
+            return new bookmarkIterator(true);
+        } catch (IOException ex) {
+            ConcurrentLog.logException(ex);
+        }
+        return null;
+    }
+
     public Iterator<String> getBookmarksIterator(final String tagName, final boolean priv){
         final TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
         final String tagHash=BookmarkHelper.tagHash(tagName);

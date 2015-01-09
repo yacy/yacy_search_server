@@ -55,7 +55,9 @@ import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.peers.NewsPool;
+import net.yacy.search.AutoSearch;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -372,6 +374,42 @@ public class Bookmarks {
 	       	count = 0;
 	       	count = recurseFolders(BookmarkHelper.getFolderList("/", sb.bookmarksDB.getTagIterator(isAdmin)), "/", 0, true, "");
 	       	prop.put("display_folderlist", count);
+
+            BusyThread bt = sb.getThread("autosearch");
+            if (bt != null) {
+                prop.put("display_autosearchrunning","1");
+                prop.put("display_autosearchrunning_msg", "" );
+                if (post != null && post.containsKey("stopautosearch")) {
+                    sb.terminateThread("autosearch", false);
+                    prop.put("display_autosearchrunning_msg", "autosearch will terminate");
+                    prop.put("display_autosearchrunning","0");
+                }
+                int jobs = bt.getJobCount();
+                prop.put("display_autosearchrunning_jobcount", jobs);
+                int cnt=0;
+                String qstr = "";
+                if (bt instanceof AutoSearch) {
+                    cnt = ((AutoSearch) bt).gotresults;
+                    qstr = ((AutoSearch) bt).currentQuery;
+                    if (qstr == null) qstr = "---";
+                }
+                prop.put("display_autosearchrunning_totalcount", cnt);
+                prop.put("display_autosearchrunning_query", qstr);
+
+            } else {
+                prop.put("display_autosearchrunning", "0");
+                prop.put("display_autosearchrunning_msg", "");
+                if (post != null && post.containsKey("startautosearch")) {
+                    sb.deployThread(
+                            "autosearch",
+                            "Auto Search",
+                            "query all peers for given search terms",
+                            null,
+                            new AutoSearch(Switchboard.getSwitchboard()),
+                            1000);
+                    prop.put("display_autosearchrunning_msg", "autsearch job started");
+                }
+            }
     	}
        	return prop;    // return from serverObjects respond()
     }

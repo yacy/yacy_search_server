@@ -596,6 +596,10 @@ public class yacysearch {
                         //bmk.setProperty(Bookmark.BOOKMARK_QUERY, originalquerystring);
                         bmk.addTag("/search"); // add to bookmark folder
                         bmk.addTag("searchresult"); // add tag
+                        String urlhash = post.get("bookmarkref");
+                        final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(urlhash));
+                        if (urlentry != null && !urlentry.dc_title().isEmpty()) 
+                            bmk.setProperty(Bookmark.BOOKMARK_TITLE,urlentry.dc_title());
                         sb.bookmarksDB.saveBookmark(bmk);
 
                         // do the same for YMarks ?

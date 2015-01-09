@@ -180,7 +180,6 @@ public class PerformanceQueues_p {
 
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
-                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; loadprereq = 9; }
 
                 sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq, loadprereq);
                 idlesleep = sb.getConfigLong(threadName + "_idlesleep", idlesleep);
@@ -194,7 +193,6 @@ public class PerformanceQueues_p {
                 loadprereq = Double.parseDouble(d(defaultSettings.get(threadName + "_loadprereq"), String.valueOf(memprereq)));
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
-                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; loadprereq = 9; }
                 //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
                 sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq, loadprereq);
             }
@@ -204,7 +202,6 @@ public class PerformanceQueues_p {
             prop.put("table_" + c + "_loadprereq", loadprereq);
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
             // prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
-            prop.put("table_" + c + "_disabled", threadName.equals("10_httpd") ? "1" : "0" ); // httpd hardcoded defaults
             prop.put("table_" + c + "_recommendation", threadName.endsWith("_indexing") ? "1" : "0");
             prop.putNum("table_" + c + "_recommendation_value", rwi == null ? 0 : threadName.endsWith("_indexing") ? (rwi.minMem() / 1024) : 0);
             c++;
