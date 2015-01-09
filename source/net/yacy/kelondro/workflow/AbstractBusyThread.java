@@ -41,13 +41,23 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     private boolean intermissionObedient = true;
     private final Object syncObject = new Object();
     
-    private long idleSleep = Long.MIN_VALUE;
-    private long busySleep = Long.MIN_VALUE;
-    
-    public AbstractBusyThread(long idleSleep, long busySleep) {
+    private final long idleSleep; // min allowed idle sleep
+    private final long busySleep; // min allowed busy sleep
+
+    /**
+     * Initializes the AbstractBusyThread with min allowed sleep time (in milliseconds)
+     * and sets the actual sleep time to this values.
+     *
+     * @param minidleSleep defines min idle sleep time that can be set via setIdleSleep()
+     * @param minbusySleep defines min busy sleep time that can be set via setBusySleep()
+     */
+    public AbstractBusyThread(long minidleSleep, long minbusySleep) {
         super();
-        this.idleSleep = idleSleep;
-        this.busySleep = busySleep;
+        this.idleSleep = minidleSleep; // set min allowed
+        this.busySleep = minbusySleep;
+
+        this.idlePause = minidleSleep; // initialized actual (might be changed ba set methodes)
+        this.busyPause = minbusySleep; // init here makes sure getIdleSleep() returns at least min allowed
     }
 
     @Override
@@ -55,7 +65,14 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         // sets a sleep time before execution of the job-loop
         startup = milliseconds;
     }
-    
+
+   /**
+     * Set the delay between idle cycles to the larger of the input argument
+     * and the min allowed delay defined on init
+     *
+     * @param milliseconds
+     * @return the actually set sleep time
+     */
     @Override
     public final long setIdleSleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
@@ -67,7 +84,14 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     public final long getIdleSleep() {
         return idlePause;
     }
-    
+
+    /**
+     * Set the delay between busy cycles to the larger of the input argument
+     * and the min allowed delay defined on init
+     *
+     * @param milliseconds
+     * @return the actually set sleep time
+     */
     @Override
     public final long setBusySleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
