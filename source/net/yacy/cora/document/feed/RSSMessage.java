@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
@@ -121,7 +120,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         if (link.length() > 0) this.map.put(Token.link.name(), link);
-        this.map.put(Token.pubDate.name(), ISO8601Formatter.FORMATTER.format());
+        this.map.put(Token.pubDate.name(), HeaderFramework.FORMAT_RFC1123.format(new Date()));
         this.map.put(Token.guid.name(), artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
 
@@ -130,7 +129,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         this.map.put(Token.link.name(), link.toNormalform(true));
-        this.map.put(Token.pubDate.name(), ISO8601Formatter.FORMATTER.format());
+        this.map.put(Token.pubDate.name(), HeaderFramework.FORMAT_RFC1123.format(new Date()));
         if (guid.length() > 0) this.map.put(Token.guid.name(), guid);
     }
 
@@ -218,7 +217,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         final String dateString = Token.pubDate.valueFrom(this.map, "");
         Date date;
         try {
-            date = ISO8601Formatter.FORMATTER.parse(dateString);
+            date = HeaderFramework.FORMAT_RFC1123.parse(dateString);
         } catch (final ParseException e) {
             try {
                 date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString);
@@ -338,7 +337,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public void setPubDate(final Date pubdate) {
-        setValue(Token.pubDate, ISO8601Formatter.FORMATTER.format(pubdate));
+        setValue(Token.pubDate, HeaderFramework.FORMAT_RFC1123.format(pubdate));
     }
 
     @Override

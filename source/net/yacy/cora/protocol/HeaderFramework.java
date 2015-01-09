@@ -251,10 +251,10 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
     private static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
     private static final String PATTERN_GSAFS = "yyyy-MM-dd";
-    private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
-    private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
-    private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
-    private static final SimpleDateFormat FORMAT_GSAFS        = new SimpleDateFormat(PATTERN_GSAFS, Locale.US);
+    public  static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
+    public  static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
+    public  static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
+    public  static final SimpleDateFormat FORMAT_GSAFS        = new SimpleDateFormat(PATTERN_GSAFS, Locale.US);
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
 
