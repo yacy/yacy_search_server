@@ -2840,7 +2840,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // remove stopwords
-        this.log.info("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + url);
+        this.log.info("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + url.toNormalform(true));
 
         // STORE WORD INDEX
         SolrInputDocument newEntry =

@@ -53,15 +53,22 @@ public class IndexImportMediawiki_p {
                 prop.put("import_status", 0);
             } else {
                 if (post.containsKey("file")) {
-                    final File sourcefile = new File(post.get("file"));
-                    if (sourcefile.exists()) {
-                        MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
-                        MediawikiImporter.job.start();
-                        prop.put("import_dump", MediawikiImporter.job.source());
-                        prop.put("import_thread", "started");
-                    } else {
+                    String file = post.get("file");
+                    if (file.startsWith("file://")) file = file.substring(7);
+                    if (file.startsWith("http")) {
                         prop.put("import_dump", "");
-                        prop.put("import_thread", "Error: file not found ["+sourcefile+"]");
+                        prop.put("import_thread", "Error: file argument must be a path to a document in the local file system");
+                    } else {
+                        final File sourcefile = new File(file);
+                        if (sourcefile.exists()) {
+                            MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
+                            MediawikiImporter.job.start();
+                            prop.put("import_dump", MediawikiImporter.job.source());
+                            prop.put("import_thread", "started");
+                        } else {
+                            prop.put("import_dump", "");
+                            prop.put("import_thread", "Error: file not found ["+sourcefile+"]");
+                        }
                     }
                     prop.put("import", 1);
                     prop.put("import_count", 0);
