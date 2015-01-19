@@ -714,16 +714,7 @@ public final class Switchboard extends serverSwitch {
         this.log.info("surrogates.out Path = " + this.surrogatesOutPath.getAbsolutePath());
         this.surrogatesOutPath.mkdirs();
 */
-        // copy opensearch heuristic config (if not exist)
-        final File osdConfig = new File(getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
-        if (!osdConfig.exists()) {
-            final File osdDefaultConfig = new File(getAppPath(), "defaults/heuristicopensearch.conf");
-            this.log.info("heuristic.opensearch list Path = " + osdDefaultConfig.getAbsolutePath());
-            try {
-                Files.copy(osdDefaultConfig, osdConfig);
-            } catch (final IOException ex) { }
-        }
-
+        
         // create the release download directory
         this.releasePath =
             getDataPath(SwitchboardConstants.RELEASE_PATH, SwitchboardConstants.RELEASE_PATH_DEFAULT);
@@ -3615,7 +3606,9 @@ public final class Switchboard extends serverSwitch {
      * @param urlpattern the search query url (e.g. http://search.org?query=searchword)
      * @param searchEvent
      * @param feedName short/internal name of the remote system
+     * @deprecated use FederateSearchManager(SearchEvent) instead
      */
+    @Deprecated // not used (since 2015-01-18, v1.81)
     public final void heuristicRSS(
         final String urlpattern,
         final SearchEvent searchEvent,

@@ -127,8 +127,8 @@ public class ConfigNetwork_p
                     sb.peers.mySeed().setPeerTags(MapTools.string2set(normalizedList(post.get("peertags")), ","));
                 }
 
-                sb.setConfig("cluster.mode", post.get(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER));
-                sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));
+                sb.setConfig(SwitchboardConstants.CLUSTER_MODE, post.get(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER));
+                sb.setConfig(SwitchboardConstants.CLUSTER_PEERS_IPPORT, checkIPPortList(post.get(SwitchboardConstants.CLUSTER_PEERS_IPPORT, "")));
                 sb.setConfig(
                     "cluster.peers.yacydomain",
                     checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));

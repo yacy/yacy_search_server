@@ -69,7 +69,7 @@ public class URIMetadataNode extends SolrDocument {
     private static final long serialVersionUID = -256046934741561968L;
     
     protected String keywords = null;
-    protected DigestURL url = null;
+    protected DigestURL url;
     protected Bitfield flags = null;
     protected int imagec = -1, audioc = -1, videoc = -1, appc = -1;
     protected double lat = Double.NaN, lon = Double.NaN;
@@ -150,7 +150,6 @@ public class URIMetadataNode extends SolrDocument {
         for (String name : doc.getFieldNames()) {
             this.addField(name, doc.getFieldValue(name));
         }
-        this.snippet = "";
         Float scorex = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
         this.score = scorex == null ? 0.0f : scorex.floatValue();
         final byte[] hash = ASCII.getBytes(getString(CollectionSchema.id)); // TODO: can we trust this id ?
@@ -169,6 +168,24 @@ public class URIMetadataNode extends SolrDocument {
         this.score = scorex;
     }
 
+    public URIMetadataNode (final String urlstr) {
+        super();
+        try {
+            url = new DigestURL(urlstr);
+            this.setField(CollectionSchema.sku.name(), url.toNormalform(true));
+            this.setField(CollectionSchema.id.name(), ASCII.String(url.hash()));
+        } catch (final MalformedURLException e) {
+            ConcurrentLog.logException(e);
+            this.url = null;
+        }
+    }
+    public URIMetadataNode(DigestURL theurl) {
+        super();
+        url = theurl;
+        this.setField(CollectionSchema.sku.name(), url.toNormalform(true));
+        this.setField(CollectionSchema.id.name(), ASCII.String(url.hash()));
+    }
+    
     /**
      * Get the content domain of a document. This tries to get the content domain from the mime type
      * and if this fails it uses alternatively the content domain from the file extension.

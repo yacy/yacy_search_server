@@ -45,7 +45,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.opensearch.OpenSearchConnector;
+import net.yacy.cora.federate.FederateSearchManager;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -719,10 +719,10 @@ public class yacysearch {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
                 if ( heuristicBlekko >= 0  && authenticated && !stealthmode ) {
-                    OpenSearchConnector.query(sb, theSearch);
+                    FederateSearchManager.getManager().search(theSearch);
                 }
                 if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && authenticated && !stealthmode) {
-                    OpenSearchConnector.query(sb, theSearch);
+                    FederateSearchManager.getManager().search(theSearch);
                 }
             }
 

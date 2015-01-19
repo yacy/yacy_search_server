@@ -25,7 +25,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import com.google.common.io.Files;
 
 import java.io.File;
 
@@ -37,9 +36,10 @@ import net.yacy.search.Switchboard;
 
 import java.io.IOException;
 import java.util.Iterator;
+import net.yacy.cora.federate.FederateSearchManager;
 
-import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
+import net.yacy.cora.storage.Files;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
@@ -66,9 +66,9 @@ public class ConfigHeuristics_p {
             if (post.containsKey("searchresultglobal_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL, false);
             if (post.containsKey("opensearch_on")) {
                 sb.setConfig(SwitchboardConstants.HEURISTIC_OPENSEARCH, true);
-                // re-read config (and create work table)
-                OpenSearchConnector os = new OpenSearchConnector(sb, true);
-                if (os.getSize() == 0) {
+                // re-read config
+                FederateSearchManager.getManager().init(sb.getDataPath().getAbsolutePath()+ "DATA/SETTINGS/heuristicopensearch.conf");
+                if (FederateSearchManager.getManager().getSize() == 0) {
                     osderrmsg = "no active search targets are configured";
                 }
             }
@@ -77,8 +77,8 @@ public class ConfigHeuristics_p {
                 final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name())
                         && (sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()));
                 if (metafieldavailable) {
-                    OpenSearchConnector osc = new OpenSearchConnector(sb, false);
-                    if (osc.discoverFromSolrIndex(sb)) {
+                    //OpenSearchConnector osc = new OpenSearchConnector(sb, false);
+                    if (FederateSearchManager.getManager().discoverFromSolrIndex(sb)) {
                         osderrmsg = "started background search for target systems, refresh page after some minutes";
                     } else {
                         osderrmsg = "Error: webgraph Solr index not enabled";
@@ -98,8 +98,7 @@ public class ConfigHeuristics_p {
                 if (tmpname != null && tmpurl !=null) {
                     if (!tmpname.isEmpty() && !tmpurl.isEmpty() && tmpurl.toLowerCase().contains("{searchterms}")) {
                         final String tmpcomment = post.get("ossys_newcomment");
-                        OpenSearchConnector osc = new OpenSearchConnector(sb,false);
-                        osc.add (tmpname,tmpurl,false,tmpcomment);
+                        FederateSearchManager.getManager().addOpenSearchTarget(tmpname,tmpurl,false,tmpcomment);
                     } else osderrmsg = "Url template must contain '{searchTerms}'";
                     }
                 }
@@ -143,6 +142,10 @@ public class ConfigHeuristics_p {
                 if ((post.containsKey("resettodefaultosdlist") || !osdConfig.exists()) && osdDefaultConfig.exists()) {
                     try {
                         Files.copy(osdDefaultConfig, osdConfig);
+                        File defdir = new File(sb.dataPath, "DATA/SETTINGS/federatecfg");
+                        if (!defdir.exists()) {
+                            Files.copy(new File(sb.appPath, "defaults/federatecfg"), defdir);
+                        }
                     } catch (final IOException ex) {
                         osderrmsg = "file I/O error during copy";
                     }
@@ -240,7 +243,7 @@ public class ConfigHeuristics_p {
         
         // re-read config (and create/update work table)
         if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, true)) {
-            new OpenSearchConnector(sb, true);
+            FederateSearchManager.getManager().init(f.getAbsolutePath());
         }
     }
 }
