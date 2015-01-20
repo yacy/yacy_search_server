@@ -146,7 +146,7 @@ public class Transactions {
         }
     }
     
-    public static boolean store(final SolrInputDocument doc, final boolean concurrency, final boolean loadImage, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent, final String acceptLanguage) {
+    public static boolean store(final SolrInputDocument doc, final boolean concurrency, final boolean loadImage, final boolean replaceOld, final String proxy, final String acceptLanguage) {
 
         // GET METADATA FROM DOC
         final String urls = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
@@ -160,7 +160,7 @@ public class Transactions {
             return false;
         }
         
-        boolean success = loadImage ? store(url, date, depth, concurrency, replaceOld, proxy, agent, acceptLanguage) : true;
+        boolean success = loadImage ? store(url, date, depth, concurrency, replaceOld, proxy, acceptLanguage) : true;
         if (success) {
             // STORE METADATA FOR THE IMAGE
             File metadataPath = Transactions.definePath(url, depth, date, "xml", Transactions.State.INVENTORY);
@@ -189,7 +189,7 @@ public class Transactions {
     }
     
 
-    public static boolean store(final DigestURL url, final Date date, final int depth, final boolean concurrency, final boolean replaceOld, final String proxy, final ClientIdentification.Agent agent, final String acceptLanguage) {
+    public static boolean store(final DigestURL url, final Date date, final int depth, final boolean concurrency, final boolean replaceOld, final String proxy, final String acceptLanguage) {
 
         // CLEAN UP OLD DATA (if wanted)
         Collection<File> oldPaths = Transactions.findPaths(url, depth, null, Transactions.State.INVENTORY);
@@ -211,7 +211,7 @@ public class Transactions {
                 public void run() {
                     executorRunning.incrementAndGet();
                     try {
-                        Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
+                        Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath);
                     } catch (Throwable e) {} finally {
                     executorRunning.decrementAndGet();
                     }
@@ -219,7 +219,7 @@ public class Transactions {
             };
             executor.execute(t);
         } else {
-            success = Html2Image.writeWkhtmltopdf(urls, proxy, agent.userAgent, acceptLanguage, pdfPath);
+            success = Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath);
         }
         
         return success;

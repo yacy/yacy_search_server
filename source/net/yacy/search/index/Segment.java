@@ -580,7 +580,7 @@ public class Segment {
             String ext = MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase();
             if (ext.length() == 0 || url.getFile().length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext)) {
                 // STORE IMAGE AND METADATA
-                Transactions.store(vector, true, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, crawlProfile.getAgent(), acceptLanguage);
+                Transactions.store(vector, true, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, acceptLanguage);
             }
         }
         

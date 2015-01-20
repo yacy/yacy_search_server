@@ -52,7 +52,7 @@ public class Html2Image {
     // to install wkhtmltopdf, download wkhtmltox-0.12.1_osx-cocoa-x86-64.pkg from http://wkhtmltopdf.org/downloads.html
     // to install imagemagick, download from http://cactuslab.com/imagemagick/assets/ImageMagick-6.8.9-9.pkg.zip
     // the convert command from imagemagick needs ghostscript, if not present on older macs, download a version of gs from http://pages.uoregon.edu/koch/
-    private final static File wkhtmltopdfMac = new File("/usr/local/bin/wkhtmltopdf");
+    private final static File wkhtmltopdfMac = new File("/usr/local/bin/wkhtmltopdf");  // sometimes this is also the path on debian
     private final static File convertMac1 = new File("/opt/local/bin/convert");
     private final static File convertMac2 = new File("/opt/ImageMagick/bin/convert");
     
@@ -81,7 +81,7 @@ public class Html2Image {
     public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, final String acceptLanguage, File destination) {
         boolean success = false;
         for (boolean ignoreErrors: new boolean[]{false, true}) {
-            success = writeWkhtmltopdfInternal(url, proxy, destination, null, acceptLanguage, ignoreErrors);
+            success = writeWkhtmltopdfInternal(url, proxy, destination, userAgent, acceptLanguage, ignoreErrors);
             if (success) break;
             if (!success && proxy != null) {
                 ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
@@ -106,7 +106,7 @@ public class Html2Image {
                 (proxy == null ? "" : "--proxy " + proxy + " ") +
                 (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") + // some versions do not have that flag and fail if attempting to use it...
                 //"--footer-font-name 'Courier' --footer-font-size 9 --footer-left [webpage] --footer-right [date]/[time]([page]/[topage]) " +
-                "--footer-left [webpage] --footer-right '[date]/[time]([page]/[topage])' " +
+                "--footer-left [webpage] --footer-right '[date]/[time]([page]/[topage])' --footer-font-size 7 " +
                 url + " " + destination.getAbsolutePath();
         try {
             ConcurrentLog.info("Html2Pdf", "creating pdf from url " + url + " with command: " + commandline); 

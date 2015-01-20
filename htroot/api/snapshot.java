@@ -258,10 +258,10 @@ public class snapshot {
                 SolrDocument sd = sb.index.fulltext().getMetadata(durl.hash());
                 boolean success = false;
                 if (sd == null) {
-                    success = Transactions.store(durl, new Date(), 99, false, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, ClientIdentification.yacyProxyAgent, sb.getConfig("crawler.http.acceptLanguage", null));
+                    success = Transactions.store(durl, new Date(), 99, false, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, sb.getConfig("crawler.http.acceptLanguage", null));
                 } else {
                     SolrInputDocument sid = sb.index.fulltext().getDefaultConfiguration().toSolrInputDocument(sd);
-                    success = Transactions.store(sid, false, true, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, ClientIdentification.yacyProxyAgent, sb.getConfig("crawler.http.acceptLanguage", null));
+                    success = Transactions.store(sid, false, true, true, sb.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, sb.getConfig("crawler.http.acceptLanguage", null));
                 }
                 if (success) {
                     pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.ANY);
