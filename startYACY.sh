@@ -179,13 +179,13 @@ if [ $GUI -eq 1 ] #gui
 then
 	cmdline="$cmdline -gui $parameter"
 fi
-if [ $DEBUG -eq 0 ] #debug
+if [ $DEBUG -eq 1 ] #debug
 then
 	cmdline=$cmdline
 elif [ $LOGGING -eq 1 ];then #logging
 	cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
 else
-	cmdline="$cmdline >/dev/null 2>/dev/null & echo \$! > $PIDFILE"
+	cmdline="$cmdline >/dev/null 2>/dev/null"
 fi
 if [ $PRINTONLY -eq 1 ];then
 	echo $cmdline
