@@ -4,14 +4,22 @@
 <dict>
 	<key>CFBundleName</key>
 	<string>YaCy</string>
+	<key>CFBundleDisplayName</key>
+	<string>YaCy</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.82</string>
+    <key>CFBundleGetInfoString</key>
+    <string>Peer-to-Peer Search Engine</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>GPL-2.0</string>
 	<key>CFBundleIdentifier</key>
 	<string>net.yacy.yacy</string>
 	<key>CFBundleVersion</key>
-	<string>@REPL_VERSION@</string>
+	<string>1.82</string>
 	<key>CFBundleAllowMixedLocalizations</key>
 	<string>true</string>
 	<key>CFBundleExecutable</key>
-	<string>JavaApplicationStub</string>
+	<string>JavaApplicationStub</string><!-- relative to Contents/MacOS -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundlePackageType</key>
@@ -21,106 +29,6 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleIconFile</key>
-	<string>YaCy_2013_Icon.icns</string>
-	<key>Java</key>
-	<dict>
-		<key>VMOptions</key>
-		<string>-Xmx600m -Xms600m -Dfile.encoding=UTF-8 -Dsolr.directoryFactory=solr.MMapDirectoryFactory</string>
-		<key>WorkingDirectory</key>
-		<string>$APP_PACKAGE/Contents/Resources/Java</string>
-		<key>MainClass</key>
-		<string>net.yacy.yacy</string>
-		<key>JVMVersion</key>
-		<string>1.5+</string>
-		<key>Arguments</key>
-		<string>-gui Library/YaCy</string>
-		<key>ClassPath</key>
-			<array>
-			<string>$JAVAROOT/htroot</string>
-			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
-			<string>$JAVAROOT/lib/bcmail-jdk15-1.46.jar</string>
-			<string>$JAVAROOT/lib/bcprov-jdk15-1.46.jar</string>
-			<string>$JAVAROOT/lib/chardet.jar</string>
-			<string>$JAVAROOT/lib/commons-codec-1.9.jar</string>
-			<string>$JAVAROOT/lib/commons-compress-1.8.1.jar</string>
-			<string>$JAVAROOT/lib/commons-fileupload-1.3.1.jar</string>
-			<string>$JAVAROOT/lib/commons-io-2.3.jar</string>
-			<string>$JAVAROOT/lib/commons-jxpath-1.3.jar</string>
-			<string>$JAVAROOT/lib/commons-lang-2.6.jar</string>
-			<string>$JAVAROOT/lib/commons-logging-1.2.jar</string>
-			<string>$JAVAROOT/lib/fontbox-1.8.8.jar</string>
-			<string>$JAVAROOT/lib/geronimo-stax-api_1.0_spec-1.0.1.jar</string>
-			<string>$JAVAROOT/lib/guava-18.0.jar</string>
-			<string>$JAVAROOT/lib/htmllexer.jar</string>
-			<string>$JAVAROOT/lib/httpclient-4.3.6.jar</string>
-			<string>$JAVAROOT/lib/httpcore-4.3.3.jar</string>
-			<string>$JAVAROOT/lib/httpmime-4.3.6.jar</string>
-			<string>$JAVAROOT/lib/icu4j-core.jar</string>
-			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
-			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
-			<string>$JAVAROOT/lib/jaudiotagger-2.0.4-20111207.115108-15.jar</string>
-			<string>$JAVAROOT/lib/jcifs-1.3.17.jar</string>
-			<string>$JAVAROOT/lib/jcl-over-slf4j-1.7.9.jar</string>
-			<string>$JAVAROOT/lib/jempbox-1.8.8.jar</string>
-			<string>$JAVAROOT/lib/javax.servlet-api-3.1.0.jar</string>
-			<string>$JAVAROOT/lib/jetty-client-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-continuation-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-deploy-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-http-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-io-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-jmx-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-proxy-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-security-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-server-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-servlet-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-servlets-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-util-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-webapp-9.2.6.v20141205.jar</string>
-			<string>$JAVAROOT/lib/jetty-xml-9.2.6.v20141205.jar</string>			                      
-			<string>$JAVAROOT/lib/jsch-0.1.51.jar</string>
-			<string>$JAVAROOT/lib/json-simple-1.1.1.jar</string>
-			<string>$JAVAROOT/lib/jsoup-1.8.1.jar</string>
-			<string>$JAVAROOT/lib/log4j-over-slf4j-1.7.9.jar</string>
-			<string>$JAVAROOT/lib/lucene-analyzers-common-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-analyzers-phonetic-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-classification-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-codecs-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-core-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-facet-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-grouping-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-highlighter-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-join-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-memory-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-misc-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-queries-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-queryparser-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-spatial-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/lucene-suggest-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/metadata-extractor-2.7.0.jar</string>
-			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
-			<string>$JAVAROOT/lib/org.restlet.jar</string>
-			<string>$JAVAROOT/lib/pdfbox-1.8.8.jar</string>
-			<string>$JAVAROOT/lib/poi-3.10.1.jar</string>
-			<string>$JAVAROOT/lib/poi-scratchpad-3.10.1.jar</string>
-			<string>$JAVAROOT/lib/slf4j-api-1.7.9.jar</string>
-			<string>$JAVAROOT/lib/slf4j-jdk14-1.7.9.jar</string>
-			<string>$JAVAROOT/lib/solr-core-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/solr-solrj-4.10.3.jar</string>
-			<string>$JAVAROOT/lib/spatial4j-0.4.1.jar</string>
-			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>
-			<string>$JAVAROOT/lib/weupnp-0.1.2.jar</string>
-			<string>$JAVAROOT/lib/wstx-asl-3.2.9.jar</string>
-			<string>$JAVAROOT/lib/xercesImpl.jar</string>
-			<string>$JAVAROOT/lib/xml-apis.jar</string>
-                        <string>$JAVAROOT/lib/xmpcore-5.1.2.jar</string>
-			<string>$JAVAROOT/lib/yacycore.jar</string>
-			<string>$JAVAROOT/lib/zookeeper-3.4.6.jar</string>
-			</array>
-		<key>Properties</key>
-		<dict>
-			<key>apple.laf.useScreenMenuBar</key>
-			<string>true</string>
-		</dict>
-	</dict>
+	<string>YaCy_2013_Icon.icns</string><!-- relative to Contents/Resources -->
 </dict>
 </plist>

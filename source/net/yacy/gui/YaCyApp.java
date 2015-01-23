@@ -90,14 +90,45 @@ public class YaCyApp {
         public void closeAndExit() {
             if (this.app != null) this.app.setVisible(false); // fake closing
             //Browser.openBrowser("http://" + host + ":" + port + "/Steering.html?shutdown=");
-            net.yacy.search.Switchboard.getSwitchboard().terminate(10, "shutdown request from gui");
+            net.yacy.search.Switchboard.getSwitchboard().terminate(10, "shutdown request from gui(1)");
             Switchboard.shutdown();
             //System.exit(0);
         }
     }
-
+    
     public static void start(final String host, final int port) {
-
+        System.setProperty("apple.eawt.quitStrategy", "CLOSE_ALL_WINDOWS");
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name","YaCy Search Engine");
+        
+        /*
+        com.apple.eawt.Application osxapp = com.apple.eawt.Application.getApplication();
+        osxapp.setAboutHandler(new com.apple.eawt.AboutHandler() {
+            @Override public void handleAbout(com.apple.eawt.AppEvent.AboutEvent evt) {}
+        });
+        osxapp.setPreferencesHandler(new com.apple.eawt.PreferencesHandler() {
+            @Override public void handlePreferences(com.apple.eawt.AppEvent.PreferencesEvent pe) {}
+        });
+        osxapp.setQuitHandler(new com.apple.eawt.QuitHandler(){
+            @Override public void handleQuitRequestWith(com.apple.eawt.AppEvent.QuitEvent evt, com.apple.eawt.QuitResponse resp) {
+                net.yacy.search.Switchboard.getSwitchboard().terminate(10, "shutdown request from gui(2)");
+                Switchboard.shutdown();
+            }
+        });
+         */
+        /*
+        com.apple.eawt.QuitHandler quitHandler = new com.apple.eawt.QuitHandler() {
+            @Override public void handleQuitRequestWith(com.apple.eawt.AppEvent.QuitEvent evt, com.apple.eawt.QuitResponse resp) {
+                net.yacy.search.Switchboard.getSwitchboard().terminate(10, "shutdown request from gui(2)");
+                Switchboard.shutdown();
+            }
+        };
+        try {
+            Toolkits.applicationGetApplication.invoke(Toolkits.setQuitHandler, quitHandler); //wrong number of arguments
+        } catch (IllegalAccessException|IllegalArgumentException|InvocationTargetException e) {
+            ConcurrentLog.logException(e);
+        }
+        */
         Switchboard.startInfoUpdater();
         operation = new Op(app, host, port);
 

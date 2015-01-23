@@ -39,7 +39,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 
 import javax.imageio.ImageIO;
 
@@ -149,11 +148,7 @@ public final class Tray {
 	private static void setDockIcon(Image icon) {
 	    if (!OS.isMacArchitecture) return;
 	    try {
-	        Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
-	        Method applicationGetApplication = applicationClass.getMethod("getApplication");
-	        Object applicationInstance = applicationGetApplication.invoke(null);
-	        Method setDockIconImage = applicationClass.getMethod("setDockIconImage", Class.forName("java.awt.Image"));
-	        setDockIconImage.invoke(applicationInstance, icon);
+	        Toolkits.setDockIconImage.invoke(Toolkits.applicationInstance, icon);
         } catch (Throwable e) {}
         // same as: Application.getApplication().setDockIconImage(i);
 	}

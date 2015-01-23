@@ -2,10 +2,6 @@
  *  Application
  *  Copyright 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 05.08.2010 at http://yacy.net
- *  
- *  $LastChangedDate$
- *  $LastChangedRevision$
- *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -36,7 +32,6 @@ import javax.swing.JMenuBar;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
 
 public class Application extends JFrame implements DocumentListener {
 

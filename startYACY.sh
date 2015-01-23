@@ -179,7 +179,7 @@ if [ $GUI -eq 1 ] #gui
 then
 	cmdline="$cmdline -gui $parameter"
 fi
-if [ $DEBUG -eq 1 ] #debug
+if [ $DEBUG -eq 0 ] #debug
 then
 	cmdline=$cmdline
 elif [ $LOGGING -eq 1 ];then #logging
