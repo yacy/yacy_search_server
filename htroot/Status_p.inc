@@ -10,6 +10,7 @@
       ::
       <div>Uptime: #[uptime]#</div>
     #(/peerStatistics)#
+    <div>Java version: #[java.version]#</div>
     <div>Processors: #[processors]#</div>
     <div>Load: #[load]#</div>
     <div>Threads: #[processesCurrentInclDaemon]#/#[processesCurrentOnlyDaemon]#, peak:#[processesPeak]#, total:#[processesTotal]#</div>

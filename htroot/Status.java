@@ -160,9 +160,9 @@ public class Status
 
         // version information
         //final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
-        final String versionstring =
-            yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
+        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
         prop.put("versionpp", versionstring);
+        prop.put("java.version", System.getProperty("java.version"));
 
         // place some more hints
         if (adminaccess && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) {
