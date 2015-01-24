@@ -6,26 +6,42 @@
 
 package net.yacy.cora.util;
 
-public class JSONException extends Exception {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 0;
-	private Throwable cause;
+/**
+ * The JSONException is thrown by the JSON.org classes when things are amiss.
+ *
+ * @author JSON.org
+ * @version 2014-05-03
+ */
+public class JSONException extends RuntimeException {
+    private static final long serialVersionUID = 0;
+    private Throwable cause;
 
     /**
      * Constructs a JSONException with an explanatory message.
-     * @param message Detail about the reason for the exception.
+     *
+     * @param message
+     *            Detail about the reason for the exception.
      */
-    protected JSONException(String message) {
+    public JSONException(String message) {
         super(message);
     }
 
-    protected JSONException(Throwable t) {
-        super(t.getMessage());
-        this.cause = t;
+    /**
+     * Constructs a new JSONException with the specified cause.
+     * @param cause The cause.
+     */
+    public JSONException(Throwable cause) {
+        super(cause.getMessage());
+        this.cause = cause;
     }
 
+    /**
+     * Returns the cause of this exception or null if the cause is nonexistent
+     * or unknown.
+     *
+     * @return the cause of this exception or null if the cause is nonexistent
+     *          or unknown.
+     */
     @Override
     public synchronized Throwable getCause() {
         return this.cause;
