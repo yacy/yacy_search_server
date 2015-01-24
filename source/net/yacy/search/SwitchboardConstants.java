@@ -475,7 +475,9 @@ public final class SwitchboardConstants {
     public static final String RESOURCE_DISK_USED_MAX_OVERSHOT    = "resource.disk.used.max.overshot";    
     
     public static final String MEMORY_ACCEPTDHT = "memory.acceptDHTabove";
-    public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT";
+    public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT"; // set if DHT was disabled by ResourceObserver
+    public static final String CRAWLJOB_LOCAL_AUTODISABLED = "memory.disabledLocalCrawler"; // set if local crawl was disabled by ResourceObserver
+    public static final String CRAWLJOB_REMOTE_AUTODISABLED = "memory.disabledRemoteCrawler"; // set if remote crawl was disabled by ResourceObserver
 
     /*
      * Some constants
