@@ -113,8 +113,12 @@ public class genericImageParser extends AbstractParser implements Parser {
                 ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             }
-            final IMAGEMAP imap = bmpParser.parse(b);
-            ii = parseJavaImage(location, imap.getImage());
+            if (bmpParser.isBMP(b)) {
+                final IMAGEMAP imap = bmpParser.parse(b);
+                ii = parseJavaImage(location, imap.getImage());
+            } else {
+                throw new Parser.Failure("Not supported by bmpParser", location);
+            }
         } else if (mimeType.equals("image/jpeg") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("jpe")) {
             // use the exif parser from
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
