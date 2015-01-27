@@ -53,7 +53,7 @@ public class SynonymLibrary {
             File ff = new File(path, f);
             String line;
             try {
-                BlockingQueue<String> list = Files.concurentLineReader(ff, 1000);
+                BlockingQueue<String> list = Files.concurentLineReader(ff);
                 while ((line = list.take()) != Files.POISON_LINE) {
                     line = line.trim();
                     if (line.length() == 0 || line.charAt(0) == '#') continue;

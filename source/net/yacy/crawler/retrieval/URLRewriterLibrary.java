@@ -49,7 +49,7 @@ public class URLRewriterLibrary {
         for (final String f: files) {
             File ff = new File(this.rewritingPath, f);
             try {
-                BlockingQueue<String> list = Files.concurentLineReader(ff, 1000);
+                BlockingQueue<String> list = Files.concurentLineReader(ff);
                 String line;
                 while ((line = list.take()) != Files.POISON_LINE) {
                     line = line.trim();

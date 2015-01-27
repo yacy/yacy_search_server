@@ -207,7 +207,7 @@ public class Tagging {
         ConcurrentLog.info("Tagging", "Started Vocabulary Initialization for " + this.propFile);
         long start = System.currentTimeMillis();
         long count = 0;
-        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
         String term, v;
         String[] tags;
         int p;
@@ -268,7 +268,8 @@ public class Tagging {
             }
         } catch (final InterruptedException e) {
         }
-        ConcurrentLog.info("Tagging", "Finished Vocabulary Initialization for " + this.propFile + "; " + count + " lines; " + (System.currentTimeMillis() - start) + " milliseconds");
+        long time = Math.max(1, System.currentTimeMillis() - start);
+        ConcurrentLog.info("Tagging", "Finished Vocabulary Initialization for " + this.propFile + "; " + count + " lines; " + time + " milliseconds; " + (1000L * count / time) + " lines / second");
     }
 
     public boolean isFacet() {
@@ -292,7 +293,7 @@ public class Tagging {
         if (this.propFile == null) return;
         File tmp = tmpFile();
         BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
-        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
         if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
         if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
         String line;
@@ -325,7 +326,7 @@ public class Tagging {
         if (this.propFile == null) return;
         File tmp = tmpFile();
         BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
-        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
         if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
         if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
         String line;
@@ -366,7 +367,7 @@ public class Tagging {
         this.objectspace = os;
         File tmp = tmpFile();
         BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
-        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
         if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
         if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
         String line;
@@ -429,7 +430,7 @@ public class Tagging {
         Map<String, SOTuple> map = new LinkedHashMap<String, SOTuple>();
         BlockingQueue<String> list;
         try {
-            list=Files.concurentLineReader(this.propFile, 1000);
+            list=Files.concurentLineReader(this.propFile);
         } catch (final IOException e1) {
             return map;
         }

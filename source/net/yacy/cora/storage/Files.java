@@ -36,6 +36,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -75,8 +76,8 @@ public class Files {
 	 * @throws IOException
 	 */
 	public final static String POISON_LINE = "__@POISON__";
-	public static BlockingQueue<String> concurentLineReader(final File f, final int maxQueueSize) throws IOException {
-		final BlockingQueue<String> q = new ArrayBlockingQueue<String>(maxQueueSize);
+	public static BlockingQueue<String> concurentLineReader(final File f) throws IOException {
+		final BlockingQueue<String> q = new LinkedBlockingQueue<String>();
 		final InputStream is = read(f);
 		final BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 		Thread t = new Thread() {
