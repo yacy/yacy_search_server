@@ -492,9 +492,6 @@ public class CrawlQueues {
         // we know a peer which should provide remote crawl entries. load them now.
         final RSSFeed feed = Protocol.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 10000);
         if (feed == null || feed.isEmpty()) {
-            // something is wrong with this provider. To prevent that we get not stuck with this peer
-            // we remove it from the peer list
-            this.sb.peers.peerActions.peerDeparture(seed, "no results from provided remote crawls");
             // try again and ask another peer
             return remoteCrawlLoaderJob();
         }

@@ -38,7 +38,6 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;

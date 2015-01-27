@@ -27,7 +27,6 @@
 package net.yacy.search.snippet;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Comparator;
 import java.util.Date;
 

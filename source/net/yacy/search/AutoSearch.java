@@ -182,9 +182,8 @@ public class AutoSearch extends AbstractBusyThread {
             this.lastInitTime = System.currentTimeMillis();
             saveasPropFile();
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -305,9 +304,8 @@ public class AutoSearch extends AbstractBusyThread {
             int cnt = currentTargets.size();
             cnt += querystack.size() * sb.peers.sizeConnected();
             return cnt;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     @Override

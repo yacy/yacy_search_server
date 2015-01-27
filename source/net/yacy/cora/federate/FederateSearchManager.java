@@ -164,9 +164,8 @@ public class FederateSearchManager {
                 sdl.addAll(fsc.query(query));
             }
             return sdl;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

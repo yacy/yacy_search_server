@@ -154,9 +154,8 @@ public class ViewImage {
             image = ImageParser.parse(urlString, imgb);
             if (image == null) {
                 return null;
-            } else {
-                if ((auth && (width == 0 || height == 0) && maxwidth == 0 && maxheight == 0)) return ext == null ? image : new EncodedImage(image, ext, isStatic);
             }
+            if ((auth && (width == 0 || height == 0) && maxwidth == 0 && maxheight == 0)) return ext == null ? image : new EncodedImage(image, ext, isStatic);
             // find original size
             final int h = image.getHeight(null);
             final int w = image.getWidth(null);

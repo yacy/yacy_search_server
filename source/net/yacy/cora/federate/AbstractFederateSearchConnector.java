@@ -87,14 +87,12 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
             // mandatory to contain a mapping for "sku" or alternatively "cfg_skufieldname" for a conversion to a final url
             if (this.localcfg.contains(CollectionSchema.sku) || this.localcfg.contains("_skufieldname")) {
                 return true;
-            } else {
-                ConcurrentLog.config(this.instancename, "mandatory mapping for sku or _skufieldname missing in " + cfgFileName);
-                return false;
             }
-        } else {
-            this.localcfg = null;
+            ConcurrentLog.config(this.instancename, "mandatory mapping for sku or _skufieldname missing in " + cfgFileName);
             return false;
         }
+        this.localcfg = null;
+        return false;
     }
 
     /**
