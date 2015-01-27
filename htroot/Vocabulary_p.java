@@ -233,7 +233,7 @@ public class Vocabulary_p {
                     }
                     
                     // check the isFacet property
-                    if (vocabulary != null) {
+                    if (vocabulary != null && post.containsKey("set")) {
                         vocabulary.setFacet(post.getBoolean("isFacet"));
                     }
                 }

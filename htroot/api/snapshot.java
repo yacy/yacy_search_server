@@ -63,7 +63,7 @@ public class snapshot {
     private final static int DEFAULT_QUALITY = 75;
     private final static String DEFAULT_EXT = "jpg";
 
-    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Object respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
@@ -101,7 +101,7 @@ public class snapshot {
         }
 
         // for the following methods we (mostly) need an url or a url hash
-        if (post == null) return null;
+        if (post == null) post = new serverObjects();
         final boolean xml = ext.equals("xml");
         final boolean pdf = ext.equals("pdf");
         if (pdf && !authenticated) return null;

@@ -41,6 +41,7 @@ import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class Tagging {
 
@@ -203,6 +204,9 @@ public class Tagging {
         this.predicate = this.namespace + this.navigatorName;
         this.objectspace = null;
 
+        ConcurrentLog.info("Tagging", "Started Vocabulary Initialization for " + this.propFile);
+        long start = System.currentTimeMillis();
+        long count = 0;
         BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
         String term, v;
         String[] tags;
@@ -212,6 +216,7 @@ public class Tagging {
         try {
             String[] pl;
             vocloop: while ((line = list.take()) != Files.POISON_LINE) {
+                count++;
                 line = line.trim();
                 p = line.indexOf('#');
                 if (p >= 0) {
@@ -263,6 +268,7 @@ public class Tagging {
             }
         } catch (final InterruptedException e) {
         }
+        ConcurrentLog.info("Tagging", "Finished Vocabulary Initialization for " + this.propFile + "; " + count + " lines; " + (System.currentTimeMillis() - start) + " milliseconds");
     }
 
     public boolean isFacet() {
