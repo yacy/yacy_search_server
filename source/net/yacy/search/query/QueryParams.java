@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -62,6 +63,8 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 
+import org.apache.lucene.util.automaton.Automata;
+import org.apache.lucene.util.automaton.Automaton;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.CommonParams;
@@ -103,7 +106,9 @@ public final class QueryParams {
     private final QueryGoal queryGoal;
     public int itemsPerPage;
     public int offset;
-    public Pattern urlMask;
+    public Pattern urlMaskPattern;
+    public Automaton urlMaskAutomaton;
+    public String urlMaskString;
 
     public final Pattern prefer;
     public final String tld, inlink;
@@ -175,20 +180,32 @@ public final class QueryParams {
         this.itemsPerPage = Math.min((specialRights) ? 10000 : 1000, itemsPerPage);
         this.offset = Math.max(0, Math.min((specialRights) ? 10000 - this.itemsPerPage : 1000 - this.itemsPerPage, offset));
         try {
-            this.urlMask = Pattern.compile(urlMask.toLowerCase());
-        } catch (final PatternSyntaxException ex) {
+            this.urlMaskString = urlMask;
+            // solr doesn't like slashes, backslashes or doublepoints; remove them // urlmask = ".*\\." + ft + "(\\?.*)?";
+            int p;
+            while ((p = this.urlMaskString.indexOf(':')) >= 0) this.urlMaskString = this.urlMaskString.substring(0, p) + "." + this.urlMaskString.substring(p + 1);
+            while ((p = this.urlMaskString.indexOf('/')) >= 0) this.urlMaskString = this.urlMaskString.substring(0, p) + "." + this.urlMaskString.substring(p + 1);
+            while ((p = this.urlMaskString.indexOf('\\')) >= 0) this.urlMaskString = this.urlMaskString.substring(0, p) + "." + this.urlMaskString.substring(p + 2);
+            this.urlMaskAutomaton = Automata.makeString(this.urlMaskString);
+            this.urlMaskPattern = Pattern.compile(this.urlMaskString);
+        } catch (final Throwable ex) {
             throw new IllegalArgumentException("Not a valid regular expression: " + urlMask, ex);
         }
-        this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
+        this.urlMask_isCatchall = this.urlMaskString.equals(catchall_pattern.toString());
         if (this.urlMask_isCatchall) {
             String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
             String defaulthostprefix = modifier.protocol == null ? "www" : modifier.protocol;
             String hostfilter = modifier.sitehost == null && tld == null ? ".*" : modifier.sitehost == null ? ".*\\." + tld : modifier.sitehost.startsWith(defaulthostprefix + ".") ? "(" + defaulthostprefix + "\\.)?" + modifier.sitehost.substring(4) : "(" + defaulthostprefix + "\\.)?" + modifier.sitehost;
             String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*";
-            String filter = protocolfilter + "://" + hostfilter + "/" + filefilter;
-            if (!filter.equals(".*://.*/.*")) {
-                this.urlMask = Pattern.compile(filter);
+            String filter = protocolfilter + "..." + hostfilter + "." + filefilter;
+            if (!filter.equals(".*....*..*")) {
+                Pattern r = Pattern.compile("(\\.|(\\.\\*))\\.\\*");
+                Matcher m;
+                while ((m = r.matcher(filter)).find()) filter = m.replaceAll(".*");
+                this.urlMaskString = filter;
+                this.urlMaskAutomaton = Automata.makeString(filter);
                 this.urlMask_isCatchall = false;
+                this.urlMaskPattern = Pattern.compile(filter);
             }
         }
         this.tld = tld;
@@ -503,14 +520,7 @@ public final class QueryParams {
         
         if (!this.urlMask_isCatchall) {
             // add a filter query on urls
-            String urlMaskPattern = this.urlMask.pattern();
-            
-            // solr doesn't like slashes, backslashes or doublepoints; remove them // urlmask = ".*\\." + ft + "(\\?.*)?";
-            int p;
-            while ((p = urlMaskPattern.indexOf(':')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
-            while ((p = urlMaskPattern.indexOf('/')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
-            while ((p = urlMaskPattern.indexOf('\\')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 2);
-            fq.append(" AND ").append(CollectionSchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
+            fq.append(" AND ").append(CollectionSchema.sku.getSolrFieldName() + ":/" + this.urlMaskString + "/");
         }
         
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
@@ -583,7 +593,7 @@ public final class QueryParams {
             context.append(this.zonecode).append(asterisk);
             context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString()))).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);
-            context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString())).append(asterisk);
+            context.append(Base64Order.enhancedCoder.encodeString(this.urlMaskString)).append(asterisk);
             context.append(this.modifier.sitehash).append(asterisk);
             context.append(this.modifier.author).append(asterisk);
             context.append(this.modifier.protocol).append(asterisk);

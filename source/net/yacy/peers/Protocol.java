@@ -835,7 +835,6 @@ public final class Protocol {
                 baos = null;
             }
             
-            String filter = event.query.urlMask.pattern().toString();
             parts.put("myseed", UTF8.StringBody((event.peers.mySeed() == null) ? "" : event.peers.mySeed().genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
             parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
@@ -845,7 +844,7 @@ public final class Protocol {
             parts.put("duetime", UTF8.StringBody("1000"));
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
-            parts.put("filter", UTF8.StringBody(filter));
+            parts.put("filter", UTF8.StringBody(event.query.urlMaskString));
             parts.put("modifier", UTF8.StringBody(event.query.modifier.toString()));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(event.query.modifier.sitehash));

@@ -217,8 +217,11 @@ public class URIMetadataNode extends SolrDocument {
         return this.url;
     }
 
-    public boolean matches(Pattern matcher) {
-        return matcher.matcher(this.url.toString().toLowerCase()).matches();
+    public boolean matches(Pattern pattern) {
+        return pattern.matcher(this.url.toNormalform(true).toLowerCase()).matches();
+        //CharacterRunAutomaton automaton = new CharacterRunAutomaton(matcher);
+        //boolean match = automaton.run(this.url.toNormalform(true).toLowerCase());
+        //return match;
     }
 
     public String dc_title() {

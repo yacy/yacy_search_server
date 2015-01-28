@@ -348,7 +348,7 @@ public class yacysearch {
         }
 
         if ( !block ) {
-            String urlmask = null;
+            String urlmask = (post == null) ? ".*" : post.get("urlmaskfilter", ".*"); // the expression must be a subset of the java Match syntax described in http://lucene.apache.org/core/4_4_0/core/org/apache/lucene/util/automaton/RegExp.html
             String tld = null;
             String inlink = null;
 
@@ -406,7 +406,7 @@ public class yacysearch {
                 final String urlstr = querystring.substring(inurlp + 6, ftb);
                 querystring = querystring.replace("inurl:" + urlstr, "");
                 if ( !urlstr.isEmpty() ) {
-                    urlmask = urlmask == null ? ".*" + urlstr + ".*" : urlmask + urlstr + ".*";
+                    urlmask = urlmask == null || urlmask.equals(".*") ? ".*" + urlstr + ".*" : urlmask; // we cannot join the conditions; if an urlmask is already given then stay with that
                 }
                 modifier.add("inurl:" + urlstr);
             }

@@ -893,7 +893,7 @@ public final class SearchEvent {
 
                 if ( !this.query.urlMask_isCatchall ) {
                     // check url mask
-                    if (!iEntry.matches(this.query.urlMask)) {
+                    if (!iEntry.matches(this.query.urlMaskPattern)) {
                         if (log.isFine()) log.fine("dropped Node: url mask does not match");
                         continue pollloop;
                     }
@@ -1114,7 +1114,7 @@ public final class SearchEvent {
         URIMetadataNode page;
         mainloop: while ((page = pullOneRWI(skipDoubleDom)) != null) {
 
-            if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMask)) {
+            if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMaskPattern)) {
                 if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
