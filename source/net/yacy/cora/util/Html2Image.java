@@ -102,7 +102,7 @@ public class Html2Image {
         String commandline =
                 wkhtmltopdf.getAbsolutePath() + " -q --title '" + url + "' " +
                 //acceptLanguage == null ? "" : "--custom-header 'Accept-Language' '" + acceptLanguage + "' " + 
-                (userAgent == null ? "" : "--custom-header 'User-Agent' '" + userAgent + "' --custom-header-propagation ") + 
+                //(userAgent == null ? "" : "--custom-header \"User-Agent\" \"" + userAgent + "\" --custom-header-propagation ") + 
                 (proxy == null ? "" : "--proxy " + proxy + " ") +
                 (ignoreErrors ? (OS.isMacArchitecture ? "--load-error-handling ignore " : "--ignore-load-errors ") : "") + // some versions do not have that flag and fail if attempting to use it...
                 //"--footer-font-name 'Courier' --footer-font-size 9 --footer-left [webpage] --footer-right [date]/[time]([page]/[topage]) " +
