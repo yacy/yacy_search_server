@@ -674,7 +674,11 @@ public class Crawler_p {
         prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
 
         prop.put("crawlProfilesShow_linkstructure", 0);
-        
+
+        if (post != null) { // handle config button to display graphic
+            if (post.get("hidewebstructuregraph") != null) sb.setConfig(SwitchboardConstants.DECORATION_GRAFICS_LINKSTRUCTURE, false);
+            if (post.get("showwebstructuregraph") != null) sb.setConfig(SwitchboardConstants.DECORATION_GRAFICS_LINKSTRUCTURE, true);
+        }
         if (count > 0 && sb.getConfigBool(SwitchboardConstants.DECORATION_GRAFICS_LINKSTRUCTURE, true)) {
             // collect the host names for 'wide' crawls which can be visualized
             boolean showLinkstructure = hosts.length() > 0 && !hosts.contains("file:");
