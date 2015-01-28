@@ -53,6 +53,8 @@ import org.apache.solr.common.SolrInputDocument;
      */
      public class ReindexSolrBusyThread extends AbstractBusyThread {
 
+        public final static String THREAD_NAME = "reindexSolr";
+         
         SolrConnector esc;
         final CollectionConfiguration colcfg; // collection config
         int processed = 0; // total number of reindexed documents
@@ -71,14 +73,14 @@ import org.apache.solr.common.SolrInputDocument;
             this.esc = Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
             this.colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
 
-            if (Switchboard.getSwitchboard().getThread("reindexSolr") != null) {
+            if (Switchboard.getSwitchboard().getThread(ReindexSolrBusyThread.THREAD_NAME) != null) {
                 this.interrupt(); // only one active reindex job should exist
             } else {
                 if (query != null) {
                     this.querylist.set(query, 0);
                 }
             }   
-            setName("reindexSolr");
+            setName(ReindexSolrBusyThread.THREAD_NAME);
             this.setPriority(Thread.MIN_PRIORITY);
 
         }
@@ -154,7 +156,7 @@ import org.apache.solr.common.SolrInputDocument;
             }
 
             if (querylist.isEmpty()) { // if all processed remove from scheduled list (and terminate thread)
-                Switchboard.getSwitchboard().terminateThread("reindexSolr", false);
+                Switchboard.getSwitchboard().terminateThread(ReindexSolrBusyThread.THREAD_NAME, false);
                 ret = false;
             }
             return ret;

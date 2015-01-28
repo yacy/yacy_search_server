@@ -468,9 +468,9 @@ public class serverSwitch {
 				threadMonitorURL,
 				newThread,
 				startupDelay,
-				Long.parseLong(getConfig(threadName + "_idlesleep", "100")),
-				Long.parseLong(getConfig(threadName + "_busysleep", "1000")),
-				Long.parseLong(getConfig(threadName + "_memprereq", "1000000")),
+				Long.parseLong(getConfig(threadName + "_idlesleep", "1000")),
+				Long.parseLong(getConfig(threadName + "_busysleep", "100")),
+				Long.parseLong(getConfig(threadName + "_memprereq", "1048576")),
 				Double.parseDouble(getConfig(threadName + "_loadprereq", "9.0")));
 	}
 

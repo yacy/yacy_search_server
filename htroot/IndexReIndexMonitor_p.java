@@ -36,14 +36,14 @@ public class IndexReIndexMonitor_p {
 
         prop.put("docsprocessed", "0");
         prop.put("currentselectquery","");
-        BusyThread bt = sb.getThread("reindexSolr");
+        BusyThread bt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME);
         if (bt == null) {
             if (post != null && post.containsKey("reindexnow") && sb.index.fulltext().connectedLocalSolr()) {
                 migration.reindexToschema(sb);
                 prop.put("querysize", "0");
                 prop.put("infomessage","reindex job started");
                 
-                bt = sb.getThread("reindexSolr"); //get new created job for following posts
+                bt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME); //get new created job for following posts
             }             
         }
         
@@ -70,7 +70,7 @@ public class IndexReIndexMonitor_p {
             }
             
             if (post != null && post.containsKey("stopreindex")) {
-                sb.terminateThread("reindexSolr", false);
+                sb.terminateThread(ReindexSolrBusyThread.THREAD_NAME, false);
                 prop.put("infomessage", "reindex job stopped");
                 prop.put("reindexjobrunning",0);
             } else {

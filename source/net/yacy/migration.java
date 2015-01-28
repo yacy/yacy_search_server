@@ -293,7 +293,7 @@ public class migration {
      */
     public static int reindexToschema (final Switchboard sb) {
 
-        BusyThread bt = sb.getThread("reindexSolr");
+        BusyThread bt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME);
         // a reindex job is already running 
         if (bt != null) {
             return bt.getJobCount();
@@ -363,7 +363,7 @@ public class migration {
             reidx.addSelectFieldname("outboundlinks_text_words_val");
             reidx.addSelectFieldname("outboundlinks_alttag_txt");
         }
-        sb.deployThread("reindexSolr", "Reindex Solr", "reindex documents with obsolete fields in embedded Solr index", "/IndexReIndexMonitor_p.html",reidx , 0);
+        sb.deployThread(ReindexSolrBusyThread.THREAD_NAME, "Reindex Solr", "reindex documents with obsolete fields in embedded Solr index", "/IndexReIndexMonitor_p.html",reidx , 0);
         return 0;
     }
 }
