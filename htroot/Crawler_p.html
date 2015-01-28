@@ -218,37 +218,50 @@ window.setInterval("setTableSize()", 1000);
 <!-- crawl profile list -->
 #(crawlProfilesShow)#::
 <fieldset>
-<legend>Running Crawls (#[count]#)</legend>
-<table border="0" summary="A list of crawl profiles and their current settings.">
-  <colgroup>
-  <col width="16" />
-  <col width="140"/>
-  </colgroup>
-  <tr class="TableHeader">
-    <td><strong>Name</strong></td>
-    #(debug)#::<td><strong>Count</strong></td>#(/debug)#
-    <td><strong>Status</strong></td>
-  </tr>
-  #{list}# 
-  <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-    <td>#[name]#</td>
-    #(debug)#::<td>#[count]#</td>#(/debug)#
-    <td>#(terminateButton)#::
+    <legend>Running Crawls (#[count]#)</legend> 
+<table width="96%">
+<tr><td>
+  <table border="0" summary="A list of crawl profiles and their current settings.">
+    <colgroup>
+    <col width="16" />
+    <col width="140"/>
+    </colgroup>
+    <tr class="TableHeader">
+      <td><strong>Name</strong></td>
+      #(debug)#::<td><strong>Count</strong></td>#(/debug)#
+      <td><strong>Status</strong></td>
+    </tr>
+    #{list}# 
+    <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+      <td>#[name]#</td>
+      #(debug)#::<td>#[count]#</td>#(/debug)#
+      <td>#(terminateButton)#::
         <div style="text-decoration:blink;float:left;">Running</div>
         <form style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
         <input type="submit" name="terminate" value="Terminate" class="btn btn-danger btn-xs"/>
         </div></form>
         #(/terminateButton)#
-	</td>
-  </tr>
-  #{/list}# 
-</table>
-#(linkstructure)#::
+      </td>
+    </tr>
+    #{/list}# 
+  </table>
+</td>
+#(linkstructure)#
+<td>
+  <form style="float:right;" action="Crawler_p.html"><input type="submit" name="showwebstructuregraph" class="btn btn-default btn-xs" value="show link structure"/><form>
+</td></tr></table>
+::
+<td>
+  <form style="float:right;" action="Crawler_p.html"><input type="submit" name="hidewebstructuregraph" class="btn btn-default btn-xs" value="hide graphic"/><form>
+</td></tr></table>
 <script src="/js/d3.v3.min.js"></script>
 <script src="/js/hypertree.js"></script>
 <div id="linkstructure"></div>
 <script>$(document).ready(linkstructure("#[hosts]#", "#linkstructure", 1280, 720, 3000, 700));</script>::
+<td>
+  <form style="float:right;" action="Crawler_p.html"><input type="submit" name="hidewebstructuregraph" class="btn btn-default btn-xs" value="hide graphic"/><form>
+</td></tr></table>
 <script type="text/javascript">
     imagestub = "WebStructurePicture_p.png?host=#[hosts]#&depth=4&width=1024&height=512&nodes=600&time=1000&colortext=888888&colorback=FFFFFF&colordot0=1111BB&colordota=11BB11&colorline=222222&colorlineend=333333";
     idx = 0;
