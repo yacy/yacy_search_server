@@ -20,6 +20,7 @@ import org.apache.solr.common.SolrException;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
 import net.yacy.document.LibraryProvider;
@@ -246,7 +247,7 @@ public class DidYouMean {
                                 if (sp >= 0) s = s.substring(0, sp);
                                 sp = s.indexOf("<b>");
                                 if (sp >= 0) s = s.substring(0, sp).trim();
-                                String[] sx = s.split(" ");
+                                String[] sx = CommonPattern.SPACE.split(s);
                                 StringBuilder sb = new StringBuilder(s.length());
                                 for (String x: sx) if (x.length() > 1 && sb.length() < 28) sb.append(x).append(' '); else break;
                                 s = sb.toString().trim();

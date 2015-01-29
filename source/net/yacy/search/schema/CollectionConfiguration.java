@@ -687,7 +687,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 imgprots.add(protocol);
                 imgstubs[i] = uri.toString().substring(protocol.length() + 3);
                 imgalts[i] = ie.alt();
-                for (String it: uri.toTokens().split(" ")) images_text_map.add(it);
+                for (String it: CommonPattern.SPACE.split(uri.toTokens())) images_text_map.add(it);
                 if (ie.alt() != null && ie.alt().length() > 0) {
                     SentenceReader sr = new SentenceReader(ie.alt());
                     while (sr.hasNext()) images_text_map.add(sr.next().toString());
@@ -906,7 +906,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (content == null || content.length() == 0) {
             content = tokens;
         } else {
-            String[] t = tokens.split(" ");
+            String[] t = CommonPattern.SPACE.split(tokens);
             for (String r: t) {
                 if (r.length() > 0 &&
                     content.indexOf(" " + r + " ") < 0 &&

@@ -30,6 +30,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -69,7 +70,7 @@ public class yacysearch_location {
             int placemarkCounter = 0;
             if (query.length() > 0 && search_query) {
                 final Set<GeoLocation> locations = LibraryProvider.geoLoc.find(query, true);
-                for (final String qp: query.split(" ")) {
+                for (final String qp: CommonPattern.SPACE.split(query)) {
                     locations.addAll(LibraryProvider.geoLoc.find(qp, true));
                 }
                 String ip = sb.peers.mySeed().getIP();

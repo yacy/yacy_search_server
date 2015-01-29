@@ -187,7 +187,7 @@ public void processCitation(String host, HashMap props) {
 }
 
 public HashMap parseProps(String s) {
-  String[] l = s.split(" ");
+  String[] l = CommonPattern.SPACE.split(s);
   HashMap map = new HashMap();
   int p;
   String z;

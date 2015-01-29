@@ -66,7 +66,7 @@ public class TextSnippetTest {
         String rstr = ts.getError();
         assertEquals("testTextSnippet Error Code: ", "", rstr);
 
-        String[] wordlist = querywords.split(" ");
+        String[] wordlist = CommonPattern.SPACE.split(querywords);
         rstr = ts.toString();
         System.out.println("testTextSnippet: query=" + querywords);
         System.out.println("testTextSnippet: snippet=" + rstr);
@@ -111,7 +111,7 @@ public class TextSnippetTest {
         rstr = ts.getLineMarked(qg);
         System.out.println("testGetLineMarked: query=" + querywords);
         System.out.println("testGetLineMarked: snippet=" + rstr);
-        String[] wordlist = querywords.split(" ");
+        String[] wordlist = CommonPattern.SPACE.split(querywords);
         for (String wordstr : wordlist) {
             assertTrue("testGetLineMarked marked word " + wordstr, rstr.contains("<b>" + wordstr + "</b>"));
         }

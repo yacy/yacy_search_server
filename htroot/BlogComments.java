@@ -39,6 +39,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BlogBoard;
 import net.yacy.data.BlogBoardComments;
@@ -290,7 +291,7 @@ public class BlogComments {
 
             // get the sendmail configuration
             final String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
-            final String[] sendMail = sendMailStr.trim().split(" ");
+            final String[] sendMail = CommonPattern.SPACE.split(sendMailStr.trim());
 
             // build the message text
             final StringBuilder emailTxt = new StringBuilder();

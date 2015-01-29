@@ -14,6 +14,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
@@ -105,7 +106,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			score = 10;
 			final String phrase = iter.next();
 			if(phrases.get(phrase).size() > 3 && phrases.get(phrase).size() < 10) {
-				score = phrases.get(phrase).size() * phrase.split(" ").length * 20;
+				score = phrases.get(phrase).size() * CommonPattern.SPACE.split(phrase).length * 20;
 			}
 			if(isDigitSpace(phrase)) {
 				score = 10;
