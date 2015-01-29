@@ -278,8 +278,6 @@ public class Tagging {
     
     public void setFacet(boolean isFacet) {
         this.isFacet = isFacet;
-        String omit = Switchboard.getSwitchboard().getConfig("search.result.show.vocabulary.omit", "");
-        
     }
     
     public int size() {

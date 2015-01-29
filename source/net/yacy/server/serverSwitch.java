@@ -282,6 +282,19 @@ public class serverSwitch {
 		}
 	}
 
+    public void setConfig(final String key, final String[] value) {
+        StringBuilder sb = new StringBuilder();
+        if (value != null) for (String s: value) sb.append(',').append(s);
+        setConfig(key, sb.length() > 0 ? sb.substring(1) : "");
+    }
+
+    public void setConfig(final String key, Set<String> value) {
+        String[] a = new String[value.size()];
+        int c = 0;
+        for (String s: value) a[c++] = s;
+        setConfig(key, a);
+    }
+	
 	public void removeConfig(final String key) {
 		this.configProps.remove(key);
 	}
@@ -410,6 +423,18 @@ public class serverSwitch {
         return CommonPattern.COMMA.split(this.getConfig(key, dflt));
     }	
 
+    /**
+     * get a configuration parameter set
+     * @param key
+     * @param dflt a default list
+     * @return a set of strings which had been separated by comma in the setting
+     */
+    public Set<String> getConfigSet(final String key) {
+        Set<String> h = new LinkedHashSet<>();
+        for (String s: getConfigArray(key, "")) {s = s.trim(); if (s.length() > 0) h.add(s.trim());}
+        return h;
+    }
+    
 	/**
 	 * Create a File instance for a configuration setting specifying a path.
 	 * 

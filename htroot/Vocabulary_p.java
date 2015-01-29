@@ -74,7 +74,6 @@ public class Vocabulary_p {
                     if (discoveruri == null) discoverobjectspace = "";
                     Map<String, Tagging.SOTuple> table = new LinkedHashMap<String, Tagging.SOTuple>();
                     File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
-                    final boolean isFacet = post.getBoolean("isFacet");
                     final boolean discoverNot = post.get("discovermethod", "").equals("none");
                     final boolean discoverFromPath = post.get("discovermethod", "").equals("path");
                     final boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
@@ -185,7 +184,6 @@ public class Vocabulary_p {
                         }
                     }
                     Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
-                    newvoc.setFacet(isFacet);
                     LibraryProvider.autotagging.addVocabulary(newvoc);
                     vocabularyName = discovername;
                     vocabulary = newvoc;
@@ -234,7 +232,11 @@ public class Vocabulary_p {
                     
                     // check the isFacet property
                     if (vocabulary != null && post.containsKey("set")) {
-                        vocabulary.setFacet(post.getBoolean("isFacet"));
+                        boolean isFacet = post.getBoolean("isFacet");
+                        vocabulary.setFacet(isFacet);
+                        Set<String> omit = env.getConfigSet("search.result.show.vocabulary.omit");
+                        if (isFacet) omit.remove(vocabularyName); else omit.add(vocabularyName);
+                        env.setConfig("search.result.show.vocabulary.omit", omit);
                     }
                 }
             } catch (final IOException e) {

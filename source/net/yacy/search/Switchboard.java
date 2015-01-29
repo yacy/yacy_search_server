@@ -101,6 +101,7 @@ import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
@@ -385,6 +386,12 @@ public final class Switchboard extends serverSwitch {
             public void run() {
                 Thread.currentThread().setName("LibraryProvider.initialize");
                 LibraryProvider.initialize(Switchboard.this.dictionariesPath);
+                // persistent Vocabulary Switch
+                Set<String> omit = Switchboard.this.getConfigSet("search.result.show.vocabulary.omit");
+                for (String o: omit) {
+                    Tagging t = LibraryProvider.autotagging.getVocabulary(o);
+                    if (t != null) t.setFacet(false);
+                }
             }
         }.start();
 
