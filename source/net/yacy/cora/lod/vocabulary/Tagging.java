@@ -42,7 +42,6 @@ import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.Switchboard;
 
 public class Tagging {
 
@@ -53,7 +52,6 @@ public class Tagging {
     private final Map<String, String> synonym2term;
     private final Map<String, String> term2synonym;
     private final Map<String, String> term2objectlink;
-    private final Map<String, Set<String>> synonym2synonyms;
     private File propFile;
     private boolean isFacet; // true if the vocabulary shall generate a navigation facet
 
@@ -97,7 +95,6 @@ public class Tagging {
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
         this.term2objectlink = new ConcurrentHashMap<String, String>();
-        this.synonym2synonyms = new ConcurrentHashMap<String, Set<String>>();
         this.namespace = DEFAULT_NAMESPACE;
         this.predicate = this.namespace + name;
         this.objectspace = null;
@@ -127,7 +124,6 @@ public class Tagging {
             this.synonym2term.clear();
             this.term2synonym.clear();
             this.term2objectlink.clear();
-            this.synonym2synonyms.clear();
             this.namespace = DEFAULT_NAMESPACE;
             this.predicate = this.namespace + this.navigatorName;
 
@@ -160,9 +156,6 @@ public class Tagging {
 			    this.term2synonym.put(term, synonym);
                 if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
 			    synonyms.add(synonym);
-			    for (String s: synonyms) {
-			    	this.synonym2synonyms.put(s, synonyms);
-			    }
 			}
         } else {
             //
@@ -200,7 +193,6 @@ public class Tagging {
         this.synonym2term.clear();
         this.term2synonym.clear();
         this.term2objectlink.clear();
-        this.synonym2synonyms.clear();
         this.namespace = DEFAULT_NAMESPACE;
         this.predicate = this.namespace + this.navigatorName;
         this.objectspace = null;
@@ -262,9 +254,6 @@ public class Tagging {
                 this.term2synonym.put(term, synonym);
                 if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
                 synonyms.add(synonym);
-                for (String s: synonyms) {
-                    this.synonym2synonyms.put(s, synonyms);
-                }
             }
         } catch (final InterruptedException e) {
         }
@@ -488,19 +477,15 @@ public class Tagging {
         return this.objectspace;
     }
     
-    private final static Pattern PATTERN_SPACEPLUS = Pattern.compile(" \\+");
-    private final static Pattern PATTERN_SPACESLASH= Pattern.compile(" /");
-    private final static Pattern PATTERN_PLUS = Pattern.compile("\\+");
-    private final static Pattern PATTERN_SLASH = Pattern.compile("/");
+    private final static Pattern PATTERN_SPACESLASHPLUS = Pattern.compile(" (/|\\+)");
+    private final static Pattern PATTERN_SLASHPLUS = Pattern.compile("/|\\+");
     private final static Pattern PATTERN_SPACESPACE = Pattern.compile("  ");
     
     private final String normalizeKey(String k) {
         k = k.trim();
         // remove symbols that are bad in a query attribute
-        k = PATTERN_SPACEPLUS.matcher(k).replaceAll(", ");
-        k = PATTERN_SPACESLASH.matcher(k).replaceAll(", ");
-        k = PATTERN_PLUS.matcher(k).replaceAll(",");
-        k = PATTERN_SLASH.matcher(k).replaceAll(",");
+        k = PATTERN_SPACESLASHPLUS.matcher(k).replaceAll(", ");
+        k = PATTERN_SLASHPLUS.matcher(k).replaceAll(",");
         k = PATTERN_SPACESPACE.matcher(k).replaceAll(" ");
         return k;
     }
