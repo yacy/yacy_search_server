@@ -830,6 +830,7 @@ search.result.show.cache = true
 search.result.show.proxy = false
 search.result.show.hostbrowser = true
 search.result.show.vocabulary = false
+search.result.show.vocabulary.omit = 
 
 
 # search navigators: comma-separated list of default values for search navigation.

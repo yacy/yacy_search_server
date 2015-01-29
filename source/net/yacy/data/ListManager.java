@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.BlacklistFile;
@@ -44,8 +45,6 @@ import net.yacy.search.query.SearchEventCache;
 // The Naming of the functions is a bit strange...
 
 public class ListManager {
-
-    private final static Pattern commaPattern = Pattern.compile(",");
 
     public static Switchboard switchboard = null;
     public static File listsPath = null;
@@ -147,7 +146,7 @@ public class ListManager {
         ArrayList<String> list;
 
         if (string != null && string.length() > 0) {
-            list = new ArrayList<String>(Arrays.asList(commaPattern.split(string, 0)));
+            list = new ArrayList<String>(Arrays.asList(CommonPattern.COMMA.split(string, 0)));
         } else {
             list = new ArrayList<String>();
         }
@@ -165,7 +164,7 @@ public class ListManager {
         HashSet<String> set;
 
         if (string != null) {
-            set = new HashSet<String>(Arrays.asList(commaPattern.split(string, 0)));
+            set = new HashSet<String>(Arrays.asList(CommonPattern.COMMA.split(string, 0)));
         } else {
             set = new HashSet<String>();
         }
@@ -184,7 +183,7 @@ public class ListManager {
         Vector<String> v;
 
         if (string != null) {
-            v = new Vector<String>(Arrays.asList(commaPattern.split(string, 0)));
+            v = new Vector<String>(Arrays.asList(CommonPattern.COMMA.split(string, 0)));
         } else {
             v = new Vector<String>();
         }

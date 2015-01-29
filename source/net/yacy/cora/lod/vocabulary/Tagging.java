@@ -42,6 +42,7 @@ import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.search.Switchboard;
 
 public class Tagging {
 
@@ -212,7 +213,6 @@ public class Tagging {
         String[] tags;
         int p;
         String line;
-        Pattern kommapattern = Pattern.compile(",");
         try {
             String[] pl;
             vocloop: while ((line = list.take()) != Files.POISON_LINE) {
@@ -245,7 +245,7 @@ public class Tagging {
                 }
                 term = normalizeKey(pl[0]);
                 v = pl[1];
-                tags = kommapattern.split(v);
+                tags = CommonPattern.COMMA.split(v);
                 Set<String> synonyms = new HashSet<String>();
                 synonyms.add(term);
                 tagloop: for (String synonym: tags) {
@@ -278,6 +278,8 @@ public class Tagging {
     
     public void setFacet(boolean isFacet) {
         this.isFacet = isFacet;
+        String omit = Switchboard.getSwitchboard().getConfig("search.result.show.vocabulary.omit", "");
+        
     }
     
     public int size() {
@@ -551,7 +553,6 @@ public class Tagging {
     private final static Pattern PATTERN_OE = Pattern.compile("\u00F6");
     private final static Pattern PATTERN_UE = Pattern.compile("\u00FC");
     private final static Pattern PATTERN_SZ = Pattern.compile("\u00DF");
-    private final static Pattern PATTERN_COMMA = Pattern.compile(",");
 
     public static final String normalizeTerm(String term) {
         term = term.trim().toLowerCase();
@@ -559,7 +560,7 @@ public class Tagging {
         term = PATTERN_OE.matcher(term).replaceAll("oe");
         term = PATTERN_UE.matcher(term).replaceAll("ue");
         term = PATTERN_SZ.matcher(term).replaceAll("ss");
-        term = PATTERN_COMMA.matcher(term).replaceAll(" ");
+        term = CommonPattern.COMMA.matcher(term).replaceAll(" ");
         return term;
     }
 

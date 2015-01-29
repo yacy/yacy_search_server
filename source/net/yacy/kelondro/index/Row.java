@@ -53,7 +53,6 @@ import net.yacy.kelondro.util.kelondroException;
 
 public final class Row implements Serializable {
 
-    //private final static Pattern commaPattern = Pattern.compile(",");
     private static final long serialVersionUID=-148412365988669116L;
 
     protected final Column[]        row;
