@@ -42,6 +42,7 @@ import java.util.List;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -99,7 +100,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     String value = line.substring(pos+1).trim();
 
                     String encoding = null;
-                    final String[] keyParts = key.split(";");
+                    final String[] keyParts = CommonPattern.SEMICOLON.split(key);
                     if (keyParts.length > 1) {
                         for (final String keyPart : keyParts) {
                             if (keyPart.toUpperCase().startsWith("ENCODING")) {

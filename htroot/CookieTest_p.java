@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -56,7 +57,7 @@ public class CookieTest_p {
             while (it.hasNext()) {
                 e = it.next();
                 if ("Cookie".equals(e.getKey())) {
-                    final String cookies[] = e.getValue().split(";");
+                    final String cookies[] = CommonPattern.SEMICOLON.split(e.getValue());
                     for(final String cookie : cookies)
                     {
                         final String nameValue[] = cookie.split("=");

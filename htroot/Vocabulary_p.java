@@ -40,6 +40,7 @@ import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LibraryProvider;
@@ -170,7 +171,7 @@ public class Vocabulary_p {
                                         table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
                                     }
                                 } else if (discoverFromAuthor) {
-                                    String[] ts = t.split(";"); // author names are often separated by ';'
+                                    String[] ts = CommonPattern.SEMICOLON.split(t); // author names are often separated by ';'
                                     for (String s: ts) {
                                         if (s.isEmpty()) continue;
                                         int p = s.indexOf(','); // check if there is a reversed method to mention the name

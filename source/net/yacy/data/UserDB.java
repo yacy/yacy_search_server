@@ -42,6 +42,7 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
@@ -277,7 +278,7 @@ public final class UserDB {
     }
     
     public static String getLoginToken(final String cookies){
-        final String[] cookie = cookies.split(";"); //TODO: Mozilla uses "; "
+        final String[] cookie = CommonPattern.SEMICOLON.split(cookies); //TODO: Mozilla uses "; "
         for (final String c :cookie) {
             String[] pair = c.split("=");
             if (pair[0].trim().equals("login")) {

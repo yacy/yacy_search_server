@@ -41,6 +41,7 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 
@@ -154,7 +155,7 @@ public class DCEntry extends MultiMapSolrParams {
     public DigestURL getRelation() {
         String u = this.get("dc:relation");
         if (u == null) return null;
-        String[] urls = u.split(";");
+        String[] urls = CommonPattern.SEMICOLON.split(u);
         if (urls.length > 1) {
             // select one that fits
             u = bestU(urls);
@@ -287,7 +288,7 @@ public class DCEntry extends MultiMapSolrParams {
         String[] tx;
         if (t != null) {
             t = stripCDATA(t);
-            return t.split(";");
+            return CommonPattern.SEMICOLON.split(t);
         }
         tx = this.getParams("dc:subject");
         

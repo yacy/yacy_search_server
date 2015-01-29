@@ -111,7 +111,7 @@ public class csvParser extends AbstractParser implements Parser {
                 if (separator == null) {
                     // try comma, semicolon and tab; take that one that results with more columns
                     final String[] colc = CommonPattern.COMMA.split(row);
-                    final String[] cols = row.split(";");
+                    final String[] cols = CommonPattern.SEMICOLON.split(row);
                     final String[] colt = row.split("\t");
                     if (colc.length >= cols.length && colc.length >= colt.length) separator = ",";
                     if (cols.length >= colc.length && cols.length >= colt.length) separator = ";";

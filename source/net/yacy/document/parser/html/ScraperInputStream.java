@@ -36,6 +36,7 @@ import java.io.Writer;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.CommonPattern;
 
 
 public class ScraperInputStream extends InputStream implements ScraperListener {
@@ -86,7 +87,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     private static String extractCharsetFromMimetypeHeader(final String mimeType) {
         if (mimeType == null) return null;
 
-        final String[] parts = mimeType.split(";");
+        final String[] parts = CommonPattern.SEMICOLON.split(mimeType);
         if (parts == null || parts.length <= 1) return null;
 
         for (int i=1; i < parts.length; i++) {
