@@ -655,6 +655,11 @@ collection=user
 90_cleanup_memprereq=0
 90_cleanup_loadprereq=16.0
 
+reindexSolr_idlesleep=1000
+reindexSolr_busysleep=1
+reindexSolr_memprereq=10485760
+reindexSolr_loadprereq=9.0
+
 # additional attributes:
 # performanceIO is a percent-value. a value of 10 means, that 10% of the busysleep time
 # is used to flush the RAM cache, which is the major part of the IO in YaCy

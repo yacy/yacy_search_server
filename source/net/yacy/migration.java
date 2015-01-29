@@ -305,17 +305,13 @@ public class migration {
         omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
         omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
         omitFields.add("_version_"); // exclude internal Solr std. field from obsolete check
-        Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
-        for (Tagging v: vocs) { //exclude configured vocabulary index fields (not in CollectionSchema but valid)
-            omitFields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
-        }        
         CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
         ReindexSolrBusyThread reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all);
         
         try { // get all fields contained in index
             Collection<FieldInfo> solrfields = Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector().getFields();
             for (FieldInfo solrfield : solrfields) {
-                if (!colcfg.contains(solrfield.getName()) && !omitFields.contains(solrfield.getName())) { // add found fields not in config for reindexing
+                if (!colcfg.contains(solrfield.getName()) && !omitFields.contains(solrfield.getName()) && !solrfield.getName().startsWith(CollectionSchema.VOCABULARY_PREFIX)) { // add found fields not in config for reindexing but omit the vocabulary fields
                     reidx.addSelectFieldname(solrfield.getName());
                 }
             }
