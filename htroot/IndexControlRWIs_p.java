@@ -41,7 +41,6 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
-import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
@@ -375,7 +374,7 @@ public class IndexControlRWIs_p {
                         Word.commonHashOrder,
                         urlb.size());
                 if ( post.containsKey("blacklisturls") ) {
-                    final String[] supportedBlacklistTypes = CommonPattern.COMMA.split(env.getConfig("BlackLists.types", ""));
+                    final String[] supportedBlacklistTypes = env.getConfigArray("BlackLists.types", "");
 					DigestURL url;
 					for ( final byte[] b : urlb ) {
 					    try {

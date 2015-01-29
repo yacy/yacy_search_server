@@ -48,6 +48,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.FileUtils;
@@ -400,6 +401,16 @@ public class serverSwitch {
 	}
 
 	/**
+	 * get a configuration parameter list
+	 * @param key
+	 * @param dflt a default list
+	 * @return a list of strings which had been separated by comma in the setting
+	 */
+    public String[] getConfigArray(final String key, final String dflt) {
+        return CommonPattern.COMMA.split(this.getConfig(key, dflt));
+    }	
+
+	/**
 	 * Create a File instance for a configuration setting specifying a path.
 	 * 
 	 * @param key
@@ -614,7 +625,7 @@ public class serverSwitch {
 			final String rootPath, final File file) throws IOException,
 			FileNotFoundException {
 		if (uri.startsWith("http://") || uri.startsWith("https://")) {
-			final String[] uris = uri.split(",");
+			final String[] uris = CommonPattern.COMMA.split(uri);
 			for (String netdef : uris) {
 				netdef = netdef.trim();
 				try {
