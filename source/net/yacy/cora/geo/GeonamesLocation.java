@@ -129,7 +129,7 @@ public class GeonamesLocation implements Locations {
                 if ( line.isEmpty() ) {
                     continue;
                 }
-                fields = line.split("\t");
+                fields = CommonPattern.TAB.split(line);
                 final long population = Long.parseLong(fields[14]);
                 if (minPopulation > 0 && population < minPopulation) continue;
                 final int geonameid = Integer.parseInt(fields[0]);
