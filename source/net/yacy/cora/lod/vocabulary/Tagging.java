@@ -273,18 +273,10 @@ public class Tagging {
         return this.term2objectlink.size();
     }
 
-    private File tmpFile() {
-        if (this.propFile == null) return null;
-        return new File(this.propFile.getAbsolutePath() + ".tmp");
-    }
-
     public void put(String term, String synonyms, String objectlink) throws IOException {
         if (this.propFile == null) return;
-        File tmp = tmpFile();
-        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        TempFile tmp = new TempFile();
         BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
-        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
-        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
         String line;
         boolean written = false;
         try {
@@ -294,30 +286,27 @@ public class Tagging {
                     continue vocloop;
                 }
                 if (pl[0].equals(term)) {
-                    w.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                    tmp.writer.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
                     written = true;
                 } else {
-                    w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                    tmp.writer.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
                 }
             }
             if (!written) {
-                w.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                tmp.writer.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
             }
         } catch (final InterruptedException e) {
         }
-        w.close();
+        tmp.writer.close();
         this.propFile.delete();
-        tmp.renameTo(this.propFile);
+        tmp.file.renameTo(this.propFile);
         init();
     }
 
     public void delete(String term) throws IOException {
         if (this.propFile == null) return;
-        File tmp = tmpFile();
-        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        TempFile tmp = new TempFile();
         BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
-        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
-        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
         String line;
         try {
             vocloop: while ((line = list.take()) != Files.POISON_LINE) {
@@ -328,25 +317,22 @@ public class Tagging {
                 if (pl[0].equals(term)) {
                     continue vocloop;
                 }
-                w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                tmp.writer.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
         } catch (final InterruptedException e) {
         }
-        w.close();
+        tmp.writer.close();
         this.propFile.delete();
-        tmp.renameTo(this.propFile);
+        tmp.file.renameTo(this.propFile);
         init();
     }
 
     public void clear() throws IOException {
         if (this.propFile == null) return;
-        File tmp = tmpFile();
-        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
-        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
-        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
-        w.close();
+        TempFile tmp = new TempFile();
+        tmp.writer.close();
         this.propFile.delete();
-        tmp.renameTo(this.propFile);
+        tmp.file.renameTo(this.propFile);
         init();
     }
 
@@ -354,11 +340,8 @@ public class Tagging {
         if (this.propFile == null) return;
         if (os == null || os.length() == 0 || (this.objectspace != null && this.objectspace.equals(os))) return;
         this.objectspace = os;
-        File tmp = tmpFile();
-        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        TempFile tmp = new TempFile();
         BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
-        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
-        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
         String line;
         try {
             vocloop: while ((line = list.take()) != Files.POISON_LINE) {
@@ -366,14 +349,26 @@ public class Tagging {
                 if (pl == null) {
                     continue vocloop;
                 }
-                w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                tmp.writer.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
         } catch (final InterruptedException e) {
         }
-        w.close();
+        tmp.writer.close();
         this.propFile.delete();
-        tmp.renameTo(this.propFile);
+        tmp.file.renameTo(this.propFile);
         init();
+    }
+    
+    private class TempFile {
+        public File file;
+        public BufferedWriter writer;
+        public TempFile() throws IOException {
+            if (Tagging.this.propFile == null) throw new IOException("propfile = null");
+            this.file = new File(Tagging.this.propFile.getAbsolutePath() + ".tmp");
+            this.writer = new BufferedWriter(new FileWriter(this.file));
+            if (Tagging.this.namespace != null && !Tagging.this.namespace.equals(DEFAULT_NAMESPACE)) writer.write("#namespace:" + Tagging.this.namespace + "\n");
+            if (Tagging.this.objectspace != null && Tagging.this.objectspace.length() > 0) writer.write("#objectspace:" + Tagging.this.objectspace + "\n");
+        }
     }
 
     private Map<String, Set<String>> reconstructionSets() {
