@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.repository.Blacklist.BlacklistType;
 
 public class BlacklistFile {
@@ -52,7 +53,7 @@ public class BlacklistFile {
      * @return unified String array of file names
      */
     public Set<String> getFileNamesUnified() {
-        return new HashSet<String>(Arrays.asList(this.filename.split(",")));
+        return new HashSet<String>(Arrays.asList(CommonPattern.COMMA.split(this.filename)));
     }
     
     public BlacklistType getType() { return this.type; }

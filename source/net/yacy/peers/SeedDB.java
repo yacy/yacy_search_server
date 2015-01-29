@@ -50,6 +50,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapDataMining;
@@ -356,7 +357,7 @@ public final class SeedDB implements AlternativeDomainNames {
     	// address has therefore the form
     	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
     	// clusterdef ::= {address}{','address}*
-    	final String[] addresses = (clusterdefinition.isEmpty()) ? new String[0] : clusterdefinition.split(",");
+    	final String[] addresses = (clusterdefinition.isEmpty()) ? new String[0] : CommonPattern.COMMA.split(clusterdefinition);
     	final TreeSet<byte[]> clustermap = new TreeSet<>(Base64Order.enhancedCoder);
     	Seed seed;
     	String hash, yacydom;

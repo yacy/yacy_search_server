@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
@@ -222,12 +223,12 @@ public class Translator {
     }
 
     public static Map<String, String> langMap(@SuppressWarnings("unused") final serverSwitch env) {
-        final String[] ms = (
+        final String[] ms = CommonPattern.COMMA.split(
             "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk," +
             "gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;," +
             "ru/&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;,uk/&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;," + 
             "hi/&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;"
-            ).split(",");
+            );
         final Map<String, String> map = new HashMap<String, String>();
         for (final String element : ms) {
             int p = element.indexOf('/');

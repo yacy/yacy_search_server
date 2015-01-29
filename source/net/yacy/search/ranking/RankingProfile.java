@@ -32,6 +32,7 @@ import java.util.Map;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 
@@ -133,7 +134,7 @@ public class RankingProfile {
                 profile = profile.substring(1, profile.length() - 1);
             }
             profile = profile.trim();
-            if (profile.indexOf('&') > 0) elts = profile.split("&"); else elts = profile.split(",");
+            if (profile.indexOf('&') > 0) elts = profile.split("&"); else elts = CommonPattern.COMMA.split(profile);
             int p;
             final int s = (prefix == null) ? 0 : prefix.length();
             String e;

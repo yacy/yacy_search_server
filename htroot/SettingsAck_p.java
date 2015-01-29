@@ -264,7 +264,7 @@ public class SettingsAck_p {
             final String remoteProxyPwd = post.get("remoteProxyPwd", "");
 
             final String remoteProxyNoProxyStr = post.get("remoteProxyNoProxy", "");
-            //String[] remoteProxyNoProxyPatterns = remoteProxyNoProxyStr.split(",");
+            //String[] remoteProxyNoProxyPatterns = CommonPattern.COMMA.split(remoteProxyNoProxyStr);
 
             /* ====================================================================
              * Storing settings into config file

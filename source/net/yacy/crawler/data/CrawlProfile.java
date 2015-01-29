@@ -298,7 +298,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     
     public static Map<String, Pattern> collectionParser(String collectionString) {
         if (collectionString == null || collectionString.length() == 0) return new HashMap<String, Pattern>();
-        String[] cs = collectionString.split(",");
+        String[] cs = CommonPattern.COMMA.split(collectionString);
         final Map<String, Pattern> cm = new LinkedHashMap<String, Pattern>();
         for (String c: cs) {
             int p = c.indexOf(':');
@@ -390,7 +390,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         String countryMustMatch = get(CRAWLER_COUNTRY_MUSTMATCH);
         if (countryMustMatch == null) countryMustMatch = CrawlProfile.MATCH_NEVER_STRING;
         if (countryMustMatch.isEmpty()) return new String[0];
-        String[] list = countryMustMatch.split(",");
+        String[] list = CommonPattern.COMMA.split(countryMustMatch);
         if (list.length == 1 && list.length == 0) list = new String[0];
         return list;
     }

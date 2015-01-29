@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.search.EventTracker.Event;
 import net.yacy.search.EventTracker;
 import net.yacy.search.query.AccessTracker;
@@ -66,7 +67,7 @@ public final class timeline_p {
             else if (c == 'Y' || c == 'y') periodlength = p * 1000L * 60L * 60L * 24L * 365L;
             else periodlength = 0;
         }
-        final String[] data = post.get("data", "").split(",");  // a string of word hashes that shall be searched and combined
+        final String[] data = CommonPattern.COMMA.split(post.get("data", ""));  // a string of word hashes that shall be searched and combined
         Map<String, List<EventTracker.Event>> proc = new HashMap<>();
         for (String s: data) if (s.length() > 0) proc.put(s, null);
         

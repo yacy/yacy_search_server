@@ -38,6 +38,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
@@ -112,7 +113,7 @@ public class WebStructurePicture_p {
         } else {
             // recursively find domains, up to a specific depth
             GraphPlotter graph = new GraphPlotter();
-            String[] hostlist = hosts.split(",");
+            String[] hostlist = CommonPattern.COMMA.split(hosts);
             for (int i = 0; i < hostlist.length; i++) {
                 String host = hostlist[i];
                 String hash = null;

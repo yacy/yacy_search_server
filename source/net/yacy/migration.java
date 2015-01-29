@@ -37,11 +37,9 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
-import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;

@@ -114,6 +114,7 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlStacker;
@@ -3846,7 +3847,7 @@ public final class Switchboard extends serverSwitch {
 
         // determining addresses for which the remote proxy should not be used
         final String remoteProxyNoProxy = getConfig("remoteProxyNoProxy", "").trim();
-        ProxySettings.noProxy = remoteProxyNoProxy.split(",");
+        ProxySettings.noProxy = CommonPattern.COMMA.split(remoteProxyNoProxy);
         // trim split entries
         int i = 0;
         for ( final String pattern : ProxySettings.noProxy ) {

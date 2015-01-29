@@ -32,6 +32,7 @@ import java.util.Set;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
@@ -218,7 +219,7 @@ public class ConfigNetwork_p
     }
 
     private static String checkYaCyDomainList(final String input) {
-        final String[] array = normalizedList(input).split(",");
+        final String[] array = CommonPattern.COMMA.split(normalizedList(input));
         final StringBuilder output = new StringBuilder();
         for ( final String element : array ) {
             if ( (element.endsWith(".yacyh"))
@@ -236,7 +237,7 @@ public class ConfigNetwork_p
     }
 
     private static String checkIPPortList(final String input) {
-        final String[] array = normalizedList(input).split(",");
+        final String[] array = CommonPattern.COMMA.split(normalizedList(input));
         final StringBuilder output = new StringBuilder();
         for ( final String element : array ) {
             if ( element.indexOf(':', 0) >= 9 ) {

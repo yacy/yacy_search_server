@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -82,7 +83,7 @@ public class pptParser extends AbstractParser implements Parser {
             final String keywords = pptExtractor.getSummaryInformation().getKeywords();
             final String[] keywlist;
             if (keywords != null && !keywords.isEmpty()) {
-               keywlist = keywords.split(",");
+               keywlist = CommonPattern.COMMA.split(keywords);
             } else keywlist = null;
 
             /*

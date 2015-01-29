@@ -6,6 +6,7 @@ import java.util.List;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.peers.EventChannel;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -28,7 +29,7 @@ public class feed {
 
         final String channelNames = post.get("set");
         if (channelNames == null) return prop;
-        final String[] channels = channelNames.split(","); // several channel names can be given and separated by comma
+        final String[] channels = CommonPattern.COMMA.split(channelNames); // several channel names can be given and separated by comma
 
         int messageCount = 0;
         int messageMaxCount = Math.min(post.getInt("count", 100), 1000);

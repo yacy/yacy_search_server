@@ -54,6 +54,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
@@ -663,7 +664,7 @@ public class yacysearch {
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
                     false,
                     lat, lon, rad,
-                    sb.getConfig("search.navigation","").split(","));
+                    CommonPattern.COMMA.split(sb.getConfig("search.navigation","")));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),

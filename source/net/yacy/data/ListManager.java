@@ -33,8 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Pattern;
-
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;

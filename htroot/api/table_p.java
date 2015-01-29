@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables;
@@ -132,7 +133,7 @@ public class table_p {
 
         // if a row attribute is given
         // then order the columns according to the given order
-        final String[] row = post.get("row", "").split(",");
+        final String[] row = CommonPattern.COMMA.split(post.get("row", ""));
         for (int i = 0; i < row.length; i++) {
             if (columns.contains(row[i])) {
                 columns.remove(row[i]);

@@ -43,6 +43,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
@@ -452,7 +453,7 @@ public class ViewFile {
         }
         words = UTF8.decodeURL(words);
         if (words.indexOf(' ',0) >= 0) return words.split(" ");
-        if (words.indexOf(',',0) >= 0) return words.split(",");
+        if (words.indexOf(',',0) >= 0) return CommonPattern.COMMA.split(words);
         if (words.indexOf('+',0) >= 0) return words.split("\\+");
         w = new String[1];
         w[0] = words;

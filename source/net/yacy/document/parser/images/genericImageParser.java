@@ -58,7 +58,6 @@ import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.drew.imaging.jpeg.JpegMetadataReader;
-import com.drew.imaging.jpeg.JpegProcessingException;
 import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;

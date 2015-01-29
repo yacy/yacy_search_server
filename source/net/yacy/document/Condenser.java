@@ -49,6 +49,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
@@ -474,7 +475,7 @@ public final class Condenser {
             for (int i = 0; i <= 15; i++) {
                 sb.append('"');
                 final String s = p.getProperty("keywords" + i);
-                final String[] l = s.split(",");
+                final String[] l = CommonPattern.COMMA.split(s);
                 for (final String element : l) {
                     sb.append(ASCII.String(Word.word2hash(element)));
                 }

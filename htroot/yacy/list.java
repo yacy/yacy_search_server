@@ -30,6 +30,7 @@ import java.io.File;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
 import net.yacy.peers.Protocol;
@@ -72,7 +73,7 @@ public final class list {
             final StringBuilder out = new StringBuilder(10000);
 
             final String filenames=env.getConfig("BlackLists.Shared", "");
-            final String[] filenamesarray = filenames.split(",");
+            final String[] filenamesarray = CommonPattern.COMMA.split(filenames);
 
             if (filenamesarray.length > 0){
                 for (final String filename : filenamesarray) {

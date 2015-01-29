@@ -60,6 +60,7 @@ package net.yacy.server.http;
 import java.io.File;
 
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -109,7 +110,7 @@ public final class HTTPDFileHandler {
 
     public static final void initDefaultPath() {
         // create default files array
-        defaultFiles = switchboard.getConfig(SwitchboardConstants.BROWSER_DEFAULT,"index.html").split(",");
+        defaultFiles = CommonPattern.COMMA.split(switchboard.getConfig(SwitchboardConstants.BROWSER_DEFAULT,"index.html"));
         if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
         indexForward = switchboard.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
         if (indexForward.startsWith("/")) indexForward = indexForward.substring(1);

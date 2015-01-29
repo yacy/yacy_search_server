@@ -83,7 +83,7 @@ public class Tagging {
         }
 
         public String[] getSynonymsList() {
-            return this.synonyms.split(",");
+            return CommonPattern.COMMA.split(this.synonyms);
         }
 
         public String getObjectlink() {

@@ -8,6 +8,7 @@ import java.net.URL;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
@@ -80,8 +81,8 @@ public class SMWListSyncThread {
 											+ "/format%3Dystat");
 
 							String reply = UTF8.String(new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent).GETbytes(urlCount.toString(), null, null, false));
-							String overallcount = reply.split(",")[0];
-							String lastsyncstring = reply.split(",")[1];
+							String overallcount = CommonPattern.COMMA.split(reply)[0];
+							String lastsyncstring = CommonPattern.COMMA.split(reply)[1];
 							this.currentmax = Integer.parseInt(overallcount);
 
 							if (this.currentmax > 0) {

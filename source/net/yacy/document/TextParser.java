@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.parser.apkParser;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.bzipParser;
@@ -464,7 +465,7 @@ public final class TextParser {
     public static void setDenyMime(final String denyList) {
         denyMime.clear();
         String n;
-        for (final String s: denyList.split(",")) {
+        for (final String s: CommonPattern.COMMA.split(denyList)) {
             n = normalizeMimeType(s);
             if (n != null && n.length() > 0) denyMime.put(n, v);
         }
@@ -485,7 +486,7 @@ public final class TextParser {
 
     public static void setDenyExtension(final String denyList) {
         denyExtensionx.clear();
-        for (final String s: denyList.split(",")) denyExtensionx.put(s, v);
+        for (final String s: CommonPattern.COMMA.split(denyList)) denyExtensionx.put(s, v);
     }
 
     public static String getDenyExtension() {

@@ -40,6 +40,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
 
@@ -135,7 +136,7 @@ public class GeonamesLocation implements Locations {
                 locnames = new HashSet<StringBuilder>();
                 locnames.add(new StringBuilder(fields[1]));
                 locnames.add(new StringBuilder(fields[2]));
-                for ( final String s : fields[3].split(",") ) {
+                for ( final String s : CommonPattern.COMMA.split(fields[3]) ) {
                     locnames.add(new StringBuilder(s));
                 }
                 final GeoLocation c =

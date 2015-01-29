@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -90,7 +91,7 @@ public class docParser extends AbstractParser implements Parser {
         final String keywords = extractor.getSummaryInformation().getKeywords();
         final String[] keywlist;
         if (keywords != null && !keywords.isEmpty()) {
-            keywlist = keywords.split(",");
+            keywlist = CommonPattern.COMMA.split(keywords);
         } else {
             keywlist = null;
         }

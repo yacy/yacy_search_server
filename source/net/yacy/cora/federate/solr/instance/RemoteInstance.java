@@ -30,6 +30,7 @@ import java.util.Map;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
@@ -65,7 +66,7 @@ public class RemoteInstance implements SolrInstance {
     
     public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName, final int timeout) throws IOException {
         urlList.replace(' ', ',');
-        String[] urls = urlList.split(",");
+        String[] urls = CommonPattern.COMMA.split(urlList);
         ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
         for (final String u: urls) {
             RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName, timeout);

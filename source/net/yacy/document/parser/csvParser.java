@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -109,7 +110,7 @@ public class csvParser extends AbstractParser implements Parser {
                 if (row.isEmpty()) continue;
                 if (separator == null) {
                     // try comma, semicolon and tab; take that one that results with more columns
-                    final String[] colc = row.split(",");
+                    final String[] colc = CommonPattern.COMMA.split(row);
                     final String[] cols = row.split(";");
                     final String[] colt = row.split("\t");
                     if (colc.length >= cols.length && colc.length >= colt.length) separator = ",";

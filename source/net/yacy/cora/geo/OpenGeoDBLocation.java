@@ -40,6 +40,7 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
 
@@ -98,15 +99,14 @@ public class OpenGeoDBLocation implements Locations
                 //p = line.indexOf(' '); if (p < 0) continue;
                 if ( line.startsWith("geodb_coordinates ") ) {
                     line = line.substring(18 + 7);
-                    v = line.split(",");
-                    v = line.split(",");
+                    v = CommonPattern.COMMA.split(line);
                     lat = Float.parseFloat(v[2]);
                     lon = Float.parseFloat(v[3]);
                     this.id2loc.put(Integer.parseInt(v[0]), new GeoLocation(lat, lon));
                 }
                 if ( line.startsWith("geodb_textdata ") ) {
                     line = line.substring(15 + 7);
-                    v = line.split(",");
+                    v = CommonPattern.COMMA.split(line);
                     if ( v[1].equals("500100000") ) { // Ortsname
                         if (v.length > 10) {
                             // a ',' is probably inside the location name

@@ -40,6 +40,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
@@ -91,7 +92,7 @@ public class BookmarksDB {
                 continue;
             }
             if (bookmark == null) continue;
-            tagArray = BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
+            tagArray = CommonPattern.COMMA.split(BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()));
             tag = null;
             for (final String element : tagArray) {
                 tag = getTag(BookmarkHelper.tagHash(element));
@@ -524,7 +525,7 @@ public class BookmarksDB {
         }
 
         public String getTagsString() {
-            final String s[] = ListManager.collection2string(getTags()).split(",");
+            final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
             final StringBuilder stringBuilder = new StringBuilder();
             for (final String element : s){
                 if(!element.startsWith("/")){
@@ -536,7 +537,7 @@ public class BookmarksDB {
         }
 
         public String getFoldersString(){
-            final String s[] = ListManager.collection2string(getTags()).split(",");
+            final String s[] = CommonPattern.COMMA.split(ListManager.collection2string(getTags()));
             final StringBuilder stringBuilder = new StringBuilder();
             for (final String element : s){
                 if(element.startsWith("/")){

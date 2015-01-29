@@ -83,6 +83,7 @@ import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.JSONArray;
 import net.yacy.cora.util.JSONException;
@@ -258,7 +259,7 @@ public final class Protocol {
             final String myIP = result.get("yourip");
             // with the IPv6 extension, this may contain several ips, separated by comma ','
             HashSet<String> h = new HashSet<>();
-            for (String s: myIP.split(",")) {
+            for (String s: CommonPattern.COMMA.split(myIP)) {
                 if (s.length() > 0 && Seed.isProperIP(s)) h.add(s);
             }
             if (h.size() > 0) mySeed.setIPs(h);
@@ -907,7 +908,7 @@ public final class Protocol {
                     this.indexabstract.put(UTF8.getBytes(entry.getKey().substring(14)), entry.getValue());
                 }
             }
-            this.references = resultMap.get("references").split(",");
+            this.references = CommonPattern.COMMA.split(resultMap.get("references"));
             this.links = new ArrayList<URIMetadataNode>(this.availableCount);
             for ( int n = 0; n < this.availableCount; n++ ) {
                 // get one single search result
@@ -1323,7 +1324,7 @@ public final class Protocol {
             return null;
         } // all url's known, we are ready here
 
-        final String[] uhs = uhss.split(",");
+        final String[] uhs = CommonPattern.COMMA.split(uhss);
         if ( uhs.length == 0 ) {
             return null;
         } // all url's known
