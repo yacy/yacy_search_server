@@ -185,7 +185,7 @@ then
 elif [ $LOGGING -eq 1 ];then #logging
 	cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
 else
-	cmdline="$cmdline >/dev/null 2>/dev/null"
+	cmdline="$cmdline >/dev/null 2>/dev/null &"
 fi
 if [ $PRINTONLY -eq 1 ];then
 	echo $cmdline
