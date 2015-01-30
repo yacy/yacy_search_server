@@ -29,6 +29,7 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.poi.util.StringUtil;
@@ -60,7 +61,7 @@ public class dwgParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final VocabularyScraper scraper, final InputStream source) throws Parser.Failure, InterruptedException {
 
         // check memory for parser
         if (!MemoryControl.request(200 * 1024 * 1024, true))

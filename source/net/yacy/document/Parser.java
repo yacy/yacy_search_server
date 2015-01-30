@@ -48,6 +48,7 @@ public interface Parser {
      * @param url the url of the source
      * @param mimeType the mime type of the source, if known
      * @param charset the charset of the source, if known
+     * @param scraper an entity scraper to detect facets from text annotation context
      * @param source a input stream
      * @return a list of documents that result from parsing the source
      * @throws Parser.Failure
@@ -57,6 +58,7 @@ public interface Parser {
             AnchorURL url,
             String mimeType,
             String charset,
+            VocabularyScraper scraper,
             InputStream source
             ) throws Parser.Failure, InterruptedException;
 

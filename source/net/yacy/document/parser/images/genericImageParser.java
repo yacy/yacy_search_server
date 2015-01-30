@@ -53,6 +53,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.util.FileUtils;
@@ -92,7 +93,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     public Document[] parse(
             final AnchorURL location,
             final String mimeType,
-            final String documentCharset,
+            final String documentCharset, final VocabularyScraper scraper,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
 
         ImageInfo ii = null;
@@ -314,7 +315,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         AnchorURL uri;
         try {
             uri = new AnchorURL("http://localhost/" + image.getName());
-            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), "UTF-8", new FileInputStream(image));
+            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), "UTF-8", new VocabularyScraper(), new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {
             e.printStackTrace();

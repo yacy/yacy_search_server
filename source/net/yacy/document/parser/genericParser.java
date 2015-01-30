@@ -32,6 +32,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 /**
  * this parser can parse just anything because it uses only the uri/file/path information
@@ -46,7 +47,7 @@ public class genericParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final InputStream source1)
+            final String charset, final VocabularyScraper scraper, final InputStream source1)
             throws Parser.Failure, InterruptedException {
         String filename = location.getFileName();
         final Document[] docs = new Document[]{new Document(

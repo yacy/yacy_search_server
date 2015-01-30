@@ -275,32 +275,34 @@ public class Tagging {
 
     public void put(String term, String synonyms, String objectlink) throws IOException {
         if (this.propFile == null) return;
-        TempFile tmp = new TempFile();
-        BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
-        String line;
-        boolean written = false;
-        try {
-            vocloop: while ((line = list.take()) != Files.POISON_LINE) {
-                String[] pl = parseLine(line);
-                if (pl == null) {
-                    continue vocloop;
+        synchronized (this) {
+            TempFile tmp = new TempFile();
+            BlockingQueue<String> list = Files.concurentLineReader(this.propFile);
+            String line;
+            boolean written = false;
+            try {
+                vocloop: while ((line = list.take()) != Files.POISON_LINE) {
+                    String[] pl = parseLine(line);
+                    if (pl == null) {
+                        continue vocloop;
+                    }
+                    if (pl[0].equals(term)) {
+                        tmp.writer.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                        written = true;
+                    } else {
+                        tmp.writer.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                    }
                 }
-                if (pl[0].equals(term)) {
+                if (!written) {
                     tmp.writer.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
-                    written = true;
-                } else {
-                    tmp.writer.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
                 }
+            } catch (final InterruptedException e) {
             }
-            if (!written) {
-                tmp.writer.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
-            }
-        } catch (final InterruptedException e) {
+            tmp.writer.close();
+            this.propFile.delete();
+            tmp.file.renameTo(this.propFile);
+            init();
         }
-        tmp.writer.close();
-        this.propFile.delete();
-        tmp.file.renameTo(this.propFile);
-        init();
     }
 
     public void delete(String term) throws IOException {

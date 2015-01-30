@@ -45,6 +45,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.query.QueryParams;
 import net.yacy.server.serverObjects;
@@ -78,6 +79,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String REMOTE_INDEXING  = "remoteIndexing";
     public static final String CACHE_STRAGEGY   = "cacheStrategy";
     public static final String COLLECTIONS      = "collections";
+    public static final String SCRAPER          = "scraper";
     public static final String CRAWLER_URL_MUSTMATCH         = "crawlerURLMustMatch";
     public static final String CRAWLER_URL_MUSTNOTMATCH      = "crawlerURLMustNotMatch";
     public static final String CRAWLER_IP_MUSTMATCH          = "crawlerIPMustMatch";
@@ -99,6 +101,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     private Pattern indexcontentmustmatch = null, indexcontentmustnotmatch = null;
 
     private final Map<String, AtomicInteger> doms;
+    private final VocabularyScraper scraper;
 
     /**
      * Constructor which creates CrawlPofile from parameters.
@@ -151,7 +154,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean snapshotsReplaceOld,
                  final CacheStrategy cacheStrategy,
                  final String collections,
-                 final String userAgentName) {
+                 final String userAgentName,
+                 final VocabularyScraper scraper) {
         super(40);
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
@@ -189,18 +193,29 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(SNAPSHOTS_REPLACEOLD, snapshotsReplaceOld);
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
         put(COLLECTIONS,      CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
+        // we transform the scraper information into a JSON Array
+        this.scraper = scraper == null ? new VocabularyScraper() : scraper;
+        String jsonString = this.scraper.toString();
+        assert jsonString != null && jsonString.length() > 0 && jsonString.charAt(0) == '{' : "jsonString = " + jsonString;
+        put(SCRAPER, jsonString);
     }
 
     /**
-     * Constructor which creats a CrawlProfile from values in a Map.
+     * Constructor which creates a CrawlProfile from values in a Map.
      * @param ext contains values
      */
     public CrawlProfile(final Map<String, String> ext) {
         super(ext == null ? 1 : ext.size());
         if (ext != null) putAll(ext);
         this.doms = new ConcurrentHashMap<String, AtomicInteger>();
+        String jsonString = ext.get(SCRAPER);
+        this.scraper = jsonString == null || jsonString.length() == 0 ? new VocabularyScraper() : new VocabularyScraper(jsonString);
     }
 
+    public VocabularyScraper scraper() {
+        return this.scraper;
+    }
+    
     public void domInc(final String domain) {
         final AtomicInteger dp = this.doms.get(domain);
         if (dp == null) {

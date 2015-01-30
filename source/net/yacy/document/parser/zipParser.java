@@ -38,6 +38,7 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -62,7 +63,7 @@ public class zipParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(final AnchorURL url, final String mimeType,
-            final String charset, final InputStream source)
+            final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Parser.Failure, InterruptedException {
         // check memory for parser
         if (!MemoryControl.request(200 * 1024 * 1024, false))
@@ -89,7 +90,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());
                     final DigestURL virtualURL = DigestURL.newURL(url, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    docs = TextParser.parseSource(new AnchorURL(virtualURL), mime, null, 999, tmp);
+                    docs = TextParser.parseSource(new AnchorURL(virtualURL), mime, null, scraper, 999, tmp);
                     if (docs == null) continue;
                     for (final Document d: docs) docacc.add(d);
                 } catch (final Parser.Failure e) {

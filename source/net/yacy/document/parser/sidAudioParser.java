@@ -35,6 +35,7 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
 
@@ -58,7 +59,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final InputStream source)
+            final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Parser.Failure, InterruptedException {
         try {
             final int available = source.available();

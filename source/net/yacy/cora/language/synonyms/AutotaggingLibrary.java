@@ -23,6 +23,7 @@ package net.yacy.cora.language.synonyms;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,6 +95,13 @@ public class AutotaggingLibrary {
         return this.vocabularies.get(name);
     }
 
+    public Set<String> getVocabularyNames() {
+        // this must return a clone of the set to prevent that the vocabularies are destroyed in a side effect
+        HashSet<String> names = new HashSet<>();
+        names.addAll(this.vocabularies.keySet());
+        return names;
+    }
+
     public Collection<Tagging> getVocabularies() {
         return this.vocabularies.values();
     }
@@ -143,13 +151,16 @@ public class AutotaggingLibrary {
     	return 4;
     }
 
-    public Tagging.Metatag getTagFromTerm(String term) {
+    public Tagging.Metatag getTagFromTerm(Set<String> vocabularies, String term) {
         if (this.vocabularies.isEmpty()) return null;
         Tagging.Metatag tag;
         term = Tagging.normalizeTerm(term);
-        for (Map.Entry<String, Tagging> v: this.vocabularies.entrySet()) {
-            tag = v.getValue().getMetatagFromSynonym(term);
-            if (tag != null) return tag;
+        for (String vocabularyName: vocabularies) {
+            Tagging t = this.vocabularies.get(vocabularyName);
+            if (t != null) {
+                tag = t.getMetatagFromSynonym(term);
+                if (tag != null) return tag;
+            }
         }
         return null;
     }

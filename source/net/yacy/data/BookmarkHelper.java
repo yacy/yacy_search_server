@@ -52,6 +52,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.word.Word;
@@ -138,7 +139,7 @@ public class BookmarkHelper {
         final Set<String> tags=ListManager.string2set(tag); //this allow multiple default tags
         try {
             //load the links
-            final ContentScraper scraper = new ContentScraper(baseURL, 10000);
+            final ContentScraper scraper = new ContentScraper(baseURL, 10000, new VocabularyScraper());
             //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
             FileUtils.copy(input,writer);

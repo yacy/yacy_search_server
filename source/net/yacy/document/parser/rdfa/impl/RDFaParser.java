@@ -23,6 +23,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
 
@@ -48,10 +49,10 @@ public class RDFaParser extends AbstractParser implements Parser {
 
 	@Override
     public Document[] parse(AnchorURL url, String mimeType,
-			String charset, InputStream source) throws Failure,
+			String charset, final VocabularyScraper scraper, InputStream source) throws Failure,
 			InterruptedException {
 
-		Document[] htmlDocs = parseHtml(url, mimeType, charset, source);
+		Document[] htmlDocs = parseHtml(url, mimeType, charset, scraper, source);
 
 		// TODO: current hardcoded restriction: apply rdfa parser only on selected sources.
 
@@ -97,12 +98,12 @@ public class RDFaParser extends AbstractParser implements Parser {
 	}
 
 	private Document[] parseHtml(AnchorURL url, String mimeType,
-			String charset, InputStream source) throws Failure,
+			String charset, VocabularyScraper scraper, InputStream source) throws Failure,
 			InterruptedException {
 
 		Document[] htmlDocs = null;
 		try {
-			htmlDocs = this.hp.parse(url, mimeType, charset, source);
+			htmlDocs = this.hp.parse(url, mimeType, charset, scraper, source);
 			source.reset();
 
 		} catch (final IOException e1) {
@@ -179,7 +180,7 @@ public class RDFaParser extends AbstractParser implements Parser {
             if (aReader != null) {
                 RDFaParser aParser = new RDFaParser();
                 try {
-                    aParser.parse(new AnchorURL(args[0]),"","",aURL.openStream());
+                    aParser.parse(new AnchorURL(args[0]), "", "", new VocabularyScraper(), aURL.openStream());
                 } catch (final FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (final IOException e) {

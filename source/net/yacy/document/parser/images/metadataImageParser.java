@@ -33,6 +33,7 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.GpsDirectory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
@@ -42,11 +43,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 
 /**
@@ -84,7 +87,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
     public Document[] parse(
             final AnchorURL location,
             final String mimeType,
-            final String documentCharset,
+            final String documentCharset, final VocabularyScraper scraper,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
 
         String title = null;

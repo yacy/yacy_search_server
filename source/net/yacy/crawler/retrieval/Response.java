@@ -44,6 +44,7 @@ import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.search.Switchboard;
 
 public class Response {
@@ -864,7 +865,7 @@ public class Response {
         final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(new AnchorURL(url()), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.request.depth(), this.content);
+            return TextParser.parseSource(new AnchorURL(url()), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), new VocabularyScraper(), this.request.depth(), this.content);
         } catch (final Exception e) {
             return null;
         }

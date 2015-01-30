@@ -59,6 +59,7 @@ import net.yacy.cora.storage.SizeLimitedSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
 import net.yacy.document.parser.images.genericImageParser;
@@ -88,7 +89,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public enum TagName {
         html(TagType.singleton), // scraped as singleton to get attached properties like 'lang'
         body(TagType.singleton), // scraped as singleton to get attached properties like 'class'
-        div(TagType.singleton),  // scraped as singleton to get attached properties like 'id'
         img(TagType.singleton),
         base(TagType.singleton),
         frame(TagType.singleton),
@@ -115,7 +115,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         i(TagType.pair),
         li(TagType.pair),
         script(TagType.pair),
-        style(TagType.pair);
+        span(TagType.pair),
+        div(TagType.pair);
 
         public TagType type;
         private TagName(final TagType type) {
@@ -185,6 +186,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private double lon, lat;
     private AnchorURL canonical, publisher;
     private final int maxLinks;
+    private final VocabularyScraper vocabularyScraper;
     private int breadcrumbs;
 
 
@@ -203,14 +205,21 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      */
     private final Evaluation evaluationScores;
 
+    /**
+     * scrape a document
+     * @param root the document root url
+     * @param maxLinks the maximum number of links to scapre
+     * @param classDetector a map from class names to vocabulary names to scrape content from the DOM with associated class name
+     */
     @SuppressWarnings("unchecked")
-    public ContentScraper(final DigestURL root, int maxLinks) {
+    public ContentScraper(final DigestURL root, int maxLinks, final VocabularyScraper vocabularyScraper) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         assert root != null;
         this.root = root;
         this.maxLinks = maxLinks;
+        this.vocabularyScraper = vocabularyScraper;
         this.evaluationScores = new Evaluation();
         this.rss = new SizeLimitedMap<DigestURL, String>(maxLinks);
         this.css = new SizeLimitedMap<DigestURL, String>(maxLinks);
@@ -392,15 +401,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             this.frames.add(src);
             this.evaluationScores.match(Element.framepath, src.toNormalform(true));
         } else if (tag.name.equalsIgnoreCase("body")) {
-            final String c = tag.opts.getProperty("class", EMPTY_STRING);
-            this.evaluationScores.match(Element.bodyclass, c);
-        } else if (tag.name.equalsIgnoreCase("div")) {
-            final String id = tag.opts.getProperty("id", EMPTY_STRING);
-            this.evaluationScores.match(Element.divid, id);
-            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
-            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
-                breadcrumbs++;
-            }
+            final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
+            this.evaluationScores.match(Element.bodyclass, classprop);
         } else if (tag.name.equalsIgnoreCase("meta")) {
             final String content = tag.opts.getProperty("content", EMPTY_STRING);
             String name = tag.opts.getProperty("name", EMPTY_STRING);
@@ -509,6 +511,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     @Override
     public void scrapeTag1(Tag tag) {
+        final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
+        //System.out.println("class = " + classprop);
+        this.vocabularyScraper.check(this.root, classprop, tag.content);
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
             String href = tag.opts.getProperty("href", EMPTY_STRING);
@@ -536,7 +541,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             this.evaluationScores.match(Element.apath, href);
         }
         final String h;
-        if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
+        if (tag.name.equalsIgnoreCase("div")) {
+            final String id = tag.opts.getProperty("id", EMPTY_STRING);
+            this.evaluationScores.match(Element.divid, id);
+            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
+            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
+                breadcrumbs++;
+            }
+        } else if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[0].add(h);
         } else if((tag.name.equalsIgnoreCase("h2")) && (tag.content.length() < 1024)) {
@@ -601,7 +613,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
         // start a new scraper to parse links inside this text
         // parsing the content
-        final ContentScraper scraper = new ContentScraper(this.root, this.maxLinks);
+        final ContentScraper scraper = new ContentScraper(this.root, this.maxLinks, this.vocabularyScraper);
         final TransformerWriter writer = new TransformerWriter(null, null, scraper, null, false);
         try {
             FileUtils.copy(new CharArrayReader(inlineHtml), writer);
@@ -1090,13 +1102,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8", new DigestURL("http://localhost"),null,false, maxLinks);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), "UTF-8", new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();
 
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks);
+        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks, new VocabularyScraper());
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         writer.close();

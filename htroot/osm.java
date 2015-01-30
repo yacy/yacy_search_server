@@ -29,7 +29,7 @@ import net.yacy.visualization.RasterPlotter.DrawMode;
 
 public class osm {
 
-    public static EncodedImage respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+    public static EncodedImage respond(final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
         int zoom = 10;
         double lat = 50.11670d;

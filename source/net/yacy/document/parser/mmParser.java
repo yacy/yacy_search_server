@@ -39,6 +39,7 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -71,7 +72,7 @@ public class mmParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final InputStream source)
+            final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Parser.Failure, InterruptedException
     {
         final StringBuilder sb = new StringBuilder();

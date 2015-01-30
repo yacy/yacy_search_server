@@ -35,6 +35,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
@@ -57,7 +58,7 @@ public class docParser extends AbstractParser implements Parser {
     @SuppressWarnings("deprecation")
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final InputStream source)
+            final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         final WordExtractor extractor;

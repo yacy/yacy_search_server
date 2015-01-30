@@ -418,7 +418,7 @@ public final class LoaderDispatcher {
         final String supportError = TextParser.supports(url, responseHeader.mime());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), response.depth(), response.getContent());
+            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), response.profile().scraper(), response.depth(), response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

@@ -37,6 +37,7 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -55,7 +56,7 @@ public class gzipParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final VocabularyScraper scraper, final InputStream source) throws Parser.Failure, InterruptedException {
 
         File tempFile = null;
         Document[] docs = null;
@@ -79,7 +80,7 @@ public class gzipParser extends AbstractParser implements Parser {
             out.close();
 
             // creating a new parser class to parse the unzipped content
-            docs = TextParser.parseSource(location, null, null, 999, tempFile);
+            docs = TextParser.parseSource(location, null, null, scraper, 999, tempFile);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;

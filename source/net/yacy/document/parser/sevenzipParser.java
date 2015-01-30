@@ -40,6 +40,7 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.FileUtils;
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
@@ -105,7 +106,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final VocabularyScraper scraper, final InputStream source) throws Parser.Failure, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
             FileUtils.copy(source, cfos);
@@ -171,7 +172,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      // below for reversion of the effects
                      final AnchorURL url = AnchorURL.newAnchor(this.doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
-                     theDocs = TextParser.parseSource(url, mime, null, this.doc.getDepth() + 1, this.cfos.toByteArray());
+                     theDocs = TextParser.parseSource(url, mime, null, new VocabularyScraper(), this.doc.getDepth() + 1, this.cfos.toByteArray());
 
                      this.doc.addSubDocuments(theDocs);
                  }

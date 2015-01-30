@@ -46,6 +46,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt
@@ -65,7 +66,7 @@ public class vcfParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, final InputStream source)
+    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         try {

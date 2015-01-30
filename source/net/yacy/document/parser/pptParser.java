@@ -37,6 +37,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
 
@@ -62,7 +63,7 @@ public class pptParser extends AbstractParser implements Parser {
      */
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final InputStream source) throws Parser.Failure,
+            final String charset, final VocabularyScraper scraper, final InputStream source) throws Parser.Failure,
             InterruptedException {
         try {
             /*

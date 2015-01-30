@@ -155,7 +155,8 @@ public class QuickCrawlLink_p {
                         -1, false, true,
                         CacheStrategy.IFFRESH,
                         collection,
-                        ClientIdentification.yacyIntranetCrawlerAgentName);
+                        ClientIdentification.yacyIntranetCrawlerAgentName,
+                        null);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist

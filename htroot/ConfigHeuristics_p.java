@@ -197,7 +197,6 @@ public class ConfigHeuristics_p {
         return prop;
     }
 
-    @SuppressWarnings("unused")
     private static void writeopensearchcfg(final Switchboard sb, final serverObjects post) {
         // read index schema table flags
 

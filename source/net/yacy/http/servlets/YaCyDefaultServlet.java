@@ -1045,7 +1045,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         upload.setFileSizeMax(SIZE_FILE_THRESHOLD);
         try {
             // Parse the request to get form field items
-            @SuppressWarnings("unchecked")             
             List<FileItem> fileItems = upload.parseRequest(request);                 
             // Process the uploaded file items
             Iterator<FileItem> i = fileItems.iterator();

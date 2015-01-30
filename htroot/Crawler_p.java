@@ -42,6 +42,8 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.JSONException;
+import net.yacy.cora.util.JSONObject;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.Cache;
@@ -51,6 +53,7 @@ import net.yacy.crawler.retrieval.SitemapImporter;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -445,6 +448,27 @@ public class Crawler_p {
                 boolean snapshotsLoadImage = post.getBoolean("snapshotsLoadImage");
                 boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
                 
+                // get vocabulary scraper info
+                JSONObject vocabulary_scraper = new JSONObject(); // key = vocabulary_name, value = properties with key = type (i.e. 'class') and value = keyword in context
+                for (String key: post.keySet()) {
+                    if (key.startsWith("vocabulary_")) {
+                        if (key.endsWith("_class")) {
+                            String vocabulary = key.substring(11, key.length() - 6);
+                            String value = post.get(key);
+                            if (value != null && value.length() > 0) {
+                                JSONObject props;
+                                try {
+                                    props = vocabulary_scraper.getJSONObject(vocabulary);
+                                } catch (JSONException e) {
+                                    props = new JSONObject();
+                                    vocabulary_scraper.put(vocabulary, props);
+                                }
+                                props.put("class", value);
+                            }
+                        }
+                    }
+                }
+                
                 // prepare a new crawling profile
                 final CrawlProfile profile;
                 byte[] handle;
@@ -476,7 +500,8 @@ public class Crawler_p {
                             snapshotsReplaceOld,
                             cachePolicy,
                             collection,
-                            agentName);
+                            agentName,
+                            new VocabularyScraper(vocabulary_scraper));
                     handle = ASCII.getBytes(profile.handle());
 
                     // before we fire up a new crawl, we make sure that another crawl with the same name is not running
@@ -559,7 +584,7 @@ public class Crawler_p {
                         try {
                             // check if the crawl filter works correctly
                             Pattern.compile(newcrawlingMustMatch);
-                            final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000);
+                            final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper());
                             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
                             if (crawlingFile != null && crawlingFile.exists()) {
                                 FileUtils.copy(new FileInputStream(crawlingFile), writer);

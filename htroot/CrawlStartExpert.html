@@ -443,7 +443,7 @@
         <fieldset>
           <legend>Robot Behaviour</legend>
           <dl>
-          <dt><label for="collection">Use Special User Agent and robot identification</label></dt>
+          <dt><label>Use Special User Agent and robot identification</label></dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             You are running YaCy in non-p2p mode and because YaCy can be used as replacement for commercial search appliances
@@ -460,6 +460,30 @@
 	      </dl>
         </fieldset>
 	    #(/agentSelect)#
+	    
+	    #(vocabularySelect)#::
+        <fieldset>
+          <legend>Enrich Vocabulary</legend>
+          <dl>
+          <dt><label>Scraping Fields</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            You can use class names to enrich the terms of a vocabulary based on the text content that appears on web pages. Please write the names of classes into the matrix.
+            </span></span>
+            <table class="table table-condensed">
+            <tr><th>Vocabulary</th><th>Class</th></tr>
+	        #{vocabularyset}#
+	        <tr>
+	        <td>#[name]#</td>
+	        <td><input name="vocabulary_#[name]#_class" id="vocabulary_#[name]#_class" type="text" size="55" maxlength="1028" value="#[value]#" /></td>
+	        </tr>
+            #{/vocabularyset}#
+            </table>
+	      </dd>
+	      </dl>
+        </fieldset>
+	    #(/vocabularySelect)#
+	    
         <fieldset>
           <legend>Snapshot Creation</legend>
           <dl>

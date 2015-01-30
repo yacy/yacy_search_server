@@ -40,6 +40,7 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.apache.tools.tar.TarEntry;
@@ -61,7 +62,7 @@ public class tarParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, final VocabularyScraper scraper, InputStream source) throws Parser.Failure, InterruptedException {
 
         final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
@@ -90,7 +91,7 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(url, "#" + name), mime, null, 999, tmp);
+                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(url, "#" + name), mime, null, scraper, 999, tmp);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {

@@ -41,6 +41,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -70,7 +71,7 @@ public class audioTagParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final InputStream source)
+            final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         String filename = location.getFileName();

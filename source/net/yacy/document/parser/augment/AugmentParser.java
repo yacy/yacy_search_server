@@ -13,6 +13,7 @@ import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.rdfa.impl.RDFaParser;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.search.Switchboard;
@@ -37,9 +38,9 @@ public class AugmentParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(AnchorURL url, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(AnchorURL url, String mimeType, String charset, final VocabularyScraper scraper, InputStream source) throws Parser.Failure, InterruptedException {
 
-        Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
+        Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, scraper, source);
 
         for (final Document doc : htmlDocs) {
             /* analyze(doc, url, mimeType, charset);  // enrich document text */

@@ -42,6 +42,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -149,7 +150,7 @@ public class DocumentIndex extends Segment {
             length = -1;
         }
         try {
-            documents = TextParser.parseSource(url, null, null, 0, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null));
+            documents = TextParser.parseSource(url, null, null, new VocabularyScraper(), 0, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null));
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toNormalform(false) + ": " + e.getMessage());
         }
@@ -158,7 +159,7 @@ public class DocumentIndex extends Segment {
         int c = 0;
         for ( final Document document : documents ) {
         	if (document == null) continue;
-            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true, true);
+            final Condenser condenser = new Condenser(document, null, true, true, LibraryProvider.dymLib, true, true);
             rows[c++] =
                 super.storeDocument(
                     url,

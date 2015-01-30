@@ -34,6 +34,7 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 public class rdfParser extends AbstractParser implements Parser {
 
@@ -46,7 +47,7 @@ public class rdfParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(final AnchorURL url, final String mimeType,
-            final String charset, final InputStream source)
+            final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Failure, InterruptedException {
 
 

@@ -25,12 +25,15 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Html2Image;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
@@ -508,10 +511,23 @@ public class CrawlStartExpert {
             prop.put("agentSelect_list", agentNames.size());
 
         }
-        prop.put("agentSelect_defaultAgentName",
-                ClientIdentification.yacyInternetCrawlerAgentName);
+        prop.put("agentSelect_defaultAgentName", ClientIdentification.yacyInternetCrawlerAgentName);
 
-
+        // ---------- Enrich Vocabulary
+        Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
+        if (vocs.size() == 0) {
+            prop.put("vocabularySelect", 0);
+        } else {
+            prop.put("vocabularySelect", 1);
+            int count = 0;
+            for (Tagging v: vocs) {
+                prop.put("vocabularySelect_vocabularyset_" + count + "_name", v.getName());
+                prop.put("vocabularySelect_vocabularyset_" + count + "_value", "");
+                count++;
+            }
+            prop.put("vocabularySelect_vocabularyset", count);
+        }
+        
         // ---------- Snapshot generation
         boolean wkhtmltopdfAvailable = Html2Image.wkhtmltopdfAvailable();
         boolean convertAvailable = Html2Image.convertAvailable();

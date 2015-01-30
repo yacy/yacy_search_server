@@ -37,6 +37,7 @@ import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.document.VocabularyScraper;
 
 
 public class ScraperInputStream extends InputStream implements ScraperListener {
@@ -59,6 +60,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     public ScraperInputStream(
             final InputStream inStream,
             final String inputStreamCharset,
+            final VocabularyScraper vocabularyScraper,
             final DigestURL rooturl,
             final Transformer transformer,
             final boolean passbyIfBinarySuspect,
@@ -68,7 +70,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
         this.bufferedIn = new BufferedInputStream(inStream, (int) preBufferSize);
         this.bufferedIn.mark((int) preBufferSize);
 
-        final ContentScraper scraper = new ContentScraper(rooturl, maxLinks);
+        final ContentScraper scraper = new ContentScraper(rooturl, maxLinks, vocabularyScraper);
         scraper.registerHtmlFilterEventListener(this);
 
         try {

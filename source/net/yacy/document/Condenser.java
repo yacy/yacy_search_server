@@ -45,6 +45,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
@@ -91,6 +92,7 @@ public final class Condenser {
     
     public Condenser(
             final Document document,
+            final VocabularyScraper scraper,
             final boolean indexText,
             final boolean indexMedia,
             final WordCache meaningLib,
@@ -122,7 +124,7 @@ public final class Condenser {
         if (indexText) {
             String text = document.getTextString();
             if (findDatesInContent) this.dates_in_content = DateDetection.parse(text);
-            createCondensement(text, meaningLib, doAutotagging);
+            createCondensement(document.dc_source(), text, meaningLib, doAutotagging, scraper);
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle
@@ -249,12 +251,12 @@ public final class Condenser {
         this.exact_signature = EnhancedTextProfileSignature.getSignatureLong(text);
     }
 
-    private Condenser(final String text, final WordCache meaningLib, boolean doAutotagging) {
+    private Condenser(final DigestURL root, final String text, final WordCache meaningLib, final boolean doAutotagging, final VocabularyScraper scraper) {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         this.words = new TreeMap<String, Word>();
         this.synonyms = new HashSet<String>();
-        createCondensement(text, meaningLib, doAutotagging);
+        createCondensement(root, text, meaningLib, doAutotagging, scraper);
     }
 
     private void insertTextToWords(
@@ -324,7 +326,7 @@ public final class Condenser {
         return this.languageIdentificator.getLanguage();
     }
 
-    private void createCondensement(final String text, final WordCache meaningLib, boolean doAutotagging) {
+    private void createCondensement(final DigestURL root, final String text, final WordCache meaningLib, boolean doAutotagging, final VocabularyScraper scraper) {
         assert text != null;
         final Set<String> currsentwords = new HashSet<String>();
         String word = "";
@@ -355,7 +357,29 @@ public final class Condenser {
 
 	            // get tags from autotagging
 	            if (doAutotagging) {
-	            	for (int wordc = 1; wordc <= wordcache.length + 1; wordc++) {
+	                Set<String> vocabularyNames = LibraryProvider.autotagging.getVocabularyNames();
+	                //Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
+	                //assert vocabularyNames.size() == vocabularies.size();
+	                Map<String, String> vocMap = scraper.removeVocMap(root);
+	                if (vocMap != null) {
+	                    for (Map.Entry<String, String> entry: vocMap.entrySet()) {
+	                        String navigatorName = entry.getKey();
+	                        String term = entry.getValue();
+	                        vocabularyNames.remove(navigatorName);
+	                        Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(navigatorName);
+	                        if (vocabulary != null) {
+	                            // extend the vocabulary
+	                            String obj = vocabulary.getObjectlink(term);
+	                            if (obj == null) try {vocabulary.put(term, "", root.toNormalform(true));} catch (IOException e) {} // this makes IO, be careful!
+	                            // create annotation
+	                            tag = vocabulary.getMetatagFromTerm(term);
+	                            Set<Tagging.Metatag> tagset = new HashSet<>();
+	                            tagset.add(tag);
+	                            this.tags.put(navigatorName, tagset);
+	                        }
+	                    }
+	                }
+	            	if (vocabularyNames.size() > 0) for (int wordc = 1; wordc <= wordcache.length + 1; wordc++) {
 	            		// wordc is number of words that are tested
 	            		StringBuilder sb = new StringBuilder();
 	            		if (wordc == 1) {
@@ -368,7 +392,7 @@ public final class Condenser {
 	            		}
 	            		String testterm = sb.toString().trim();
 	            		//System.out.println("Testing: " + testterm);
-		                tag = LibraryProvider.autotagging.getTagFromTerm(testterm);
+		                tag = LibraryProvider.autotagging.getTagFromTerm(vocabularyNames, testterm);
 		                if (tag != null) {
 		                    String navigatorName = tag.getVocabularyName();
 		                    Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
@@ -461,7 +485,7 @@ public final class Condenser {
     public static Map<String, Word> getWords(final String text, final WordCache meaningLib) {
         // returns a word/indexWord relation map
         if (text == null) return null;
-        return new Condenser(text, meaningLib, false).words();
+        return new Condenser(null, text, meaningLib, false, null).words();
     }
 
     public static void main(final String[] args) {

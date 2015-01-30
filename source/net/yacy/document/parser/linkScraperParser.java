@@ -28,6 +28,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.VocabularyScraper;
 
 /**
  * This parser is used if we know that the content is text but the exact format is unknown.
@@ -59,10 +60,10 @@ public class linkScraperParser extends AbstractParser implements Parser {
     }
     @Override
     public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final InputStream source)
+            final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Parser.Failure, InterruptedException {
         
-        Document[] htmlParserDocs = new htmlParser().parse(location, mimeType, charset, source);
+        Document[] htmlParserDocs = new htmlParser().parse(location, mimeType, charset, scraper, source);
         Document htmlParserDoc = htmlParserDocs == null ? null : Document.mergeDocuments(location, mimeType, htmlParserDocs);
         
         

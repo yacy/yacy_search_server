@@ -2570,6 +2570,7 @@ public final class Switchboard extends serverSwitch {
                     new AnchorURL(response.url()),
                     response.getMimeType(),
                     response.getCharacterEncoding(),
+                    response.profile().scraper(),
                     response.depth(),
                     response.getContent());
             if ( documents == null ) {
@@ -2750,7 +2751,7 @@ public final class Switchboard extends serverSwitch {
         for ( int i = 0; i < in.documents.length; i++ ) {
             condenser[i] =
                 new Condenser(
-                        in.documents[i], in.queueEntry.profile().indexText(),
+                        in.documents[i], in.queueEntry.profile().scraper(), in.queueEntry.profile().indexText(),
                         in.queueEntry.profile().indexMedia(),
                         LibraryProvider.dymLib, true, this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_sxt));
 
@@ -3189,7 +3190,7 @@ public final class Switchboard extends serverSwitch {
                                     throw new Parser.Failure("indexing is denied", url);
                                 }
                                 final Condenser condenser = new Condenser(
-                                        document, true, true, LibraryProvider.dymLib, true, 
+                                        document, null, true, true, LibraryProvider.dymLib, true, 
                                         Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_sxt));
                                 ResultImages.registerImages(url, document, true);
                                 Switchboard.this.webStructure.generateCitationReference(url, document);

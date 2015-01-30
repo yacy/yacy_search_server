@@ -62,6 +62,7 @@ import net.yacy.data.wiki.WikiParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.content.SurrogateReader;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -523,7 +524,7 @@ public class MediawikiImporter extends Thread implements Importer {
         public void genDocument() throws Parser.Failure {
             try {
 				this.url = new AnchorURL(this.urlStub + this.title);
-				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", 1, UTF8.getBytes(this.html));
+				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", new VocabularyScraper(), 1, UTF8.getBytes(this.html));
 				this.document = Document.mergeDocuments(this.url, "text/html", parsed);
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				this.document.setTitle(this.title);

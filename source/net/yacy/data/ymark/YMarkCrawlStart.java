@@ -189,7 +189,8 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		                -1, false, true,
 		                CacheStrategy.IFFRESH,
 		                "robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
-		                ClientIdentification.yacyIntranetCrawlerAgentName); // TODO: make this a default profile in CrawlSwitchboard
+		                ClientIdentification.yacyIntranetCrawlerAgentName,
+		                null); // TODO: make this a default profile in CrawlSwitchboard
 		sb.crawler.putActive(pe.handle().getBytes(), pe);
 		return sb.crawlStacker.stackCrawl(new Request(
         sb.peers.mySeed().hash.getBytes(),
