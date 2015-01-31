@@ -235,7 +235,7 @@ public final class SearchEvent {
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
         // prepare configured search navigation
-        final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "")+",language";
+        final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
         this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
         this.collectionNavigator = navcfg.contains("collections") ? new ConcurrentScoreMap<String>() : null;
