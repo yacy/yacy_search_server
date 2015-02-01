@@ -307,7 +307,7 @@ public class yacysearchitem {
             try {
                 image = theSearch.oneImageResult(item, timeout);
                 final String imageUrlstring = image.imageUrl.toNormalform(true);
-                final String imageUrlExt = MultiProtocolURL.getFileExtension(imageUrlstring);
+                final String imageUrlExt = MultiProtocolURL.getFileExtension(image.imageUrl.getFileName());
                 final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
                 final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
