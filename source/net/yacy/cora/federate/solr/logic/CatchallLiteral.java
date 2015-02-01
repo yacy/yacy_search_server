@@ -59,7 +59,7 @@ public class CatchallLiteral extends Literal implements Term {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.key.getSolrFieldName());
-        sb.append(':').append(AbstractSolrConnector.CATCHALL_TERM);
+        sb.append(AbstractSolrConnector.CATCHALL_DTERM);
         return sb.toString();
     }
     

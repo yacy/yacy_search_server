@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
@@ -172,7 +173,7 @@ public class RankingSolr_p {
         // make boost hints for vocabularies
         Map<String, ReversibleScoreMap<String>> vocabularyFacet;
         try {
-            vocabularyFacet = sb.index.fulltext().getDefaultConnector().getFacets(CollectionSchema.vocabularies_sxt.getSolrFieldName() + ":[* TO *]", 100, CollectionSchema.vocabularies_sxt.getSolrFieldName());
+            vocabularyFacet = sb.index.fulltext().getDefaultConnector().getFacets(CollectionSchema.vocabularies_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM, 100, CollectionSchema.vocabularies_sxt.getSolrFieldName());
         } catch (IOException e) {
             ConcurrentLog.logException(e);
             vocabularyFacet = new HashMap<>();

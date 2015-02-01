@@ -266,7 +266,7 @@ public class HostBrowser {
                         ff.add(csf.getSolrFieldName());
                     }
                     // add also vocabulary counters
-                    Map<String, ReversibleScoreMap<String>> vocabularyFacet = sb.index.fulltext().getDefaultConnector().getFacets(CollectionSchema.vocabularies_sxt.getSolrFieldName() + ":[* TO *]", 100, CollectionSchema.vocabularies_sxt.getSolrFieldName());
+                    Map<String, ReversibleScoreMap<String>> vocabularyFacet = sb.index.fulltext().getDefaultConnector().getFacets(CollectionSchema.vocabularies_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM, 100, CollectionSchema.vocabularies_sxt.getSolrFieldName());
                     if (vocabularyFacet.size() > 0) {
                         Collection<String> vocnames = vocabularyFacet.values().iterator().next().keyList(true);
                         for (String vocname: vocnames) {

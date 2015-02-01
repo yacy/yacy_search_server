@@ -1315,13 +1315,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (count > 0) {
                 Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 100000, partitioningKey);
                 ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
-                long emptyCount = collectionConnector.getCountByQuery("{!cache=false}" + "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")");
+                long emptyCount = collectionConnector.getCountByQuery("{!cache=false}" + "-" + partitioningKey + AbstractSolrConnector.CATCHALL_DTERM + " AND (" + collection1query + ")");
                 if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
                 final long start = System.currentTimeMillis();
                 List<String> querystrings = new ArrayList<>(partitioning.size());
                 for (String partitioningValue: partitioning) {
                     String partitioningQuery = "{!cache=false}" + ((partitioningValue.length() == 0) ?
-                            "-" + partitioningKey + ":[* TO *] AND (" + collection1query + ")" :
+                            "-" + partitioningKey + AbstractSolrConnector.CATCHALL_DTERM + " AND (" + collection1query + ")" :
                             partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")");
                     querystrings.add(partitioningQuery);
                 }
