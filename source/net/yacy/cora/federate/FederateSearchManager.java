@@ -41,6 +41,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.xml.opensearchdescriptionReader;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryGoal;
@@ -141,7 +142,7 @@ public class FederateSearchManager {
      */
     public void search(SearchEvent theSearch) {
         if (theSearch != null) {
-            if (!theSearch.query.isLocal()) {
+            if (!theSearch.query.isLocal() && !MemoryControl.shortStatus()) {
                 Set<AbstractFederateSearchConnector> picklist = getBest(theSearch.getQuery());
                 for (AbstractFederateSearchConnector fsc : picklist) {
                     fsc.search(theSearch);
@@ -157,7 +158,7 @@ public class FederateSearchManager {
      * @return list of results according to YaCy schema
      */
     public List<URIMetadataNode> query(QueryParams query) {
-        if (query.isLocal()) {
+        if (!query.isLocal() && !MemoryControl.shortStatus()) {
             List<URIMetadataNode> sdl = new ArrayList<URIMetadataNode>();
             Set<AbstractFederateSearchConnector> picklist = getBest(query);
             for (AbstractFederateSearchConnector fsc : picklist) {
