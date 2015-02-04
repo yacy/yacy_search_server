@@ -32,6 +32,8 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Html2Image;
+import net.yacy.cora.util.JSONException;
+import net.yacy.cora.util.JSONObject;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
@@ -521,8 +523,9 @@ public class CrawlStartExpert {
             prop.put("vocabularySelect", 1);
             int count = 0;
             for (Tagging v: vocs) {
+                String value = post == null ? "" : post.get("vocabulary_" + v.getName() + "_class", "");
                 prop.put("vocabularySelect_vocabularyset_" + count + "_name", v.getName());
-                prop.put("vocabularySelect_vocabularyset_" + count + "_value", "");
+                prop.put("vocabularySelect_vocabularyset_" + count + "_value", value);
                 count++;
             }
             prop.put("vocabularySelect_vocabularyset", count);
