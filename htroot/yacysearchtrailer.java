@@ -459,7 +459,7 @@ public class yacysearchtrailer {
                         break;
                     }
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
-                    if (!theSearch.query.modifier.toString().contains("/vocabulary/"+navname+"/"+name)) {
+                    if (!theSearch.query.modifier.toString().contains("/vocabulary/" + navname + "/" + name.replace(' ', '_'))) {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", nav);
                     } else {
