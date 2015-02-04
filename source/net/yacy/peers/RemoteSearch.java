@@ -147,6 +147,7 @@ public class RemoteSearch extends Thread {
             final SortedSet<byte[]> clusterselection) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
+        Switchboard sb = Switchboard.getSwitchboard();
         
         // check the peer memory and lifesign-situation to get a scaling for the number of remote search processes
         final boolean shortmem = MemoryControl.shortStatus();
@@ -212,12 +213,12 @@ public class RemoteSearch extends Thread {
         final Collection<Seed> robinsonPeers = DHTSelection.selectExtraTargets(event.peers, event.query.getQueryGoal().getIncludeHashes(), minage, dhtPeers, robinsoncount, random);
         
         if (event.peers != null) {
-            if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
+            if (sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
                 dhtPeers.clear();
                 dhtPeers.add(event.peers.mySeed());
             }
             
-            if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
+            if (sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
                 robinsonPeers.clear();
                 robinsonPeers.add(event.peers.mySeed());
             }
@@ -229,20 +230,20 @@ public class RemoteSearch extends Thread {
         
         // start solr searches
         final int targets = dhtPeers.size() + robinsonPeers.size();
-        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
+        if (!sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
             final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
-                if (MemoryControl.shortStatus() || Memory.load() > 4.0) continue;
+                if (MemoryControl.shortStatus() || Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR, 4.0f)) continue;
                 Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
                 event.nodeSearchThreads.add(t);
             }
         }
         
         // start search to YaCy DHT peers
-        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
+        if (!sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
             for (Seed dhtPeer: dhtPeers) {
                 if (dhtPeer == null || dhtPeer.hash == null) continue;
-                if (MemoryControl.shortStatus() || Memory.load() > 8.0) continue;
+                if (MemoryControl.shortStatus() || Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI, 8.0f)) continue;
                 try {
                     RemoteSearch rs = new RemoteSearch(
                         event,

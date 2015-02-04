@@ -330,8 +330,9 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
-
     public static final String REMOTESEARCH_RESULT_STORE        = "remotesearch.result.store"; // add remote results to local index
+    public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
+    public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
 
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";

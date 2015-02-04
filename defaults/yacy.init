@@ -865,6 +865,8 @@ search.verify.delete = true
 remotesearch.maxcount = 10
 remotesearch.maxtime = 3000
 remotesearch.result.store=true
+remotesearch.maxload.rwi=8.0
+remotesearch.maxload.solr=4.0
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
