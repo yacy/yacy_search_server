@@ -515,7 +515,7 @@
         <fieldset>
           <legend>Index Administration</legend>
           <dl>
-          <dt>Do Local Indexing</dt>
+          <dt>Indexing</dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
@@ -526,7 +526,7 @@
             <label for="indexMedia">index media</label>:
             <input type="checkbox" name="indexMedia" id="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# />
           </dd>
-
+          #(remoteindexing)#::
           <dt><label for="crawlOrder">Do Remote Indexing</label></dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
@@ -549,6 +549,7 @@
               </tr>
             </table>
           </dd>
+          #(/remoteindexing)#
 
           <dt><label for="collection">Add Crawl result to collection(s)</label></dt>
           <dd>

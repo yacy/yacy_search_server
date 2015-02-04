@@ -554,18 +554,25 @@ public class CrawlStartExpert {
             prop.put("indexingMediaChecked",
                     env.getConfigBool("indexMedia", true) ? 1 : 0);
             // Do Remote Indexing?
-            prop.put("crawlOrderChecked",
-                    env.getConfigBool("crawlOrder", true) ? 1 : 0);
-            // Remote crawl intention
-            prop.put("intention", "");
+            if (sb.isP2PMode()) {
+                prop.put("remoteindexing", 1);
+                prop.put("remoteindexing_crawlOrderChecked", env.getConfigBool("crawlOrder", true) ? 1 : 0);
+                prop.put("remoteindexing_intention", "");
+            } else {
+                prop.put("remoteindexing", 0);
+            }
         } else {
             prop.put("indexingTextChecked",
                     post.getBoolean("indexText") ? 1 : 0);
             prop.put("indexingMediaChecked",
                     post.getBoolean("indexMedia") ? 1 : 0);
-            prop.put("crawlOrderChecked",
-                    post.getBoolean("crawlOrder") ? 1 : 0);
-            prop.put("intention", post.get("intention", ""));
+            if (sb.isP2PMode()) {
+                prop.put("remoteindexing", 1);
+                prop.put("remoteindexing_crawlOrderChecked", post.getBoolean("crawlOrder") ? 1 : 0);
+                prop.put("remoteindexing_intention", post.get("intention", ""));
+            } else {
+                prop.put("remoteindexing", 0);
+            }
         }
 
         // Target collection
