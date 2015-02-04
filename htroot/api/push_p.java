@@ -20,6 +20,7 @@
 
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.Set;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -120,7 +121,11 @@ public class push_p {
                     sb.indexingDocumentProcessor.enQueue(in);
                 }
                 prop.put("mode_results_" + i + "_success", "1");
-                prop.put("mode_results_" + i + "_success_message", "http://" + Domains.myPublicLocalIP().getHostAddress() + ":" + sb.getLocalPort("port", 8090) + "/solr/select?q=sku:%22" + u + "%22");
+
+                Set<String> ips = Domains.myPublicIPs();
+                String address = ips.size() == 0 ? "127.0.0.1" : ips.iterator().next();
+                if (address == null) address = "127.0.0.1";
+                prop.put("mode_results_" + i + "_success_message", "http://" + address + ":" + sb.getLocalPort("port", 8090) + "/solr/select?q=sku:%22" + u + "%22");
                 countsuccess++;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
