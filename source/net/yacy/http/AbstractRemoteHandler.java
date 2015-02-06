@@ -114,7 +114,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
  
         if (!Switchboard.getSwitchboard().getConfigBool("isTransparentProxy", false)) {
             // transparent proxy not swiched on
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed (see Advanced Settings -> HTTP Networking -> Transparent Proxy; switched off).");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed (see System Administration -> Advanced Settings -> Proxy Access Settings -> Transparent Proxy; switched off).");
             baseRequest.setHandled(true);
             return;
         }
