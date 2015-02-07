@@ -67,12 +67,8 @@ public class index {
         if (!sb.getConfigBool("search.options", true)) {
             searchoptions = 0;
         } else { // show heuristic hint on search option screen
-            int osdcnt = 0; // (only if some are active and heuristic is not ON by config)
-            try {
-                osdcnt = sb.tables.size("opensearchsys");
-            } catch (IOException ex) { }
-            prop.put("searchoptions_heuristic", !sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && osdcnt > 0);
-            prop.put("searchoptions_heuristic_count", osdcnt);
+            // (only if heuristic is ON by config)
+            prop.put("searchoptions_heuristic", sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false));
         }
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
