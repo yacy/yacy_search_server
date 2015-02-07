@@ -153,7 +153,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         // send request
         try {
             String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
-            DigestURL digestURI = new DigestURL(request.getScheme(), request.getServerName(), request.getServerPort(), request.getPathInfo() + queryString);
+            DigestURL digestURI = new DigestURL(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI() + queryString);
             if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
                 client.GET(digestURI, false);
             } else if (request.getMethod().equals(HeaderFramework.METHOD_POST)) {
