@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
@@ -39,6 +41,7 @@ import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.CollectionSchema;
+import org.apache.http.entity.mime.content.ContentBody;
 
 /**
  * Handling of queries to remote OpenSearch systems. Iterates to a list of
@@ -83,10 +86,10 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
         // see http://www.loc.gov/standards/sru/
         String searchurl = this.parseSearchTemplate(baseurl, query.getQueryGoal().getQueryString(false), 0, query.itemsPerPage);
         try {
-            MultiProtocolURL aurl = new MultiProtocolURL(MultiProtocolURL.unescape(searchurl));
+            MultiProtocolURL aurl = new MultiProtocolURL(searchurl);
             try {
                 this.lastaccesstime = System.currentTimeMillis();
-                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyIntranetCrawlerAgent);
+                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
                 byte[] result = httpClient.GETbytes(aurl, null, null, false);
                 RSSReader rssReader =  RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
                 if (rssReader != null) {
