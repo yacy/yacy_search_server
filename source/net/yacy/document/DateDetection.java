@@ -36,6 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.util.ConcurrentLog;
 
 /**
  * The purpose of this class exceeds the demands on simple date parsing using a SimpleDateFormat
@@ -450,6 +451,7 @@ public class DateDetection {
         public LinkedHashSet<Date> parse(final String text) {
             LinkedHashSet<Date> dates = new LinkedHashSet<>();
             Matcher matcher = this.pattern.matcher(text);
+            //ConcurrentLog.info("DateDetection", "applying matcher: " + matcher.toString());
             while (matcher.find()) {
                 if (!(matcher.groupCount() == 2)) continue;
                 String entity1 = matcher.group(1); if (entity1 == null) continue;
@@ -513,10 +515,12 @@ public class DateDetection {
     private static LinkedHashSet<Date> parseRawDate(String text) {
         // get parse alternatives for different date styles; we consider that one document uses only one style
         LinkedHashSet<Date> DMYDates = EndianStyle.DMY.parse(text);
-        LinkedHashSet<Date>  DMDates = ShortStyle.DM_GERMAN.parse(text);
-        DMDates.addAll(ShortStyle.DM_FRENCH.parse(text));
-        DMDates.addAll(ShortStyle.DM_ITALIAN.parse(text));
-        DMDates.addAll(ShortStyle.DM_SPANISH.parse(text));
+        ShortStyle[] shortStyleCheck = new ShortStyle[]{ShortStyle.DM_GERMAN, ShortStyle.DM_FRENCH, ShortStyle.DM_ITALIAN, ShortStyle.DM_SPANISH};
+        LinkedHashSet<Date>  DMDates = new LinkedHashSet<>();
+        for (ShortStyle shortStyle: shortStyleCheck) {
+            DMDates.addAll(shortStyle.parse(text));
+            if (DMDates.size() > 0) break;
+        }
         DMYDates.addAll(DMDates);
         
         LinkedHashSet<Date> MDYDates = DMYDates.size() == 0 ? EndianStyle.MDY.parse(text) : new LinkedHashSet<Date>(0);
