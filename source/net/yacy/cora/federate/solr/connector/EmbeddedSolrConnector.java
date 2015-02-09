@@ -74,8 +74,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     
     public static final String SELECT = "/select";
     public static final String CONTEXT = "/solr";
-    
+
     private final SearchHandler requestHandler;
+    //private final SuggestComponent suggestHandler;
     private final EmbeddedInstance instance;
     private final SolrCore core;
 
@@ -86,6 +87,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         this.requestHandler = new SearchHandler();
         this.requestHandler.init(new NamedList<Object>());
         this.requestHandler.inform(this.core);
+        //this.suggestHandler = new SuggestComponent();
+        //this.suggestHandler.init(new NamedList<Object>());
+        //this.suggestHandler.inform(this.core);
         super.init(this.instance.getDefaultServer());
     }
     
@@ -96,6 +100,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         this.requestHandler = new SearchHandler();
         this.requestHandler.init(new NamedList<Object>());
         this.requestHandler.inform(this.core);
+        //this.suggestHandler = new SuggestComponent();
+        //this.suggestHandler.init(new NamedList<Object>());
+        //this.suggestHandler.inform(this.core);
         super.init(this.instance.getServer(coreName));
     }
 

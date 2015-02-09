@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,16 +94,17 @@ public class DidYouMean {
      * @param index a termIndex - most likely retrieved from a switchboard object.
      * @param sort true/false -  sorts the resulting TreeSet by index.count(); <b>Warning:</b> this causes heavy i/o.
      */
-    public DidYouMean(final Segment segment, final StringBuilder word0) {
-        this.resultSet = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(word0, WORD_LENGTH_COMPARATOR)));
-        this.word = word0;
+    public DidYouMean(final Segment segment, final String word0) {
+        this.word = new StringBuilder(word0.trim());
+        this.resultSet = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(this.word, WORD_LENGTH_COMPARATOR)));
         this.wordLen = this.word.length();
         this.segment = segment;
         this.more = segment.connectedRWI() && segment.RWICount() > 0; // with RWIs connected the guessing is super-fast
 
         // identify language
         if (this.word.length() > 0) {
-            final char testchar = this.word.charAt(0);
+            char testchar = this.word.charAt(0);
+            if (testchar >= 'A' && testchar <= 'Z') testchar = (char) (testchar + 32);
             boolean alphafound = false;
             alphatest: for (final char[] alpha: ALPHABETS) {
                 if (isAlphabet(alpha, testchar)) {
@@ -158,13 +160,15 @@ public class DidYouMean {
         final long startTime = System.currentTimeMillis();
         final long timelimit = startTime + timeout;
         int lastIndexOfSpace = this.word.lastIndexOf(" ");
+        final Collection<StringBuilder> preSorted;
         if (lastIndexOfSpace > 0) {
-            // recursion over several words
-            return getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), timeout, preSortSelection, this.segment);
+            // several words
+            preSorted = getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), timeout, preSortSelection, this.segment);
+        } else {
+            preSorted = getSuggestions(timeout);
         }
-        final SortedSet<StringBuilder> preSorted = getSuggestions(timeout);
         final ReversibleScoreMap<StringBuilder> scored = new ClusteredScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-        Collection<StringBuilder> countSorted = new ArrayList<StringBuilder>();
+        LinkedHashSet<StringBuilder> countSorted = new LinkedHashSet<StringBuilder>();
         if (this.more) {
             final int wc = this.segment.getWordCountGuess(this.word.toString()); // all counts must be greater than this
             try {
@@ -183,7 +187,10 @@ public class DidYouMean {
             try {
                 for (final StringBuilder s: preSorted) {
                     if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(s, this.word) ||
-                        StringBuilderComparator.CASE_INSENSITIVE_ORDER.endsWith(this.word, s)) countSorted.add(s);
+                        StringBuilderComparator.CASE_INSENSITIVE_ORDER.endsWith(this.word, s)) countSorted.add(this.word);
+                }
+                for (final StringBuilder s: preSorted) {
+                    if (!StringBuilderComparator.CASE_INSENSITIVE_ORDER.equals(s, this.word)) countSorted.add(s);
                 }
             } catch (final ConcurrentModificationException e) {
             }
@@ -198,10 +205,10 @@ public class DidYouMean {
 
     /**
      * return a string that is a suggestion list for the list of given words
-     * @param head - the sequence of words before the last space in the sequence
-     * @param tail - the word after the last space, possibly empty
-     * @param timeout
-     * @param preSortSelection
+     * @param head - the sequence of words before the last space in the sequence, fixed (not to be corrected); possibly empty
+     * @param tail - the word after the last space, possibly empty or misspelled
+     * @param timeout for operation
+     * @param preSortSelection - number of suggestions to be computed
      * @return
      */
     private static Collection<StringBuilder> getSuggestions(final String head, final String tail, final long timeout, final int preSortSelection, final Segment segment) {
@@ -210,7 +217,11 @@ public class DidYouMean {
         final SolrQuery solrQuery = new SolrQuery();
         solrQuery.setParam("defType", "edismax");
         solrQuery.setFacet(false);
-        solrQuery.setQuery(CollectionSchema.title.getSolrFieldName() + ":\"" + head + "\"^10 OR " + CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + "\"" + (tail.length() == 0 ? "" : CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + " " + tail + "\""));
+        assert tail.length() > 0 && tail.indexOf(' ') < 0; // if there would be a space it should be part of head
+        String q = head.length() == 0 ? CollectionSchema.text_t.getSolrFieldName() + ":" + tail + "~" : CollectionSchema.title.getSolrFieldName() + ":\"" + head + "\"^10 " + CollectionSchema.text_t.getSolrFieldName() + ":(" + head + " " + tail + ")~"; // for a fuzzy search we cannot apply fuzzyness on the tail only
+        String fq = head.length() == 0 ? null : CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + "\""; // in all cases (a) and (b) there must be that portion, but that is not part of the snippet that we are searching
+        solrQuery.setQuery(q);
+        if (head.length() > 0 && fq != null) solrQuery.setFilterQueries(fq);
         solrQuery.setStart(0);
         solrQuery.setRows(count);
         solrQuery.setHighlight(true);
@@ -229,44 +240,21 @@ public class DidYouMean {
                 for (Map<String, List<String>> re: rawsnippets.values()) {
                     for (List<String> sl: re.values()) {
                         for (String s: sl) {
+                            // the suggestion for the tail is in the snippet
                             s = s.replaceAll("</b> <b>", " ");
-                            int sp = s.indexOf("</b>");
-                            if (sp >= 0) {
-                                if (tail.length() > 0) {
-                                    if (sp - tail.length() < 0 || !s.substring(sp - tail.length(), sp).equals(tail)) continue;
-                                    s = tail + s.substring(sp + 4);
-                                } else {
-                                    s = s.substring(sp + 4);
-                                }
-                                for (int i = 0; i < s.length(); i++) {
-                                    char c = s.charAt(i);
-                                    if (c < 'A') s = s.replace(c, ' ');
-                                }
-                                s = s.trim();
-                                sp = s.indexOf("  ");
-                                if (sp >= 0) s = s.substring(0, sp);
-                                sp = s.indexOf("<b>");
-                                if (sp >= 0) s = s.substring(0, sp).trim();
+                            int snippetOpen = s.indexOf("<b>");
+                            int snippetClose = s.indexOf("</b>");
+                            if (snippetOpen >= 0 && snippetClose > snippetOpen) {
+                                String snippet = s.substring(snippetOpen + 3, snippetClose);
+                                String afterSnippet = s.substring(snippetClose + 4).trim();
+                                s = snippet + (afterSnippet.length() > 0 ? " " + afterSnippet : "");
+                                for (int i = 0; i < s.length(); i++) {char c = s.charAt(i); if (c < 'A') s = s.replace(c, ' ');} // remove funny symbols
+                                s = s.replaceAll("<b>", " ").replaceAll("</b>", " ").replaceAll("  ", " ").trim(); // wipe superfluous whitespace
                                 String[] sx = CommonPattern.SPACE.split(s);
                                 StringBuilder sb = new StringBuilder(s.length());
                                 for (String x: sx) if (x.length() > 1 && sb.length() < 28) sb.append(x).append(' '); else break;
                                 s = sb.toString().trim();
-                                int score = count;
-                                if (s.length() > 2)  {
-                                    boolean store = true;
-                                    for (String a: snippets) {
-                                        if (a.startsWith(s)) {
-                                            snippets.inc(a, count);
-                                            store = false; // s becomes superfluous
-                                        }
-                                        if (s.startsWith(a)) {
-                                            snippets.dec(a, count); // a becomes superfluous
-                                            score += count;
-                                        }
-                                    }
-                                    if (store) snippets.inc(s, score);
-                                }
-                                count--;
+                                if (s.length() > 0)  snippets.inc(s, count--);
                             }
                         }
                     }
@@ -276,11 +264,8 @@ public class DidYouMean {
         } catch (IOException e) {
         }
         Iterator<String> si = snippets.keys(false);
-        while (si.hasNext() && result.size() < 10) {
-            String s = si.next();
-            StringBuilder sb = new StringBuilder(head.length() + s.length() + 1);
-            sb.append(head).append(' ').append(s);
-            result.add(sb);
+        while (si.hasNext() && result.size() < preSortSelection) {
+            result.add(new StringBuilder(si.next()));
         }
         return result;
     }
@@ -291,7 +276,7 @@ public class DidYouMean {
      * @param timeout execution time in ms.
      * @return a Set&lt;String&gt; with word variations contained in term index.
      */
-    private SortedSet<StringBuilder> getSuggestions(final long timeout) {
+    private Collection<StringBuilder> getSuggestions(final long timeout) {
         final long startTime = System.currentTimeMillis();
         this.timeLimit = startTime + timeout;
         
@@ -312,7 +297,7 @@ public class DidYouMean {
         }
 
         test(this.word);
-        this.resultSet.addAll(getSuggestions(this.word.toString(), "", timeout, 10, this.segment));
+        this.resultSet.addAll(getSuggestions("", this.word.toString(), timeout, 10, this.segment));
         
         if (this.more) {
             // finish the producer
@@ -335,7 +320,6 @@ public class DidYouMean {
         for (final StringBuilder t: libr) {
             if (t.length() >= MinimumOutputWordLength) this.resultSet.add(t);
         }
-        if (s.length() >= MinimumOutputWordLength) this.resultSet.add(s);
     }
     
     /**
