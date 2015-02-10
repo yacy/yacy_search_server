@@ -360,7 +360,7 @@ public final class Condenser {
 	                Set<String> vocabularyNames = LibraryProvider.autotagging.getVocabularyNames();
 	                //Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
 	                //assert vocabularyNames.size() == vocabularies.size();
-	                Map<String, String> vocMap = scraper.removeVocMap(root);
+	                Map<String, String> vocMap = scraper == null ? null : scraper.removeVocMap(root);
 	                if (vocMap != null) {
 	                    for (Map.Entry<String, String> entry: vocMap.entrySet()) {
 	                        String navigatorName = entry.getKey();
