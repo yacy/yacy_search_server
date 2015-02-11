@@ -28,7 +28,7 @@ public class genericImageParserTest {
         System.out.println("parse file: " + filename);
 
         genericImageParser p = new genericImageParser();
-        final Document[] docs = p.parse(url, mimetype, charset, new FileInputStream(file));
+        final Document[] docs = p.parse(url, mimetype, charset, null, new FileInputStream(file));
 
         Document doc = docs[0];
         assertEquals("YaCy Logo",doc.dc_title());

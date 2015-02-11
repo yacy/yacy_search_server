@@ -29,7 +29,7 @@ public class metadataImageParserTest {
         System.out.println("parse file: " + filename);
 
         metadataImageParser p = new metadataImageParser();
-        final Document[] docs = p.parse(url, mimetype, charset, new FileInputStream(file));
+        final Document[] docs = p.parse(url, mimetype, charset, null, new FileInputStream(file));
 
         Document doc = docs[0];
         assertEquals("YaCy Logo",doc.dc_title());

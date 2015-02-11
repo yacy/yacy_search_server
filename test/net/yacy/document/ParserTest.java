@@ -36,7 +36,7 @@ public class ParserTest {
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new ooxmlParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        final Document[] docs = p.parse(url, mimetype, null, null, new FileInputStream(file));
                         for (final Document doc: docs) {
                             final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
                             final StringBuilder str = new StringBuilder();
@@ -70,7 +70,7 @@ public class ParserTest {
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new odtParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        final Document[] docs = p.parse(url, mimetype, null, null, new FileInputStream(file));
                         for (final Document doc: docs) {
                             final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
                             final StringBuilder str = new StringBuilder();
@@ -102,7 +102,7 @@ public class ParserTest {
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new pdfParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        final Document[] docs = p.parse(url, mimetype, null, null, new FileInputStream(file));
                         for (final Document doc: docs) {
                             final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
                             final StringBuilder str = new StringBuilder();
@@ -134,7 +134,7 @@ public class ParserTest {
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new docParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        final Document[] docs = p.parse(url, mimetype, null, null, new FileInputStream(file));
                         for (final Document doc: docs) {
                             final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
                             final StringBuilder str = new StringBuilder();
@@ -172,7 +172,7 @@ public class ParserTest {
             final AnchorURL url = new AnchorURL("http://localhost/" + filename);
 
             AbstractParser p = new pptParser();
-            final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+            final Document[] docs = p.parse(url, mimetype, null, null, new FileInputStream(file));
             for (final Document doc : docs) {
                 final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
                 final StringBuilder str = new StringBuilder();

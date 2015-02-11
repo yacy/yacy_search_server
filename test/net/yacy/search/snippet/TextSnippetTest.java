@@ -5,6 +5,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.schema.CollectionSchema;

@@ -29,7 +29,7 @@ public class pdfParserTest {
         System.out.println("parse file: " + filename);
 
         pdfParser p = new pdfParser();
-        final Document[] docs = p.parse(url, mimetype, charset, new FileInputStream(file));
+        final Document[] docs = p.parse(url, mimetype, charset, null, new FileInputStream(file));
 
         Document doc = docs[0];
         int ilinks = doc.getAnchors().size();
