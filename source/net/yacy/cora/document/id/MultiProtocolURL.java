@@ -223,7 +223,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     // no host given
                     this.path = h.substring(2); // "/path"  or "/c:/path"
                 } else if (h.startsWith("//")) { // "//host/path" or "//host/c:/path"
-                    this.path = h.substring(2); // "/path"  or "/c:/path"
+                    int q = h.indexOf('/', 2);
+                    if (q < 0) {
+                        this.path = h.substring(2); // "path"  or "c:/path"
+                    } else {
+                        this.host = h.substring(2, q ); // TODO: handle "c:"  ?
+                        if (this.host.equalsIgnoreCase(Domains.LOCALHOST)) this.host = null;
+                        this.path = h.substring(q ); // "/path" 
+                    }
                 } else if (h.startsWith("/")) { // "/host/path" or "/host/c:/path"
                     this.path = h;
                 }
@@ -1985,7 +1992,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public java.io.File getFSFile() throws MalformedURLException {
         if (!isFile()) throw new MalformedURLException();
-        return new java.io.File(this.toNormalform(true).substring(7));
+        return new java.io.File(this.toNormalform(true).substring(5));
     }
 
     /**
