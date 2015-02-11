@@ -36,7 +36,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
 
     private final long[] gcs = new long[5];
     private int gcs_pos = 0;
-    private long properMbyte = 0L;
+    private long properByte = 0L; // treshold
     private long prevTreshold = 0L;
     private int tresholdCount = 0;
     private boolean proper = true;
@@ -157,7 +157,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
     }
     private boolean request0(final long size, final boolean force) {
     	final long avg = getAverageGCFree();
-    	if (avg >= size) return true;
+    	// if (avg >= size) return true; // optimistic view, GC may just has happened
         long avail = available();
         if (avail >= size) return true;
         if (log.isFine()) {
@@ -177,7 +177,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
                     + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             }
             checkProper(avail);
-            return avail >= size;
+            return this.proper && avail >= size;
         }
         if (log.isFine()) log.fine("former GCs indicate to not be able to free enough memory (requested/available/average: "
                 + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
@@ -209,13 +209,13 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected void setProperMbyte(final long mbyte) {
-    	this.properMbyte = mbyte;
+    	this.properByte = mbyte << 20; // convert to byte
     	this.tresholdCount = 0;
     }
 
     private void checkProper(final long available) {
     	// disable proper state if memory is less than treshold - 4 times, maximum 11 minutes between each detection
-    	if ((available >> 20) < this.properMbyte) {
+    	if ((available) < this.properByte) {
     		final long t = System.currentTimeMillis();
     		if(this.prevTreshold + 11L /* minutes */ * 60000L > t) {
     			this.tresholdCount++;
@@ -227,7 +227,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
 
 			log.info("checkProper: below treshold; tresholdCount: " + this.tresholdCount + "; proper: " + this.proper);
     	}
-    	else if (!this.proper && (available >> 20) > (this.properMbyte * 2L)) // we were wrong!
+    	else if (!this.proper && (available) > (this.properByte * 2L)) // we were wrong!
     		resetProperState();
     }
 
