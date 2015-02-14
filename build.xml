@@ -176,9 +176,9 @@
         <pathelement location="${lib}/geronimo-stax-api_1.0_spec-1.0.1.jar" />
         <pathelement location="${lib}/guava-18.0.jar" />
         <pathelement location="${lib}/htmllexer.jar" />
-        <pathelement location="${lib}/httpclient-4.3.6.jar" />
-        <pathelement location="${lib}/httpcore-4.3.3.jar" />
-        <pathelement location="${lib}/httpmime-4.3.6.jar" />
+        <pathelement location="${lib}/httpclient-4.4.jar" />
+        <pathelement location="${lib}/httpcore-4.4.jar" />
+        <pathelement location="${lib}/httpmime-4.4.jar" />
         <pathelement location="${lib}/icu4j-core.jar" />
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
