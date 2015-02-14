@@ -258,7 +258,7 @@ public class yacysearchitem {
             prop.putHTML("content_former", origQ);
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.descriptionline(theSearch.query.getQueryGoal());
-            prop.putHTML("content_description", desc);
+            prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
             prop.put("content_mimetype",result.getNode().mime()); // for atom <link> type attribute
