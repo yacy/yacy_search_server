@@ -144,18 +144,16 @@ public class HTTPClient {
     	final RequestConfig.Builder builder = RequestConfig.custom();
     	// IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
     	builder.setExpectContinueEnabled(false);
-		// timeout in milliseconds until a connection is established in milliseconds
-		builder.setConnectionRequestTimeout(default_timeout);
-		builder.setConnectTimeout(default_timeout);
-		// SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
-		builder.setSocketTimeout(default_timeout);
-		// getting an I/O error when executing a request over a connection that has been closed at the server side
-		builder.setStaleConnectionCheckEnabled(true);
-		// ignore cookies, cause this may cause segfaults in default cookiestore and is not needed
-		builder.setCookieSpec(CookieSpecs.IGNORE_COOKIES);
-		builder.setRedirectsEnabled(true);
-		builder.setRelativeRedirectsAllowed(true);
-		return builder.build();
+        // timeout in milliseconds until a connection is established in milliseconds
+        builder.setConnectionRequestTimeout(default_timeout);
+        builder.setConnectTimeout(default_timeout);
+        // SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
+        builder.setSocketTimeout(default_timeout);
+        // ignore cookies, cause this may cause segfaults in default cookiestore and is not needed
+        builder.setCookieSpec(CookieSpecs.IGNORE_COOKIES);
+        builder.setRedirectsEnabled(true);
+        builder.setRelativeRedirectsAllowed(true);
+        return builder.build();
     }
     
     private static HttpClientBuilder initClientBuilder() {
@@ -200,32 +198,32 @@ public class HTTPClient {
 				if (ip == null) throw new UnknownHostException(host0);
 				return new InetAddress[]{ip};
 			}});
-    	// how much connections do we need? - default: 20
-		pooling.setMaxTotal(maxcon);
-		// for statistics same value should also be set here
-		ConnectionInfo.setMaxcount(maxcon);
-		// connections per host (2 default)
-		pooling.setDefaultMaxPerRoute((int) (2 * Memory.cores()));
-		// Increase max connections for localhost
-		final HttpHost localhost = new HttpHost(Domains.LOCALHOST);
-		pooling.setMaxPerRoute(new HttpRoute(localhost), maxcon);
-		
-		final SocketConfig socketConfig = SocketConfig.custom()
-				// Defines whether the socket can be bound even though a previous connection is still in a timeout state.
-				.setSoReuseAddress(true)
-				// SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
-				.setSoTimeout(3000)
-				// conserve bandwidth by minimizing the number of segments that are sent
-				.setTcpNoDelay(false)
-				.build();
-		pooling.setDefaultSocketConfig(socketConfig);
-		
-		if (connectionMonitor == null) {
-			connectionMonitor = new IdleConnectionMonitorThread(pooling);
-			connectionMonitor.start();
-		}
-		
-		return pooling;
+        // how much connections do we need? - default: 20
+        pooling.setMaxTotal(maxcon);
+        // for statistics same value should also be set here
+        ConnectionInfo.setMaxcount(maxcon);
+        // connections per host (2 default)
+        pooling.setDefaultMaxPerRoute((int) (2 * Memory.cores()));
+        // Increase max connections for localhost
+        final HttpHost localhost = new HttpHost(Domains.LOCALHOST);
+        pooling.setMaxPerRoute(new HttpRoute(localhost), maxcon);
+        pooling.setValidateAfterInactivity(default_timeout); // on init set to default 5000ms
+        final SocketConfig socketConfig = SocketConfig.custom()
+                // Defines whether the socket can be bound even though a previous connection is still in a timeout state.
+                .setSoReuseAddress(true)
+                // SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
+                .setSoTimeout(3000)
+                // conserve bandwidth by minimizing the number of segments that are sent
+                .setTcpNoDelay(false)
+                .build();
+        pooling.setDefaultSocketConfig(socketConfig);
+
+        if (connectionMonitor == null) {
+            connectionMonitor = new IdleConnectionMonitorThread(pooling);
+            connectionMonitor.start();
+        }
+
+        return pooling;
     }
 
     /**
