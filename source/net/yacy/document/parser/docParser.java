@@ -28,7 +28,9 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.util.CommonPattern;
@@ -80,7 +82,7 @@ public class docParser extends AbstractParser implements Parser {
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
         String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
-        title.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
+        title = title.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
         if (title.length() > 80) title = title.substring(0, 80);
         int l = title.length();
         while (true) {
@@ -97,6 +99,10 @@ public class docParser extends AbstractParser implements Parser {
             keywlist = null;
         }
 
+        final String subject = extractor.getSummaryInformation().getSubject();
+        List<String> descriptions = new ArrayList<String>();
+        if (subject != null && !subject.isEmpty()) descriptions.add(subject);
+
         Document[] docs;
         docs = new Document[]{new Document(
                   location,
@@ -109,7 +115,7 @@ public class docParser extends AbstractParser implements Parser {
                   extractor.getSummaryInformation().getAuthor(), // constuctor can handle null
                   extractor.getDocSummaryInformation().getCompany(), // publisher
                   null,
-                  null,
+                  descriptions,
                   0.0f, 0.0f,
                   contents.toString(),
                   null,
