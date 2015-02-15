@@ -166,7 +166,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         final ResultClass source = ResultClass.SOURCE_CACHE;
         final String wordhashes = RemoteSearch.set2string(queryhashes);
         final String urls = ASCII.String(url.hash());
-        String snippetLine = snippetsCache.get(wordhashes, urls);
+        final String snippetLine = snippetsCache.get(wordhashes, urls);
         if (snippetLine != null) {
             // found the snippet
             init(url.hash(), snippetLine, false, source, null);
@@ -336,11 +336,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
             return;
         }
-        if (snippetLine.length() > snippetMaxLength) snippetLine = snippetLine.substring(0, snippetMaxLength);
+        if (textline.length() > snippetMaxLength) textline = textline.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
         snippetsCache.put(wordhashes, urls, textline);
-        init(url.hash(), snippetLine, false, source, null);
+        init(url.hash(), textline, false, source, null);
     }
 
     private void init(
