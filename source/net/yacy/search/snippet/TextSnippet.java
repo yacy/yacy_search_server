@@ -343,6 +343,17 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         init(url.hash(), textline, false, source, null);
     }
 
+    /**
+     * Init a snippet line for urlhash, used for display in search results.
+     * HTML code in text will be html-encoded.
+     * If the input is already marked (highlightened) <b>...</b> tags are kept as is.
+     *
+     * @param urlhash hash of the url for this snippet
+     * @param line text to use as snippet
+     * @param isMarked true if query words already marked in input text
+     * @param errorCode
+     * @param errortext
+     */
     private void init(
             final byte[] urlhash,
             final String line,
@@ -350,7 +361,15 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             final ResultClass errorCode,
             final String errortext) {
         this.urlhash = urlhash;
-        this.line = line;
+        if (line != null) { // line may contain html code (possible to mess up result display)
+            if (isMarked) { // if marked, keep <b>...</b> html tags in place
+                this.line = CharacterCoding.unicode2html(line, false).replaceAll("&lt;b&gt;(.+?)&lt;/b&gt;", "<b>$1</b>");
+            } else { // otherwise encode all text for html display
+                this.line = CharacterCoding.unicode2html(line, false);
+            }
+        } else {
+            this.line = line;
+        }
         this.isMarked = isMarked;
         this.resultStatus = errorCode;
         this.error = errortext;
