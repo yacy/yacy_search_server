@@ -82,6 +82,7 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -621,7 +622,7 @@ public class HTTPClient {
                 final HttpEntity httpEntity = this.httpResponse.getEntity();
 	        if (httpEntity != null && httpEntity.isStreaming()) {
 	            // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-	            EntityUtils.consume(httpEntity);
+	            EntityUtils.consumeQuietly(httpEntity);
 	        }
 	        this.httpResponse.close();
         }
@@ -789,7 +790,7 @@ public class HTTPClient {
 
         final SSLConnectionSocketFactory sslSF = new SSLConnectionSocketFactory(
                 sslContext,
-                SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                new NoopHostnameVerifier());
     	return sslSF;
     }
 
