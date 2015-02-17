@@ -2905,7 +2905,7 @@ public final class Switchboard extends serverSwitch {
 
         // if this was performed for a remote crawl request, notify requester
         if ( (processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null) ) {
-            final Seed initiatorPeer = this.peers.get(ASCII.String(queueEntry.initiator()));
+            final Seed initiatorPeer = this.peers.getConnected(queueEntry.initiator());
             if ( initiatorPeer != null ) {
                 // start a thread for receipt sending to avoid a blocking here
                 SolrDocument sd = this.index.fulltext().getDefaultConfiguration().toSolrDocument(newEntry);
