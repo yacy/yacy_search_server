@@ -565,7 +565,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return sbuf;
     }
 
-    // from: http://www.w3.org/International/unescape.java
+    // from: http://www.w3.org/International/unescape.java (2015-02-19 !! this eats up characters > 0x80 hex !!)
     public static String unescape(final String s) {
         final int l  = s.length();
         final StringBuilder sbuf = new StringBuilder(l);
@@ -596,6 +596,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 sumb = (sumb << 6) | (b & 0x3f);    // Add 6 bits to sumb
                 if (--more == 0) sbuf.append((char) sumb); // Add char to sbuf
             } else if ((b & 0x80) == 0x00) {        // 0xxxxxxx (yields 7 bits)
+                if (more > 0) { // 2015-2-19 if this then prev loop was no complete multibyte char (just add it, instead of eating it up)
+                    sbuf.append(s.charAt(i-1));
+                    more = -1;
+                }
                 sbuf.append((char) b);              // Store in sbuf
             } else if ((b & 0xe0) == 0xc0) {        // 110xxxxx (yields 5 bits)
                 sumb = b & 0x1f;
