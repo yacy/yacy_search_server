@@ -29,7 +29,9 @@ package net.yacy.document.parser;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.util.CommonPattern;
@@ -87,6 +89,10 @@ public class pptParser extends AbstractParser implements Parser {
                keywlist = CommonPattern.COMMA.split(keywords);
             } else keywlist = null;
 
+            final String subject = pptExtractor.getSummaryInformation().getSubject();
+            List<String> descriptions = new ArrayList<String>();
+            if (subject != null && !subject.isEmpty()) descriptions.add(subject);
+
             /*
              * create the plasmaParserDocument for the database
              * and set shortText and bodyText properly
@@ -102,7 +108,7 @@ public class pptParser extends AbstractParser implements Parser {
                     pptExtractor.getSummaryInformation().getAuthor(), // may be null
                     pptExtractor.getDocSummaryInformation().getCompany(),
                     null,
-                    null,
+                    descriptions,
                     0.0f, 0.0f,
                     contents,
                     null,
