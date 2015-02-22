@@ -1014,8 +1014,9 @@ search.ranking.rwi.profile =
 # Boost queries are added to all queries; functions evaluate a value which is either added or multiplied with the ranking.
 # The field boostfunctionmode can be either 'add' or 'multiply' to describe the mode.
 # All boost methods > 0 must have names to be able to select this name with a query, with the syntax /name
+# The bostfields setting is of special importance as these are the fields used to query for search terms
 search.ranking.solr.collection.boostname.tmpa.0=Default Profile
-search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,keywords^2.0,author^1.0
+search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,keywords^2.0,description_txt^1.5,author^1.0
 search.ranking.solr.collection.filterquery.tmpa.0=
 search.ranking.solr.collection.boostquery.tmpa.0=crawldepth_i:0^0.8 crawldepth_i:1^0.4
 search.ranking.solr.collection.boostfunction.tmpb.0=
@@ -1025,7 +1026,7 @@ search.ranking.solr.collection.filterquery.tmpa.1=
 search.ranking.solr.collection.boostquery.tmpa.1=
 search.ranking.solr.collection.boostfunction.tmpb.1=recip(ms(NOW,last_modified),3.16e-11,1,1)
 search.ranking.solr.collection.boostname.tmpa.2=Intranet Profile: when a search is done on a single domain only, i.e. if a site:-operator is used
-search.ranking.solr.collection.boostfields.tmpa.2=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,h3_txt^2.0
+search.ranking.solr.collection.boostfields.tmpa.2=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,h3_txt^2.0,keywords^2.0,description_txt^1.5,author^1.0
 search.ranking.solr.collection.filterquery.tmpa.2=
 search.ranking.solr.collection.boostquery.tmpa.2=fuzzy_signature_unique_b:true^10.0
 search.ranking.solr.collection.boostfunction.tmpb.2=
