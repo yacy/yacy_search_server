@@ -38,7 +38,7 @@ public class Ranking {
     private static int   minTokenLen = 3;   // to be filled with search.ranking.solr.doubledetection.minlength
     
     private Map<SchemaDeclaration, Float> fieldBoosts;
-    private String name, filterQuery, boostQuery, boostFunction;
+    private String name, filterQuery, boostQuery, boostFunction, queryFields;
     
     public Ranking() {
         super();
@@ -47,6 +47,7 @@ public class Ranking {
         this.filterQuery = "";
         this.boostQuery = "";
         this.boostFunction = "";
+        this.queryFields = null;
     }
 
     public String getName() {
@@ -60,7 +61,7 @@ public class Ranking {
     public void putFieldBoost(SchemaDeclaration schema, float boost) {
         this.fieldBoosts.put(schema,  boost);
     }
-    
+
     public Float getFieldBoost(SchemaDeclaration schema) {
         return this.fieldBoosts.get(schema);
     }
@@ -68,7 +69,46 @@ public class Ranking {
     public Set<Map.Entry<SchemaDeclaration,Float>> getBoostMap() {
         return this.fieldBoosts.entrySet();
     }
-    
+
+   /**
+     * The boost fields are the fields to query used as Solr QF parameter
+     * This is currently used in local and remote queries, asure anticipated search relevant
+     * remote index fields are part of query fields (recommended: at least core
+     * metadata/Dublin Core text fields) even if disabled locally.
+     *
+     * @return queryfield string for Solr QF query parameter (list of fields with optonal boost factor "field1^5.0 field2 field3^2.0")
+     */
+    public String getQueryFields() {
+        if (this.queryFields != null) return this.queryFields;
+        StringBuilder qf = new StringBuilder(80);
+        for (Map.Entry<SchemaDeclaration, Float> entry : this.fieldBoosts.entrySet()) {
+            SchemaDeclaration field = entry.getKey();
+            if ((field.getType() == SolrType.num_integer) // numerical and logical fields not usefull as default query field
+                    || (field.getType() == SolrType.num_long)
+                    || (field.getType() == SolrType.num_float)
+                    || (field.getType() == SolrType.num_double)
+                    || (field.getType() == SolrType.bool)) {
+                continue;
+            }
+            qf.append(field.getSolrFieldName());
+
+            final Float boost = entry.getValue();
+            if (boost != null) {
+                qf.append('^').append(boost.toString()).append(' ');
+            } else {
+                qf.append(' ');
+            }
+        }
+        // make sure Dublin Core Metadata core/text fields are set as default query field
+        if (!this.fieldBoosts.containsKey(CollectionSchema.title)) qf.append(CollectionSchema.title.getSolrFieldName()).append(' ');
+        if (!this.fieldBoosts.containsKey(CollectionSchema.text_t)) qf.append(CollectionSchema.text_t.getSolrFieldName()).append(' ');
+        if (!this.fieldBoosts.containsKey(CollectionSchema.description_txt)) qf.append(CollectionSchema.description_txt.getSolrFieldName()).append(' ');
+        if (!this.fieldBoosts.containsKey(CollectionSchema.keywords)) qf.append(CollectionSchema.keywords.getSolrFieldName());
+
+        this.queryFields = qf.toString(); // doesn't change often, cache it
+        return this.queryFields;
+    }
+
     /**
      * the updateDef is a definition string that comes from a configuration file.
      * It should be a comma-separated list of field^boost values
@@ -79,6 +119,7 @@ public class Ranking {
         // call i.e. with "sku^20.0,url_paths_sxt^20.0,title^15.0,h1_txt^11.0,h2_txt^10.0,author^8.0,description_txt^5.0,keywords^2.0,text_t^1.0,fuzzy_signature_unique_b^100000.0"
         if (boostDef == null || boostDef.length() == 0) return;
         String[] bf = CommonPattern.COMMA.split(boostDef);
+        this.queryFields = null; // empty cached qf
         this.fieldBoosts.clear();
         for (String boost: bf) {
             int p = boost.indexOf('^');

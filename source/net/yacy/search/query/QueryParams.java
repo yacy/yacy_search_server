@@ -369,11 +369,13 @@ public final class QueryParams {
         final SolrQuery params = getBasicParams(getFacets);
         int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
         params.setQuery(this.queryGoal.collectionTextQueryString(this.indexSegment.fulltext().getDefaultConfiguration(), rankingProfile, excludeintext_image).toString());
-        Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
+        Ranking actRanking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
 
-        String fq = ranking.getFilterQuery();
-        String bq = ranking.getBoostQuery();
-        String bf = ranking.getBoostFunction();
+        String fq = actRanking.getFilterQuery();
+        String bq = actRanking.getBoostQuery();
+        String bf = actRanking.getBoostFunction();
+        final String qf = actRanking.getQueryFields();
+        if (!qf.isEmpty()) params.setParam(DisMaxParams.QF, qf);
         if (this.queryGoal.getIncludeSize() > 1) {
             // add boost on combined words
             if (bq.length() > 0) bq += " ";

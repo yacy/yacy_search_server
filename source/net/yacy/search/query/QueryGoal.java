@@ -27,15 +27,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.WordCache;
-import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.SchemaDeclaration;
-import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.Domains;
@@ -336,28 +332,11 @@ public class QueryGoal {
         // add goal query
         StringBuilder w = getGoalQuery();
         
-        // combine these queries for all relevant fields
         if (w.length() > 0) {
             q.append(" AND (");
-            int wc = 0;
-            Float boost;
-            Ranking r = configuration.getRanking(rankingProfile);
-            for (Map.Entry<SchemaDeclaration,Float> entry: r.getBoostMap()) {
-                SchemaDeclaration field = entry.getKey();
-                boost = entry.getValue();
-                if (boost == null || boost.floatValue() <= 0.0f) continue;
-                if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
-                if (field.getType() == SolrType.num_integer) continue;
-                if (wc > 0) q.append(" OR ");
-                q.append('(');
-                q.append(field.getSolrFieldName()).append(':').append(w);
-                if (boost != null) q.append('^').append(boost.toString());
-                q.append(')');
-                wc++;
-            }
+            q.append(w);
             q.append(')');
         }
-
         return q;
     }
     

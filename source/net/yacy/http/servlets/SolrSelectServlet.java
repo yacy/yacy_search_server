@@ -40,8 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.SchemaDeclaration;
-import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
@@ -65,6 +63,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
+import static org.apache.solr.common.params.MultiMapSolrParams.addParam;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
@@ -206,32 +205,16 @@ public class SolrSelectServlet extends HttpServlet {
             if (connector == null) throw new ServletException("no core");
 
             // add default queryfield parameter according to local ranking config (or defaultfield)
-            if (!mmsp.getMap().containsKey(DisMaxParams.QF) && !mmsp.getMap().containsKey(CommonParams.DF)) {
-                
-                if (ranking != null && defaultConnector) { // ranking normally never null
-                    // construct the queryfield parameter
-                    StringBuilder qf = new StringBuilder(80);
-
-                    for (Map.Entry<SchemaDeclaration, Float> entry : ranking.getBoostMap()) {
-                        SchemaDeclaration field = entry.getKey();
-                        final Float boost = entry.getValue();
-                        if (field.getType() == SolrType.num_integer) {
-                            continue;
-                        }
-                        qf.append(field.getSolrFieldName());
-                        if (boost != null) {
-                            qf.append('^').append(boost.toString()).append(' ');
-                        } else {
-                            qf.append("^1.0 ");
-                        }
-                    }
-                    if (qf.length() > 4) // make sure qf has content (else use df)
-                        mmsp.getMap().put(DisMaxParams.QF, new String[]{qf.toString()});
-                    else
-                        mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
+            if (ranking != null) { // ranking normally never null
+                final String qf = ranking.getQueryFields();
+                if (qf.length() > 4) { // make sure qf has content (else use df)
+                    addParam(DisMaxParams.QF, qf, mmsp.getMap()); // add QF that we set to be best suited for our index
+                            // TODO: if every peer applies a decent QF itself, this can be reverted to getMap().put()
                 } else {
                     mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
                 }
+            } else {
+                mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
             }
 
             // do the solr request, generate facets if we use a special YaCy format
