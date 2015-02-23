@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 cd "`dirname $0`/.."
 for i in DATA/INDEX/* ; do
   if [ -d "$i" ]; then

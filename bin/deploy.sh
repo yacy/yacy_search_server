@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 cd "`dirname $0`"
 cd ..
 ./stopYACY.sh

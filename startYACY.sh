@@ -45,8 +45,20 @@ USAGE
 #startup YaCy
 cd "`dirname $0`"
 
-options="`getopt -n YaCy -o h,d,l,p,t,g -l help,debug,logging,print-out,tail-log,gui -- $@`"
+if [ $OS = "OpenBSD" ]
+then
+		if [ $(echo $@ | grep -o "\-\-" | wc -l) -ne 0  ]
+		then
+			echo "WARNING: Unfortunately this script does not support long options in $OS."
+		fi
+		
+        options="`getopt -n YaCy -o h,d,l,p,t,g -- $@`"
+else
+        options="`getopt -n YaCy -o h,d,l,p,t,g -l help,debug,logging,print-out,tail-log,gui -- $@`"
+fi
+
 if [ $? -ne 0 ];then
+
 	exit 1;
 fi
 
@@ -87,7 +99,7 @@ for option in $options;do
 			-t|--tail-log)
 				TAILLOG=1
 				;;
-			-gui)
+			-g|--gui)
 				GUI=1
 				isparameter=1
 				;;
