@@ -59,33 +59,29 @@ public class rssParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL url, final String mimeType,
+    public Document[] parse(final AnchorURL feedurl, final String mimeType,
             final String charset, final VocabularyScraper scraper, final InputStream source)
             throws Failure, InterruptedException {
         RSSReader rssReader;
         try {
             rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source);
         } catch (final IOException e) {
-            throw new Parser.Failure("Load error:" + e.getMessage(), url, e);
+            throw new Parser.Failure("Load error:" + e.getMessage(), feedurl, e);
         }
 
         final RSSFeed feed = rssReader.getFeed();
         //RSSMessage channel = feed.getChannel();
         final List<Document> docs = new ArrayList<Document>();
-        AnchorURL uri;
+        AnchorURL itemuri;
         Set<String> languages;
-        List<AnchorURL> anchors;
         Document doc;
         for (final Hit item: feed) try {
-            uri = new AnchorURL(item.getLink());
+            itemuri = new AnchorURL(item.getLink());
             languages = new HashSet<String>();
             languages.add(item.getLanguage());
-            anchors = new ArrayList<AnchorURL>();
-            uri.setNameProperty(item.getTitle());
-            anchors.add(uri);
             doc = new Document(
-                    uri,
-                    TextParser.mimeOf(url),
+                    itemuri,
+                    TextParser.mimeOf(itemuri),
                     charset,
                     this,
                     languages,
@@ -98,7 +94,7 @@ public class rssParser extends AbstractParser implements Parser {
                     item.getLon(),
                     item.getLat(),
                     null,
-                    anchors,
+                    null,
                     null,
                     new LinkedHashMap<DigestURL, ImageEntry>(),
                     false,
