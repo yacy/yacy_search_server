@@ -38,7 +38,7 @@ Options
   -l, --logging		save the output of YaCy to yacy.log
   -d, --debug		show the output of YaCy on the console
   -p, --print-out	only print the command, which would be executed to start YaCy
-  -g, --gui			start a gui for YaCy
+  -g, --gui		start a gui for YaCy
 USAGE
 }
 
@@ -52,7 +52,7 @@ then
 			echo "WARNING: Unfortunately this script does not support long options in $OS."
 		fi
 		
-        options="`getopt -n YaCy -o h,d,l,p,t,g -- $@`"
+        options="`getopt hdlptg: $*`"
 else
         options="`getopt -n YaCy -o h,d,l,p,t,g -l help,debug,logging,print-out,tail-log,gui -- $@`"
 fi
