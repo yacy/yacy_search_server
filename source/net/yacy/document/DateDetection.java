@@ -36,7 +36,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.util.ConcurrentLog;
 
 /**
  * The purpose of this class exceeds the demands on simple date parsing using a SimpleDateFormat
@@ -122,8 +121,8 @@ public class DateDetection {
     private final static int CURRENT_YEAR  = Integer.parseInt(CONFORM.format(TODAY).substring(0, 4)); // we need that to parse dates without given years, see the ShortStyle class
     private final static int CURRENT_MONTH = Integer.parseInt(CONFORM.format(TODAY).substring(5, 7)); // wee need that to generate recurring dates, see RecurringStyle class
 
-    private final static String BODNCG = "(?:^|(?s:.*?\\s))"; // begin of date non-capturing group
-    private final static String EODNCG = "(?:(?s:[\\s\\.,;:].*+)|$)"; // end of date non-capturing group
+    private final static String BODNCG = "(?:\\b|^)"; // begin of date non-capturing group
+    private final static String EODNCG = "(?:[).:;! ]|$)"; // end of date non-capturing group
     private final static String SEPARATORNCG = "(?:/|-| - |\\.\\s|,\\s|\\.|,|\\s)"; // separator non-capturing group
     private final static String DAYCAPTURE = "(\\d{1,2})";
     private final static String YEARCAPTURE = "(\\d{2}|\\d{4})";
@@ -551,6 +550,7 @@ public class DateDetection {
     }
     
     public static void main(String[] args) {
+        String fill = ""; for (int i = 0; i < 1000; i++) fill += 'x';
         String[] test = new String[]{
                 "\n laden die Stadtwerke \n X am Rosenmontag und am \n Faschingsdienstag zur Disko auf die \n",
                 "kein Datum im Text",
@@ -585,8 +585,9 @@ public class DateDetection {
         };
         long t = System.currentTimeMillis();
         for (String s: test) {
+            String parsed = parse(fill + " " + s + " " + fill).toString();
             System.out.println("SOURCE: " + s);
-            System.out.println("DATE  : " + parse(s).toString());
+            System.out.println("DATE  : " + parsed);
             System.out.println();
         }
         System.out.println("Runtime: " + (System.currentTimeMillis() - t) + " milliseconds.");
