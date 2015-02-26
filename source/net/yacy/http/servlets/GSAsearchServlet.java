@@ -137,6 +137,9 @@ public class GSAsearchServlet extends HttpServlet {
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100));
         
         // set ranking
+        final Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+        final String qf = ranking.getQueryFields();
+        if (!qf.isEmpty()) post.put(DisMaxParams.QF, qf);
         if (post.containsKey(CommonParams.SORT)) {
             // if a gsa-style sort attribute is given, use this to set the solr sort attribute
             GSAResponseWriter.Sort sort = new GSAResponseWriter.Sort(post.get(CommonParams.SORT, ""));
@@ -148,7 +151,6 @@ public class GSAsearchServlet extends HttpServlet {
             }
         } else {
             // if no such sort attribute is given, use the ranking as configured for YaCy
-            Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
             String fq = ranking.getFilterQuery();
             String bq = ranking.getBoostQuery();
             String bf = ranking.getBoostFunction();
