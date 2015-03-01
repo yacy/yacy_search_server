@@ -1,6 +1,7 @@
 
 package net.yacy.search.snippet;
 
+import java.net.MalformedURLException;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -118,4 +119,38 @@ public class TextSnippetTest {
         }
     }
 
+    /**
+     * Test of descriptionline method, of class TextSnippet.
+     * checking poper encoding of remaining html in raw snippet line.
+     */
+    @Test
+    public void testDescriptionline() throws MalformedURLException {
+        String rawtestline = "Über großer test case </span> <pre> <hr><hr /></pre>"; // test line with html, risk of snippet format issue
+
+        DigestURL url = new DigestURL("http://localhost/page.html");
+        QueryGoal qg = new QueryGoal("test");
+
+        // test with raw line (no marking added by YaCy)
+        TextSnippet ts = new TextSnippet(
+            url.hash(),
+            rawtestline,
+            true, // isMarked,
+            TextSnippet.ResultClass.SOURCE_METADATA, "");
+
+        String sniptxt = ts.descriptionline(qg); // snippet text for display
+        System.out.println("testDescriptionline: snippet=" + sniptxt);
+        assertFalse ("HTML code not allowed in snippet text",sniptxt.contains("<pre>")); // display text not to include unwanted html
+
+        // test with marking of query word
+         ts = new TextSnippet(
+            url.hash(),
+            rawtestline,
+            false, // isMarked,
+            TextSnippet.ResultClass.SOURCE_METADATA, "");
+
+        sniptxt = ts.descriptionline(qg);
+        System.out.println("testDescriptionline: snippet=" + sniptxt);
+        assertFalse ("HTML code not allowed in snippet text",sniptxt.contains("<pre>")); // display text not to include unwanted html
+        assertTrue ("Query word not marked", sniptxt.contains("<b>test</b>")); // query word to be marked
+    }
 }
