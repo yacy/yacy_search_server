@@ -131,7 +131,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
 
     private byte[] urlhash;
-    private String line;
+    private String line; // the raw (unmodified) line from source ( use getDescriptionLine() to get the html encoded version for display)
     private boolean isMarked;
     private String error;
     private ResultClass resultStatus;
@@ -344,9 +344,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
 
     /**
-     * Init a snippet line for urlhash, used for display in search results.
-     * HTML code in text will be html-encoded.
-     * If the input is already marked (highlightened) <b>...</b> tags are kept as is.
+     * Init a snippet line for urlhash
      *
      * @param urlhash hash of the url for this snippet
      * @param line text to use as snippet
@@ -361,15 +359,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             final ResultClass errorCode,
             final String errortext) {
         this.urlhash = urlhash;
-        if (line != null) { // line may contain html code (possible to mess up result display)
-            if (isMarked) { // if marked, keep <b>...</b> html tags in place
-                this.line = CharacterCoding.unicode2html(line, false).replaceAll("&lt;b&gt;(.+?)&lt;/b&gt;", "<b>$1</b>");
-            } else { // otherwise encode all text for html display
-                this.line = CharacterCoding.unicode2html(line, false);
-            }
-        } else {
-            this.line = line;
-        }
+        this.line = line;
         this.isMarked = isMarked;
         this.resultStatus = errorCode;
         this.error = errortext;
@@ -437,9 +427,22 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
 
     private String descriptionline = null;
+    /**
+     * Snippet line formatted/encoded for display in browser
+     * possible html code in raw line is html encoded
+     * query words marked by <b>..</b>
+     *
+     * @param queryGoal
+     * @return html encoded snippet line
+     */
     public String descriptionline(QueryGoal queryGoal) {
         if (descriptionline != null) return descriptionline;
-        descriptionline = this.isMarked() ? this.getLineRaw() : this.getLineMarked(queryGoal);
+        if (this.isMarked) {
+            // html encode source, keep <b>..</b>
+            descriptionline = CharacterCoding.unicode2html(this.getLineRaw(), false).replaceAll("&lt;b&gt;(.+?)&lt;/b&gt;", "<b>$1</b>");
+        } else {
+            descriptionline = this.getLineMarked(queryGoal);
+        }
         return descriptionline;
     }
     
