@@ -170,6 +170,9 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public Date modified() {
         return this.urlentry.moddate();
     }
+    public Date[] events() {
+        return this.urlentry.datesInContent();
+    }
     public int filesize() {
         return this.urlentry.filesize();
     }

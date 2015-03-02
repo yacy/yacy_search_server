@@ -27,6 +27,7 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -195,8 +196,11 @@ public class yacysearchitem {
             prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
+            Date[] events = result.events();
+            boolean showEvent = events != null && events.length > 0 && sb.getConfig("search.navigation", "").indexOf("date",0) >= 0;
+            prop.put("content_showEvent", showEvent ? 1 : 0);
             if (fileType == FileType.HTML) { // html template specific settings
-                prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) ? 1 : 0);
+                prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) && !showEvent ? 1 : 0);
                 prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
                 prop.put("content_showMetadata", sb.getConfigBool("search.result.show.metadata", true) ? 1 : 0);
                 prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
@@ -207,6 +211,7 @@ public class yacysearchitem {
                 prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
                 prop.put("content_showVocabulary", sb.getConfigBool("search.result.show.vocabulary", true) ? 1 : 0);
 
+                if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
                 prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
                 prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
                 prop.put("content_showMetadata_urlhash", urlhash);
@@ -239,6 +244,7 @@ public class yacysearchitem {
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(urlhash));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
             prop.put("content_date822", isAtomFeed ? ISO8601Formatter.FORMATTER.format(result.modified()) : HeaderFramework.formatRFC1123(result.modified()));
+            if (showEvent) prop.put("content_showEvent_date822", isAtomFeed ? ISO8601Formatter.FORMATTER.format(events[0]) : HeaderFramework.formatRFC1123(events[0]));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));            

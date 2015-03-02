@@ -213,6 +213,10 @@ public class URIMetadataNode extends SolrDocument {
         return getDate(CollectionSchema.last_modified);
     }
 
+    public Date[] datesInContent() {
+        return getDates(CollectionSchema.dates_in_content_dts);
+    }
+
     public DigestURL url() {
         return this.url;
     }
@@ -594,6 +598,15 @@ public class URIMetadataNode extends SolrDocument {
         if (x == null) return new Date(0);
         Date now = new Date();
         return x.after(now) ? now : x;
+    }
+
+    private Date[] getDates(CollectionSchema field) {
+        assert field.isMultiValued();
+        assert field.getType() == SolrType.date;
+        @SuppressWarnings("unchecked")
+        List<Date> x = (List<Date>) this.getFieldValue(field.getSolrFieldName());
+        if (x == null) return new Date[0];
+        return x.toArray(new Date[x.size()]);
     }
 
     private String getString(CollectionSchema field) {

@@ -5,6 +5,7 @@
       "code": "#[code]#",
       "description": "#[description-json]#",
       "pubDate": "#[date822]#",
+      #(showEvent)#::"eventDate": "#[date822]#",#(/showEvent)#
       "size": "#[size]#",
       "sizename": "#[sizename]#",
       "guid": "#[urlhash]#",
