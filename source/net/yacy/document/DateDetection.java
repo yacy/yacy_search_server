@@ -35,6 +35,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
 
 /**
@@ -156,6 +157,8 @@ public class DateDetection {
             Holidays.put("Karsamstag",                new Date[]{CONFORM.parse("2014/04/19"), CONFORM.parse("2015/04/04"), CONFORM.parse("2016/04/26")});
             Holidays.put("Ostersonntag",              new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27")});
             Holidays.put("Ostermontag",               new Date[]{CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
+            Holidays.put("Ostern",                    new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27"),
+                                                                 CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
             Holidays.put("Walpurgisnacht",            sameDayEveryYear(4, 30));
             Holidays.put("Tag der Arbeit",            sameDayEveryYear(5, 1));
             Holidays.put("Muttertag",                 new Date[]{CONFORM.parse("2014/05/11"), CONFORM.parse("2015/05/10"), CONFORM.parse("2016/05/08")});
@@ -184,6 +187,7 @@ public class DateDetection {
             Holidays.put("Silvester",                 sameDayEveryYear(12, 26));
             
             // English
+            Holidays.put("Eastern",                   Holidays.get("Ostern"));
             Holidays.put("New Year's Day",            Holidays.get("Neujahr"));
             Holidays.put("Epiphany",                  Holidays.get("Heilige Drei Könige"));
             Holidays.put("Valentine's Day",           Holidays.get("Valentinstag"));
@@ -482,12 +486,24 @@ public class DateDetection {
         
     }
     
+    private static final HashMap<String, Long> specialDayOffset = new HashMap<>();
+    static {
+        specialDayOffset.put("today", 0L); specialDayOffset.put("heute", 0L);
+        specialDayOffset.put("tomorrow", AbstractFormatter.dayMillis); specialDayOffset.put("morgen", AbstractFormatter.dayMillis);
+        specialDayOffset.put("dayaftertomorrow", 2 * AbstractFormatter.dayMillis); specialDayOffset.put("uebermorgen", 2 * AbstractFormatter.dayMillis);
+        specialDayOffset.put("yesterday", -AbstractFormatter.dayMillis); specialDayOffset.put("gestern", -AbstractFormatter.dayMillis);
+    }
+    
     /**
      * get all dates in the text
      * @param text
      * @return a set of dates, ordered by time. first date in the ordered set is the oldest time.
      */
     public static LinkedHashSet<Date> parse(String text) {
+        Long offset;
+        if ((offset = specialDayOffset.get(text)) != null) {
+            LinkedHashSet<Date> dates = new LinkedHashSet<>(); dates.add(new Date((System.currentTimeMillis() / AbstractFormatter.dayMillis) * AbstractFormatter.dayMillis + offset.longValue())); return dates;
+        }
         LinkedHashSet<Date> dates = parseRawDate(text);
         for (Map.Entry<Pattern, Date[]> entry: HolidayPattern.entrySet()) {
             if (entry.getKey().matcher(text).matches()) {
