@@ -223,6 +223,12 @@ public enum WebgraphSchema implements SchemaDeclaration {
     }
 
     @Override
+    public final void add(final SolrInputDocument doc, final Date[] value) {
+        assert this.isMultiValued();
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    @Override
     public final void add(final SolrInputDocument doc, final String[] value) {
         assert this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);

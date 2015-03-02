@@ -1,6 +1,5 @@
-    "navigation": [#(nav-filetypes)#::
-    {
-      "facetname": "filetypes",
+    "navigation": {#(nav-dates)#::
+    "dates": {
       "displayname": "Filetype",
       "type": "String",
       "min": "0",
@@ -11,9 +10,20 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
+    },#(/nav-dates)##(nav-filetypes)#::
+    "filetypes": {
+      "displayname": "Filetype",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
     },#(/nav-filetypes)##(nav-protocols)#::
-    {
-      "facetname": "protocols",
+    "protocols": {
       "displayname": "Protocol",
       "type": "String",
       "min": "0",
@@ -25,8 +35,7 @@
 #{/element}#
       ]
     },#(/nav-protocols)##(nav-domains)#::
-    {
-      "facetname": "domains",
+    "domains": {
       "displayname": "Domains",
       "type": "String",
       "min": "0",
@@ -38,8 +47,7 @@
 #{/element}#
       ]
     },#(/nav-domains)##(nav-namespace)#::
-    {
-      "facetname": "namespace",
+    "namespace": {
       "displayname": "Name Space",
       "type": "String",
       "min": "0",
@@ -51,8 +59,7 @@
 #{/element}#
       ]
     },#(/nav-namespace)##(nav-authors)#::
-    {
-      "facetname": "authors",
+    "authors": {
       "displayname": "Authors",
       "type": "String",
       "min": "0",
@@ -64,8 +71,7 @@
 #{/element}#
       ]
     },#(/nav-authors)##(nav-collections)#::
-    {
-      "facetname": "collections",
+    "collections": {
       "displayname": "Collections",
       "type": "String",
       "min": "0",
@@ -77,8 +83,7 @@
 #{/element}#
       ]
     },#(/nav-collections)##{nav-vocabulary}#
-    {
-      "facetname": "#[navname]#",
+    "#[navname]#": {
       "displayname": "#[navname]#",
       "type": "String",
       "min": "0",
@@ -90,8 +95,7 @@
 #{/element}#
       ]
     },#{/nav-vocabulary}##(nav-topics)#{}::
-    {
-      "facetname": "topics",
+    "topics": {
       "displayname": "Topics",
       "type": "String",
       "min": "0",
@@ -103,5 +107,5 @@
 #{/element}#
       ]
     }#(/nav-topics)#
-    ],
+    },
     "totalResults": "#[num-results_totalcount]#"

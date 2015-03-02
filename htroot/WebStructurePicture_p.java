@@ -158,7 +158,7 @@ public class WebStructurePicture_p {
         final double radius = 1.0 / (1 << nextlayer);
         final WebStructureGraph.StructureEntry sr = structure.outgoingReferences(pivotnode.getKey());
         final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
-        ClusteredScoreMap<String> next0 = new ClusteredScoreMap<String>();
+        ClusteredScoreMap<String> next0 = new ClusteredScoreMap<String>(false);
         for (Map.Entry<String, Integer> entry: next.entrySet()) next0.set(entry.getKey(), entry.getValue());
         // first set points to next hosts
         final List<Map.Entry<String, String>> targets = new ArrayList<Map.Entry<String, String>>();

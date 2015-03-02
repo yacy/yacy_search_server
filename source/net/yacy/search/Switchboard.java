@@ -2753,7 +2753,8 @@ public final class Switchboard extends serverSwitch {
                 new Condenser(
                         in.documents[i], in.queueEntry.profile().scraper(), in.queueEntry.profile().indexText(),
                         in.queueEntry.profile().indexMedia(),
-                        LibraryProvider.dymLib, true, this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_sxt));
+                        LibraryProvider.dymLib, true,
+                        this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts));
 
             // update image result list statistics
             // its good to do this concurrently here, because it needs a DNS lookup
@@ -3190,8 +3191,8 @@ public final class Switchboard extends serverSwitch {
                                     throw new Parser.Failure("indexing is denied", url);
                                 }
                                 final Condenser condenser = new Condenser(
-                                        document, null, true, true, LibraryProvider.dymLib, true, 
-                                        Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_sxt));
+                                        document, null, true, true, LibraryProvider.dymLib, true,
+                                        Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts));
                                 ResultImages.registerImages(url, document, true);
                                 Switchboard.this.webStructure.generateCitationReference(url, document);
                                 storeDocumentIndex(

@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -496,30 +495,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (firstSeen > 0 && firstSeen < lastModified.getTime()) lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
             add(doc, CollectionSchema.last_modified, lastModified);
         }
-        if (allAttr ||
-                contains(CollectionSchema.dates_in_content_sxt) || contains(CollectionSchema.dates_in_content_count_i) ||
-                contains(CollectionSchema.date_in_content_min_dt) || contains(CollectionSchema.date_in_content_max_dt)) {
+        if (allAttr || contains(CollectionSchema.dates_in_content_dts) || contains(CollectionSchema.dates_in_content_count_i)) {
             LinkedHashSet<Date> dates_in_content = condenser.dates_in_content;
             if (allAttr || contains(CollectionSchema.dates_in_content_count_i)) {
                 add(doc, CollectionSchema.dates_in_content_count_i, dates_in_content.size());
             }
-            if (dates_in_content.size() > 0) {
-                if (allAttr || contains(CollectionSchema.dates_in_content_sxt)) {
-                    String[] dates = new String[dates_in_content.size()];   
-                    int i = 0; for (Date d: dates_in_content) dates[i++] = org.apache.solr.schema.TrieDateField.formatExternal(d);
-                    add(doc, CollectionSchema.dates_in_content_sxt, dates);
-                }
-                // order the dates to get the oldest and youngest
-                TreeSet<Date> ordered_dates = new TreeSet<>();
-                ordered_dates.addAll(dates_in_content);
-                if (allAttr || contains(CollectionSchema.date_in_content_min_dt)) {
-                    Date date_in_content_min_dt = ordered_dates.iterator().next();
-                    add(doc, CollectionSchema.date_in_content_min_dt, date_in_content_min_dt);
-                }
-                if (allAttr || contains(CollectionSchema.date_in_content_max_dt)) {
-                    Date date_in_content_max_dt = ordered_dates.descendingIterator().next();
-                    add(doc, CollectionSchema.date_in_content_max_dt, date_in_content_max_dt);
-                }
+            if (dates_in_content.size() > 0 && (allAttr || contains(CollectionSchema.dates_in_content_dts))) {
+                add(doc, CollectionSchema.dates_in_content_dts, dates_in_content.toArray(new Date[dates_in_content.size()]));
             }
         }
         if (allAttr || contains(CollectionSchema.keywords)) {
@@ -1085,7 +1067,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             collection1hosts = hostfacet.get(CollectionSchema.host_s.getSolrFieldName());
         } catch (final IOException e2) {
             ConcurrentLog.logException(e2);
-            collection1hosts = new ClusteredScoreMap<String>();
+            collection1hosts = new ClusteredScoreMap<String>(true);
         }
 
         postprocessingActivity = "create ranking map";
@@ -1173,7 +1155,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (collection1hosts.size() != countcheck) ConcurrentLog.warn("CollectionConfiguration", "ambiguous host count: expected=" + collection1hosts.size() + ", counted=" + countcheck);
         } catch (final IOException e2) {
             ConcurrentLog.logException(e2);
-            collection1hosts = new ClusteredScoreMap<String>();
+            collection1hosts = new ClusteredScoreMap<String>(true);
         }
         
         // process all documents at the webgraph for the outgoing links of this document
@@ -1192,7 +1174,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 webgraphhosts = hostfacet.get(WebgraphSchema.source_host_s.getSolrFieldName());
             } catch (final IOException e2) {
                 ConcurrentLog.logException(e2);
-                webgraphhosts = new ClusteredScoreMap<String>();
+                webgraphhosts = new ClusteredScoreMap<String>(true);
             }
             try {
                 final long start = System.currentTimeMillis();

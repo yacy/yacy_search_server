@@ -154,7 +154,7 @@ public class Evaluation {
          * @return a list of subject names that match with the element
          */
         public ClusteredScoreMap<String> match(final Element element, final CharSequence content) {
-            final ClusteredScoreMap<String> subjects = new ClusteredScoreMap<String>();
+            final ClusteredScoreMap<String> subjects = new ClusteredScoreMap<String>(false);
             final List<Attribute> patterns = this.elementMatcher.get(element);
             if (patterns == null) return subjects;
             for (final Attribute attribute: patterns) {
@@ -224,7 +224,7 @@ public class Evaluation {
             newScores = pattern.match(element, content);
             oldScores = getScores(pattern.getName());
             if (oldScores == null) {
-                oldScores = new ClusteredScoreMap<String>();
+                oldScores = new ClusteredScoreMap<String>(false);
                 this.modelMap.put(pattern.getName(), oldScores);
             }
             oldScores.inc(newScores);

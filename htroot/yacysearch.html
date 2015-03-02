@@ -92,9 +92,9 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 <form class="search small" name="searchform" action="" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;max-width:500px;">
   
   <div class="input-group">
-    <input type="text" class="form-control searchinput typeahead" size="40" maxlength="200" placeholder="#[promoteSearchPageGreeting]#" name="query" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" id="search" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
+    <input name="query" id="search" type="text" class="form-control searchinput typeahead" size="40" maxlength="200" placeholder="#[promoteSearchPageGreeting]#" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
     <div class="input-group-btn">
-       <button id="Enter" class="btn btn-default" type="submit">search</button>
+       <button id="Enter" name="Enter" class="btn btn-default" type="submit">search</button>
     </div>
   </div>
     <input type="hidden" name="contentdom" id="contentdom" value="#[contentdom]#" />
@@ -174,6 +174,9 @@ document.getElementById("Enter").innerHTML = "search again";
   <p class="urlinfo" style="clear:left;">Map (c) by <a href="http://www.openstreetmap.org">OpenStreetMap</a> and contributors, CC-BY-SA</p>
   </div>
 #(/geoinfo)#
+
+<!-- show date histogram if date navigation is active -->
+<div id="datehistogram"></div>
 
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>#(/resultTable)#

@@ -27,6 +27,7 @@
 package net.yacy.search.query;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -70,9 +71,13 @@ import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.FacetParams;
+import org.apache.solr.schema.TrieDateField;
 
 public final class QueryParams {
 
+    public static int FACETS_STANDARD_MAXCOUNT = 30;
+    public static int FACETS_DATE_MAXCOUNT = 730;
+    
     public enum Searchdom {
         LOCAL, CLUSTER, GLOBAL;
 
@@ -92,13 +97,13 @@ public final class QueryParams {
         defaultfacetfields.put("hosts", CollectionSchema.host_s);
         defaultfacetfields.put("protocol", CollectionSchema.url_protocol_s);
         defaultfacetfields.put("filetype", CollectionSchema.url_file_ext_s);
+        defaultfacetfields.put("date", CollectionSchema.dates_in_content_dts);
         defaultfacetfields.put("authors", CollectionSchema.author_sxt);
         defaultfacetfields.put("collections", CollectionSchema.collection_sxt);
         defaultfacetfields.put("language", CollectionSchema.language_s);
         //missing: namespace
     }
     
-    private static final int defaultmaxfacets = 30;
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     private static final Pattern matchnothing_pattern = Pattern.compile("");
@@ -137,7 +142,6 @@ public final class QueryParams {
     protected boolean filterfailurls, filterscannerfail;
     protected double lat, lon, radius;
     public LinkedHashSet<String> facetfields;
-    public int maxfacets;
     private SolrQuery cachedQuery;
     private CollectionConfiguration solrSchema;
 
@@ -252,7 +256,6 @@ public final class QueryParams {
                 this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
             }
         }
-        this.maxfacets = defaultmaxfacets;
         this.cachedQuery = null;
     }
 
@@ -443,16 +446,32 @@ public final class QueryParams {
         if (getFacets && this.facetfields.size() > 0) {
             params.setFacet(true);
             params.setFacetMinCount(1);
-            params.setFacetLimit(this.maxfacets);
+            params.setFacetLimit(FACETS_STANDARD_MAXCOUNT);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
             params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
-            for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field);
+            for (String field: this.facetfields) params.addFacetField(field); // params.addFacetField("{!ex=" + field + "}" + field);
+            if (this.facetfields.contains(CollectionSchema.dates_in_content_dts.name())) {
+                params.setParam("facet.range", CollectionSchema.dates_in_content_dts.name());
+                @SuppressWarnings({ "static-access", "deprecation" })
+                String start = TrieDateField.formatExternal(new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L * 3));
+                @SuppressWarnings({ "static-access", "deprecation" })
+                String end = TrieDateField.formatExternal(new Date(System.currentTimeMillis() + 1000L * 60L * 60L * 24L * 3));
+                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.start", start);
+                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.end", end);
+                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.gap", "+1DAY");
+                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.sort", "index");
+                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.limit", Integer.toString(FACETS_DATE_MAXCOUNT)); // the year constraint should cause that limitation already
+            }
+            //for (String k: params.getParameterNames()) {ArrayList<String> al = new ArrayList<>(); for (String s: params.getParams(k)) al.add(s); System.out.println("Parameter: " + k + "=" + al.toString());}
+            //http://localhost:8090/solr/collection1/select?q=*:*&rows=0&facet=true&facet.field=dates_in_content_dts&f.dates_in_content_dts.facet.limit=730&f.dates_in_content_dts.facet.sort=index
         } else {
             params.setFacet(false);
         }
         params.setFields("*", "score"); // we need the score for post-ranking
         return params;
     }
+    
+    long year = 1000L * 60L * 60L * 24L * 365L;
     
     private String getFacets() {
         
@@ -500,8 +519,22 @@ public final class QueryParams {
             fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.modifier.collection));
         }
         
-        if (this.modifier.on != null && this.modifier.on.length() > 0 && this.solrSchema.contains(CollectionSchema.dates_in_content_sxt)) {
-            fq.append(" AND ").append(QueryModifier.parseOnExpression(this.modifier.on));
+        if (this.solrSchema.contains(CollectionSchema.dates_in_content_dts)) {
+            if (this.modifier.on != null && this.modifier.on.length() > 0) {
+                fq.append(" AND ").append(QueryModifier.parseOnExpression(this.modifier.on));
+            }
+            
+            if (this.modifier.from != null && this.modifier.from.length() > 0 && (this.modifier.to == null || this.modifier.to.equals("*"))) {
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.modifier.from, null));
+            }
+            
+            if ((this.modifier.from == null || this.modifier.from.equals("*")) && this.modifier.to != null && this.modifier.to.length() > 0) {
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(null, this.modifier.to));
+            }
+            
+            if (this.modifier.from != null && this.modifier.from.length() > 0 && this.modifier.to != null && this.modifier.to.length() > 0) {
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.modifier.from, this.modifier.to));
+            }
         }
         
         if (this.modifier.protocol != null) {

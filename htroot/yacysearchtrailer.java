@@ -1,12 +1,7 @@
-// yacysearchitem.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 28.08.2007 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
 //
 // LICENSE
 //
@@ -24,10 +19,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.text.ParseException;
 import java.util.AbstractMap;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+
+import org.apache.solr.schema.TrieDateField;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -35,6 +34,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.document.DateDetection;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.graphics.ProfilingGraph;
@@ -55,6 +55,7 @@ public class yacysearchtrailer {
     private static final int TOPWORDS_MINSIZE = 8;
     private static final int TOPWORDS_MAXSIZE = 22;
 
+    @SuppressWarnings({ "deprecation", "static-access" })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -105,12 +106,10 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.namespaceNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 10 && navigatorIterator.hasNext()) {
+            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = theSearch.namespaceNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
+                if (count == 0) break;
                 nav = "inurl%3A" + name;
                 if (!theSearch.query.modifier.toString().contains("inurl:"+name)) {
                     pos++;
@@ -131,10 +130,7 @@ public class yacysearchtrailer {
             prop.put("nav-namespace_element", i);
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0)
-             {
-                prop.put("nav-namespace", 0); // this navigation is not useful
-            }
+            if (pos == 1 && neg == 0) prop.put("nav-namespace", 0); // this navigation is not useful
         }
 
         // host navigators
@@ -146,12 +142,10 @@ public class yacysearchtrailer {
             navigatorIterator = hostNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 10 && navigatorIterator.hasNext()) {
+            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
+                if (count == 0) break;
                 nav = "site%3A" + name;
                 if (theSearch.query.modifier.sitehost == null || !theSearch.query.modifier.sitehost.contains(name)) {
                     pos++;                    
@@ -172,10 +166,7 @@ public class yacysearchtrailer {
             prop.put("nav-domains_element", i);
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0)
-             {
-                prop.put("nav-domains", 0); // this navigation is not useful
-            }
+            if (pos == 1 && neg == 0) prop.put("nav-domains", 0); // this navigation is not useful
         }
 
         // language navigators
@@ -187,12 +178,10 @@ public class yacysearchtrailer {
             navigatorIterator = languageNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 10 && navigatorIterator.hasNext()) {
+            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = languageNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
+                if (count == 0) break;
                 nav = "%2Flanguage%2F" + name;
                 if (theSearch.query.modifier.language == null || !theSearch.query.modifier.language.contains(name)) {
                     pos++;
@@ -214,10 +203,7 @@ public class yacysearchtrailer {
             prop.put("nav-languages_element", i);
             i--;
             prop.put("nav-languages_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0)
-             {
-                prop.put("nav-languages", 0); // this navigation is not useful
-            }
+            if (pos == 1 && neg == 0) prop.put("nav-languages", 0); // this navigation is not useful
         }
 
         // author navigators
@@ -228,12 +214,10 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.authorNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 10 && navigatorIterator.hasNext()) {
+            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.authorNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
+                if (count == 0) break;
                 nav = (name.indexOf(' ', 0) < 0) ? "author%3A" + name : "author%3A%28" + name.replace(" ", "+") + "%29";
                 if (theSearch.query.modifier.author == null || !theSearch.query.modifier.author.contains(name)) {
                     pos++;
@@ -254,8 +238,7 @@ public class yacysearchtrailer {
             prop.put("nav-authors_element", i);
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0)
-             {
+            if (pos == 1 && neg == 0) {
                 prop.put("nav-authors", 0); // this navigation is not useful
             }
         }
@@ -268,12 +251,10 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.collectionNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            while (i < 10 && navigatorIterator.hasNext()) {
+            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.collectionNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
+                if (count == 0) break;
                 nav = (name.indexOf(' ', 0) < 0) ? "collection%3A" + name : "collection%3A%28" + name.replace(" ", "+") + "%29";
                 if (theSearch.query.modifier.collection == null || !theSearch.query.modifier.collection.contains(name)) {
                     pos++;
@@ -294,10 +275,7 @@ public class yacysearchtrailer {
             prop.put("nav-collections_element", i);
             i--;
             prop.put("nav-collections_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0)
-             {
-                prop.put("nav-collections", 0); // this navigation is not useful
-            }
+            if (pos == 1 && neg == 0) prop.put("nav-collections", 0); // this navigation is not useful
         }
 
         // topics navigator
@@ -360,12 +338,10 @@ public class yacysearchtrailer {
             if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) {theSearch.query.modifier.remove("/" + oldProtocolModifier); theSearch.query.modifier.remove(oldProtocolModifier);}
             theSearch.query.modifier.protocol = "";
             theSearch.query.getQueryGoal().query_original = oldQuery.replaceAll(" /https", "").replaceAll(" /http", "").replaceAll(" /ftp", "").replaceAll(" /smb", "").replaceAll(" /file", "");
-            while (i < 10 && navigatorIterator.hasNext()) {
+            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.protocolNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
+                if (count == 0) break;
                 visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
                 if (oldProtocolModifier == null || !oldProtocolModifier.equals(name)) {
@@ -391,10 +367,60 @@ public class yacysearchtrailer {
             prop.put("nav-protocols_element", i);
             i--;
             prop.put("nav-protocols_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0)
-             {
-                prop.put("nav-protocols", 0); // this navigation is not useful
+            if (pos == 1 && neg == 0) prop.put("nav-protocols", 0); // this navigation is not useful
+        }
+
+        // date navigators
+        if (theSearch.dateNavigator == null || theSearch.dateNavigator.isEmpty()) {
+            prop.put("nav-dates", 0);
+        } else {
+            prop.put("nav-dates", 1);
+            navigatorIterator = theSearch.dateNavigator.iterator(); // this iterator is different as it iterates by the key order (which is a date order)
+            int i = 0, pos = 0, neg = 0;
+            long dx = -1;
+            long dayms = 1000L * 60L * 60L * 24L;
+            Date fromconstraint = theSearch.getQuery().modifier.from == null ? null : DateDetection.parseLine(theSearch.getQuery().modifier.from);
+            if (fromconstraint == null) fromconstraint = new Date(System.currentTimeMillis() - 365 * dayms);
+            Date toconstraint = theSearch.getQuery().modifier.to == null ? null : DateDetection.parseLine(theSearch.getQuery().modifier.to);
+            if (toconstraint == null) toconstraint = new Date(System.currentTimeMillis() + 365 * dayms);
+            while (i < QueryParams.FACETS_DATE_MAXCOUNT && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next().trim();
+                if (name.length() < 10) continue;
+                count = theSearch.dateNavigator.get(name);
+                String shortname = name.substring(0, 10);
+                long d;
+                Date dd;
+                try {dd = TrieDateField.parseDate(name); d = dd.getTime();} catch (ParseException e) {continue;}
+                if (fromconstraint != null && dd.before(fromconstraint)) continue;
+                if (toconstraint != null && dd.after(toconstraint)) break;
+                if (dx > 0) {
+                    while (d - dx > dayms) {
+                        dx += dayms;
+                        String sn = TrieDateField.formatExternal(new Date(dx)).substring(0, 10);
+                        prop.put("nav-dates_element_" + i + "_on", 0);
+                        prop.put(fileType, "nav-dates_element_" + i + "_name", sn);
+                        prop.put("nav-dates_element_" + i + "_count", 0);
+                        prop.put("nav-dates_element_" + i + "_nl", 1);
+                        i++;
+                    }
+                }
+                dx = d;
+                if (theSearch.query.modifier.on == null || !theSearch.query.modifier.on.contains(shortname) ) {
+                    pos++;
+                    prop.put("nav-dates_element_" + i + "_on", 1);
+                } else {
+                    neg++;                    
+                    prop.put("nav-dates_element_" + i + "_on", 0);
+                }
+                prop.put(fileType, "nav-dates_element_" + i + "_name", shortname);
+                prop.put("nav-dates_element_" + i + "_count", count);
+                prop.put("nav-dates_element_" + i + "_nl", 1);
+                i++;
             }
+            prop.put("nav-dates_element", i);
+            i--;
+            prop.put("nav-dates_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0) prop.put("nav-dates", 0); // this navigation is not useful
         }
 
         // filetype navigators
@@ -406,12 +432,10 @@ public class yacysearchtrailer {
             int i = 0, pos = 0, neg = 0;
             String nav;
             boolean visible = false;
-            while (i < 10 && navigatorIterator.hasNext()) {
+            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.filetypeNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
+                if (count == 0) break;
                 visible = visible || Classification.isMediaExtension(name) || "pdf,doc,docx".indexOf(name) >= 0;
                 nav = "filetype%3A" + name;
                 if (theSearch.query.modifier.filetype == null || !theSearch.query.modifier.filetype.contains(name) ) {
@@ -433,10 +457,7 @@ public class yacysearchtrailer {
             prop.put("nav-filetypes_element", i);
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0)
-             {
-                prop.put("nav-filetypes", 0); // this navigation is not useful
-            }
+            if (pos == 1 && neg == 0) prop.put("nav-filetypes", 0); // this navigation is not useful
         }
 
         // vocabulary navigators
@@ -455,9 +476,7 @@ public class yacysearchtrailer {
                 while (i < 20 && navigatorIterator.hasNext()) {
                     name = navigatorIterator.next();
                     count = ve.getValue().get(name);
-                    if (count == 0) {
-                        break;
-                    }
+                    if (count == 0) break;
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
                     if (!theSearch.query.modifier.toString().contains("/vocabulary/" + navname + "/" + name.replace(' ', '_'))) {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
@@ -509,10 +528,6 @@ public class yacysearchtrailer {
         prop.put("num-results_totalcount", theSearch.getResultCount());
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "bottomline", 0, 0), false);
         return prop;
-    }
-
-    private static final boolean on(final int pos, final int neg, final int maxlimit) {
-        return neg > 0 || (pos > 1 && pos <= maxlimit);
     }
 
 }

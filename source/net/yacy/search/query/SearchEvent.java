@@ -58,6 +58,7 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.Scanner;
+import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
@@ -148,6 +149,7 @@ public final class SearchEvent {
     public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
+    public final ScoreMap<String> dateNavigator; // a counter for file types
     public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
@@ -243,6 +245,7 @@ public final class SearchEvent {
         this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
         this.filetypeNavigator = navcfg.contains("filetype") ? new ConcurrentScoreMap<String>() : null;
+        this.dateNavigator = navcfg.contains("date") ? new ClusteredScoreMap<String>(true) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
@@ -834,6 +837,11 @@ public final class SearchEvent {
                 }
                 this.filetypeNavigator.inc(fcts);
             }
+        }
+
+        if (this.dateNavigator != null) {
+            fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
+            if (fcts != null) this.dateNavigator.inc(fcts);
         }
 
         if (this.languageNavigator != null) {

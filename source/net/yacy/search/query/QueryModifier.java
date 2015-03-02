@@ -26,6 +26,7 @@ import java.util.Date;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
+import org.apache.solr.schema.TrieDateField;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
@@ -39,7 +40,7 @@ import net.yacy.server.serverObjects;
 public class QueryModifier {
 
     private final StringBuilder modifier;
-    public String sitehost, sitehash, filetype, protocol, language, author, collection, on;
+    public String sitehost, sitehash, filetype, protocol, language, author, collection, on, from, to;
     
     public QueryModifier() {
         this.sitehash = null;
@@ -50,6 +51,8 @@ public class QueryModifier {
         this.author = null;
         this.collection = null;
         this.on = null;
+        this.from = null;
+        this.to = null;
         this.modifier = new StringBuilder(20);
     }
     
@@ -90,7 +93,7 @@ public class QueryModifier {
         
         // parse site
         final int sp = querystring.indexOf("site:", 0);
-        if ( sp >= 0 ) {
+        if (sp >= 0) {
             int ftb = querystring.indexOf(' ', sp);
             if ( ftb == -1 ) {
                 ftb = querystring.length();
@@ -114,13 +117,12 @@ public class QueryModifier {
         
         // parse author
         final int authori = querystring.indexOf("author:", 0);
-        if ( authori >= 0 ) {
+        if (authori >= 0) {
             // check if the author was given with single quotes or without
             final boolean quotes = (querystring.charAt(authori + 7) == '(');
             if ( quotes ) {
                 int ftb = querystring.indexOf(')', authori + 8);
-                if (ftb == -1) ftb = querystring.length() + 1;
-                this.author = querystring.substring(authori + 8, ftb);
+                this.author = querystring.substring(authori + 8, ftb == -1 ? querystring.length() : ftb);
                 querystring = querystring.replace("author:(" + this.author + ")", "");
                 add("author:(" + author + ")");
             } else {
@@ -129,33 +131,45 @@ public class QueryModifier {
                     ftb = querystring.length();
                 }
                 this.author = querystring.substring(authori + 7, ftb);
-                querystring = querystring.replace("author:" + this.author, "");
+                querystring = querystring.replace("author:" + this.author, "").replace("  ", " ").trim();
                 add("author:" + author);
             }
         }
         
         // parse collection
         final int collectioni = querystring.indexOf("collection:", 0);
-        if ( collectioni >= 0 ) {
+        if (collectioni >= 0) {
             int ftb = querystring.indexOf(' ', collectioni);
-            if ( ftb == -1 ) {
-                ftb = querystring.length();
-            }
-            this.collection = querystring.substring(collectioni + 11, ftb);
-            querystring = querystring.replace("collection:" + this.collection, "");
+            this.collection = querystring.substring(collectioni + 11, ftb == -1 ? querystring.length() : ftb);
+            querystring = querystring.replace("collection:" + this.collection, "").replace("  ", " ").trim();
             add("collection:" + this.collection);
         }
         
         // parse on-date
         final int oni = querystring.indexOf("on:", 0);
-        if ( oni >= 0 ) {
+        if (oni >= 0) {
             int ftb = querystring.indexOf(' ', oni);
-            if ( ftb == -1 ) {
-                ftb = querystring.length();
-            }
-            this.on = querystring.substring(oni + 3, ftb);
-            querystring = querystring.replace("on:" + this.on, "");
+            this.on = querystring.substring(oni + 3, ftb == -1 ? querystring.length() : ftb);
+            querystring = querystring.replace("on:" + this.on, "").replace("  ", " ").trim();
             add("on:" + this.on);
+        }
+        
+        // parse from-date
+        final int fromi = querystring.indexOf("from:", 0);
+        if (fromi >= 0) {
+            int ftb = querystring.indexOf(' ', fromi);
+            this.from = querystring.substring(fromi + 5, ftb == -1 ? querystring.length() : ftb);
+            querystring = querystring.replace("from:" + this.from, "").replace("  ", " ").trim();
+            add("from:" + this.from);
+        }
+        
+        // parse to-date
+        final int toi = querystring.indexOf("to:", 0);
+        if (toi >= 0) {
+            int ftb = querystring.indexOf(' ', toi);
+            this.to = querystring.substring(toi + 3, ftb == -1 ? querystring.length() : ftb);
+            querystring = querystring.replace("to:" + this.to, "").replace("  ", " ").trim();
+            add("to:" + this.to);
         }
 
         // parse language
@@ -255,8 +269,22 @@ public class QueryModifier {
             fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.collection));
         }
         
-        if (this.on != null && this.on.length() > 0 && fq.indexOf(CollectionSchema.dates_in_content_sxt.getSolrFieldName()) < 0) {
-            fq.append(" AND ").append(QueryModifier.parseOnExpression(this.on));
+        if (fq.indexOf(CollectionSchema.dates_in_content_dts.getSolrFieldName()) < 0) {
+            if (this.on != null && this.on.length() > 0) {
+                fq.append(" AND ").append(QueryModifier.parseOnExpression(this.on));
+            }
+            
+            if (this.from != null && this.from.length() > 0 && (this.to == null || this.to.equals("*"))) {
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.from, null));
+            }
+            
+            if ((this.from == null || this.from.equals("*")) && this.to != null && this.to.length() > 0) {
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(null, this.to));
+            }
+            
+            if (this.from != null && this.from.length() > 0 && this.to != null && this.to.length() > 0) {
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.from, this.to));
+            }
         }
         
         if (this.protocol != null && this.protocol.length() > 0 && fq.indexOf(CollectionSchema.url_protocol_s.getSolrFieldName()) < 0) {
@@ -317,13 +345,29 @@ public class QueryModifier {
     }
     
     public static String parseOnExpression(String onDescription) {
+        assert onDescription != null;
         Date onDate = DateDetection.parseLine(onDescription);
         StringBuilder filterQuery = new StringBuilder(20);
         if (onDate != null) {
-            filterQuery.append(CollectionSchema.dates_in_content_sxt.getSolrFieldName()).append(":\"").append(org.apache.solr.schema.TrieDateField.formatExternal(onDate)).append('\"'); 
+            @SuppressWarnings({ "deprecation", "static-access" })
+            String dstr = TrieDateField.formatExternal(onDate);
+            filterQuery.append(CollectionSchema.dates_in_content_dts.getSolrFieldName()).append(":[").append(dstr).append(" TO ").append(dstr).append(']'); 
         }
         return filterQuery.toString();
-
+    }
+    
+    public static String parseFromToExpression(String from, String to) {
+        Date fromDate = from == null || from.equals("*") ? null : DateDetection.parseLine(from);
+        Date toDate = to == null || to.equals("*") ? null : DateDetection.parseLine(to);
+        StringBuilder filterQuery = new StringBuilder(20);
+        if (fromDate != null && toDate != null) {
+            @SuppressWarnings({ "deprecation", "static-access" })
+            String dstrFrom = fromDate == null ? "*" : TrieDateField.formatExternal(fromDate);
+            @SuppressWarnings({ "deprecation", "static-access" })
+            String dstrTo = toDate == null ? "*" : TrieDateField.formatExternal(toDate);
+            filterQuery.append(CollectionSchema.dates_in_content_dts.getSolrFieldName()).append(":[").append(dstrFrom).append(" TO ").append(dstrTo).append(']'); 
+        }
+        return filterQuery.toString();
     }
     
 }

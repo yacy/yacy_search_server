@@ -26,6 +26,7 @@ package net.yacy.cora.sorting;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
@@ -40,8 +41,12 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
     private long gcount;
     private int encnt;
 
-    public ClusteredScoreMap()  {
-        this.map = new TreeMap<E, Long>();
+    /**
+     * create a sorted map where there is a choice between a hash map or a tree map for the key store
+     * @param sortedKeys if true, a tree map is used for key storage; in this case the iterator() returns a sorted list of keys; if sortedKey is set to false, a linked hash map is used which preserves the original key appearance order
+     */
+    public ClusteredScoreMap(boolean sortedKeys)  {
+        this.map = sortedKeys ? new TreeMap<E, Long>() : new LinkedHashMap<E, Long>();
         this.pam = new TreeMap<Long, E>();
         this.gcount = 0;
         this.encnt = 0;
@@ -345,7 +350,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
     public static void main(final String[] args) {
 
         System.out.println("Test for Score: start");
-        final ClusteredScoreMap<String> s = new ClusteredScoreMap<String>();
+        final ClusteredScoreMap<String> s = new ClusteredScoreMap<String>(false);
         long c = 0;
 
         // create cluster

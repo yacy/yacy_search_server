@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -347,8 +348,13 @@ public class HostQueue implements Balancer {
 
     @Override
     public boolean has(final byte[] urlhashb) {
-        for (Index depthStack: this.depthStacks.values()) {
-            if (depthStack.has(urlhashb)) return true;
+        for (int retry = 0; retry < 3; retry++) {
+            try {
+                for (Index depthStack: this.depthStacks.values()) {
+                    if (depthStack.has(urlhashb)) return true;
+                }
+                return false;
+            } catch (ConcurrentModificationException e) {}
         }
         return false;
     }

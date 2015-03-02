@@ -28,7 +28,6 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;

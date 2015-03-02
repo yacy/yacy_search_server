@@ -174,9 +174,46 @@
                     </div>
                   </fieldset>
                 </div>
+                
 
                 <!-- the search result -->
                 <div style="float: left;">
+                
+                
+                <input type="checkbox" name="search.navigation.date" value="true" #(search.navigation.date)#::checked="checked" #(/search.navigation.date)# /> Date Navigation
+<link rel="stylesheet" href="/env/morris.css">
+<script src="/js/raphael-min.js"></script>
+<script src="/js/morris.js"></script>
+<div id="graph" style="height:200px"></div>
+<script>
+var solr= $.getJSON("http://localhost:8090/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
+	dates_in_content_dts = data.facet_counts.facet_fields.dates_in_content_dts;
+	var parsed = [];
+    for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
+        var date = dates_in_content_dts[i];
+        var count = dates_in_content_dts[i + 1];
+        if (date && count) {parsed[parsed.length] = {x: date,y: count};};
+    };
+    if (parsed.length > 0) Morris.Bar({
+      element: 'graph',
+      data: parsed,
+      xkey: 'x',
+      ykeys: ['y'],
+      labels: ['number of documents about this date'],
+      yLabelFormat: function (y) { return y.toString() + ' docs'; },
+      barColors: function (row, series, type) {
+    	  var d = new Date(row.label);
+          if (d.getDay() === 6) return '#4aaf46'; //saturday
+          if (d.getDay() === 0) return '#4aaf46'; //sunday
+    	  return '#3574c0';
+      },
+      hideHover: 'false'
+    }).on('click', function(i, row) {
+    	console.log(i, row);
+    });
+});
+</script>
+
                   <fieldset>
                     <div class="searchresults">
                       <h4 class="linktitle">

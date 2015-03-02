@@ -32,8 +32,6 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Html2Image;
-import net.yacy.cora.util.JSONException;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;

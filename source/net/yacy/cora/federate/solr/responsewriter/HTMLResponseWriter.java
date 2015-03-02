@@ -45,6 +45,7 @@ import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
+import org.apache.solr.schema.TrieDateField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
@@ -217,12 +218,13 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         return kv;
     }
 
+    @SuppressWarnings({ "static-access", "deprecation" })
     private static String field2string(final FieldType type, final String value) {
         String typeName = type.getTypeName();
         if (typeName.equals(SolrType.bool.printName())) {
             return "F".equals(value) ? "false" : "true";
         } else if (typeName.equals(SolrType.date.printName())) {
-            return org.apache.solr.schema.TrieDateField.formatExternal(new Date(Long.parseLong(value)));
+            return TrieDateField.formatExternal(new Date(Long.parseLong(value)));
         }
         return value;
     }

@@ -58,7 +58,7 @@
         <div class="input-group">
           <input name="query" id="search" type="text" size="40" maxlength="80" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" class="form-control searchinput typeahead" />
           <div class="input-group-btn">
-            <button type="submit" id="Enter" class="btn btn-primary">Search</button>
+            <button id="Enter" name="Enter" class="btn btn-primary" type="submit">Search</button>
           </div>
         </div>
         <input type="hidden" name="verify" value="#[search.verify]#" />

@@ -1344,7 +1344,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     }
     		
     public static void main(final String[] args) {
-        final ScoreMap<Integer> s = new ClusteredScoreMap<Integer>();
+        final ScoreMap<Integer> s = new ClusteredScoreMap<Integer>(true);
         for ( int i = 0; i < 10000; i++ ) {
             final byte[] b = randomHash();
             s.inc(0xff & Base64Order.enhancedCoder.decodeByte(b[0]));

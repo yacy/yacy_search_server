@@ -235,9 +235,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.titles = new LinkedHashSet<String>();
         this.headlines = (List<String>[]) Array.newInstance(ArrayList.class, 6);
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
-        this.bold = new ClusteredScoreMap<String>();
-        this.italic = new ClusteredScoreMap<String>();
-        this.underline = new ClusteredScoreMap<String>();
+        this.bold = new ClusteredScoreMap<String>(false);
+        this.italic = new ClusteredScoreMap<String>(false);
+        this.underline = new ClusteredScoreMap<String>(false);
         this.li = new ArrayList<String>();
         this.content = new CharBuffer(MAX_DOCSIZE, 1024);
         this.htmlFilterEventListeners = new EventListenerList();

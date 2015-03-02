@@ -75,7 +75,7 @@ public final class ResultURLs {
     static {
         for (final EventOrigin origin: EventOrigin.values()) {
             resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
-            resultDomains.put(origin, new ClusteredScoreMap<String>());
+            resultDomains.put(origin, new ClusteredScoreMap<String>(true));
         }
     }
 

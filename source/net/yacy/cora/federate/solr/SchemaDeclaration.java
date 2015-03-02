@@ -59,6 +59,8 @@ public interface SchemaDeclaration {
 
     public void add(final SolrInputDocument doc, final long value);
 
+    public void add(final SolrInputDocument doc, final Date[] value);
+    
     public void add(final SolrInputDocument doc, final String[] value);
 
     public void add(final SolrInputDocument doc, final Integer[] value);

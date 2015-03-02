@@ -204,16 +204,16 @@ public class HostBrowser {
                 
                 // collect hosts from index
                 ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_QUERY, maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
-                if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
+                if (hostscore == null) hostscore = new ClusteredScoreMap<String>(true);
                 
                 // collect hosts from crawler
                 final Map<String, Integer[]> crawler = (authorized) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
                 
                 // collect the errorurls
                 Map<String, ReversibleScoreMap<String>> exclfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
-                ReversibleScoreMap<String> exclscore = exclfacets == null ? new ClusteredScoreMap<String>() : exclfacets.get(CollectionSchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> exclscore = exclfacets == null ? new ClusteredScoreMap<String>(true) : exclfacets.get(CollectionSchema.host_s.getSolrFieldName());
                 Map<String, ReversibleScoreMap<String>> failfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
-                ReversibleScoreMap<String> failscore = failfacets == null ? new ClusteredScoreMap<String>() : failfacets.get(CollectionSchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> failscore = failfacets == null ? new ClusteredScoreMap<String>(true) : failfacets.get(CollectionSchema.host_s.getSolrFieldName());
                 
                 int c = 0;
                 Iterator<String> i = hostscore.keys(false);

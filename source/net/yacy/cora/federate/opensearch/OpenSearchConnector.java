@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
@@ -41,7 +39,6 @@ import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.CollectionSchema;
-import org.apache.http.entity.mime.content.ContentBody;
 
 /**
  * Handling of queries to remote OpenSearch systems. Iterates to a list of

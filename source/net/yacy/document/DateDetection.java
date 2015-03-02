@@ -500,7 +500,7 @@ public class DateDetection {
     public static Date parseLine(String text) {
         Date d = null;
         try {d = CONFORM.parse(text);} catch (ParseException e) {}
-        if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {}
+        //if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {} // did not work well and fired for wrong formats; do not use
         if (d == null) try {d = GenericFormatter.FORMAT_RFC1123_SHORT.parse(text);} catch (ParseException e) {}
         if (d == null) try {d = GenericFormatter.FORMAT_ANSIC.parse(text);} catch (ParseException e) {}
             
