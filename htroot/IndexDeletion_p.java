@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
 
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
@@ -263,11 +264,11 @@ public class IndexDeletion_p {
     }
 
     private static long timeParser(final int number, final String unit) {
-        if ("year".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 365L;
-        if ("month".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 30L;
-        if ("day".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L;
-        if ("hour".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L;
-        if ("minute".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L;
+        if ("year".equals(unit)) return System.currentTimeMillis() - number * AbstractFormatter.normalyearMillis;
+        if ("month".equals(unit)) return System.currentTimeMillis() - number * AbstractFormatter.monthAverageMillis;
+        if ("day".equals(unit)) return System.currentTimeMillis() - number * AbstractFormatter.dayMillis;
+        if ("hour".equals(unit)) return System.currentTimeMillis() - number * AbstractFormatter.hourMillis;
+        if ("minute".equals(unit)) return System.currentTimeMillis() - number * AbstractFormatter.minuteMillis;
         return 0L;
     }
 

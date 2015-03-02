@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
@@ -165,7 +166,7 @@ public class Table_API_p {
                 Iterator<Row> ri = sb.tables.iterator(WorkTables.TABLE_API_NAME);
                 Row row;
                 Date now = new Date();
-                Date limit = new Date(now.getTime() - 1000L * 60L * 60L * 24L * days);
+                Date limit = new Date(now.getTime() - AbstractFormatter.dayMillis * days);
                 List<byte[]> pkl = new ArrayList<byte[]>();
                 while (ri.hasNext()) {
                     row = ri.next();

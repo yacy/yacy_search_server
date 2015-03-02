@@ -37,6 +37,7 @@ public abstract class AbstractFormatter implements DateFormatter {
     public final static long minuteMillis = 60 * secondMillis;
     public final static long hourMillis = 60 * minuteMillis;
     public final static long dayMillis = 24 * hourMillis;
+    public final static long monthAverageMillis = 30 * dayMillis;
     public final static long normalyearMillis = 365 * dayMillis;
     public final static long leapyearMillis = 366 * dayMillis;
 
@@ -49,5 +50,4 @@ public abstract class AbstractFormatter implements DateFormatter {
     public abstract String format(final Date date);
     @Override
     public abstract String format();
-    
 }

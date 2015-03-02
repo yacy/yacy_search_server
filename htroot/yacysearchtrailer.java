@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.apache.solr.schema.TrieDateField;
 
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -378,11 +379,10 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.dateNavigator.iterator(); // this iterator is different as it iterates by the key order (which is a date order)
             int i = 0, pos = 0, neg = 0;
             long dx = -1;
-            long dayms = 1000L * 60L * 60L * 24L;
             Date fromconstraint = theSearch.getQuery().modifier.from == null ? null : DateDetection.parseLine(theSearch.getQuery().modifier.from);
-            if (fromconstraint == null) fromconstraint = new Date(System.currentTimeMillis() - 365 * dayms);
+            if (fromconstraint == null) fromconstraint = new Date(System.currentTimeMillis() - AbstractFormatter.normalyearMillis);
             Date toconstraint = theSearch.getQuery().modifier.to == null ? null : DateDetection.parseLine(theSearch.getQuery().modifier.to);
-            if (toconstraint == null) toconstraint = new Date(System.currentTimeMillis() + 365 * dayms);
+            if (toconstraint == null) toconstraint = new Date(System.currentTimeMillis() + AbstractFormatter.normalyearMillis);
             while (i < QueryParams.FACETS_DATE_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 if (name.length() < 10) continue;
@@ -394,8 +394,8 @@ public class yacysearchtrailer {
                 if (fromconstraint != null && dd.before(fromconstraint)) continue;
                 if (toconstraint != null && dd.after(toconstraint)) break;
                 if (dx > 0) {
-                    while (d - dx > dayms) {
-                        dx += dayms;
+                    while (d - dx > AbstractFormatter.dayMillis) {
+                        dx += AbstractFormatter.dayMillis;
                         String sn = TrieDateField.formatExternal(new Date(dx)).substring(0, 10);
                         prop.put("nav-dates_element_" + i + "_on", 0);
                         prop.put(fileType, "nav-dates_element_" + i + "_name", sn);

@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
@@ -725,11 +726,11 @@ public class Crawler_p {
 
     private static Date timeParser(final boolean recrawlIfOlderCheck, final int number, final String unit) {
         if (!recrawlIfOlderCheck) return null;
-        if ("year".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 365L);
-        if ("month".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 30L);
-        if ("day".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L);
-        if ("hour".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L * 60L);
-        if ("minute".equals(unit)) return new Date(System.currentTimeMillis() - number * 1000L * 60L);
+        if ("year".equals(unit)) return new Date(System.currentTimeMillis() - number * AbstractFormatter.normalyearMillis);
+        if ("month".equals(unit)) return new Date(System.currentTimeMillis() - number * AbstractFormatter.monthAverageMillis);
+        if ("day".equals(unit)) return new Date(System.currentTimeMillis() - number * AbstractFormatter.dayMillis);
+        if ("hour".equals(unit)) return new Date(System.currentTimeMillis() - number * AbstractFormatter.hourMillis);
+        if ("minute".equals(unit)) return new Date(System.currentTimeMillis() - number * AbstractFormatter.minuteMillis);
         return null;
     }
 

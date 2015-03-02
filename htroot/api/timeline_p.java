@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
@@ -59,12 +60,12 @@ public final class timeline_p {
         if (period.length() > 0) {
             char c = period.charAt(period.length() - 1);
             long p = Long.parseLong(period.substring(0, period.length() - 1));
-                 if (c == 's') periodlength = p * 1000L;
-            else if (c == 'm') periodlength = p * 1000L * 60L;
-            else if (c == 'h') periodlength = p * 1000L * 60L * 60L;
-            else if (c == 'd') periodlength = p * 1000L * 60L * 60L * 24L;
-            else if (c == 'M') periodlength = p * 1000L * 60L * 60L * 24L * 30L;
-            else if (c == 'Y' || c == 'y') periodlength = p * 1000L * 60L * 60L * 24L * 365L;
+                 if (c == 's') periodlength = p * AbstractFormatter.secondMillis;
+            else if (c == 'm') periodlength = p * AbstractFormatter.minuteMillis;
+            else if (c == 'h') periodlength = p * AbstractFormatter.hourMillis;
+            else if (c == 'd') periodlength = p * AbstractFormatter.dayMillis;
+            else if (c == 'M') periodlength = p * AbstractFormatter.monthAverageMillis;
+            else if (c == 'Y' || c == 'y') periodlength = p * AbstractFormatter.normalyearMillis;
             else periodlength = 0;
         }
         final String[] data = CommonPattern.COMMA.split(post.get("data", ""));  // a string of word hashes that shall be searched and combined
