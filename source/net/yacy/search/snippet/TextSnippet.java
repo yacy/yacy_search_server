@@ -187,12 +187,17 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         
         if (!remainingHashes.isEmpty()) {
             // we did not find everything in the metadata, look further into the document itself.
-            
-            // first acquire the sentences:
-            String solrText = row.getText();
-            if (solrText != null && solrText.length() > 0) {
+
+            // first acquire the sentences (from description/abstract or text):
+            ArrayList<String> solrdesc = row.getDescription();
+            if (!solrdesc.isEmpty()) { // include description_txt (similar to solr highlighting config)
+                sentences = new ArrayList<StringBuilder>();
+                for (String s:solrdesc) sentences.add(new StringBuilder(s));
+            }
+            final String solrText = row.getText();
+            if (solrText != null && solrText.length() > 0) { // TODO: instead of join with desc, we could check if snippet already complete and skip further computation
                 // compute sentences from solr query
-                sentences = row.getSentences(pre);
+                if (sentences == null) sentences = row.getSentences(pre); else sentences.addAll(row.getSentences(pre));
             } else if (net.yacy.crawler.data.Cache.has(url.hash())) {
                 // get the sentences from the cache
                 final Request request = loader == null ? null : loader.request(url, true, reindexing);
