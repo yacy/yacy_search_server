@@ -25,7 +25,6 @@
 //if the shell's current path is HTROOT
 
 //import java.util.Iterator;
-import java.io.File;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
@@ -40,7 +39,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.RAMIndex;
 import net.yacy.kelondro.table.Table;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -52,16 +50,12 @@ public class PerformanceMemory_p {
 
     private static final long KB = 1024;
     private static final long MB = 1024 * KB;
-    private static Map<String, String> defaultSettings = null;
     
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         Switchboard sb = (Switchboard) env;
         
         final serverObjects prop = new serverObjects();
-        if (defaultSettings == null) {
-            defaultSettings = FileUtils.loadMap(new File(env.getAppPath(), "defaults/yacy.init"));
-        }
 
         prop.put("gc", "0");
         prop.put("autoreload.checked", "0");
