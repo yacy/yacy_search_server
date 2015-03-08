@@ -524,7 +524,7 @@ Default is to add the links to the local crawl queue \(your peer crawls the link
 add as global crawl job==als globaler Crawl hinzufügen
 
 opensearch load external search result list from active systems below==Lade externe Suchergebnisse von den gelisteten aktiven OpenSearch Systemen
-When using this heuristic, then every search request line is used for a call to listed opensearch systems until enough results to fill the current search page are available.==Wenn diese Heuristik genutzt wird, dann wird jede Suchanfragezeile für einen Aufruf der aufgelisteten OpenSearch Systeme bis genügend Resultate verfügbar sind, um die aktuelle Suchseite zu füllen.
+When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==Wenn diese Heuristik genutzt wird, dann wird jede neue Suchanfragezeile für einen Aufruf der aufgelisteten OpenSearch Systeme verwendet.
 20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 Resultate werden vom remote System genommen und simultan geladen, geparsed und sofort indexiert.
 To find out more about OpenSearch see==Um mehr über OpenSearch zu erfahren besuche
 #>OpenSearch.org<==>OpenSearch.org<

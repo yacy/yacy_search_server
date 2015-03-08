@@ -534,7 +534,7 @@ Default is to add the links to the local crawl queue \(your peer crawls the link
 add as global crawl job==Добавить как задачу глобального индексирования
 
 opensearch load external search result list from active systems below==Загрузка результатов внешнего поиска из списка активных систем ниже
-When using this heuristic, then every search request line is used for a call to listed opensearch systems until enough results to fill the current search page are available.==При использовании эвристики, каждый поисковый запрос используется для вызова доступных opensearch-систем.
+When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==При использовании эвристики, каждый поисковый запрос используется для вызова доступных opensearch-систем.
 20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 результатов берутся из удалённой системы,  загружаются одновременно, анализируются и индексируются сразу.
 To find out more about OpenSearch see==Для поиска информации об OpenSearch смотрите
 #>OpenSearch.org<==>OpenSearch.org<
