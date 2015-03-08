@@ -1233,9 +1233,18 @@ public final class Protocol {
             parts.put("result", UTF8.StringBody(result));
             parts.put("reason", UTF8.StringBody(reason));
             parts.put("wordh", UTF8.StringBody(wordhashes));
-            parts.put(
-                "lurlEntry",
-                UTF8.StringBody(((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
+            final String lurlstr;
+            if (entry == null) {
+                lurlstr = "";
+            } else { 
+                final ArrayList<String> ldesc = entry.getDescription();
+                if (ldesc.isEmpty()) {
+                    lurlstr = entry.toString();
+                } else { // add document abstract/description as snippet (remotely stored in description_txt)
+                    lurlstr = entry.toString(ldesc.get(0));
+                }
+            }
+            parts.put("lurlEntry", UTF8.StringBody(crypt.simpleEncode(lurlstr, salt)));
             // send request
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"), 10000, target.getHexHash() + ".yacyh", parts);
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000);
