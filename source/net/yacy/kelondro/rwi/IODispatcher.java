@@ -69,8 +69,8 @@ public class IODispatcher extends Thread {
     }
 
     public void terminate() {
+        this.terminate = true; // asure current run() loop will termiate
         if (this.termination != null && this.controlQueue != null && isAlive()) {
-            this.terminate = true;
             this.controlQueue.release();
             // await termination
             try {
