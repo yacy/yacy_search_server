@@ -73,7 +73,7 @@ public class LibraryProvider {
         GEON0( "geon0", "http://download.geonames.org/export/dump/cities1000.zip" ),
         GEON1( "geon1", "http://download.geonames.org/export/dump/cities5000.zip" ),
         GEON2( "geon2", "http://download.geonames.org/export/dump/cities15000.zip" ),
-        DRW0( "drw0", "http://www.ids-mannheim.de/kl/derewo/derewo-v-100000t-2009-04-30-0.1.zip" ),
+        DRW0( "drw0", "http://www1.ids-mannheim.de/fileadmin/kl/derewo/derewo-v-100000t-2009-04-30-0.1.zip" ),
         PND0( "pnd0", "http://downloads.dbpedia.org/3.7-i18n/de/pnd_de.nt.bz2" );
 
         public String nickname, url, filename;
