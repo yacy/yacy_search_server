@@ -141,6 +141,30 @@ public class MultiProtocolURLTest {
 
         }
     }
+
+    /**
+     * Test of toNormalform method, of class MultiProtocolURL.
+     */
+    @Test
+    public void testToNormalform() throws Exception {
+        // some test url/uri with problems in the past
+        String[][] testStrings = new String[][]{
+            // teststring , expectedresult
+            new String[]{"http://www.heise.de/newsticker/thema/%23saukontrovers", "http://www.heise.de/newsticker/thema/%23saukontrovers"}, // http://mantis.tokeek.de/view.php?id=519
+            new String[]{"http://www.heise.de/newsticker/thema/#saukontrovers", "http://www.heise.de/newsticker/thema/"}
+        };
+
+        for (String[] testString : testStrings) {
+            // desired conversion result
+            System.out.print("orig uri: " + testString[0]);
+            String shouldBe = testString[1];
+            // conversion result
+            String resolvedHost = new MultiProtocolURL(testString[0]).toNormalform(true);
+            // test if equal
+            assertEquals(shouldBe, resolvedHost);
+            System.out.println(" -> " + resolvedHost);
+        }
+    }
 }
 
 

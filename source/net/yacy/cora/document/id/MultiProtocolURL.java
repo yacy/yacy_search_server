@@ -124,6 +124,15 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         this.port = url.port;
     }
 
+    /**
+     * Create MultiProtocolURL
+     *
+     * decoding exception: if url string contains http url with char '%' the url string must be url encoded (percent-escaped) before
+     * as internal encoding is skipped if url string contains '%'.
+     *
+     * @param url '%' char url encoded before
+     * @throws MalformedURLException
+     */
     public MultiProtocolURL(String url) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
 
@@ -133,8 +142,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         // identify protocol
         assert (url != null);
         url = url.trim();
-        url = UTF8.decodeURL(url); // normalization here
-        //url = patternSpace.matcher(url).replaceAll(" ");
+        
         if (url.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             url = "http:" + url;
@@ -195,6 +203,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             identSearchpart();
             escape();
         } else {
+            url = UTF8.decodeURL(url); // normalization here
             // this is not a http or ftp url
             if (this.protocol.equals("mailto")) {
                 // parse email url
