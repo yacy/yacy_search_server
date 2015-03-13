@@ -86,7 +86,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
     }
 
-    // class variables
+    // class variables (the variable content is stored in encoded/escaped form)
     protected final String protocol, userInfo;
     protected       String host, path, searchpart, anchor;
     protected       int port;
@@ -163,8 +163,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         int p = url.indexOf("://");
         if (p < 0) {
-            url = "http://" + url;
-            p = 4;
+            if (url.startsWith("mailto:")) {
+                p = 6;
+            } else {
+                url = "http://" + url;
+                p = 4;
+            }
         }
         this.protocol = url.substring(0, p).toLowerCase().trim().intern();
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
