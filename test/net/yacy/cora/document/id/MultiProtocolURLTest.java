@@ -151,7 +151,8 @@ public class MultiProtocolURLTest {
         String[][] testStrings = new String[][]{
             // teststring , expectedresult
             new String[]{"http://www.heise.de/newsticker/thema/%23saukontrovers", "http://www.heise.de/newsticker/thema/%23saukontrovers"}, // http://mantis.tokeek.de/view.php?id=519
-            new String[]{"http://www.heise.de/newsticker/thema/#saukontrovers", "http://www.heise.de/newsticker/thema/"}
+            new String[]{"http://www.heise.de/newsticker/thema/#saukontrovers", "http://www.heise.de/newsticker/thema/"},
+            new String[]{"http://www.liferay.com/community/wiki/-/wiki/Main/Wiki+Portlet", "http://www.liferay.com/community/wiki/-/wiki/Main/Wiki+Portlet"} // http://mantis.tokeek.de/view.php?id=559
         };
 
         for (String[] testString : testStrings) {
@@ -159,10 +160,10 @@ public class MultiProtocolURLTest {
             System.out.print("orig uri: " + testString[0]);
             String shouldBe = testString[1];
             // conversion result
-            String resolvedHost = new MultiProtocolURL(testString[0]).toNormalform(true);
+            String resultUrl = new MultiProtocolURL(testString[0]).toNormalform(true);
             // test if equal
-            assertEquals(shouldBe, resolvedHost);
-            System.out.println(" -> " + resolvedHost);
+            assertEquals(shouldBe, resultUrl);
+            System.out.println(" -> " + resultUrl);
         }
     }
 }

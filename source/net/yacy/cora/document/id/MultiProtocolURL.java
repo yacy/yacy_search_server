@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -73,6 +74,46 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
     private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
     //private static final Pattern patternSpace = Pattern.compile("%20");
+
+    private final static BitSet UNRESERVED_RFC1738 = new BitSet(256); // register unreserved chars (never escaped in url)
+    private final static BitSet UNRESERVED_PATH    = new BitSet(256); // register unreserved chars for path part (not escaped in path)
+    static {
+        // unreserved characters (chars not to escape in url)
+        for (int i = 'A'; i <= 'Z'; i++) { // hialpha RFC1738 Section 5
+            UNRESERVED_RFC1738.set(i);
+        }
+        for (int i = 'a'; i <= 'z'; i++) { // lowalpha RFC1738 Section 5
+            UNRESERVED_RFC1738.set(i);
+        }
+        for (int i = '0'; i <= '9'; i++) { // digit RFC1738 Section 5
+            UNRESERVED_RFC1738.set(i);
+        }
+        // special char set RFC1738 Section 2.2    $-_.+!*'(),
+        UNRESERVED_RFC1738.set('$'); // safe chars RFC1738 Section 5
+        UNRESERVED_RFC1738.set('-'); //        & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set('_'); //        & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set('.'); //        & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set('+');
+
+        UNRESERVED_RFC1738.set('!'); // extra chars RFC1738 Section 5 & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set('*'); //        & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set('\''); //       & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set('('); //        & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set(')'); //        & mark RFC2396 Section 2.2
+        UNRESERVED_RFC1738.set(',');
+
+        UNRESERVED_RFC1738.set('~'); // mark RFC2396 Section 2.2
+
+        // unreseved in URL path
+        UNRESERVED_PATH.or(UNRESERVED_RFC1738);
+        UNRESERVED_PATH.set('/'); // hpath segment separator RFC 1738 Section 5
+
+        UNRESERVED_PATH.set(';'); // hsegment param separator (FTP)
+        UNRESERVED_PATH.set(':');
+        UNRESERVED_PATH.set('@');
+        UNRESERVED_PATH.set('&');
+        UNRESERVED_PATH.set('=');
+    }
 
     // session id handling
     private static final Object PRESENT = new Object();
@@ -440,14 +481,25 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (this.anchor != null) this.anchor = escape(this.anchor).toString();
     }
 
+    /**
+     * Url encode/escape the path part according to the allowed characters
+     * (RFC1738 & RFC2396)
+     */
     private void escapePath() {
-        final String[] pathp = CommonPattern.SLASH.split(this.path, -1);
         final StringBuilder ptmp = new StringBuilder(this.path.length() + 10);
-        for (final String element : pathp) {
-            ptmp.append('/');
-            ptmp.append(escape(element));
+        final byte[] bpath = UTF8.getBytes(this.path);
+        boolean modified = false;
+        for (byte b : bpath) {
+            if (UNRESERVED_PATH.get(b)) {
+                ptmp.append((char) b);
+            } else {
+                ptmp.append(hex[b]);
+                modified = true;
+            }
         }
-        this.path = ptmp.substring((ptmp.length() > 0) ? 1 : 0);
+        if (modified) {
+            this.path = ptmp.toString();
+        }
     }
 
     private void escapeSearchpart() {
