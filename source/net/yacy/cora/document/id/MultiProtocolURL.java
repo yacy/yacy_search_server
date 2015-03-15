@@ -487,9 +487,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     private void escapePath() {
         final StringBuilder ptmp = new StringBuilder(this.path.length() + 10);
-        final byte[] bpath = UTF8.getBytes(this.path);
         boolean modified = false;
-        for (byte b : bpath) {
+        final int len = this.path.length();
+        for (int i = 0; i < len; i++) {
+            int b = this.path.charAt(i) & 0xFF; // protect index out of bound exception (TODO: do we need to handle hichars > 255 or 2-byte chars here ?)
             if (UNRESERVED_PATH.get(b)) {
                 ptmp.append((char) b);
             } else {
