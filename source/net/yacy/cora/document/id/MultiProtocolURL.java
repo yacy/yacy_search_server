@@ -75,8 +75,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
     //private static final Pattern patternSpace = Pattern.compile("%20");
 
-    private final static BitSet UNRESERVED_RFC1738 = new BitSet(256); // register unreserved chars (never escaped in url)
-    private final static BitSet UNRESERVED_PATH    = new BitSet(256); // register unreserved chars for path part (not escaped in path)
+    private final static BitSet UNRESERVED_RFC1738 = new BitSet(128); // register unreserved chars (never escaped in url)
+    private final static BitSet UNRESERVED_PATH    = new BitSet(128); // register unreserved chars for path part (not escaped in path)
     static {
         // unreserved characters (chars not to escape in url)
         for (int i = 'A'; i <= 'Z'; i++) { // hialpha RFC1738 Section 5
@@ -484,17 +484,29 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     /**
      * Url encode/escape the path part according to the allowed characters
      * (RFC1738 & RFC2396)
+     * uses UTF-8 character codes for non-ASCII
      */
     private void escapePath() {
         final StringBuilder ptmp = new StringBuilder(this.path.length() + 10);
         boolean modified = false;
         final int len = this.path.length();
         for (int i = 0; i < len; i++) {
-            int b = this.path.charAt(i) & 0xFF; // protect index out of bound exception (TODO: do we need to handle hichars > 255 or 2-byte chars here ?)
-            if (UNRESERVED_PATH.get(b)) {
-                ptmp.append((char) b);
-            } else {
-                ptmp.append(hex[b]);
+            int ch = this.path.charAt(i);
+            if (ch <= 0x7F) {
+                if (UNRESERVED_PATH.get(ch)) {
+                    ptmp.append((char) ch);
+                } else {
+                    ptmp.append(hex[ch]);
+                    modified = true;
+                }
+            } else if (ch <= 0x07FF) {              // non-ASCII <= 0x7FF
+                ptmp.append(hex[0xc0 | (ch >> 6)]);
+                ptmp.append(hex[0x80 | (ch & 0x3F)]);
+                modified = true;
+            } else {                                // 0x7FF < ch <= 0xFFFF
+                ptmp.append(hex[0xe0 | (ch >> 12)]);
+                ptmp.append(hex[0x80 | ((ch >> 6) & 0x3F)]);
+                ptmp.append(hex[0x80 | (ch & 0x3F)]);
                 modified = true;
             }
         }
