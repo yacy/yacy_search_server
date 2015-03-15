@@ -85,9 +85,12 @@ public class QueryModifier {
         }
         
         // parse 'common search mistakes' like guessed regular expressions
+        // (changes  "abc*" to "ab",   "abc *def" to "abcdef")  TODO: handle most common  "abc*"
         int p = querystring.indexOf('*');
-        if ((p >= 0) && ((p > 0 && querystring.charAt(p - 1) != ' ') || (p < querystring.length() - 1 && querystring.charAt(p + 1) != ' '))) querystring = querystring.substring(0, p - 1) + querystring.substring(p + 1);
-        
+        if ((p >= 0) && ((p > 0 && querystring.charAt(p - 1) != ' ') || (p > 1 && p < querystring.length() - 1 && querystring.charAt(p + 1) != ' '))) {
+            querystring = querystring.substring(0, p - 1) + querystring.substring(p + 1);
+        }
+
         // parse filetype
         querystring = filetypeParser(querystring, "filetype:");
         
