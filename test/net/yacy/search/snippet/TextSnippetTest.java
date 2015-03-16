@@ -152,5 +152,17 @@ public class TextSnippetTest {
         System.out.println("testDescriptionline: snippet=" + sniptxt);
         assertFalse ("HTML code not allowed in snippet text",sniptxt.contains("<pre>")); // display text not to include unwanted html
         assertTrue ("Query word not marked", sniptxt.contains("<b>test</b>")); // query word to be marked
+
+        // test text with some numbers (english/german format)
+        rawtestline = "Test Version 1.83 calculates pi to 3,14 always";
+        ts = new TextSnippet(
+            url.hash(),
+            rawtestline,
+            false, // isMarked,
+            TextSnippet.ResultClass.SOURCE_METADATA, "");
+        sniptxt = ts.descriptionline(qg);
+        System.out.println("testDescriptionline: (with numbers) snippet="+sniptxt);
+        assertTrue ("number (.) broken up",sniptxt.contains("1.83"));
+        assertTrue ("number (,) broken up",sniptxt.contains("3,14"));
     }
 }

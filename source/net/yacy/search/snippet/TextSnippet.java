@@ -75,9 +75,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             Pattern.compile(".+[^\\p{L}\\p{N}]\\Z");
     /**
      * <code>\\A[\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+\\Z</code>
+     * updated to <code>\\A([\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+)([\\p{N}]+[.,][\\p{N}])+\\Z</code>
+     * to detect words with none alphanumeric chars (1) allow comma/dot surrounded by number (2)
      */
     private static final Pattern p3 =
-            Pattern.compile("\\A[\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+\\Z");
+            Pattern.compile("\\A([\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+)([\\p{N}]+[.,][\\p{N}])+\\Z");
     /**
      * <code>[^\\p{L}\\p{N}]</code>
      */
@@ -390,7 +392,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return this.resultStatus;
     }
 
-    private static final Pattern SPLIT_PATTERN = Pattern.compile(" |-");
+    private static final Pattern SPLIT_PATTERN = Pattern.compile("[ |-]+");
 
     /**
      * Marks all words in current line which have the same
