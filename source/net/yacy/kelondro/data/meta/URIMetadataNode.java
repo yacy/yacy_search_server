@@ -322,8 +322,17 @@ public class URIMetadataNode extends SolrDocument {
         return getDate(CollectionSchema.load_date_dt);
     }
 
+    /**
+     * Get calculated date until resource shall be considered as fresh
+     * this may be a date in future
+     *
+     * @return Date initally calculated to (loaddate + (loaddate - lastmodified)/2)
+     */
     public Date freshdate() {
-        return getDate(CollectionSchema.fresh_date_dt);
+        // getDate() can't be used as it checks for date <= now
+        Date x = (Date) this.getFieldValue(CollectionSchema.fresh_date_dt.getSolrFieldName());
+        if (x == null) return new Date(0);
+        return x;
     }
 
     public String md5() {
