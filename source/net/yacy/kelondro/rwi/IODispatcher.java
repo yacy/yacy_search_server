@@ -124,15 +124,15 @@ public class IODispatcher extends Thread {
             final MergeJob job = new MergeJob(f1, f2, factory, array, newFile);
             if (isAlive()) {
                 try {
-                    this.mergeQueue.put(job);
+                    this.mergeQueue.add(job);
                     if (f2 == null) {
                         log.info("appended rewrite job of file " + f1.getName() + " to " + newFile.getName());
                     } else {
                         log.info("appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
                     }
-                } catch (final InterruptedException e) {
-                    log.warn("interrupted: " + e.getMessage(), e);
-                    array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize));
+                } catch (final Exception e) {
+                	log.warn("Could not add merge job to queue: " + e.getMessage(), e);
+                	array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize));
                 } finally {
                     this.controlQueue.release();
                 }
