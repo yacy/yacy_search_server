@@ -746,7 +746,11 @@ public final class Protocol {
         if (event.addResultsToLocalIndex) {
             for (URIMetadataNode entry : storeDocs) {
                 try {
-                    event.query.getSegment().fulltext().putMetadata(entry);
+                    // firstSseen is set on access (crawl/index) to full resource,
+                    // on existing firstSeen prevent that metadata overwrite this rich data (this can be the case if crawldata has older loaddate as metadata)
+                    if (!event.query.getSegment().firstSeen().has(entry.hash())) { // TODO: cleanup firstSeen on document deletion from index
+                        event.query.getSegment().fulltext().putMetadata(entry);
+                    }
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
@@ -1111,14 +1115,14 @@ public final class Protocol {
 
             // passed all checks, store url
             if (!localsearch) {
-                event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
-                
                 // put the remote documents to the local index. We must convert the solr document to a solr input document:
                 if (event.addResultsToLocalIndex) {
                     final SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
 
                     // the input document stays untouched because it contains top-level cloned objects
-                    if (event.addResultsToLocalIndex) docs.add(sid);
+                    docs.add(sid);
+                    // will be stored to index, and is a full solr document, can be added to firstseen
+                    event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
                 }
 
                 // after this conversion we can remove the largest and not used field text_t and synonyms_sxt from the document
