@@ -131,7 +131,7 @@ Please join us!
 
 == HOW TO GET THE SOURCE CODE AND HOW TO COMPILE YACY YOURSELF? ==
 The source code is inside every YaCy release. You can also get YaCy
-from https://gitorious.org/yacy/rc1
+from https://github.com/yacy/yacy_search_server
 Please clone our code and help with development!
 The code is licensed under the GPL v2.
 

@@ -9,7 +9,7 @@ Version:		@REPL_VERSION@_@REPL_REVISION_NR@
 Release:		3
 License:		GPL
 Group:			Application/Internet
-Source0:		git@gitorious.org:yacy/rc1.git
+Source0:		git@github.com:yacy/yacy_search_server.git
 URL:			http://yacy.net
 Requires:		bash
 Requires:		sudo
