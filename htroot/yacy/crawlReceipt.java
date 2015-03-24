@@ -114,7 +114,7 @@ public final class crawlReceipt {
     	}
 
         // generating a new loaded URL entry
-        final URIMetadataNode entry = URIMetadataNode.importEntry(propStr);
+        final URIMetadataNode entry = URIMetadataNode.importEntry(propStr, "dht");
         if (entry == null) {
             if (log.isWarn()) log.warn("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");

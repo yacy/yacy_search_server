@@ -103,7 +103,7 @@ public final class transferURL {
                 }
 
                 // parse new lurl-entry
-                lEntry = URIMetadataNode.importEntry(urls);
+                lEntry = URIMetadataNode.importEntry(urls, "dht");
                 if (lEntry == null) {
                 	if (Network.log.isWarn()) Network.log.warn("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;

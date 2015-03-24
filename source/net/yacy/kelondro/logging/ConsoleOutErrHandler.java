@@ -171,7 +171,7 @@ public final class ConsoleOutErrHandler extends Handler {
     }
 
     @Override
-    public void setFormatter(final Formatter newFormatter) throws SecurityException {
+    public synchronized void setFormatter(final Formatter newFormatter) throws SecurityException {
         super.setFormatter(newFormatter);
         if (newFormatter == null) return;
         try {
@@ -183,7 +183,7 @@ public final class ConsoleOutErrHandler extends Handler {
     }
 
     @Override
-    public final void setFilter(final Filter newFilter) throws SecurityException {
+    public final synchronized void setFilter(final Filter newFilter) throws SecurityException {
         super.setFilter(newFilter);
         if (newFilter == null) return;
         try {

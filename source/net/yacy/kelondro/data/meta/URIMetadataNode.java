@@ -77,7 +77,7 @@ public class URIMetadataNode extends SolrDocument {
     protected String snippet = null;
     protected WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
 
-    public URIMetadataNode(final Properties prop) {
+    public URIMetadataNode(final Properties prop, String collection) {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -139,6 +139,9 @@ public class URIMetadataNode extends SolrDocument {
         this.appc = Integer.parseInt(prop.getProperty("lapp", "0"));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
         this.score = Float.parseFloat(prop.getProperty("score", "0.0"));
+        List<String> cs = new ArrayList<String>();
+        cs.add(collection);
+        this.setField(CollectionSchema.collection_sxt.name(), cs);
         this.word = null;
         if (prop.containsKey("wi")) {
             this.word = new WordReferenceVars(new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""))), false);
@@ -497,13 +500,13 @@ public class URIMetadataNode extends SolrDocument {
         return getStringList(CollectionSchema.description_txt);
     }    
 
-    public static URIMetadataNode importEntry(final String propStr) {
+    public static URIMetadataNode importEntry(final String propStr, String collection) {
         if (propStr == null || propStr.isEmpty() || propStr.charAt(0) != '{' || !propStr.endsWith("}")) {
             ConcurrentLog.severe("URIMetadataNode", "importEntry: propStr is not proper: " + propStr);
             return null;
         }
         try {
-            return new URIMetadataNode(MapTools.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new URIMetadataNode(MapTools.s2p(propStr.substring(1, propStr.length() - 1)), collection);
         } catch (final kelondroException e) {
             // wrong format
             ConcurrentLog.severe("URIMetadataNode", e.getMessage());

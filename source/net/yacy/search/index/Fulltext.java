@@ -341,8 +341,24 @@ public final class Fulltext {
         try {
             // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
             long date = this.getLoadTime(id);
-            if (date < entry.loaddate().getTime()) {
+            if (date == -1) {
+                // document does not exist
                 putDocument(getDefaultConfiguration().metadata2solr(entry));
+            } else {
+                // check if document contains rich data
+                if (date < entry.loaddate().getTime()) {
+                    SolrDocument doc = this.getDefaultConnector().getDocumentById(id, CollectionSchema.collection_sxt.getSolrFieldName());
+                    if (doc == null || !doc.containsKey(CollectionSchema.collection_sxt.getSolrFieldName())) {
+                        putDocument(getDefaultConfiguration().metadata2solr(entry));
+                    } else {
+                        Collection<Object> collections = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
+                        for (Object s: collections) {
+                            if (!"dht".equals(s)) return;
+                        }
+                        // passed all checks, overwrite document
+                        putDocument(getDefaultConfiguration().metadata2solr(entry));
+                    }
+                }
             }
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
