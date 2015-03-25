@@ -85,11 +85,11 @@ public class Banner {
         final Seed seed = sb.peers.mySeed();
         if (seed != null) {
             name = seed.get(Seed.NAME, "-").toUpperCase();
-            links = seed.getLinkCount();
+            links = sb.index.fulltext().collectionSize();
             words = seed.getWordCount();
-            myppm = seed.getPPM();
-            myqph = 60d * seed.getQPM();
-
+            myppm = Switchboard.currentPPM();
+            myqph = 60d * sb.averageQPM();
+            
             if (sb.peers.mySeed().isVirgin()) {
                 type = "VIRGIN";
                 nqph = Math.round(6000d * nqpm) / 100d;
