@@ -376,8 +376,8 @@ public class ViewFile {
                 prop.put("showSnippet_teasertext", desc);
                 prop.put("showSnippet", 1);
             }
-            // update index with parsed resouce if index entry is older
-            if (urlEntry.loaddate().before(response.lastModified())) {
+            // update index with parsed resouce if index entry is older or missing
+            if (urlEntry == null || urlEntry.loaddate().before(response.lastModified())) {
                 Switchboard.getSwitchboard().toIndexer(response);
             }
             if (document != null) document.close();
