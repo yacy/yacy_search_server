@@ -262,7 +262,7 @@ public class Load_RSS_p {
         try {
             url = post.containsKey("url") ? new DigestURL(post.get("url", "")) : null;
         } catch (final MalformedURLException e) {
-            ConcurrentLog.warn("Load_RSS_p", "url not well-formed: '" + post.get("url", "") + "'");
+            ConcurrentLog.warn("Load_RSS", "url not well-formed: '" + post.get("url", "") + "'");
         }
 
         ClientIdentification.Agent agent = post == null ? ClientIdentification.yacyInternetCrawlerAgent : ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
@@ -275,7 +275,8 @@ public class Load_RSS_p {
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final IOException e) {
-            ConcurrentLog.logException(e);
+            ConcurrentLog.warn("Load_RSS", e.getMessage());
+            return prop; // if no response nothing to process further
         }
 
         // index all selected items: description only
