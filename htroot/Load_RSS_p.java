@@ -73,7 +73,8 @@ public class Load_RSS_p {
         prop.put("shownewfeeds", 0);
         prop.put("showscheduledfeeds", 0);
         prop.put("url", "");
-
+        prop.put("showerrmsg", 0);
+        
         if (post != null && post.containsKey("removeSelectedFeedsNewList")) {
             for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
@@ -276,6 +277,8 @@ public class Load_RSS_p {
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final IOException e) {
             ConcurrentLog.warn("Load_RSS", e.getMessage());
+            prop.put("showerrmsg", 1);
+            prop.put("showerrmsg_msgtxt", "no valid response from given url");
             return prop; // if no response nothing to process further
         }
 
