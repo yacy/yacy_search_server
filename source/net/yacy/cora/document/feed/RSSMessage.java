@@ -212,20 +212,26 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return Token.language.valueFrom(this.map, "");
     }
 
+    /**
+     * @return publishDate or null
+     */
     @Override
     public Date getPubDate() {
         final String dateString = Token.pubDate.valueFrom(this.map, "");
-        Date date;
-        try {
-            date = HeaderFramework.FORMAT_RFC1123.parse(dateString);
-        } catch (final ParseException e) {
+        if (!dateString.isEmpty()) { // skip parse exception on empty string
+            Date date;
             try {
-                date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString);
-            } catch (final ParseException e1) {
-                date = HeaderFramework.parseHTTPDate(dateString);
+                date = HeaderFramework.FORMAT_RFC1123.parse(dateString);
+            } catch (final ParseException e) {
+                try {
+                    date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString);
+                } catch (final ParseException e1) {
+                    date = HeaderFramework.parseHTTPDate(dateString); // returns null on parse error
+                }
             }
+            return date;
         }
-        return date;
+        return null;
     }
 
     @Override

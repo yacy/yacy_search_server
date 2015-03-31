@@ -113,7 +113,7 @@ public class yacysearch_location {
                     prop.put("kml_placemark_" + placemarkCounter + "_copyright", message.getCopyright());
                     prop.put("kml_placemark_" + placemarkCounter + "_subject", message.getSubject());
                     prop.put("kml_placemark_" + placemarkCounter + "_description", message.getDescriptions().size() > 0 ? message.getDescriptions().get(0) : "");
-                    prop.put("kml_placemark_" + placemarkCounter + "_date", message.getPubDate());
+                    prop.put("kml_placemark_" + placemarkCounter + "_date", (message.getPubDate() != null) ? message.getPubDate() : new Date());
                     prop.putXML("kml_placemark_" + placemarkCounter + "_url", message.getLink());
                     prop.put("kml_placemark_" + placemarkCounter + "_pointname", message.getTitle());
                     prop.put("kml_placemark_" + placemarkCounter + "_lon", lo);
