@@ -795,7 +795,7 @@ public final class SearchEvent {
         // collect navigation information
         ReversibleScoreMap<String> fcts;
         if (this.locationNavigator != null) {
-            fcts = facets.get(CollectionSchema.coordinate_p.getSolrFieldName());
+            fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
             if (fcts != null) {
                 for (String coordinate: fcts) {
                     int hc = fcts.get(coordinate);

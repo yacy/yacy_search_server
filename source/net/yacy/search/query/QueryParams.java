@@ -93,7 +93,7 @@ public final class QueryParams {
     private static final Map<String, CollectionSchema> defaultfacetfields = new HashMap<String, CollectionSchema>();
     static {
         // the key shall match with configuration property search.navigation
-        defaultfacetfields.put("location", CollectionSchema.coordinate_p);
+        defaultfacetfields.put("location", CollectionSchema.coordinate_p_0_coordinate); // coordinate_p can't be used for facet (subfields), as value isn't used subfield can be used
         defaultfacetfields.put("hosts", CollectionSchema.host_s);
         defaultfacetfields.put("protocol", CollectionSchema.url_protocol_s);
         defaultfacetfields.put("filetype", CollectionSchema.url_file_ext_s);
@@ -249,7 +249,9 @@ public final class QueryParams {
         for (String navkey: search_navigation) {
             CollectionSchema f = defaultfacetfields.get(navkey);
             // handle special field, authors_sxt (add to facet w/o contains check, as authors_sxt is not enabled (is copyfield))
-            if (f != null && (solrSchema.contains(f) || f.name().equals("author_sxt"))) this.facetfields.add(f.getSolrFieldName());
+            // dto. for coordinate_p_0_coordinate is not enabled but used for location facet (because coordinate_p not valid for facet field)
+            if (f != null && (solrSchema.contains(f) || f.name().equals("author_sxt") || f.name().equals("coordinate_p_0_coordinate") ))
+                this.facetfields.add(f.getSolrFieldName());
         }
         if (LibraryProvider.autotagging != null) for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
             if (v.isFacet()) {
