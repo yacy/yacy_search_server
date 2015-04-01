@@ -75,8 +75,8 @@ import org.apache.solr.schema.TrieDateField;
 
 public final class QueryParams {
 
-    public static int FACETS_STANDARD_MAXCOUNT = 30;
-    public static int FACETS_DATE_MAXCOUNT = 730;
+    public static int FACETS_STANDARD_MAXCOUNT = 10000;
+    public static int FACETS_DATE_MAXCOUNT = 640;
     
     public enum Searchdom {
         LOCAL, CLUSTER, GLOBAL;
@@ -371,7 +371,7 @@ public final class QueryParams {
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
         int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
-        params.setQuery(this.queryGoal.collectionTextQueryString(this.indexSegment.fulltext().getDefaultConfiguration(), rankingProfile, excludeintext_image).toString());
+        params.setQuery(this.queryGoal.collectionTextQueryString(excludeintext_image).toString());
         Ranking actRanking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
 
         String fq = actRanking.getFilterQuery();

@@ -41,7 +41,6 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.search.index.Segment;
-import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 
 public class QueryGoal {
@@ -319,7 +318,7 @@ public class QueryGoal {
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
 
-    public StringBuilder collectionTextQueryString(CollectionConfiguration configuration, int rankingProfile, boolean noimages) {
+    public StringBuilder collectionTextQueryString(boolean noimages) {
         final StringBuilder q = new StringBuilder(80);
 
         // add filter to prevent that results come from failed urls

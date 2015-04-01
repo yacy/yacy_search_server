@@ -130,7 +130,7 @@ public class GSAsearchServlet extends HttpServlet {
         
         // get a solr query string
         QueryGoal qg = new QueryGoal(originalQuery);
-        StringBuilder solrQ = qg.collectionTextQueryString(sb.index.fulltext().getDefaultConfiguration(), 0, false);
+        StringBuilder solrQ = qg.collectionTextQueryString(false);
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));

@@ -124,6 +124,7 @@ public class yacysearchtrailer {
                 }
                 prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
                 prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-namespace_element_" + i + "_id", "namespace_" + i);
                 prop.put("nav-namespace_element_" + i + "_count", count);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
                 i++;
@@ -134,7 +135,7 @@ public class yacysearchtrailer {
             if (pos == 1 && neg == 0) prop.put("nav-namespace", 0); // this navigation is not useful
         }
 
-        // host navigators
+        // domain navigators
         final ScoreMap<String> hostNavigator = theSearch.hostNavigator;
         if (hostNavigator == null || hostNavigator.isEmpty()) {
             prop.put("nav-domains", 0);
@@ -160,11 +161,13 @@ public class yacysearchtrailer {
                 }
                 prop.put(fileType, "nav-domains_element_" + i + "_name", name);
                 prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-domains_element_" + i + "_id", "domains_" + i);
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
                 i++;
             }
             prop.put("nav-domains_element", i);
+            prop.put("nav-domains_count", i);
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-domains", 0); // this navigation is not useful
@@ -197,11 +200,13 @@ public class yacysearchtrailer {
                 String longname = ISO639.country(name);
                 prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
                 prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-languages_element_" + i + "_id", "languages_" + i);
                 prop.put("nav-languages_element_" + i + "_count", count);
                 prop.put("nav-languages_element_" + i + "_nl", 1);
                 i++;
             }
             prop.put("nav-languages_element", i);
+            prop.put("nav-languages_count", i);
             i--;
             prop.put("nav-languages_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-languages", 0); // this navigation is not useful
@@ -232,11 +237,13 @@ public class yacysearchtrailer {
                 }
                 prop.put(fileType, "nav-authors_element_" + i + "_name", name);
                 prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-authors_element_" + i + "_id", "authors_" + i);
                 prop.put("nav-authors_element_" + i + "_count", count);
                 prop.put("nav-authors_element_" + i + "_nl", 1);
                 i++;
             }
             prop.put("nav-authors_element", i);
+            prop.put("nav-authors_count", i);
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) {
@@ -269,11 +276,13 @@ public class yacysearchtrailer {
                 }
                 prop.put(fileType, "nav-collections_element_" + i + "_name", name);
                 prop.put(fileType, "nav-collections_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-collections_element_" + i + "_id", "collections_" + i);
                 prop.put("nav-collections_element_" + i + "_count", count);
                 prop.put("nav-collections_element_" + i + "_nl", 1);
                 i++;
             }
             prop.put("nav-collections_element", i);
+            prop.put("nav-collections_count", i);
             i--;
             prop.put("nav-collections_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-collections", 0); // this navigation is not useful
@@ -318,6 +327,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-topics_element", i);
+            prop.put("nav-topics_count", i);
             i--;
             prop.put("nav-topics_element_" + i + "_nl", 0);
         }
@@ -366,6 +376,7 @@ public class yacysearchtrailer {
             if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) theSearch.query.modifier.add(oldProtocolModifier.startsWith("/") ? oldProtocolModifier : "/" + oldProtocolModifier);
             theSearch.query.getQueryGoal().query_original = oldQuery;
             prop.put("nav-protocols_element", i);
+            prop.put("nav-protocols_count", i);
             i--;
             prop.put("nav-protocols_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-protocols", 0); // this navigation is not useful
@@ -418,6 +429,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-dates_element", i);
+            prop.put("nav-dates_count", i);
             i--;
             prop.put("nav-dates_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-dates", 0); // this navigation is not useful
@@ -450,11 +462,13 @@ public class yacysearchtrailer {
                 }
                 prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
                 prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-filetypes_element_" + i + "_id", "filetypes_" + i);
                 prop.put("nav-filetypes_element_" + i + "_count", count);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
                 i++;
             }
             prop.put("nav-filetypes_element", i);
+            prop.put("nav-filetypes_count", i);
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-filetypes", 0); // this navigation is not useful
@@ -488,11 +502,13 @@ public class yacysearchtrailer {
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_id", "vocabulary_" + navname + "_" + i);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
                     i++;
                 }
                 prop.put("nav-vocabulary_" + navvoccount + "_element", i);
+                prop.put("nav-vocabulary_" + navvoccount + "_count", i);
                 i--;
                 prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 0);
                 navvoccount++;
