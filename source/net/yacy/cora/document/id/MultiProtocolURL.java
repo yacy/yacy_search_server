@@ -599,11 +599,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             final int ch = s.charAt(i);
             if (ch == ' ') {                 // space
                 sbuf.append("%20");
-            } else if (ch == '%') {
+            } else if (ch == '%') {  
                 if (i < len - 2 && s.charAt(i + 1) >= '0' && s.charAt(i + 1) <= '9' && s.charAt(i + 2) >= '0' && s.charAt(i + 2) <= '9') {
+                    // TODO: actually 0..9 A..F a..f is allowed (or any of hex[] sequence)
                     sbuf.append((char)ch);   // lets consider this is used for encoding, leave it that way
                 } else {
-                    sbuf.append("%23");      // RFC 1738 2.2 unsafe char shall be encoded
+                    sbuf.append("%25");      // '%' RFC 1738 2.2 unsafe char shall be encoded
                 }
             } else if (ch == '&') { 
                 if (i < len - 6 && "amp;".equals(s.substring(i + 1, i + 5).toLowerCase())) {

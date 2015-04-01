@@ -59,11 +59,11 @@
           </dl>
           <input type="submit" name="indexAllItemContent" value="Add All Items to Index (full content of url)" />
           #(/showload)#</dd>
-	      
+          #(showerrmsg)#::<dd class="error">#[msgtxt]#</dd>#(/showerrmsg)#   
         </dl>
       </fieldset>
     </form>
-
+    
 	#(showscheduledfeeds)#::
     <form id="scheduledfeeds" action="Load_RSS_p.html" method="post" enctype="multipart/form-data"><fieldset>
 	  <legend>List of Scheduled RSS Feed Load Targets</legend>

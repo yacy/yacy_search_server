@@ -63,6 +63,7 @@ import com.google.common.io.Files;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Digest;
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.server.serverSwitch;
 
@@ -299,6 +300,9 @@ public final class yacy {
                 httpServer = new Jetty9HttpServerImpl(port);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
+                // TODO: this has no effect on Jetty (but needed to reflect configured value and limit is still used)
+                ConnectionInfo.setServerMaxcount(sb.getConfigInt("connectionsMax", ConnectionInfo.getMaxcount()));
+
                 ConcurrentLog.info("STARTUP",httpServer.getVersion());
                 
                 // open the browser window
