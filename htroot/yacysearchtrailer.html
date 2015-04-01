@@ -156,7 +156,7 @@ function toggleVisibility(name, count) {
 </script>
 #(nav-domains)#::
 <ul class="nav nav-sidebar menugroup">
-<li><h3 onclick="toggleVisibility('domains', #[count]#);">Provider [#[count]#] <span style="float:right" id="chevron-domains" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('domains', #[count]#);">Provider [#[count]#] <span style="float:right" id="chevron-domains" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
@@ -165,7 +165,7 @@ function toggleVisibility(name, count) {
 
 #(nav-filetypes)#::
 <ul class="nav nav-sidebar menugroup">
-<li><h3 onclick="toggleVisibility('filetypes', #[count]#);">Filetype [#[count]#] <span style="float:right" id="chevron-filetypes" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('filetypes', #[count]#);">Filetype [#[count]#] <span style="float:right" id="chevron-filetypes" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
@@ -174,7 +174,7 @@ function toggleVisibility(name, count) {
 
 #(nav-languages)#::
 <ul class="nav nav-sidebar menugroup">
-<li><h3 onclick="toggleVisibility('languages', #[count]#);">Language [#[count]#] <span style="float:right" id="chevron-languages" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('languages', #[count]#);">Language [#[count]#] <span style="float:right" id="chevron-languages" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
@@ -183,7 +183,7 @@ function toggleVisibility(name, count) {
 
 #(nav-namespace)#::
 <ul class="nav nav-sidebar menugroup">
-<li><h3 onclick="toggleVisibility('namespace', #[count]#);">Name Space [#[count]#] <span style="float:right" id="chevron-namespace" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('namespace', #[count]#);">Name Space [#[count]#] <span style="float:right" id="chevron-namespace" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
@@ -192,7 +192,7 @@ function toggleVisibility(name, count) {
 
 #(nav-authors)#::
 <ul class="nav nav-sidebar menugroup">
-<li><h3 onclick="toggleVisibility('authors', #[count]#);">Author [#[count]#] <span style="float:right" id="chevron-authors" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('authors', #[count]#);">Author [#[count]#] <span style="float:right" id="chevron-authors" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
@@ -201,7 +201,7 @@ function toggleVisibility(name, count) {
 
 #(nav-collections)#::
 <ul class="nav nav-sidebar menugroup">
-<li><h3 onclick="toggleVisibility('collections', #[count]#);">Collection [#[count]#] <span style="float:right" id="chevron-collections" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('collections', #[count]#);">Collection [#[count]#] <span style="float:right" id="chevron-collections" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
@@ -210,7 +210,7 @@ function toggleVisibility(name, count) {
 
 #{nav-vocabulary}#
 <ul class="nav nav-sidebar menugroup">
-<li><h3 onclick="toggleVisibility('vocabulary_#[navname]#', #[count]#);">#[navname]# [#[count]#] <span style="float:right" id="chevron-vocabulary_#[navname]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('vocabulary_#[navname]#', #[count]#);">#[navname]# [#[count]#] <span style="float:right" id="chevron-vocabulary_#[navname]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
