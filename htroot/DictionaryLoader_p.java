@@ -76,6 +76,8 @@ public class DictionaryLoader_p {
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
                 prop.put("geon0ActionLoaded", 1);
+                final String nav = sb.getConfig("search.navigation", "");
+                if (nav.indexOf("location") < 0) sb.setConfig("search.navigation", "location,"+nav);
             } catch (final MalformedURLException e) {
                 ConcurrentLog.logException(e);
                 prop.put("geon0ActionLoaded", 2);
@@ -118,6 +120,8 @@ public class DictionaryLoader_p {
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geon1Status", LibraryProvider.Dictionary.GEON1.file().exists() ? 1 : 0);
                 prop.put("geon1ActionLoaded", 1);
+                final String nav = sb.getConfig("search.navigation", "");
+                if (nav.indexOf("location") < 0) sb.setConfig("search.navigation", "location,"+nav);
             } catch (final MalformedURLException e) {
                 ConcurrentLog.logException(e);
                 prop.put("geon1ActionLoaded", 2);
@@ -160,6 +164,8 @@ public class DictionaryLoader_p {
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geon2Status", LibraryProvider.Dictionary.GEON2.file().exists() ? 1 : 0);
                 prop.put("geon2ActionLoaded", 1);
+                final String nav = sb.getConfig("search.navigation", "");
+                if (nav.indexOf("location") < 0) sb.setConfig("search.navigation", "location,"+nav);
             } catch (final MalformedURLException e) {
                 ConcurrentLog.logException(e);
                 prop.put("geon2ActionLoaded", 2);
@@ -203,6 +209,8 @@ public class DictionaryLoader_p {
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);
                 prop.put("geo1ActionLoaded", 1);
+                final String nav = sb.getConfig("search.navigation", "");
+                if (nav.indexOf("location") < 0) sb.setConfig("search.navigation", "location,"+nav);
             } catch (final MalformedURLException e) {
                 ConcurrentLog.logException(e);
                 prop.put("geo1ActionLoaded", 2);
