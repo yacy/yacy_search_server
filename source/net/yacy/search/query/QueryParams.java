@@ -26,11 +26,13 @@
 
 package net.yacy.search.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -439,9 +441,9 @@ public final class QueryParams {
         }
         
         // add site facets
-        final String fq = getFacets();
-        if (fq.length() > 0) {
-            params.setFilterQueries(fq);
+        final List<String> fqs = getFacetsFilterQueries();
+        if (fqs.size() > 0) {
+            params.setFilterQueries(fqs.toArray(new String[fqs.size()]));
         }
         
         // set facet query attributes
@@ -475,89 +477,88 @@ public final class QueryParams {
     
     long year = 1000L * 60L * 60L * 24L * 365L;
     
-    private String getFacets() {
+    private List<String> getFacetsFilterQueries() {
+        
+        ArrayList<String> fqs = new ArrayList<>();
         
         // add site facets
-        final StringBuilder fq = new StringBuilder();
         if (this.modifier.sitehash == null && this.modifier.sitehost == null) {
             if (this.siteexcludes != null) {
                 for (String ex: this.siteexcludes) {
-                    fq.append(" AND -").append(CollectionSchema.host_id_s.getSolrFieldName()).append(':').append(ex);
+                    fqs.add("-" + CollectionSchema.host_id_s.getSolrFieldName() + ':' + ex);
                 }
             }
         } else {
             if (this.modifier.sitehost != null) {
                 // consider to search for hosts with 'www'-prefix, if not already part of the host name
                 if (this.modifier.sitehost.startsWith("www.")) {
-                    fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost.substring(4)).append('\"');
-                    fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append("\")");
+                    fqs.add(CollectionSchema.host_s.getSolrFieldName() + ":\"" + this.modifier.sitehost.substring(4) + "\" OR " + CollectionSchema.host_s.getSolrFieldName() + ":\"" + this.modifier.sitehost + "\"");
                 } else {
-                    fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append('\"');
-                    fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"www.").append(this.modifier.sitehost).append("\")");
+                    fqs.add(CollectionSchema.host_s.getSolrFieldName() + ":\"" + this.modifier.sitehost + "\" OR " + CollectionSchema.host_s.getSolrFieldName() + ":\"www." + this.modifier.sitehost + "\"");
                 }
             } else
-                fq.append(" AND ").append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehash).append('\"');
+                fqs.add(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + this.modifier.sitehash + '\"');
         }
 
         // add vocabulary facets
         if (this.metatags != null) {
             for (Tagging.Metatag tag : this.metatags) {
-                fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_TERMS_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
+                fqs.add(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX + ":\"" + tag.getObject() + '\"');
             }
         }
 
         // add language facet
         if (this.modifier.language != null && this.modifier.language.length() > 0 && this.solrSchema.contains((CollectionSchema.language_s))) {
-            fq.append(" AND ").append(CollectionSchema.language_s.getSolrFieldName()).append(":\"").append(this.modifier.language).append('\"');
+            fqs.add(CollectionSchema.language_s.getSolrFieldName() + ":\"" + this.modifier.language + '\"');
         }
 
         // add author facets (check for contains(author) as author_sxt is omitted copyfield)
         if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author)) {
-            fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
+            fqs.add(CollectionSchema.author_sxt.getSolrFieldName() + ":\"" + this.modifier.author + '\"');
         }
 
         // add collection facets
         if (this.modifier.collection != null && this.modifier.collection.length() > 0 && this.solrSchema.contains(CollectionSchema.collection_sxt)) {
-            fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.modifier.collection));
+            fqs.add(QueryModifier.parseCollectionExpression(this.modifier.collection));
         }
         
         if (this.solrSchema.contains(CollectionSchema.dates_in_content_dts)) {
             if (this.modifier.on != null && this.modifier.on.length() > 0) {
-                fq.append(" AND ").append(QueryModifier.parseOnExpression(this.modifier.on));
+                fqs.add(QueryModifier.parseOnExpression(this.modifier.on));
             }
             
             if (this.modifier.from != null && this.modifier.from.length() > 0 && (this.modifier.to == null || this.modifier.to.equals("*"))) {
-                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.modifier.from, null));
+                fqs.add(QueryModifier.parseFromToExpression(this.modifier.from, null));
             }
             
             if ((this.modifier.from == null || this.modifier.from.equals("*")) && this.modifier.to != null && this.modifier.to.length() > 0) {
-                fq.append(" AND ").append(QueryModifier.parseFromToExpression(null, this.modifier.to));
+                fqs.add(QueryModifier.parseFromToExpression(null, this.modifier.to));
             }
             
             if (this.modifier.from != null && this.modifier.from.length() > 0 && this.modifier.to != null && this.modifier.to.length() > 0) {
-                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.modifier.from, this.modifier.to));
+                fqs.add(QueryModifier.parseFromToExpression(this.modifier.from, this.modifier.to));
             }
         }
         
         if (this.modifier.protocol != null) {
-            fq.append(" AND {!tag=").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append("}").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
+            fqs.add("{!tag=" + CollectionSchema.url_protocol_s.getSolrFieldName() + "}" + CollectionSchema.url_protocol_s.getSolrFieldName() + ':' + this.modifier.protocol);
         }
         
         if (this.tld != null) {
-            fq.append(" AND ").append(CollectionSchema.host_dnc_s.getSolrFieldName()).append(":\"").append(this.tld).append('\"');
+            fqs.add(CollectionSchema.host_dnc_s.getSolrFieldName() + ":\"" + this.tld + '\"');
         }
         
         if (this.modifier.filetype != null) {
-            fq.append(" AND ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.modifier.filetype).append('\"');
+            fqs.add(CollectionSchema.url_file_ext_s.getSolrFieldName() + ":\"" + this.modifier.filetype + '\"');
         }
         
         if (this.inlink != null) {
-            fq.append(" AND ").append(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
+            fqs.add(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName() + ":\"" + this.inlink + '\"');
         }
         
         if (!this.urlMask_isCatchall) {
             // add a filter query on urls
-            fq.append(" AND ").append(CollectionSchema.sku.getSolrFieldName() + ":/" + this.urlMaskString + "/");
+            fqs.add(CollectionSchema.sku.getSolrFieldName() + ":/" + this.urlMaskString + "/");
         }
         
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
@@ -568,11 +569,11 @@ public final class QueryParams {
             //params.set("sfield", YaCySchema.coordinate_p.name());
             //params.set("pt", Double.toString(this.lat) + "," + Double.toString(this.lon));
             //params.set("d", GeoLocation.degreeToKm(this.radius));
-            fq.append(" AND ").append("{!bbox sfield=" + CollectionSchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
+            fqs.add("{!bbox sfield=" + CollectionSchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
             //params.setRows(Integer.MAX_VALUE);
         }
         
-        return fq.length() > 0 ? fq.substring(5) : fq.toString();
+        return fqs;
     }
     
     public QueryGoal getQueryGoal() {
