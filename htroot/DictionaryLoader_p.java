@@ -60,6 +60,9 @@ public class DictionaryLoader_p {
             prop.put(dictionary.nickname + "ActionActivated", 0);
             prop.put(dictionary.nickname + "ActionDeactivated", 0);
         }
+        if (SynonymLibrary.size() > 0) { // status of SynonymLibrary not included in above
+            prop.put("syn0Status", 1);
+        }
 
         if (post == null) {
             return prop;
