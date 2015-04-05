@@ -43,9 +43,9 @@
 	<classpathentry kind="lib" path="lib/spatial4j-0.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.6.jar"/>
 	<classpathentry kind="lib" path="lib/org.restlet.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-1.8.8.jar"/>
-	<classpathentry kind="lib" path="lib/jempbox-1.8.8.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.8.8.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-1.8.9.jar"/>
+	<classpathentry kind="lib" path="lib/jempbox-1.8.9.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.8.9.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.10.1.jar"/>
