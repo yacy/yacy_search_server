@@ -26,8 +26,8 @@ package net.yacy.http;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
@@ -50,7 +50,7 @@ import org.eclipse.jetty.server.Request;
 abstract public class AbstractRemoteHandler extends ConnectHandler implements Handler {
 	
     protected Switchboard sb = null;
-    private final List<String> localVirtualHostNames = new LinkedList<String>(); // list for quick check for req to local peer
+    private final Set<String> localVirtualHostNames = new HashSet<String>(); // list for quick check for req to local peer
     
     @Override
     protected void doStart() throws Exception {
@@ -76,7 +76,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
                     }
                 }
                 if (sb.peers != null) {
-                    localVirtualHostNames.add(sb.peers.mySeed().getIP());
+                    localVirtualHostNames.addAll(sb.peers.mySeed().getIPs());
                     localVirtualHostNames.add(sb.peers.myAlternativeAddress()); // add the "peername.yacy" address
                     localVirtualHostNames.add(sb.peers.mySeed().getHexHash() + ".yacyh"); // bugfix by P. Dahl
                 }
