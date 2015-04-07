@@ -25,7 +25,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -130,8 +132,10 @@ public class GSAsearchServlet extends HttpServlet {
         
         // get a solr query string
         QueryGoal qg = new QueryGoal(originalQuery);
-        StringBuilder solrQ = qg.collectionTextQueryString(false);
+        List<String> solrFQ = qg.collectionTextFilterQuery(false);
+        StringBuilder solrQ = qg.collectionTextQuery();
         post.put("defType", "edismax");
+        for (String fq: solrFQ) post.add(CommonParams.FQ, fq);
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100));

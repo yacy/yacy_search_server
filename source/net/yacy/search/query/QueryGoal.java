@@ -26,6 +26,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.SortedSet;
@@ -318,41 +319,46 @@ public class QueryGoal {
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
 
-    public StringBuilder collectionTextQueryString(boolean noimages) {
-        final StringBuilder q = new StringBuilder(80);
+    public List<String> collectionTextFilterQuery(boolean noimages) {
+        final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
-        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
-        if (noimages) q.append(" AND -").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif)");
+        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
+        if (noimages) fqs.add("-" + CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif)");
         
-        // parse special requests
-        if (isCatchall()) return q;
-        
-        // add goal query
-        StringBuilder w = getGoalQuery();
-        
-        if (w.length() > 0) {
-            q.append(" AND (");
-            q.append(w);
-            q.append(')');
-        }
-        return q;
+        return fqs;
     }
     
-    public StringBuilder collectionImageQueryString(final QueryModifier modifier) {
-        final StringBuilder q = new StringBuilder(80);
+    public StringBuilder collectionTextQuery() {
+
+        // parse special requests
+        if (isCatchall()) return new StringBuilder("*:*");
+        
+        // add goal query
+        return getGoalQuery();
+    }
+    
+    public List<String> collectionImageFilterQuery() {
+        final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
-        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND (");
-        q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(AbstractSolrConnector.CATCHALL_DTERM + " OR ");
-        q.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif) OR ");
-        q.append(CollectionSchema.content_type.getSolrFieldName()).append(":(image/*))");
+        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
+        fqs.add(
+                CollectionSchema.images_urlstub_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM + " OR " +
+                CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif) OR " +
+                CollectionSchema.content_type.getSolrFieldName() + ":(image/*))");
+        return fqs;
+    }
+    
+    public StringBuilder collectionImageQuery(final QueryModifier modifier) {
+        final StringBuilder q = new StringBuilder(80);
         
         // parse special requests
-        if (isCatchall()) return q;
+        if (isCatchall()) return new StringBuilder("*:*");
 
         // add goal query
         StringBuilder w = getGoalQuery();
+        q.append(w);
         
         // combine these queries for all relevant fields
         if (w.length() > 0) {

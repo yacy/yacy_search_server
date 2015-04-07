@@ -373,9 +373,9 @@ public final class QueryParams {
         }
         
         // construct query
-        final SolrQuery params = getBasicParams(getFacets);
+        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionTextFilterQuery(excludeintext_image));
         int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
-        params.setQuery(this.queryGoal.collectionTextQueryString(excludeintext_image).toString());
+        params.setQuery(this.queryGoal.collectionTextQuery().toString());
         Ranking actRanking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
 
         String fq = actRanking.getFilterQuery();
@@ -409,8 +409,8 @@ public final class QueryParams {
         }
         
         // construct query
-        final SolrQuery params = getBasicParams(getFacets);
-        params.setQuery(this.queryGoal.collectionImageQueryString(this.modifier).toString());
+        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionImageFilterQuery());
+        params.setQuery(this.queryGoal.collectionImageQuery(this.modifier).toString());
         
         // set boosts
         StringBuilder bq = new StringBuilder();
@@ -426,7 +426,7 @@ public final class QueryParams {
         return params;
     }
     
-    private SolrQuery getBasicParams(boolean getFacets) {
+    private SolrQuery getBasicParams(boolean getFacets, List<String> fqs) {
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
         params.setParam(DisMaxParams.QF, CollectionSchema.text_t.getSolrFieldName() + "^1.0");
@@ -441,7 +441,7 @@ public final class QueryParams {
         }
         
         // add site facets
-        final List<String> fqs = getFacetsFilterQueries();
+        fqs.addAll(getFacetsFilterQueries());
         if (fqs.size() > 0) {
             params.setFilterQueries(fqs.toArray(new String[fqs.size()]));
         }
