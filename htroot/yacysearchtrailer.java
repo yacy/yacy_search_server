@@ -275,7 +275,7 @@ public class yacysearchtrailer {
                     nav="";
                 }
                 prop.put(fileType, "nav-collections_element_" + i + "_name", name);
-                prop.put(fileType, "nav-collections_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                prop.put(fileType, "nav-collections_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, true).toString());
                 prop.put(fileType, "nav-collections_element_" + i + "_id", "collections_" + i);
                 prop.put("nav-collections_element_" + i + "_count", count);
                 prop.put("nav-collections_element_" + i + "_nl", 1);

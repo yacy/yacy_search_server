@@ -334,17 +334,18 @@ public class QueryModifier {
             s = s.trim();
             if (s.length() > 0) sites.add(s);
         }
-        StringBuilder filterQuery = new StringBuilder(20);
+        StringBuilder fq = new StringBuilder(20);
         if (sites.size() > 1) {
-            filterQuery.append('(').append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(0)).append('\"');
+            fq.append('(').append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(0)).append('\"');
             for (int i = 1; i < sites.size(); i++) {
-                filterQuery.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(i)).append('\"');
+                fq.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(i)).append('\"');
             }
-            filterQuery.append(')');
+            fq.append(')');
         } else if (sites.size() == 1) {
-            filterQuery.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(0)).append('\"');
+            fq.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(0)).append('\"');
         }
-        return filterQuery.toString();
+        if (fq.length() > 0) fq.insert(0, "{!tag=" + CollectionSchema.collection_sxt.getSolrFieldName() + "}"); 
+        return fq.toString();
     }
     
     public static String parseOnExpression(String onDescription) {

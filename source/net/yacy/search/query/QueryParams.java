@@ -453,7 +453,7 @@ public final class QueryParams {
             params.setFacetLimit(FACETS_STANDARD_MAXCOUNT);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
             params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
-            for (String field: this.facetfields) params.addFacetField(field); // params.addFacetField("{!ex=" + field + "}" + field);
+            for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field); // params.addFacetField("{!ex=" + field + "}" + field);
             if (this.facetfields.contains(CollectionSchema.dates_in_content_dts.name())) {
                 params.setParam("facet.range", CollectionSchema.dates_in_content_dts.name());
                 @SuppressWarnings({ "static-access", "deprecation" })
@@ -688,25 +688,25 @@ public final class QueryParams {
      */
     public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery, final String newModifier, boolean newModifierReplacesOld) {
 
-        final StringBuilder sb = new StringBuilder(120);
+        StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
         sb.append(ext.name().toLowerCase());
         sb.append("?query=");
 
+        sb.append(theQuery.getQueryGoal().getQueryString(true));
         if (newModifier == null) {
-            sb.append(theQuery.getQueryGoal().getQueryString(true));
             if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
         } else {
-            if (newModifier.isEmpty()) {
-                sb.append(theQuery.getQueryGoal().getQueryString(true));
-            } else {
+            if (!newModifier.isEmpty()) {
+                if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
                 if (newModifierReplacesOld) {
-                    sb.append(newModifier);
-                } else {
-                    sb.append(theQuery.queryGoal.getQueryString(true));
-                    if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
-                    sb.append("+" + newModifier);
+                    int nmpi = newModifier.indexOf("%3A");
+                    String nmp = newModifier.substring(0, nmpi) + ":";
+                    int i = sb.indexOf(nmp);
+                    if (i > 0) sb = new StringBuilder(sb.substring(0, i).trim());
+                    if (sb.charAt(sb.length() - 1) == '+') sb.setLength(sb.length() - 1);
                 }
+                sb.append("+" + newModifier);
             }
         }
 
