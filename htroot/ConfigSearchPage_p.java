@@ -35,6 +35,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
+import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -80,6 +81,7 @@ public class ConfigSearchPage_p {
 
                 // construct navigation String
                 String nav = "";
+                if (post.getBoolean("search.navigation.location")) nav += "location,";
                 if (post.getBoolean("search.navigation.filetype")) nav += "filetype,";
                 if (post.getBoolean("search.navigation.protocol")) nav += "protocol,";
                 if (post.getBoolean("search.navigation.hosts")) nav += "hosts,";
@@ -159,6 +161,7 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);
         prop.put("search.result.show.hostbrowser", sb.getConfigBool("search.result.show.hostbrowser", false) ? 1 : 0);
 
+        prop.put("search.navigation.location", sb.getConfig("search.navigation", "").indexOf("location",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.protocol", sb.getConfig("search.navigation", "").indexOf("protocol",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);

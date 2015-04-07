@@ -106,6 +106,14 @@
                 <version>2.6.1</version>
                 <configuration>
                     <filesets>
+                        <!-- clean htroot servlet classes -->
+                        <fileset>
+                            <directory>htroot</directory>
+                            <includes>
+                                <include>**/*.class</include>
+                            </includes>
+                        </fileset>
+                        <!-- clean test data -->
                         <fileset>
                             <directory>test/DATA</directory>
                         </fileset>
@@ -137,16 +145,18 @@
            <!-- compile htroot -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
+                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>compile-htroot</id>
                         <phase>compile</phase>
                         <configuration>
                             <target>
-                                <javac fork="true"  srcdir="htroot/"
+                                <javac fork="true"  srcdir="htroot"
                                        excludes="processing/**"
-                                       includeantruntime="false">
+                                       source="${maven.compiler.source}" target="${maven.compiler.target}"
+                                       debug="true" debuglevel="lines,vars,source" 
+                                       includeantruntime="false" encoding="UTF-8">
                                     <classpath refid="maven.compile.classpath"/>
                                     <compilerarg value="-Xlint"/>
                                 </javac>
@@ -356,7 +366,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>fontbox</artifactId>
-            <version>1.8.8</version>
+            <version>1.8.9</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
@@ -416,7 +426,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>jempbox</artifactId>
-            <version>1.8.8</version>
+            <version>1.8.9</version>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -506,7 +516,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>1.8.8</version>
+            <version>1.8.9</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
