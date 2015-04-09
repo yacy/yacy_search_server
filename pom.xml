@@ -14,8 +14,8 @@
         <url>http://bugs.yacy.net</url>
     </issueManagement>
     <scm>
-        <connection>scm:git:https://git.gitorious.org/yacy/rc1.git</connection>
-        <url>https://gitorious.org/yacy</url>
+        <connection>scm:git:https://github.com/yacy/yacy_search_server.git</connection>
+        <url>https://github.com/yacy/yacy_search_server</url>
     </scm>
     <licenses>
         <license>

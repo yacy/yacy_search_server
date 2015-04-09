@@ -22,7 +22,7 @@
   <Url type="application/x-suggestions+json" template="#[thisprotocol]#://#[thisaddress]#/suggest.json?query={searchTerms}"/>
   <Url type="application/x-suggestions+xml" template="#[thisprotocol]#://#[thisaddress]#/suggest.xml?query={searchTerms}"/>
   <!-- syntax according to http://www.loc.gov/standards/sru/. Set verify=true to get snippets in the search results -->
-  <Developer>See https://gitorious.org/+yacy-developers</Developer>
+  <Developer>See https://github.com/orgs/yacy/teams/yacy_developers</Developer>
   <Query role="example" searchTerms="yacy+free+software" />
   <Tags>YaCy Free Software Open Source P2P Peer-to-Peer Uncensored Distributed Web Search Engine</Tags>
   <Contact>See #[thisprotocol]#://#[thisaddress]#/ViewProfile.html?hash=localhash</Contact>
