@@ -331,13 +331,14 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String q = params.get(CommonParams.Q);
+        String fl = params.get(CommonParams.FL);
         String[] fq = params.getParams(CommonParams.FQ);
         String threadname = Thread.currentThread().getName();
         if (q != null) {
             StringBuilder fqa = new StringBuilder();
-            for (String f: fq) fqa.append("fq=").append(f).append(' ');
-            Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", " + fqa.toString()));
-            //System.out.println("solr query: q = " + q + (fq == null ? "" : ", " + fqa.toString()));
+            if (fq != null) for (String f: fq) fqa.append("fq=").append(f).append(' ');
+            Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", " + fqa.toString()) + (fl == null ? "" : ", fl=" + fl));
+            //System.out.println("solr query: q = " + q + (fq == null ? "" : ", " + fqa.toString()) + (fl == null ? "" : ", fl=" + fl));
         }
         QueryResponse rsp;
         try {
