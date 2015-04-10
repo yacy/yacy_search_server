@@ -83,6 +83,7 @@ public class DidYouMean {
 
     private final Segment segment;
     private final StringBuilder word;
+    private final boolean endsWithSpace;
     private final int wordLen;
     private long timeLimit;
     private final SortedSet<StringBuilder> resultSet;
@@ -94,6 +95,7 @@ public class DidYouMean {
      * @param sort true/false -  sorts the resulting TreeSet by index.count(); <b>Warning:</b> this causes heavy i/o.
      */
     public DidYouMean(final Segment segment, final String word0) {
+        this.endsWithSpace = word0.length() > 0 && word0.charAt(word0.length() - 1) == ' ';
         this.word = new StringBuilder(word0.trim());
         this.resultSet = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(this.word, WORD_LENGTH_COMPARATOR)));
         this.wordLen = this.word.length();
@@ -164,7 +166,11 @@ public class DidYouMean {
             // several words
             preSorted = getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), timeout, preSortSelection, this.segment);
         } else {
-            preSorted = getSuggestions(timeout);
+            if (this.endsWithSpace) {
+                preSorted = getSuggestions(this.word.toString(), "", timeout, preSortSelection, this.segment);
+            } else {
+                preSorted = getSuggestions(timeout);
+            }
         }
         final ReversibleScoreMap<StringBuilder> scored = new ClusteredScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
         LinkedHashSet<StringBuilder> countSorted = new LinkedHashSet<StringBuilder>();
@@ -216,24 +222,74 @@ public class DidYouMean {
         final SolrQuery solrQuery = new SolrQuery();
         solrQuery.setParam("defType", "edismax");
         solrQuery.setFacet(false);
-        assert tail.length() > 0 && tail.indexOf(' ') < 0; // if there would be a space it should be part of head
-        String q = head.length() == 0 ? CollectionSchema.text_t.getSolrFieldName() + ":" + tail + "~" : CollectionSchema.title.getSolrFieldName() + ":\"" + head + "\"^10 " + CollectionSchema.text_t.getSolrFieldName() + ":(" + head + " " + tail + ")~"; // for a fuzzy search we cannot apply fuzzyness on the tail only
-        String fq = head.length() == 0 ? null : CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + "\""; // in all cases (a) and (b) there must be that portion, but that is not part of the snippet that we are searching
+        String q = "", fq = "";
+        if (head.length() == 0 && tail.length() > 0) {
+            // head == "", tail != "" -> only one word was entered, no space at end
+            q = CollectionSchema.title.getSolrFieldName() + ":\"" + tail + "\"^1000.0 " + CollectionSchema.text_t.getSolrFieldName() + ":" + tail + "~";
+            fq = null;
+        }
+        if (head.length() > 0 && tail.length() == 0) {
+            // head != "", tail == "" -> only one word was entered and ends on space
+            q = CollectionSchema.title.getSolrFieldName() + ":\"" + head + " \"^1000.0 " + CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + " \"";
+            fq = CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + " \"";
+        }
+        if (head.length() > 0 && tail.length() > 0) {
+            // head != "", tail != "" -> several words were entered, last one is in tail, everything before in head.
+            q = CollectionSchema.text_t.getSolrFieldName() + ":(" + head + " " + tail + ")~"; // for a fuzzy search we cannot apply fuzzyness on the tail only
+            fq = CollectionSchema.text_t.getSolrFieldName() + ":\"" + head + "\"";
+        }
         solrQuery.setQuery(q);
         if (head.length() > 0 && fq != null) solrQuery.setFilterQueries(fq);
         solrQuery.setStart(0);
         solrQuery.setRows(count);
         solrQuery.setHighlight(true);
-        solrQuery.setHighlightFragsize(head.length() + tail.length() + 80);
+        //solrQuery.setHighlightFragsize(head.length() + tail.length() + 180);
         solrQuery.setHighlightSimplePre("<b>");
         solrQuery.setHighlightSimplePost("</b>");
-        solrQuery.setHighlightSnippets(1);
-        solrQuery.addHighlightField(CollectionSchema.title.getSolrFieldName());
+        solrQuery.setHighlightSnippets(5);
+        //solrQuery.addHighlightField(CollectionSchema.title.getSolrFieldName());
         solrQuery.addHighlightField(CollectionSchema.text_t.getSolrFieldName());
         solrQuery.setFields(); // no fields wanted! only snippets
         OrderedScoreMap<String> snippets = new OrderedScoreMap<String>(null);
         try {
             QueryResponse response = segment.fulltext().getDefaultConnector().getResponseByParams(solrQuery);
+            
+            /*
+            SolrQuery query = new SolrQuery();
+            query.setRequestHandler("/suggest");
+            //query.setQueryType(suggestHandler);
+            query.setQuery((head + " " + tail).trim());
+            Map<String,String> params = new HashMap<String,String>();
+            params.put(CommonParams.ROWS,Integer.toString(count));
+            params.put(SpellingParams.SPELLCHECK_PREFIX + "field",dictionary);
+            params.put(SpellingParams.SPELLCHECK_PREFIX + "dictionary",dictionary);
+            params.put(SpellingParams.SPELLCHECK_ONLY_MORE_POPULAR,Boolean.toString(onlyMorePopular));
+            params.put(SpellingParams.SPELLCHECK_MAX_COLLATION_TRIES,Integer.toString(1));
+            params.put(SpellingParams.SPELLCHECK_COLLATE_EXTENDED_RESULTS,Boolean.toString(collate));
+            params.put(SpellingParams.SPELLCHECK_COLLATE,Boolean.toString(collate));
+            query.add(new MapSolrParams(params));
+            response = segment.fulltext().getDefaultConnector().getResponseByParams(query);
+            
+            SpellCheckResponse spellCheckResponse = response.getSpellCheckResponse();
+            if (spellCheckResponse != null) {
+                Map<String,Suggestion> suggestionMapInternal = spellCheckResponse.getSuggestionMap();
+                if (suggestionMapInternal != null) {
+                    Map<String, Suggestion> suggestionMap = spellCheckResponse.getSuggestionMap();
+                }
+                if (spellCheckResponse.getCollatedResult() != null) {
+                    String collatedResult = spellCheckResponse.getCollatedResult().trim();
+                }
+                List<Suggestion> suggestions=spellCheckResponse.getSuggestions();
+                if (suggestions.size() != 0) {
+                    StringBuffer sb=new StringBuffer();
+                    for (Suggestion suggestion : suggestions) {
+                        sb.append(suggestion.getSuggestions().get(0)).append(" ");
+                    }
+                    String spellCheckProposal = sb.toString().trim();
+                }
+            }
+            */
+            
             Map<String, Map<String, List<String>>> rawsnippets = response.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
             if (rawsnippets != null) {
                 for (Map<String, List<String>> re: rawsnippets.values()) {
@@ -260,9 +316,25 @@ public class DidYouMean {
                 }
             }
         } catch (SolrException e) {
+            e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
         }
+        // delete all snippets which occur double-times, i.e. one that is a substring of another: remove longer snippet
         Iterator<String> si = snippets.keys(false);
+        while (si.hasNext()) {
+            String testsnippet = si.next().toLowerCase();
+            if (testsnippet.length() > head.length() + tail.length() + 1) {
+                Iterator<String> sin = snippets.keys(false);
+                while (sin.hasNext()) {
+                    String snippetx = sin.next();
+                    if (snippetx.length() != testsnippet.length() && snippetx.toLowerCase().startsWith(testsnippet)) {
+                        snippets.delete(snippetx);
+                    }
+                }
+            }
+        }
+        si = snippets.keys(false);
         while (si.hasNext() && result.size() < preSortSelection) {
             result.add(new StringBuilder(si.next()));
         }

@@ -64,7 +64,7 @@ public class suggest {
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", ""));
         final String querystring =  originalquerystring.replace('+', ' ').replaceAll("%20", " ");
         final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
-        final int count = (post == null) ? 10 : Math.min(20, post.getInt("count", 10));
+        final int count = (post == null) ? 10 : Math.min(30, post.getInt("count", 20));
 
         int c = 0;
         final DidYouMean didYouMean = new DidYouMean(sb.index, querystring);
