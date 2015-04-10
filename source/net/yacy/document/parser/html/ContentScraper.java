@@ -116,7 +116,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         li(TagType.pair),
         script(TagType.pair),
         span(TagType.pair),
-        div(TagType.pair);
+        div(TagType.pair),
+        article(TagType.pair);
 
         public TagType type;
         private TagName(final TagType type) {
@@ -177,6 +178,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Map<String, String> metas;
     private final Map<String, DigestURL> hreflang, navigation;
     private LinkedHashSet<String> titles;
+    private final List<String> articles;
     //private String headline;
     private List<String>[] headlines;
     private final ClusteredScoreMap<String> bold, italic, underline;
@@ -233,6 +235,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.navigation = new SizeLimitedMap<String, DigestURL>(maxLinks);
         this.script = new SizeLimitedSet<AnchorURL>(maxLinks);
         this.titles = new LinkedHashSet<String>();
+        this.articles = new ArrayList<String>();
         this.headlines = (List<String>[]) Array.newInstance(ArrayList.class, 6);
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
         this.bold = new ClusteredScoreMap<String>(false);
@@ -596,6 +599,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } else {
                 this.evaluationScores.match(Element.scriptcode, LB.matcher(new String(tag.content.getChars())).replaceAll(" "));
             }
+        } else if (tag.name.equalsIgnoreCase("article")) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
+            if (h.length() > 0) this.articles.add(h);
         }
 
         // fire event
@@ -754,6 +760,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public String getText() {
+        if (this.articles.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (String al: this.articles) {
+                sb.append(al).append(' ');
+            }
+            if (sb.length() > this.articles.size()) return sb.toString().trim();
+        }
         this.content.trim();
         try {
             return this.content.toString();
