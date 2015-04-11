@@ -94,7 +94,7 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#{/nav-vocabulary}##(nav-topics)#{}::
+    },#{/nav-vocabulary}##(nav-topics)#"topics": {}::
     "topics": {
       "displayname": "Topics",
       "type": "String",
