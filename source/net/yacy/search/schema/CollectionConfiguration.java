@@ -697,8 +697,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 c = 0;
                 for (final Map.Entry<DigestURL, String> entry: csss.entrySet()) {
                     final String cssurl = entry.getKey().toNormalform(false);
-                    inboundLinks.remove(cssurl);
-                    outboundLinks.remove(cssurl);
+                    inboundLinks.remove(entry.getKey());
+                    outboundLinks.remove(entry.getKey());
                     css_tag[c] =
                         "<link rel=\"stylesheet\" type=\"text/css\" media=\"" + entry.getValue() + "\"" +
                         " href=\""+ cssurl + "\" />";
