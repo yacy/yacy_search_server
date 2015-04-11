@@ -389,8 +389,11 @@ public final class QueryParams {
             bq += CollectionSchema.text_t.getSolrFieldName() + ":\"" + this.queryGoal.getIncludeString() + "\"^10";
         }
         if (fq.length() > 0) {
-            String oldfq = params.get(CommonParams.FQ);
-            params.setParam(CommonParams.FQ, oldfq == null || oldfq.length() == 0 ? fq : "(" + oldfq + ") AND (" + fq + ")");
+            String[] oldfq = params.getFilterQueries();
+            ArrayList<String> newfq = new ArrayList<>(oldfq.length + 1);
+            for (String x: oldfq) newfq.add(x);
+            newfq.add(fq);
+            params.setFilterQueries(newfq.toArray(new String[newfq.size()]));
         }
         if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq);
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
