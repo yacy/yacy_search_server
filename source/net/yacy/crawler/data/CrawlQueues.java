@@ -87,9 +87,13 @@ public class CrawlQueues {
 
         // start crawling management
         log.config("Starting Crawling Management");
+        log.config("Opening noticeURL..");
         this.noticeURL = new NoticedURL(queuePath, sb.getConfigInt("crawler.onDemandLimit", 1000), sb.exceed134217727);
+        log.config("Opening errorURL..");
         this.errorURL = new ErrorCache(sb.index.fulltext());
+        log.config("Opening delegatedURL..");
         this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
+        log.config("Finishted Startup of Crawling Management");
     }
     
     /**
