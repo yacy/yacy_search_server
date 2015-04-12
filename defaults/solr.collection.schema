@@ -314,6 +314,24 @@ images_width_val
 ## number of <li> tags, int
 #licount_i
 
+## all texts in <dt> tags
+#dt_txt
+
+## number of <dt> tags, int
+#dtcount_i
+
+## all texts in <dd> tags
+#dd_txt
+
+## number of <dd> tags, int
+#ddcount_i
+
+## all texts in <article> tags
+#article_txt
+
+## number of <article> tags, int
+#articlecount_i
+
 ## all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order
 bold_txt
 

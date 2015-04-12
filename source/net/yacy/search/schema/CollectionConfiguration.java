@@ -647,6 +647,18 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             final String[] li = html.getLi();
             add(doc, CollectionSchema.licount_i, li.length);
             if (li.length > 0) add(doc, CollectionSchema.li_txt, li);
+            
+            final String[] dt = html.getDt();
+            add(doc, CollectionSchema.dtcount_i, dt.length);
+            if (dt.length > 0) add(doc, CollectionSchema.dt_txt, li);
+            
+            final String[] dd = html.getLi();
+            add(doc, CollectionSchema.ddcount_i, dd.length);
+            if (dd.length > 0) add(doc, CollectionSchema.dd_txt, li);
+            
+            final List<String> articles = html.getArticles();
+            add(doc, CollectionSchema.articlecount_i, articles.size());
+            if (articles.size() > 0) add(doc, CollectionSchema.article_txt, articles);
 
             // images
             final ArrayList<String> imgprots = new ArrayList<String>(images.size());

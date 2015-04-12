@@ -4,10 +4,6 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -114,6 +110,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         u(TagType.pair),
         i(TagType.pair),
         li(TagType.pair),
+        dt(TagType.pair),
+        dd(TagType.pair),
         script(TagType.pair),
         span(TagType.pair),
         div(TagType.pair),
@@ -182,7 +180,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     //private String headline;
     private List<String>[] headlines;
     private final ClusteredScoreMap<String> bold, italic, underline;
-    private final List<String> li;
+    private final List<String> li, dt, dd;
     private final CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private double lon, lat;
@@ -242,6 +240,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.italic = new ClusteredScoreMap<String>(false);
         this.underline = new ClusteredScoreMap<String>(false);
         this.li = new ArrayList<String>();
+        this.dt = new ArrayList<String>();
+        this.dd = new ArrayList<String>();
         this.content = new CharBuffer(MAX_DOCSIZE, 1024);
         this.htmlFilterEventListeners = new EventListenerList();
         this.lon = 0.0d;
@@ -591,6 +591,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if ((tag.name.equalsIgnoreCase("li")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.li.add(h);
+        } else if ((tag.name.equalsIgnoreCase("dt")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
+            if (h.length() > 0) this.dt.add(h);
+        } else if ((tag.name.equalsIgnoreCase("dd")) && (tag.content.length() < 1024)) {
+            h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
+            if (h.length() > 0) this.dd.add(h);
         } else if (tag.name.equalsIgnoreCase("script")) {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
             if (src.length() > 0) {
@@ -734,6 +740,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return this.li.toArray(new String[this.li.size()]);
     }
 
+    public String[] getDt() {
+        return this.dt.toArray(new String[this.dt.size()]);
+    }
+
+    public String[] getDd() {
+        return this.dd.toArray(new String[this.dd.size()]);
+    }
+
     public DigestURL[] getFlash() {
         String ext;
         ArrayList<DigestURL> f = new ArrayList<DigestURL>();
@@ -760,20 +774,16 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public String getText() {
-        if (this.articles.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-            for (String al: this.articles) {
-                sb.append(al).append(' ');
-            }
-            if (sb.length() > this.articles.size()) return sb.toString().trim();
-        }
-        this.content.trim();
         try {
-            return this.content.toString();
+            return this.content.trim().toString();
         } catch (final OutOfMemoryError e) {
             ConcurrentLog.logException(e);
             return "";
         }
+    }
+
+    public List<String> getArticles() {
+        return this.articles;
     }
 
     public List<AnchorURL> getAnchors() {
