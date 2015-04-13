@@ -23,6 +23,12 @@ dates_in_content_dts
 
 ## the number of entries in dates_in_content_sxt
 dates_in_content_count_i
+
+## content of itemprop attributes with content='startDate'
+startDates_dts
+
+## content of itemprop attributes with content='endDate'
+endDates_dts
     
 ## mime-type of document, string (mandatory field)
 content_type

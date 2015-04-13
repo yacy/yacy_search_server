@@ -177,6 +177,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Map<String, DigestURL> hreflang, navigation;
     private LinkedHashSet<String> titles;
     private final List<String> articles;
+    private final List<Date> startDates, endDates;
     //private String headline;
     private List<String>[] headlines;
     private final ClusteredScoreMap<String> bold, italic, underline;
@@ -234,6 +235,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.script = new SizeLimitedSet<AnchorURL>(maxLinks);
         this.titles = new LinkedHashSet<String>();
         this.articles = new ArrayList<String>();
+        this.startDates = new ArrayList<>();
+        this.endDates = new ArrayList<>();
         this.headlines = (List<String>[]) Array.newInstance(ArrayList.class, 6);
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
         this.bold = new ClusteredScoreMap<String>(false);
@@ -373,9 +376,34 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             return null;
         }
     }
+    
+    private void checkOpts(Tag tag) {
+        // vocabulary classes
+        final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
+        this.vocabularyScraper.check(this.root, classprop, tag.content);
+        
+        // itemprop
+        String itemprop = tag.opts.getProperty("itemprop");
+        if (itemprop != null) {
+            String content = tag.opts.getProperty("content");
+            if (content != null) {
+                if ("startDate".equals(itemprop)) try {
+                    // parse ISO 8601 date
+                    Date startDate = ISO8601Formatter.FORMATTER.parse(content);
+                    this.startDates.add(startDate);
+                } catch (ParseException e) {}
+                if ("endDate".equals(itemprop)) try {
+                    // parse ISO 8601 date
+                    Date endDate = ISO8601Formatter.FORMATTER.parse(content);
+                    this.endDates.add(endDate);
+                } catch (ParseException e) {}
+            }
+        }
+    }
 
     @Override
     public void scrapeTag0(Tag tag) {
+        checkOpts(tag);
         if (tag.name.equalsIgnoreCase("img")) {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
             try {
@@ -514,9 +542,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     @Override
     public void scrapeTag1(Tag tag) {
-        final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
-        //System.out.println("class = " + classprop);
-        this.vocabularyScraper.check(this.root, classprop, tag.content);
+        checkOpts(tag);
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
             String href = tag.opts.getProperty("href", EMPTY_STRING);
@@ -746,6 +772,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     public String[] getDd() {
         return this.dd.toArray(new String[this.dd.size()]);
+    }
+    
+    public List<Date> getStartDates() {
+        return this.startDates;
+    }
+    
+    public List<Date> getEndDates() {
+        return this.endDates;
     }
 
     public DigestURL[] getFlash() {

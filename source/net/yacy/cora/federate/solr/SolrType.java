@@ -26,7 +26,7 @@ public enum SolrType {
     text_general("t", "txt"),            // tokenizes with StandardTokenizer, removes stop words from case-insensitive "stopwords.txt", down cases, applies synonyms.
     text_en_splitting_tight(null, null), // can insert dashes in the wrong place and still match
     location("p", null),                 // lat,lon - format: specialized field for geospatial search.
-    date("dt", null),                    // date format as in http://www.w3.org/TR/xmlschema-2/#dateTime with trailing 'Z'
+    date("dt", "dts"),                   // date format as in http://www.w3.org/TR/xmlschema-2/#dateTime with trailing 'Z'
     bool("b", "bs", "boolean"),
     num_integer("i", "val", "int"),
     num_long("l", "ls", "long"), 

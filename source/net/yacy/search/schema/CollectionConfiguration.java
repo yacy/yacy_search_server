@@ -650,11 +650,16 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             
             final String[] dt = html.getDt();
             add(doc, CollectionSchema.dtcount_i, dt.length);
-            if (dt.length > 0) add(doc, CollectionSchema.dt_txt, li);
-            
-            final String[] dd = html.getLi();
+            if (dt.length > 0) add(doc, CollectionSchema.dt_txt, dt);
+
+            final String[] dd = html.getDd();
             add(doc, CollectionSchema.ddcount_i, dd.length);
-            if (dd.length > 0) add(doc, CollectionSchema.dd_txt, li);
+            if (dd.length > 0) add(doc, CollectionSchema.dd_txt, dd);
+
+            final List<Date> startDates = html.getStartDates();
+            if (startDates.size() > 0) add(doc, CollectionSchema.startDates_dts, startDates.toArray(new Date[startDates.size()]));
+            final List<Date> endDates = html.getStartDates();
+            if (endDates.size() > 0) add(doc, CollectionSchema.endDates_dts, endDates.toArray(new Date[endDates.size()]));
             
             final List<String> articles = html.getArticles();
             add(doc, CollectionSchema.articlecount_i, articles.size());

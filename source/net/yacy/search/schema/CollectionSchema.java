@@ -37,6 +37,8 @@ public enum CollectionSchema implements SchemaDeclaration {
     last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"),
     dates_in_content_dts(SolrType.date, true, true, true, false, true, "if date expressions can be found in the content, these dates are listed here as date objects in order of the appearances"),
     dates_in_content_count_i(SolrType.num_integer, true, true, false, false, false, "the number of entries in dates_in_content_sxt"),
+    startDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='startDate'"),
+    endDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='endDate'"),
     content_type(SolrType.string, true, true, true, false, false, "mime-type of document"),
     http_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false"),
     www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false"),
@@ -272,6 +274,7 @@ public enum CollectionSchema implements SchemaDeclaration {
             assert !ext.equals("s") || (type == SolrType.string && !multiValued) : name;
             assert !ext.equals("sxt") || (type == SolrType.string && multiValued) : name;
             assert !ext.equals("dt") || (type == SolrType.date && !multiValued) : name;
+            assert !ext.equals("dts") || (type == SolrType.date && multiValued) : name;
             assert !ext.equals("t") || (type == SolrType.text_general && !multiValued) : name;
             assert !ext.equals("coordinate") || (type == SolrType.coordinate && !multiValued) : name;
             assert !ext.equals("txt") || (type == SolrType.text_general && multiValued) : name;
