@@ -1,17 +1,5 @@
-    "navigation": {#(nav-dates)#::
-    "dates": {
-      "displayname": "Filetype",
-      "type": "String",
-      "min": "0",
-      "max": "0",
-      "mean": "0",
-      "elements": [
-#{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
-#{/element}#
-      ]
-    },#(/nav-dates)##(nav-filetypes)#::
-    "filetypes": {
+    "navigation": [#(nav-dates)#::{
+      "facetname": "dates",
       "displayname": "Filetype",
       "type": "String",
       "min": "0",
@@ -22,8 +10,20 @@
         {"name": "#[name]#", "count": "#[count]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-filetypes)##(nav-protocols)#::
-    "protocols": {
+    },#(/nav-dates)##(nav-filetypes)#::{
+      "facetname": "filetypes",
+      "displayname": "Filetype",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-filetypes)##(nav-protocols)#::{
+      "facetname": "protocols",
       "displayname": "Protocol",
       "type": "String",
       "min": "0",
@@ -34,8 +34,8 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-protocols)##(nav-domains)#::
-    "domains": {
+    },#(/nav-protocols)##(nav-domains)#::{
+      "facetname": "domains",
       "displayname": "Domains",
       "type": "String",
       "min": "0",
@@ -46,8 +46,8 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-domains)##(nav-namespace)#::
-    "namespace": {
+    },#(/nav-domains)##(nav-namespace)#::{
+      "facetname": "namespace",
       "displayname": "Name Space",
       "type": "String",
       "min": "0",
@@ -58,8 +58,8 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-namespace)##(nav-authors)#::
-    "authors": {
+    },#(/nav-namespace)##(nav-authors)#::{
+      "facetname": "authors",
       "displayname": "Authors",
       "type": "String",
       "min": "0",
@@ -70,8 +70,8 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-authors)##(nav-collections)#::
-    "collections": {
+    },#(/nav-authors)##(nav-collections)#::{
+      "facetname": "collections",
       "displayname": "Collections",
       "type": "String",
       "min": "0",
@@ -82,8 +82,8 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-collections)##{nav-vocabulary}#
-    "#[navname]#": {
+    },#(/nav-collections)##{nav-vocabulary}#{
+      "facetname": "#[navname]#",
       "displayname": "#[navname]#",
       "type": "String",
       "min": "0",
@@ -94,8 +94,8 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#{/nav-vocabulary}##(nav-topics)#"topics": {}::
-    "topics": {
+    },#{/nav-vocabulary}##(nav-topics)#{}::{
+      "facetname": "topics",
       "displayname": "Topics",
       "type": "String",
       "min": "0",
@@ -107,5 +107,5 @@
 #{/element}#
       ]
     }#(/nav-topics)#
-    },
+    ],
     "totalResults": "#[num-results_totalcount]#"

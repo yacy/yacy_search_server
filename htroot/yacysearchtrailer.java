@@ -289,7 +289,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopicNavigator(TOPWORDS_MAXCOUNT) : null;
+        final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(TOPWORDS_MAXCOUNT);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             prop.put("nav-topics", "0");
         } else {
