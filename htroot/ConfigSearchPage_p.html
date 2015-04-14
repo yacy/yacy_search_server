@@ -255,7 +255,13 @@ var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows
                           <td align="center"><input type="checkbox" name="search.result.show.citation" value="true" #(search.result.show.citation)#::checked="checked" #(/search.result.show.citation)# /></td>
                           <td align="center"><input type="checkbox" name="search.result.show.pictures" value="true" #(search.result.show.pictures)#::checked="checked" #(/search.result.show.pictures)# /></td>
                           <td align="center"><input type="checkbox" name="search.result.show.cache" value="true" #(search.result.show.cache)#::checked="checked" #(/search.result.show.cache)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.proxy" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.proxy" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# />
+                            <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>
+                              For this option URL proxy must be enabled.<br>
+                              see <a href="AugmentedBrowsing_p.html">AugmentedBrowsing_p.html</a><br>
+                              menu: Content Semantic > Augmented Browsing
+                            </span></span>
+                          </td>
                           <td align="center"><input type="checkbox" name="search.result.show.hostbrowser" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
                         </tr>
                       </table>
