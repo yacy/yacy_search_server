@@ -207,7 +207,7 @@ public class yacysearchitem {
                 prop.put("content_showCitation", sb.getConfigBool("search.result.show.citation", true) ? 1 : 0);
                 prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
                 prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
-                prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
+                prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) && sb.getConfigBool("proxyURL", false) ? 1 : 0);
                 prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
                 prop.put("content_showVocabulary", sb.getConfigBool("search.result.show.vocabulary", true) ? 1 : 0);
 
