@@ -123,7 +123,7 @@ public class AccessTracker_p {
                         host = i.next();
                         access = serverAccessTracker.accessTrack(host);
                         final Iterator<Track> ii = listclone(access).iterator();
-                        while (ii.hasNext()) {
+                        while (ii.hasNext() && entCount < maxCount) {
                                 entry = ii.next();
                                 prop.putHTML("page_list_" + entCount + "_host", host);
                                 prop.put("page_list_" + entCount + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(entry.getTime())));

@@ -146,10 +146,10 @@ show search results for "#[query]#" on map</a>
 <script>
 function toggleVisibility(name, count) {
 	if (document.getElementById(name + "_0").style.display == "none") {
-		for (i = 0; i < count; i++) document.getElementById(name + "_" + i).style="display:block";
+		for (i = 0; i < count; i++) document.getElementById(name + "_" + i).style.display="block";
 		document.getElementById("chevron-" + name).className = "glyphicon glyphicon-chevron-up";
 	} else {
-		for (i = 0; i < count; i++) document.getElementById(name + "_" + i).style="display:none";
+		for (i = 0; i < count; i++) document.getElementById(name + "_" + i).style.display="none";
 		document.getElementById("chevron-" + name).className = "glyphicon glyphicon-chevron-down";
 	}
 }

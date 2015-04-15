@@ -42,7 +42,7 @@ This images shows incoming connections to your YaCy peer and outgoing connection
 Access Tracker==Zugriffe
 Server Access Overview==Server Zugriff Überblick
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen HTTP Server innerhalb der letzten Stunde gestellt wurden.
-This is a list of requests to the local http server within the last hour.==Dies ist eine Liste von Anfragen, die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
+This is a list of requests \(max. 1000\) to the local http server within the last hour.==Dies ist eine Liste von Anfragen (max. 1000), die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
 Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
 #>Host<==>Host<
 >Path<==>Pfad<
