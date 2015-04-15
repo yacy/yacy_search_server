@@ -70,8 +70,13 @@ public class sitemapParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL url, final String mimeType,
-            final String charset, final VocabularyScraper scraper, final InputStream source)
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source)
             throws Failure, InterruptedException {
         final List<Document> docs = new ArrayList<Document>();
         SitemapReader sitemap = new SitemapReader(source, ClientIdentification.yacyInternetCrawlerAgent);
@@ -83,7 +88,7 @@ public class sitemapParser extends AbstractParser implements Parser {
             uri = new DigestURL(item.loc);
             doc = new Document(
                     uri,
-                    TextParser.mimeOf(url),
+                    TextParser.mimeOf(location),
                     charset,
                     this,
                     null,
@@ -224,7 +229,7 @@ public class sitemapParser extends AbstractParser implements Parser {
 
         public Date lastmod(final Date dflt) {
             try {
-                return ISO8601Formatter.FORMATTER.parse(this.lastmod);
+                return ISO8601Formatter.FORMATTER.parse(this.lastmod, 0).getTime();
             } catch (final ParseException e) {
                 return dflt;
             }
@@ -245,7 +250,7 @@ public class sitemapParser extends AbstractParser implements Parser {
 
         public Date lastmod(final Date dflt) {
             try {
-                return ISO8601Formatter.FORMATTER.parse(this.lastmod);
+                return ISO8601Formatter.FORMATTER.parse(this.lastmod, 0).getTime();
             } catch (final ParseException e) {
                 return dflt;
             }

@@ -513,7 +513,7 @@
 	      </dl>
         </fieldset>
         <fieldset>
-          <legend>Index Administration</legend>
+          <legend>Index Attributes</legend>
           <dl>
           <dt>Indexing</dt>
           <dd>
@@ -559,6 +559,17 @@
             To use this option, the 'collection_sxt'-field must be switched on in the <a href="IndexFederated_p.html">Solr Schema</a>
             </span></span>
 			<input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
+	      </dd>
+	      
+          <dt><label for="collection">Time Zone Offset</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            The time zone is required when the parser detects a date in the crawled web page. Content can be searched with the on: - modifier which
+            requires also a time zone when a query is made. To normalize all given dates, the date is stored in UTC time zone. To get the right offset
+            from dates without time zones to UTC, this offset must be given here.  The offset is given in minutes;
+            Time zone offsets for locations east of UTC must be negative; offsets for zones west of UTC must be positve.
+            </span></span>
+			<input id="timezoneOffset" type="text" size="4" maxlength="4" name="timezoneOffset" value=""><script>document.getElementById("timezoneOffset").value = new Date().getTimezoneOffset();</script>
 	      </dd>
 	      
 	      </dl>

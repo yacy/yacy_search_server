@@ -48,11 +48,16 @@ public class RDFaParser extends AbstractParser implements Parser {
 	}
 
 	@Override
-    public Document[] parse(AnchorURL url, String mimeType,
-			String charset, final VocabularyScraper scraper, InputStream source) throws Failure,
+    public Document[] parse(
+            final AnchorURL url,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Failure,
 			InterruptedException {
 
-		Document[] htmlDocs = parseHtml(url, mimeType, charset, scraper, source);
+		Document[] htmlDocs = parseHtml(url, mimeType, charset, scraper, timezoneOffset, source);
 
 		// TODO: current hardcoded restriction: apply rdfa parser only on selected sources.
 
@@ -97,13 +102,18 @@ public class RDFaParser extends AbstractParser implements Parser {
 		return doc;
 	}
 
-	private Document[] parseHtml(AnchorURL url, String mimeType,
-			String charset, VocabularyScraper scraper, InputStream source) throws Failure,
+	private Document[] parseHtml(
+	        final AnchorURL url,
+	        final String mimeType,
+			final String charset,
+			final VocabularyScraper scraper,
+			final int timezoneOffset,
+			final InputStream source) throws Failure,
 			InterruptedException {
 
 		Document[] htmlDocs = null;
 		try {
-			htmlDocs = this.hp.parse(url, mimeType, charset, scraper, source);
+			htmlDocs = this.hp.parse(url, mimeType, charset, scraper, timezoneOffset, source);
 			source.reset();
 
 		} catch (final IOException e1) {
@@ -180,7 +190,7 @@ public class RDFaParser extends AbstractParser implements Parser {
             if (aReader != null) {
                 RDFaParser aParser = new RDFaParser();
                 try {
-                    aParser.parse(new AnchorURL(args[0]), "", "", new VocabularyScraper(), aURL.openStream());
+                    aParser.parse(new AnchorURL(args[0]), "", "", new VocabularyScraper(), 0, aURL.openStream());
                 } catch (final FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (final IOException e) {

@@ -59,14 +59,19 @@ public class rssParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL feedurl, final String mimeType,
-            final String charset, final VocabularyScraper scraper, final InputStream source)
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source)
             throws Failure, InterruptedException {
         RSSReader rssReader;
         try {
             rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source);
         } catch (final IOException e) {
-            throw new Parser.Failure("Load error:" + e.getMessage(), feedurl, e);
+            throw new Parser.Failure("Load error:" + e.getMessage(), location, e);
         }
 
         final RSSFeed feed = rssReader.getFeed();

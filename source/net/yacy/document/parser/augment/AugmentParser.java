@@ -38,13 +38,19 @@ public class AugmentParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(AnchorURL url, String mimeType, String charset, final VocabularyScraper scraper, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Parser.Failure, InterruptedException {
 
-        Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, scraper, source);
+        Document[] htmlDocs = this.rdfaParser.parse(location, mimeType, charset, scraper, timezoneOffset, source);
 
         for (final Document doc : htmlDocs) {
             /* analyze(doc, url, mimeType, charset);  // enrich document text */
-            parseAndAugment(doc, url, mimeType, charset); // enrich document with additional tags
+            parseAndAugment(doc, location, mimeType, charset); // enrich document with additional tags
         }
         return htmlDocs;
     }

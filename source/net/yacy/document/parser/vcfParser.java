@@ -66,7 +66,13 @@ public class vcfParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, final VocabularyScraper scraper, final InputStream source)
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         try {
@@ -201,7 +207,7 @@ public class vcfParser extends AbstractParser implements Parser {
 
                 } else {
                     if (AbstractParser.log.isFinest()) AbstractParser.log.finest("Invalid data in vcf file" +
-                                             "\n\tURL: " + url +
+                                             "\n\tURL: " + location +
                                              "\n\tLine: " + line +
                                              "\n\tLine-Nr: " + lineNr);
                 }
@@ -212,7 +218,7 @@ public class vcfParser extends AbstractParser implements Parser {
             final byte[] text = UTF8.getBytes(parsedDataText.toString());
             final List<String> descriptions = new ArrayList<String>(1); descriptions.add("vCard");
             return new Document[]{new Document(
-                    url,                        // url of the source document
+                    location,                   // url of the source document
                     mimeType,                   // the documents mime type
                     null,                       // charset
                     this,
@@ -234,7 +240,7 @@ public class vcfParser extends AbstractParser implements Parser {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
 
-            throw new Parser.Failure("Unexpected error while parsing vcf resource. " + e.getMessage(),url);
+            throw new Parser.Failure("Unexpected error while parsing vcf resource. " + e.getMessage(), location);
         }
     }
 

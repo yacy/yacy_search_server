@@ -59,11 +59,16 @@ public class linkScraperParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("text/sgml");
     }
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final VocabularyScraper scraper, final InputStream source)
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source)
             throws Parser.Failure, InterruptedException {
         
-        Document[] htmlParserDocs = new htmlParser().parse(location, mimeType, charset, scraper, source);
+        Document[] htmlParserDocs = new htmlParser().parse(location, mimeType, charset, scraper, timezoneOffset, source);
         Document htmlParserDoc = htmlParserDocs == null ? null : Document.mergeDocuments(location, mimeType, htmlParserDocs);
         
         

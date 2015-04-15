@@ -224,7 +224,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
                 date = HeaderFramework.FORMAT_RFC1123.parse(dateString);
             } catch (final ParseException e) {
                 try {
-                    date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString);
+                    date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString, 0).getTime();
                 } catch (final ParseException e1) {
                     date = HeaderFramework.parseHTTPDate(dateString); // returns null on parse error
                 }

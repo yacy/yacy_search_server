@@ -25,13 +25,19 @@
 package net.yacy.cora.date;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 public abstract class AbstractFormatter implements DateFormatter {
 
-    protected static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
-
+    public final static Calendar testCalendar = Calendar.getInstance(); // a calendar in the current time zone of the server
+    public final static Calendar UTCCalendar = Calendar.getInstance();
+    public final static TimeZone UTCtimeZone = TimeZone.getTimeZone("UTC");
+    static {
+        UTCCalendar.setTimeZone(UTCtimeZone);
+    }
+    
     // statics
     public final static long secondMillis = 1000;
     public final static long minuteMillis = 60 * secondMillis;
@@ -45,7 +51,7 @@ public abstract class AbstractFormatter implements DateFormatter {
     protected String last_format;
     
     @Override
-    public abstract Date parse(String s) throws ParseException;
+    public abstract Calendar parse(String s, int timezoneOffset) throws ParseException;
     @Override
     public abstract String format(final Date date);
     @Override

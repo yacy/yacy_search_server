@@ -107,17 +107,17 @@ public class URIMetadataNode extends SolrDocument {
         final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
 
         try {
-            this.setField(CollectionSchema.last_modified.name(), formatter.parse(prop.getProperty("mod", "20000101")));
+            this.setField(CollectionSchema.last_modified.name(), formatter.parse(prop.getProperty("mod", "20000101"), 0).getTime());
         } catch (final ParseException e) {
             this.setField(CollectionSchema.last_modified.name(), new Date());
         }
         try {
-            this.setField(CollectionSchema.load_date_dt.name(), formatter.parse(prop.getProperty("load", "20000101")));
+            this.setField(CollectionSchema.load_date_dt.name(), formatter.parse(prop.getProperty("load", "20000101"), 0).getTime());
         } catch (final ParseException e) {
             this.setField(CollectionSchema.load_date_dt.name(), new Date());
         }
         try {
-            this.setField(CollectionSchema.fresh_date_dt.name(), formatter.parse(prop.getProperty("fresh", "20000101")));
+            this.setField(CollectionSchema.fresh_date_dt.name(), formatter.parse(prop.getProperty("fresh", "20000101"), 0).getTime());
         } catch (final ParseException e) {
             this.setField(CollectionSchema.fresh_date_dt.name(), new Date());
         }

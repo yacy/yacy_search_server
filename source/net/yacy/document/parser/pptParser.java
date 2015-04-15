@@ -64,8 +64,13 @@ public class pptParser extends AbstractParser implements Parser {
      * all extracted information about the parsed document
      */
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final VocabularyScraper scraper, final InputStream source) throws Parser.Failure,
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Parser.Failure,
             InterruptedException {
         try {
             /*

@@ -86,7 +86,13 @@ public class pdfParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final VocabularyScraper scraper, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Parser.Failure, InterruptedException {
 
         // check memory for parser
         if (!MemoryControl.request(200 * 1024 * 1024, false))
@@ -376,7 +382,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 final AbstractParser parser = new pdfParser();
                 Document document = null;
                 try {
-                    document = Document.mergeDocuments(null, "application/pdf", parser.parse(null, "application/pdf", null, new VocabularyScraper(), new FileInputStream(pdfFile)));
+                    document = Document.mergeDocuments(null, "application/pdf", parser.parse(null, "application/pdf", null, new VocabularyScraper(), 0, new FileInputStream(pdfFile)));
                 } catch (final Parser.Failure e) {
                     System.err.println("Cannot parse file " + pdfFile.getAbsolutePath());
                     ConcurrentLog.logException(e);

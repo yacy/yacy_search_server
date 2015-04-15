@@ -137,7 +137,7 @@ public class SolrSelectServlet extends HttpServlet {
             if (!mmsp.getMap().containsKey(CommonParams.Q) && mmsp.getMap().containsKey(CommonParams.QUERY)) {
                 querystring = mmsp.get(CommonParams.QUERY, "");
                 mmsp.getMap().remove(CommonParams.QUERY);
-                QueryModifier modifier = new QueryModifier();
+                QueryModifier modifier = new QueryModifier(0);
                 querystring = modifier.parse(querystring);
                 modifier.apply(mmsp);
                 QueryGoal qg = new QueryGoal(querystring);

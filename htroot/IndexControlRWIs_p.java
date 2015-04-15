@@ -637,11 +637,12 @@ public class IndexControlRWIs_p {
         final QueryGoal qg = new QueryGoal(queryhashes, null);
         final QueryParams query = new QueryParams(
                 qg,
-                new QueryModifier(),
+                new QueryModifier(0),
                 Integer.MAX_VALUE,
                 "",
                 ContentDomain.ALL,
                 "", //lang
+                0, //timezoneOffset
                 null,
                 CacheStrategy.IFFRESH,
                 1000, 0, //count, offset             

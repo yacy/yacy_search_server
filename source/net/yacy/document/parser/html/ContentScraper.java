@@ -188,6 +188,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private AnchorURL canonical, publisher;
     private final int maxLinks;
     private final VocabularyScraper vocabularyScraper;
+    private final int timezoneOffset;
     private int breadcrumbs;
 
 
@@ -213,7 +214,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param classDetector a map from class names to vocabulary names to scrape content from the DOM with associated class name
      */
     @SuppressWarnings("unchecked")
-    public ContentScraper(final DigestURL root, int maxLinks, final VocabularyScraper vocabularyScraper) {
+    public ContentScraper(final DigestURL root, int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
@@ -221,6 +222,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.root = root;
         this.maxLinks = maxLinks;
         this.vocabularyScraper = vocabularyScraper;
+        this.timezoneOffset = timezoneOffset;
         this.evaluationScores = new Evaluation();
         this.rss = new SizeLimitedMap<DigestURL, String>(maxLinks);
         this.css = new SizeLimitedMap<DigestURL, String>(maxLinks);
@@ -389,12 +391,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (content != null) {
                 if ("startDate".equals(itemprop)) try {
                     // parse ISO 8601 date
-                    Date startDate = ISO8601Formatter.FORMATTER.parse(content);
+                    Date startDate = ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();
                     this.startDates.add(startDate);
                 } catch (ParseException e) {}
                 if ("endDate".equals(itemprop)) try {
                     // parse ISO 8601 date
-                    Date endDate = ISO8601Formatter.FORMATTER.parse(content);
+                    Date endDate = ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();
                     this.endDates.add(endDate);
                 } catch (ParseException e) {}
             }
@@ -651,7 +653,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
         // start a new scraper to parse links inside this text
         // parsing the content
-        final ContentScraper scraper = new ContentScraper(this.root, this.maxLinks, this.vocabularyScraper);
+        final ContentScraper scraper = new ContentScraper(this.root, this.maxLinks, this.vocabularyScraper, this.timezoneOffset);
         final TransformerWriter writer = new TransformerWriter(null, null, scraper, null, false);
         try {
             FileUtils.copy(new CharArrayReader(inlineHtml), writer);
@@ -1003,19 +1005,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         
         // <meta name="date" content="YYYY-MM-DD..." />
         content = this.metas.get("date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
 
         // <meta name="DC.date" content="YYYY-MM-DD" />
         content = this.metas.get("dc.date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
         
         // <meta name="DC:date" content="YYYY-MM-DD" />
         content = this.metas.get("dc:date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
         
         // <meta http-equiv="last-modified" content="YYYY-MM-DD" />
         content = this.metas.get("last-modified");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
         
         return new Date();
     }
@@ -1153,19 +1155,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    public static ContentScraper parseResource(final File file, final int maxLinks) throws IOException {
+    public static ContentScraper parseResource(final File file, final int maxLinks, final int timezoneOffset) throws IOException {
         // load page
         final byte[] page = FileUtils.read(file);
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), "UTF-8", new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), "UTF-8", new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();
 
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks, new VocabularyScraper());
+        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks, new VocabularyScraper(), timezoneOffset);
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         writer.close();

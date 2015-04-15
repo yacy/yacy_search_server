@@ -59,6 +59,7 @@ public interface Parser {
             String mimeType,
             String charset,
             VocabularyScraper scraper,
+            int timezoneOffset,
             InputStream source
             ) throws Parser.Failure, InterruptedException;
 

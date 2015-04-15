@@ -118,7 +118,8 @@ public final class search {
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "all");
         final String  filter = post.get("filter", ".*"); // a filter on the url
-        QueryModifier modifier = new QueryModifier();
+        final int timezoneOffset = post.getInt("timezoneOffset", 0);
+        QueryModifier modifier = new QueryModifier(timezoneOffset);
         modifier.sitehost = post.get("sitehost", ""); if (modifier.sitehost.isEmpty()) modifier.sitehost = null;
         modifier.sitehash = post.get("sitehash", ""); if (modifier.sitehash.isEmpty()) modifier.sitehash = null;
         modifier.author = post.get("author", ""); if (modifier.author.isEmpty()) modifier.author = null;
@@ -232,6 +233,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
+                    timezoneOffset,
                     new HashSet<Tagging.Metatag>(),
                     null, // no snippet computation
                     count,
@@ -297,6 +299,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
+                    timezoneOffset,
                     new HashSet<Tagging.Metatag>(),
                     null, // no snippet computation
                     count,

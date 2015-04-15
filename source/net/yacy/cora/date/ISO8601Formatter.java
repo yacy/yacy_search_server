@@ -41,7 +41,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
     private static final SimpleDateFormat FORMAT_ISO8601 = new SimpleDateFormat(PATTERN_ISO8601, Locale.US);
     
     static {
-        FORMAT_ISO8601.setTimeZone(TZ_GMT);
+        FORMAT_ISO8601.setTimeZone(AbstractFormatter.UTCtimeZone);
     }
     
     public static final ISO8601Formatter FORMATTER = new ISO8601Formatter();
@@ -72,7 +72,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
      * @throws ParseException
      */
     @Override
-    public Date parse(String s) throws ParseException {
+    public Calendar parse(String s, final int timezoneOffset) throws ParseException {
         // do some lazy checks here
         s = s.trim();
         while (!s.isEmpty() && s.endsWith("?")) s = s.substring(0, s.length() - 1); // sometimes used if write is not sure about date
@@ -87,7 +87,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
         while (!s.isEmpty() && s.endsWith("?")) s = s.substring(0, s.length() - 1); // sometimes used if write is not sure about date
         
         // no go for exact parsing
-        final Calendar cal = Calendar.getInstance(TZ_GMT, Locale.US);
+        final Calendar cal = Calendar.getInstance(AbstractFormatter.UTCtimeZone, Locale.US);
         cal.clear();
         
         // split 2007-12-19T10:20:30.789+0500 into its parts
@@ -103,13 +103,13 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
             if (t.nextToken().equals("-")) {
                 cal.set(Calendar.MONTH, Integer.parseInt(t.nextToken()) - 1);
             } else {
-                return cal.getTime();
+                return cal;
             }
             // day
             if (t.nextToken().equals("-")) {
                 cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(t.nextToken()));
             } else {
-                return cal.getTime();
+                return cal;
             }
             // The standard says:
             // if there is an hour there has to be a minute and a timezone token, too.
@@ -147,7 +147,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
                             sign = -1;
                         } else {
                             // no legal TZ offset found
-                            return cal.getTime();
+                            return cal;
                         }
                         offset = sign * Integer.parseInt(t.nextToken()) * 10 * 3600;
                     }
@@ -168,8 +168,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
         // in case we couldn't even parse a year
         if (!cal.isSet(Calendar.YEAR))
             throw new ParseException("parseISO8601: Cannot parse '" + s + "'", 0);
-        Date d = cal.getTime();
-        return d;
+        return cal;
     }
 
 

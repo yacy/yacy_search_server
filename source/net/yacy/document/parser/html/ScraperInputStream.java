@@ -64,13 +64,14 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
             final DigestURL rooturl,
             final Transformer transformer,
             final boolean passbyIfBinarySuspect,
-            final int maxLinks
+            final int maxLinks,
+            final int timezoneOffset
     ) {
         // create a input stream for buffereing
         this.bufferedIn = new BufferedInputStream(inStream, (int) preBufferSize);
         this.bufferedIn.mark((int) preBufferSize);
 
-        final ContentScraper scraper = new ContentScraper(rooturl, maxLinks, vocabularyScraper);
+        final ContentScraper scraper = new ContentScraper(rooturl, maxLinks, vocabularyScraper, timezoneOffset);
         scraper.registerHtmlFilterEventListener(this);
 
         try {

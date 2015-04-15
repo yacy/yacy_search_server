@@ -210,7 +210,7 @@ public class BlogBoard {
             }
 
             try {
-                date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(StrDate);
+                date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(StrDate, 0).getTime();
             } catch (final ParseException e1) {
                 date = new Date();
             }
@@ -404,7 +404,7 @@ public class BlogBoard {
                     }
                     return new Date();
                 }
-                return GenericFormatter.SHORT_SECOND_FORMATTER.parse(date);
+                return GenericFormatter.SHORT_SECOND_FORMATTER.parse(date, 0).getTime();
             } catch (final ParseException ex) {
                 return new Date();
             }

@@ -214,6 +214,9 @@ public class yacysearch {
             prop.setOutgoingHeader(outgoingHeader);
         }
 
+        // time zone
+        int timezoneOffset = post.getInt("timezoneOffset", 0);
+        
         // collect search attributes
 
         int itemsPerPage =
@@ -359,7 +362,7 @@ public class yacysearch {
             }
 
             final RankingProfile ranking = sb.getRanking();
-            final QueryModifier modifier = new QueryModifier();
+            final QueryModifier modifier = new QueryModifier(timezoneOffset);
             querystring = modifier.parse(querystring);
             if (modifier.sitehost != null && modifier.sitehost.length() > 0 && querystring.length() == 0) querystring = "*"; // allow to search for all documents on a host
 
@@ -643,6 +646,7 @@ public class yacysearch {
                     prefermask,
                     contentdom,
                     language,
+                    timezoneOffset,
                     metatags,
                     snippetFetchStrategy,
                     itemsPerPage,

@@ -97,7 +97,8 @@ public final class Condenser {
             final boolean indexMedia,
             final WordCache meaningLib,
             final boolean doAutotagging,
-            final boolean findDatesInContent
+            final boolean findDatesInContent,
+            final int timezoneOffset
             ) {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
@@ -123,7 +124,7 @@ public final class Condenser {
         Map.Entry<AnchorURL, String> entry;
         if (indexText) {
             String text = document.getTextString();
-            if (findDatesInContent) this.dates_in_content = DateDetection.parse(text);
+            if (findDatesInContent) this.dates_in_content = DateDetection.parse(text, timezoneOffset);
             createCondensement(document.dc_source(), text, meaningLib, doAutotagging, scraper);
             // the phrase counter:
             // phrase   0 are words taken from the URL

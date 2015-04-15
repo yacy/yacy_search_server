@@ -112,21 +112,24 @@ public final class LoaderDispatcher {
             final boolean forText,
             final boolean global
                     ) {
+        CrawlProfile profile =
+                (forText) ?
+                    ((global) ?
+                        this.sb.crawler.defaultTextSnippetGlobalProfile :
+                        this.sb.crawler.defaultTextSnippetLocalProfile)
+                    :
+                    ((global) ?
+                        this.sb.crawler.defaultMediaSnippetGlobalProfile :
+                        this.sb.crawler.defaultMediaSnippetLocalProfile);
         return new Request(
                 ASCII.getBytes(this.sb.peers.mySeed().hash),
                     url,
                     null,
                     "",
                     new Date(),
-                    (forText) ?
-                        ((global) ?
-                            this.sb.crawler.defaultTextSnippetGlobalProfile.handle() :
-                            this.sb.crawler.defaultTextSnippetLocalProfile.handle())
-                        :
-                        ((global) ?
-                            this.sb.crawler.defaultMediaSnippetGlobalProfile.handle() :
-                            this.sb.crawler.defaultMediaSnippetLocalProfile.handle()), // crawl profile
-                    0);
+                    profile.handle(),
+                    0,
+                    profile.timezoneOffset());
     }
 
     public void load(final DigestURL url, final CacheStrategy cacheStratgy, final int maxFileSize, final File targetFile, BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
@@ -407,7 +410,7 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<AnchorURL, String> loadLinks(final AnchorURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+    public final Map<AnchorURL, String> loadLinks(final AnchorURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent, final int timezoneOffset) throws IOException {
         final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, agent);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
@@ -418,7 +421,7 @@ public final class LoaderDispatcher {
         final String supportError = TextParser.supports(url, responseHeader.mime());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), response.profile().scraper(), response.depth(), response.getContent());
+            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

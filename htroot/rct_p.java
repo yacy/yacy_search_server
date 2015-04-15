@@ -78,7 +78,8 @@ public class rct_p {
                                     "REMOTE-CRAWLING",
                                     loaddate,
                                     sb.crawler.defaultRemoteProfile.handle(),
-                                    0));
+                                    0,
+                                    sb.crawler.defaultRemoteProfile.timezoneOffset()));
                         } else {
                             env.getLog().warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
                         }

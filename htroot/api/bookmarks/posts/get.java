@@ -39,7 +39,7 @@ public class get {
 
         Date parsedDate = null;
         try {
-            parsedDate = ISO8601Formatter.FORMATTER.parse(date);
+            parsedDate = ISO8601Formatter.FORMATTER.parse(date, 0).getTime();
         } catch (final ParseException e) {
             parsedDate = new Date();
         }

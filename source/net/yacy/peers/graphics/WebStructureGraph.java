@@ -503,7 +503,7 @@ public class WebStructureGraph {
                     hr =
                         new HostReference(
                             ASCII.getBytes(sentry.hosthash),
-                            GenericFormatter.SHORT_DAY_FORMATTER.parse(sentry.date).getTime(),
+                            GenericFormatter.SHORT_DAY_FORMATTER.parse(sentry.date, 0).getTime().getTime(),
                             refhosthashandcounter.getValue().intValue());
                 } catch (final ParseException e ) {
                     continue refloop;

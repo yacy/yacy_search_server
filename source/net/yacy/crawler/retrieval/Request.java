@@ -92,7 +92,8 @@ public class Request extends WorkflowJob
     private Bitfield flags;
     private String statusMessage;
     private int initialHash; // to provide a object hash that does not change even if the url changes because of redirection
-
+    private int timezoneOffset;
+    
     public Request() {
         // used only to create poison entries
         this.initiator = null;
@@ -106,6 +107,7 @@ public class Request extends WorkflowJob
         this.statusMessage = null;
         this.initialHash = 0;
         this.status = 0;
+        this.timezoneOffset = 0;
     }
     
     /**
@@ -115,7 +117,7 @@ public class Request extends WorkflowJob
      * @param referrerhash
      */
     public Request(final DigestURL url, final byte[] referrerhash) {
-        this(null, url, referrerhash, null, null, null, 0);
+        this(null, url, referrerhash, null, null, null, 0, 0);
     }
 
     /**
@@ -136,7 +138,8 @@ public class Request extends WorkflowJob
         final String name,
         final Date appdate,
         final String profileHandle,
-        final int depth) {
+        final int depth,
+        final int timezoneOffset) {
         // create new entry and store it into database
         assert url != null;
         assert profileHandle == null || profileHandle.length() == Word.commonHashLength : profileHandle
@@ -150,6 +153,7 @@ public class Request extends WorkflowJob
         this.appdate = (appdate == null) ? 0 : appdate.getTime();
         this.profileHandle = profileHandle; // must not be null
         this.depth = depth;
+        this.timezoneOffset = timezoneOffset;
         this.flags = new Bitfield(rowdef.width(10));
         this.statusMessage = "loaded(args)";
         this.initialHash = url.hashCode();
@@ -270,6 +274,10 @@ public class Request extends WorkflowJob
     public int depth() {
         // crawl depth where the url appeared
         return this.depth;
+    }
+    
+    public int timezoneOffset() {
+        return this.timezoneOffset;
     }
 
     public String profileHandle() {

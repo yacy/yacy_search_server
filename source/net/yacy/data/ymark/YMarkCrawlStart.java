@@ -190,7 +190,8 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		                CacheStrategy.IFFRESH,
 		                "robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
 		                ClientIdentification.yacyIntranetCrawlerAgentName,
-		                null); // TODO: make this a default profile in CrawlSwitchboard
+		                null,
+		                0); // TODO: make this a default profile in CrawlSwitchboard
 		sb.crawler.putActive(pe.handle().getBytes(), pe);
 		return sb.crawlStacker.stackCrawl(new Request(
         sb.peers.mySeed().hash.getBytes(),
@@ -198,7 +199,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
         null,
         "CRAWLING-ROOT",
         new Date(),
-        pe.handle(), 0
+        pe.handle(), 0, pe.timezoneOffset()
         ));
 	}
 }

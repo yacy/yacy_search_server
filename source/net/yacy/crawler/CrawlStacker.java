@@ -151,17 +151,26 @@ public final class CrawlStacker {
         if (CrawlStacker.log.isFinest()) CrawlStacker.log.finest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
         this.requestQueue.enQueue(entry);
     }
-    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final List<AnchorURL> hyperlinks) {
+    public void enqueueEntriesAsynchronous(
+            final byte[] initiator,
+            final String profileHandle,
+            final List<AnchorURL> hyperlinks,
+            final int timezoneOffset) {
         new Thread() {
             @Override
             public void run() {
                 Thread.currentThread().setName("enqueueEntriesAsynchronous");
-                enqueueEntries(initiator, profileHandle, hyperlinks, true);
+                enqueueEntries(initiator, profileHandle, hyperlinks, true, timezoneOffset);
             }
         }.start();
     }
 
-    private void enqueueEntries(final byte[] initiator, final String profileHandle, final List<AnchorURL> hyperlinks, final boolean replace) {
+    private void enqueueEntries(
+            final byte[] initiator,
+            final String profileHandle,
+            final List<AnchorURL> hyperlinks,
+            final boolean replace,
+            final int timezoneOffset) {
         if (replace) {
             // delete old entries, if exists to force a re-load of the url (thats wanted here)
             Set<String> hosthashes = new HashSet<String>();
@@ -199,7 +208,7 @@ public final class CrawlStacker {
                 int p = userInfo == null ? -1 : userInfo.indexOf(':');
                 String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
                 String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
-                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), user, pw, replace);
+                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), user, pw, replace, timezoneOffset);
             } else {
                 // put entry on crawl stack
                 enqueueEntry(new Request(
@@ -209,13 +218,22 @@ public final class CrawlStacker {
                         url.getNameProperty(),
                         new Date(),
                         profileHandle,
-                        0
+                        0,
+                        timezoneOffset
                         ));
             }
         }
     }
 
-    public void enqueueEntriesFTP(final byte[] initiator, final String profileHandle, final String host, final int port, final String user, final String pw, final boolean replace) {
+    public void enqueueEntriesFTP(
+            final byte[] initiator,
+            final String profileHandle,
+            final String host,
+            final int port,
+            final String user,
+            final String pw,
+            final boolean replace,
+            final int timezoneOffset) {
         final CrawlQueues cq = this.nextQueue;
         new Thread() {
             @Override
@@ -248,7 +266,8 @@ public final class CrawlStacker {
                                 MultiProtocolURL.unescape(entry.name),
                                 entry.date,
                                 profileHandle,
-                                0));
+                                0,
+                                timezoneOffset));
                     }
                 } catch (final IOException e1) {
                     ConcurrentLog.logException(e1);
@@ -272,7 +291,7 @@ public final class CrawlStacker {
                 "CRAWLING-ROOT",
                 new Date(),
                 pe.handle(),
-                0));
+                0, 0));
     }
 
     /**

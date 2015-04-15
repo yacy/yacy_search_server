@@ -62,12 +62,17 @@ public class zipParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL url, final String mimeType,
-            final String charset, final VocabularyScraper scraper, final InputStream source)
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source)
             throws Parser.Failure, InterruptedException {
         // check memory for parser
         if (!MemoryControl.request(200 * 1024 * 1024, false))
-            throw new Parser.Failure("Not enough Memory available for zip parser: " + MemoryControl.available(), url);
+            throw new Parser.Failure("Not enough Memory available for zip parser: " + MemoryControl.available(), location);
 
          Document[] docs = null;
         final List<Document> docacc = new ArrayList<Document>();
@@ -88,9 +93,9 @@ public class zipParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(zis, tmp, entry.getSize());
-                    final DigestURL virtualURL = DigestURL.newURL(url, "#" + name);
+                    final DigestURL virtualURL = DigestURL.newURL(location, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    docs = TextParser.parseSource(new AnchorURL(virtualURL), mime, null, scraper, 999, tmp);
+                    docs = TextParser.parseSource(new AnchorURL(virtualURL), mime, null, scraper, timezoneOffset, 999, tmp);
                     if (docs == null) continue;
                     for (final Document d: docs) docacc.add(d);
                 } catch (final Parser.Failure e) {

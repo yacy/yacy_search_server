@@ -46,8 +46,13 @@ public class genericParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType,
-            final String charset, final VocabularyScraper scraper, final InputStream source1)
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source)
             throws Parser.Failure, InterruptedException {
         String filename = location.getFileName();
         final Document[] docs = new Document[]{new Document(

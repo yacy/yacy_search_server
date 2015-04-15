@@ -1942,7 +1942,8 @@ public final class Switchboard extends serverSwitch {
                     "",
                     surrogate.getDate(),
                     this.crawler.defaultSurrogateProfile.handle(),
-                    0);
+                    0,
+                    this.crawler.defaultSurrogateProfile.timezoneOffset());
             response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false, null);
             final IndexingQueueEntry queueEntry =
                 new IndexingQueueEntry(response, new Document[] {document}, null);
@@ -2571,6 +2572,7 @@ public final class Switchboard extends serverSwitch {
                     response.getMimeType(),
                     response.getCharacterEncoding(),
                     response.profile().scraper(),
+                    response.profile().timezoneOffset(),
                     response.depth(),
                     response.getContent());
             if ( documents == null ) {
@@ -2673,7 +2675,8 @@ public final class Switchboard extends serverSwitch {
                         nextEntry.getValue(),
                         new Date(),
                         response.profile().handle(),
-                        nextdepth));
+                        nextdepth,
+                        response.profile().timezoneOffset()));
                 } catch (final MalformedURLException e ) {
                     ConcurrentLog.logException(e);
                 }
@@ -2754,7 +2757,8 @@ public final class Switchboard extends serverSwitch {
                         in.documents[i], in.queueEntry.profile().scraper(), in.queueEntry.profile().indexText(),
                         in.queueEntry.profile().indexMedia(),
                         LibraryProvider.dymLib, true,
-                        this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts));
+                        this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts),
+                        profile.timezoneOffset());
 
             // update image result list statistics
             // its good to do this concurrently here, because it needs a DNS lookup
@@ -3043,7 +3047,15 @@ public final class Switchboard extends serverSwitch {
                 int p = userInfo == null ? -1 : userInfo.indexOf(':');
                 String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
                 String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
-                this.crawlStacker.enqueueEntriesFTP(this.peers.mySeed().hash.getBytes(), profile.handle(), url.getHost(), url.getPort(), user, pw, false);
+                this.crawlStacker.enqueueEntriesFTP(
+                        this.peers.mySeed().hash.getBytes(),
+                        profile.handle(),
+                        url.getHost(),
+                        url.getPort(),
+                        user,
+                        pw,
+                        false,
+                        profile.timezoneOffset());
                 return null;
             } catch (final Exception e) {
                 // mist
@@ -3080,7 +3092,8 @@ public final class Switchboard extends serverSwitch {
                 "CRAWLING-ROOT",
                 new Date(),
                 profile.handle(),
-                0
+                0,
+                profile.timezoneOffset()
                 ));
         
         if (reasonString != null) return reasonString;
@@ -3134,7 +3147,7 @@ public final class Switchboard extends serverSwitch {
      * @throws IOException
      * @throws Parser.Failure
      */
-    public void addToIndex(final Collection<DigestURL> urls, final SearchEvent searchEvent, final String heuristicName, final Map<String, Pattern> collections, boolean doublecheck) {
+    public void addToIndex(final Collection<DigestURL> urls, final SearchEvent searchEvent, final String heuristicName, final Map<String, Pattern> collections, final boolean doublecheck) {
         Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (DigestURL url: urls) urlmap.put(ASCII.String(url.hash()), url);
         if (searchEvent != null) {
@@ -3192,7 +3205,7 @@ public final class Switchboard extends serverSwitch {
                                 }
                                 final Condenser condenser = new Condenser(
                                         document, null, true, true, LibraryProvider.dymLib, true,
-                                        Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts));
+                                        Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts), searchEvent.query.timezoneOffset);
                                 ResultImages.registerImages(url, document, true);
                                 Switchboard.this.webStructure.generateCitationReference(url, document);
                                 storeDocumentIndex(
@@ -3546,7 +3559,7 @@ public final class Switchboard extends serverSwitch {
                 final Map<AnchorURL, String> links;
                 searchEvent.oneFeederStarted();
                 try {
-                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
+                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent, searchEvent.query.timezoneOffset);
                     if ( links != null ) {
                         final Iterator<AnchorURL> i = links.keySet().iterator();
                         while ( i.hasNext() ) {
@@ -3585,7 +3598,7 @@ public final class Switchboard extends serverSwitch {
                 final Map<AnchorURL, String> links;
                 DigestURL url;
                 try {
-                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
+                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent, 0);
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
                             final Iterator<AnchorURL> i = links.keySet().iterator();

@@ -296,7 +296,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_PROXY,
                 ClientIdentification.yacyProxyAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultProxyProfile.handle()),
             this.defaultProxyProfile);
@@ -327,7 +328,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_REMOTE,
                 ClientIdentification.yacyInternetCrawlerAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultRemoteProfile.handle()),
             this.defaultRemoteProfile);
@@ -358,7 +360,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetLocalProfile.handle()),
             this.defaultTextSnippetLocalProfile);
@@ -389,7 +392,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
             this.defaultTextSnippetGlobalProfile);
@@ -421,7 +425,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_GREEDY_LEARNING_TEXT,
                 ClientIdentification.browserAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
             this.defaultTextSnippetGlobalProfile);
@@ -452,7 +457,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultMediaSnippetLocalProfile.handle()),
             this.defaultMediaSnippetLocalProfile);
@@ -483,7 +489,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultMediaSnippetGlobalProfile.handle()),
             this.defaultMediaSnippetGlobalProfile);
@@ -514,7 +521,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_SURROGATE,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultSurrogateProfile.handle()),
             this.defaultSurrogateProfile);
@@ -548,7 +556,8 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 collection,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null);
+                null,
+                0);
         this.profilesActiveCrawls.put(UTF8.getBytes(genericPushProfile.handle()), genericPushProfile);
         this.defaultPushProfiles.put(collection, genericPushProfile);
         return genericPushProfile;

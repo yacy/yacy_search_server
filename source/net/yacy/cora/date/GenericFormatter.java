@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import net.yacy.cora.util.NumberTools;
 
@@ -51,14 +52,11 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final SimpleDateFormat FORMAT_ANSIC         = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
     public static final SimpleDateFormat FORMAT_SIMPLE        = new SimpleDateFormat(PATTERN_SIMPLE, Locale.US);
 
-    // find out time zone and DST offset
-    private static Calendar thisCalendar = Calendar.getInstance();
-
     static {
         // we want GMT times on the formats as well as they don't support any timezone
-        FORMAT_SHORT_DAY.setTimeZone(TZ_GMT);
-        FORMAT_SHORT_SECOND.setTimeZone(TZ_GMT);
-        FORMAT_SHORT_MILSEC.setTimeZone(TZ_GMT);
+        FORMAT_SHORT_DAY.setTimeZone(UTCtimeZone);
+        FORMAT_SHORT_SECOND.setTimeZone(UTCtimeZone);
+        FORMAT_SHORT_MILSEC.setTimeZone(UTCtimeZone);
     }
 
     public static final long time_second =  1000L;
@@ -124,56 +122,55 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
      * the String.
      */
     @Override
-    public Date parse(final String timeString) throws ParseException {
+    public Calendar parse(final String timeString, final int timezoneOffset) throws ParseException {
         synchronized (this.dateFormat) {
-            return this.dateFormat.parse(timeString);
+            Calendar cal = Calendar.getInstance(UTCtimeZone);
+            cal.setTime(this.dateFormat.parse(timeString));
+            cal.add(Calendar.MINUTE, timezoneOffset); // add a correction; i.e. for UTC+1 -60 minutes is added to patch a time given in UTC+1 to the actual time at UTC
+            return cal;
         }
     }
-
+    
     /**
      * Like {@link #parseShortSecond(String)} using additional timezone information provided in an
      * offset String, like "+0100" for CET.
+     * @throws ParseException 
      */
-    public Date parse(final String timeString, final String UTCOffset) {
+    public Calendar parse(final String timeString, final String UTCOffset) throws ParseException {
         // FIXME: This method returns an incorrect date, check callers!
         // ex: de.anomic.server.serverDate.parseShortSecond("20070101120000", "+0200").toGMTString()
         // => 1 Jan 2007 13:00:00 GMT
-        if (timeString == null || timeString.isEmpty()) { return new Date(); }
-        if (UTCOffset == null || UTCOffset.isEmpty()) { return new Date(); }
-        try {
-            synchronized (this.dateFormat) {
-                return new Date(this.dateFormat.parse(timeString).getTime() - UTCDiff() + UTCDiff(UTCOffset));
-            }
-        } catch (final Throwable e) {
-            //serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
-            return new Date();
-        }
+        if (timeString == null || timeString.isEmpty()) { return Calendar.getInstance(UTCtimeZone); }
+        if (UTCOffset == null || UTCOffset.isEmpty()) { return Calendar.getInstance(UTCtimeZone); }
+        return parse(timeString, UTCDiff(UTCOffset));
     }
 
-    private static long UTCDiff(final String diffString) {
+    private static int UTCDiff(final String diffString) {
         if (diffString.length() != 5) throw new IllegalArgumentException("UTC String malformed (wrong size):" + diffString);
         boolean ahead = true;
         if (diffString.length() > 0 && diffString.charAt(0) == '+') ahead = true;
         else if (diffString.length() > 0 && diffString.charAt(0) == '-') ahead = false;
         else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
-        final long oh = NumberTools.parseLongDecSubstring(diffString, 1, 3);
-        final long om = NumberTools.parseLongDecSubstring(diffString, 3);
-        return ((ahead) ? (long) 1 : (long) -1) * (oh * AbstractFormatter.hourMillis + om * AbstractFormatter.minuteMillis);
+        final int oh = NumberTools.parseIntDecSubstring(diffString, 1, 3);
+        final int om = NumberTools.parseIntDecSubstring(diffString, 3);
+        return (int) ((ahead) ? 1 : -1 * (oh * AbstractFormatter.hourMillis + om * AbstractFormatter.minuteMillis));
     }
-
+    
+    /**
+     * get the difference of this servers time zone to UTC/GMT in milliseconds
+     * @return
+     */
     private static long UTCDiff() {
         // DST_OFFSET is dependent on the time of the Calendar, so it has to be updated
         // to get the correct current offset
-        synchronized (thisCalendar) {
-            thisCalendar.setTimeInMillis(System.currentTimeMillis());
-            final long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
-            final long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
+        synchronized (testCalendar) {
+            testCalendar.setTimeInMillis(System.currentTimeMillis());
+            final long zoneOffsetHours = testCalendar.get(Calendar.ZONE_OFFSET);
+            final long DSTOffsetHours = testCalendar.get(Calendar.DST_OFFSET);
             return zoneOffsetHours + DSTOffsetHours;
         }
     }
-
-    private final static DecimalFormat D2 = new DecimalFormat("00");
-
+    
     public static String UTCDiffString() {
         // we express the UTC Difference in 5 digits:
         // SHHMM
@@ -195,11 +192,9 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         return sb.toString();
     }
 
-    public static long correctedUTCTime() {
-        return System.currentTimeMillis() - UTCDiff();
-    }
+    private final static DecimalFormat D2 = new DecimalFormat("00");
 
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         System.out.println(UTCDiffString());
     }
 }

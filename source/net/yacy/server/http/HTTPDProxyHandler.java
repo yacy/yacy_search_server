@@ -358,7 +358,8 @@ public final class HTTPDProxyHandler {
                         "",
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
-                        0);
+                        0,
+                        sb.crawler.defaultProxyProfile.timezoneOffset());
                 final Response response = new Response(
                 		request,
                         requestHeader,
@@ -473,8 +474,8 @@ public final class HTTPDProxyHandler {
                         "",
                         responseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
-                        0);
-
+                        0,
+                        sb.crawler.defaultProxyProfile.timezoneOffset());
 
                 // handle incoming cookies
                 handleIncomingCookies(responseHeader, host, ip);

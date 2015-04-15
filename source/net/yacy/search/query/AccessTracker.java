@@ -315,7 +315,7 @@ public class AccessTracker {
         byte[] b = new byte[GenericFormatter.PATTERN_SHORT_SECOND.length()];
         raf.readFully(b);
         try {
-            return GenericFormatter.SHORT_SECOND_FORMATTER.parse(UTF8.String(b));
+            return GenericFormatter.SHORT_SECOND_FORMATTER.parse(UTF8.String(b), 0).getTime();
         } catch (ParseException e) {
             throw new IOException(e.getMessage());
         }
@@ -326,8 +326,8 @@ public class AccessTracker {
         String file = args[0];
         Date from;
         try {
-            from = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1]);
-            Date to = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2]);
+            from = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1], 0).getTime();
+            Date to = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2], 0).getTime();
             List<EventTracker.Event> dump = readLog(new File(file), from, to);
             for (EventTracker.Event s: dump) System.out.println(s.toString());
         } catch (ParseException e) {

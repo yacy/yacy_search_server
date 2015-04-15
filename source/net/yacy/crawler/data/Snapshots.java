@@ -359,10 +359,10 @@ public class Snapshots {
     
     private static Date parseDate(String d) {
         try {
-            return GenericFormatter.SHORT_MINUTE_FORMATTER.parse(d);
+            return GenericFormatter.SHORT_MINUTE_FORMATTER.parse(d, 0).getTime();
         } catch (ParseException e) {
             try {
-                return GenericFormatter.SHORT_DAY_FORMATTER.parse(d);
+                return GenericFormatter.SHORT_DAY_FORMATTER.parse(d, 0).getTime();
             } catch (ParseException ee) {
                 return null;
             }

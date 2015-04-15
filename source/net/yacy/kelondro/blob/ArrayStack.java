@@ -172,7 +172,7 @@ public class ArrayStack implements BLOB {
                    f.delete();
                    deletions = true;
                } else try {
-                   d = GenericFormatter.SHORT_SECOND_FORMATTER.parse(file.substring(0, 14));
+                   d = GenericFormatter.SHORT_SECOND_FORMATTER.parse(file.substring(0, 14), 0).getTime();
                    f.renameTo(newBLOB(d));
                    deletions = true;
                } catch (final ParseException e) {continue;}
@@ -188,7 +188,7 @@ public class ArrayStack implements BLOB {
         for (final String file : files) {
             if (file.length() >= 22 && file.charAt(this.prefix.length()) == '.' && file.endsWith(".blob")) {
                try {
-                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18));
+                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime();
                    time = d.getTime();
                    if (time > maxtime) maxtime = time;
                } catch (final ParseException e) {continue;}
@@ -199,7 +199,7 @@ public class ArrayStack implements BLOB {
         for (final String file : files) {
             if (file.length() >= 22 && file.charAt(this.prefix.length()) == '.' && file.endsWith(".blob")) {
                 try {
-                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18));
+                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime();
                    f = new File(heapLocation, file);
                    time = d.getTime();
                    try {
@@ -253,7 +253,7 @@ public class ArrayStack implements BLOB {
     public synchronized void mountBLOB(final File location, final boolean full) throws IOException {
         Date d;
         try {
-            d = my_SHORT_MILSEC_FORMATTER.parse(location.getName().substring(this.prefix.length() + 1, this.prefix.length() + 18));
+            d = my_SHORT_MILSEC_FORMATTER.parse(location.getName().substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime();
         } catch (final ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }

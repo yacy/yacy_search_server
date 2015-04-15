@@ -179,7 +179,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
                 (element.length() == this.prefix.length() + 24)) {
                 f = new File(this.path, element);
                 try {
-                    d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(element.substring(this.prefix.length() + 1, this.prefix.length() + 18));
+                    d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(element.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime();
                 } catch (final ParseException e) {
                     ConcurrentLog.severe("SplitTable", "", e);
                     continue;
@@ -372,7 +372,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         final String name = new File(table.filename()).getName();
         long d;
         try {
-            d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(this.prefix.length() + 1, this.prefix.length() + 18)).getTime();
+            d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(this.prefix.length() + 1, this.prefix.length() + 18), 0).getTime().getTime();
         } catch (final ParseException e) {
             ConcurrentLog.severe("SplitTable", "", e);
             d = 0;

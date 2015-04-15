@@ -80,6 +80,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String CACHE_STRAGEGY   = "cacheStrategy";
     public static final String COLLECTIONS      = "collections";
     public static final String SCRAPER          = "scraper";
+    public static final String TIMEZONEOFFSET   = "timezoneOffset";
     public static final String CRAWLER_URL_MUSTMATCH         = "crawlerURLMustMatch";
     public static final String CRAWLER_URL_MUSTNOTMATCH      = "crawlerURLMustNotMatch";
     public static final String CRAWLER_IP_MUSTMATCH          = "crawlerIPMustMatch";
@@ -131,6 +132,9 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param xpstopw true if parent stop words shall be ignored
      * @param cacheStrategy determines if and how cache is used loading content
      * @param collections a comma-separated list of tags which are attached to index entries
+     * @param userAgentName the profile name of the user agent to be used
+     * @param scraper a scraper for vocabularies
+     * @param timezoneOffset the time offset in minutes for scraped dates in text without time zone
      */
     public CrawlProfile(
                  String name,
@@ -155,7 +159,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final CacheStrategy cacheStrategy,
                  final String collections,
                  final String userAgentName,
-                 final VocabularyScraper scraper) {
+                 final VocabularyScraper scraper,
+                 final int timezoneOffset) {
         super(40);
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
@@ -198,6 +203,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         String jsonString = this.scraper.toString();
         assert jsonString != null && jsonString.length() > 0 && jsonString.charAt(0) == '{' : "jsonString = " + jsonString;
         put(SCRAPER, jsonString);
+        put(TIMEZONEOFFSET, timezoneOffset);
     }
 
     /**
@@ -623,6 +629,16 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
 
+    public int timezoneOffset() {
+        final String timezoneOffset = get(TIMEZONEOFFSET);
+        if (timezoneOffset == null) return 0;
+        try {
+            return Integer.parseInt(timezoneOffset);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+    
     /**
      * get a recrawl date for a given age in minutes
      * @param oldTimeMinutes

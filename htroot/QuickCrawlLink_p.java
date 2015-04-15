@@ -128,7 +128,8 @@ public class QuickCrawlLink_p {
             final byte[] urlhash = crawlingStartURL.hash();
             indexSegment.fulltext().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
-
+            int timezoneOffset = post.getInt("timezoneOffset", 0);
+            
             // create crawling profile
             CrawlProfile pe = null;
             try {
@@ -156,7 +157,8 @@ public class QuickCrawlLink_p {
                         CacheStrategy.IFFRESH,
                         collection,
                         ClientIdentification.yacyIntranetCrawlerAgentName,
-                        null);
+                        null,
+                        timezoneOffset);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist
@@ -175,7 +177,8 @@ public class QuickCrawlLink_p {
                     (title==null)?"CRAWLING-ROOT":title,
                     new Date(),
                     pe.handle(),
-                    0
+                    0,
+                    pe.timezoneOffset()
                 ));
 
             // validate rejection reason

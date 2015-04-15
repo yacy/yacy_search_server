@@ -152,7 +152,7 @@ public class EventTracker {
         }
         public long getTime() {
             if (this.time instanceof String) try {
-                return GenericFormatter.SHORT_SECOND_FORMATTER.parse((String) this.time).getTime();
+                return GenericFormatter.SHORT_SECOND_FORMATTER.parse((String) this.time, 0).getTime().getTime();
             } catch (ParseException e) {
                 return -1L;
             }
@@ -162,7 +162,7 @@ public class EventTracker {
         }
         public Date getDate() {
             if (this.time instanceof String) try {
-                return GenericFormatter.SHORT_SECOND_FORMATTER.parse((String) this.time);
+                return GenericFormatter.SHORT_SECOND_FORMATTER.parse((String) this.time, 0).getTime();
             } catch (ParseException e) {
                 return null;
             }if (this.time instanceof Long) return new Date((Long) this.time);

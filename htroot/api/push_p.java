@@ -103,7 +103,8 @@ public class push_p {
                         "",               // the name of the document to crawl
                         new Date(),       // current date
                         profile.handle(), // the name of the prefetch profile. This must not be null!
-                        0);               // forkfactor sum of anchors of all ancestors
+                        0,                // forkfactor sum of anchors of all ancestors
+                        profile.timezoneOffset());
                 Response response = new Response(
                         request,
                         requestHeader,

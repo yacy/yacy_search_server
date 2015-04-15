@@ -158,7 +158,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         final String d = get("expirationDate");
         if (d == null) return null;
         try {
-            return ISO8601Formatter.FORMATTER.parse(d);
+            return ISO8601Formatter.FORMATTER.parse(d, 0).getTime();
         } catch (final ParseException e) {
             ConcurrentLog.logException(e);
             return new Date();

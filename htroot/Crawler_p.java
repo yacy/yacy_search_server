@@ -470,6 +470,8 @@ public class Crawler_p {
                     }
                 }
                 
+                int timezoneOffset = post.getInt("timezoneOffset", 0);
+                
                 // prepare a new crawling profile
                 final CrawlProfile profile;
                 byte[] handle;
@@ -502,7 +504,8 @@ public class Crawler_p {
                             cachePolicy,
                             collection,
                             agentName,
-                            new VocabularyScraper(vocabulary_scraper));
+                            new VocabularyScraper(vocabulary_scraper),
+                            timezoneOffset);
                     handle = ASCII.getBytes(profile.handle());
 
                     // before we fire up a new crawl, we make sure that another crawl with the same name is not running
@@ -585,7 +588,7 @@ public class Crawler_p {
                         try {
                             // check if the crawl filter works correctly
                             Pattern.compile(newcrawlingMustMatch);
-                            final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper());
+                            final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper(), timezoneOffset);
                             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
                             if (crawlingFile != null && crawlingFile.exists()) {
                                 FileUtils.copy(new FileInputStream(crawlingFile), writer);
@@ -605,7 +608,7 @@ public class Crawler_p {
                             }
 
                             sb.crawler.putActive(handle, profile);
-                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks);
+                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, profile.timezoneOffset());
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);

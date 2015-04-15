@@ -87,8 +87,10 @@ public class metadataImageParser extends AbstractParser implements Parser {
     public Document[] parse(
             final AnchorURL location,
             final String mimeType,
-            final String documentCharset, final VocabularyScraper scraper,
-            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Parser.Failure, InterruptedException {
 
         String title = null;
         String author = null;
@@ -99,7 +101,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
         StringBuilder imgInfotxt = new StringBuilder();
 
         try {
-            final Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(sourceStream));
+            final Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(source));
 
             final Iterator<Directory> directories = metadata.getDirectories().iterator();
             final HashMap<String, String> props = new HashMap<String, String>();
@@ -160,7 +162,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
         return new Document[]{new Document(
             location,
             mimeType,
-            documentCharset,
+            charset,
             this,
             new HashSet<String>(0), // languages
             keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords

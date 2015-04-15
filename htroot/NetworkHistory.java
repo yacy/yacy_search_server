@@ -74,7 +74,7 @@ public class NetworkHistory {
             while (rowi.hasNext()) {
                 Row row = rowi.next();
                 String d = ASCII.String(row.getPK());
-                Date date = GenericFormatter.SHORT_MINUTE_FORMATTER.parse(d);
+                Date date = GenericFormatter.SHORT_MINUTE_FORMATTER.parse(d, 0).getTime();
                 if (date.getTime() < timelimit) break;
                 statrow = new HashMap<>();
                 for (String key: columns) {

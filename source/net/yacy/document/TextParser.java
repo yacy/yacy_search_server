@@ -167,6 +167,7 @@ public final class TextParser {
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper,
+            final int timezoneOffset,
             final int depth,
             final File sourceFile
         ) throws InterruptedException, Parser.Failure {
@@ -181,7 +182,7 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            docs = parseSource(location, mimeType, charset, scraper, depth, sourceFile.length(), sourceStream);
+            docs = parseSource(location, mimeType, charset, scraper, timezoneOffset, depth, sourceFile.length(), sourceStream);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -199,6 +200,7 @@ public final class TextParser {
             String mimeType,
             final String charset,
             final VocabularyScraper scraper,
+            final int timezoneOffset,
             final int depth,
             final byte[] content
         ) throws Parser.Failure {
@@ -214,7 +216,7 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
-        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, depth, content);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, content);
 
         return docs;
     }
@@ -224,6 +226,7 @@ public final class TextParser {
             String mimeType,
             final String charset,
             final VocabularyScraper scraper,
+            final int timezoneOffset,
             final int depth,
             final long contentLength,
             final InputStream sourceStream
@@ -244,7 +247,7 @@ public final class TextParser {
         // then we use only one stream-oriented parser.
         if (idioms.size() == 1 || contentLength > Integer.MAX_VALUE) {
             // use a specific stream-oriented parser
-            return parseSource(location, mimeType, idioms.iterator().next(), charset, scraper, sourceStream);
+            return parseSource(location, mimeType, idioms.iterator().next(), charset, scraper, timezoneOffset, sourceStream);
         }
 
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
@@ -255,7 +258,7 @@ public final class TextParser {
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, depth, b);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, b);
 
         return docs;
     }
@@ -266,6 +269,7 @@ public final class TextParser {
             final Parser parser,
             final String charset,
             final VocabularyScraper scraper,
+            final int timezoneOffset,
             final InputStream sourceStream
         ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from stream");
@@ -275,7 +279,7 @@ public final class TextParser {
 
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         try {
-            final Document[] docs = parser.parse(location, mimeType, documentCharset, scraper, sourceStream);
+            final Document[] docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, sourceStream);
             return docs;
         } catch (final Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);
@@ -288,6 +292,7 @@ public final class TextParser {
             final Set<Parser> parsers,
             final String charset,
             final VocabularyScraper scraper,
+            final int timezoneOffset,
             final int depth,
             final byte[] sourceArray
         ) throws Parser.Failure {
@@ -310,7 +315,7 @@ public final class TextParser {
             	    bis = new ByteArrayInputStream(sourceArray);
             	}
                 try {
-                    docs = parser.parse(location, mimeType, documentCharset, scraper, bis);
+                    docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, bis);
                 } catch (final Parser.Failure e) {
                     failedParser.put(parser, e);
                     //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);

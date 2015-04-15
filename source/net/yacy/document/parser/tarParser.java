@@ -62,16 +62,22 @@ public class tarParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, final VocabularyScraper scraper, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            InputStream source) throws Parser.Failure, InterruptedException {
 
         final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
-        final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
+        final String ext = MultiProtocolURL.getFileExtension(location.getFileName());
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
                 source = new GZIPInputStream(source);
             } catch (final IOException e) {
-                throw new Parser.Failure("tar parser: " + e.getMessage(), url);
+                throw new Parser.Failure("tar parser: " + e.getMessage(), location);
             }
         }
         TarEntry entry;
@@ -91,7 +97,7 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(url, "#" + name), mime, null, scraper, 999, tmp);
+                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(location, "#" + name), mime, null, scraper, timezoneOffset, 999, tmp);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {

@@ -25,11 +25,12 @@
 package net.yacy.cora.date;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 
 public interface DateFormatter {
 
-    public Date parse(String s) throws ParseException;
+    public Calendar parse(String s, int timezoneOffset) throws ParseException;
     public String format(final Date date);
     public String format();
     

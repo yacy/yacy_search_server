@@ -41,8 +41,10 @@ public class QueryModifier {
 
     private final StringBuilder modifier;
     public String sitehost, sitehash, filetype, protocol, language, author, collection, on, from, to;
+    public int timezoneOffset;
     
-    public QueryModifier() {
+    public QueryModifier(final int timezoneOffset) {
+        this.timezoneOffset = timezoneOffset;
         this.sitehash = null;
         this.sitehost = null;
         this.filetype = null;
@@ -274,19 +276,19 @@ public class QueryModifier {
         
         if (fq.indexOf(CollectionSchema.dates_in_content_dts.getSolrFieldName()) < 0) {
             if (this.on != null && this.on.length() > 0) {
-                fq.append(" AND ").append(QueryModifier.parseOnExpression(this.on));
+                fq.append(" AND ").append(QueryModifier.parseOnExpression(this.on, this.timezoneOffset));
             }
             
             if (this.from != null && this.from.length() > 0 && (this.to == null || this.to.equals("*"))) {
-                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.from, null));
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.from, null, this.timezoneOffset));
             }
             
             if ((this.from == null || this.from.equals("*")) && this.to != null && this.to.length() > 0) {
-                fq.append(" AND ").append(QueryModifier.parseFromToExpression(null, this.to));
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(null, this.to, this.timezoneOffset));
             }
             
             if (this.from != null && this.from.length() > 0 && this.to != null && this.to.length() > 0) {
-                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.from, this.to));
+                fq.append(" AND ").append(QueryModifier.parseFromToExpression(this.from, this.to, this.timezoneOffset));
             }
         }
         
@@ -348,9 +350,9 @@ public class QueryModifier {
         return fq.toString();
     }
     
-    public static String parseOnExpression(String onDescription) {
+    public static String parseOnExpression(final String onDescription, final int timezoneOffset) {
         assert onDescription != null;
-        Date onDate = DateDetection.parseLine(onDescription);
+        Date onDate = DateDetection.parseLine(onDescription, timezoneOffset);
         StringBuilder filterQuery = new StringBuilder(20);
         if (onDate != null) {
             @SuppressWarnings({ "deprecation", "static-access" })
@@ -360,9 +362,9 @@ public class QueryModifier {
         return filterQuery.toString();
     }
     
-    public static String parseFromToExpression(String from, String to) {
-        Date fromDate = from == null || from.equals("*") ? null : DateDetection.parseLine(from);
-        Date toDate = to == null || to.equals("*") ? null : DateDetection.parseLine(to);
+    public static String parseFromToExpression(final String from, final String to, final int timezoneOffset) {
+        Date fromDate = from == null || from.equals("*") ? null : DateDetection.parseLine(from, timezoneOffset);
+        Date toDate = to == null || to.equals("*") ? null : DateDetection.parseLine(to, timezoneOffset);
         StringBuilder filterQuery = new StringBuilder(20);
         if (fromDate != null && toDate != null) {
             @SuppressWarnings({ "deprecation", "static-access" })

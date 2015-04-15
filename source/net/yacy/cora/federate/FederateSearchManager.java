@@ -183,11 +183,12 @@ public class FederateSearchManager {
         Bitfield filter = new Bitfield();
         final QueryParams query = new QueryParams(
                 qg,
-                new QueryModifier(),
+                new QueryModifier(0),
                 Integer.MAX_VALUE,
                 "",
                 Classification.ContentDomain.ALL,
                 "", //lang
+                0, //timezoneOffset
                 null,
                 CacheStrategy.IFFRESH,
                 100, 0, //count, offset

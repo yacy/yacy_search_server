@@ -87,13 +87,15 @@ public class htmlParser extends AbstractParser implements Parser {
     public Document[] parse(
             final AnchorURL location,
             final String mimeType,
-            final String documentCharset, final VocabularyScraper vocscraper,
+            final String documentCharset,
+            final VocabularyScraper vocscraper,
+            final int timezoneOffset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
 
         try {
             // first get a document from the parsed html
             Charset[] detectedcharsetcontainer = new Charset[]{null};
-            final ContentScraper scraper = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, sourceStream, maxLinks);
+            final ContentScraper scraper = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
             // parseToScraper also detects/corrects/sets charset from html content tag
             final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
 
@@ -151,7 +153,7 @@ public class htmlParser extends AbstractParser implements Parser {
         return ppd;
     }
 
-    public static ContentScraper parseToScraper(final DigestURL location, final String documentCharset, final VocabularyScraper vocabularyScraper, String input, int maxLinks) throws IOException {
+    public static ContentScraper parseToScraper(final DigestURL location, final String documentCharset, final VocabularyScraper vocabularyScraper, final int timezoneOffset, final String input, final int maxLinks) throws IOException {
         Charset[] detectedcharsetcontainer = new Charset[]{null};
         InputStream sourceStream;
         try {
@@ -161,7 +163,7 @@ public class htmlParser extends AbstractParser implements Parser {
         }
         ContentScraper scraper;
         try {
-            scraper = parseToScraper(location, documentCharset, vocabularyScraper, detectedcharsetcontainer, sourceStream, maxLinks);
+            scraper = parseToScraper(location, documentCharset, vocabularyScraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
         } catch (Failure e) {
             throw new IOException(e.getMessage());
         }
@@ -173,6 +175,7 @@ public class htmlParser extends AbstractParser implements Parser {
             final String documentCharset,
             final VocabularyScraper vocabularyScraper,
             Charset[] detectedcharsetcontainer,
+            final int timezoneOffset,
             InputStream sourceStream,
             final int maxLinks) throws Parser.Failure, IOException {
 
@@ -188,7 +191,7 @@ public class htmlParser extends AbstractParser implements Parser {
         if (charset == null) {
             ScraperInputStream htmlFilter = null;
             try {
-                htmlFilter = new ScraperInputStream(sourceStream, documentCharset, vocabularyScraper, location, null, false, maxLinks);
+                htmlFilter = new ScraperInputStream(sourceStream, documentCharset, vocabularyScraper, location, null, false, maxLinks, timezoneOffset);
                 sourceStream = htmlFilter;
                 charset = htmlFilter.detectCharset();
             } catch (final IOException e1) {
@@ -222,7 +225,7 @@ public class htmlParser extends AbstractParser implements Parser {
         }
         
         // parsing the content
-        final ContentScraper scraper = new ContentScraper(location, maxLinks, vocabularyScraper);
+        final ContentScraper scraper = new ContentScraper(location, maxLinks, vocabularyScraper, timezoneOffset);
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(64, Math.min(4096, sourceStream.available())));
         try {
             FileUtils.copy(sourceStream, writer, detectedcharsetcontainer[0]);
@@ -324,7 +327,7 @@ public class htmlParser extends AbstractParser implements Parser {
         try {
             url = new AnchorURL(args[0]);
             final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent, null, null);
-            final Document[] document = new htmlParser().parse(url, "text/html", "utf-8", new VocabularyScraper(), new ByteArrayInputStream(content));
+            final Document[] document = new htmlParser().parse(url, "text/html", "utf-8", new VocabularyScraper(), 0, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();
             System.out.println(title);
         } catch (final MalformedURLException e) {

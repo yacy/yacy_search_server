@@ -56,7 +56,12 @@ public class sevenzipParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-7z-compressed");
     }
 
-    public Document parse(final AnchorURL location, final String mimeType, final String charset, final IInStream source) throws Parser.Failure, InterruptedException {
+    public Document parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final int timezoneOffset,
+            final IInStream source) throws Parser.Failure, InterruptedException {
         final Document doc = new Document(
                 location,
                 mimeType,
@@ -83,7 +88,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
         } catch (final IOException e) {
             throw new Parser.Failure("error opening 7zip archive: " + e.getMessage(), location);
         }
-        final SZParserExtractCallback aec = new SZParserExtractCallback(AbstractParser.log, archive, doc, location.getFile());
+        final SZParserExtractCallback aec = new SZParserExtractCallback(AbstractParser.log, archive, doc, location.getFile(), timezoneOffset);
         AbstractParser.log.fine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
@@ -101,16 +106,27 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
 
-    public Document parse(final AnchorURL location, final String mimeType, final String charset, final byte[] source) throws Parser.Failure, InterruptedException {
-        return parse(location, mimeType, charset, new ByteArrayIInStream(source));
+    public Document parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final int timezoneOffset,
+            final byte[] source) throws Parser.Failure, InterruptedException {
+        return parse(location, mimeType, charset, timezoneOffset, new ByteArrayIInStream(source));
     }
 
     @Override
-    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final VocabularyScraper scraper, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Parser.Failure, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
             FileUtils.copy(source, cfos);
-            return new Document[]{parse(location, mimeType, charset, cfos.toByteArray())};
+            return new Document[]{parse(location, mimeType, charset, timezoneOffset, cfos.toByteArray())};
         } catch (final IOException e) {
             throw new Parser.Failure("error processing 7zip archive: " + e.getMessage(), location);
         }
@@ -124,13 +140,19 @@ public class sevenzipParser extends AbstractParser implements Parser {
          private ByteArrayOutputStream cfos = null;
          private final Document doc;
          private final String prefix;
+         private final int timezoneOffset;
 
-         public SZParserExtractCallback(final ConcurrentLog logger, final IInArchive handler,
-                 final Document doc, final String prefix) {
+         public SZParserExtractCallback(
+                 final ConcurrentLog logger,
+                 final IInArchive handler,
+                 final Document doc,
+                 final String prefix,
+                 final int timezoneOffset) {
              super.Init(handler);
              this.log = logger;
              this.doc = doc;
              this.prefix = prefix;
+             this.timezoneOffset = timezoneOffset;
          }
 
         @Override
@@ -172,7 +194,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      // below for reversion of the effects
                      final AnchorURL url = AnchorURL.newAnchor(this.doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
-                     theDocs = TextParser.parseSource(url, mime, null, new VocabularyScraper(), this.doc.getDepth() + 1, this.cfos.toByteArray());
+                     theDocs = TextParser.parseSource(url, mime, null, new VocabularyScraper(), timezoneOffset, this.doc.getDepth() + 1, this.cfos.toByteArray());
 
                      this.doc.addSubDocuments(theDocs);
                  }

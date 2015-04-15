@@ -53,7 +53,13 @@ public class csvParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(AnchorURL location, String mimeType, String charset, final VocabularyScraper scraper, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(
+            final AnchorURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Parser.Failure, InterruptedException {
         // construct a document using all cells of the document
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.

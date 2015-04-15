@@ -764,7 +764,7 @@ public class Tables implements Iterable<String> {
             final byte[] r = this.get(colname);
             if (r == null) return dflt;
             try {
-                return my_SHORT_MILSEC_FORMATTER.parse(UTF8.String(r));
+                return my_SHORT_MILSEC_FORMATTER.parse(UTF8.String(r), 0).getTime();
             } catch (final ParseException e) {
                 return dflt;
             }

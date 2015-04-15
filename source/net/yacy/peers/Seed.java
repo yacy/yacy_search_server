@@ -797,7 +797,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         try {
             final GenericFormatter my_SHORT_SECOND_FORMATTER =
                 new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-            final long t = my_SHORT_SECOND_FORMATTER.parse(get(Seed.LASTSEEN, "20040101000000")).getTime();
+            final long t = my_SHORT_SECOND_FORMATTER.parse(get(Seed.LASTSEEN, "20040101000000"), 0).getTime().getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
             // Therefore java subtracts the local UTC offset, to get a UTC number.
@@ -831,7 +831,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         try {
             final GenericFormatter my_SHORT_SECOND_FORMATTER =
                 new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-            b = my_SHORT_SECOND_FORMATTER.parse(get(Seed.BDATE, "20040101000000")).getTime();
+            b = my_SHORT_SECOND_FORMATTER.parse(get(Seed.BDATE, "20040101000000"), 0).getTime().getTime();
         } catch (final ParseException e ) {
             b = System.currentTimeMillis();
         }

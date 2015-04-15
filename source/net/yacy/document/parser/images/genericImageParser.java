@@ -93,8 +93,10 @@ public class genericImageParser extends AbstractParser implements Parser {
     public Document[] parse(
             final AnchorURL location,
             final String mimeType,
-            final String documentCharset, final VocabularyScraper scraper,
-            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
+            final String charset,
+            final VocabularyScraper scraper, 
+            final int timezoneOffset,
+            final InputStream source) throws Parser.Failure, InterruptedException {
 
         ImageInfo ii = null;
         String title = null;
@@ -108,7 +110,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         if (mimeType.equals("image/bmp") || ext.equals("bmp")) {
             byte[] b;
             try {
-                b = FileUtils.read(sourceStream);
+                b = FileUtils.read(source);
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
@@ -126,7 +128,7 @@ public class genericImageParser extends AbstractParser implements Parser {
             // a tutorial is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/sampleUsage.html
             byte[] b;
             try {
-                b = FileUtils.read(sourceStream);
+                b = FileUtils.read(source);
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
@@ -182,7 +184,7 @@ public class genericImageParser extends AbstractParser implements Parser {
                 // just ignore
             }
         } else {
-            ii = parseJavaImage(location, sourceStream);
+            ii = parseJavaImage(location, source);
         }
 
         final HashSet<String> languages = new HashSet<String>();
@@ -315,7 +317,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         AnchorURL uri;
         try {
             uri = new AnchorURL("http://localhost/" + image.getName());
-            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), "UTF-8", new VocabularyScraper(), new FileInputStream(image));
+            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), "UTF-8", new VocabularyScraper(), 0, new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {
             e.printStackTrace();

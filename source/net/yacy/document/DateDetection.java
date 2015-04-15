@@ -499,7 +499,7 @@ public class DateDetection {
      * @param text
      * @return a set of dates, ordered by time. first date in the ordered set is the oldest time.
      */
-    public static LinkedHashSet<Date> parse(String text) {
+    public static LinkedHashSet<Date> parse(String text, int timezoneOffset) {
         Long offset;
         if ((offset = specialDayOffset.get(text)) != null) {
             LinkedHashSet<Date> dates = new LinkedHashSet<>(); dates.add(new Date((System.currentTimeMillis() / AbstractFormatter.dayMillis) * AbstractFormatter.dayMillis + offset.longValue())); return dates;
@@ -513,7 +513,7 @@ public class DateDetection {
         return dates;
     }
     
-    public static Date parseLine(String text) {
+    public static Date parseLine(final String text, final int timezoneOffset) {
         Date d = null;
         try {d = CONFORM.parse(text);} catch (ParseException e) {}
         //if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {} // did not work well and fired for wrong formats; do not use
@@ -521,7 +521,7 @@ public class DateDetection {
         if (d == null) try {d = GenericFormatter.FORMAT_ANSIC.parse(text);} catch (ParseException e) {}
             
         if (d == null) {
-            Set<Date> dd = parse(text);
+            Set<Date> dd = parse(text, timezoneOffset);
             if (dd.size() >= 1) d = dd.iterator().next();
         }
         return d;
@@ -601,7 +601,7 @@ public class DateDetection {
         };
         long t = System.currentTimeMillis();
         for (String s: test) {
-            String parsed = parse(fill + " " + s + " " + fill).toString();
+            String parsed = parse(fill + " " + s + " " + fill, 0).toString();
             System.out.println("SOURCE: " + s);
             System.out.println("DATE  : " + parsed);
             System.out.println();

@@ -531,7 +531,8 @@ public class CrawlQueues {
                         item.getDescriptions().size() > 0 ? item.getDescriptions().get(0) : "",
                         loaddate,
                         this.sb.crawler.defaultRemoteProfile.handle(),
-                        0
+                        0,
+                        this.sb.crawler.defaultRemoteProfile.timezoneOffset()
                 ));
             } else {
                 CrawlQueues.log.warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);

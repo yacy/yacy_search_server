@@ -61,18 +61,27 @@ public class DocumentIndex extends Segment {
         } catch (final MalformedURLException e ) {
         }
     }
-    BlockingQueue<AnchorURL> queue; // a queue of document ID's
+    private BlockingQueue<AnchorURL> queue; // a queue of document ID's
     private final Worker[] worker;
-    CallbackListener callback;
+    private CallbackListener callback;
+    private int timezoneOffset;
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-    public DocumentIndex(final File segmentPath, final File archivePath, final File collectionConfigurationPath, final File webgraphConfigurationPath, final CallbackListener callback, final int cachesize)
+    public DocumentIndex(
+            final File segmentPath,
+            final File archivePath,
+            final File collectionConfigurationPath,
+            final File webgraphConfigurationPath,
+            final CallbackListener callback,
+            final int cachesize,
+            final int timezoneOffset)
         throws IOException {
         super(new ConcurrentLog("DocumentIndex"), segmentPath, archivePath,
                 collectionConfigurationPath == null ? null : new CollectionConfiguration(collectionConfigurationPath, true),
                 webgraphConfigurationPath == null ? null : new WebgraphConfiguration(webgraphConfigurationPath, true)
         );
+        this.timezoneOffset = timezoneOffset;
         super.connectRWI(cachesize, targetFileSize * 4 - 1);
         super.connectCitation(cachesize, targetFileSize * 4 - 1);
         super.fulltext().connectLocalSolr();
@@ -99,7 +108,7 @@ public class DocumentIndex extends Segment {
             try {
                 while ( (f = DocumentIndex.this.queue.take()) != poison ) {
                     try {
-                        resultRows = add(f);
+                        resultRows = add(f, DocumentIndex.this.timezoneOffset);
                         for ( final SolrInputDocument resultRow : resultRows ) {
                             if ( DocumentIndex.this.callback != null ) {
                                 if ( resultRow == null ) {
@@ -132,7 +141,7 @@ public class DocumentIndex extends Segment {
         this.queue.clear();
     }
 
-    private SolrInputDocument[] add(final AnchorURL url) throws IOException {
+    private SolrInputDocument[] add(final AnchorURL url, final int timezoneOffset) throws IOException {
         if ( url == null ) {
             throw new IOException("file = null");
         }
@@ -150,7 +159,7 @@ public class DocumentIndex extends Segment {
             length = -1;
         }
         try {
-            documents = TextParser.parseSource(url, null, null, new VocabularyScraper(), 0, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null));
+            documents = TextParser.parseSource(url, null, null, new VocabularyScraper(), timezoneOffset, 0, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null));
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toNormalform(false) + ": " + e.getMessage());
         }
@@ -159,7 +168,7 @@ public class DocumentIndex extends Segment {
         int c = 0;
         for ( final Document document : documents ) {
         	if (document == null) continue;
-            final Condenser condenser = new Condenser(document, null, true, true, LibraryProvider.dymLib, true, true);
+            final Condenser condenser = new Condenser(document, null, true, true, LibraryProvider.dymLib, true, true, 0);
             rows[c++] =
                 super.storeDocument(
                     url,

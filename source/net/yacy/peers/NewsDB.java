@@ -46,6 +46,8 @@ package net.yacy.peers;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -164,10 +166,16 @@ public class NewsDB {
 
     private Record b2r(final Row.Entry b) {
         if (b == null) return null;
+        Calendar c;
+        try {
+            c = b.empty(2) ? null : my_SHORT_SECOND_FORMATTER.parse(b.getColASCII(2), 0);
+        } catch (ParseException e) {
+            c = null;
+        }
         return new NewsDB.Record(
             b.getPrimaryKeyASCII(),
             b.getColUTF8(1),
-            (b.empty(2)) ? null : my_SHORT_SECOND_FORMATTER.parse(b.getColASCII(2), GenericFormatter.UTCDiffString()),
+            c == null ? null : c.getTime(),
             (int) b.getColLong(3),
             MapTools.string2map(b.getColUTF8(4), ",")
         );
@@ -226,8 +234,8 @@ public class NewsDB {
     public class Record {
 
         private final String originator;  // hash of originating peer
-        private final Date   created;     // Date when news was created by originator
-        private final Date   received;    // Date when news was received here at this peer
+        private       Date   created;     // Date when news was created by originator
+        private       Date   received;    // Date when news was received here at this peer
         private final String category;    // keyword that addresses possible actions
         private       int    distributed; // counter that counts number of distributions of this news record
         private final Map<String, String> attributes;  // elements of the news for a special category
@@ -238,8 +246,16 @@ public class NewsDB {
             if (this.attributes.toString().length() > NewsDB.this.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + this.attributes.toString().length() + ") exceeds maximum (" + NewsDB.this.attributesMaxLength + ")");
             this.category = (this.attributes.containsKey("cat")) ? this.attributes.get("cat") : "";
             if (this.category.length() > NewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + this.category.length() + ") exceeds maximum (" + NewsDB.categoryStringLength + ")");
-            this.received = (this.attributes.containsKey("rec")) ? my_SHORT_SECOND_FORMATTER.parse(this.attributes.get("rec"), GenericFormatter.UTCDiffString()) : new Date();
-            this.created = (this.attributes.containsKey("cre")) ? my_SHORT_SECOND_FORMATTER.parse(this.attributes.get("cre"), GenericFormatter.UTCDiffString()) : new Date();
+            try {
+                this.received = (this.attributes.containsKey("rec")) ? my_SHORT_SECOND_FORMATTER.parse(this.attributes.get("rec"), 0).getTime() : new Date();
+            } catch (ParseException e) {
+                this.received = new Date();
+            }
+            try {
+                this.created = (this.attributes.containsKey("cre")) ? my_SHORT_SECOND_FORMATTER.parse(this.attributes.get("cre"), 0).getTime() : new Date();
+            } catch (ParseException e) {
+                this.created = new Date();
+            }
             this.distributed = (this.attributes.containsKey("dis")) ? Integer.parseInt(this.attributes.get("dis")) : 0;
             this.originator = (this.attributes.containsKey("ori")) ? this.attributes.get("ori") : "";
             removeStandards();
@@ -262,7 +278,11 @@ public class NewsDB {
             if (attributes.toString().length() > NewsDB.this.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + NewsDB.this.attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = received;
-            this.created = my_SHORT_SECOND_FORMATTER.parse(id.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length()), GenericFormatter.UTCDiffString());
+            try {
+                this.created = my_SHORT_SECOND_FORMATTER.parse(id.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length()), 0).getTime();
+            } catch (ParseException e) {
+                this.created = new Date();
+            }
             this.category = category;
             this.distributed = distributed;
             this.originator = id.substring(GenericFormatter.PATTERN_SHORT_SECOND.length());

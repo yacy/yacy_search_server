@@ -70,7 +70,6 @@ import org.apache.lucene.util.automaton.Automata;
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
-import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.schema.TrieDateField;
@@ -146,6 +145,7 @@ public final class QueryParams {
     public LinkedHashSet<String> facetfields;
     private SolrQuery cachedQuery;
     private CollectionConfiguration solrSchema;
+    public final int timezoneOffset;
 
     public QueryParams(
         final QueryGoal queryGoal,
@@ -154,6 +154,7 @@ public final class QueryParams {
         final String prefer,
         final ContentDomain contentdom,
         final String language,
+        final int timezoneOffset,
         final Collection<Tagging.Metatag> metatags,
         final CacheStrategy snippetCacheStrategy,
         final int itemsPerPage,
@@ -183,6 +184,7 @@ public final class QueryParams {
         this.ranking = ranking;
         this.maxDistance = maxDistance;
         this.contentdom = contentdom;
+        this.timezoneOffset = timezoneOffset;
         this.itemsPerPage = Math.min((specialRights) ? 10000 : 1000, itemsPerPage);
         this.offset = Math.max(0, Math.min((specialRights) ? 10000 - this.itemsPerPage : 1000 - this.itemsPerPage, offset));
         try {
@@ -527,19 +529,19 @@ public final class QueryParams {
         
         if (this.solrSchema.contains(CollectionSchema.dates_in_content_dts)) {
             if (this.modifier.on != null && this.modifier.on.length() > 0) {
-                fqs.add(QueryModifier.parseOnExpression(this.modifier.on));
+                fqs.add(QueryModifier.parseOnExpression(this.modifier.on, this.timezoneOffset));
             }
             
             if (this.modifier.from != null && this.modifier.from.length() > 0 && (this.modifier.to == null || this.modifier.to.equals("*"))) {
-                fqs.add(QueryModifier.parseFromToExpression(this.modifier.from, null));
+                fqs.add(QueryModifier.parseFromToExpression(this.modifier.from, null, this.timezoneOffset));
             }
             
             if ((this.modifier.from == null || this.modifier.from.equals("*")) && this.modifier.to != null && this.modifier.to.length() > 0) {
-                fqs.add(QueryModifier.parseFromToExpression(null, this.modifier.to));
+                fqs.add(QueryModifier.parseFromToExpression(null, this.modifier.to, this.timezoneOffset));
             }
             
             if (this.modifier.from != null && this.modifier.from.length() > 0 && this.modifier.to != null && this.modifier.to.length() > 0) {
-                fqs.add(QueryModifier.parseFromToExpression(this.modifier.from, this.modifier.to));
+                fqs.add(QueryModifier.parseFromToExpression(this.modifier.from, this.modifier.to, this.timezoneOffset));
             }
         }
         

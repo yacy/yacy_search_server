@@ -107,7 +107,7 @@ public class DCEntry extends MultiMapSolrParams {
         if (d == null) return null;
         if (d.isEmpty()) return null;
         try {
-            Date x = ISO8601Formatter.FORMATTER.parse(d);
+            Date x = ISO8601Formatter.FORMATTER.parse(d, 0).getTime();
             Date now = new Date();
             return x.after(now) ? now : x;
         } catch (final ParseException e) {
