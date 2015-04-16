@@ -3739,6 +3739,7 @@ public final class Switchboard extends serverSwitch {
         mySeed.setFlagAcceptRemoteCrawl(getConfigBool("crawlResponse", true));
         mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
+        if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort("port.ssl", 8443)));
 
         // set local ips
         String staticIP = this.getConfig("staticIP", "");

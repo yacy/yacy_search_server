@@ -195,6 +195,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public static final String IP6 = "IP6";
     
     public static final String PORT = "Port";
+    public static final String PORTSSL = "PortSSL"; // https port
     public static final String SEEDLISTURL = "seedURL";
     public static final String NEWS = "news"; // news attachment
     public static final String DCT = "dct"; // disconnect time

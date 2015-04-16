@@ -406,6 +406,8 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
                             prop.put(STR_TABLE_LIST + conCount + "_special", (seed.getFlagRootNode() && !seed.getFlagAcceptRemoteIndex()) ? 1 : 0);
                             prop.put(STR_TABLE_LIST + conCount + "_ssl", (seed.getFlagSSLAvailable()) ? 1 : 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_ssl_ip", seed.getIP());
+                            prop.put(STR_TABLE_LIST + conCount + "_ssl_portssl", seed.get(Seed.PORTSSL,"8443"));
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 userAgent = ClientIdentification.yacyInternetCrawlerAgent.userAgent;
