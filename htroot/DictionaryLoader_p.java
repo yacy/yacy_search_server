@@ -305,8 +305,27 @@ public class DictionaryLoader_p {
             }
             SynonymLibrary.init(synonyms_path);
         }
+        
         prop.put("syn0Status", synonym_de_production.exists() ? 1 : 0);
 
+        final File synonym_en_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "mobythesaurus_en_yacy");
+        final File synonym_en_production = new File(synonyms_path, synonym_en_default.getName());
+        if (post.containsKey("syn1Deactivate")) {
+            synonym_en_production.delete();
+            SynonymLibrary.init(synonyms_path);
+        }
+        
+        if (post.containsKey("syn1Activate")) {
+            try {
+                FileUtils.copy(new FileInputStream(synonym_en_default), synonym_en_production);
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
+            }
+            SynonymLibrary.init(synonyms_path);
+        }
+        
+        prop.put("syn1Status", synonym_en_production.exists() ? 1 : 0);
+        
         // check status again
         boolean keepPlacesTagging = false;
         for (final LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {
