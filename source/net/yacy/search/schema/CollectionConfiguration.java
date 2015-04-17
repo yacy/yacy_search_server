@@ -338,7 +338,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	accText(sb, md.dc_publisher());
         	// accText(sb, md.snippet()); // above added to description_txt, default search field via getQueryFields(), description_txt incl. in snippet calculation
         	accText(sb, md.url().toTokens());
-        	accText(sb, keywords); // default search field via getQueryFields(), keywords not incl. in snippet calculation
+        	// accText(sb, keywords); // default search field via getQueryFields(), keywords not incl. in snippet calculation
         	add(doc, CollectionSchema.text_t, sb.toString());
         }
 
