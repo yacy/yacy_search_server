@@ -44,6 +44,11 @@ public class DictionaryLoader_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects(); // return variable that accumulates replacements
 
+        final File synonyms_path = new File(sb.dictionariesPath, LibraryProvider.path_to_synonym_dictionaries);
+        final File synonym_de_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "openthesaurus_de_yacy");
+        final File synonym_de_production = new File(synonyms_path, synonym_de_default.getName());
+        final File synonym_en_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "mobythesaurus_en_yacy");
+        final File synonym_en_production = new File(synonyms_path, synonym_en_default.getName());
         /*
          * distinguish the following cases:
          * - dictionary file was not loaded -> actions: load the file
@@ -60,11 +65,12 @@ public class DictionaryLoader_p {
             prop.put(dictionary.nickname + "ActionActivated", 0);
             prop.put(dictionary.nickname + "ActionDeactivated", 0);
         }
-        if (SynonymLibrary.size() > 0) { // status of SynonymLibrary not included in above
-            prop.put("syn0Status", 1);
-        }
 
         if (post == null) {
+        	// check here only if there is no possibility synonym libraries have been activated/deactivated
+            prop.put("syn0Status", synonym_de_production.exists() ? 1 : 0);
+            prop.put("syn1Status", synonym_en_production.exists() ? 1 : 0);
+            
             return prop;
         }
 
@@ -289,9 +295,6 @@ public class DictionaryLoader_p {
             prop.put("drw0ActionActivated", 1);
         }
         
-        final File synonym_de_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "openthesaurus_de_yacy");
-        final File synonyms_path = new File(sb.dictionariesPath, LibraryProvider.path_to_synonym_dictionaries);
-        final File synonym_de_production = new File(synonyms_path, synonym_de_default.getName());
         if (post.containsKey("syn0Deactivate")) {
             synonym_de_production.delete();
             SynonymLibrary.init(synonyms_path);
@@ -306,10 +309,6 @@ public class DictionaryLoader_p {
             SynonymLibrary.init(synonyms_path);
         }
         
-        prop.put("syn0Status", synonym_de_production.exists() ? 1 : 0);
-
-        final File synonym_en_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "mobythesaurus_en_yacy");
-        final File synonym_en_production = new File(synonyms_path, synonym_en_default.getName());
         if (post.containsKey("syn1Deactivate")) {
             synonym_en_production.delete();
             SynonymLibrary.init(synonyms_path);
@@ -324,7 +323,11 @@ public class DictionaryLoader_p {
             SynonymLibrary.init(synonyms_path);
         }
         
-        prop.put("syn1Status", synonym_en_production.exists() ? 1 : 0);
+        if (post != null) {
+        	// check here if there is a possibility synonym libraries have been activated/deactivated
+            prop.put("syn0Status", synonym_de_production.exists() ? 1 : 0);
+            prop.put("syn1Status", synonym_en_production.exists() ? 1 : 0);
+        }
         
         // check status again
         boolean keepPlacesTagging = false;
