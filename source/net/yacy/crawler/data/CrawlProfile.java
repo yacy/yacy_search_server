@@ -708,7 +708,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.put(CRAWL_PROFILE_PREFIX + count + "_domMaxPages", this.domMaxPages());
         //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (this.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(this.domMaxPages())); // TODO: remove, replace with 'domMaxPages'
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingQ", this.crawlingQ() ? 1 : 0);
-        //prop.put(CRAWL_PROFILE_PREFIX + count + "_withQuery", (this.crawlingQ()) ? "1" : "0"); // TODO: remove, replace with crawlingQ
         prop.put(CRAWL_PROFILE_PREFIX + count + "_followFrames", this.followFrames() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNoindex", this.obeyHtmlRobotsNoindex() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNofollow", this.obeyHtmlRobotsNofollow() ? 1 : 0);
