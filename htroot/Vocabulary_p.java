@@ -188,7 +188,7 @@ public class Vocabulary_p {
                     LibraryProvider.autotagging.addVocabulary(newvoc);
                     vocabularyName = discovername;
                     vocabulary = newvoc;
-                } else {
+                } else if (vocabulary != null) {
                     // check if objectspace was set
                     vocabulary.setObjectspace(post.get("objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace()));
 
@@ -217,7 +217,7 @@ public class Vocabulary_p {
                     }
 
                     // check if the vocabulary shall be deleted
-                    if (vocabulary != null && post.get("delete_vocabulary", "").equals("checked") ) {
+                    if (post.get("delete_vocabulary", "").equals("checked") ) {
                         LibraryProvider.autotagging.deleteVocabulary(vocabularyName);
                         vocabulary = null;
                         vocabularyName = null;
