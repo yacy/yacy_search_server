@@ -43,13 +43,13 @@
                         data: [row],
                         value: row,
                         result: row
-                    };  
+                    };
                 };
             };
-            cb(parsed); 
+            cb(parsed);
           });
         };
-      };     
+      };
     $(document).ready(function() {
       $('#search').typeahead({hint:false,highlight:true,minLength:1}, {
     	name: 'states',
@@ -70,11 +70,11 @@
       document.getElementById("header_websearch").className += " active";
     </script>
     #(/topmenu)#
-        
+
 <div id="api" style="top:58px;">
 <script type="text/javascript">
 //<![CDATA[
-document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\" id=\"apilink\" target=\"_blank\"\><img src=\"env/grafics/rss.png\" width=\"32\" height=\"32\" alt=\"RSS\" /></a>")
+document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\" id=\"apilink\" target=\"_blank\"\><img src=\"env/grafics/rss.png\" width=\"16\" height=\"16\" alt=\"RSS\" /></a>")
 //]]>
 </script>
 <span>This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.
@@ -90,7 +90,7 @@ Use the RSS search result format to add static searches to your RSS reader, if y
     <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
 
 <form class="search small" name="searchform" action="" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;max-width:500px;">
-  
+
   <div class="input-group">
     <input name="query" id="search" type="text" class="form-control searchinput typeahead" size="40" maxlength="200" placeholder="#[promoteSearchPageGreeting]#" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
     <div class="input-group-btn">
@@ -190,8 +190,8 @@ document.getElementById("Enter").innerHTML = "search again";
 #(num-results)#
 	::
 	::
-	::        
-	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;"></span>        
+	::
+	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;"></span>
 	::
 #(/num-results)#
 
@@ -209,7 +209,7 @@ document.getElementById("Enter").innerHTML = "search again";
 <script type="text/javascript">
 function latestinfo() {
   if (window.XMLHttpRequest) { // Mozilla/Safari
-    self.xmlHttpReq = new XMLHttpRequest(); 
+    self.xmlHttpReq = new XMLHttpRequest();
   } else if (window.ActiveXObject) { // IE
     self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   }
