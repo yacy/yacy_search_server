@@ -29,7 +29,7 @@ a:hover {
   -khtml-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
- 
+
   background-color: #5090D0;
   color:white;
 }
@@ -86,8 +86,8 @@ table {
   border:1px solid #888888;
 }
 
-.TableCellActive {       
-  background-color: #FFCCCC;     
+.TableCellActive {
+  background-color: #FFCCCC;
 }
 
 /* Blog and Wiki*/
@@ -173,7 +173,7 @@ div.ProgressBarFill {
 
 /* Searchresults */
 
-fieldset.maininput, fieldset.yacys { 
+fieldset.maininput, fieldset.yacys {
   background-color:#666666;
   -webkit-border-radius: 5px;
   -khtml-border-radius: 5px;
@@ -191,7 +191,6 @@ form.search.small h2 {
 
 .searchresults h4 a {
   font-size:1.2em;
-  font-weight:normal;
   color:#ffffff;
 }
 .searchresults h4 a:hover {
