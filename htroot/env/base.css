@@ -898,30 +898,30 @@ ul#menu a.MenuItemLink {
   padding:1px 5% 1px 15%;
 }
 /* Bookmark Folder---------------------------*/
-ul.folder {    
+ul.folder {
 	list-style-type: none;
 	margin-left: -3em;
 	white-space:nowrap;
-	overflow:hidden;	  
+	overflow:hidden;
 }
 ul.folder > li a {
-	list-style-type: none;	
-	padding-left: 20px; 	
+	list-style-type: none;
+	padding-left: 20px;
  	background: url(/env/grafics/doc2.gif) no-repeat;
 }
 ul.folder li.treeMenu_opened a {
 	list-style-type: none;
-	padding-left: 20px; 	
+	padding-left: 20px;
  	background: url(/env/grafics/doc2.gif) no-repeat;
 }
 ul.folder li.treeMenu_closed {
-	list-style-type: none;	
-	padding-left: 20px;	 
+	list-style-type: none;
+	padding-left: 20px;
  	background: url(/env/grafics/closed.gif) no-repeat;
 }
 ul.folder li.treeMenu_opened {
-	list-style-type: none;	
-	padding-left: 20px;	 
+	list-style-type: none;
+	padding-left: 20px;
  	background: url(/env/grafics/opened.gif) no-repeat;
 }
 /*
@@ -947,17 +947,17 @@ div#kiosk:hover span {
    display: block;
    position: absolute;
    font-size:1em;
-   top: 18px; 
+   top: 18px;
    left: -80px;
    width: 80px;
    padding: 3px;
-   color: #000000; 
+   color: #000000;
    background: #DDDDDD;
    text-align: center;
    border: 1px dashed black;
    z-index: 100;
 }
- 
+
 /* API */
 div#api {
   position:absolute;
@@ -974,11 +974,11 @@ div#api:hover span {
   display: block;
   position: absolute;
   font-size:1em;
-  top: 48px; 
+  top: 48px;
   left: -120px; /* 30 - width */
   width: 160px;
   padding: 3px;
-  color: #000000; 
+  color: #000000;
   background: #DDDDDD;
   text-align: center;
   border: 1px dashed black;
@@ -1000,11 +1000,11 @@ div#searchmode:hover span {
   display: block;
   position: absolute;
   font-size:1em;
-  top: 1px; 
+  top: 1px;
   left: -169px; /* 30 - width */
   width: 160px;
   padding: 3px;
-  color: #000000; 
+  color: #000000;
   background: #DDDDDD;
   text-align: center;
   border: 1px dashed black;
@@ -1016,7 +1016,7 @@ div#yacylivesearch {
 
 div#info {
   float:left;
-} 
+}
 
 div#info span {
   display: none;
@@ -1028,7 +1028,7 @@ div#info:hover span {
   font-size:1em;
   width: 200px;
   padding: 3px;
-  color: #000000; 
+  color: #000000;
   background: #DDDDDD;
   text-align: center;
   border: 1px dashed black;
@@ -1037,6 +1037,7 @@ div#info:hover span {
 
 div#tagcloud {
 	line-height:16px;
+    margin: 10px 0;
 }
 
 .info span {
@@ -1049,7 +1050,7 @@ div#tagcloud {
   font-size:1em;
   width: 200px;
   padding: 3px;
-  color: #000000; 
+  color: #000000;
   background: #DDDDDD;
   text-align: left;
   border: 1px dashed black;
