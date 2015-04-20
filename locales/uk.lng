@@ -392,7 +392,7 @@ Join and support the global network \'freeworld\', search the web with an uncens
 Search portal for your own web pages==Пошуковий портал для ваших власних веб-сторінок
 Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ваша установка YaCy працює незалежно від інших вузлів, і ви можете створити свій власний індекс, запустити своє власне сканувати веб. Це може бути використано для пошуку на власному сайті або створення тематично-орієнтованого пошукового порталу.
 Files may also be shared with the YaCy server, assign a path here:==Спільні файли також можуть використовуватися з сервером YaCy, призначте шлях тут:
-This path can be accessed at ==Цей шлях може бути доступний на 
+This path can be accessed at ==Цей шлях може бути доступний на
 Use that path as crawl start point.==Використовуйте його як відправну точку для сканування.
 Intranet Indexing==Індексування внутрішньої мережі
 Create a search portal for your intranet or web pages or your \(shared\) file system.==Пошуковий портал для вашої внутрішньої мережі, публічних веб-сторінок чи вашої (розподіленої) файлової системи.
@@ -530,7 +530,7 @@ Installing:==Установка:
 faster connection speed==краща швидкість з’єднання
 possibility for local adaptions==можливість пристосування до місця
 No automatic update to future releases of YaCy Search Widget==Немає самооновлення до наступних випусків Пошукової штучки YaCy
-Ajax/JSONP cross domain requests needed to query remote YaCy Peer==Для звернення до віддаленого вузла YaCy необхідні міждоменні запити Ajax/JSONP 
+Ajax/JSONP cross domain requests needed to query remote YaCy Peer==Для звернення до віддаленого вузла YaCy необхідні міждоменні запити Ajax/JSONP
 download yacy-portalsearch.tar.gz from==завантажте yacy-portalsearch.tar.gz з
 unpack within your HTTP servers path==розпакуйте в шлях вашого HTTP-сервера
 use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==використовуйте ./yacy/portalsearch/yacy-portalsearch.html в якості посилання для вбудовування у вашу власну сторінку порталу
@@ -1174,7 +1174,7 @@ Network Scanner==Сканувач внутрішньої мережі
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy може сканувати частину мережі на наявність HTTP, FTP і SMB серверів.
 You must first select a IP range and then, after this range is scanned,==Перш за все, необхідно вказати IP-область, а коли область буде просканована,
 it is possible to select servers that had been found for a full-site crawl.==можна вибрати знайдені сервери для повного сканування сторінок.
-No servers had been detected in the given IP range \#\[iprange\]\#. 
+No servers had been detected in the given IP range \#\[iprange\]\#.
 Please enter a different IP range for another scan.==Будь ласка, введіть інший IP-діапазон для сканування.
 Please wait...==Будь-ласка, зачекайте...
 >Scan the network<==>Сканування мережі<
@@ -1363,7 +1363,7 @@ Index Cleaner==Очисник індексу
 Total URLs searched:==Всього шуканих URL:
 Blacklisted URLs found:==Виявлено URL з чорного списку:
 Percentage blacklisted:==Відсоток з ЧС:
-last searched URL:==останні шукані URL: 
+last searched URL:==останні шукані URL:
 last blacklisted URL found:==останні виявлені URL з ЧС:
 >RWI-DB-Cleaner==>RWI-БД-Очисник
 RWIs at Start:==RWI на початку:
@@ -1689,7 +1689,7 @@ Modified Date==Дата зміни
 Anchor Name==Ім’я якоря
 URL==URL
 Delete==Видалити
-#-----------------------------        
+#-----------------------------
 
 #File: IndexImport_p.html
 #---------------------------
@@ -2632,7 +2632,7 @@ Proxy Accounts==облікові записи проксі
 #File: Settings_Seed.inc
 #---------------------------
 Seed Upload Settings==Установки вивантаження насіння
-With these settings you can configure if you have an account on a public accessible==За допомогою цих настройок можна визначити, чи у вас є обліковий запис на загальнодоступному 
+With these settings you can configure if you have an account on a public accessible==За допомогою цих настройок можна визначити, чи у вас є обліковий запис на загальнодоступному
 server where you can host a seed-list file.==сервері, куди б можна було викласти насіннєвий файл.
 General Settings:==Загальні установки:
 If you enable one of the available uploading methods, you will become a principal peer.==Якщо ви увімкнете один з доступних способів вивантаження, ви станету Головним вузлом.
@@ -2680,7 +2680,7 @@ The password==Пароль
 Uploading via SCP:==Вивантажити по SCP:
 This is the account for a server where you are able to login via ssh.==Це обліковий запис сервера, на який ви можете ввійти по SSH.
 >Server==>Сервер
-The host where you have an account, like 'my.host.net'==Хост, на якому у вас є обліковий запис, наприклад, "mein.host.net" 
+The host where you have an account, like 'my.host.net'==Хост, на якому у вас є обліковий запис, наприклад, "mein.host.net"
 Server&nbsp;Port==Порт
 The sshd port of the host, like '22'==Порт SSHD хосту, наприклад, "22"
 Path</label>==Шлях</label>
@@ -2912,8 +2912,8 @@ Enabled: Updating to file==Ввімкнено: Оновлення файлу
 >Traffic==>Трафік
 >Proxy==>Проксі
 >Crawler==>Сканер
-pause ==призупинити 
-continue ==продовжити 
+pause ==призупинити
+continue ==продовжити
 local crawl==місцеве сканування
 remote triggered crawl==вхідне віддалене сканування
 Tray-Icon==Значок у треї
@@ -3111,7 +3111,7 @@ Threaddump<==Dump потоку<
 #File: User.html
 #---------------------------
 User Page==Сторінка користувача
-You are not logged in.<br />==Ви не ввійшли.<br /> 
+You are not logged in.<br />==Ви не ввійшли.<br />
 Username:==Ім’я користувача:
 Password: <input==Пароль: <input
 "login"=="ввійти"
@@ -3389,10 +3389,10 @@ This search result can also be retrieved as RSS/<a href="http://www.opensearch.o
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Формат запиту схожий на <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Клацніть по значку API, щоб побачити зразок виклику пошукового API RSS.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Щоб побачити список усіх API, будь ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">вікі-сторінку API</a>.
-Did you mean:==Ви мали наувазі:
+Did you mean:==Можливо, ви мали на увазі:
 "Search"=="Пошук"
 'Search'=='Пошук'
-"search again"=="Шукати знову" 
+"search again"=="Шукати знову"
 more options==більше налаштувань...
 Text==Текст
 Images==Зображення
@@ -3404,7 +3404,7 @@ No Results.==Результати відсутні.
 length of search words must be at least==Довжина пошукового запиту повинна бути не менше
 \d+ characters==\d+ знаків
 
-> of==> з 
+> of==> з
 g> local,==g> локально,
 g> remote\),==g> віддалених),
 > from==> з
@@ -3853,7 +3853,7 @@ Public:==Загальна:
 >no<==>ні<
 YaCy Bookmarks==Закладки YaCy
 
-This dialog lets you select an alternate theme/skin for YaCy-UI==Це вікно дозволяє вибрати 
+This dialog lets you select an alternate theme/skin for YaCy-UI==Це вікно дозволяє вибрати
 Base Theme==Основна тема
 Custom Theme==Змінена тема
 >You can==Ви можете
@@ -4023,7 +4023,7 @@ Enter tags to add \(<i>replace with</i>\)==
 >\(comma separated tags\)==>(ключі через кому)
 #>Bookmark Importer==>Імпортувач закладок
 >Bookmark Importer==>Імпорт закладок
-> ?Netscape HTML==>Netscape HTML 
+> ?Netscape HTML==>Netscape HTML
 > ?Firefox JSON==>Firefox JSON
 > ?XBEL==>XBEL
 > ?Surrogate XML==>Surrogate XM
