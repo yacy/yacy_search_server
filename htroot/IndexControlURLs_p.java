@@ -284,7 +284,7 @@ public class IndexControlURLs_p {
             prop.put("indexdump_dumpfile", dump.getAbsolutePath());
             dumpFiles =  segment.fulltext().dumpFiles();
             prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
-            sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
+            //sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
         }
 
         if (post.containsKey("indexrestore")) {
