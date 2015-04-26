@@ -258,8 +258,14 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             }
 
             // 9 - deliver to client
-            byte[] sbb = UTF8.getBytes(doc.toString());
-
+            byte[] sbb;
+            if (doc.charset() == null) {
+                sbb = UTF8.getBytes(doc.toString());
+                response.setCharacterEncoding(UTF8.charset.name());
+            } else { // keep orig charset
+                sbb = doc.toString().getBytes(doc.charset());
+                response.setCharacterEncoding(doc.charset().name());
+            }
             // add some proxy-headers to response header
             if (proxyResponseHeader.containsKey(HeaderFramework.SERVER)) {
                 response.setHeader(HeaderFramework.SERVER, proxyResponseHeader.get(HeaderFramework.SERVER));
