@@ -224,8 +224,8 @@
     	<pathelement location="${lib}/noggit-0.5.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
         <pathelement location="${lib}/pdfbox-1.8.9.jar" />
-    	<pathelement location="${lib}/poi-3.10.1.jar" />
-    	<pathelement location="${lib}/poi-scratchpad-3.10.1.jar" />
+    	<pathelement location="${lib}/poi-3.11-20141221.jar" />
+    	<pathelement location="${lib}/poi-scratchpad-3.11-20141221.jar" />
         <pathelement location="${lib}/slf4j-api-1.7.9.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.7.9.jar" />
         <pathelement location="${lib}/solr-core-4.10.3.jar" />

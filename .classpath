@@ -48,8 +48,8 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.9.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
-	<classpathentry kind="lib" path="lib/poi-3.10.1.jar"/>
-	<classpathentry kind="lib" path="lib/poi-scratchpad-3.10.1.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.11-20141221.jar"/>
+	<classpathentry kind="lib" path="lib/poi-scratchpad-3.11-20141221.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.9.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.10.3.jar"/>
