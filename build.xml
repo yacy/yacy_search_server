@@ -203,7 +203,7 @@
         <pathelement location="${lib}/jetty-xml-9.2.10.v20150310.jar" />
     	<pathelement location="${lib}/jsch-0.1.51.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
-    	<pathelement location="${lib}/jsoup-1.8.1.jar" />
+    	<pathelement location="${lib}/jsoup-1.8.2.jar" />
     	<pathelement location="${lib}/log4j-over-slf4j-1.7.9.jar" />
     	<pathelement location="${lib}/lucene-analyzers-common-4.10.3.jar" />
     	<pathelement location="${lib}/lucene-analyzers-phonetic-4.10.3.jar" />
@@ -224,8 +224,8 @@
     	<pathelement location="${lib}/noggit-0.5.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
         <pathelement location="${lib}/pdfbox-1.8.9.jar" />
-    	<pathelement location="${lib}/poi-3.10.1.jar" />
-    	<pathelement location="${lib}/poi-scratchpad-3.10.1.jar" />
+    	<pathelement location="${lib}/poi-3.11-20141221.jar" />
+    	<pathelement location="${lib}/poi-scratchpad-3.11-20141221.jar" />
         <pathelement location="${lib}/slf4j-api-1.7.9.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.7.9.jar" />
         <pathelement location="${lib}/solr-core-4.10.3.jar" />

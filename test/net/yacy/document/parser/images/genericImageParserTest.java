@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.Document;
+import net.yacy.document.VocabularyScraper;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -28,7 +29,7 @@ public class genericImageParserTest {
         System.out.println("parse file: " + filename);
 
         genericImageParser p = new genericImageParser();
-        final Document[] docs = p.parse(url, mimetype, charset, null, new FileInputStream(file));
+        final Document[] docs = p.parse(url, mimetype, charset, new VocabularyScraper(), 0, new FileInputStream(file));
 
         Document doc = docs[0];
         assertEquals("YaCy Logo",doc.dc_title());

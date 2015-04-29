@@ -346,7 +346,7 @@ public class QueryGoal {
         fqs.add(
                 CollectionSchema.images_urlstub_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM + " OR " +
                 CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif) OR " +
-                CollectionSchema.content_type.getSolrFieldName() + ":(image/*))");
+                CollectionSchema.content_type.getSolrFieldName() + ":(image/*)");
         return fqs;
     }
     

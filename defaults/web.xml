@@ -9,6 +9,20 @@
     <display-name>YaCy</display-name>
     <description>Decentralized Web Search</description>
 
+    <!-- Quality of Service filter to prioritize service for requests from localhost -->
+    <!-- uncomment this to activate
+    <filter>
+        <description>Quality of Service Filter, to prioritize requests from localhost</description>
+        <filter-name>YaCyQoSFilter</filter-name>
+        <filter-class>net.yacy.http.servlets.YaCyQoSFilter</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+    <filter-mapping>
+        <filter-name>YaCyQoSFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    -->
+    
     <!-- Standard YaCy Servlets -->
     
     <!-- Default servlet for all YaCy output
@@ -17,6 +31,7 @@
     <servlet>
         <servlet-name>YaCyDefaultServlet</servlet-name>
         <servlet-class>net.yacy.http.servlets.YaCyDefaultServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
     <servlet-mapping>
         <servlet-name>YaCyDefaultServlet</servlet-name>

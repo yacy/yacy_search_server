@@ -135,9 +135,10 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         // as fundamental component leave this hardcoded, other servlets may be defined in web.xml only
         ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
         sholder.setInitParameter("resourceBase", htrootpath);
+        sholder.setAsyncSupported(true); // needed for YaCyQoSFilter
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
-        htrootContext.addServlet(sholder,"/*");    
-        
+        htrootContext.addServlet(sholder, "/*");
+
         // -----------------------------------------------------------------------------
         // here we set and map the mandatory servlets, needed for typical YaCy operation
         // to make sure they are available even if removed in individual web.xml

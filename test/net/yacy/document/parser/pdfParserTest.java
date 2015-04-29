@@ -6,6 +6,7 @@ import java.util.Collection;
 import static junit.framework.TestCase.assertEquals;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.Document;
+import net.yacy.document.VocabularyScraper;
 import org.junit.Test;
 
 public class pdfParserTest {
@@ -29,7 +30,7 @@ public class pdfParserTest {
         System.out.println("parse file: " + filename);
 
         pdfParser p = new pdfParser();
-        final Document[] docs = p.parse(url, mimetype, charset, null, new FileInputStream(file));
+        final Document[] docs = p.parse(url, mimetype, charset, new VocabularyScraper(), 0, new FileInputStream(file));
 
         Document doc = docs[0];
         int ilinks = doc.getAnchors().size();

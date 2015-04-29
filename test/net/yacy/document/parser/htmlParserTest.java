@@ -75,7 +75,7 @@ public class htmlParserTest extends TestCase {
             System.out.println("parse file: " + filename);
 
             htmlParser p = new htmlParser();
-            final Document[] docs = p.parse(url, mimetype, null, null, new FileInputStream(file));
+            final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, new FileInputStream(file));
 
             Document doc = docs[0];
             String txt = doc.getCharset();
@@ -101,7 +101,7 @@ public class htmlParserTest extends TestCase {
                 + "<figure><img width=\"550px\" title=\"image as exemple\" alt=\"image as exemple\" src=\"./img/my_image.png\"></figrue>" // + img width 550 (+html5 figure)
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, mimetype, new VocabularyScraper(), testhtml, 10);
+        ContentScraper scraper = parseToScraper(url, mimetype, new VocabularyScraper(), 0, testhtml, 10);
         List<AnchorURL> anchorlist = scraper.getAnchors();
 
         String linktxt = anchorlist.get(0).getTextProperty();

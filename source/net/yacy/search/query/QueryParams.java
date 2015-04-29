@@ -706,10 +706,12 @@ public final class QueryParams {
                 if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
                 if (newModifierReplacesOld) {
                     int nmpi = newModifier.indexOf("%3A");
-                    String nmp = newModifier.substring(0, nmpi) + ":";
-                    int i = sb.indexOf(nmp);
-                    if (i > 0) sb = new StringBuilder(sb.substring(0, i).trim());
-                    if (sb.charAt(sb.length() - 1) == '+') sb.setLength(sb.length() - 1);
+                    if (nmpi > 0) {
+                        String nmp = newModifier.substring(0, nmpi) + ":";
+                        int i = sb.indexOf(nmp);
+                        if (i > 0) sb = new StringBuilder(sb.substring(0, i).trim());
+                        if (sb.charAt(sb.length() - 1) == '+') sb.setLength(sb.length() - 1);
+                    }
                 }
                 sb.append("+" + newModifier);
             }
