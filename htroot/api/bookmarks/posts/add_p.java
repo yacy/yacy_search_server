@@ -47,7 +47,7 @@ public class add_p {
             final String pathString = post.get("path","/unsorted");
             tagsString= tagsString + "," + pathString;
             final Set<String> tags = ListManager.string2set(BookmarkHelper.cleanTagsString(tagsString));
-            final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
+            final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createorgetBookmark(url, username);
             if(bookmark != null){
                 bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);

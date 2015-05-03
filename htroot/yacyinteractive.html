@@ -16,7 +16,7 @@
 </script>
 #(/topmenu)#
 
-<div id="api">
+<div id="api" style="top:58px;">
 <script type="text/javascript">
 document.write("\<a id=\"rsslink\" href=\"/solr/select?hl=false&wt=opensearch&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=" + window.location.search.substring(1) + "\"\><img src=\"env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>");
 </script>
@@ -31,11 +31,12 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
   <fieldset class="yacys">
   <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
   <input type="hidden" name="startRecord" value="#[startRecord]#" />
-  <input type="hidden" name="contentdom", value="all" />
-  <input id="search" class="searchinput" name="query" type="text" placeholder="Search..." value="#[query]#" size="40" maxlength="80" onFocus="this.select()" />
-  #(allowrealtime)#
-  <input id="Enter" type="submit" name="Enter" value="Search" />::
-  #(/allowrealtime)#
+  <input type="hidden" name="contentdom" value="all" />
+  <div class="input-group">
+    <input id="search" class="form-control searchinput typeahead" name="query" type="text" placeholder="Search..." value="#[query]#" size="40" maxlength="80" onFocus="this.select()" />
+    #(allowrealtime)#<input class="btn btn-default" id="Enter" type="submit" name="Enter" value="Search" />::
+    #(/allowrealtime)#
+  </div>
   </fieldset>
   <!--<pre>Raw JSON String: <div id="raw"></div></pre>-->
 </form>

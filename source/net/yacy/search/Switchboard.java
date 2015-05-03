@@ -3113,11 +3113,10 @@ public final class Switchboard extends serverSwitch {
         if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
 
         // we will create always a bookmark to use this to track crawled hosts
-        final BookmarksDB.Bookmark bookmark = this.bookmarksDB.createBookmark(url.toNormalform(true), "admin");
+        final BookmarksDB.Bookmark bookmark = this.bookmarksDB.createorgetBookmark(url.toNormalform(true), "admin");
         if (bookmark != null) {
             bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
             bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
-            bookmark.setOwner("admin");
             bookmark.setPublic(false);
             bookmark.setTags(tags, true);
             this.bookmarksDB.saveBookmark(bookmark);

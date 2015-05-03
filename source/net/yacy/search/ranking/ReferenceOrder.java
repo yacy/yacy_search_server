@@ -117,6 +117,7 @@ public class ReferenceOrder {
                     p++;
                     if (System.currentTimeMillis() > timeout) {
                         ConcurrentLog.warn("NormalizeDistributor", "adding of decoded rows to workers ended with timeout = " + this.maxtime);
+                        break;
                     }
                 }
             } catch (final InterruptedException e) {
