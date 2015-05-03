@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -126,11 +128,25 @@ public class BookmarksDB {
     // bookmarksDB's functions for bookmarksTable / bookmarkCache
     // -----------------------------------------------------------
 
-    public Bookmark createBookmark(final String url, final String user){
+    /**
+     * create or get existing bookmark
+     * @param url
+     * @param user
+     * @return
+     */
+    public Bookmark createorgetBookmark(final String url, final String user){
         if (url == null || url.isEmpty()) return null;
         Bookmark bk;
         try {
-            bk = new Bookmark(url);
+            try {
+                DigestURL durl = new DigestURL((url.indexOf("://") < 0) ? "http://" + url : url);
+                bk = this.getBookmark(ASCII.String(durl.hash()));
+            } catch (IOException ex) {
+                bk = null;
+            }
+            if (bk == null) {
+                bk = new Bookmark(url);
+            }
             bk.setOwner(user);
             return (bk.getUrlHash() == null || bk.toMap() == null) ? null : bk;
         } catch (final MalformedURLException e) {
@@ -461,6 +477,7 @@ public class BookmarksDB {
         private static final String BOOKMARK_TIMESTAMP = "bookmarkTimestamp";
         private static final String BOOKMARK_OWNER = "bookmarkOwner";
         private static final String BOOKMARK_IS_FEED = "bookmarkIsFeed";
+        public static final String BOOKMARK_QUERY = "bookmarkQuery"; // tag for original search string if bookmark was created from search result
         private final String urlHash;
         private Set<String> tagNames;
         private long timestamp;
@@ -585,6 +602,18 @@ public class BookmarksDB {
                 return "true".equals(this.entry.get(BOOKMARK_IS_FEED));
             }
             return false;
+        }
+
+        /**
+         * get the original query string (if bookmark was created from a search result original query is stored as a bookmark property)
+         * or null if not exist
+         * @return query-string or null
+         */
+        public String getQuery() {
+            if (this.entry.containsKey(BOOKMARK_QUERY)) {
+                return this.entry.get(BOOKMARK_QUERY);
+            }
+            return null;
         }
 
         public void setPublic(final boolean isPublic){

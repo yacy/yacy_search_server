@@ -594,9 +594,8 @@ public class yacysearch {
                 final String urlstr = crypt.simpleDecode(post.get("bookmarkurl"));
                 if (urlstr != null) {
                     try {
-                        final Bookmark bmk = sb.bookmarksDB.createBookmark(urlstr, YMarkTables.USER_ADMIN);
-                        bmk.setProperty(Bookmark.BOOKMARK_DESCRIPTION, "query="+querystring);
-                        //bmk.setProperty(Bookmark.BOOKMARK_QUERY, originalquerystring);
+                        final Bookmark bmk = sb.bookmarksDB.createorgetBookmark(urlstr, YMarkTables.USER_ADMIN);
+                        bmk.setProperty(Bookmark.BOOKMARK_QUERY, querystring);
                         bmk.addTag("/search"); // add to bookmark folder
                         bmk.addTag("searchresult"); // add tag
                         String urlhash = post.get("bookmarkref");

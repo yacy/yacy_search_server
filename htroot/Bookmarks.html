@@ -251,6 +251,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					<a href="#[link]#" class="bookmarkTitle">#[title]#</a>
 				</h4>
 				<p class="bookmarkDescription">#[description]#</p>
+                                #(hasquery)#::<p class="bookmarkDescription">query=#[query]#</p>#(/hasquery)#
 				<p class="tags">Tagged with | #{tags}#<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#</p>
 				<p class="bookmarkActions">
 					<a href="Bookmarks.html?edit=#[hash]#" class="bookmarkAction">Edit</a>
@@ -258,6 +259,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					<a href="Bookmarks.html?delete=#[hash]#" class="bookmarkAction" onclick="return confirm('Confirm deletion')">Delete</a>
 					/
 					<a href="api/getpageinfo_p.xml?url=#[link]#" class="bookmarkAction">Info</a>
+                                        #(hasquery)#::
+                                        /
+                                        <a href="yacysearch.html?query=#[query]#" class="bookmarkAction">search</a>
+                                        #(/hasquery)#
 				</p>
 			</div>
 			#{/bookmarks}#

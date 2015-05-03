@@ -166,12 +166,12 @@ public class AutoSearch extends AbstractBusyThread {
                 if (bmk.getFoldersString().startsWith("/search")) {
                     // take only new created or edited bookmarks
                     if (bmk.getTimeStamp() >= this.lastInitTime) {
-                        final String query = bmk.getDescription();
-                        if (!query.isEmpty() && query.startsWith("query=")) {
+                        final String query = bmk.getQuery();
+                        if (query != null && !query.isEmpty()) {
                             {
-                                querystack.add(query.substring(6));
+                                querystack.add(query);
                                 added++;
-                                ConcurrentLog.info(AutoSearch.class.getName(), "add query from Bookmarks " + query);
+                                ConcurrentLog.info(AutoSearch.class.getName(), "add query from Bookmarks: query=" + query);
                             }
                         }
                     }

@@ -152,7 +152,7 @@ public class Bookmarks {
                 }
                 tagsString = tagsString + "," + pathString;
                 final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(tagsString));
-                final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
+                final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createorgetBookmark(url, username);
 
                 if (bookmark != null) {
                     bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
@@ -326,6 +326,12 @@ public class Bookmarks {
                         }
                         prop.putHTML("display_bookmarks_"+count+"_title", bookmark.getTitle());
                         prop.putHTML("display_bookmarks_"+count+"_description", bookmark.getDescription());
+                        if (bookmark.getQuery() == null) {
+                            prop.put("display_bookmarks_"+count+"_hasquery", false);
+                        } else {
+                            prop.put("display_bookmarks_"+count+"_hasquery", true);
+                            prop.put("display_bookmarks_"+count+"_hasquery_query", bookmark.getQuery());
+                        }
                         prop.put("display_bookmarks_"+count+"_date", ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())));
                         prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
                         prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
@@ -477,7 +483,7 @@ public class Bookmarks {
                     bookmark = sb.bookmarksDB.getBookmark(bit.next());
                 } catch (final IOException e) {
                 }
-        		if (bookmark == null) break;
+                if (bookmark == null) break;
                 prop.put("display_folderlist_" + count + "_folder", "<li><a href=\"" + bookmark.getUrl() + "\" title=\"" + bookmark.getDescription() + "\">" + bookmark.getTitle() + "</a></li>");
                 count++;
             }
