@@ -37,14 +37,17 @@
 package net.yacy.search;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
@@ -74,6 +77,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -245,7 +249,7 @@ public final class Switchboard extends serverSwitch {
     public File networkRoot;
     public File queuesRoot;
     public File surrogatesInPath;
-    //public File surrogatesOutPath;
+    public File surrogatesOutPath;
     public Segment index;
     public LoaderDispatcher loader;
     public CrawlSwitchboard crawler;
@@ -715,14 +719,23 @@ public final class Switchboard extends serverSwitch {
                 SwitchboardConstants.SURROGATES_IN_PATH_DEFAULT);
         this.log.info("surrogates.in Path = " + this.surrogatesInPath.getAbsolutePath());
         this.surrogatesInPath.mkdirs();
-/*        this.surrogatesOutPath =
+        this.surrogatesOutPath =
             getDataPath(
                 SwitchboardConstants.SURROGATES_OUT_PATH,
                 SwitchboardConstants.SURROGATES_OUT_PATH_DEFAULT);
         this.log.info("surrogates.out Path = " + this.surrogatesOutPath.getAbsolutePath());
         this.surrogatesOutPath.mkdirs();
-*/
-        
+
+        // copy opensearch heuristic config (if not exist)
+        final File osdConfig = new File(getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
+        if (!osdConfig.exists()) {
+            final File osdDefaultConfig = new File("defaults/heuristicopensearch.conf");
+            this.log.info("heuristic.opensearch list Path = " + osdDefaultConfig.getAbsolutePath());
+            try {
+                Files.copy(osdDefaultConfig, osdConfig);
+            } catch (final IOException ex) { }
+        }
+
         // create the release download directory
         this.releasePath =
             getDataPath(SwitchboardConstants.RELEASE_PATH, SwitchboardConstants.RELEASE_PATH_DEFAULT);
@@ -1866,6 +1879,8 @@ public final class Switchboard extends serverSwitch {
         if ( !infile.exists() || !infile.canWrite() || !infile.canRead() ) {
             return false;
         }
+        final File outfile = new File(this.surrogatesOutPath, s);
+        //if (outfile.exists()) return false;
         boolean moved = false;
         if ( s.endsWith("xml.zip") ) {
             // open the zip file with all the xml files in it
@@ -1889,7 +1904,7 @@ public final class Switchboard extends serverSwitch {
             } catch (final IOException e ) {
                 ConcurrentLog.logException(e);
             } finally {
-                moved = infile.delete();
+                moved = infile.renameTo(outfile);
                 if (zis != null) try {zis.close();} catch (final IOException e) {}
             }
             return moved;
@@ -1905,7 +1920,29 @@ public final class Switchboard extends serverSwitch {
             ConcurrentLog.logException(e);
         } finally {
             if (!shallTerminate()) {
-                moved = infile.delete();
+                moved = infile.renameTo(outfile);
+                if ( moved ) {
+                    // check if this file is already compressed, if not, compress now
+                    if ( !outfile.getName().endsWith(".gz") ) {
+                        final String gzname = outfile.getName() + ".gz";
+                        final File gzfile = new File(outfile.getParentFile(), gzname);
+                        try {
+                            final OutputStream os =
+                                new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
+                            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(outfile)); 
+                            FileUtils.copy(bis, os);
+                            os.close();
+                            bis.close();
+                            if ( gzfile.exists() ) {
+                                FileUtils.deletedelete(outfile);
+                            }
+                        } catch (final FileNotFoundException e ) {
+                            ConcurrentLog.logException(e);
+                        } catch (final IOException e ) {
+                            ConcurrentLog.logException(e);
+                        }
+                    }
+                }
             }
             if (is != null) try {is.close();} catch (IOException e) {}
         }
