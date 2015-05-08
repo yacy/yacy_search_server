@@ -503,11 +503,13 @@
             <input type="radio" name="snapshotsReplaceOld" value="on" checked="checked"/> replace old snapshots with new one&nbsp;&nbsp;&nbsp;
 			<input type="radio" name="snapshotsReplaceOld" value="off" /> add new versions for each crawl
           </dd>
+          <dt><label for="<label for="snapshotVersion">must-not-match filter for snapshot generation</label></dt>
+          <dd><input name="snapshotsMustnotmatch" id="snapshotsMustnotmatch" type="text" size="55" maxlength="100000" value="#[snapshotsMustnotmatch]#" /></dd>
           #(snapshotEnableImages)#
           <input type="hidden" name="snapshotsLoadImage" id="snapshotsLoadImage" value="false"/>::
           <dt><label for="snapshotImage">Image Creation</label></dt>
           <dd>
-            <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage" #(snapshotsLoadImageChecked)#::checked="checked"#(/snapshotsLoadImageChecked)# />
+            <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage"#(snapshotsLoadImageChecked)#:: checked="checked"#(/snapshotsLoadImageChecked)#/>
           </dd>
 	      #(/snapshotEnableImages)#
 	      </dl>

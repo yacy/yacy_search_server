@@ -666,6 +666,7 @@ public class CrawlQueues {
                                 if (CrawlQueues.log.isFine()) {
                                     CrawlQueues.log.fine("problem loading " + request.url().toString() + ": " + e.getMessage());
                                 }
+                                e.printStackTrace();
                                 error = "load error - " + e.getMessage();
                             }
    

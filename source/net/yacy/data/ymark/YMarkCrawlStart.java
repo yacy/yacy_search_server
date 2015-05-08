@@ -186,7 +186,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		                crawlingQ,
 		                true, true, true, false,
 		                true, true, false,
-		                -1, false, true,
+		                -1, false, true, CrawlProfile.MATCH_NEVER_STRING,
 		                CacheStrategy.IFFRESH,
 		                "robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
 		                ClientIdentification.yacyIntranetCrawlerAgentName,

@@ -575,7 +575,8 @@ public class Segment {
         
         // CREATE SNAPSHOT
         if ((url.getProtocol().equals("http") || url.getProtocol().equals("https")) &&
-                crawlProfile != null && document.getDepth() <= crawlProfile.snapshotMaxdepth()) {
+                crawlProfile != null && document.getDepth() <= crawlProfile.snapshotMaxdepth() &&
+                !crawlProfile.snapshotsMustnotmatch().matcher(urlNormalform).matches()) {
             // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
             String ext = MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase();
             if (ext.length() == 0 || url.getFile().length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext)) {

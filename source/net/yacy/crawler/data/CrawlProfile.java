@@ -94,12 +94,14 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String SNAPSHOTS_MAXDEPTH            = "snapshotsMaxDepth"; // if previews shall be loaded, this is positive and denotes the maximum depth; if not this is -1
     public static final String SNAPSHOTS_REPLACEOLD          = "snapshotsReplaceOld"; // if this is set to true, only one version of a snapshot per day is stored, otherwise we store also different versions per day
     public static final String SNAPSHOTS_LOADIMAGE           = "snapshotsLoadImage"; // if true, an image is loaded
+    public static final String SNAPSHOTS_MUSTNOTMATCH        = "snapshotsMustnotmatch";
     
     private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
     private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;
     private Pattern crawlernodepthlimitmatch = null;
     private Pattern indexurlmustmatch = null, indexurlmustnotmatch = null;
     private Pattern indexcontentmustmatch = null, indexcontentmustnotmatch = null;
+    private Pattern snapshotsMustnotmatch = null;
 
     private final Map<String, AtomicInteger> doms;
     private final VocabularyScraper scraper;
@@ -127,6 +129,10 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param indexMedia true if media content of URL shall be indexed
      * @param storeHTCache true if content chall be kept in cache after indexing
      * @param remoteIndexing true if part of the crawl job shall be distributed
+     * @param snapshotsMaxDepth if the current crawl depth is equal or below that given depth, a snapshot is generated
+     * @param snapshotsLoadImage true if graphical (== pdf) shapshots shall be made
+     * @param snapshotsReplaceOld true if snapshots shall not be historized
+     * @param snapshotsMustnotmatch a regular expression; if it matches on the url, the snapshot is not generated
      * @param xsstopw true if static stop words shall be ignored
      * @param xdstopw true if dynamic stop words shall be ignored
      * @param xpstopw true if parent stop words shall be ignored
@@ -156,6 +162,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final int snapshotsMaxDepth,
                  final boolean snapshotsLoadImage,
                  final boolean snapshotsReplaceOld,
+                 final String snapshotsMustnotmatch,
                  final CacheStrategy cacheStrategy,
                  final String collections,
                  final String userAgentName,
@@ -196,6 +203,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(SNAPSHOTS_MAXDEPTH, snapshotsMaxDepth);
         put(SNAPSHOTS_LOADIMAGE, snapshotsLoadImage);
         put(SNAPSHOTS_REPLACEOLD, snapshotsReplaceOld);
+        put(SNAPSHOTS_MUSTNOTMATCH, snapshotsMustnotmatch);
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
         put(COLLECTIONS,      CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
         // we transform the scraper information into a JSON Array
@@ -628,6 +636,16 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
+    
+    public Pattern snapshotsMustnotmatch() {
+        if (this.snapshotsMustnotmatch == null) {
+            final String r = get(SNAPSHOTS_MUSTNOTMATCH);
+            try {
+                this.snapshotsMustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
+            } catch (final PatternSyntaxException e) { this.snapshotsMustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+        }
+        return this.snapshotsMustnotmatch;
+    }    
 
     public int timezoneOffset() {
         final String timezoneOffset = get(TIMEZONEOFFSET);

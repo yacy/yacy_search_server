@@ -448,6 +448,7 @@ public class Crawler_p {
                 int snapshotsMaxDepth = Integer.parseInt(snapshotsMaxDepthString);
                 boolean snapshotsLoadImage = post.getBoolean("snapshotsLoadImage");
                 boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
+                String snapshotsMustnotmatch = post.get("snapshotsMustnotmatch", "");
                 
                 // get vocabulary scraper info
                 JSONObject vocabulary_scraper = new JSONObject(); // key = vocabulary_name, value = properties with key = type (i.e. 'class') and value = keyword in context
@@ -501,6 +502,7 @@ public class Crawler_p {
                             snapshotsMaxDepth,
                             snapshotsLoadImage,
                             snapshotsReplaceOld,
+                            snapshotsMustnotmatch,
                             cachePolicy,
                             collection,
                             agentName,
