@@ -620,13 +620,15 @@ public class Segment {
                 Collection<Object> inboundlinks_urlstub = vector.getFieldValues(CollectionSchema.inboundlinks_urlstub_sxt.getSolrFieldName());
                 List<String> inboundlinks_protocol = inboundlinks_urlstub == null ? null : CollectionConfiguration.indexedList2protocolList(vector.getFieldValues(CollectionSchema.inboundlinks_protocol_sxt.getSolrFieldName()), inboundlinks_urlstub.size());
                 if (inboundlinks_protocol != null && inboundlinks_urlstub != null && inboundlinks_protocol.size() == inboundlinks_urlstub.size() && inboundlinks_urlstub instanceof List<?>) {
-                    for (int i = 0; i < inboundlinks_protocol.size(); i++) {
+                    for (int i = 0; i < inboundlinks_protocol.size(); i++) try {
                         String targetURL = inboundlinks_protocol.get(i) + "://" + ((String) ((List<?>) inboundlinks_urlstub).get(i));
                         String referrerhash = id;
                         String anchorhash = ASCII.String(new DigestURL(targetURL).hash());
                         if (referrerhash != null && anchorhash != null) {
                             urlCitationIndex.add(ASCII.getBytes(anchorhash), new CitationReference(ASCII.getBytes(referrerhash), loadDate.getTime()));
                         }
+                    } catch (Throwable e) {
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -634,13 +636,15 @@ public class Segment {
                 Collection<Object> outboundlinks_urlstub = vector.getFieldValues(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName());
                 List<String> outboundlinks_protocol = outboundlinks_urlstub == null ? null : CollectionConfiguration.indexedList2protocolList(vector.getFieldValues(CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName()), outboundlinks_urlstub.size());
                 if (outboundlinks_protocol != null && outboundlinks_urlstub != null && outboundlinks_protocol.size() == outboundlinks_urlstub.size() && outboundlinks_urlstub instanceof List<?>) {
-                    for (int i = 0; i < outboundlinks_protocol.size(); i++) {
+                    for (int i = 0; i < outboundlinks_protocol.size(); i++) try {
                         String targetURL = outboundlinks_protocol.get(i) + "://" + ((String) ((List<?>) outboundlinks_urlstub).get(i));
                         String referrerhash = id;
                         String anchorhash = ASCII.String(new DigestURL(targetURL).hash());
                         if (referrerhash != null && anchorhash != null) {
                             urlCitationIndex.add(ASCII.getBytes(anchorhash), new CitationReference(ASCII.getBytes(referrerhash), loadDate.getTime()));
                         }
+                    } catch (Throwable e) {
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
