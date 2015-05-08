@@ -1942,6 +1942,7 @@ public final class Switchboard extends serverSwitch {
                             ConcurrentLog.logException(e);
                         }
                     }
+                    log.info("processed surrogate " + infile);
                 }
             }
             if (is != null) try {is.close();} catch (IOException e) {}
@@ -1969,23 +1970,27 @@ public final class Switchboard extends serverSwitch {
                 continue;
             }
 
-            // create a queue entry
-            final Document document = surrogate.document();
-            final Request request =
-                new Request(
-                    ASCII.getBytes(this.peers.mySeed().hash),
-                    surrogate.getIdentifier(true),
-                    null,
-                    "",
-                    surrogate.getDate(),
-                    this.crawler.defaultSurrogateProfile.handle(),
-                    0,
-                    this.crawler.defaultSurrogateProfile.timezoneOffset());
-            response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false, null);
-            final IndexingQueueEntry queueEntry =
-                new IndexingQueueEntry(response, new Document[] {document}, null);
-
-            this.indexingCondensementProcessor.enQueue(queueEntry);
+            if (surrogate.get("text_t") == null) {
+                // create a queue entry
+                final Document document = surrogate.document();
+                final Request request =
+                    new Request(
+                        ASCII.getBytes(this.peers.mySeed().hash),
+                        surrogate.getIdentifier(true),
+                        null,
+                        "",
+                        surrogate.getDate(),
+                        this.crawler.defaultSurrogateProfile.handle(),
+                        0,
+                        this.crawler.defaultSurrogateProfile.timezoneOffset());
+                response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false, null);
+                final IndexingQueueEntry queueEntry =
+                    new IndexingQueueEntry(response, new Document[] {document}, null);
+    
+                this.indexingCondensementProcessor.enQueue(queueEntry);
+            } else {
+                this.index.putDocument(this.index.fulltext().getDefaultConfiguration().toSolrInputDocument(surrogate));
+            }
             if (shallTerminate()) break;
         }
     }

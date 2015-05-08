@@ -31,6 +31,8 @@ import java.util.Set;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import org.apache.solr.common.params.MultiMapSolrParams;
+import org.apache.solr.common.util.NamedList;
 
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.util.ConcurrentLog;
@@ -82,6 +84,16 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         for (String name: doc.getFieldNames()) {
             if (this.contains(name) && (omitFields == null || !omitFields.contains(name))) { // check each field if enabled in local Solr schema
                 sid.addField(name, doc.getFieldValue(name), 1.0f);
+            }
+        }
+        return sid;
+    }
+    
+    public SolrInputDocument toSolrInputDocument(final MultiMapSolrParams params) {
+        SolrInputDocument sid = new SolrInputDocument();
+        for (String name: params.getMap().keySet()) {
+            if (this.contains(name)) { // check each field if enabled in local Solr schema
+                sid.addField(name, params.getParams(name));
             }
         }
         return sid;

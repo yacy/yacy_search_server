@@ -127,6 +127,7 @@ public class DCEntry extends MultiMapSolrParams {
         // <dc:identifier>http://hdl.handle.net/2104/8302</dc:identifier>
         // <dc:identifier>10.1051/0004-6361/201117940</dc:identifier>
         String u = this.get("url");
+        if (u == null) u = this.get("sku");
         
         if (u == null) {
             final String[] urls = this.getParams("dc:identifier");
@@ -342,7 +343,7 @@ public class DCEntry extends MultiMapSolrParams {
             null,
             getDescriptions(),
             getLon(), getLat(),
-            "",
+            get("text_t", ""),
             null,
             null,
             null,

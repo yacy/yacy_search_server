@@ -140,6 +140,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             this.surrogate = new DCEntry();
         } else if ("element".equals(tag) || "str".equals(tag) || "int".equals(tag) || "bool".equals(tag) || "long".equals(tag)) {
             this.elementName = atts.getValue("name");
+            this.parsingValue = true;
         } else if ("value".equals(tag)) {
             this.buffer.setLength(0);
             this.parsingValue = true;
@@ -174,6 +175,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             if (this.elementName != null) {
                 this.surrogate.getMap().put(this.elementName, new String[]{value});
             }
+            this.buffer.setLength(0);
             this.parsingValue = false;
         } else if ("value".equals(tag)) {
             //System.out.println("BUFFER-SIZE=" + buffer.length());
