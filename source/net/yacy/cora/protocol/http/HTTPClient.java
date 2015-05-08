@@ -166,7 +166,7 @@ public class HTTPClient {
 		builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 		
 		// remove retries; we expect connections to fail; therefore we should not retry
-		builder.disableAutomaticRetries();
+		//builder.disableAutomaticRetries();
 		// disable the cookiestore, cause this may cause segfaults and is not needed
 		builder.setDefaultCookieStore(null);
 		builder.disableCookieManagement();
@@ -677,11 +677,12 @@ public class HTTPClient {
 	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI());
         final long time = System.currentTimeMillis();
 	    try {
-	        final CloseableHttpClient client = clientBuilder.build();
+	        
 	        if (concurrent) {
 	            FutureTask<CloseableHttpResponse> t = new FutureTask<CloseableHttpResponse>(new Callable<CloseableHttpResponse>() {
 	                @Override
                     public CloseableHttpResponse call() throws ClientProtocolException, IOException {
+	                    final CloseableHttpClient client = clientBuilder.build();
 	                    CloseableHttpResponse response = client.execute(httpUriRequest, context);
 	                    return response;
 	                }
@@ -693,8 +694,9 @@ public class HTTPClient {
 	                throw e.getCause();
 	            } catch (Throwable e) {}
 	            try {t.cancel(true);} catch (Throwable e) {}
-	            if (this.httpResponse == null) throw new IOException("timout to client after " + this.timeout + "ms");
+	            if (this.httpResponse == null) throw new IOException("timout to client after " + this.timeout + "ms" + " for url " + httpUriRequest.getURI().toString());
 	        } else {
+	            final CloseableHttpClient client = clientBuilder.build();
 	            this.httpResponse = client.execute(httpUriRequest, context);
 	        }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
@@ -702,9 +704,10 @@ public class HTTPClient {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
             if (this.httpResponse != null) this.httpResponse.close();
+            e.printStackTrace();
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
-            		+ " duration=" + Long.toString(System.currentTimeMillis() - time));
+            		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + httpUriRequest.getURI().toString());
         }
     }
 
