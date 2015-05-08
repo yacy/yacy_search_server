@@ -585,26 +585,28 @@ public class yacysearch {
             }
 
             // if a bookmarks-button was hit, create new bookmark entry
-            if ( post != null && post.containsKey("bookmarkref") ) {
-                if ( !sb.verifyAuthentication(header) ) {
-                	prop.authenticationRequired();
+            if (post != null && post.containsKey("bookmarkref")) {
+                if (!sb.verifyAuthentication(header)) {
+                    prop.authenticationRequired();
                     return prop;
                 }
                 //final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
                 final String urlstr = crypt.simpleDecode(post.get("bookmarkurl"));
                 if (urlstr != null) {
-                    try {
-                        final Bookmark bmk = sb.bookmarksDB.createorgetBookmark(urlstr, YMarkTables.USER_ADMIN);
+                    final Bookmark bmk = sb.bookmarksDB.createorgetBookmark(urlstr, YMarkTables.USER_ADMIN);
+                    if (bmk != null) {
                         bmk.setProperty(Bookmark.BOOKMARK_QUERY, querystring);
                         bmk.addTag("/search"); // add to bookmark folder
                         bmk.addTag("searchresult"); // add tag
                         String urlhash = post.get("bookmarkref");
                         final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(urlhash));
-                        if (urlentry != null && !urlentry.dc_title().isEmpty()) 
-                            bmk.setProperty(Bookmark.BOOKMARK_TITLE,urlentry.dc_title());
+                        if (urlentry != null && !urlentry.dc_title().isEmpty()) {
+                            bmk.setProperty(Bookmark.BOOKMARK_TITLE, urlentry.dc_title());
+                        }
                         sb.bookmarksDB.saveBookmark(bmk);
-
-                        // do the same for YMarks ?
+                    }
+                    // do the same for YMarks ?
+                    try {
                         sb.tables.bookmarks.createBookmark(
                                 sb.loader,
                                 urlstr,
