@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -676,8 +674,14 @@ public class BookmarksDB {
             return this.timestamp;
         }
 
+        /**
+         * Set the timestamp (created/last modified time) of the bookmark
+         * and store it in properties (persist for reload)
+         * @param ts current-time in ms
+         */
         public void setTimeStamp(final long ts){
         	this.timestamp = ts;
+                this.entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp)); //persist timestamp
         }
     }
 
