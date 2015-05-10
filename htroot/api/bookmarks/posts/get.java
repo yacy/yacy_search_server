@@ -1,6 +1,5 @@
 
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -8,7 +7,7 @@ import java.util.List;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.data.BookmarksDB;
+import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -45,10 +44,9 @@ public class get {
         }
 
         final List<String> bookmark_hashes = switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
-        BookmarksDB.Bookmark bookmark = null;
         for (final String bookmark_hash : bookmark_hashes){
-            try {
-                bookmark=switchboard.bookmarksDB.getBookmark(bookmark_hash);
+            Bookmark bookmark = switchboard.bookmarksDB.getBookmark(bookmark_hash);
+            if (bookmark != null) {
                 if (ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())).equals(date) &&
                         tag==null || bookmark.getTags().contains(tag) &&
                         isAdmin || bookmark.getPublic()){
@@ -66,7 +64,6 @@ public class get {
                     }
                     count++;
                 }
-            } catch (final IOException e) {
             }
         }
         prop.put("posts", count);

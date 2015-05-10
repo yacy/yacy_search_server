@@ -1,5 +1,4 @@
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -29,11 +28,10 @@ public class all {
         final boolean extendedXML = (post != null && post.containsKey("extendedXML"));
 
         int count=0;
-        BookmarksDB.Bookmark bookmark;
         Date date;
         while(it.hasNext()){
-            try {
-                bookmark=switchboard.bookmarksDB.getBookmark(it.next());
+            BookmarksDB.Bookmark bookmark=switchboard.bookmarksDB.getBookmark(it.next());
+            if (bookmark != null) {
                 prop.putXML("posts_"+count+"_url", bookmark.getUrl());
                 prop.putXML("posts_"+count+"_title", bookmark.getTitle());
                 prop.putXML("posts_"+count+"_description", bookmark.getDescription());
@@ -48,7 +46,6 @@ public class all {
                     prop.put("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
                 }
                 count++;
-            } catch (final IOException e) {
             }
         }
         prop.put("posts", count);

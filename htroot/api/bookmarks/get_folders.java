@@ -1,6 +1,5 @@
 
 
-import java.io.IOException;
 import java.util.Iterator;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
@@ -72,10 +71,9 @@ public class get_folders {
 
     	// loop through bookmarkList
     	it = sb.bookmarksDB.getBookmarksIterator(root, isAdmin);
-    	BookmarksDB.Bookmark bm;
     	while (it.hasNext()) {
-    		try {
-                bm = sb.bookmarksDB.getBookmark(it.next());
+            BookmarksDB.Bookmark bm = sb.bookmarksDB.getBookmark(it.next());
+            if (bm != null) {
                 // TODO: get rid of bmtype
                 if (post.containsKey("bmtype")) {
                     if (post.get("bmtype").equals("title")) {
@@ -93,7 +91,6 @@ public class get_folders {
                 prop.put("folders_"+count+"_hasChildren", "false");
                 prop.put("folders_"+count+"_comma", ",");
                 count++;
-            } catch (final IOException e) {
             }
     	}
 
