@@ -176,6 +176,11 @@ public class Bookmarks {
                     }
 
                     bookmark.setTags(tags, true);
+                    
+                    if (post.containsKey("query")) {
+                        bookmark.setProperty(Bookmark.BOOKMARK_QUERY, post.get("query"));
+                        bookmark.setTimeStamp(System.currentTimeMillis());
+                    }
                     sb.bookmarksDB.saveBookmark(bookmark);
                 }
 
@@ -223,6 +228,13 @@ public class Bookmarks {
                         prop.put("mode_url", bookmark.getUrl()); //TODO: XSS protection - how is this stored?
                         prop.putHTML("mode_tags", bookmark.getTagsString());
                         prop.putHTML("mode_path",bookmark.getFoldersString());
+
+                        if (bookmark.getQuery() != null) {
+                            prop.put("mode_hasquery","1");
+                            prop.putHTML("mode_hasquery_query", bookmark.getQuery());
+                        } else {
+                            prop.put("mode_hasquery", "0");
+                        }
 
                         if (bookmark.getPublic()) {
                             prop.put("mode_public", "1");
