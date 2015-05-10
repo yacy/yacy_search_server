@@ -352,9 +352,9 @@ public final class Fulltext {
                         putDocument(getDefaultConfiguration().metadata2solr(entry));
                     } else {
                         Collection<Object> collections = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
-                        for (Object s: collections) {
-                            if (!"dht".equals(s)) return;
-                        }
+                        // collection dht is used to identify metadata from full crawled documents (if "dht" exists don't overwrite rich crawldata with metadata
+                        if (!collections.contains("dht")) return;
+                        
                         // passed all checks, overwrite document
                         putDocument(getDefaultConfiguration().metadata2solr(entry));
                     }

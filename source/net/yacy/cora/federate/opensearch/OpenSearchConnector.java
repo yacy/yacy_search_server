@@ -113,10 +113,10 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
                                 }
                                 doc.setField(CollectionSchema.publisher_t.getSolrFieldName(), item.getCopyright());
 
-                                // TODO: we likely got only a search related snippet (take is as text content)
-                                // we need a way to differentiate metadata from full crawl data in the index (would be also good for rwi transferred/received metadata)
-                                // or considere to add this to snippet cache, without adding text_t
                                 doc.setField(CollectionSchema.text_t.getSolrFieldName(), item.getDescriptions());
+                                // we likely got only a search related snippet (take is as text content)
+                                // add collection "dht" which is used to differentiate metadata from full crawl data in the index
+                                doc.setField(CollectionSchema.collection_sxt.getSolrFieldName(), "dht");
 
                                 if (item.getLat() != 0.0 && item.getLon() != 0.0) {
                                     doc.setField(CollectionSchema.coordinate_p.getSolrFieldName(), item.getLat() + "," + item.getLon());
