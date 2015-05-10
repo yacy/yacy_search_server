@@ -3246,7 +3246,8 @@ public final class Switchboard extends serverSwitch {
                                 }
                                 final Condenser condenser = new Condenser(
                                         document, null, true, true, LibraryProvider.dymLib, true,
-                                        Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts), searchEvent.query.timezoneOffset);
+                                        Switchboard.this.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts), 
+                                        searchEvent == null ? 0 : searchEvent.query.timezoneOffset);
                                 ResultImages.registerImages(url, document, true);
                                 Switchboard.this.webStructure.generateCitationReference(url, document);
                                 storeDocumentIndex(
