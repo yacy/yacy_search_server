@@ -58,7 +58,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.5</version>                
+                <version>2.6</version>                
                 <configuration>
                     <warSourceDirectory>htroot</warSourceDirectory>
                 </configuration>
@@ -67,7 +67,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.3</version>
                 <configuration>
                     <excludes>
                         <!-- special exclude for compatibility with ant build script
@@ -86,7 +86,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.6</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -123,7 +123,7 @@
             
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.5.2</version>
+                <version>2.5.3</version>
                 <configuration>
                     <descriptors>
                         <descriptor>assembly.xml</descriptor>
@@ -172,7 +172,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
+                <version>2.10.3</version>
                 <configuration>
                     <reportOutputDirectory>javadoc</reportOutputDirectory>
                     <author>true</author>
@@ -346,7 +346,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.3</version>
+            <version>2.4</version>
         </dependency>        
         <dependency>
             <groupId>commons-jxpath</groupId>
