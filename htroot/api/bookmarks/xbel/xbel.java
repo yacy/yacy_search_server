@@ -1,6 +1,5 @@
 
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -104,11 +103,10 @@ public class xbel {
     	return count;
     }
     private static int print_XBEL(final Iterator<String> bit, int count) {
-    	BookmarksDB.Bookmark bookmark;
     	Date date;
     	while(bit.hasNext()){
-			try {
-                bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
+            BookmarksDB.Bookmark bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
+            if (bookmark != null) {
                 date=new Date(bookmark.getTimeStamp());
                 prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
                         + "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
@@ -138,9 +136,8 @@ public class xbel {
                 count++;
                 prop.put("xbel_"+count+"_elements", "</bookmark>");
                 count++;
-            } catch (final IOException e) {
             }
-		}
+	}
     	return count;
     }
 }

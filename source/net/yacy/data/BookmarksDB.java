@@ -134,14 +134,9 @@ public class BookmarksDB {
      */
     public Bookmark createorgetBookmark(final String url, final String user){
         if (url == null || url.isEmpty()) return null;
-        Bookmark bk;
         try {
-            try {
-                DigestURL durl = new DigestURL((url.indexOf("://") < 0) ? "http://" + url : url);
-                bk = this.getBookmark(ASCII.String(durl.hash()));
-            } catch (IOException ex) {
-                bk = null;
-            }
+            DigestURL durl = new DigestURL((url.indexOf("://") < 0) ? "http://" + url : url);
+            Bookmark bk = this.getBookmark(ASCII.String(durl.hash()));
             if (bk == null) {
                 bk = new Bookmark(url);
             }
@@ -166,21 +161,28 @@ public class BookmarksDB {
         }
     }
 
-    public Bookmark getBookmark(final String urlHash) throws IOException {
+    /**
+     * Get bookmark for urlHash
+     * @param urlHash
+     * @return bookmark or null if not exist
+     */
+    public Bookmark getBookmark(final String urlHash) {
         try {
             final Map<String, String> map = this.bookmarks.get(ASCII.getBytes(urlHash));
-            if (map == null) throw new IOException("cannot get bookmark for url hash " + urlHash);
-            return new Bookmark(map);
+            if (map == null) {
+                ConcurrentLog.info("BOOKMARKS", "cannot get bookmark for url hash " + urlHash);
+                return null;
+            } else {
+                return new Bookmark(map);
+            }
         } catch (final Throwable e) {
-            throw new IOException(e.getMessage());
+            return null;
         }
     }
 
     public boolean removeBookmark(final String urlHash){
-        Bookmark bookmark;
-        try {
-            bookmark = getBookmark(urlHash);
-        } catch (final IOException e1) {
+        Bookmark bookmark = getBookmark(urlHash);
+        if (bookmark == null) {
             return false;
         }
         final Set<String> tagSet = bookmark.getTags();
@@ -193,10 +195,9 @@ public class BookmarksDB {
                 putTag(tag);
             }
         }
-        Bookmark b;
+        Bookmark  b = getBookmark(urlHash);
         try {
-            b = getBookmark(urlHash);
-            this.bookmarks.delete(ASCII.getBytes(urlHash));
+            if (b != null) this.bookmarks.delete(ASCII.getBytes(urlHash));
         } catch (final IOException e) {
             b = null;
         }
@@ -241,12 +242,9 @@ public class BookmarksDB {
             for (byte[] hash: hashes) set.add(ASCII.String(hash));
         } else {
             for (byte[] hash: hashes) {
-                try {
-                    Bookmark bm = getBookmark(ASCII.String(hash));
-                    if (bm != null && bm.getPublic()) {
-                        set.add(bm.getUrlHash());
-                    }
-                } catch (final IOException e) {
+                Bookmark bm = getBookmark(ASCII.String(hash));
+                if (bm != null && bm.getPublic()) {
+                    set.add(bm.getUrlHash());
                 }
             }
         }
@@ -322,24 +320,20 @@ public class BookmarksDB {
     	final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	Iterator<String> it=null;
     	final Iterator<String> bit=getBookmarksIterator(tagName, priv);
-    	Bookmark bm;
     	Tag tag;
     	Set<String> tagSet;
-    	while (bit.hasNext()) {
-            try {
-                bm = getBookmark(bit.next());
-                if (bm == null) continue;
-                tagSet = bm.getTags();
-                it = tagSet.iterator();
-                while (it.hasNext()) {
-                    tag=getTag(BookmarkHelper.tagHash(it.next()) );
-                    if((priv ||tag.hasPublicItems()) && tag != null){
-                            set.add(tag);
-                    }
+        while (bit.hasNext()) {
+            Bookmark bm = getBookmark(bit.next());
+            if (bm == null) continue;
+            tagSet = bm.getTags();
+            it = tagSet.iterator();
+            while (it.hasNext()) {
+                tag = getTag(BookmarkHelper.tagHash(it.next()));
+                if ((priv || tag.hasPublicItems()) && tag != null) {
+                    set.add(tag);
                 }
-            } catch (final IOException e) {
             }
-    	}
+        }
     	return set.iterator();
     }
 
@@ -367,18 +361,18 @@ public class BookmarksDB {
             final RowHandleSet urlHashes = oldTag.getUrlHashes();	// preserve urlHashes of oldTag
             removeTag(BookmarkHelper.tagHash(oldName));							// remove oldHash from TagsDB
 
-            Bookmark bookmark;
             Set<String> tagSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
             for (final byte[] urlHash : urlHashes) {									// looping through all bookmarks which were tagged with oldName
-                try {
-                    bookmark = getBookmark(ASCII.String(urlHash));
+                Bookmark bookmark = getBookmark(ASCII.String(urlHash));
+                if (bookmark != null) {
                     tagSet = bookmark.getTags();
                     tagSet.remove(oldName);
                     bookmark.setTags(tagSet, true);                     // might not be needed, but doesn't hurt
-                    if(!"".equals(newName)) bookmark.addTag(newName);
+                    if (!"".equals(newName)) {
+                        bookmark.addTag(newName);
+                    }
                     saveBookmark(bookmark);
-                } catch (final IOException e) {
-                }
+                } 
             }
             return true;
     	}
@@ -387,13 +381,11 @@ public class BookmarksDB {
 
     public void addTag(final String selectTag, final String newTag) {
 
-    	Bookmark bookmark;
-    	for (final byte[] urlHash : getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes()) {	// looping through all bookmarks which were tagged with selectTag
-            try {
-                bookmark = getBookmark(ASCII.String(urlHash));
+        for (final byte[] urlHash : getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes()) {	// looping through all bookmarks which were tagged with selectTag
+            Bookmark bookmark = getBookmark(ASCII.String(urlHash));
+            if (bookmark != null) {
                 bookmark.addTag(newTag);
                 saveBookmark(bookmark);
-            } catch (final IOException e) {
             }
         }
     }
@@ -487,15 +479,12 @@ public class BookmarksDB {
             this.entry.put(BOOKMARK_URL, url.toNormalform(false));
             this.tagNames = new HashSet<String>();
             this.timestamp = System.currentTimeMillis();
-            Bookmark oldBm;
-            try {
-                oldBm = getBookmark(this.urlHash);
-                if(oldBm!=null && oldBm.entry.containsKey(BOOKMARK_TIMESTAMP)){
-                    this.entry.put(BOOKMARK_TIMESTAMP, oldBm.entry.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
-                }else{
-                    this.entry.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
-                }
-            } catch (final IOException e) {
+
+            Bookmark oldBm = getBookmark(this.urlHash);
+            if (oldBm != null && oldBm.entry.containsKey(BOOKMARK_TIMESTAMP)) {
+                this.entry.put(BOOKMARK_TIMESTAMP, oldBm.entry.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
+            } else {
+                this.entry.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
             }
             final BookmarkDate.Entry bmDate=BookmarksDB.this.dates.getDate(this.entry.get(BOOKMARK_TIMESTAMP));
             bmDate.add(this.urlHash);
@@ -706,12 +695,7 @@ public class BookmarksDB {
 
         @Override
         public Bookmark next() {
-            try {
-                return getBookmark(UTF8.String(this.bookmarkIter.next()));
-            } catch (final IOException e) {
-                this.bookmarkIter.remove();
-                return null;
-            }
+            return getBookmark(UTF8.String(this.bookmarkIter.next()));
         }
 
         @Override
@@ -736,19 +720,16 @@ public class BookmarksDB {
 
         @Override
         public int compare(final String obj1, final String obj2) {
-            try {
-                Bookmark bm1 = getBookmark(obj1);
-                Bookmark bm2 = getBookmark(obj2);
-                if (bm1 == null || bm2 == null) {
-                    return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
-                }
-                if (this.newestFirst){
-                    if (bm2.getTimeStamp() - bm1.getTimeStamp() >0) return 1;
-                    return -1;
-                }
-                if  (bm1.getTimeStamp() - bm2.getTimeStamp() > 0) return 1;
-            } catch (final IOException e) {
+            Bookmark bm1 = getBookmark(obj1);
+            Bookmark bm2 = getBookmark(obj2);
+            if (bm1 == null || bm2 == null) {
+                return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
             }
+            if (this.newestFirst){
+            if (bm2.getTimeStamp() - bm1.getTimeStamp() >0) return 1;
+                return -1;
+            }
+            if  (bm1.getTimeStamp() - bm2.getTimeStamp() > 0) return 1;
             return -1;
         }
     }

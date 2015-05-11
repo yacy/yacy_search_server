@@ -1,6 +1,5 @@
 
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -154,10 +153,9 @@ public class get_bookmarks {
                 total += count;
             }
             count = 0;
-            BookmarksDB.Bookmark bookmark = null;
             while (count < itemsPerPage && it.hasNext()) {
-                try {
-                    bookmark = sb.bookmarksDB.getBookmark(it.next());
+           
+                    BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(it.next());
                     if (bookmark != null) {
                         prop.put("display_bookmarks_"+count+"_id",count);
                         prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
@@ -187,8 +185,6 @@ public class get_bookmarks {
 
                         count++;
                     }
-                } catch (final IOException e) {
-                }
             }
             // eliminate the trailing comma for Json output
 
@@ -251,11 +247,10 @@ public class get_bookmarks {
     }
 
     private static int print_XBEL(final Iterator<String> bit, int count) {
-    	BookmarksDB.Bookmark bookmark = null;
     	Date date;
     	while(bit.hasNext()){
-            try {
-                bookmark = sb.bookmarksDB.getBookmark(bit.next());
+            BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(bit.next());
+            if (bookmark != null) {
                 date = new Date(bookmark.getTimeStamp());
                 prop.put("display_xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
                     + "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
@@ -285,7 +280,6 @@ public class get_bookmarks {
                 count++;
                 prop.put("display_xbel_"+count+"_elements", "</bookmark>");
                 count++;
-            } catch (final IOException e) {
             }
         }
     	return count;

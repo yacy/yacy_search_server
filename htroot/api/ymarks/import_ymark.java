@@ -16,7 +16,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.BookmarksDB;
+import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.UserDB;
 import net.yacy.data.WorkTables;
 import net.yacy.data.ymark.MonitoredReader;
@@ -173,10 +173,9 @@ public class import_ymark {
         			return prop;
         		}
         		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(isAdmin);
-            	BookmarksDB.Bookmark bookmark;
             	while(bit.hasNext()){
-        			try {
-                        bookmark=sb.bookmarksDB.getBookmark(bit.next());
+                        Bookmark bookmark=sb.bookmarksDB.getBookmark(bit.next());
+                        if (bookmark != null) {
                         final YMarkEntry bmk_entry = new YMarkEntry(false);
                         bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), bookmark.getUrl());
                         try {
@@ -197,7 +196,6 @@ public class import_ymark {
                         } catch (final IOException e) {
                             ConcurrentLog.logException(e);
                         }
-                    } catch (final IOException e1) {
                     }
             	}
             } else if(post.containsKey("importer") && post.get("importer").equals("dmoz")) {

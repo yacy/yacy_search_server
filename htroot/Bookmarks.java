@@ -200,11 +200,8 @@ public class Bookmarks {
                     prop.put("mode_public", "0");
                     prop.put("mode_feed", "0");
                 } else {
-                    BookmarksDB.Bookmark bookmark = null;
-                    try {
-                        bookmark = sb.bookmarksDB.getBookmark(urlHash);
-                    } catch (final IOException e1) {
-                    }
+                    BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
+
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         final URIMetadataNode urlentry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlHash));
@@ -324,11 +321,7 @@ public class Bookmarks {
 
 	       	count = 0;
 	       	while(count < max_count && it.hasNext()) {
-                    Bookmark bookmark = null;
-                    try {
-                        bookmark = sb.bookmarksDB.getBookmark(it.next());
-                    } catch (final IOException e) {
-                    }
+                    Bookmark bookmark = bookmark = sb.bookmarksDB.getBookmark(it.next());
 
                     if (bookmark != null){
                         if (bookmark.getFeed() && isAdmin) {
@@ -490,11 +483,7 @@ public class Bookmarks {
             final Iterator<String> bit = sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
 
             while (bit.hasNext()) {
-                Bookmark bookmark = null;
-                try {
-                    bookmark = sb.bookmarksDB.getBookmark(bit.next());
-                } catch (final IOException e) {
-                }
+                Bookmark bookmark = sb.bookmarksDB.getBookmark(bit.next());
                 if (bookmark == null) break;
                 prop.put("display_folderlist_" + count + "_folder", "<li><a href=\"" + bookmark.getUrl() + "\" title=\"" + bookmark.getDescription() + "\">" + bookmark.getTitle() + "</a></li>");
                 count++;

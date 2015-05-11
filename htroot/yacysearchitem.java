@@ -24,7 +24,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Date;
@@ -137,11 +136,8 @@ public class yacysearchitem {
             final String urlhash = ASCII.String(result.hash());
             if (authenticated) { // only needed if authorized
                 boolean bookmarkexists;
-                try { // check url exists in bookkmarks
-                    bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
-                } catch (IOException ex) {
-                    bookmarkexists = false;
-                }
+                // check url exists in bookkmarks
+                bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
                 prop.put("content_authorized_bookmark", !bookmarkexists);
                 // bookmark icon check for YMarks
                 //prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
