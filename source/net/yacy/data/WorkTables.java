@@ -34,10 +34,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.http.entity.mime.content.ContentBody;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -238,14 +241,34 @@ public class WorkTables extends Tables {
             String theapicall = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)) + "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
             try {
                 // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
-                MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
-                ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
-                try {
-                    client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
-                    l.put(url.toNormalform(true), client.getStatusCode());
-                } catch (final IOException e) {
-                    ConcurrentLog.logException(e);
-                    l.put(url.toString(), -1);
+                if (theapicall.length() > 1000) {
+                    // use a POST to execute the call
+                    int ai = theapicall.indexOf('?');
+                    String[] tacs = theapicall.substring(ai + 1).split("&");
+                    Map<String, ContentBody> post = new HashMap<>();
+                    for (String a: tacs) {
+                        int f = a.indexOf('=');
+                        if (f < 0) continue;
+                        post.put(a.substring(0, f), UTF8.StringBody(a.substring(f + 1)));
+                    }
+                    MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall.substring(0,  ai));
+                    try {
+                        client.POSTbytes(url, "localhost", post, false, false);
+                    } catch (final IOException e) {
+                        ConcurrentLog.logException(e);
+                        l.put(url.toString(), -1);
+                    }
+                } else {
+                    // use a GET to execute the call
+                    MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
+                    ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
+                    try {
+                        client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
+                        l.put(url.toNormalform(true), client.getStatusCode());
+                    } catch (final IOException e) {
+                        ConcurrentLog.logException(e);
+                        l.put(url.toString(), -1);
+                    }
                 }
             } catch (MalformedURLException ex) {
                 ConcurrentLog.warn("APICALL", "wrong url in apicall " + theapicall);

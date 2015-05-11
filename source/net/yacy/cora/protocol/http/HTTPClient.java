@@ -341,33 +341,34 @@ public class HTTPClient {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        if (localhost && pass != null) {
-            CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(
-                    AuthScope.ANY, // thats ok since we tested for localhost!
-                    new UsernamePasswordCredentials(username, pass));
-            CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
-            byte[] content = null;
+        if (!localhost || pass == null) {
+            return getContentBytes(httpGet, maxBytes, concurrent);
+        }
+        
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
+                AuthScope.ANY, // thats ok since we tested for localhost!
+                new UsernamePasswordCredentials(username, pass));
+        CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+        byte[] content = null;
+        try {
+            this.httpResponse = httpclient.execute(httpGet);
             try {
-                this.httpResponse = httpclient.execute(httpGet);
-                try {
-                    HttpEntity httpEntity = this.httpResponse.getEntity();
-                    if (httpEntity != null) {
-                        if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
-                            content = getByteArray(httpEntity, maxBytes);
-                        }
-                        // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                        EntityUtils.consume(httpEntity);
+                HttpEntity httpEntity = this.httpResponse.getEntity();
+                if (httpEntity != null) {
+                    if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
+                        content = getByteArray(httpEntity, maxBytes);
                     }
-                } finally {
-                    this.httpResponse.close();
+                    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+                    EntityUtils.consume(httpEntity);
                 }
             } finally {
-                httpclient.close();
+                this.httpResponse.close();
             }
-            return content;
+        } finally {
+            httpclient.close();
         }
-        return getContentBytes(httpGet, maxBytes, concurrent);
+        return content;
     }
     
     /**
@@ -498,8 +499,8 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip, final boolean concurrent) throws IOException {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
-
-        setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+    	final boolean localhost = Domains.isLocalhost(url.getHost());
+        if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	if (vhost == null) setHost(Domains.LOCALHOST);
     	
     	final MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();

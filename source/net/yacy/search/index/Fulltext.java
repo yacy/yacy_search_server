@@ -312,6 +312,7 @@ public final class Fulltext {
         if (connector == null) return;
         String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
         String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+        assert url != null && url.length() < 30000;
         ConcurrentLog.info("Fulltext", "indexing: " + id + " " + url);
         try {
             connector.add(doc);
