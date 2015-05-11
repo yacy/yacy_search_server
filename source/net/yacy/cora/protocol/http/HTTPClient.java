@@ -705,7 +705,7 @@ public class HTTPClient {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
             if (this.httpResponse != null) this.httpResponse.close();
-            e.printStackTrace();
+            //e.printStackTrace();
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
             		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + httpUriRequest.getURI().toString());
