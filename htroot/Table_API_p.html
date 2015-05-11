@@ -83,7 +83,29 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" id="#[pk]#">
           <td valign="top" align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
-          <td valign="top">#[type]##(isCrawlerStart)#::<br/><br/><a href="#[url]#" title="clone"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>#(/isCrawlerStart)#</td>
+          <td valign="top">#[type]#
+          #(isCrawlerStart)#::<br/><br/>
+          <a href="#[url]#" title="clone"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>::<br/><br/>
+         
+         <script>
+           var f = document.createElement("form");
+           f.setAttribute("method", "post");
+           f.setAttribute("enctype", "multipart/form-data");
+           f.setAttribute("accept-charset", "UTF-8");
+           f.setAttribute("action", "#[servlet]#");
+           f.setAttribute("id", "#[pk]#");
+           #{attr}#
+           var e = document.createElement("input");
+           e.setAttribute("type", "hidden");
+           e.setAttribute("name", "#[key]#");
+           e.setAttribute("value", "#[value]#");
+           f.appendChild(e);
+           #{/attr}#
+           document.body.appendChild(f);
+         </script>
+         <a href="#" title="clone" onclick="document.forms['#[pk]#'].submit(); return false;"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>
+
+          #(/isCrawlerStart)#</td>
           <td valign="top">#[comment]#</td>
           <td valign="top">#[callcount]#</td>
           <td valign="top">#[dateRecording]#</td>

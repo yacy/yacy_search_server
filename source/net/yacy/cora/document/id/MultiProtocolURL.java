@@ -516,18 +516,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     private void escapeSearchpart() {
-        final String[] questp = CommonPattern.AMP.split(this.searchpart, -1);
         final StringBuilder qtmp = new StringBuilder(this.searchpart.length() + 10);
-        for (final String element : questp) {
-            if (element.indexOf('=') != -1) {
-                qtmp.append('&');
-                qtmp.append(escape(element.substring(0, element.indexOf('='))));
-                qtmp.append('=');
-                qtmp.append(escape(element.substring(element.indexOf('=') + 1)));
-            } else {
-                qtmp.append('&');
-                qtmp.append(escape(element));
-            }
+        for (final Map.Entry<String, String> element: getAttributes().entrySet()) {
+            qtmp.append('&');
+            qtmp.append(element.getKey());
+            qtmp.append('=');
+            qtmp.append(escape(element.getValue()));
         }
         this.searchpart = qtmp.substring((qtmp.length() > 0) ? 1 : 0);
     }
@@ -1013,6 +1007,21 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return token;
     }
 
+    public Map<String, String> getAttributes() {
+        Map<String, String > map = new LinkedHashMap<>();
+        if (this.searchpart == null) return map;
+        final String[] questp = CommonPattern.AMP.split(this.searchpart, -1);
+        for (final String element : questp) {
+            int p = element.indexOf('=');
+            if (p != -1) {
+                map.put(element.substring(0, p), element.substring(p + 1));
+            } else {
+                map.put(element.substring(0, p), "");
+            }
+        }
+        return map;
+    }
+    
     private static CharType charType(final char c) {
         if (c >= 'a' && c <= 'z') return CharType.low;
         if (c >= '0' && c <= '9') return CharType.number;

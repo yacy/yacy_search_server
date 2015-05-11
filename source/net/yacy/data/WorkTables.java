@@ -240,18 +240,15 @@ public class WorkTables extends Tables {
             if (row == null) continue;
             String theapicall = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)) + "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
             try {
+                MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
                 // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
                 if (theapicall.length() > 1000) {
                     // use a POST to execute the call
-                    int ai = theapicall.indexOf('?');
-                    String[] tacs = theapicall.substring(ai + 1).split("&");
                     Map<String, ContentBody> post = new HashMap<>();
-                    for (String a: tacs) {
-                        int f = a.indexOf('=');
-                        if (f < 0) continue;
-                        post.put(a.substring(0, f), UTF8.StringBody(a.substring(f + 1)));
+                    for (Map.Entry<String, String> a: url.getAttributes().entrySet()) {
+                        post.put(a.getKey(), UTF8.StringBody(a.getValue()));
                     }
-                    MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall.substring(0,  ai));
+                    url = new MultiProtocolURL("http", host, port, url.getFileName());
                     try {
                         client.POSTbytes(url, "localhost", post, false, false);
                     } catch (final IOException e) {
@@ -260,7 +257,6 @@ public class WorkTables extends Tables {
                     }
                 } else {
                     // use a GET to execute the call
-                    MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
                     ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
                     try {
                         client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%

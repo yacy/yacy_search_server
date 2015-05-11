@@ -55,7 +55,7 @@ public class CrawlStartExpert {
         // ---------- Start point
         // crawl start URL
         if (post != null && post.containsKey("crawlingURL")) {
-            final String crawlingURL = post.get("crawlingURL", "");
+            final String crawlingURL = post.get("crawlingURL", "").replaceAll("%0D%0A", "\n").replaceAll("%0A", "\n").replaceAll("%0D", "\n");
             prop.put("starturl", crawlingURL);
             // simple check for content since it may be empty
             if (!crawlingURL.trim().isEmpty()) {

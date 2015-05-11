@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -290,9 +291,25 @@ public class Table_API_p {
                 // check type & action to link crawl start URLs back to CrawlStartExpert.html
                 if (prop.get("showtable_list_" + count + "_type", "").equals(WorkTables.TABLE_API_TYPE_CRAWLER)
                         && prop.get("showtable_list_" + count + "_comment", "").startsWith("crawl start for")) {
-                    prop.put("showtable_list_" + count + "_isCrawlerStart", 1);
                     final String editUrl = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)).replace("Crawler_p", "CrawlStartExpert");
-                    prop.put("showtable_list_" + count + "_isCrawlerStart_url", editUrl);
+                    if (editUrl.length() > 1000) {
+                        final MultiProtocolURL u = new MultiProtocolURL("http://localhost:8090" + editUrl);                       
+                        prop.put("showtable_list_" + count + "_isCrawlerStart", 2);
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_pk", UTF8.String(row.getPK()));
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_servlet", "/CrawlStartExpert.html");
+                        Map<String, String> attr = u.getAttributes();
+                        int ac = 0;
+                        for (Map.Entry<String, String> entry: attr.entrySet()) {
+                            prop.put("showtable_list_" + count + "_isCrawlerStart_attr_" + ac + "_key", entry.getKey());
+                            prop.put("showtable_list_" + count + "_isCrawlerStart_attr_" + ac + "_value", entry.getValue());
+                            ac++;
+                        }
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_attr", ac);
+                    } else {
+                        // short calls
+                        prop.put("showtable_list_" + count + "_isCrawlerStart", 1);
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_url", editUrl);
+                    }
                 } else {
                     prop.put("showtable_list_" + count + "_isCrawlerStart", 0);
                 }
