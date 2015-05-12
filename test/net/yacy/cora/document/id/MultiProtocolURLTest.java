@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.net.MalformedURLException;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TreeSet;
 
 import org.junit.Test;
@@ -158,13 +159,37 @@ public class MultiProtocolURLTest {
 
         for (String[] testString : testStrings) {
             // desired conversion result
-            System.out.print("orig uri: " + testString[0]);
+            System.out.print("toNormalform orig uri: " + testString[0]);
             String shouldBe = testString[1];
             // conversion result
             String resultUrl = new MultiProtocolURL(testString[0]).toNormalform(true);
             // test if equal
             assertEquals(shouldBe, resultUrl);
             System.out.println(" -> " + resultUrl);
+        }
+    }
+
+    /**
+     * Test of getAttribute method, of class MultiProtocolURL.
+     */
+    @Test
+    public void testGetAttribute() throws Exception {
+        // some test url/uri with problems in the past
+        String[][] testStrings = new String[][]{
+            // teststring , expectedresult
+            new String[]{"http://yacy.net?&test", "test"}
+        };
+
+        for (String[] testString : testStrings) {
+            // desired conversion result
+            System.out.print("test getAttribute: " + testString[0]);
+            String shouldBe = testString[1];
+
+            MultiProtocolURL resultUrl = new MultiProtocolURL(testString[0]);
+            Map<String, String> attr = resultUrl.getAttributes();
+
+            assertEquals("", attr.get(shouldBe));
+            System.out.println(" -> " + resultUrl.toNormalform(false));
         }
     }
 }
