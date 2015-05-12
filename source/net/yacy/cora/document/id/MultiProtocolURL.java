@@ -519,7 +519,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         final StringBuilder qtmp = new StringBuilder(this.searchpart.length() + 10);
         for (final Map.Entry<String, String> element: getAttributes().entrySet()) {
             qtmp.append('&');
-            qtmp.append(element.getKey());
+            qtmp.append(escape(element.getKey()));
             qtmp.append('=');
             qtmp.append(escape(element.getValue()));
         }
