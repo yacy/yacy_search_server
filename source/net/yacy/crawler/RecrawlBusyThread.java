@@ -35,11 +35,8 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.params.CommonParams;
 
 /**
  * Selects documents by a query from the local index
@@ -63,10 +60,10 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         super(3000, 1000); // set lower limits of cycle delay
         this.setIdleSleep(10*60000); // set actual cycle delays
         this.setBusySleep(2*60000);
+        this.setPriority(Thread.MIN_PRIORITY);
 
         this.sb = xsb;
         urlstack = new HashSet<DigestURL>();
-
     }
 
     /**
@@ -102,11 +99,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             }
             this.urlstack.clear();
         }
-
-        if (added > 0) {
-            return true;
-        }
-        return false;
+        return (added > 0);
     }
 
     /**
@@ -116,13 +109,13 @@ public class RecrawlBusyThread extends AbstractBusyThread {
      */
     @Override
     public boolean job() {
+        // other crawls are running, do nothing
         if (sb.crawlQueues.coreCrawlJobSize() > 0) {
             return false;
         }
 
         if (this.urlstack.isEmpty()) {
-            processSingleQuery();
-            return true;
+            return processSingleQuery();
         } else {
             return feedToCrawler();
         }
@@ -131,27 +124,24 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 
     /**
      * Selects documents to recrawl the urls
+     * @return true if query has more results
      */
-    private void processSingleQuery() {
+    private boolean processSingleQuery() {
         if (!this.urlstack.isEmpty()) {
-            return;
+            return true;
         }
         SolrDocumentList docList = null;
-        SolrQuery solrQuery = new SolrQuery();
-        solrQuery.set(CommonParams.Q, currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)"); // except this yacy special
-        solrQuery.set("sort", CollectionSchema.fresh_date_dt.getSolrFieldName() + " asc");
-        solrQuery.set(CommonParams.FL, CollectionSchema.sku.getSolrFieldName());
-        solrQuery.set(CommonParams.ROWS, this.chunksize);
-        solrQuery.set(CommonParams.START, this.chunkstart);
-
         SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
         if (!solrConnector.isClosed()) {
             try {
-                QueryResponse rsp = solrConnector.getResponseByParams(solrQuery);
-                docList = rsp.getResults();
+                docList = solrConnector.getDocumentListByQuery(currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)",
+                        CollectionSchema.fresh_date_dt.getSolrFieldName() + " asc", this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
                 this.urlsfound = docList.getNumFound();
             } catch (Throwable e) {
+                this.urlsfound = 0;
             }
+        } else {
+            this.urlsfound =0;
         }
 
         if (docList != null) {
@@ -161,14 +151,15 @@ public class RecrawlBusyThread extends AbstractBusyThread {
                 } catch (MalformedURLException ex) {
                 }
             }
-
-            this.chunkstart = this.chunkstart + urlstack.size();
-
-            if (docList.getNumFound() <= this.chunkstart) {
-                this.chunkstart = 0;
-            }
+            this.chunkstart = this.chunkstart + this.chunksize;
         }
-
+        
+        if (this.urlsfound <= this.chunkstart) {
+            this.chunkstart = 0;
+            return false;
+            // TODO: add a stop condition
+        }
+        return true;
     }
 
     @Override
