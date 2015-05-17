@@ -252,7 +252,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 // do a clean-up
                 this.freemem();
                 // sleep a while
-                ratz(this.idlePause + 1000*(outofmemoryCycles++));
+                ratz(this.idlePause + 1000*(outofmemoryCycles++ % 0x0F)); // limit extra sleep time (oomCycles can grow big over time)
                 idletime += System.currentTimeMillis() - timestamp;
             }
         }
