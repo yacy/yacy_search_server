@@ -320,7 +320,7 @@ public class yacysearchtrailer {
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
-                int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (maxcount - mincount);
+                int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (1 + maxcount - mincount);
                 fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
                 prop.put("nav-topics_element_" + i + "_size", fontsize); // font size in pixel
                 prop.put("nav-topics_element_" + i + "_nl", 1);
