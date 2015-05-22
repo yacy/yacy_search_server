@@ -519,7 +519,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         final StringBuilder qtmp = new StringBuilder(this.searchpart.length() + 10);
         for (final Map.Entry<String, String> element: getAttributes().entrySet()) {
             qtmp.append('&');
-            qtmp.append(element.getKey());
+            qtmp.append(escape(element.getKey()));
             qtmp.append('=');
             qtmp.append(escape(element.getValue()));
         }
@@ -1007,6 +1007,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return token;
     }
 
+    /**
+     * Evaluates url search part and returns attribute '=' value pairs
+     *
+     * @return map key=attribue name, value=string after '='
+     */
     public Map<String, String> getAttributes() {
         Map<String, String > map = new LinkedHashMap<>();
         if (this.searchpart == null) return map;
@@ -1016,7 +1021,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if (p != -1) {
                 map.put(element.substring(0, p), element.substring(p + 1));
             } else {
-                map.put(element.substring(0, p), "");
+                if (!element.isEmpty()) map.put(element, "");
             }
         }
         return map;

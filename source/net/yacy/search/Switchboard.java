@@ -3294,7 +3294,7 @@ public final class Switchboard extends serverSwitch {
             if (acceptedError == null) acceptedError = this.crawlStacker.checkAcceptanceInitially(url, profile);
             if (acceptedError != null) {
                 this.log.info("addToCrawler: cannot load " + url.toNormalform(true) + ": " + acceptedError);
-                return;
+                continue;
             }
             final String s;
             if (asglobal) {

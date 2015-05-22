@@ -17,7 +17,7 @@
                     <tr>
                         <td>Documents in current queue</td>
                         <td>#[querysize]#</td>
-                        <td>#(reindexjobrunning)#::<input type="submit" value="refresh page" class="btn btn-primary"/>#(/reindexjobrunning)#</td>
+                        <td>#(reindexjobrunning)#::<input type="submit" value="refresh page" class="btn btn-success"/>#(/reindexjobrunning)#</td>
                     </tr>
                     <tr>
                         <td>Documents processed</td>
@@ -37,7 +37,7 @@
                 </table>
                 #(reindexjobrunning)#                
                 <input type="submit" name="reindexnow" value="start reindex job now" class="btn btn-primary"/>
-                ::<input type="submit" name="stopreindex" value="stop reindexing" class="btn btn-primary"/>
+                ::<input type="submit" name="stopreindex" value="stop reindexing" class="btn btn-danger"/>
                 #(/reindexjobrunning)# 
                 <p class="info">#[infomessage]#</p>                            
             </fieldset>
@@ -57,6 +57,24 @@
             #(/reindexjobrunning)#
           </td></tr></table>
         </form>    
+        <h2>Re-Crawl Index Documents</h2>
+        <p>Searches the local index and selects documents to add to the crawler (recrawl the document).
+           This runs transparent as background job. Documents are added to the crawler only if no other crawls are active
+           and are added in small chunks.</p>
+        <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+          <fieldset>
+          #(recrawljobrunning)#                
+            <input type="submit" name="recrawlnow" value="start recrawl job now" class="btn btn-primary"/>
+            to re-crawl documents with fresh_date_dt before today.
+            ::<input type="submit" name="stoprecrawl" value="stop recrawl job" class="btn btn-danger"/>
+            <table>
+              <tr>  
+                <td>Documents to process</td> <td>#[docCount]#</td> <td> with fresh_date_dt before today</td>
+              </tr>    
+            </table>
+          #(/recrawljobrunning)# 
+          </fieldset>
+        </form>
         #%env/templates/footer.template%#
     </body>
 </html>

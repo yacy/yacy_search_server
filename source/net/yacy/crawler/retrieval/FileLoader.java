@@ -60,7 +60,7 @@ public class FileLoader {
 
     public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
         DigestURL url = request.url();
-        if (!url.getProtocol().equals("file")) throw new IOException("wrong loader for FileLoader: " + url.getProtocol());
+        if (!url.getProtocol().equals("file")) throw new IOException("wrong protocol for FileLoader: " + url.getProtocol());
 
         RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {

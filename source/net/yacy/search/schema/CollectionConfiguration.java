@@ -1888,7 +1888,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         List<String> a = new ArrayList<String>(dimension);
         for (int i = 0; i < dimension; i++) a.add("http");
         if (iplist == null) return a;
-        for (Object ip: iplist) a.set(Integer.parseInt(((String) ip).substring(0, 3)), ((String) ip).substring(4));
+        for (Object ip : iplist) {
+            // ip format is 001-https but can be 4 digits  1011-https
+            int i = ((String) ip).indexOf('-');
+            a.set(Integer.parseInt(((String) ip).substring(0, i)), ((String) ip).substring(i+1));
+        }
         return a;
     }
     

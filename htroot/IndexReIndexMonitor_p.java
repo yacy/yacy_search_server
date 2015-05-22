@@ -21,6 +21,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.migration;
+import net.yacy.crawler.RecrawlBusyThread;
 
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.ReindexSolrBusyThread;
@@ -36,26 +37,26 @@ public class IndexReIndexMonitor_p {
 
         prop.put("docsprocessed", "0");
         prop.put("currentselectquery","");
-        BusyThread bt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME);
-        if (bt == null) {
+        BusyThread reidxbt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME);
+        if (reidxbt == null) {
             if (post != null && post.containsKey("reindexnow") && sb.index.fulltext().connectedLocalSolr()) {
                 migration.reindexToschema(sb);
                 prop.put("querysize", "0");
                 prop.put("infomessage","reindex job started");
                 
-                bt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME); //get new created job for following posts
+                reidxbt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME); //get new created job for following posts
             }             
         }
         
-        if (bt != null) {
+        if (reidxbt != null) {
             prop.put("reindexjobrunning", 1);
-            prop.put("querysize", bt.getJobCount());
+            prop.put("querysize", reidxbt.getJobCount());
 
-            if (bt instanceof ReindexSolrBusyThread) {                
-                prop.put("docsprocessed", ((ReindexSolrBusyThread) bt).getProcessed());
-                prop.put("currentselectquery","q="+((ReindexSolrBusyThread) bt).getCurrentQuery());
+            if (reidxbt instanceof ReindexSolrBusyThread) {
+                prop.put("docsprocessed", ((ReindexSolrBusyThread) reidxbt).getProcessed());
+                prop.put("currentselectquery","q="+((ReindexSolrBusyThread) reidxbt).getCurrentQuery());
                 // prepare list of fields in queue
-                final OrderedScoreMap<String> querylist = ((ReindexSolrBusyThread) bt).getQueryList();
+                final OrderedScoreMap<String> querylist = ((ReindexSolrBusyThread) reidxbt).getQueryList();
                 if (querylist != null) {
                     int i = 0;
                     for (String oneqs : querylist) { // just use fieldname from query (fieldname:[* TO *])
@@ -86,6 +87,34 @@ public class IndexReIndexMonitor_p {
                 prop.putHTML("infomessage", "! reindex works only with embedded Solr index !");
             }
         }
+
+        // recrawl job handling
+        BusyThread recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
+        if (recrawlbt == null) {
+            if (post != null && post.containsKey("recrawlnow") && sb.index.fulltext().connectedLocalSolr()) {
+                sb.deployThread(RecrawlBusyThread.THREAD_NAME,
+                        "ReCrawl",
+                        "recrawl existing documents",
+                        null,
+                        new RecrawlBusyThread(Switchboard.getSwitchboard()),
+                        1000);
+                recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
+            }
+        }
+        
+        if (recrawlbt != null) {
+            if (post != null && post.containsKey("stoprecrawl")) {
+                sb.terminateThread(RecrawlBusyThread.THREAD_NAME, false);
+                prop.put("recrawljobrunning",0);
+
+            } else {
+                prop.put("recrawljobrunning", 1);
+                prop.put("recrawljobrunning_docCount", ((RecrawlBusyThread) recrawlbt).urlsfound);
+            }
+        } else {
+            prop.put("recrawljobrunning", 0);
+        }
+
         // return rewrite properties
         return prop;
     }
