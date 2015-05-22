@@ -3,17 +3,17 @@
   "channels": [{
     "title": "YaCy P2P-Search for #[rss_query]#",
     "description": "Search for #[rss_query]#",
-    "link": "#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#",
+    "link": "#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#",
     "image": {
       "url": "#[rssYacyImageURL]#",
       "title": "Search for #[rss_query]#",
-      "link": "#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#"
+      "link": "#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#"
     },
     "totalResults": "#[num-results_totalcount]#",
     "startIndex": "#[num-results_offset]#",
     "itemsPerPage": "#[num-results_itemsPerPage]#",
     "searchTerms": "#[rss_queryenc]#",
-    
+
     "items": [
 #{results}#
 <!--#include virtual="yacysearchitem.json?item=#[item]#&eventID=#[eventID]#" -->
