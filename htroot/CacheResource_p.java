@@ -24,11 +24,13 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -79,16 +81,23 @@ public class CacheResource_p {
             return ImageParser.parse(u, resource);
         }
         // get response header and set mime type
-        if (responseHeader == null) responseHeader = Cache.getResponseHeader(url.hash());
-        String resMime = responseHeader == null ? null : responseHeader.mime();
-        if (resMime != null) {
-            final ResponseHeader outgoingHeader = new ResponseHeader(200);
-            outgoingHeader.put(HeaderFramework.CONTENT_TYPE, resMime);
-            prop.setOutgoingHeader(outgoingHeader);
+        if (responseHeader == null) {
+            responseHeader = Cache.getResponseHeader(url.hash());
         }
 
-        // add resource
-        prop.put("resource", resource);
+        // because for display a servlet html variable is use
+        // which is internally processed using utf-8, we need to convert encoding of cached resource
+        final String charset = responseHeader.getCharacterEncoding();
+        if (charset != null && !charset.equalsIgnoreCase("utf-8")) {
+            CharBuffer cb = Charset.forName(charset).decode(ByteBuffer.wrap(resource));
+            ByteBuffer x = Charset.forName("UTF-16").encode(cb); // encode to a default java string (which uses utf-16 and is handled correct for servlet content)
+            prop.put("resource", x.asCharBuffer().toString());
+
+        } else {
+            prop.put("resource", resource);
+        }
+
+        // add resource   
         return prop;
     }
 }
