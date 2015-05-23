@@ -21,6 +21,7 @@
 
 package net.yacy.crawler;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -90,6 +91,9 @@ public interface Balancer {
      */
     public int size();
 
+    public int getOnDemandLimit();
+
+    public boolean getExceed134217727();
     /**
      * check if stack is empty
      * @return true iff size() == 0

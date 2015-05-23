@@ -143,7 +143,7 @@ public class ConfigNetwork_p
         prop.put("commit", commit);
 
         // write remote crawl request settings
-        prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
+        prop.put("crawlResponse", sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false) ? "1" : "0");
         final long RTCbusySleep =
             Math
                 .max(1, env.getConfigInt(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 100));
@@ -166,7 +166,7 @@ public class ConfigNetwork_p
         prop.put("indexReceiveSearchChecked", indexReceiveSearch);
         
         // set seed information directly
-        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         sb.peers.mySeed().setFlagAcceptRemoteIndex(indexReceive);
 
         // set p2p/robinson mode flags and values

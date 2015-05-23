@@ -143,7 +143,7 @@ public final class crawlReceipt {
             return prop;
         }
 
-        if ("fill".equals(result)) try {
+        if ("fill".equals(result) && sb.crawlQueues.delegatedURL != null) try {
             // put new entry into database
             sb.index.fulltext().putMetadata(entry);
             ResultURLs.stack(ASCII.String(entry.url().hash()), entry.url().getHost(), youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
@@ -159,8 +159,10 @@ public final class crawlReceipt {
             return prop;
         }
 
-        sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        sb.crawlQueues.errorURL.push(entry.url(), 997, null, FailCategory.FINAL_LOAD_CONTEXT, result + ":" + reason, -1);
+        if (sb.crawlQueues.delegatedURL != null) { // the delegated work is transformed into an error case
+            sb.crawlQueues.delegatedURL.remove(entry.hash());
+            sb.crawlQueues.errorURL.push(entry.url(), 997, null, FailCategory.FINAL_LOAD_CONTEXT, result + ":" + reason, -1);
+        }
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");
         return prop;

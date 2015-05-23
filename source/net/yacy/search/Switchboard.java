@@ -1051,32 +1051,9 @@ public final class Switchboard extends serverSwitch {
                 20000,
                 0),
             10000);
-        deployThread(
-            SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL,
-            "Remote Crawl Job",
-            "thread that performes a single crawl/indexing step triggered by a remote peer",
-            "/IndexCreateQueues_p.html?stack=REMOTE",
-            new InstantBusyThread(
-                this.crawlQueues,
-                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START,
-                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT,
-                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM,
-                0,
-                0),
-            10000);
-        deployThread(
-            SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER,
-            "Remote Crawl URL Loader",
-            "thread that loads remote crawl lists from other peers",
-            null,
-            new InstantBusyThread(
-                this.crawlQueues,
-                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START,
-                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT,
-                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM,
-                10000,
-                10000),
-            10000); // error here?
+
+        this.initRemoteCrawler(this.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+
         deployThread(
             SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL,
             "Local Crawl",
@@ -1472,21 +1449,77 @@ public final class Switchboard extends serverSwitch {
         // propagate to crawler
         final BusyThread rct = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, newBusySleep);
-        setConfig(
-            SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP,
-            Math.min(10000, newBusySleep * 10));
-        rct.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 1000));
-        rct
-            .setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, 10000));
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP,
+                Math.min(10000, newBusySleep * 10));
+        if (rct != null) {
+            rct.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 1000));
+            rct.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, 10000));
+        }
 
         // propagate to loader
         final BusyThread rcl = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
         setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, newBusySleep * 4);
-        setConfig(
-            SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP,
-            Math.min(10000, newBusySleep * 20));
-        rcl.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, 1000));
-        rcl.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, 10000));
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP,
+                Math.min(10000, newBusySleep * 20));
+        if (rcl != null) {
+            rcl.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, 1000));
+            rcl.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, 10000));
+        }
+    }
+
+    /**
+     * Initialisize and perform all settings to enable remote crawls
+     * (if remote crawl is not in use, save the resources)
+     * @param activate true=enable, false=disable
+     */
+    public void initRemoteCrawler(final boolean activate) {
+
+        this.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE, activate);
+        this.peers.mySeed().setFlagAcceptRemoteCrawl(activate);
+        if (activate) {
+            this.crawlQueues.initRemoteCrawlQueues();
+
+            BusyThread rct = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            if (rct == null) {
+                deployThread(
+                        SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL,
+                        "Remote Crawl Job",
+                        "thread that performes a single crawl/indexing step triggered by a remote peer",
+                        "/IndexCreateQueues_p.html?stack=REMOTE",
+                        new InstantBusyThread(
+                                this.crawlQueues,
+                                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START,
+                                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT,
+                                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM,
+                                0,
+                                0),
+                        10000);
+                rct = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            }
+            rct.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 1000));
+            rct.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, 10000));
+
+            BusyThread rcl = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
+            if (rcl == null) {
+                deployThread(
+                        SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER,
+                        "Remote Crawl URL Loader",
+                        "thread that loads remote crawl lists from other peers",
+                        null,
+                        new InstantBusyThread(
+                                this.crawlQueues,
+                                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START,
+                                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT,
+                                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM,
+                                10000,
+                                10000),
+                        10000);
+
+                rcl = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
+            }
+            rcl.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, 1000));
+            rcl.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, 10000));
+        }
     }
 
     public void initMessages() throws IOException {
@@ -2160,7 +2193,7 @@ public final class Switchboard extends serverSwitch {
     
     public int cleanupJobSize() {
         int c = 1; // run this always!
-        if ( (this.crawlQueues.delegatedURL.size() > 1000) ) {
+        if (this.crawlQueues.delegatedURL != null && (this.crawlQueues.delegatedURL.size() > 1000) ) {
             c++;
         }
         if ( (this.crawlQueues.errorURL.stackSize() > 1000) ) {
@@ -2256,7 +2289,7 @@ public final class Switchboard extends serverSwitch {
 
             // clean up delegated stack
             checkInterruption();
-            if ( (this.crawlQueues.delegatedURL.size() > 1000) ) {
+            if (this.crawlQueues.delegatedURL != null && (this.crawlQueues.delegatedURL.size() > 1000) ) {
                 if ( this.log.isFine() ) {
                     this.log.fine("Cleaning Delegated-URLs report stack, "
                         + this.crawlQueues.delegatedURL.size()
@@ -3778,7 +3811,7 @@ public final class Switchboard extends serverSwitch {
         mySeed.setFlagDirectConnect(true);
         mySeed.setLastSeenUTC();
         mySeed.put(Seed.UTC, GenericFormatter.UTCDiffString());
-        mySeed.setFlagAcceptRemoteCrawl(getConfigBool("crawlResponse", true));
+        mySeed.setFlagAcceptRemoteCrawl(getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
         if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort("port.ssl", 8443)));

@@ -46,6 +46,7 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
+import net.yacy.kelondro.util.MemoryControl;
 
 public class NoticedURL {
 
@@ -55,8 +56,9 @@ public class NoticedURL {
 
     private Balancer coreStack;      // links found by crawling to depth-1
     private Balancer limitStack;     // links found by crawling at target depth
-    private Balancer remoteStack;    // links from remote crawl orders
+    private Balancer remoteStack;    // links from remote crawl orders (init on demand)
     private Balancer noloadStack;    // links that are not passed to a loader; the index will be generated from the Request entry
+    private final File cachePath;
 
     protected NoticedURL(
             final File cachePath,
@@ -64,14 +66,26 @@ public class NoticedURL {
             final boolean exceed134217727) {
         ConcurrentLog.info("NoticedURL", "START CREATING STACKS at " + cachePath.toString());
         ConcurrentLog.info("NoticedURL", "opening CrawlerCoreStacks..");
+        this.cachePath = cachePath;
         this.coreStack = new HostBalancer(new File(cachePath, "CrawlerCoreStacks"), onDemandLimit, exceed134217727);
         ConcurrentLog.info("NoticedURL", "opening CrawlerLimitStacks..");
         this.limitStack = new HostBalancer(new File(cachePath, "CrawlerLimitStacks"), onDemandLimit, exceed134217727);
-        ConcurrentLog.info("NoticedURL", "opening CrawlerRemoteStacks..");
-        this.remoteStack = new HostBalancer(new File(cachePath, "CrawlerRemoteStacks"), onDemandLimit, exceed134217727);
+
+        this.remoteStack = null; // init on demand (on first push)
+        
         ConcurrentLog.info("NoticedURL", "opening CrawlerNoLoadStacks..");
         this.noloadStack = new HostBalancer(new File(cachePath, "CrawlerNoLoadStacks"), onDemandLimit, exceed134217727);
         ConcurrentLog.info("NoticedURL", "FINISHED CREATING STACKS at " + cachePath.toString());
+    }
+
+    /**
+     * Init Remote crawl stack, internally called on 1st push to remoteStack
+     */
+    protected void initRemoteStack() {
+        if (this.remoteStack == null && !MemoryControl.shortStatus()) {
+            ConcurrentLog.info("NoticedURL", "opening CrawlerRemoteStacks..");
+            this.remoteStack = new HostBalancer(new File(this.cachePath, "CrawlerRemoteStacks"), this.coreStack.getOnDemandLimit(), this.coreStack.getExceed134217727());
+        }
     }
 
     public void clear() {
@@ -113,7 +127,6 @@ public class NoticedURL {
     }
 
     public int size() {
-        // this does not count the overhang stack size
         return ((this.coreStack == null) ? 0 : this.coreStack.size()) + ((this.limitStack == null) ? 0 : this.limitStack.size()) + ((this.remoteStack == null) ? 0 : this.remoteStack.size());
     }
 
@@ -127,7 +140,7 @@ public class NoticedURL {
     
     public boolean isEmpty() {
         if (!isEmptyLocal()) return false;
-        if (!this.remoteStack.isEmpty()) return false;
+        if (this.remoteStack != null && !this.remoteStack.isEmpty()) return false;
         return true;
     }
 
@@ -155,8 +168,7 @@ public class NoticedURL {
         return
             this.coreStack.has(urlhashb) ||
             this.limitStack.has(urlhashb) ||
-            //overhangStack.has(urlhashb) ||
-            this.remoteStack.has(urlhashb) ||
+            (this.remoteStack != null && this.remoteStack.has(urlhashb)) ||
             this.noloadStack.has(urlhashb);
     }
 
@@ -169,11 +181,16 @@ public class NoticedURL {
     public String push(final StackType stackType, final Request entry, CrawlProfile profile, final RobotsTxt robots) {
         try {
             switch (stackType) {
-                case LOCAL: return this.coreStack.push(entry, profile, robots);
+                case LOCAL:  return this.coreStack.push(entry, profile, robots);
                 case GLOBAL: return this.limitStack.push(entry, profile, robots);
-                case REMOTE: return this.remoteStack.push(entry, profile, robots);
+                case REMOTE: {
+                    if (this.remoteStack == null) {
+                        this.initRemoteStack();
+                    }
+                    return (this.remoteStack != null) ? this.remoteStack.push(entry, profile, robots) : "remote crawler stack deactivated";
+                }
                 case NOLOAD: return this.noloadStack.push(entry, profile, robots);
-                default: return "stack type unknown";
+                default:     return "stack type unknown";
             }
         } catch (final Exception er) {
             ConcurrentLog.logException(er);
@@ -186,7 +203,7 @@ public class NoticedURL {
         try {if ((entry = this.noloadStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         try {if ((entry = this.coreStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         try {if ((entry = this.limitStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
-        try {if ((entry = this.remoteStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
+        try {if (this.remoteStack != null && (entry = this.remoteStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         return null;
     }
 
@@ -204,7 +221,7 @@ public class NoticedURL {
             try {ret |= this.noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             try {ret |= this.coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             try {ret |= this.limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {ret |= this.remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= this.remoteStack != null && this.remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             return ret;
         } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
@@ -217,7 +234,7 @@ public class NoticedURL {
         try {removed += this.noloadStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         try {removed += this.coreStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         try {removed += this.limitStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
-        try {removed += this.remoteStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        if (this.remoteStack != null) try {removed += this.remoteStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         return removed;
     }
 
@@ -226,7 +243,7 @@ public class NoticedURL {
         removed += this.noloadStack.removeAllByHostHashes(hosthashes);
         removed += this.coreStack.removeAllByHostHashes(hosthashes);
         removed += this.limitStack.removeAllByHostHashes(hosthashes);
-        removed += this.remoteStack.removeAllByHostHashes(hosthashes);
+        if (this.remoteStack != null) removed += this.remoteStack.removeAllByHostHashes(hosthashes);
         return removed;
     }
 
@@ -238,7 +255,7 @@ public class NoticedURL {
         switch (stackType) {
             case LOCAL:     return this.coreStack.getDomainStackHosts(robots);
             case GLOBAL:    return this.limitStack.getDomainStackHosts(robots);
-            case REMOTE:   return this.remoteStack.getDomainStackHosts(robots);
+            case REMOTE:   return (this.remoteStack != null) ? this.remoteStack.getDomainStackHosts(robots) : null;
             case NOLOAD:   return this.noloadStack.getDomainStackHosts(robots);
             default: return null;
         }
@@ -254,7 +271,7 @@ public class NoticedURL {
         switch (stackType) {
             case LOCAL:     return this.coreStack.getDomainStackReferences(host, maxcount, maxtime);
             case GLOBAL:    return this.limitStack.getDomainStackReferences(host, maxcount, maxtime);
-            case REMOTE:   return this.remoteStack.getDomainStackReferences(host, maxcount, maxtime);
+            case REMOTE:   return (this.remoteStack != null) ? this.remoteStack.getDomainStackReferences(host, maxcount, maxtime) : null;
             case NOLOAD:   return this.noloadStack.getDomainStackReferences(host, maxcount, maxtime);
             default: return null;
         }
@@ -264,7 +281,7 @@ public class NoticedURL {
         switch (stackType) {
             case LOCAL:     return pop(this.coreStack, delay, cs, robots);
             case GLOBAL:    return pop(this.limitStack, delay, cs, robots);
-            case REMOTE:   return pop(this.remoteStack, delay, cs, robots);
+            case REMOTE:   return (this.remoteStack != null) ? pop(this.remoteStack, delay, cs, robots) : null;
             case NOLOAD:   return pop(this.noloadStack, false, cs, robots);
             default: return null;
         }
@@ -285,14 +302,25 @@ public class NoticedURL {
     }
 
     public void clear(final StackType stackType) {
-    	ConcurrentLog.info("NoticedURL", "CLEARING STACK " + stackType);
+        ConcurrentLog.info("NoticedURL", "CLEARING STACK " + stackType);
         switch (stackType) {
-                case LOCAL:     this.coreStack.clear(); break;
-                case GLOBAL:    this.limitStack.clear(); break;
-                case REMOTE:   this.remoteStack.clear(); break;
-                case NOLOAD:   this.noloadStack.clear(); break;
-                default: return;
-            }
+            case LOCAL:
+                this.coreStack.clear();
+                break;
+            case GLOBAL:
+                this.limitStack.clear();
+                break;
+            case REMOTE:
+                if (this.remoteStack != null) {
+                    this.remoteStack.clear();
+                }
+                break;
+            case NOLOAD:
+                this.noloadStack.clear();
+                break;
+            default:
+                return;
+        }
     }
 
     private static Request pop(final Balancer balancer, final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
@@ -331,7 +359,7 @@ public class NoticedURL {
         try {switch (stackType) {
             case LOCAL:     return this.coreStack.iterator();
             case GLOBAL:    return this.limitStack.iterator();
-            case REMOTE:   return this.remoteStack.iterator();
+            case REMOTE:   return (this.remoteStack != null) ? this.remoteStack.iterator() : null;
             case NOLOAD:   return this.noloadStack.iterator();
             default: return null;
         }} catch (final IOException e) {

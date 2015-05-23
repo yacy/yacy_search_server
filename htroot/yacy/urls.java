@@ -83,7 +83,7 @@ public class urls {
                 }
 
                 // place url to notice-url db
-                sb.crawlQueues.delegatedURL.put(ASCII.String(entry.url().hash()), entry.url());
+                if (sb.crawlQueues.delegatedURL != null) sb.crawlQueues.delegatedURL.put(ASCII.String(entry.url().hash()), entry.url());
 
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");

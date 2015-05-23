@@ -113,6 +113,7 @@ public final class SwitchboardConstants {
      *
      * @see Switchboard#CRAWLJOB_REMOTE_CRAWL_LOADER
      */
+    public static final String CRAWLJOB_REMOTE                                 = "crawlResponse"; // enable/disable response to remote crawl requests
     public static final String CRAWLJOB_REMOTE_CRAWL_LOADER                    = "60_remotecrawlloader";
     public static final String CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START       = "remoteCrawlLoaderJob";
     public static final String CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT    = null;

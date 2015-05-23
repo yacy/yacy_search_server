@@ -356,7 +356,7 @@ public class Status
 
         prop.putNum(
             "remoteTriggeredCrawlQueueSize",
-            sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
+            sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) != null ? sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount() : 0);
         prop.put(
             "remoteTriggeredCrawlPaused",
             sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");

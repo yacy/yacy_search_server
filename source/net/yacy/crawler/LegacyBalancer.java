@@ -76,6 +76,16 @@ public class LegacyBalancer implements Balancer {
     private final List<Map.Entry<String, byte[]>>  zeroWaitingCandidates;
     private final Random random; // used to alternate between choose-from-maxstack or choose from any zero-waiting
 
+    @Override
+    public int getOnDemandLimit() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean getExceed134217727() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     private static class HostHandles {
         public String hosthash;
         public HandleSet handleSet;

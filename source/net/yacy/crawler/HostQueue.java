@@ -544,4 +544,14 @@ public class HostQueue implements Balancer {
         return cel;
     }
 
+    @Override
+    public int getOnDemandLimit() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean getExceed134217727() {
+        return this.exceed134217727;
+    }
+
 }

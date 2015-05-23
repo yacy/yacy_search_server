@@ -202,7 +202,16 @@ public class HostBalancer implements Balancer {
         }
         return true;
     }
-    
+
+    @Override
+    public int getOnDemandLimit() {
+        return this.onDemandLimit;
+    }
+
+    @Override
+    public boolean getExceed134217727() {
+        return this.exceed134217727;
+    }
     /**
      * push a request to one of the host queues. If the queue does not exist, it is created
      * @param entry

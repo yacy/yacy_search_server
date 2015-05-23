@@ -56,7 +56,7 @@ public class RemoteCrawl_p {
                 boolean crawlResponse = post.get("crawlResponse", "off").equals("on");
 
                 // read remote crawl request settings
-                sb.setConfig("crawlResponse", crawlResponse);
+                sb.initRemoteCrawler(crawlResponse);
             }
 
             if (post.containsKey("acceptCrawlLimit")) {
@@ -70,7 +70,7 @@ public class RemoteCrawl_p {
         }
 
         // set seed information directly
-        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         
         // write remote crawl request settings
         prop.put("disabled", !sb.peers.mySeed().isActive() && !sb.peers.mySeed().getFlagAcceptRemoteCrawl() ? 1 : 0);

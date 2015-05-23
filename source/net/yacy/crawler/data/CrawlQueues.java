@@ -72,7 +72,7 @@ public class CrawlQueues {
     private final Switchboard sb;
     private final Loader[] worker;
     private final ArrayBlockingQueue<Request> workerQueue;
-    private final ArrayList<String> remoteCrawlProviderHashes;
+    private ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
     public  ErrorCache errorURL;
@@ -83,7 +83,7 @@ public class CrawlQueues {
         final int maxWorkers = (int) sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
         this.worker = new Loader[maxWorkers];
         this.workerQueue = new ArrayBlockingQueue<Request>(200);
-        this.remoteCrawlProviderHashes = new ArrayList<String>();
+        this.remoteCrawlProviderHashes = null;
 
         // start crawling management
         log.config("Starting Crawling Management");
@@ -92,10 +92,16 @@ public class CrawlQueues {
         log.config("Opening errorURL..");
         this.errorURL = new ErrorCache(sb.index.fulltext());
         log.config("Opening delegatedURL..");
-        this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
-        log.config("Finishted Startup of Crawling Management");
+        this.delegatedURL = null;
     }
-    
+
+    public void initRemoteCrawlQueues () {
+        if (this.remoteCrawlProviderHashes == null) this.remoteCrawlProviderHashes = new ArrayList<String>();
+        if (this.delegatedURL == null) {
+            this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
+            log.config("Finishted Startup of Crawling Management");
+        }
+    }
     /**
      * Relocation is necessary if the user switches the network.
      * Because this object is part of the scheduler we cannot simply close that object and create a new one.
@@ -106,10 +112,10 @@ public class CrawlQueues {
         // removed pending requests
         this.workerQueue.clear();
         this.errorURL.clearCache();
-        this.remoteCrawlProviderHashes.clear();
+        if (this.remoteCrawlProviderHashes != null) this.remoteCrawlProviderHashes.clear();
         this.noticeURL.close();
         this.noticeURL = new NoticedURL(newQueuePath, sb.getConfigInt("crawler.onDemandLimit", 1000), this.sb.exceed134217727);
-        this.delegatedURL.clear();
+        if (this.delegatedURL != null) this.delegatedURL.clear();
     }
 
     public synchronized void close() {
@@ -130,16 +136,16 @@ public class CrawlQueues {
             }
         }
         this.noticeURL.close();
-        this.delegatedURL.clear();
+        if (this.delegatedURL != null) this.delegatedURL.clear();
     }
 
     public void clear() {
         // wait for all workers to finish
         this.workerQueue.clear();
         for (final Loader w: this.worker) if (w != null) w.interrupt();
-        this.remoteCrawlProviderHashes.clear();
+        if (this.remoteCrawlProviderHashes != null) this.remoteCrawlProviderHashes.clear();
         this.noticeURL.clear();
-        this.delegatedURL.clear();
+        if (this.delegatedURL != null) this.delegatedURL.clear();
     }
 
     /**
@@ -148,7 +154,7 @@ public class CrawlQueues {
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
     public HarvestProcess exists(final byte[] hash) {
-        if (this.delegatedURL.containsKey(ASCII.String(hash))) {
+        if (this.delegatedURL != null && this.delegatedURL.containsKey(ASCII.String(hash))) {
             return HarvestProcess.DELEGATED;
         }
         //if (this.noticeURL.existsInStack(hash)) {
@@ -181,7 +187,7 @@ public class CrawlQueues {
     public void removeURL(final byte[] hash) {
         assert hash != null && hash.length == 12;
         this.noticeURL.removeByURLHash(hash);
-        this.delegatedURL.remove(hash);
+        if (this.delegatedURL != null) this.delegatedURL.remove(hash);
     }
     
     public int removeHosts(final Set<String> hosthashes) {
@@ -194,9 +200,11 @@ public class CrawlQueues {
         if (urlhash == null || urlhash.length == 0) {
             return null;
         }
-        DigestURL u = this.delegatedURL.get(ASCII.String(urlhash));
-        if (u != null) {
-            return u;
+        if (this.delegatedURL != null) {
+            DigestURL u = this.delegatedURL.get(ASCII.String(urlhash));
+            if (u != null) {
+                return u;
+            }
         }
         for (final DigestURL url: activeWorkerEntries().keySet()) {
             if (Base64Order.enhancedCoder.equal(url.hash(), urlhash)) {
@@ -456,7 +464,7 @@ public class CrawlQueues {
 
         // check if we have an entry in the provider list, otherwise fill the list
         Seed seed;
-        if (this.remoteCrawlProviderHashes.isEmpty()) {
+        if (this.remoteCrawlProviderHashes != null && this.remoteCrawlProviderHashes.isEmpty()) {
             if (this.sb.peers != null && this.sb.peers.sizeConnected() > 0) {
                 final Iterator<Seed> e = DHTSelection.getProvidesRemoteCrawlURLs(this.sb.peers);
                 while (e.hasNext()) {
@@ -467,14 +475,14 @@ public class CrawlQueues {
                 }
             }
         }
-        if (this.remoteCrawlProviderHashes.isEmpty()) {
+        if (this.remoteCrawlProviderHashes == null || this.remoteCrawlProviderHashes.isEmpty()) {
             return false;
         }
 
         // take one entry from the provider list and load the entries from the remote peer
         seed = null;
         String hash = null;
-        while (seed == null && !this.remoteCrawlProviderHashes.isEmpty()) {
+        while (seed == null && (this.remoteCrawlProviderHashes != null && !this.remoteCrawlProviderHashes.isEmpty())) {
             hash = this.remoteCrawlProviderHashes.remove(this.remoteCrawlProviderHashes.size() - 1);
             if (hash == null) {
                 continue;
