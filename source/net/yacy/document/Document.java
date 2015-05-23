@@ -1003,10 +1003,18 @@ dc_rights
         if (tagname.length() > 0) {
             if (sb.length() > Request.descrLength - tagname.length() - 3) {
                 // cut this off because otherwise the tagname is lost.
-                sb.setLength(Request.descrLength - tagname.length() - 3);
+                if (tagname.length() > Request.descrLength) { // but in rare case tagname could be extreme long
+                    sb.setLength(0);
+                    sb.append(tagname.substring(0, Request.descrLength));
+                } else {
+                    sb.setLength(Request.descrLength - tagname.length());
+                    sb.append(" - ");
+                    sb.append(tagname);
+                }
+            } else {
+                sb.append(" - ");
+                sb.append(tagname);
             }
-            sb.append(" - ");
-            sb.append(tagname);
         }
         return sb.toString().trim();
     }
