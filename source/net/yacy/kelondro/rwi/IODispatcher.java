@@ -130,9 +130,8 @@ public class IODispatcher extends Thread {
                     } else {
                         log.info("appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
                     }
-                } catch (final Exception e) {
+                } catch (final Exception e) { // because mergeQueue size is 1, IllegalStateException could happen frequently (serial execution ensured in run() )
                 	log.warn("Could not add merge job to queue: " + e.getMessage(), e);
-                	array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize));
                 } finally {
                     this.controlQueue.release();
                 }
@@ -164,10 +163,8 @@ public class IODispatcher extends Thread {
                         dumpJob.dump();
                     } catch (final InterruptedException e) {
                         log.severe("main run job was interrupted (1)", e);
-                        ConcurrentLog.logException(e);
                     } catch (final Throwable e) {
                         log.severe("main run job had errors (1), dump to " + f + " failed.", e);
-                        ConcurrentLog.logException(e);
                     }
                     continue loop;
                 }
@@ -183,14 +180,12 @@ public class IODispatcher extends Thread {
                         mergeJob.merge();
                     } catch (final InterruptedException e) {
                         log.severe("main run job was interrupted (2)", e);
-                        ConcurrentLog.logException(e);
                     } catch (final Throwable e) {
                         if (f2 == null) {
                             log.severe("main run job had errors (2), dump to " + f + " failed. Input file is " + f1, e);
                         } else {
                             log.severe("main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
                         }
-                        ConcurrentLog.logException(e);
                     }
                     continue loop;
                 }
@@ -201,16 +196,14 @@ public class IODispatcher extends Thread {
                     break;
                 }
 
-                log.severe("main loop in bad state, dumpQueue.size() = " + this.dumpQueue.size() + ", mergeQueue.size() = " + this.mergeQueue.size() + ", controlQueue.availablePermits() = " + this.controlQueue.availablePermits());
+                log.severe("main loop in bad state, dumpQueue.size() = " + this.dumpQueue.size() + ", mergeQueue.size() = " + this.mergeQueue.size() + ", controlQueue.availablePermits() = " + this.controlQueue.availablePermits() + ", MemoryControl.shortStatus() = " + MemoryControl.shortStatus());
                 assert false : "this process statt should not be reached"; // this should never happen
             } catch (final Throwable e) {
                 log.severe("main run job failed (X)", e);
-                ConcurrentLog.logException(e);
             }
         log.info("loop terminated");
         } catch (final Throwable e) {
             log.severe("main run job failed (4)", e);
-            ConcurrentLog.logException(e);
         } finally {
             log.info("terminating run job");
             this.controlQueue = null;
