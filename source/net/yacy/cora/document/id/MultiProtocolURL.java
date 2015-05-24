@@ -827,11 +827,26 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return this.path.substring(p + 1); // the 'real' file name
     }
 
+    /**
+     * Get extension out of a filename
+     * cuts off query part
+     * @param fileName
+     * @return extension or ""
+     */
     public static String getFileExtension(final String fileName) {
         final int p = fileName.lastIndexOf('.');
         if (p < 0) return "";
         final int q = fileName.lastIndexOf('?');
-        return q < 0 ? fileName.substring(p + 1).toLowerCase() : fileName.substring(p + 1, q).toLowerCase();
+        if (q < 0) {
+            return fileName.substring(p + 1).toLowerCase();
+        } else {
+            // check last dot in query part
+            if (p > q) {
+                return ""; // TODO: last . after ?  (file.ext?param=one.txt)
+            } else {
+                return fileName.substring(p + 1, q).toLowerCase();
+            }
+        }
     }
 
     public String getPath() {
