@@ -196,7 +196,6 @@ public class ViewFile {
         }
 
         final String[] wordArray = wordArray(post.get("words", null));
-        final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (viewMode.equals("plain")) {
 
             // TODO: how to handle very large files here ?
@@ -222,7 +221,7 @@ public class ViewFile {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CACHE);
             prop.put("viewMode_png", 0);
             prop.put("viewMode_html", 0);
-            if (ext.length() > 0 && "jpg.jpeg.png.gif".indexOf(ext) >= 0) {
+            if (response.docType() == Response.DT_IMAGE) {
                 prop.put("viewMode_png", 1);
                 prop.put("viewMode_png_url", url.toNormalform(true));
             } else {
@@ -406,7 +405,6 @@ public class ViewFile {
             prop.put("error_md5", "");
             prop.put("error_lat", "");
             prop.put("error_lon", "");
-            prop.put("error_doctype", "");
             prop.put("error_language", "");
             prop.put("error_flags", "");
             prop.put("error_wordCount", "");
@@ -429,7 +427,6 @@ public class ViewFile {
             prop.put("error_md5", urlEntry.md5());
             prop.put("error_lat", urlEntry.lat());
             prop.put("error_lon", urlEntry.lon());
-            prop.put("error_doctype", Response.doctype2mime(ext, urlEntry.doctype()));
             prop.put("error_language", urlEntry.language());
             prop.put("error_flags", urlEntry.flags().toString());
             prop.put("error_wordCount", urlEntry.wordCount());
