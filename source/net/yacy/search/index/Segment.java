@@ -73,6 +73,7 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
+import net.yacy.kelondro.rwi.IODispatcher;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
@@ -120,6 +121,7 @@ public class Segment {
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
     protected       IndexTable                     firstSeenIndex;
+    protected       IODispatcher                   merger = null; // shared iodispatcher for kelondro indexes
 
     /**
      * create a new Segment
@@ -148,6 +150,11 @@ public class Segment {
 
     public void connectRWI(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
         if (this.termIndex != null) return;
+        
+        if (this.merger == null) { // init shared iodispatcher if none running
+            this.merger = new IODispatcher(2, 2, writeBufferSize);
+            this.merger.start();
+        }
         this.termIndex = new IndexCell<WordReference>(
                         new File(this.segmentPath, "default"),
                         termIndexName,
@@ -157,7 +164,8 @@ public class Segment {
                         entityCacheMaxSize,
                         targetFileSize,
                         maxFileSize,
-                        writeBufferSize);
+                        writeBufferSize,
+                        merger);
     }
 
     public void disconnectRWI() {
@@ -172,6 +180,11 @@ public class Segment {
 
     public void connectCitation(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
         if (this.urlCitationIndex != null) return;
+
+        if (this.merger == null) { // init shared iodispatcher if none running
+            this.merger = new IODispatcher(2,2,writeBufferSize);
+            this.merger.start();
+        }
         this.urlCitationIndex = new IndexCell<CitationReference>(
                         new File(this.segmentPath, "default"),
                         citationIndexName,
@@ -181,7 +194,8 @@ public class Segment {
                         entityCacheMaxSize,
                         targetFileSize,
                         maxFileSize,
-                        writeBufferSize);
+                        writeBufferSize,
+                        merger);
     }
 
     public void disconnectCitation() {
@@ -468,6 +482,10 @@ public class Segment {
         if (this.fulltext != null) this.fulltext.close();
         if (this.urlCitationIndex != null) this.urlCitationIndex.close();
         if (this.firstSeenIndex != null) this.firstSeenIndex.close();
+        if (this.merger != null) {
+            this.merger.terminate();
+            this.merger = null;
+        }
     }
 
     private static String votedLanguage(

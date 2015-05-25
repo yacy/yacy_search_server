@@ -93,10 +93,10 @@ public class IODispatcher extends Thread {
             // check if the dispatcher is running
             if (isAlive()) {
                 try {
-                    this.dumpQueue.put(job);
+                    this.dumpQueue.add(job);
                     log.info("appended dump job for file " + file.getName());
-                } catch (final InterruptedException e) {
-                    ConcurrentLog.logException(e);
+                } catch (final IllegalStateException e) {
+                    log.warn("could not append dump job, emergency dump of file " + file.getName());
                     cache.dump(file, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize), true);
                 } finally {
                     this.controlQueue.release();
@@ -130,8 +130,8 @@ public class IODispatcher extends Thread {
                     } else {
                         log.info("appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
                     }
-                } catch (final Exception e) { // because mergeQueue size is 1, IllegalStateException could happen frequently (serial execution ensured in run() )
-                	log.warn("Could not add merge job to queue: " + e.getMessage(), e);
+                } catch (final IllegalStateException e) { // because mergeQueue size is 1, IllegalStateException could happen frequently (serial execution ensured in run() )
+                	log.warn("Could not add merge job to queue: " + e.getMessage());
                 } finally {
                     this.controlQueue.release();
                 }
@@ -195,9 +195,7 @@ public class IODispatcher extends Thread {
                     log.info("caught termination signal");
                     break;
                 }
-
-                log.severe("main loop in bad state, dumpQueue.size() = " + this.dumpQueue.size() + ", mergeQueue.size() = " + this.mergeQueue.size() + ", controlQueue.availablePermits() = " + this.controlQueue.availablePermits() + ", MemoryControl.shortStatus() = " + MemoryControl.shortStatus());
-                assert false : "this process statt should not be reached"; // this should never happen
+                
             } catch (final Throwable e) {
                 log.severe("main run job failed (X)", e);
             }

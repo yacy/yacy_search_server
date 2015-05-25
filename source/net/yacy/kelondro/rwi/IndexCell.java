@@ -72,7 +72,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private       ReferenceContainerCache<ReferenceType> ram;
     private final ComparableARC<byte[], Integer>         countCache;
     private       int                                    maxRamEntries;
-    private final IODispatcher                           merger;
+    private       IODispatcher                           merger; // pointer to shared merger
     private       long                                   lastCleanup;
     private long  lastDump;
     private final long                                   targetFileSize, maxFileSize;
@@ -90,16 +90,16 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             final int maxRamEntries,
             final long targetFileSize,
             final long maxFileSize,
-            final int writeBufferSize
+            final int writeBufferSize,
+            final IODispatcher merger
             ) throws IOException {
         super(factory);
 
-        this.merger = new IODispatcher(2, 1, writeBufferSize);
+        this.merger = merger;
         this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, termSize);
         this.ram = new ReferenceContainerCache<ReferenceType>(factory, termOrder, termSize);
         this.countCache = new ComparableARC<byte[], Integer>(1000, termOrder);
         this.maxRamEntries = maxRamEntries;
-        this.merger.start();
         this.lastCleanup = System.currentTimeMillis();
         this.lastDump = System.currentTimeMillis();
         this.targetFileSize = targetFileSize;
@@ -600,7 +600,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // close all
         this.flushShallRun = false;
         if (this.flushThread != null) try { this.flushThread.join(); } catch (final InterruptedException e) {}
-        this.merger.terminate();
         this.ram.close();
         this.array.close();
     }
