@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Date;
 
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ByteArray;
@@ -39,21 +38,15 @@ import net.yacy.document.Condenser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.rwi.Reference;
-import net.yacy.kelondro.util.Bitfield;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionSchema;
 
 
-public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEntry> {
+public class ResultEntry extends URIMetadataNode implements Comparable<ResultEntry>, Comparator<ResultEntry> {
 
     // payload objects
-    private final URIMetadataNode urlentry;
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
@@ -63,8 +56,8 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                        final Segment indexSegment,
                        SeedDB peers,
                        final TextSnippet textSnippet) {
-        this.urlentry = urlentry;
-        this.urlentry.setField(CollectionSchema.text_t.getSolrFieldName(), ""); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
+        super(urlentry);
+        this.removeFields(CollectionSchema.text_t.getSolrFieldName()); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
         this.indexSegment = indexSegment;
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
@@ -102,7 +95,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     @Override
     public int hashCode() {
         if (this.hashCache == Integer.MIN_VALUE) {
-            this.hashCache = ByteArray.hashCode(this.urlentry.hash());
+            this.hashCache = ByteArray.hashCode(this.hash());
         }
         return this.hashCache;
     }
@@ -112,29 +105,18 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         if (obj == null) return false;
         if (!(obj instanceof ResultEntry)) return false;
         ResultEntry other = (ResultEntry) obj;
-        return Base64Order.enhancedCoder.equal(this.urlentry.hash(), other.urlentry.hash());
+        return Base64Order.enhancedCoder.equal(this.hash(), other.hash());
     }
-    public URIMetadataNode getNode() {
-        return this.urlentry;
-    }
-    public byte[] hash() {
-        return this.urlentry.hash();
-    }
-    public DigestURL url() {
-        return this.urlentry.url();
-    }
-    public Bitfield flags() {
-        return this.urlentry.flags();
-    }
+
     public String urlstring() {
         if (this.alternative_urlstring != null) return this.alternative_urlstring;
         
         if (!pdfParser.individualPages) return this.url().toNormalform(true);
-        if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.urlentry.url().getFileName()).toLowerCase())) return this.url().toNormalform(true);
+        if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.url().getFileName()).toLowerCase())) return this.url().toNormalform(true);
         // for pdf links we rewrite the url
         // this is a special treatment of pdf files which can be splitted into subpages
         String pageprop = pdfParser.individualPagePropertyname;
-        String resultUrlstring = this.urlentry.url().toNormalform(true);
+        String resultUrlstring = this.url().toNormalform(true);
         int p = resultUrlstring.lastIndexOf(pageprop + "=");
         if (p > 0) {
           return resultUrlstring.substring(0, p - 1) + "#page=" + resultUrlstring.substring(p + pageprop.length() + 1);
@@ -145,72 +127,22 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return (this.alternative_urlname == null) ? MultiProtocolURL.unescape(urlstring()) : this.alternative_urlname;
     }
     public String title() {
-        String titlestr = this.urlentry.dc_title();
+        String titlestr = this.dc_title();
         // if title is empty use filename as title
         if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
             titlestr = this.url() != null ? this.url().getFileName() : "";
         }
         return titlestr;
     }
-    public String publisher() {
-        // dc:publisher
-        return this.urlentry.dc_publisher();
-    }
-    public String creator() {
-        // dc:creator, the author
-        return this.urlentry.dc_creator();
-    }
-    public String subject() {
-        // dc:subject, keywords
-        return this.urlentry.dc_subject();
-    }
     public TextSnippet textSnippet() {
         return this.textSnippet;
     }
-    public Date modified() {
-        return this.urlentry.moddate();
-    }
     public Date[] events() {
-        return this.urlentry.datesInContent();
-    }
-    public int filesize() {
-        return this.urlentry.filesize();
+        return this.datesInContent();
     }
     public int referencesCount() {
         // urlCitationIndex index might be null (= configuration option)
-    	return this.indexSegment.connectedCitation() ? this.indexSegment.urlCitation().count(this.urlentry.hash()) : 0;
-    }
-    public int llocal() {
-    	return this.urlentry.llocal();
-    }
-    public int lother() {
-    	return this.urlentry.lother();
-    }
-    public int limage() {
-        return this.urlentry.limage();
-    }
-    public int laudio() {
-        return this.urlentry.laudio();
-    }
-    public int lvideo() {
-        return this.urlentry.lvideo();
-    }
-    public int lapp() {
-        return this.urlentry.lapp();
-    }
-    public double lat() {
-        return this.urlentry.lat();
-    }
-    public double lon() {
-        return this.urlentry.lon();
-    }
-    public WordReference word() {
-        final Reference word = this.urlentry.word();
-        if (word == null) return null;
-        if (word instanceof WordReferenceVars) return (WordReferenceVars) word;
-        if (word instanceof WordReferenceRow) return (WordReferenceRow) word;
-        assert word instanceof WordReferenceRow || word instanceof WordReferenceVars : word == null ? "word = null" : "type = " + word.getClass().getCanonicalName();
-        return null;
+    	return this.indexSegment.connectedCitation() ? this.indexSegment.urlCitation().count(this.hash()) : 0;
     }
     public boolean hasTextSnippet() {
         return (this.textSnippet != null) && (!this.textSnippet.getErrorCode().fail());
@@ -218,19 +150,16 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public String resource() {
         // generate transport resource
         if ((this.textSnippet == null) || (!this.textSnippet.exists())) {
-            return this.urlentry.toString();
+            return this.toString();
         }
-        return this.urlentry.toString(this.textSnippet.getLineRaw());
+        return this.toString(this.textSnippet.getLineRaw());
     }
     @Override
     public int compareTo(ResultEntry o) {
-        return Base64Order.enhancedCoder.compare(this.urlentry.hash(), o.urlentry.hash());
+        return Base64Order.enhancedCoder.compare(this.hash(), o.hash());
     }
     @Override
     public int compare(ResultEntry o1, ResultEntry o2) {
-        return Base64Order.enhancedCoder.compare(o1.urlentry.hash(), o2.urlentry.hash());
-    }
-    public float score() {
-        return this.urlentry.score();
+        return Base64Order.enhancedCoder.compare(o1.hash(), o2.hash());
     }
 }

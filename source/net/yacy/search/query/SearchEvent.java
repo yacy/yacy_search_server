@@ -1570,25 +1570,22 @@ public final class SearchEvent {
     public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
         if (item < imageViewed.size()) return nthImage(item);
         if (imageSpareGood.size() > 0) return nextSpare(); // first put out all good spare, but no bad spare
-        ResultEntry ms = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
+        ResultEntry doc = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
         // check if the match was made in the url or in the image links
-        if (ms == null) {
+        if (doc == null) {
             if (hasSpare()) return nextSpare();
             throw new MalformedURLException("no image url found");
         }
         // try to get more
-        SolrDocument doc = ms.getNode();
+
         // there can be two different kinds of image hits: either the document itself is an image or images are embedded in the links of text documents.
         String mime = (String) doc.getFirstValue(CollectionSchema.content_type.getSolrFieldName());
 
         // boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
         // generalize above hack (regarding url with file extension but beeing a html (with html mime)
-        char docType = Response.docType(mime); // first look at mime (as some html pages have img extension (like wikipedia)
-        if (docType == Response.DT_UNKNOWN) docType = Response.docType(ms.url()); // try extension if mime wasn't successful
-
-        if (docType == Response.DT_IMAGE) {
-            String id = ASCII.String(ms.hash());
-            if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
+        if (doc.doctype() == Response.DT_IMAGE) {
+            String id = ASCII.String(doc.hash());
+            if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), "", doc.title(), 0, 0, 0));
         } else {
             Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
@@ -1612,7 +1609,7 @@ public final class SearchEvent {
                         boolean sizeok = h != null && w != null && h.intValue() > 16 && w.intValue() > 16;
                         String id = ASCII.String(imageUrl.hash());
                         if (!imageViewed.containsKey(id) && !containsSpare(id)) {
-                            ImageResult imageResult = new ImageResult(ms.url(), imageUrl, "", image_alt, w == null ? 0 : w, h == null ? 0 : h, 0);
+                            ImageResult imageResult = new ImageResult(doc.url(), imageUrl, "", image_alt, w == null ? 0 : w, h == null ? 0 : h, 0);
                             if (match || sizeok) imageSpareGood.put(id, imageResult); else imageSpareBad.put(id, imageResult);
                         }
                     } catch (MalformedURLException e) {

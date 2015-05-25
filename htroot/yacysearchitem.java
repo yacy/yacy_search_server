@@ -208,7 +208,7 @@ public class yacysearchitem {
                 prop.put("content_showVocabulary", sb.getConfigBool("search.result.show.vocabulary", true) ? 1 : 0);
 
                 if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
-                prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
+                prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.moddate()));
                 prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
                 prop.put("content_showMetadata_urlhash", urlhash);
                 prop.put("content_showParser_urlhash", urlhash);
@@ -218,7 +218,7 @@ public class yacysearchitem {
                 prop.put("content_showProxy_link", resultUrlstring);
                 prop.put("content_showHostBrowser_link", resultUrlstring);
                 if (sb.getConfigBool("search.result.show.vocabulary", true)) {
-                    URIMetadataNode node = result.getNode();
+                    URIMetadataNode node = result;
                     int c = 0;
                     for (Map.Entry<String, Object> entry: node.entrySet()) {
                         String key = entry.getKey();
@@ -239,7 +239,7 @@ public class yacysearchitem {
             }
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(urlhash));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
-            prop.put("content_date822", isAtomFeed ? ISO8601Formatter.FORMATTER.format(result.modified()) : HeaderFramework.formatRFC1123(result.modified()));
+            prop.put("content_date822", isAtomFeed ? ISO8601Formatter.FORMATTER.format(result.moddate()) : HeaderFramework.formatRFC1123(result.moddate()));
             if (showEvent) prop.put("content_showEvent_date822", isAtomFeed ? ISO8601Formatter.FORMATTER.format(events[0]) : HeaderFramework.formatRFC1123(events[0]));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
@@ -248,9 +248,9 @@ public class yacysearchitem {
             prop.putXML("content_file", resultFileName); // putXML for rss
             prop.putXML("content_path", resultURL.getPath()); // putXML for rss
             prop.put("content_nl", (item == theSearch.query.offset) ? 0 : 1);
-            prop.putHTML("content_publisher", result.publisher());
-            prop.putHTML("content_creator", result.creator());// author
-            prop.putHTML("content_subject", result.subject());
+            prop.putHTML("content_publisher", result.dc_publisher());
+            prop.putHTML("content_creator", result.dc_creator());// author
+            prop.putHTML("content_subject", result.dc_subject());
             final Iterator<String> query = theSearch.query.getQueryGoal().getIncludeStrings();
             final StringBuilder s = new StringBuilder(theSearch.query.getQueryGoal().getIncludeSize() * 20);
             while (query.hasNext()) s.append('+').append(query.next());
@@ -263,7 +263,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            prop.put("content_mimetype",result.getNode().mime()); // for atom <link> type attribute
+            prop.put("content_mimetype", result.mime()); // for atom <link> type attribute
             final HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
             if (heuristic == null) {
                 prop.put("content_heuristic", 0);
