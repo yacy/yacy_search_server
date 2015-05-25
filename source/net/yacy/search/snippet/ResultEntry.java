@@ -46,6 +46,7 @@ import net.yacy.search.schema.CollectionSchema;
 
 public class ResultEntry extends URIMetadataNode implements Comparable<ResultEntry>, Comparator<ResultEntry> {
 
+    private static final long serialVersionUID = -256046934741561978L;
     // payload objects
     private String alternative_urlstring;
     private String alternative_urlname;
