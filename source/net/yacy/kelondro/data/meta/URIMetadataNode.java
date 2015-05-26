@@ -717,10 +717,9 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
                     ConcurrentLog.logException(e);
                 }
                 indexSegment.fulltext().remove(this.hash()); // clean up
-                throw new RuntimeException("index void");
             }
             this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + path;
-            this.alternative_urlname = "http://share." + seed.getName() + ".yacy" + path;
+            this.alternative_urlname = "http://" + seed.getName() + ".yacy" + path;
             if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
         }
         return this;
