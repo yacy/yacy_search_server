@@ -1580,13 +1580,12 @@ public final class SearchEvent {
         // try to get more
 
         // there can be two different kinds of image hits: either the document itself is an image or images are embedded in the links of text documents.
-        String mime = (String) doc.getFirstValue(CollectionSchema.content_type.getSolrFieldName());
 
         // boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
         // generalize above hack (regarding url with file extension but beeing a html (with html mime)
         if (doc.doctype() == Response.DT_IMAGE) {
             String id = ASCII.String(doc.hash());
-            if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), "", doc.title(), 0, 0, 0));
+            if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), doc.mime(), doc.title(), 0, 0, 0));
         } else {
             Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
