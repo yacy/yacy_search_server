@@ -28,7 +28,6 @@ import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -44,6 +43,7 @@ import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.URLLicense;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Formatter;
@@ -58,7 +58,6 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.query.SearchEventType;
-import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -115,7 +114,7 @@ public class yacysearchitem {
             // text search
 
             // generate result object
-            final ResultEntry result = theSearch.oneResult(item, timeout);
+            final URIMetadataNode result = theSearch.oneResult(item, timeout);
             if (result == null) return prop; // no content
             final String resultUrlstring = result.urlstring();
             final DigestURL resultURL = result.url();
@@ -218,13 +217,11 @@ public class yacysearchitem {
                 prop.put("content_showProxy_link", resultUrlstring);
                 prop.put("content_showHostBrowser_link", resultUrlstring);
                 if (sb.getConfigBool("search.result.show.vocabulary", true)) {
-                    URIMetadataNode node = result;
                     int c = 0;
-                    for (Map.Entry<String, Object> entry: node.entrySet()) {
-                        String key = entry.getKey();
+                    for (String key: result.getFieldNames()) {
                         if (key.startsWith("vocabulary_") && key.endsWith("_sxt")) {
                             @SuppressWarnings("unchecked")
-                            Collection<String> terms = (Collection<String>) entry.getValue();
+                            Collection<Object> terms = result.getFieldValues(key);
                             prop.putHTML("content_showVocabulary_vocabulary_" + c + "_name", key.substring(11, key.length() - 4));
                             prop.putHTML("content_showVocabulary_vocabulary_" + c + "_terms", terms.toString());
                             c++;
@@ -276,8 +273,7 @@ public class yacysearchitem {
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
-            final String ext = MultiProtocolURL.getFileExtension(resultFileName);
-            if (MultiProtocolURL.isImage(ext)) {
+            if (result.doctype() == Response.DT_IMAGE) {
                 final String license = URLLicense.aquireLicense(resultURL);
                 prop.put("content_code", license);
             } else {
@@ -343,7 +339,7 @@ public class yacysearchitem {
             // any other media content
 
             // generate result object
-            final ResultEntry ms = theSearch.oneResult(item, timeout);
+            final URIMetadataNode ms = theSearch.oneResult(item, timeout);
             prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
             if (ms == null) {
                 prop.put("content_item", "0");

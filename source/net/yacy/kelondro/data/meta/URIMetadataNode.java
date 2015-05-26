@@ -22,6 +22,7 @@
 
 package net.yacy.kelondro.data.meta;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
@@ -46,14 +48,20 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.SentenceReader;
+import net.yacy.document.parser.pdfParser;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
+import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.utils.crypt;
 
 import org.apache.solr.common.SolrDocument;
@@ -64,7 +72,7 @@ import org.apache.solr.common.SolrDocument;
  * The purpose of this object is the migration from the old metadata structure to solr document.
  * Future implementations should try to replace URIMetadata objects completely by SolrDocument objects
  */
-public class URIMetadataNode extends SolrDocument {
+public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMetadataNode>, Comparator<URIMetadataNode> */ {
     
     private static final long serialVersionUID = -256046934741561968L;
     
@@ -76,6 +84,11 @@ public class URIMetadataNode extends SolrDocument {
     protected float score = 0; // during generation of a search result this value is set
     protected String snippet = null;
     protected WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
+
+    // fields for search results (implemented from ResultEntry)
+    private String alternative_urlstring;
+    private String alternative_urlname;
+    private TextSnippet textSnippet = null;
 
     public URIMetadataNode(final Properties prop, String collection) {
         // generates an plasmaLURLEntry using the properties from the argument
@@ -662,4 +675,145 @@ public class URIMetadataNode extends SolrDocument {
         return a;
     }
 
+    // --- implementation for use as search result ----------
+    /**
+     * Initialisize some variables only needed for search results
+     * and eleminates underlaying fields not needed for search results
+     *
+     * ! never put this back to the index because of the reduced content fields
+     * @param indexSegment
+     * @param peers
+     * @param textSnippet
+     * @return
+     */
+    public URIMetadataNode makeResultEntry(
+                       final Segment indexSegment,
+                       SeedDB peers,
+                       final TextSnippet textSnippet) {
+        this.removeFields(CollectionSchema.text_t.getSolrFieldName()); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
+        //this.indexSegment = indexSegment;
+        this.alternative_urlstring = null;
+        this.alternative_urlname = null;
+        this.textSnippet = textSnippet;
+        final String host = this.url().getHost();
+        if (host != null && host.endsWith(".yacyh")) {
+            // translate host into current IP
+            int p = host.indexOf('.');
+            final String hash = Seed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
+            final Seed seed = peers.getConnected(hash);
+            final String path = this.url().getFile();
+            String address = null;
+            if ((seed == null) || ((address = seed.getPublicAddress(seed.getIP())) == null)) {
+                // seed is not known from here
+                try {
+                    if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(
+                        Word.words2hashesHandles(Condenser.getWords(
+                            ("yacyshare " +
+                             path.replace('?', ' ') +
+                             " " +
+                             this.dc_title()), null).keySet()),
+                             this.hash());
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
+                }
+                indexSegment.fulltext().remove(this.hash()); // clean up
+                throw new RuntimeException("index void");
+            }
+            this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + path;
+            this.alternative_urlname = "http://share." + seed.getName() + ".yacy" + path;
+            if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
+        }
+        return this;
+    }
+    /**
+     * used for search result entry
+     */
+    public String urlstring() {
+        if (this.alternative_urlstring != null) return this.alternative_urlstring;
+        
+        if (!pdfParser.individualPages) return this.url().toNormalform(true);
+        if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.url().getFileName()).toLowerCase())) return this.url().toNormalform(true);
+        // for pdf links we rewrite the url
+        // this is a special treatment of pdf files which can be splitted into subpages
+        String pageprop = pdfParser.individualPagePropertyname;
+        String resultUrlstring = this.url().toNormalform(true);
+        int p = resultUrlstring.lastIndexOf(pageprop + "=");
+        if (p > 0) {
+          return resultUrlstring.substring(0, p - 1) + "#page=" + resultUrlstring.substring(p + pageprop.length() + 1);
+        }
+        return resultUrlstring;
+    }
+    /**
+     * used for search result entry
+     */
+    public String urlname() {
+        return (this.alternative_urlname == null) ? MultiProtocolURL.unescape(urlstring()) : this.alternative_urlname;
+    }
+    /**
+     * used for search result entry
+     */
+    public String title() {
+        String titlestr = this.dc_title();
+        // if title is empty use filename as title
+        if (titlestr.isEmpty()) { // if url has no filename, title is still empty (e.g. "www.host.com/" )
+            titlestr = this.url() != null ? this.url().getFileName() : "";
+        }
+        return titlestr;
+    }
+    /**
+     * used for search result entry
+     */
+    public TextSnippet textSnippet() {
+        return this.textSnippet;
+    }
+    /**
+     * used for search result entry
+     */
+    public Date[] events() {
+        return this.datesInContent();
+    }
+    /**
+     * used for search result entry
+     */
+    public boolean hasTextSnippet() {
+        return (this.textSnippet != null) && (!this.textSnippet.getErrorCode().fail());
+    }
+    /**
+     * used for search result entry
+     */
+    public String resource() {
+        // generate transport resource
+        if ((this.textSnippet == null) || (!this.textSnippet.exists())) {
+            return this.toString();
+        }
+        return this.toString(this.textSnippet.getLineRaw());
+    }
+/* 
+    taken from ResultEntry (should work without)
+
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+    @Override
+    public int hashCode() {
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(this.hash());
+        }
+        return this.hashCache;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof URIMetadataNode)) return false;
+        URIMetadataNode other = (URIMetadataNode) obj;
+        return Base64Order.enhancedCoder.equal(this.hash(), other.hash());
+    }
+   @Override
+    public int compareTo(URIMetadataNode o) {
+        return Base64Order.enhancedCoder.compare(this.hash(), o.hash());
+    }
+    @Override
+    public int compare(URIMetadataNode o1, URIMetadataNode o2) {
+        return Base64Order.enhancedCoder.compare(o1.hash(), o2.hash());
+    }*/
 }

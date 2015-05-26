@@ -99,7 +99,6 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
-import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
 
@@ -174,7 +173,7 @@ public final class SearchEvent {
     private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
     private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack; // thats the bag where the RWI search process writes to
     private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack; // thats the bag where the solr results are written to
-    private final WeakPriorityBlockingQueue<ResultEntry>  resultList; // thats the result list where the actual search result is waiting to be displayed
+    private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList; // thats the result list where the actual search result is waiting to be displayed
     private final boolean pollImmediately; // if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source.
     public  final boolean excludeintext_image;
     
@@ -406,7 +405,7 @@ public final class SearchEvent {
         this.deleteIfSnippetFail = deleteIfSnippetFail;
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
-        this.resultList = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(max_results_node, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.resultList = new WeakPriorityBlockingQueue<URIMetadataNode>(Math.max(max_results_node, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
 
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search       
@@ -1312,7 +1311,7 @@ public final class SearchEvent {
                         false);
                 final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
                 final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
-                ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
+                URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
                 addResult(re);
                 success = true;
             } else {
@@ -1380,16 +1379,16 @@ public final class SearchEvent {
      * place the result to the result vector and apply post-ranking
      * @param resultEntry
      */
-    public void addResult(ResultEntry resultEntry) {
+    public void addResult(URIMetadataNode resultEntry) {
         if (resultEntry == null) return;
         float score = resultEntry.score();
         final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
-        this.resultList.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
+        this.resultList.put(new ReverseElement<URIMetadataNode>(resultEntry, ranking)); // remove smallest in case of overflow
         if (pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
         this.addTopics(resultEntry);
     }
 
-    private long postRanking(final ResultEntry rentry, final ScoreMap<String> topwords) {
+    private long postRanking(final URIMetadataNode rentry, final ScoreMap<String> topwords) {
         long r = 0;
 
         // for media search: prefer pages with many links
@@ -1400,8 +1399,10 @@ public final class SearchEvent {
 
         // apply citation count
         //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
-        r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
-
+        if (this.query.getSegment().connectedCitation()) {
+            int referencesCount = this.query.getSegment().urlCitation().count(rentry.hash());
+            r += (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
+        } /* else r += 0; */
         // prefer hit with 'prefer' pattern
         if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 256 << this.query.ranking.coeff_prefer;
         if (this.query.prefer.matcher(rentry.title()).matches()) r += 256 << this.query.ranking.coeff_prefer;
@@ -1432,7 +1433,7 @@ public final class SearchEvent {
         return r;
     }
     
-    public ResultEntry getSnippet(URIMetadataNode page, final CacheStrategy cacheStrategy) {
+    public URIMetadataNode getSnippet(URIMetadataNode page, final CacheStrategy cacheStrategy) {
         if (page == null) return null;
 
         if (cacheStrategy == null) {
@@ -1444,7 +1445,7 @@ public final class SearchEvent {
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
                     SearchEvent.SNIPPET_MAX_LENGTH,
                     !this.query.isLocal());
-            return new ResultEntry(page, this.query.getSegment(), this.peers, snippet); // result without snippet
+            return page.makeResultEntry(this.query.getSegment(), this.peers, snippet); // result without snippet
         }
 
         // load snippet
@@ -1464,16 +1465,16 @@ public final class SearchEvent {
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
-                return new ResultEntry(page, this.query.getSegment(), this.peers, snippet); // result with snippet attached
+                return page.makeResultEntry(this.query.getSegment(), this.peers, snippet); // result with snippet attached
             } else if (cacheStrategy.mustBeOffline()) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, this.query.getSegment(), this.peers, null); // result without snippet
+                return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
             } else {
                 // problems with snippet fetch
                 if (this.snippetFetchWordHashes.has(Segment.catchallHash)) {
                     // we accept that because the word cannot be on the page
-                    return new ResultEntry(page, this.query.getSegment(), this.peers, null);
+                    return page.makeResultEntry(this.query.getSegment(), this.peers, null);
                 }
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.deleteIfSnippetFail) {
@@ -1483,10 +1484,10 @@ public final class SearchEvent {
                 return null;
             }
         }
-        return new ResultEntry(page, this.query.getSegment(), this.peers, null); // result without snippet
+        return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
     }
     
-    public ResultEntry oneResult(final int item, final long timeout) {        
+    public URIMetadataNode oneResult(final int item, final long timeout) {
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)
         final long finishTime = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
@@ -1515,7 +1516,7 @@ public final class SearchEvent {
         // check if we have a success
         if (this.resultList.sizeAvailable() > item) {
             // we have the wanted result already in the result array .. return that
-            final ResultEntry re = this.resultList.element(item).getElement();
+            final URIMetadataNode re = this.resultList.element(item).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
             
             if (this.localsolrsearch == null || !this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
@@ -1570,7 +1571,7 @@ public final class SearchEvent {
     public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
         if (item < imageViewed.size()) return nthImage(item);
         if (imageSpareGood.size() > 0) return nextSpare(); // first put out all good spare, but no bad spare
-        ResultEntry doc = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
+        URIMetadataNode doc = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
         // check if the match was made in the url or in the image links
         if (doc == null) {
             if (hasSpare()) return nextSpare();
@@ -1641,12 +1642,12 @@ public final class SearchEvent {
         }
     }
     
-    public ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> completeResults(final long waitingtime) {
+    public ArrayList<WeakPriorityBlockingQueue.Element<URIMetadataNode>> completeResults(final long waitingtime) {
         final long timeout = waitingtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + waitingtime;
         int i = 0;
         
         while (this.resultList.sizeAvailable() < this.query.neededResults() && System.currentTimeMillis() < timeout) {
-            ResultEntry re = oneResult(i++, timeout - System.currentTimeMillis());
+            URIMetadataNode re = oneResult(i++, timeout - System.currentTimeMillis());
             if (re == null) break;
         }
         return this.resultList.list(Math.min(this.query.neededResults(), this.resultList.sizeAvailable()));
@@ -1659,8 +1660,8 @@ public final class SearchEvent {
      * @return true if an entry was deleted, false otherwise
      */
     protected boolean delete(final String urlhash) {
-        final Iterator<Element<ResultEntry>> i = this.resultList.iterator();
-        Element<ResultEntry> entry;
+        final Iterator<Element<URIMetadataNode>> i = this.resultList.iterator();
+        Element<URIMetadataNode> entry;
         while (i.hasNext()) {
             entry = i.next();
             if (urlhash.equals(ASCII.String(entry.getElement().url().hash()))) {
@@ -1810,7 +1811,7 @@ public final class SearchEvent {
         }
     }
 
-    protected void addTopics(final ResultEntry resultEntry) {
+    protected void addTopics(final URIMetadataNode resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         final String[] descrcomps = MultiProtocolURL.splitpattern.split(resultEntry.title()); // words in the description

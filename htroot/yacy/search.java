@@ -52,6 +52,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.gui.Audio;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -77,7 +78,6 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.query.SearchEventType;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ResultEntry;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -221,7 +221,7 @@ public final class search {
         int indexabstractContainercount = 0;
         QueryParams theQuery = null;
         SearchEvent theSearch = null;
-        ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
+        ArrayList<WeakPriorityBlockingQueue.Element<URIMetadataNode>> accu = null;
         if (query.isEmpty() && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
             final Segment indexSegment = sb.index;
@@ -413,7 +413,7 @@ public final class search {
             final long timer = System.currentTimeMillis();
             final StringBuilder links = new StringBuilder(6000);
             String resource = null;
-            WeakPriorityBlockingQueue.Element<ResultEntry> entry;
+            WeakPriorityBlockingQueue.Element<URIMetadataNode> entry;
             for (int i = 0; i < accu.size(); i++) {
                 entry = accu.get(i);
                 resource = entry.getElement().resource();
