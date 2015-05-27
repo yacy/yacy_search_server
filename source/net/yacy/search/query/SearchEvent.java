@@ -1630,7 +1630,7 @@ public final class SearchEvent {
             this.sourceUrl = sourceUrl;
             this.imageUrl = imageUrl;
             this.mimetype = mimetype;
-            this.imagetext = imagetext;
+            this.imagetext = imagetext.isEmpty() ? imageUrl.getFileName() : imagetext;
             this.width = width;
             this.height = height;
             this.fileSize = fileSize;

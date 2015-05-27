@@ -49,7 +49,7 @@ focusTitle : 'Click to bring to front',
 allowMultipleInstances: true,
 numberOfImagesToPreload : 5,
 captionSlideSpeed : 1, // set to 0 to disable slide in effect
-padToMinWidth : false, // pad the popup width to make room for wide caption
+padToMinWidth : true, // pad the popup width to make room for wide caption
 outlineWhileAnimating : 2, // 0 = never, 1 = always, 2 = HTML only 
 outlineStartOffset : 3, // ends at 10
 fullExpandTitle : 'Expand to actual size',
