@@ -158,9 +158,9 @@ public class CrawlProfileEditor_p {
                 prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type", attribute.type);
                 if (attribute.type == CrawlProfile.CrawlAttribute.BOOLEAN) {
                     prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_checked",
-                            Boolean.parseBoolean(val) ? "1" : "0");
+                            val == null ? "0" : Boolean.parseBoolean(val) ? "1" : "0");
                 } else {
-                    prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_value", val);
+                    prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_value", val == null ? "" : val);
                 }
                 count++;
             }
