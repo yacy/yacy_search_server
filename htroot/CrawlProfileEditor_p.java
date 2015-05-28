@@ -24,9 +24,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -45,50 +42,6 @@ public class CrawlProfileEditor_p {
     private final static String CRAWL_PROFILE_PREFIX = "crawlProfiles_";
     private static final String EDIT_ENTRIES_PREFIX = "edit_entries_";
 
-    public static class eentry {
-        public static final int BOOLEAN = 0;
-        public static final int INTEGER = 1;
-        public static final int STRING = 2;
-
-        public final String name;
-        public final String label;
-        public final boolean readonly;
-        public final int type;
-
-        public eentry(final String name, final String label, final boolean readonly, final int type) {
-            this.name = name;
-            this.label = label;
-            this.readonly = readonly;
-            this.type = type;
-        }
-    }
-
-    private static final List <eentry> labels = new ArrayList<eentry>();
-    static {
-        labels.add(new eentry(CrawlProfile.NAME,                          "Name",                                  true,  eentry.STRING));
-        labels.add(new eentry(CrawlProfile.COLLECTIONS,                   "Collections (comma-separated list)",    false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTMATCH,         "URL Must-Match Filter",                 false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTNOTMATCH,      "URL Must-Not-Match Filter",             false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_IP_MUSTMATCH,          "IP Must-Match Filter",                  false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_IP_MUSTNOTMATCH,       "IP Must-Not-Match Filter",              false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_COUNTRY_MUSTMATCH,     "Country Must-Match Filter",             false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_URL_NODEPTHLIMITMATCH, "URL No-Depth-Limit Must-Match Filter",  false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.INDEXING_URL_MUSTMATCH,        "Indexing URL Must-Match Filter",        false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.INDEXING_URL_MUSTNOTMATCH,     "Indexing URL Must-Not-Match Filter",    false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.INDEXING_CONTENT_MUSTMATCH,    "Indexing Content Must-Match Filter",    false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.INDEXING_CONTENT_MUSTNOTMATCH, "Indexing Content Must-Not-Match Filter",false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CACHE_STRAGEGY,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)",  false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
-        labels.add(new eentry(CrawlProfile.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
-        labels.add(new eentry(CrawlProfile.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));
-        labels.add(new eentry(CrawlProfile.CRAWLING_Q,          "CrawlingQ / '?'-URLs",  false, eentry.BOOLEAN));
-        labels.add(new eentry(CrawlProfile.INDEX_TEXT,          "Index Text",            false, eentry.BOOLEAN));
-        labels.add(new eentry(CrawlProfile.INDEX_MEDIA,         "Index Media",           false, eentry.BOOLEAN));
-        labels.add(new eentry(CrawlProfile.STORE_HTCACHE,       "Store in HTCache",      false, eentry.BOOLEAN));
-        labels.add(new eentry(CrawlProfile.REMOTE_INDEXING,     "Remote Indexing",       false, eentry.BOOLEAN));
-        labels.add(new eentry(CrawlProfile.DIRECT_DOC_BY_URL,   "Put all linked urls into index without parsing", false, eentry.BOOLEAN));
-    }
-    
     public static serverObjects respond(
             @SuppressWarnings("unused") final RequestHeader header,
             final serverObjects post,
@@ -148,14 +101,11 @@ public class CrawlProfileEditor_p {
         if ((post != null) && (selentry != null)) {
             if (post.containsKey("submit")) {
                 try {
-                    final Iterator<eentry> lit = labels.iterator();
-                    eentry tee;
-                    while (lit.hasNext()) {
-                        tee = lit.next();
-                        final String cval = selentry.get(tee.name);
-                        final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
+                    for (CrawlProfile.CrawlAttribute attribute: CrawlProfile.CrawlAttribute.values()) {
+                        final String cval = selentry.get(attribute.key);
+                        final String val = (attribute.type == CrawlProfile.CrawlAttribute.BOOLEAN) ? Boolean.toString(post.containsKey(attribute.key)) : post.get(attribute.key, cval);
                         if (!cval.equals(val)) {
-                            selentry.put(tee.name, val);
+                            selentry.put(attribute.key, val);
                             sb.crawler.putActive(selentry.handle().getBytes(), selentry);
                         }
                     }
@@ -199,16 +149,14 @@ public class CrawlProfileEditor_p {
             prop.put("edit", "1");
             prop.put("edit_name", selentry.collectionName());
             prop.put("edit_handle", selentry.handle());
-            final Iterator<eentry> lit = labels.iterator();
             count = 0;
-            while (lit.hasNext()) {
-                final eentry ee = lit.next();
-                final String val = selentry.get(ee.name);
-                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly", ee.readonly ? "1" : "0");
-                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_name", ee.name);
-                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_label", ee.label);
-                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type", ee.type);
-                if (ee.type == eentry.BOOLEAN) {
+            for (CrawlProfile.CrawlAttribute attribute: CrawlProfile.CrawlAttribute.values()) {
+                final String val = selentry.get(attribute.key);
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly", attribute.readonly ? "1" : "0");
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_name", attribute.key);
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_label", attribute.label);
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type", attribute.type);
+                if (attribute.type == CrawlProfile.CrawlAttribute.BOOLEAN) {
                     prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_checked",
                             Boolean.parseBoolean(val) ? "1" : "0");
                 } else {
