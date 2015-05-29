@@ -256,13 +256,15 @@ public class IndexControlURLs_p {
             if (fname.endsWith("text")) format = 0;
             if (fname.endsWith("html")) format = 1;
             if (fname.endsWith("rss")) format = 2;
+            if (fname.endsWith("solr")) format = 3;
 
             // extend export file name
             String s = post.get("exportfile", "");
             if (s.indexOf('.',0) < 0) {
                 if (format == 0) s = s + ".txt";
                 if (format == 1) s = s + ".html";
-                if (format == 2) s = s + ".xml";
+                if (format == 2 ) s = s + "_rss.xml";
+                if (format == 3) s = s + "_full.xml";
             }
             final File f = new File(s);
             f.getParentFile().mkdirs();

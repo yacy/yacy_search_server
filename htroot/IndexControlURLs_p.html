@@ -118,7 +118,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Statistics about top-domains in URL Database</legend>
       <dl>
-        <dt class="TableCellDark">&nbsp;</dt>
+        <dt>&nbsp;</dt>
         <dd>Show top <input type="text" name="lines" value="#[lines]#" size="6" maxlength="6" /> domains from all URLs.
             <input type="submit" name="statistics" value="Generate Statistics" class="btn btn-primary" style="width:240px;"/>
         </dd>
@@ -157,7 +157,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Dump and Restore of Solr Index</legend>
       <dl>
-        <dt class="TableCellDark">&nbsp;</dt>
+        <dt>&nbsp;</dt>
         <dd><input type="submit" name="indexdump" value="Create Dump" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
@@ -165,7 +165,7 @@ function updatepage(str) {
         <dt class="TableCellDark">Dump File</dt>
         <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" />
         </dd>
-        <dt class="TableCellDark">&nbsp;</dt>
+        <dt>&nbsp;</dt>
         <dd><input type="submit" name="indexrestore" value="Restore Dump" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
@@ -174,7 +174,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Optimize Solr</legend>
       <dl>
-        <dt class="TableCellDark">&nbsp;</dt>
+        <dt>&nbsp;</dt>
         <dd>merge to max. <input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> segments
         <input type="submit" name="optimizesolr" value="Optimize Solr" class="btn btn-primary" style="width:240px;"/>
         </dd>
@@ -184,7 +184,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Reboot Solr Core</legend>
       <dl>
-        <dt class="TableCellDark">&nbsp;</dt>
+        <dt>&nbsp;</dt>
         <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
@@ -206,16 +206,19 @@ function updatepage(str) {
         <dd><input type="text" name="exportquery" value="*:*" size="20" maxlength="250" />
         </dd>
         <dt class="TableCellDark">Export Format</dt>
-        <dd>Only Domain:
-            <input type="radio" name="format" value="dom-text" />Plain Text List (domains only)&nbsp;&nbsp;
-            <input type="radio" name="format" value="dom-html" checked="checked" />HTML (domains as URLs, no title)<br />
-            Full URL List:
-            <input type="radio" name="format" value="url-text" />Plain Text List (URLs only)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="radio" name="format" value="url-html" />HTML (URLs with title)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="radio" name="format" value="url-rss" />XML (RSS)
-            <br />
-        </dd>
-        <dt class="TableCellDark">&nbsp;</dt>
+        <dd>
+        <dl>
+        <dt>Only Domain:</dt>
+        <dd><input type="radio" name="format" value="dom-text" /> Plain Text List (domains only)<br />
+            <input type="radio" name="format" value="dom-html" /> HTML (domains as URLs, no title)</dd>
+        <dt>Full URL List:</dt>
+        <dd><input type="radio" name="format" value="url-text" /> Plain Text List (URLs only)<br />
+            <input type="radio" name="format" value="url-html" /> HTML (URLs with title)</dd>
+        <dt>Full Data Records:</dt>
+        <dd><input type="radio" name="format" value="full-rss" /> XML (RSS)<br />
+            <input type="radio" name="format" value="full-solr" checked="checked" /> XML (Rich and full Solr data using Solr Schema, can be imported with DATA/SURROGATE/in/)</dd>
+		</dl></dd>
+        <dt>&nbsp;</dt>
         <dd><input type="submit" name="lurlexport" value="Export URLs" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>

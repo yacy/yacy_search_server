@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -55,11 +56,13 @@ import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.InstanceMirror;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
+import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
+import net.yacy.cora.util.CRIgnoreWriter;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -75,6 +78,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrInfoMBean;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.lucene.util.Version;
 
 public final class Fulltext {
@@ -666,8 +670,11 @@ public final class Fulltext {
                     pw.println("<description></description>");
                     pw.println("<link>http://yacy.net</link>");
                 }
-                
-               
+                if (this.format == 3) {
+                    pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                    pw.println("<response>");
+                    pw.println("<result>");
+                }
                 if (this.dom) {
                     Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
                     ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
@@ -678,40 +685,55 @@ public final class Fulltext {
                         this.count++;
                     }
                 } else {
-                    BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true, 
-                            CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
-                            CollectionSchema.author.getSolrFieldName(), CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
-                    SolrDocument doc;
-                    String url, hash, title, author, description;
-                    Integer size;
-                    Date date;
-                    while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                        hash = getStringFrom(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                        url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
-                        title = getStringFrom(doc.getFieldValue(CollectionSchema.title.getSolrFieldName()));
-                        author = getStringFrom(doc.getFieldValue(CollectionSchema.author.getSolrFieldName()));
-                        description = getStringFrom(doc.getFieldValue(CollectionSchema.description_txt.getSolrFieldName()));
-                        size = (Integer) doc.getFieldValue(CollectionSchema.size_i.getSolrFieldName());
-                        date = (Date) doc.getFieldValue(CollectionSchema.last_modified.getSolrFieldName());
-                        if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
-                        if (this.format == 0) {
-                            pw.println(url);
+                    if (this.format < 3) {
+                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true, 
+                                CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
+                                CollectionSchema.author.getSolrFieldName(), CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
+                        SolrDocument doc;
+                        String url, hash, title, author, description;
+                        Integer size;
+                        Date date;
+                        while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                            hash = getStringFrom(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                            url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                            title = getStringFrom(doc.getFieldValue(CollectionSchema.title.getSolrFieldName()));
+                            author = getStringFrom(doc.getFieldValue(CollectionSchema.author.getSolrFieldName()));
+                            description = getStringFrom(doc.getFieldValue(CollectionSchema.description_txt.getSolrFieldName()));
+                            size = (Integer) doc.getFieldValue(CollectionSchema.size_i.getSolrFieldName());
+                            date = (Date) doc.getFieldValue(CollectionSchema.last_modified.getSolrFieldName());
+                            if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
+                            if (this.format == 0) {
+                                pw.println(url);
+                            }
+                            if (this.format == 1) {
+                                if (title != null) pw.println("<a href=\"" + MultiProtocolURL.escape(url) + "\">" + CharacterCoding.unicode2xml(title, true) + "</a>");
+                            }
+                            if (this.format == 2) {
+                                pw.println("<item>");
+                                if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml(title, true) + "</title>");
+                                pw.println("<link>" + MultiProtocolURL.escape(url) + "</link>");
+                                if (author != null && !author.isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(author, true) + "</author>");
+                                if (description != null && !description.isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(description, true) + "</description>");
+                                if (date != null) pw.println("<pubDate>" + HeaderFramework.formatRFC1123(date) + "</pubDate>");
+                                if (size != null) pw.println("<yacy:size>" + size.intValue() + "</yacy:size>");
+                                pw.println("<guid isPermaLink=\"false\">" + hash + "</guid>");
+                                pw.println("</item>");
+                            }
+                            this.count++;
                         }
-                        if (this.format == 1) {
-                            if (title != null) pw.println("<a href=\"" + MultiProtocolURL.escape(url) + "\">" + CharacterCoding.unicode2xml(title, true) + "</a>");
+                    } else {
+                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
+                        SolrDocument doc;
+                        while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                            String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                            if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
+                            CRIgnoreWriter sw = new CRIgnoreWriter();
+                            EnhancedXMLResponseWriter.writeDoc(sw, doc);
+                            sw.close();
+                            String d = sw.toString();
+                            pw.println(d);
+                            this.count++;
                         }
-                        if (this.format == 2) {
-                            pw.println("<item>");
-                            if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml(title, true) + "</title>");
-                            pw.println("<link>" + MultiProtocolURL.escape(url) + "</link>");
-                            if (author != null && !author.isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(author, true) + "</author>");
-                            if (description != null && !description.isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(description, true) + "</description>");
-                            if (date != null) pw.println("<pubDate>" + HeaderFramework.formatRFC1123(date) + "</pubDate>");
-                            if (size != null) pw.println("<yacy:size>" + size.intValue() + "</yacy:size>");
-                            pw.println("<guid isPermaLink=\"false\">" + hash + "</guid>");
-                            pw.println("</item>");
-                        }
-                        this.count++;
                     }
                 }
                 if (this.format == 1) {
@@ -720,6 +742,10 @@ public final class Fulltext {
                 if (this.format == 2) {
                     pw.println("</channel>");
                     pw.println("</rss>");
+                }
+                if (this.format == 3) {
+                    pw.println("</result>");
+                    pw.println("</response>");
                 }
                 pw.close();
             } catch (final IOException e) {
