@@ -26,6 +26,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
@@ -40,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -655,7 +657,9 @@ public final class Fulltext {
             try {
                 final File parentf = this.f.getParentFile();
                 if (parentf != null) parentf.mkdirs();
-                final PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(this.f)));
+                OutputStream os = new FileOutputStream(this.format == 3 ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
+                if (this.format == 3) os = new GZIPOutputStream(os);
+                final PrintWriter pw = new PrintWriter(new BufferedOutputStream(os));
                 if (this.format == 1) {
                     pw.println("<html><head></head><body>");
                 }
