@@ -603,6 +603,7 @@ public class HeapReader {
     public void close(boolean writeIDX) {
         if (this.index == null) return;
         synchronized (this.index) {
+            try {
             if (this.file != null)
     			try {
     				this.file.close();
@@ -654,6 +655,7 @@ public class HeapReader {
             if (this.index != null) this.index.close();
             this.index = null;
             this.closeDate = new Date();
+            } catch (Throwable e) {ConcurrentLog.logException(e);}
             log.info("close HeapFile " + this.heapFile.getName() + "; trace: " + ConcurrentLog.stackTrace());
         }
     }
