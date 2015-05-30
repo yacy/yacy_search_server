@@ -155,7 +155,6 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.Parser.Failure;
-import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.audioTagParser;
@@ -1984,46 +1983,15 @@ public final class Switchboard extends serverSwitch {
     }
 
     public void processSurrogate(final InputStream is, final String name) throws IOException {
-        final SurrogateReader reader = new SurrogateReader(is, 100);
+        final SurrogateReader reader = new SurrogateReader(is, 100, this.crawlStacker, this.index.fulltext().getDefaultConfiguration());
         final Thread readerThread = new Thread(reader, name);
         readerThread.start();
-        DCEntry surrogate;
-        Response response;
-        while ( (surrogate = reader.take()) != DCEntry.poison ) {
+        SolrInputDocument surrogate;
+        while ((surrogate = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
             // check if url is in accepted domain
             assert surrogate != null;
             assert this.crawlStacker != null;
-            final String urlRejectReason =
-                this.crawlStacker.urlInAcceptedDomain(surrogate.getIdentifier(true));
-            if ( urlRejectReason != null ) {
-                this.log.warn("Rejected URL '"
-                    + surrogate.getIdentifier(true)
-                    + "': "
-                    + urlRejectReason);
-                continue;
-            }
-
-            if (surrogate.get("text_t") == null) {
-                // create a queue entry
-                final Document document = surrogate.document();
-                final Request request =
-                    new Request(
-                        ASCII.getBytes(this.peers.mySeed().hash),
-                        surrogate.getIdentifier(true),
-                        null,
-                        "",
-                        surrogate.getDate(),
-                        this.crawler.defaultSurrogateProfile.handle(),
-                        0,
-                        this.crawler.defaultSurrogateProfile.timezoneOffset());
-                response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false, null);
-                final IndexingQueueEntry queueEntry =
-                    new IndexingQueueEntry(response, new Document[] {document}, null);
-    
-                this.indexingCondensementProcessor.enQueue(queueEntry);
-            } else {
-                this.index.putDocument(this.index.fulltext().getDefaultConfiguration().toSolrInputDocument(surrogate));
-            }
+            this.index.putDocument(surrogate);
             if (shallTerminate()) break;
         }
     }

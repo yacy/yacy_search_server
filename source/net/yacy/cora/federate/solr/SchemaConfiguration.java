@@ -32,7 +32,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.MultiMapSolrParams;
-import org.apache.solr.common.util.NamedList;
 
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.util.ConcurrentLog;

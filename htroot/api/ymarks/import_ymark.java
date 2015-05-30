@@ -30,7 +30,6 @@ import net.yacy.data.ymark.YMarkTables;
 import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.data.ymark.YMarkXBELImporter;
 import net.yacy.document.Parser.Failure;
-import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.search.Switchboard;
@@ -38,8 +37,6 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 import org.xml.sax.SAXException;
-
-
 
 public class import_ymark {
 
@@ -92,9 +89,10 @@ public class import_ymark {
         		final byte[] bytes = UTF8.getBytes(post.get("bmkfile$file"));
         		stream = new ByteArrayInputStream(bytes);
         		if(post.get("importer").equals("surro") && stream != null) {
+        		    /**
                     SurrogateReader surrogateReader;
                     try {
-                        surrogateReader = new SurrogateReader(stream, queueSize);
+                        surrogateReader = new SurrogateReader(stream, queueSize, sb.crawlStacker, sb.index.fulltext().getDefaultConfiguration());
                     } catch (final IOException e) {
                         //TODO: display an error message
                         ConcurrentLog.logException(e);
@@ -106,6 +104,7 @@ public class import_ymark {
                         putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                     }
                     prop.put("status", "1");
+                    */
                 } else {
                     MonitoredReader reader = null;
                     try {
