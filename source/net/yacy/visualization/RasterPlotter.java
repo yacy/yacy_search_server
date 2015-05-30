@@ -507,7 +507,7 @@ public class RasterPlotter {
     }
 
     /**
-     * draw a connecting line between two points o a circle
+     * draw a connecting line between two points on a circle
      * @param cx center of circle, x
      * @param cy center of circle, y
      * @param arcRadius radius of circle
@@ -526,7 +526,7 @@ public class RasterPlotter {
     public void arcConnect(final int cx, final int cy, final int arcRadius, final double angle1, final double angle2, final boolean in,
             final Long colorLine, final int intensityLine,
             final Long colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled,
-            final String message, final Long colorMessage) {
+            final String message, final Long colorMessage, final int intensityMessage) {
         final double a1 = PI180 * angle1;
         final double a2 = PI180 * angle2;
         // find positions of points
@@ -552,7 +552,7 @@ public class RasterPlotter {
             if (ym < cy) ym += 6; else ym -=6;
             if (xm < cx) xm += 6; else xm -=6;
             if (xm > cx) xm -= 6 * message.length();
-            PrintTool.print(this, xm, ym, 0, message.toUpperCase(), -1);
+            PrintTool.print(this, xm, ym, 0, message.toUpperCase(), -1, intensityMessage);
         }
     }
 
@@ -852,16 +852,16 @@ public class RasterPlotter {
 
     public static void demoPaint(final RasterPlotter m) {
         m.setColor(GREY);
-        m.line(0,  70, 100,  70, 100); PrintTool.print(m, 0,  65, 0, "Grey", -1);
+        m.line(0,  70, 100,  70, 100); PrintTool.print(m, 0,  65, 0, "Grey", -1, 100);
         m.line(65, 0,   65, 300, 100);
         m.setColor(RED);
-        m.line(0,  90, 100,  90, 100); PrintTool.print(m, 0,  85, 0, "Red", -1);
+        m.line(0,  90, 100,  90, 100); PrintTool.print(m, 0,  85, 0, "Red", -1, 100);
         m.line(70, 0,   70, 300, 100);
         m.setColor(GREEN);
-        m.line(0, 110, 100, 110, 100); PrintTool.print(m, 0, 105, 0, "Green", -1);
+        m.line(0, 110, 100, 110, 100); PrintTool.print(m, 0, 105, 0, "Green", -1, 100);
         m.line(75, 0,   75, 300, 100);
         m.setColor(BLUE);
-        m.line(0, 130, 100, 130, 100); PrintTool.print(m, 0, 125, 0, "Blue", -1);
+        m.line(0, 130, 100, 130, 100); PrintTool.print(m, 0, 125, 0, "Blue", -1, 100);
         m.line(80, 0,   80, 300, 100);
     }
 

@@ -100,13 +100,13 @@ public class HexGridPlotter extends RasterPlotter {
         CircleTool.circle(this, projectionX(x, y), projectionY(y), radius, fromArc, toArc);
     }
 
-    public void gridPrint(final int x, final int y, final int radius, final String messageHigh, final String messageLow, final int align) {
-        if (messageHigh != null && messageHigh.length() > 0) PrintTool.print(this, projectionX(x, y) - align * radius, projectionY(y) - (cellwidth2 >> 2) - ((align == 0) ? radius : 0), 0, messageHigh, align);
-        if (messageLow != null && messageLow.length() > 0) PrintTool.print(this, projectionX(x, y) - align * radius, projectionY(y) + (cellwidth2 >> 2) + 4 + ((align == 0) ? radius : 0), 0, messageLow, align);
+    public void gridPrint(final int x, final int y, final int radius, final String messageHigh, final String messageLow, final int align, int intensity) {
+        if (messageHigh != null && messageHigh.length() > 0) PrintTool.print(this, projectionX(x, y) - align * radius, projectionY(y) - (cellwidth2 >> 2) - ((align == 0) ? radius : 0), 0, messageHigh, align, intensity);
+        if (messageLow != null && messageLow.length() > 0) PrintTool.print(this, projectionX(x, y) - align * radius, projectionY(y) + (cellwidth2 >> 2) + 4 + ((align == 0) ? radius : 0), 0, messageLow, align, intensity);
     }
     
-    public void gridPrint315(final int x, final int y, final int radius, final String message315) {
-        if (message315 != null && message315.length() > 0) PrintTool.print(this, projectionX(x, y) + (radius >> 1), projectionY(y) + (cellwidth2 >> 2) + 4, 315, message315, -1);
+    public void gridPrint315(final int x, final int y, final int radius, final String message315, int intensity) {
+        if (message315 != null && message315.length() > 0) PrintTool.print(this, projectionX(x, y) + (radius >> 1), projectionY(y) + (cellwidth2 >> 2) + 4, 315, message315, -1, intensity);
     }
     
     public void gridLine(
@@ -150,37 +150,37 @@ public class HexGridPlotter extends RasterPlotter {
         picture.drawGrid(gridcolor);
         long dotcolori = Long.parseLong(dotcolor, 16);
         picture.setColor(dotcolori);
-        picture.gridDot(0, 0, 5, true, 100); picture.gridPrint(0, 0, 5, "", "0,0", -1);
+        picture.gridDot(0, 0, 5, true, 100); picture.gridPrint(0, 0, 5, "", "0,0", -1, 100);
         for (int i = 1; i < picture.gridHeight() -1; i++) {
             picture.setColor(dotcolori);picture.gridDot(0, i, 3, true, 100);
-            picture.setColor(dotcolori);picture.gridPrint(0, i, 3, "", "0," + i, -1);
+            picture.setColor(dotcolori);picture.gridPrint(0, i, 3, "", "0," + i, -1, 100);
         }
         for (int i = 1; i < picture.gridWidth() -1; i++) {
             picture.setColor(dotcolori);picture.gridDot(i, 0, 3, true, 100);
-            picture.setColor(dotcolori);picture.gridPrint315(i, 0, 3, i + ",0");
+            picture.setColor(dotcolori);picture.gridPrint315(i, 0, 3, i + ",0", 100);
         }
         picture.setColor(dotcolori);
-        picture.gridDot(0, picture.gheight - 1, 5, true, 100); picture.gridPrint(0, picture.gheight - 1, 5, "0, grid.gheight - 1", "", -1);
-        picture.gridDot(picture.gwidth - 1, 0, 5, true, 100); picture.gridPrint(picture.gwidth - 1, 0, 5, "", "grid.gwidth - 1, 0", -1);
-        picture.gridDot(picture.gwidth - 1, picture.gheight - 1, 5, true, 100); picture.gridPrint(picture.gwidth - 1, picture.gheight - 1, 5, "grid.gwidth - 1, grid.gheight - 1", "", 1);
+        picture.gridDot(0, picture.gheight - 1, 5, true, 100); picture.gridPrint(0, picture.gheight - 1, 5, "0, grid.gheight - 1", "", -1, 100);
+        picture.gridDot(picture.gwidth - 1, 0, 5, true, 100); picture.gridPrint(picture.gwidth - 1, 0, 5, "", "grid.gwidth - 1, 0", -1, 100);
+        picture.gridDot(picture.gwidth - 1, picture.gheight - 1, 5, true, 100); picture.gridPrint(picture.gwidth - 1, picture.gheight - 1, 5, "grid.gwidth - 1, grid.gheight - 1", "", 1, 100);
         
         
         picture.gridDot(3, 3, 20, 0, 360);
         
         picture.gridDot(7, 5, 5, 0, 360);
-        picture.gridPrint(7, 5, 8, "COMMUNICATION TEST", "TRANSFER 64KBIT", -1);
+        picture.gridPrint(7, 5, 8, "COMMUNICATION TEST", "TRANSFER 64KBIT", -1, 100);
         picture.gridDot(14, 8, 5, true, 100);
         picture.gridLine(7, 5, 14, 8);
-        picture.gridPrint315(14, 8, 8, "NULL");
+        picture.gridPrint315(14, 8, 8, "NULL", 100);
         
         picture.gridDot(4, 28, 5, 0, 360);
-        picture.gridPrint(4, 28, 8, "REVERSE", "ESREVER", -1);
+        picture.gridPrint(4, 28, 8, "REVERSE", "ESREVER", -1, 100);
         picture.gridLine(4, 28, 14, 8);
         
         picture.gridDot(picture.gwidth - 1, picture.gheight - 4, 5, 0, 360);
-        picture.gridPrint(picture.gwidth - 1, picture.gheight - 4, 5, "INTERNET", "END", 1);
+        picture.gridPrint(picture.gwidth - 1, picture.gheight - 4, 5, "INTERNET", "END", 1, 100);
         picture.gridDot(picture.gwidth / 2, picture.gheight / 2, 5, 0, 360);
-        picture.gridPrint(picture.gwidth / 2, picture.gheight / 2, 5, "HOME PEER", "ANON_23", 0);
+        picture.gridPrint(picture.gwidth / 2, picture.gheight / 2, 5, "HOME PEER", "ANON_23", 0, 100);
         //grid.gridLine(grid.gwidth - 2, grid.gheight - 2, grid.gwidth / 2, grid.gheight / 2);
         picture.gridLine(picture.gwidth / 2, picture.gheight / 2, picture.gwidth - 1, picture.gheight - 4);
         return picture;

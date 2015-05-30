@@ -57,7 +57,7 @@ public class osm {
          * set the lowercase letters do not look good, so we use uppercase only.
          * The (C) symbol is not available in our font, so we use the letters (C) instead.
          */
-        PrintTool.print(map, map.getWidth() - 6, map.getHeight() - 6, 0, "(C) OPENSTREETMAP CONTRIBUTORS", 1);
+        PrintTool.print(map, map.getWidth() - 6, map.getHeight() - 6, 0, "(C) OPENSTREETMAP CONTRIBUTORS", 1, 80);
         return new EncodedImage(map, header.get("EXT", null), true);
    }
 

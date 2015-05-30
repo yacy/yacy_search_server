@@ -36,8 +36,8 @@ public class imagetest {
 
         final RasterPlotter img = new RasterPlotter(800, 600, RasterPlotter.DrawMode.MODE_SUB, "FFFFFF");
         img.setColor(RasterPlotter.GREY);
-        for (int y = 0; y < 600; y = y + 50) PrintTool.print(img, 0, 6 + y, 0, Integer.toString(y), -1);
-        for (int x = 0; x < 800; x = x + 50) PrintTool.print(img, x, 6    , 0, Integer.toString(x), -1);
+        for (int y = 0; y < 600; y = y + 50) PrintTool.print(img, 0, 6 + y, 0, Integer.toString(y), -1, 100);
+        for (int x = 0; x < 800; x = x + 50) PrintTool.print(img, x, 6    , 0, Integer.toString(x), -1, 100);
         img.setColor(RasterPlotter.RED);
         img.dot(550, 110, 90, true, 100);
         img.setColor(RasterPlotter.GREEN);
@@ -50,9 +50,9 @@ public class imagetest {
         img.arc(220, 110, 50, 90, 30, 110);
         img.arc(210, 120, 50, 90, 30, 110);
         img.setColor(RasterPlotter.GREY);
-        PrintTool.print(img, 50, 110, 0, "BROADCAST MESSAGE #772: NODE %882 GREY abcefghijklmnopqrstuvwxyz", -1);
+        PrintTool.print(img, 50, 110, 0, "BROADCAST MESSAGE #772: NODE %882 GREY abcefghijklmnopqrstuvwxyz", -1, 100);
         img.setColor(RasterPlotter.GREEN);
-        PrintTool.print(img, 50, 120, 0, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", -1);
+        PrintTool.print(img, 50, 120, 0, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", -1, 100);
         for (long i = 0; i < 256; i++) {
             img.setColor(i);
             img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true, 100);
@@ -79,7 +79,7 @@ public class imagetest {
         for (byte c = (byte) 'A'; c <= 'Z'; c++) {
             angle = (c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');
             img.arcLine(550, 400, 81, 100, angle, true, null, null, -1, -1, -1, false);
-            PrintTool.arcPrint(img, 550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
+            PrintTool.arcPrint(img, 550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c, 100);
         }
         return img;
 

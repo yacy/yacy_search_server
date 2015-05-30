@@ -62,11 +62,11 @@ public class ChartPlotter extends RasterPlotter {
         //this.foregroundColor = foregroundColor;
         if (name != null) {
             if (foregroundColor != null) this.setColor(foregroundColor);
-            PrintTool.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
+            PrintTool.print(this, width / 2 - name.length() * 3, 6, 0, name, -1, 100);
         }
         if (subline != null) {
             if (lightColor != null) this.setColor(lightColor);
-            PrintTool.print(this, width / 2 - subline.length() * 3, 14, 0, subline, -1);
+            PrintTool.print(this, width / 2 - subline.length() * 3, 14, 0, subline, -1, 100);
         }
     }
 
@@ -101,7 +101,7 @@ public class ChartPlotter extends RasterPlotter {
         final int y = (coord_y - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
         if (dotsize == 1) plot(this.leftborder + x, this.height - this.bottomborder - y, 100);
                       else dot(this.leftborder + x, this.height - this.bottomborder - y, dotsize, true, 100);
-        if (anot != null) PrintTool.print(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? (anot.length() * 6 + x > this.width ? 1 : -1) : ((anotAngle == 315) ? 1 : 0));
+        if (anot != null) PrintTool.print(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? (anot.length() * 6 + x > this.width ? 1 : -1) : ((anotAngle == 315) ? 1 : 0), 100);
     }
 
     public void chartLine(final int dimension_x, final int dimension_y, final float coord_x1, final int coord_y1, final float coord_x2, final int coord_y2) {
@@ -133,12 +133,12 @@ public class ChartPlotter extends RasterPlotter {
             }
             setColor(colorNaming);
             line(x, y - 3, x, y + 3, 100);
-            PrintTool.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1);
+            PrintTool.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1, 80);
             x += pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        PrintTool.print(this, this.width - this.rightborder, (top) ? y - 9 : y + 15, 0, name, 1);
+        PrintTool.print(this, this.width - this.rightborder, (top) ? y - 9 : y + 15, 0, name, 1, 80);
         line(this.leftborder - 4, y, this.width - this.rightborder + 4, y, 100);
     }
 
@@ -170,12 +170,12 @@ public class ChartPlotter extends RasterPlotter {
             line(x - 3, y, x + 3, y, 100);
             s1 = (s >= 1000000 && s % 10000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
-            PrintTool.print(this, (left) ? this.leftborder - 4 : this.width - this.rightborder + 4, y, 0, s1, (left) ? 1 : -1);
+            PrintTool.print(this, (left) ? this.leftborder - 4 : this.width - this.rightborder + 4, y, 0, s1, (left) ? 1 : -1, 80);
             y -= pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        PrintTool.print(this, (left) ? Math.max(6, x - s1max * 6 - 6) : x + s1max * 6 + 9, this.height - this.bottomborder, 90, name, -1);
+        PrintTool.print(this, (left) ? Math.max(6, x - s1max * 6 - 6) : x + s1max * 6 + 9, this.height - this.bottomborder, 90, name, -1, 80);
         line(x, this.topborder - 4, x, this.height - this.bottomborder + 4, 100);
     }
 

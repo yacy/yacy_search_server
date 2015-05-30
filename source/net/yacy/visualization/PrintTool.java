@@ -39,20 +39,23 @@ public class PrintTool {
     	0x0000000EC2E0ECL,0x0000000EC2E030L,0x0000000FF2E3FCL,0x000F0B8B80B80FL,0x00300C0300C030L,0x03C0B80B8B83C0L,0x0000B83BB0B800L,0x03FFC0F03C0FFFL
     };
 
-    private static void print(final RasterPlotter matrix, int x, int y, final int angle, final char letter) {
+    private static void print(final RasterPlotter matrix, int x, int y, final int angle, final char letter, int intensity) {
         final int index = letter - 0x20;
         if (index >= font.length) return;
         long character = font[index];
         long row;
         long c;
+        int i2 = intensity / 2;
+        int i3 = intensity / 3;
+        int i5 = intensity / 5;
         for (int i = 0; i < 5; i++) {
             row = character & 0x3FFL;
             character = character >> 10;
             if (angle == 0) {
                 for (int j = 0; j < 5; j++) {
                 	c = row & 3L;
-                    if (c == 3) matrix.plot(x + 5 - j, y, 100);
-                    else if (c == 2) matrix.plot(x + 5 - j, y, 36);
+                    if (c == 3) matrix.plot(x + 5 - j, y, intensity);
+                    else if (c == 2) matrix.plot(x + 5 - j, y, i3);
                     row = row >> 2;
                 }
                 y--;
@@ -60,8 +63,8 @@ public class PrintTool {
             if (angle == 90) {
                 for (int j = 0; j < 5; j++) {
                 	c = row & 3L;
-                    if (c == 3) matrix.plot(x, y - 5 + j, 100);
-                    else if (c == 2) matrix.plot(x, y - 5 + j, 36);
+                    if (c == 3) matrix.plot(x, y - 5 + j, intensity);
+                    else if (c == 2) matrix.plot(x, y - 5 + j, i3);
                     row = row >> 2;
                 }
                 x--;
@@ -69,8 +72,8 @@ public class PrintTool {
             if (angle == 315) {
                 for (int j = 0; j < 5; j++) {
                     c = row & 3L;
-                    if (c == 3) { matrix.plot(x + 5 - j, y + 5 - j, 100); matrix.plot(x + 6 - j, y + 5 - j, 50); matrix.plot(x + 5 - j, y + 6 - j, 50); }
-                    else if (c == 2) { matrix.plot(x + 5 - j, y + 5 - j, 36);  matrix.plot(x + 6 - j, y + 5 - j, 18); matrix.plot(x + 5 - j, y + 6 - j, 18); }
+                    if (c == 3) { matrix.plot(x + 5 - j, y + 5 - j, intensity); matrix.plot(x + 6 - j, y + 5 - j, i2); matrix.plot(x + 5 - j, y + 6 - j, i2); }
+                    else if (c == 2) { matrix.plot(x + 5 - j, y + 5 - j, i3);  matrix.plot(x + 6 - j, y + 5 - j, i5); matrix.plot(x + 5 - j, y + 6 - j, i5); }
                     row = row >> 2;
                 }
                 x++;
@@ -79,7 +82,7 @@ public class PrintTool {
         }
     }
 
-    public static void print(final RasterPlotter matrix, final int x, final int y, final int angle, final String message, final int align) {
+    public static void print(final RasterPlotter matrix, final int x, final int y, final int angle, final String message, final int align, int intensity) {
         // align = -1 : left
         // align =  1 : right
         // align =  0 : center
@@ -95,7 +98,7 @@ public class PrintTool {
             yy = (align == -1) ? y : (align == 1) ? y - 6 * message.length() : y - 3 * message.length();
         }
         for (int i = 0; i < message.length(); i++) {
-            print(matrix, xx, yy, angle, message.charAt(i));
+            print(matrix, xx, yy, angle, message.charAt(i), intensity);
             if (angle == 0) xx += 6;
             else if (angle == 90) yy -= 6;
             else if (angle == 315) {xx += 6; yy += 6;}
@@ -113,7 +116,7 @@ public class PrintTool {
      * @param angle angle == position of text on a circle in distance of radius
      * @param message the message to be printed
      */
-    public static void arcPrint(final RasterPlotter matrix, final int cx, final int cy, final int radius, final double angle, final String message) {
+    public static void arcPrint(final RasterPlotter matrix, final int cx, final int cy, final int radius, final double angle, final String message, final int intensity) {
         final int x = cx + (int) ((radius + 1) * Math.cos(RasterPlotter.PI180 * angle));
         final int y = cy - (int) ((radius + 1) * Math.sin(RasterPlotter.PI180 * angle));
         int yp = y + 3;
@@ -124,7 +127,7 @@ public class PrintTool {
         int xp = x - 3 * message.length();
         if ((angle > (90 + arcDist)) && (angle < (270 - arcDist))) xp = x - 6 * message.length();
         if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
-        print(matrix, xp, yp, 0, message, -1);
+        print(matrix, xp, yp, 0, message, -1, intensity);
     }
 
 

@@ -108,8 +108,8 @@ public class WebStructurePicture_p {
             // probably no information available
             final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
             graphPicture = new RasterPlotter(width, height, drawMode, color_back);
-            PrintTool.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
-            PrintTool.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
+            PrintTool.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0, 100);
+            PrintTool.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0, 100);
         } else {
             // recursively find domains, up to a specific depth
             GraphPlotter graph = new GraphPlotter();
@@ -141,9 +141,9 @@ public class WebStructurePicture_p {
         }
         // print headline
         graphPicture.setColor(Long.parseLong(color_text, 16));
-        PrintTool.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
-        if (hosts != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1);
-        PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
+        PrintTool.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1, 100);
+        if (hosts != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1, 80);
+        PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1, 80);
 
         return graphPicture;
     }
