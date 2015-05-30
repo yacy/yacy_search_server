@@ -85,6 +85,7 @@ public final class Tray {
     						doubleClickAction();
     					}
     				};
+    				ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
     			    final Image trayIcon = ImageIO.read(new File(iconPath)); // 128x128
                     final Image progressBooting = ImageIO.read(new File(sb.getAppPath().toString() + "/addon/progress_booting.png".replace("/", File.separator))); // 128x28
                     final BufferedImage progress = getProgressImage();
@@ -134,6 +135,7 @@ public final class Tray {
 	            try {Thread.sleep(80);} catch (InterruptedException e) {break;}
 	        }
             try {
+                ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
                 Image trayIcon = ImageIO.read(new File(Tray.this.iconPath));
                 ti.setImage(trayIcon);
                 ti.setToolTip(readyMessage());
@@ -160,6 +162,7 @@ public final class Tray {
 		appIsReady = true;
 		if (useTray()) {
     		try {
+    		    ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
     		    Image trayIcon = ImageIO.read(new File(this.iconPath));
     	        if (ti != null) {
     	            ti.setImage(trayIcon);
@@ -180,6 +183,7 @@ public final class Tray {
         if (useTray()) {
             try {
                 if (ti != null) {
+                    ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
                     Image trayIcon = ImageIO.read(new File(this.iconPath)); // 128x128
                     final Image progressShutdown = ImageIO.read(new File(sb.getAppPath().toString() + "/addon/progress_shutdown.png".replace("/", File.separator))); // 128x28
                     final BufferedImage progress = getProgressImage();
@@ -208,6 +212,7 @@ public final class Tray {
 
     private BufferedImage getProgressImage() throws IOException {
         final String progressPath = sb.getAppPath().toString() + "/addon/progressbar.png".replace("/", File.separator);
+        ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
         Image progress_raw = ImageIO.read(new File(progressPath)); // 149x56
         BufferedImage progress = new BufferedImage(149, 56, BufferedImage.TYPE_INT_ARGB);
         Graphics2D progressg = progress.createGraphics();
