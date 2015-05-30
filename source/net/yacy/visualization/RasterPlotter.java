@@ -1,30 +1,21 @@
-// RasterPlotter.java
-// (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 16.09.2005 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// LICENSE
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-/*
- This Class implements some convenience-methods to support drawing of statistical Data
- It is not intended to replace existing awt-funktions even if it looks so
- This class provides some drawing methods that creates transparency effects that
- are not available in awt.
+/**
+ *  RasterPlotter
+ *  Copyright 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 16.09.2005 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package net.yacy.visualization;
@@ -61,7 +52,12 @@ import javax.swing.JLabel;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 
-
+/**
+ * This Class implements some convenience-methods to support drawing of statistical Data
+ * It is not intended to replace existing awt-funktions even if it looks so
+ * This class provides some drawing methods that creates transparency effects that
+ * are not available in awt.
+ */
 public class RasterPlotter {
 
     public static final ConcurrentLog log = new ConcurrentLog("RasterPlotter");

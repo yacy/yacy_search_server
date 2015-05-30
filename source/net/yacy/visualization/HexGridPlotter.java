@@ -2,10 +2,6 @@
  *  HexGridPlotter
  *  Copyright 2011 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 18.02.2010 at http://yacy.net
- *  
- *  $LastChangedDate$
- *  $LastChangedRevision$
- *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
