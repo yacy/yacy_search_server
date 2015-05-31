@@ -178,12 +178,11 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     
     private boolean isSolrDump() {
         try {
-            if (this.inputStream.available() < 60) return false;
             byte[] b = new byte[100];
             this.inputStream.read(b);
             try {
                 String s = UTF8.String(b);
-                if (s.contains("<response>") && s.contains("<result>")) {
+                if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
                     this.inputStream.unread(b);
                     return true;
                 }

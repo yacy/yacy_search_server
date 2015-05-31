@@ -1945,9 +1945,7 @@ public final class Switchboard extends serverSwitch {
         InputStream is = null;
         try {
             is = new BufferedInputStream(new FileInputStream(infile));
-            if ( s.endsWith(".gz") ) {
-                is = new GZIPInputStream(is);
-            }
+            if (s.endsWith(".gz")) is = new GZIPInputStream(is, 65535);
             processSurrogate(is, infile.getName());
         } catch (final IOException e ) {
             ConcurrentLog.logException(e);
