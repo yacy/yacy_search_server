@@ -35,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -49,7 +50,7 @@ public class gzip {
     public static void gzipFile(final String inFile, final String outFile) {
 	try {
 	    final InputStream  fin  = new BufferedInputStream(new FileInputStream(inFile));
-	    final OutputStream fout = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outFile), 1024));
+	    final OutputStream fout = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
 	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
@@ -87,7 +88,7 @@ public class gzip {
 	    final InputStream fin = new ByteArrayInputStream(in.getBytes("UTF8"));
 	    final int buffersize = Math.min(1024, in.length());
 	    final ByteArrayOutputStream baos = new ByteArrayOutputStream(buffersize);
-	    final OutputStream fout = new GZIPOutputStream(baos, Math.max(buffersize, 512));
+	    final OutputStream fout = new GZIPOutputStream(baos, Math.max(buffersize, 65536)){{def.setLevel(Deflater.BEST_COMPRESSION);}};
 	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
@@ -123,7 +124,7 @@ public class gzip {
         java.util.zip.GZIPOutputStream gzipout = null;
         try {
             f.getParentFile().mkdirs();
-            gzipout = new java.util.zip.GZIPOutputStream(new FileOutputStream(f));
+            gzipout = new java.util.zip.GZIPOutputStream(new FileOutputStream(f), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
             gzipout.write(content, 0, content.length);
         } finally {
             if (gzipout!=null)try{gzipout.close();}catch(final Exception e){}

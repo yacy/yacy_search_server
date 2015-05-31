@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -114,7 +115,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
             //System.out.print("/(" + cdr + ")"); // DEBUG
             final ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length / 5);
             baos.write(gzipMagic);
-            final OutputStream os = new GZIPOutputStream(baos, 512);
+            final OutputStream os = new GZIPOutputStream(baos, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
             os.write(b);
             os.close();
             baos.close();

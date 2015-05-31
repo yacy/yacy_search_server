@@ -76,6 +76,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -1959,8 +1960,7 @@ public final class Switchboard extends serverSwitch {
                         final String gzname = outfile.getName() + ".gz";
                         final File gzfile = new File(outfile.getParentFile(), gzname);
                         try {
-                            final OutputStream os =
-                                new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
+                            final OutputStream os = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}});
                             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(outfile)); 
                             FileUtils.copy(bis, os);
                             os.close();

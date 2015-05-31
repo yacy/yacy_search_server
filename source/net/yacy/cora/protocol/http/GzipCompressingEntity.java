@@ -27,6 +27,7 @@ package net.yacy.cora.protocol.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.http.Header;
@@ -65,7 +66,7 @@ public class GzipCompressingEntity extends HttpEntityWrapper {
 		if (outstream == null) {
 			throw new IllegalArgumentException("Output stream may not be null");
 		}
-		GZIPOutputStream gzip = new GZIPOutputStream(outstream);
+		GZIPOutputStream gzip = new GZIPOutputStream(outstream, 65536){{def.setLevel(Deflater.BEST_SPEED);}};
 		wrappedEntity.writeTo(gzip);
 		gzip.finish();
 	}

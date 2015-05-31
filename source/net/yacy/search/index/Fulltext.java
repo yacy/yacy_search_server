@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -658,7 +659,7 @@ public final class Fulltext {
                 final File parentf = this.f.getParentFile();
                 if (parentf != null) parentf.mkdirs();
                 OutputStream os = new FileOutputStream(this.format == 3 ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
-                if (this.format == 3) os = new GZIPOutputStream(os);
+                if (this.format == 3) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
                 final PrintWriter pw = new PrintWriter(new BufferedOutputStream(os));
                 if (this.format == 1) {
                     pw.println("<html><head></head><body>");

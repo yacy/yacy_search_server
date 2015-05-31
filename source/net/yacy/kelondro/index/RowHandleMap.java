@@ -45,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -189,7 +190,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         } catch (final OutOfMemoryError e) {
             os = new FileOutputStream(tmp);
         }
-        if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os);
+        if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
         int c = 0;
         while (i.hasNext()) {
             os.write(i.next().bytes());
