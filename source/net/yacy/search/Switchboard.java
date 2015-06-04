@@ -2408,12 +2408,6 @@ public final class Switchboard extends serverSwitch {
 
             // after all clean up is done, check the resource usage
             this.observer.resourceObserverJob();
-
-            // cleanup cached search failures
-            if ( getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
-                && this.peers.mySeed().getFlagAcceptRemoteIndex() ) {
-                this.tables.cleanFailURLS(getConfigLong("cleanup.failedSearchURLtimeout", -1));
-            }
             
             // clean up profiles
             checkInterruption();

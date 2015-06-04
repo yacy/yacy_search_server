@@ -98,7 +98,7 @@ function updatepage(str) {
       <dl>
         <dt class="TableCellDark">Index Deletion</dt>
         <dd><input type="checkbox" name="deleteIndex" id="deleteIndex"
-             onclick="x=document.getElementById('deleteIndex').checked;#(rwi)#::document.getElementById('deleteRWI').checked=x;#(/rwi)#document.getElementById('deleteRobots').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';};document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteFirstSeen').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
+             onclick="x=document.getElementById('deleteIndex').checked;#(rwi)#::document.getElementById('deleteRWI').checked=x;#(/rwi)#document.getElementById('deleteRobots').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteFirstSeen').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;"
             /> Delete local search index (embedded Solr and old Metadata)<br/>
             #(cleanupsolr)#::<input type="checkbox" name="deleteRemoteSolr" id="deleteRemoteSolr" onclick="x=document.getElementById('deleteRemoteSolr').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete remote solr index<br/>#(/cleanupsolr)#
             #(cleanuprwi)#::<input type="checkbox" name="deleteRWI" id="deleteRWI" onclick="x=document.getElementById('deleteRWI').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /> Delete RWI Index (DHT transmission words)<br/>#(/cleanuprwi)#
@@ -107,7 +107,6 @@ function updatepage(str) {
             <input type="checkbox" name="deleteCache" id="deleteCache" disabled="disabled" /> Delete HTTP &amp; FTP Cache<br/>
             <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /> Stop Crawler and delete Crawl Queues<br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /> Delete robots.txt Cache<br/>
-            <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" /> Delete cached snippet-fetching failures during search<br/><br/>
             <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="btn btn-danger" style="width:240px;" onclick="return confirm('Confirm Deletion')"/>
         </dd>
       </dl>

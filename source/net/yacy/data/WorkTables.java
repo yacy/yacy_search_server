@@ -87,12 +87,6 @@ public class WorkTables extends Tables {
     public final static String TABLE_ACTIVECRAWLS_NAME = "crawljobsActive";
     public final static String TABLE_PASSIVECRAWLS_NAME = "crawljobsPassive";
 
-    public final static String TABLE_SEARCH_FAILURE_NAME = "searchfl";
-    public final static String TABLE_SEARCH_FAILURE_COL_URL = "url";
-    public final static String TABLE_SEARCH_FAILURE_COL_DATE = "date";
-    public final static String TABLE_SEARCH_FAILURE_COL_WORDS = "words";
-    public final static String TABLE_SEARCH_FAILURE_COL_COMMENT = "comment";
-
     public YMarkTables bookmarks;
 
     public WorkTables(final File workPath) {
@@ -353,52 +347,6 @@ public class WorkTables extends Tables {
                 indexCell.removeDelayed(word, url.hash());
             }
         }
-
-        // insert information about changed url into database
-        try {
-            // create and insert new entry
-            Data data = new Data();
-            byte[] date = UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
-            data.put(TABLE_SEARCH_FAILURE_COL_URL, url.toNormalform(true));
-            data.put(TABLE_SEARCH_FAILURE_COL_DATE, date);
-            data.put(TABLE_SEARCH_FAILURE_COL_WORDS, queryHashes.export());
-            data.put(TABLE_SEARCH_FAILURE_COL_COMMENT, UTF8.getBytes(reason));
-            super.insert(TABLE_SEARCH_FAILURE_NAME, url.hash(),  data);
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
-    }
-
-    public boolean failURLsContains(byte[] urlhash) {
-        try {
-            return super.has(TABLE_SEARCH_FAILURE_NAME, urlhash);
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-            return false;
-        }
-    }
-
-    /**
-     * cleanup cached failed searchs older then timeout
-     */
-    public void cleanFailURLS(long timeout) {
-    	if (timeout >= 0) {
-    		try {
-    			Row row;
-    			Date date;
-    			Iterator<Row> iter = this.iterator(WorkTables.TABLE_SEARCH_FAILURE_NAME);
-				while (iter.hasNext()) {
-					row = iter.next();
-					date = new Date();
-					date = row.get(TABLE_SEARCH_FAILURE_COL_DATE, date);
-					if(date.before(new Date(System.currentTimeMillis() - timeout))) {
-						this.delete(TABLE_SEARCH_FAILURE_NAME, row.getPK());
-					}
-				}
-			} catch (final IOException e) {
-	            ConcurrentLog.logException(e);
-			}
-    	}
     }
 
     public static Map<byte[], String> commentCache(Switchboard sb) {

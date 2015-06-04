@@ -71,9 +71,6 @@ public class ConfigHTCache_p {
             if ("on".equals(post.get("deleteRobots", ""))) {
                 sb.robots.clear();
             }
-            if ("on".equals(post.get("deleteSearchFl", ""))) {
-            	sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
-            }
         }
 
         prop.put("HTCachePath", env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT));

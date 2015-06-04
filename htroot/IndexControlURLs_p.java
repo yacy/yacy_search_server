@@ -135,9 +135,6 @@ public class IndexControlURLs_p {
             if ( post.get("deleteRobots", "").equals("on") ) {
                 try {sb.robots.clear();} catch (final IOException e) {}
             }
-            if ( post.get("deleteSearchFl", "").equals("on") ) {
-                sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
-            }
             post.remove("deletecomplete");
         }
 

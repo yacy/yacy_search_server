@@ -305,3 +305,5 @@ form dt, dl.pairs dt {
 form dd, dl.pairs dd {
   background-color:#333333;
 }
+
+.navbar-default{background-color:#000;border-color:#000}
