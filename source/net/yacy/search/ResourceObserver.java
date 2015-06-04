@@ -114,12 +114,7 @@ public class ResourceObserver {
             shrinkmethods: while (true /*this is not a loop, just a construct that we can leave with a break*/) {
                 // delete old releases
                 //if (getNormalizedDiskFree() == Space.AMPLE && getNormalizedDiskUsed(false) == Space.AMPLE) break;
-                
-                // delete fetched snippets
-                log.info("DISK SPACE EXHAUSTED - deleting snippet cache");
-                sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
-                if (getNormalizedDiskFree() == Space.AMPLE && getNormalizedDiskUsed(false) == Space.AMPLE) break;
-                
+
                 // clear HTCACHE
                 log.info("DISK SPACE EXHAUSTED - deleting HTCACHE");
                 Cache.clear();
