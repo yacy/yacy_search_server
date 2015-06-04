@@ -16,20 +16,12 @@ public final class AugmentedParsing_p {
 				env.setConfig("parserAugmentation",
 						"on".equals(post.get("augmentedparserenabled")) ? true : false);
 
-				env.setConfig("parserAugmentation.RDFa",
-						"on".equals(post.get("augmentedparserRDFenabled")) ? true : false);
-
-
 			}
-
 
 		}
 
 		prop.put("augmentedparserenabled_checked",
 				env.getConfigBool("parserAugmentation", false) ? "1" : "0");
-
-		prop.put("augmentedparserRDFenabled_checked",
-				env.getConfigBool("parserAugmentation.RDFa", false) ? "1" : "0");
 
 		// return rewrite properties
 		return prop;

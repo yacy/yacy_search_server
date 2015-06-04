@@ -67,7 +67,6 @@ import net.yacy.document.parser.zipParser;
 import net.yacy.document.parser.augment.AugmentParser;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.document.parser.images.metadataImageParser;
-import net.yacy.document.parser.rdfa.impl.RDFaParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -93,7 +92,7 @@ public final class TextParser {
         // AugmentParser calls internally RDFaParser (therefore add before RDFa)
         if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation", true)) initParser(new AugmentParser()); 
         // RDFaParser calls internally htmlParser (therefore add before html)
-        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser());          
+        // if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser()); // experimental implementation, not working yet (2015-06-04)
         initParser(new htmlParser()); // called within rdfa parser
         initParser(new genericImageParser());
         initParser(new metadataImageParser());
