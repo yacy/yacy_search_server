@@ -242,6 +242,8 @@ form.search.small h2 {
 
 .hides:hover .hoverShow { background-color: #222222; }
 
+.navbar-default{background-color:#222222;border-color:#222222}
+
 /* Log */
 
 body#ViewLog pre {
