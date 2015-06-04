@@ -224,6 +224,8 @@ div.ProgressBarFill {
 
 .hides:hover .hoverShow { background-color: #010; }
 
+.navbar-default{background-color:#000;border-color:#000}
+
 /* Log */
 
 body#ViewLog pre {
