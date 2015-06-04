@@ -4325,7 +4325,7 @@ RAM/Disk Usage &amp; Updates==Использование памяти и обн�
 System Status==Монитор производительности
 Peer-to-Peer Network==Сеть YaCy
 Advanced Crawler==Расширенная индексация
-Content Importer==Импорт контента
+Index Export/Import==Импорт контента
 System Administration==Настройки системы
 Configuration==Конфигурация
 Production==Индексирование
@@ -4378,7 +4378,7 @@ Outgoing&nbsp;Cookies==Исходящие куки
 
 #File: env/templates/submenuIndexImport.template
 #-----------------------------
-Content Importer==Импорт контента
+Index Export/Import==Импорт контента
 External Datasets==Импорт из внешних источников
 >Database Reader<==>Обозреватель баз данных<
 RSS Feed Importer==Импорт RSS-лент

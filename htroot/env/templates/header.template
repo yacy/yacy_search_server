@@ -94,7 +94,7 @@
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Production</h3></li>
       <li><a href="CrawlStartExpert.html" class="MenuItemLink">Advanced Crawler</a></li>
-      <li><a href="Load_RSS_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Content Importer</a></li>
+      <li><a href="IndexExport_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Export/Import</a></li>
       <li><a href="Vocabulary_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Content Semantic</a></li>
       <li><a href="CrawlCheck_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Target Analysis</a></li>      
     </ul>

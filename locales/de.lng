@@ -3882,7 +3882,7 @@ Crawler Monitor==Crawler Überwachung
 ### PRODUCTION ###
 Production==Produktion
 Advanced Crawler==Experten Crawl Start
-Content Importer==Importfunktionen
+Index Export/Import==Daten Export / Import
 Target Analysis==Ziel Analyse
 Process Scheduler==Prozess Planer
 ### ADMINISTRATION ###
@@ -4058,7 +4058,7 @@ Network<br/>Scanner==Netzwerk<br/>Scanner
 Crawling of==Crawlen von
 #MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3 Foren<
-Content Import<==Content Importer<
+Index Export/Import<==Content Importer<
 Network Harvesting<==Netzwerk Harvesting<
 #Remote<br/>Crawling==Remote<br/>Crawling
 #Scraping<br/>Proxy==Scraping<br/>Proxy
