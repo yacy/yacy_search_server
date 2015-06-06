@@ -90,27 +90,46 @@ public class IndexReIndexMonitor_p {
 
         // recrawl job handling
         BusyThread recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
-        if (recrawlbt == null) {
-            if (post != null && post.containsKey("recrawlnow") && sb.index.fulltext().connectedLocalSolr()) {
-                sb.deployThread(RecrawlBusyThread.THREAD_NAME,
-                        "ReCrawl",
-                        "recrawl existing documents",
-                        null,
-                        new RecrawlBusyThread(Switchboard.getSwitchboard()),
-                        1000);
-                recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
+        
+        // to signal that a setting shall change the form provides a fixed parameter setup=recrawljob, if not present return status only
+        if (post != null && "recrawljob".equals(post.get("setup"))) { // it's a command to recrawlThread
+
+            if (recrawlbt == null) {
+                if (post.containsKey("recrawlnow") && sb.index.fulltext().connectedLocalSolr()) {
+                    sb.deployThread(RecrawlBusyThread.THREAD_NAME,
+                            "ReCrawl",
+                            "recrawl existing documents",
+                            null,
+                            new RecrawlBusyThread(Switchboard.getSwitchboard()),
+                            1000);
+                    recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
+                }
+            } else {
+                if (post.containsKey("stoprecrawl")) {
+                    sb.terminateThread(RecrawlBusyThread.THREAD_NAME, false);
+                    prop.put("recrawljobrunning", 0);
+                }
+            }
+
+            boolean inclerrdoc = false;
+            if (post.containsKey("includefailedurls")) {
+                inclerrdoc = post.getBoolean("includefailedurls");
+            }
+
+            if (recrawlbt != null && !recrawlbt.shutdownInProgress()) {
+                if (post.containsKey("updquery") && post.containsKey("recrawlquerytext")) {
+                    ((RecrawlBusyThread) recrawlbt).setQuery(post.get("recrawlquerytext"),inclerrdoc);
+                } else {
+                    ((RecrawlBusyThread) recrawlbt).setIncludeFailed(inclerrdoc);
+                }
             }
         }
-        
-        if (recrawlbt != null) {
-            if (post != null && post.containsKey("stoprecrawl")) {
-                sb.terminateThread(RecrawlBusyThread.THREAD_NAME, false);
-                prop.put("recrawljobrunning",0);
-
-            } else {
-                prop.put("recrawljobrunning", 1);
-                prop.put("recrawljobrunning_docCount", ((RecrawlBusyThread) recrawlbt).urlsfound);
-            }
+        // just post status of recrawlThread
+        if (recrawlbt != null && !recrawlbt.shutdownInProgress()) { // provide status
+            prop.put("recrawljobrunning", 1);
+            prop.put("recrawljobrunning_docCount", ((RecrawlBusyThread) recrawlbt).urlsfound);
+            prop.put("recrawljobrunning_recrawlquerytext", ((RecrawlBusyThread) recrawlbt).getQuery());
+            prop.put("recrawljobrunning_includefailedurls", ((RecrawlBusyThread) recrawlbt).getIncludeFailed());
         } else {
             prop.put("recrawljobrunning", 0);
         }

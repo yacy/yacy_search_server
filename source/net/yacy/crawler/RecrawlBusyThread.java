@@ -49,7 +49,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 
     public final static String THREAD_NAME = "recrawlindex";
 
-    public String currentQuery = CollectionSchema.fresh_date_dt.getSolrFieldName()+":[* TO NOW/DAY-1DAY]"; // current query
+    private String currentQuery = CollectionSchema.fresh_date_dt.getSolrFieldName()+":[* TO NOW/DAY-1DAY]"; // current query
+    private boolean includefailed = false; // flag if docs with httpstatus_i <> 200 shall be recrawled
     private int chunkstart = 0;
     private int chunksize = 200;
     final Switchboard sb;
@@ -67,7 +68,38 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     }
 
     /**
+     * Set the query to select documents to recrawl
+     * and resets the counter to start a fresh query loop
+     * @param q select query
+     * @param includefailedurls true=all http status docs are recrawled, false=httpstatus=200 docs are recrawled
+     */
+    public void setQuery(String q, boolean includefailedurls) {
+        this.currentQuery = q;
+        this.includefailed = includefailedurls;
+        this.chunkstart = 0;
+    }
+
+    public String getQuery () {
+        return this.currentQuery;
+    }
+
+    /**
+     * Flag to include failed urls (httpstatus_i <> 200)
+     * if true -> currentQuery is used as is,
+     * if false -> the term " AND (httpstatus_i:200)" is appended to currentQuery
+     * @param includefailedurls
+     */
+    public void setIncludeFailed(boolean includefailedurls) {
+        this.includefailed = includefailedurls;
+    }
+
+    public boolean getIncludeFailed () {
+        return this.includefailed;
+    }
+
+    /**
      * feed urls to the local crawler
+     * (Switchboard.addToCrawler() is not used here, as there existing urls are always skiped)
      *
      * @return true if urls were added/accepted to the crawler
      */
@@ -81,7 +113,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             for (DigestURL url : this.urlstack) {
                 final Request request = sb.loader.request(url, true, true);
                 String acceptedError = sb.crawlStacker.checkAcceptanceChangeable(url, profile, 0);
-                if (acceptedError == null) {
+                if (!includefailed && acceptedError == null) { // skip check if failed docs to be included
                     acceptedError = sb.crawlStacker.checkAcceptanceInitially(url, profile);
                 }
                 if (acceptedError != null) {
@@ -134,8 +166,9 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
         if (!solrConnector.isClosed()) {
             try {
-                docList = solrConnector.getDocumentListByQuery(currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)",
-                        CollectionSchema.fresh_date_dt.getSolrFieldName() + " asc", this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
+                // query all or only httpstatus=200 depending on includefailed flag
+                docList = solrConnector.getDocumentListByQuery(this.includefailed  ? currentQuery : currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)",
+                        CollectionSchema.load_date_dt.getSolrFieldName() + " asc", this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
                 this.urlsfound = docList.getNumFound();
             } catch (Throwable e) {
                 this.urlsfound = 0;
