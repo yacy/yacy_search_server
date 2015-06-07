@@ -831,6 +831,7 @@ search.result.show.proxy = false
 search.result.show.hostbrowser = true
 search.result.show.vocabulary = false
 search.result.show.vocabulary.omit = 
+search.result.show.snapshots = false
 
 
 # search navigators: comma-separated list of default values for search navigation.

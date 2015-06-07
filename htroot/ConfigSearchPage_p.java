@@ -35,7 +35,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
-import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -78,6 +77,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
                 sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
                 sb.setConfig("search.result.show.hostbrowser", post.getBoolean("search.result.show.hostbrowser"));
+                sb.setConfig("search.result.show.snapshots", post.getBoolean("search.result.show.snapshots"));
 
                 // construct navigation String
                 String nav = "";
@@ -134,6 +134,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.cache", config.getProperty("search.result.show.cache","true"));
                 sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
                 sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
+                sb.setConfig("search.result.show.snapshots", config.getProperty("search.result.show.snapshots","true"));
             }
         }
 
@@ -160,6 +161,7 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.cache", sb.getConfigBool("search.result.show.cache", false) ? 1 : 0);
         prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);
         prop.put("search.result.show.hostbrowser", sb.getConfigBool("search.result.show.hostbrowser", false) ? 1 : 0);
+        prop.put("search.result.show.snapshots", sb.getConfigBool("search.result.show.snapshots", false) ? 1 : 0);
 
         prop.put("search.navigation.location", sb.getConfig("search.navigation", "").indexOf("location",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);

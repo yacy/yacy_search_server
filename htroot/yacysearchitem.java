@@ -24,6 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Date;
@@ -43,6 +44,8 @@ import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.data.Transactions;
+import net.yacy.crawler.data.Transactions.State;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.URLLicense;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -194,6 +197,7 @@ public class yacysearchitem {
             Date[] events = result.events();
             boolean showEvent = events != null && events.length > 0 && sb.getConfig("search.navigation", "").indexOf("date",0) >= 0;
             prop.put("content_showEvent", showEvent ? 1 : 0);
+            Collection<File> snapshotPaths = sb.getConfigBool("search.result.show.snapshots", true) ? Transactions.findPaths(result.url(), null, State.ANY) : null;
             if (fileType == FileType.HTML) { // html template specific settings
                 prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) && !showEvent ? 1 : 0);
                 prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
@@ -204,6 +208,7 @@ public class yacysearchitem {
                 prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
                 prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) && sb.getConfigBool("proxyURL", false) ? 1 : 0);
                 prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
+                prop.put("content_showSnapshots", snapshotPaths != null && snapshotPaths.size() > 0 && sb.getConfigBool("search.result.show.snapshots", true) ? 1 : 0);
                 prop.put("content_showVocabulary", sb.getConfigBool("search.result.show.vocabulary", true) ? 1 : 0);
 
                 if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
@@ -220,7 +225,6 @@ public class yacysearchitem {
                     int c = 0;
                     for (String key: result.getFieldNames()) {
                         if (key.startsWith("vocabulary_") && key.endsWith("_sxt")) {
-                            @SuppressWarnings("unchecked")
                             Collection<Object> terms = result.getFieldValues(key);
                             prop.putHTML("content_showVocabulary_vocabulary_" + c + "_name", key.substring(11, key.length() - 4));
                             prop.putHTML("content_showVocabulary_vocabulary_" + c + "_terms", terms.toString());
@@ -232,6 +236,9 @@ public class yacysearchitem {
                 } else {
                     prop.put("content_showVocabulary_vocabulary", 0);
                     prop.put("content_showVocabulary", 0);
+                }
+                if (snapshotPaths != null && snapshotPaths.size() > 0) {
+                    prop.put("content_showSnapshots_link", snapshotPaths.iterator().next().getAbsolutePath());
                 }
             }
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(urlhash));

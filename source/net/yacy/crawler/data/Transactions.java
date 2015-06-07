@@ -57,8 +57,8 @@ public class Transactions {
     
     private final static String XML_PREFIX = "<response>\n<!--\n";
     private final static char[] WHITESPACE = new char[132];
-    private final static int WHITESPACE_START = XML_PREFIX.length();
-    private final static int WHITESPACE_LENGTH = WHITESPACE.length;
+    //private final static int WHITESPACE_START = XML_PREFIX.length();
+    //private final static int WHITESPACE_LENGTH = WHITESPACE.length;
     private static File transactionDir = null, inventoryDir = null, archiveDir = null;
     private static Snapshots inventory = null, archive = null;
     private static ExecutorService executor = Executors.newCachedThreadPool();
@@ -348,7 +348,7 @@ public class Transactions {
      * This method is inefficient because it tests all different depths, it would be better to use
      * findPaths/3 with a given depth.
      * @param url
-     * @param ext
+     * @param ext required extension or null if the extension must not be checked
      * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
      * @return a set of files for snapshots of the url
      */

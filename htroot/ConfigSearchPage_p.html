@@ -245,6 +245,7 @@ var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows
                           <td>&nbsp;|&nbsp;<a href="CacheResource_p.html" target="LayouTest">Cache</a></td>
                           <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">Augmented Browsing</a></td>
                           <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" /></a></td>
+                          <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Snapshots</a></td>
                         </tr>
                         <tr>
                           <td></td>
@@ -263,6 +264,7 @@ var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows
                             </span></span>
                           </td>
                           <td align="center"><input type="checkbox" name="search.result.show.hostbrowser" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
+                          <td align="center"><input type="checkbox" name="search.result.show.snapshots" value="true" #(search.result.show.snapshots)#::checked="checked" #(/search.result.show.snapshots)# /></td>
                         </tr>
                       </table>
                     </p>
