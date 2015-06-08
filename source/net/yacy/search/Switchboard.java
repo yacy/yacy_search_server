@@ -920,7 +920,8 @@ public final class Switchboard extends serverSwitch {
         wikiParser = new WikiCode();
 
         // initializing the resourceObserver
-        InstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", 0);
+        this.observer = new ResourceObserver(this);
+        InstantBusyThread.oneTimeJob(this.observer, "resourceObserverJob", 0);
 
         // initializing the stackCrawlThread
         this.crawlStacker =
@@ -2408,7 +2409,7 @@ public final class Switchboard extends serverSwitch {
 
             // after all clean up is done, check the resource usage
             this.observer.resourceObserverJob();
-            
+
             // clean up profiles
             checkInterruption();
 

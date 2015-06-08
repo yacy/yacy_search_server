@@ -34,11 +34,11 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.ResultURLs;
-import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.NewsPool;
+import net.yacy.peers.operation.yacyRelease;
 import net.yacy.search.query.SearchEventCache;
 
 public class ResourceObserver {
@@ -65,17 +65,11 @@ public class ResourceObserver {
         log.info("path for disc space measurement: " + this.path);
     }
 
-    public static void initThread() {
-    	final Switchboard sb = Switchboard.getSwitchboard();
-    	sb.observer =  new ResourceObserver(Switchboard.getSwitchboard());
-    	sb.observer.resourceObserverJob();
-    }
-
     /**
      * checks the resources and pauses crawls if necessary
      */
     public void resourceObserverJob() {
-    	MemoryControl.setProperMbyte(getMinFreeMemory());
+    	MemoryControl.setProperMbyte(getMinFreeMemory()); // may change by user config
 
         this.normalizedDiskFree = getNormalizedDiskFree();
         this.normalizedDiskUsed = getNormalizedDiskUsed(true);
@@ -113,7 +107,8 @@ public class ResourceObserver {
             (this.normalizedDiskUsed == Space.EXHAUSTED && this.sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE, false))) {
             shrinkmethods: while (true /*this is not a loop, just a construct that we can leave with a break*/) {
                 // delete old releases
-                //if (getNormalizedDiskFree() == Space.AMPLE && getNormalizedDiskUsed(false) == Space.AMPLE) break;
+                yacyRelease.deleteOldDownloads(sb.releasePath, 1);
+                if (getNormalizedDiskFree() == Space.AMPLE && getNormalizedDiskUsed(false) == Space.AMPLE) break;
 
                 // clear HTCACHE
                 log.info("DISK SPACE EXHAUSTED - deleting HTCACHE");
