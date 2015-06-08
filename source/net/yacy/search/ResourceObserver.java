@@ -107,6 +107,7 @@ public class ResourceObserver {
             (this.normalizedDiskUsed == Space.EXHAUSTED && this.sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE, false))) {
             shrinkmethods: while (true /*this is not a loop, just a construct that we can leave with a break*/) {
                 // delete old releases
+                log.warn("DISK SPACE EXHAUSTED - deleting downloaded releases files");
                 yacyRelease.deleteOldDownloads(sb.releasePath, 1);
                 if (getNormalizedDiskFree() == Space.AMPLE && getNormalizedDiskUsed(false) == Space.AMPLE) break;
 
