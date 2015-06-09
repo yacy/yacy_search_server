@@ -35,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -1126,6 +1127,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     private class GZIPRequestStream extends ServletInputStream {
 
         private final GZIPInputStream in;
+        private final List<ReadListener> listeners = new ArrayList<ReadListener>();
 
         public GZIPRequestStream(HttpServletRequest request) throws IOException {
             this.in = new GZIPInputStream(request.getInputStream());
@@ -1133,45 +1135,126 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         @Override
         public int read() throws IOException {
-            return in.read();
+        	if (isFinished()) return -1;
+            try {
+        		final int r = in.read();
+        		if (r < 1) fireAllDataRead();
+        		return r;
+        	} catch (final IOException ex) {
+        		fireError(ex);
+        		throw ex;
+        	}
         }
 
         @Override
         public int read(byte[] b) throws IOException {
-            return in.read(b);
+            return read(b, 0, b.length);
         }
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            return in.read(b, off, len);
+        	if (isFinished()) return -1;
+            try {
+        		final int r = in.read(b, off, len);
+        		if (r < len) fireAllDataRead();
+        		return r;
+        	} catch (final IOException ex) {
+        		fireError(ex);
+        		throw ex;
+        	}
         }
 
         @Override
         public void close() throws IOException {
-            in.close();
+            try {
+            	in.close();
+            	fireAllDataRead();
+        	} catch (final IOException ex) {
+        		fireError(ex);
+        		throw ex;
+        	}
+        }
+        
+        @Override
+        public int available() throws IOException {
+            try {
+        		final int r = in.available();
+        		if (r < 1) fireAllDataRead();
+        		return r;
+        	} catch (final IOException ex) {
+        		fireError(ex);
+        		throw ex;
+        	}
+        }
+        
+        @Override
+        public synchronized void mark(int readlimit) {
+        	in.mark(readlimit);
+        }
+        
+        @Override
+        public boolean markSupported() {
+        	return in.markSupported();
+        }
+        
+        @Override
+        public synchronized void reset() throws IOException {
+        	try {
+        		in.reset();
+        	} catch (final IOException ex) {
+        		fireError(ex);
+        		throw ex;
+        	}
+        }
+        
+        @Override
+        public long skip(long n) throws IOException {
+        	try {
+        		final long r = in.skip(n);
+        		if (r < n) fireAllDataRead();
+        		return r;
+        	} catch (final IOException ex) {
+        		fireError(ex);
+        		throw ex;
+        	}
         }
 
         @Override
         public boolean isFinished() {
             try {
-                return (in.available() < 1);
-            } catch (IOException ex) {
+            	return available() < 1;
+            } catch (final IOException ex) {
+            	fireError(ex);
                 return true;
             }
         }
 
         @Override
         public boolean isReady() {
-            try {
-                return in.available() > 0;
-            } catch (IOException ex) {
-                return false;
-            }
+            return !isFinished();
         }
 
         @Override
         public void setReadListener(ReadListener rl) {
-            // TODO: implement
+        	listeners.add(rl);
+        }
+        
+        private void fireAllDataRead() throws IOException {
+        	for (final ReadListener rl : listeners) {
+        		rl.onAllDataRead();
+        	}
+        }
+        
+//        private void fireDataAvailable() throws IOException {
+//        	for (final ReadListener rl : listeners) {
+//        		rl.onDataAvailable();
+//        	}
+//        }
+        
+        private void fireError(Throwable th) {
+        	for (final ReadListener rl : listeners) {
+        		rl.onError(th);
+        	}
         }
     }
  }
