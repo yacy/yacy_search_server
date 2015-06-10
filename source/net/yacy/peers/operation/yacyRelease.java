@@ -568,15 +568,17 @@ public final class yacyRelease extends yacyVersion {
      }
 
     /**
-     * keep only releases of last month (minimum latest and 1 main (maybe the same))
+     * keep only releases older as deleteAfterDays (keep minimum latest and 1 main (maybe the same))
      *
      * @param filesPath where all downloaded files reside
      * @param deleteAfterDays
+     * @return true = some files deleted
      */
-    public static void deleteOldDownloads(final File filesPath, final int deleteAfterDays) {
+    public static boolean deleteOldDownloads(final File filesPath, final int deleteAfterDays) { 
         // list downloaded releases
         yacyVersion release;
         final String[] downloaded = filesPath.list();
+        boolean deletedSomeFiles = false;
 
         // parse all filenames and put them in a sorted set
         final SortedSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
@@ -623,10 +625,13 @@ public final class yacyRelease extends yacyVersion {
                     FileUtils.deletedelete(new File(downloadedFile.getAbsolutePath() + ".sig"));
                     if (downloadedFile.exists()) {
                         ConcurrentLog.warn("STARTUP", "cannot delete old release " + downloadedFile.getAbsolutePath());
+                    } else {
+                        deletedSomeFiles = true;
                     }
                 }
             }
         }
+        return deletedSomeFiles;
     }
 
     public File getReleaseFile() {
