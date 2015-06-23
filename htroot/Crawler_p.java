@@ -429,14 +429,7 @@ public class Crawler_p {
                     prop.put("info", "4"); // crawlfilter does not match url
                     prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                     prop.putHTML("info_error", e.getMessage());
-                } 
-                try {
-                    Pattern.compile(newcrawlingMustNotMatch);
-                } catch (final PatternSyntaxException e) {
-                    prop.put("info", "4"); // crawlfilter does not match url
-                    prop.putHTML("info_newcrawlingfilter", newcrawlingMustNotMatch);
-                    prop.putHTML("info_error", e.getMessage());
-                } 
+                }
                 
                 boolean hasCrawlstartDataOK = !crawlName.isEmpty();
                 if (hasCrawlstartDataOK) {
