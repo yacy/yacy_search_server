@@ -29,7 +29,7 @@ import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
 
 import org.apache.solr.client.solrj.ResponseParser;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.BinaryResponseParser;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.QueryRequest;
@@ -54,7 +54,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         this.instance = instance;
         this.useBinaryResponseWriter = useBinaryResponseWriter;
         this.corename = this.instance.getDefaultCoreName();
-        SolrServer s = instance.getServer(this.corename);
+        SolrClient s = instance.getServer(this.corename);
         super.init(s);
     }
     
@@ -63,7 +63,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         this.instance = instance;
         this.useBinaryResponseWriter = useBinaryResponseWriter;
         this.corename = corename == null ? this.instance.getDefaultCoreName() : corename;
-        SolrServer s = instance.getServer(this.corename);
+        SolrClient s = instance.getServer(this.corename);
         super.init(s);
     }
 

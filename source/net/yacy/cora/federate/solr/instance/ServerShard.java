@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.StreamingResponseCallback;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -42,7 +42,7 @@ import org.apache.solr.common.util.NamedList;
 
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 
-public class ServerShard extends SolrServer {
+public class ServerShard extends SolrClient {
     
     private static final long serialVersionUID = -3524175189049786312L;
     private static final UpdateResponse _dummyOKResponse = new UpdateResponse();
@@ -54,7 +54,7 @@ public class ServerShard extends SolrServer {
     private final ShardSelection shards;
     private final boolean writeEnabled;
     
-    public ServerShard(ArrayList<SolrServer> server, final ShardSelection.Method method, final boolean writeEnabled) {
+    public ServerShard(ArrayList<SolrClient> server, final ShardSelection.Method method, final boolean writeEnabled) {
         this.shards = new ShardSelection(server, method);
         this.writeEnabled = writeEnabled;
     }
@@ -96,7 +96,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse addBeans(Collection<?> beans ) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.addBeans(beans);
+        for (SolrClient s: this.shards) ur = s.addBeans(beans);
         return ur;
     }
     
@@ -111,7 +111,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse addBeans(Collection<?> beans, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.addBeans(beans, commitWithinMs);
+        for (SolrClient s: this.shards) ur = s.addBeans(beans, commitWithinMs);
         return ur;
     }
 
@@ -148,7 +148,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse addBean(Object obj) throws IOException, SolrServerException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.addBean(obj);
+        for (SolrClient s: this.shards) ur = s.addBean(obj);
         return ur;
     }
 
@@ -163,7 +163,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse addBean(Object obj, int commitWithinMs) throws IOException, SolrServerException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.addBean(obj, commitWithinMs);
+        for (SolrClient s: this.shards) ur = s.addBean(obj, commitWithinMs);
         return ur;
     }
 
@@ -177,7 +177,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse commit() throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.commit();
+        for (SolrClient s: this.shards) ur = s.commit();
         return ur;
     }
 
@@ -193,7 +193,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse optimize() throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.optimize();
+        for (SolrClient s: this.shards) ur = s.optimize();
         return ur;
     }
     
@@ -207,7 +207,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse commit(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.commit(waitFlush, waitSearcher);
+        for (SolrClient s: this.shards) ur = s.commit(waitFlush, waitSearcher);
         return ur;
     }
 
@@ -222,7 +222,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse commit(boolean waitFlush, boolean waitSearcher, boolean softCommit) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.commit(waitFlush, waitSearcher, softCommit);
+        for (SolrClient s: this.shards) ur = s.commit(waitFlush, waitSearcher, softCommit);
         return ur;
     }
 
@@ -238,7 +238,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.optimize(waitFlush, waitSearcher);
+        for (SolrClient s: this.shards) ur = s.optimize(waitFlush, waitSearcher);
         return ur;
     }
 
@@ -255,7 +255,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse optimize(boolean waitFlush, boolean waitSearcher, int maxSegments) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.optimize(waitFlush, waitSearcher, maxSegments);
+        for (SolrClient s: this.shards) ur = s.optimize(waitFlush, waitSearcher, maxSegments);
         return ur;
     }
     
@@ -271,7 +271,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse rollback() throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards) ur = s.rollback();
+        for (SolrClient s: this.shards) ur = s.rollback();
         return ur;
     }
     
@@ -284,7 +284,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse deleteById(String id) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards.server4read()) ur = s.deleteById(id);
+        for (SolrClient s: this.shards.server4read()) ur = s.deleteById(id);
         return ur;
     }
 
@@ -299,7 +299,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse deleteById(String id, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards.server4read()) ur = s.deleteById(id, commitWithinMs);
+        for (SolrClient s: this.shards.server4read()) ur = s.deleteById(id, commitWithinMs);
         return ur;
     }
 
@@ -312,7 +312,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse deleteById(List<String> ids) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards.server4read()) ur = s.deleteById(ids);
+        for (SolrClient s: this.shards.server4read()) ur = s.deleteById(ids);
         return ur;
     }
 
@@ -327,7 +327,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse deleteById(List<String> ids, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards.server4read()) ur = s.deleteById(ids, commitWithinMs);
+        for (SolrClient s: this.shards.server4read()) ur = s.deleteById(ids, commitWithinMs);
         return ur;
     }
 
@@ -340,7 +340,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse deleteByQuery(String query) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards.server4read()) ur = s.deleteByQuery(query);
+        for (SolrClient s: this.shards.server4read()) ur = s.deleteByQuery(query);
         return ur;
     }
 
@@ -355,7 +355,7 @@ public class ServerShard extends SolrServer {
     public UpdateResponse deleteByQuery(String query, int commitWithinMs) throws SolrServerException, IOException {
         if (!this.writeEnabled) return _dummyOKResponse;
         UpdateResponse ur = null;
-        for (SolrServer s: this.shards.server4read()) ur = s.deleteByQuery(query, commitWithinMs);
+        for (SolrClient s: this.shards.server4read()) ur = s.deleteByQuery(query, commitWithinMs);
         return ur;
     }
 
@@ -365,7 +365,7 @@ public class ServerShard extends SolrServer {
      */
     @Override
     public SolrPingResponse ping() throws SolrServerException, IOException {
-        for (SolrServer s: this.shards) {
+        for (SolrClient s: this.shards) {
             SolrPingResponse spr = s.ping();
             if (spr != null) return spr;
         }
@@ -375,10 +375,11 @@ public class ServerShard extends SolrServer {
     /**
      * Performs a query to the Solr server
      * @param params  an object holding all key/value parameters to send along the request
+     * @throws IOException 
      */
     @Override
-    public QueryResponse query(final SolrParams params) throws SolrServerException {
-        List<SolrServer> qs = this.shards.server4read();
+    public QueryResponse query(final SolrParams params) throws SolrServerException, IOException {
+        List<SolrClient> qs = this.shards.server4read();
         if (qs.size() == 1) {
             return qs.get(0).query(params);
         }
@@ -386,7 +387,7 @@ public class ServerShard extends SolrServer {
         // concurrently call all shards
         final Collection<QueryResponse> qrl = new ConcurrentLinkedQueue<QueryResponse>();
         List<Thread> t = new ArrayList<Thread>();
-        for (final SolrServer s: qs) {
+        for (final SolrClient s: qs) {
             Thread t0 = new Thread() {
                 @Override
                 public void run() {
@@ -413,10 +414,11 @@ public class ServerShard extends SolrServer {
      * Performs a query to the Solr server
      * @param params  an object holding all key/value parameters to send along the request
      * @param method  specifies the HTTP method to use for the request, such as GET or POST
+     * @throws IOException 
      */
     @Override
-    public QueryResponse query(final SolrParams params, final METHOD method) throws SolrServerException {
-        List<SolrServer> qs = this.shards.server4read();
+    public QueryResponse query(final SolrParams params, final METHOD method) throws SolrServerException, IOException {
+        List<SolrClient> qs = this.shards.server4read();
         if (qs.size() == 1) {
             return qs.get(0).query(params, method);
         }
@@ -424,7 +426,7 @@ public class ServerShard extends SolrServer {
         final Collection<QueryResponse> qrl = new ConcurrentLinkedQueue<QueryResponse>();
         // concurrently call all shards
         List<Thread> t = new ArrayList<Thread>();
-        for (final SolrServer s: qs) {
+        for (final SolrClient s: qs) {
             Thread t0 = new Thread() {
                 @Override
                 public void run() {
@@ -468,16 +470,16 @@ public class ServerShard extends SolrServer {
      * SolrServer implementations need to implement how a request is actually processed
      */ 
     @Override
-    public NamedList<Object> request(final SolrRequest request) throws SolrServerException, IOException {
+    public NamedList<Object> request(@SuppressWarnings("rawtypes") SolrRequest request, String collection) throws SolrServerException, IOException {
         ResponseAccumulator acc = new ResponseAccumulator();
-        for (SolrServer s: this.shards.server4read()) acc.addResponse(s.request(request));
-        return acc.getAccumulatedResponse();        
+        for (SolrClient s: this.shards.server4read()) acc.addResponse(s.request(request, collection));
+        return acc.getAccumulatedResponse();  
     }
 
     @Override
     public DocumentObjectBinder getBinder() {
         DocumentObjectBinder db;
-        for (SolrServer s: this.shards) {
+        for (SolrClient s: this.shards) {
             db = s.getBinder();
             if (db != null) return db;
         }
@@ -486,8 +488,12 @@ public class ServerShard extends SolrServer {
     
     @Override
     public void shutdown() {
-        for (SolrServer s: this.shards) {
-            s.shutdown();
+        for (SolrClient s: this.shards) {
+            try {
+                s.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

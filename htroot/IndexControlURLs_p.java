@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.lucene.search.FieldCache;
-
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -214,7 +212,6 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("rebootsolr")) {
             segment.fulltext().rebootSolr();
-            FieldCache.DEFAULT.purgeAllCaches();
             sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr reboot");
         }
 

@@ -28,14 +28,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 public class ShardInstance implements SolrInstance {
 
     private final ArrayList<RemoteInstance> instances;
     private final ShardSelection.Method method;
-    private SolrServer defaultServer;
-    private Map<String, SolrServer> serverCache;
+    private SolrClient defaultServer;
+    private Map<String, SolrClient> serverCache;
     private final boolean writeEnabled;
 
     public ShardInstance(final ArrayList<RemoteInstance> instances, final ShardSelection.Method method, final boolean writeEnabled) {
@@ -43,7 +43,7 @@ public class ShardInstance implements SolrInstance {
         this.method = method;
         this.writeEnabled = writeEnabled;
         this.defaultServer = null;
-        this.serverCache = new ConcurrentHashMap<String, SolrServer>();
+        this.serverCache = new ConcurrentHashMap<String, SolrClient>();
     }
 
     @Override
@@ -57,19 +57,19 @@ public class ShardInstance implements SolrInstance {
     }
 
     @Override
-    public SolrServer getDefaultServer() {
+    public SolrClient getDefaultServer() {
         if (this.defaultServer != null) return this.defaultServer;
-        ArrayList<SolrServer> server = new ArrayList<SolrServer>(instances.size());
+        ArrayList<SolrClient> server = new ArrayList<SolrClient>(instances.size());
         for (int i = 0; i < instances.size(); i++) server.set(i, instances.get(i).getDefaultServer());
         this.defaultServer = new ServerShard(server, method, this.writeEnabled);
         return this.defaultServer;
     }
 
     @Override
-    public SolrServer getServer(String name) {
-        SolrServer s = serverCache.get(name);
+    public SolrClient getServer(String name) {
+        SolrClient s = serverCache.get(name);
         if (s != null) return s;
-        ArrayList<SolrServer> server = new ArrayList<SolrServer>(instances.size());
+        ArrayList<SolrClient> server = new ArrayList<SolrClient>(instances.size());
         for (int i = 0; i < instances.size(); i++) server.add(i, instances.get(i).getServer(name));
         s = new ServerShard(server, method, this.writeEnabled);
         this.serverCache.put(name, s);

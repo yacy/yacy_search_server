@@ -33,16 +33,16 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 
-public class ShardSelection implements Iterable<SolrServer> {
+public class ShardSelection implements Iterable<SolrClient> {
 
     private final Method method; // the sharding method
     private final AtomicLong shardID;  // the next id that shall be given away
     private final int dimension; // the number of chards
-    private final ArrayList<SolrServer> server;
+    private final ArrayList<SolrClient> server;
     
     public enum Method {
         MODULO_HOST_MD5("hash-based calculation of storage targets, select all for retrieval"),
@@ -54,7 +54,7 @@ public class ShardSelection implements Iterable<SolrServer> {
         }
     }
 
-    public ShardSelection(final ArrayList<SolrServer> server, final Method method) {
+    public ShardSelection(final ArrayList<SolrClient> server, final Method method) {
         this.server = server;
         this.method = method;
         this.dimension = server.size();
@@ -71,7 +71,7 @@ public class ShardSelection implements Iterable<SolrServer> {
         return rr;
     }
 
-    public SolrServer server4write(final SolrInputDocument solrdoc) throws IOException {
+    public SolrClient server4write(final SolrInputDocument solrdoc) throws IOException {
         if (this.method == Method.MODULO_HOST_MD5) {
             SolrInputField sif = solrdoc.getField(CollectionSchema.host_s.getSolrFieldName());
             if (sif != null) {
@@ -95,7 +95,7 @@ public class ShardSelection implements Iterable<SolrServer> {
         return this.server.get(selectRoundRobin());
     }
 
-    public SolrServer server4write(final String host) throws IOException {
+    public SolrClient server4write(final String host) throws IOException {
         if (host == null) throw new IOException("sharding - host url, host empty: " + host);
         if (host.indexOf("://") >= 0) return server4write(new URL(host)); // security catch for accidantly using the wrong method
         if (this.method == Method.MODULO_HOST_MD5) {
@@ -113,14 +113,14 @@ public class ShardSelection implements Iterable<SolrServer> {
         return this.server.get(selectRoundRobin());
     }
     
-    public SolrServer server4write(final URL url) throws IOException {
+    public SolrClient server4write(final URL url) throws IOException {
         return server4write(url.getHost());
     }
     
-    public List<SolrServer> server4read() {
+    public List<SolrClient> server4read() {
         if (this.method == Method.MODULO_HOST_MD5 || this.method == Method.ROUND_ROBIN) return this.server; // return all
         // this is a SolrCloud, we select just one of the SolrCloud server(s)
-        ArrayList<SolrServer> a = new ArrayList<>(1);
+        ArrayList<SolrClient> a = new ArrayList<>(1);
         a.add(this.server.get(selectRoundRobin()));
         return a;
     }
@@ -129,7 +129,7 @@ public class ShardSelection implements Iterable<SolrServer> {
      * return all solr server
      */
     @Override
-    public Iterator<SolrServer> iterator() {
+    public Iterator<SolrClient> iterator() {
         return this.server.iterator();
     }
 }

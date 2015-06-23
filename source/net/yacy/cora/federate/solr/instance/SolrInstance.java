@@ -22,7 +22,7 @@ package net.yacy.cora.federate.solr.instance;
 
 import java.util.Collection;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 public interface SolrInstance {
 
@@ -30,9 +30,9 @@ public interface SolrInstance {
     
     public Collection<String> getCoreNames();
 
-    public SolrServer getDefaultServer();
+    public SolrClient getDefaultServer();
     
-    public SolrServer getServer(String name);
+    public SolrClient getServer(String name);
     
     public void close();
 }

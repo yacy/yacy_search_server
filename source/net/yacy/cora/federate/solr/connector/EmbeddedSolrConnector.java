@@ -35,7 +35,6 @@ import net.yacy.search.schema.CollectionSchema;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -56,7 +55,6 @@ import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.request.SolrRequestInfo;
-import org.apache.solr.request.UnInvertedField;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.FieldType;
@@ -129,7 +127,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public void clearCaches() {
         SolrConfig solrConfig = this.core.getSolrConfig();
         @SuppressWarnings("unchecked")
-        SolrCache<String, UnInvertedField> fieldValueCache = solrConfig.fieldValueCacheConfig == null ? null : solrConfig.fieldValueCacheConfig.newInstance();
+        SolrCache<String, ?> fieldValueCache = solrConfig.fieldValueCacheConfig == null ? null : solrConfig.fieldValueCacheConfig.newInstance();
         if (fieldValueCache != null) fieldValueCache.clear();
         @SuppressWarnings("unchecked")
         SolrCache<Query, DocSet> filterCache= solrConfig.filterCacheConfig == null ? null : solrConfig.filterCacheConfig.newInstance();
@@ -144,7 +142,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             // clear 'lost' caches
             if (ib instanceof SolrCache) ((SolrCache<?,?>) ib).clear();
         }
-        FieldCache.DEFAULT.purgeAllCaches(); // purge the lucene field cache
     }
     
     public SolrInstance getInstance() {

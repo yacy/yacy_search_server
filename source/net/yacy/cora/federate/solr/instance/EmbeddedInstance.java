@@ -21,15 +21,18 @@
 package net.yacy.cora.federate.solr.instance;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
@@ -43,10 +46,10 @@ public class EmbeddedInstance implements SolrInstance {
     private CoreContainer coreContainer;
     private String defaultCoreName;
     private SolrCore defaultCore;
-    private SolrServer defaultCoreServer;
+    private SolrClient defaultCoreServer;
     private File containerPath;
     private Map<String, SolrCore> cores;
-    private Map<String, SolrServer> server;
+    private Map<String, SolrClient> server;
 
     public EmbeddedInstance(final File solr_config, final File containerPath, String givenDefaultCoreName, String[] initializeCoreNames) throws IOException {
         super();
@@ -77,14 +80,13 @@ public class EmbeddedInstance implements SolrInstance {
         }
         
         // initialize the coreContainer
-        String containerDir = this.containerPath.getAbsolutePath(); // the home directory of all resources.
+        String containerDir = this.containerPath.getAbsolutePath(); // the home directory of all cores
         File configFile = new File(solr_config, "solr.xml"); //  the configuration file for all cores
         this.coreContainer = CoreContainer.createAndLoad(containerDir, configFile); // this may take indefinitely long if solr files are broken
         if (this.coreContainer == null) throw new IOException("cannot create core container dir = " + containerDir + ", configFile = " + configFile);
 
         // get the default core from the coreContainer
-        this.defaultCoreName = this.coreContainer.getDefaultCoreName();
-        assert(this.defaultCoreName.equals(givenDefaultCoreName));
+        this.defaultCoreName = givenDefaultCoreName;
         ConcurrentLog.info("SolrEmbeddedInstance", "detected default solr core: " + this.defaultCoreName);
         this.defaultCore = this.coreContainer.getCore(this.defaultCoreName);
         assert givenDefaultCoreName.equals(this.defaultCore.getName()) : "givenDefaultCoreName = " + givenDefaultCoreName + ", this.defaultCore.getName() = " + this.defaultCore.getName();
@@ -96,7 +98,7 @@ public class EmbeddedInstance implements SolrInstance {
         // initialize core cache
         this.cores = new ConcurrentHashMap<String, SolrCore>();
         this.cores.put(this.defaultCoreName, this.defaultCore);
-        this.server = new ConcurrentHashMap<String, SolrServer>();
+        this.server = new ConcurrentHashMap<String, SolrClient>();
         this.server.put(this.defaultCoreName, this.defaultCoreServer);
     }
 
@@ -110,11 +112,29 @@ public class EmbeddedInstance implements SolrInstance {
         return o instanceof EmbeddedInstance && this.containerPath.equals(((EmbeddedInstance) o).containerPath);
     }
     
-    private void initializeCoreConf(final File solr_config, final File containerPath, String coreName) {
+    private static void initializeCoreConf(final File solr_config, final File containerPath, String coreName) {
 
         // ensure that default core path exists
         File corePath = new File(containerPath, coreName);
         if (!corePath.exists()) corePath.mkdirs();
+
+        // check if core.properties exists in each path (thats new in Solr 5.0)
+        File core_properties = new File(corePath, "core.properties");
+        if (!core_properties.exists()) {
+            // create the file
+            try {
+                FileOutputStream fos = new FileOutputStream(core_properties);
+                fos.write(ASCII.getBytes("name=" + coreName + "\n"));
+                fos.write(ASCII.getBytes("shard=${shard:}\n"));
+                fos.write(ASCII.getBytes("collection=${collection:" + coreName + "}\n"));
+                fos.write(ASCII.getBytes("config=${solrconfig:solrconfig.xml}\n"));
+                fos.write(ASCII.getBytes("schema=${schema:schema.xml}\n"));
+                fos.write(ASCII.getBytes("coreNodeName=${coreNodeName:}\n"));
+                fos.close();
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
+            }
+        }
 
         // ensure necessary subpaths exist
         File conf = new File(corePath, "conf");
@@ -191,13 +211,13 @@ public class EmbeddedInstance implements SolrInstance {
     }
 
     @Override
-    public SolrServer getDefaultServer() {
+    public SolrClient getDefaultServer() {
         return this.defaultCoreServer;
     }
 
     @Override
-    public SolrServer getServer(String coreName) {
-        SolrServer s = this.server.get(coreName);
+    public SolrClient getServer(String coreName) {
+        SolrClient s = this.server.get(coreName);
         if (s != null) return s;
         s = new EmbeddedSolrServer(this.coreContainer, coreName);
         this.server.put(coreName, s);

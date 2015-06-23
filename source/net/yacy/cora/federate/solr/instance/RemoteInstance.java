@@ -50,8 +50,8 @@ import org.apache.http.client.AuthCache;
 import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.protocol.HttpContext;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 
 @SuppressWarnings("deprecation")
 public class RemoteInstance implements SolrInstance {
@@ -59,9 +59,9 @@ public class RemoteInstance implements SolrInstance {
     private String solrurl;
     private final Object client; // not declared as org.apache.http.impl.client.DefaultHttpClient to avoid warnings during compilation. TODO: switch to org.apache.http.impl.client.HttpClientBuilder
     private final String defaultCoreName;
-    private final ConcurrentUpdateSolrServer defaultServer;
+    private final ConcurrentUpdateSolrClient defaultServer;
     private final Collection<String> coreNames;
-    private final Map<String, ConcurrentUpdateSolrServer> server;
+    private final Map<String, ConcurrentUpdateSolrClient> server;
     private final int timeout;
     
     public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName, final int timeout) throws IOException {
@@ -77,7 +77,7 @@ public class RemoteInstance implements SolrInstance {
     
     public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName, final int timeout) throws IOException {
         this.timeout = timeout;
-        this.server= new HashMap<String, ConcurrentUpdateSolrServer>();
+        this.server= new HashMap<String, ConcurrentUpdateSolrClient>();
         this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
         this.coreNames = coreNames == null ? new ArrayList<String>() : coreNames;
         if (this.coreNames.size() == 0) {
@@ -180,7 +180,7 @@ public class RemoteInstance implements SolrInstance {
             this.client = null;
         }
         
-        this.defaultServer = (ConcurrentUpdateSolrServer) getServer(this.defaultCoreName);
+        this.defaultServer = (ConcurrentUpdateSolrClient) getServer(this.defaultCoreName);
         if (this.defaultServer == null) throw new IOException("cannot connect to url " + url + " and connect core " + defaultCoreName);
     }
 
@@ -216,14 +216,14 @@ public class RemoteInstance implements SolrInstance {
     }
 
     @Override
-    public SolrServer getDefaultServer() {
+    public SolrClient getDefaultServer() {
         return this.defaultServer;
     }
 
     @Override
-    public SolrServer getServer(String name) {
+    public SolrClient getServer(String name) {
         // try to get the server from the cache
-        ConcurrentUpdateSolrServer s = this.server.get(name);
+        ConcurrentUpdateSolrClient s = this.server.get(name);
         if (s != null) return s;
         // create new http server
         if (this.client != null) {
@@ -238,10 +238,10 @@ public class RemoteInstance implements SolrInstance {
             String solrpath = u.getPath();
             String p = "http://" + host + ":" + port + solrpath;
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
-            s = new ConcurrentUpdateSolrServer(p, ((org.apache.http.impl.client.DefaultHttpClient) this.client), 10, Runtime.getRuntime().availableProcessors());
+            s = new ConcurrentUpdateSolrClient(p, ((org.apache.http.impl.client.DefaultHttpClient) this.client), 10, Runtime.getRuntime().availableProcessors());
         } else {
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
-            s = new ConcurrentUpdateSolrServer(this.solrurl + name, queueSizeByMemory(), Runtime.getRuntime().availableProcessors());
+            s = new ConcurrentUpdateSolrClient(this.solrurl + name, queueSizeByMemory(), Runtime.getRuntime().availableProcessors());
         }
         //s.setAllowCompression(true);
         s.setSoTimeout(this.timeout);

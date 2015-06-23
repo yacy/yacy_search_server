@@ -38,7 +38,7 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.request.LukeRequest;
@@ -57,17 +57,17 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     static {
         assert classLoaderSynchro != null;
     }
-    protected SolrServer server;
+    protected SolrClient server;
 
     protected SolrServerConnector() {
         this.server = null;
     }
 
-    protected void init(SolrServer server) {
+    protected void init(SolrClient server) {
         this.server = server;
     }
 
-    public SolrServer getServer() {
+    public SolrClient getServer() {
         return this.server;
     }
     
@@ -117,7 +117,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 }
             }
             synchronized (this.server) {
-                this.server.shutdown(); // if the server is embedded, resources are freed, if it is a HttpSolrServer, only the httpclient is shut down, not the remote server
+                this.server.close(); // if the server is embedded, resources are freed, if it is a HttpSolrServer, only the httpclient is shut down, not the remote server
             }
             this.server = null;
         } catch (final Throwable e) {

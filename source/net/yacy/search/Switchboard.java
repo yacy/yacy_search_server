@@ -82,7 +82,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.lucene.search.FieldCache;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -2067,8 +2066,7 @@ public final class Switchboard extends serverSwitch {
         // clear caches
         if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();
         Word.clearCache();
-        // Domains.clear();            
-        FieldCache.DEFAULT.purgeAllCaches();
+        // Domains.clear();
         
         // clean up image stack
         ResultImages.clearQueues();

@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.StreamingResponseCallback;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -37,21 +37,21 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 
-public class ServerMirror extends SolrServer {
+public class ServerMirror extends SolrClient {
 
     private static final long serialVersionUID = 4665364470785220322L;
-    private SolrServer solr0, solr1;
+    private SolrClient solr0, solr1;
     
     public ServerMirror() {
         solr0 = null;
         solr1 = null;
     }
     
-    public void connect0(SolrServer solr0) {
+    public void connect0(SolrClient solr0) {
         this.solr0 = solr0;
     }
     
-    public void connect1(SolrServer solr1) {
+    public void connect1(SolrClient solr1) {
         this.solr1 = solr1;
     }
 
@@ -373,9 +373,10 @@ public class ServerMirror extends SolrServer {
     /**
      * Performs a query to the Solr server
      * @param params  an object holding all key/value parameters to send along the request
+     * @throws IOException 
      */
     @Override
-    public QueryResponse query(SolrParams params) throws SolrServerException {
+    public QueryResponse query(SolrParams params) throws SolrServerException, IOException {
         if (this.solr0 != null) return this.solr0.query(params);
         if (this.solr1 != null) return this.solr1.query(params);
         return null;
@@ -385,9 +386,10 @@ public class ServerMirror extends SolrServer {
      * Performs a query to the Solr server
      * @param params  an object holding all key/value parameters to send along the request
      * @param method  specifies the HTTP method to use for the request, such as GET or POST
+     * @throws IOException 
      */
     @Override
-    public QueryResponse query(SolrParams params, METHOD method) throws SolrServerException {
+    public QueryResponse query(SolrParams params, METHOD method) throws SolrServerException, IOException {
         if (this.solr0 != null) return this.solr0.query(params, method);
         if (this.solr1 != null) return this.solr1.query(params, method);
         return null;
@@ -413,11 +415,11 @@ public class ServerMirror extends SolrServer {
 
     /**
      * SolrServer implementations need to implement how a request is actually processed
-     */ 
+     */
     @Override
-    public NamedList<Object> request( final SolrRequest request ) throws SolrServerException, IOException {
-        if (this.solr0 != null) return this.solr0.request(request);
-        if (this.solr1 != null) return this.solr1.request(request);
+    public NamedList<Object> request(@SuppressWarnings("rawtypes") SolrRequest request, String collection) throws SolrServerException, IOException {
+        if (this.solr0 != null) return this.solr0.request(request, collection);
+        if (this.solr1 != null) return this.solr1.request(request, collection);
         return null;
     }
 
@@ -430,8 +432,18 @@ public class ServerMirror extends SolrServer {
     
     @Override
     public void shutdown() {
-        if (this.solr0 != null) this.solr0.shutdown();
-        if (this.solr1 != null) this.solr1.shutdown();
+        if (this.solr0 != null)
+            try {
+                this.solr0.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        if (this.solr1 != null)
+            try {
+                this.solr1.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
     }
 
 }
