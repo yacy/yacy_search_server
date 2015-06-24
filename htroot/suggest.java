@@ -68,7 +68,7 @@ public class suggest {
 
         int c = 0;
         final DidYouMean didYouMean = new DidYouMean(sb.index, querystring);
-        final Collection<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
+        final Collection<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count, sb.index.fulltext().collectionSize() < 2000000);
         //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
         synchronized (suggestions) {
             for (StringBuilder suggestion: suggestions) {

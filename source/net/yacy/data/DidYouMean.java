@@ -154,7 +154,7 @@ public class DidYouMean {
      * @param preSortSelection the number of words that participate in the IO-intensive sort
      * @return
      */
-    public Collection<StringBuilder> getSuggestions(final long timeout, final int preSortSelection) {
+    public Collection<StringBuilder> getSuggestions(final long timeout, final int preSortSelection, boolean askIndex) {
         if (this.word.length() < MinimumInputWordLength) {
             return this.resultSet; // return nothing if input is too short
         }
@@ -162,14 +162,14 @@ public class DidYouMean {
         final long timelimit = startTime + timeout;
         int lastIndexOfSpace = this.word.lastIndexOf(" ");
         final Collection<StringBuilder> preSorted;
-        if (lastIndexOfSpace > 0) {
+        if (askIndex && lastIndexOfSpace > 0) {
             // several words
             preSorted = getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), timeout, preSortSelection, this.segment);
         } else {
             if (this.endsWithSpace) {
                 preSorted = getSuggestions(this.word.toString(), "", timeout, preSortSelection, this.segment);
             } else {
-                preSorted = getSuggestions(timeout);
+                preSorted = getSuggestions(timeout, askIndex);
             }
         }
         final ReversibleScoreMap<StringBuilder> scored = new ClusteredScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
@@ -347,7 +347,7 @@ public class DidYouMean {
      * @param timeout execution time in ms.
      * @return a Set&lt;String&gt; with word variations contained in term index.
      */
-    private Collection<StringBuilder> getSuggestions(final long timeout) {
+    private Collection<StringBuilder> getSuggestions(final long timeout, boolean askIndex) {
         final long startTime = System.currentTimeMillis();
         this.timeLimit = startTime + timeout;
         
@@ -368,7 +368,7 @@ public class DidYouMean {
         }
 
         test(this.word);
-        this.resultSet.addAll(getSuggestions("", this.word.toString(), timeout, 10, this.segment));
+        if (askIndex) this.resultSet.addAll(getSuggestions("", this.word.toString(), timeout, 10, this.segment));
         
         if (this.more) {
             // finish the producer
