@@ -254,11 +254,12 @@ public class Crawler_p {
                 } else {
                 	crawlName = crawlingFile.getName();
                 }
-                if (crawlName.length() > 256) {
+                if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
+                if (crawlName.length() > 64) {
+                    crawlName = "crawl_for_" + rootURLs.size() + "_start_points_" + Integer.toHexString(crawlName.hashCode());
                     int p = crawlName.lastIndexOf(',');
                     if (p >= 8) crawlName = crawlName.substring(0, p);
                 }
-                if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
                 if (crawlName.length() == 0 && sitemapURLStr.length() > 0) crawlName = "sitemap loader for " + sitemapURLStr;
                 
                 // delete old robots entries
@@ -466,6 +467,40 @@ public class Crawler_p {
                 
                 int timezoneOffset = post.getInt("timezoneOffset", 0);
                 
+                // in case that we crawl from a file, load that file and re-compute mustmatch pattern
+                List<AnchorURL> hyperlinks_from_file = null;
+                if ("file".equals(crawlingMode) && post.containsKey("crawlingFile") && crawlingFile != null) {
+                    final String crawlingFileContent = post.get("crawlingFile$file", "");
+                    try {
+                        // check if the crawl filter works correctly
+                        final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper(), timezoneOffset);
+                        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+                        if (crawlingFile != null && crawlingFile.exists()) {
+                            FileUtils.copy(new FileInputStream(crawlingFile), writer);
+                        } else {
+                            FileUtils.copy(crawlingFileContent, writer);
+                        }
+                        writer.close();
+
+                        // get links and generate filter
+                        hyperlinks_from_file = scraper.getAnchors();
+                        if (newcrawlingdepth > 0) {
+                            if (fullDomain) {
+                                newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks_from_file);
+                            } else if (subPath) {
+                                newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks_from_file);
+                            }
+                        }
+                    } catch (final Exception e) {
+                        // mist
+                        prop.put("info", "7"); // Error with file
+                        prop.putHTML("info_crawlingStart", crawlingFileName);
+                        prop.putHTML("info_error", e.getMessage());
+                        ConcurrentLog.logException(e);
+                    }
+                    sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                }
+                
                 // prepare a new crawling profile
                 final CrawlProfile profile;
                 byte[] handle;
@@ -578,32 +613,17 @@ public class Crawler_p {
                         ConcurrentLog.logException(e);
                     }
                 } else if ("file".equals(crawlingMode)) {
-                    if (post.containsKey("crawlingFile") && crawlingFile != null) {
-                        final String crawlingFileContent = post.get("crawlingFile$file", "");
+                    if (post.containsKey("crawlingFile") && crawlingFile != null && hyperlinks_from_file != null) {
                         try {
-                            // check if the crawl filter works correctly
-                            Pattern.compile(newcrawlingMustMatch);
-                            final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper(), timezoneOffset);
-                            final Writer writer = new TransformerWriter(null, null, scraper, null, false);
-                            if (crawlingFile != null && crawlingFile.exists()) {
-                                FileUtils.copy(new FileInputStream(crawlingFile), writer);
-                            } else {
-                                FileUtils.copy(crawlingFileContent, writer);
-                            }
-                            writer.close();
-
-                            // get links and generate filter
-                            final List<AnchorURL> hyperlinks = scraper.getAnchors();
                             if (newcrawlingdepth > 0) {
                                 if (fullDomain) {
-                                    newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks);
+                                    newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks_from_file);
                                 } else if (subPath) {
-                                    newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks);
+                                    newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks_from_file);
                                 }
                             }
-
                             sb.crawler.putActive(handle, profile);
-                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, profile.timezoneOffset());
+                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks_from_file, profile.timezoneOffset());
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);

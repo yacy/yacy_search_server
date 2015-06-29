@@ -691,11 +691,16 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
 
     public static String siteFilter(final Collection<? extends MultiProtocolURL> urls) {
-        LinkedHashSet<String> filters = new LinkedHashSet<String>(); // first collect in a set to eliminate doubles
-        for (final MultiProtocolURL url: urls) filters.add(mustMatchFilterFullDomain(url));
         final StringBuilder filter = new StringBuilder();
-        for (final String urlfilter: filters) filter.append('|').append(urlfilter);
-        return filter.length() > 0 ? filter.substring(1) : CrawlProfile.MATCH_ALL_STRING;
+        filter.append("(smb|ftp|https?)://(www.)?(");
+        for (final MultiProtocolURL url: urls) {
+            String host = url.getHost();
+            if (host == null) continue;
+            if (host.startsWith("www.")) host = host.substring(4);
+            filter.append(Pattern.quote(host.toLowerCase())).append(".*|");
+        }
+        filter.setCharAt(filter.length() - 1, ')');
+        return filter.toString();
     }
 
     public static String mustMatchFilterFullDomain(final MultiProtocolURL url) {
@@ -721,7 +726,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (host.startsWith("www.")) host = host.substring(4);
         String protocol = url.getProtocol();
         if ("http".equals(protocol) || "https".equals(protocol)) protocol = "https?+";
-        return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host)).append(url.getPath()).append(".*").toString();
+        return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host.toLowerCase())).append(url.getPath()).append(".*").toString();
     }
     
     public boolean isPushCrawlProfile() {
