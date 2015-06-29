@@ -82,6 +82,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private final PushbackInputStream inputStream;
     private final CrawlStacker crawlStacker;
     private final CollectionConfiguration configuration;
+    private final int concurrency;
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
@@ -97,13 +98,14 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     	return parser;
     }
 
-    public SurrogateReader(final InputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration) throws IOException {
-        this(new PushbackInputStream(stream, 200), queueSize, crawlStacker, configuration);
+    public SurrogateReader(final InputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
+        this(new PushbackInputStream(stream, 200), queueSize, crawlStacker, configuration, concurrency);
     }
     
-    public SurrogateReader(final PushbackInputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration) throws IOException {
+    public SurrogateReader(final PushbackInputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
         this.crawlStacker = crawlStacker;
         this.configuration = configuration;
+        this.concurrency = concurrency;
         this.buffer = new StringBuilder(300);
         this.parsingValue = false;
         this.dcEntry = null;
@@ -163,11 +165,13 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } finally {
-        	try {
-				this.surrogates.put(POISON_DOCUMENT);
-			} catch (final InterruptedException e1) {
-			    ConcurrentLog.logException(e1);
-			}
+            for (int i = 0; i < this.concurrency; i++) {
+            	try {
+    				this.surrogates.put(POISON_DOCUMENT);
+    			} catch (final InterruptedException e1) {
+    			    ConcurrentLog.logException(e1);
+    			}
+            }
 			try {
         		this.inputStream.close();
 			} catch (final IOException e) {

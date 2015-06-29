@@ -1981,16 +1981,37 @@ public final class Switchboard extends serverSwitch {
     }
 
     public void processSurrogate(final InputStream is, final String name) throws IOException {
-        final SurrogateReader reader = new SurrogateReader(is, 100, this.crawlStacker, this.index.fulltext().getDefaultConfiguration());
+        final int concurrency = Runtime.getRuntime().availableProcessors();
+
+        // start reader thread
+        final SurrogateReader reader = new SurrogateReader(is, 100, this.crawlStacker, this.index.fulltext().getDefaultConfiguration(), concurrency);
         final Thread readerThread = new Thread(reader, name);
+        readerThread.setPriority(Thread.MAX_PRIORITY); // we must have maximum prio here because this thread feeds the other threads. It must always be ahead of them.
         readerThread.start();
-        SolrInputDocument surrogate;
-        while ((surrogate = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
-            // check if url is in accepted domain
-            assert surrogate != null;
-            assert this.crawlStacker != null;
-            this.index.putDocument(surrogate);
-            if (shallTerminate()) break;
+        
+        // start indexer threads
+        assert this.crawlStacker != null;
+        Thread[] indexer = new Thread[concurrency];
+        for (int t = 0; t < concurrency; t++) {
+            indexer[t] = new Thread() {
+                @Override
+                public void run() {
+                    SolrInputDocument surrogate;
+                    while ((surrogate = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
+                        // check if url is in accepted domain
+                        assert surrogate != null;
+                        Switchboard.this.index.putDocument(surrogate);
+                        if (shallTerminate()) break;
+                    }
+                }
+            };
+            indexer[t].setPriority(5);
+            indexer[t].start();
+        }
+        
+        // wait for termination of indexer threads
+        for (int t = 0; t < concurrency; t++) {
+            try {indexer[t].join();} catch (InterruptedException e) {}
         }
     }
 
