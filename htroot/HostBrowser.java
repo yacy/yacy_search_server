@@ -204,7 +204,7 @@ public class HostBrowser {
                 int maxcount = authorized ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
                 
                 // collect hosts from index
-                ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_QUERY, maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
                 if (hostscore == null) hostscore = new ClusteredScoreMap<String>(true);
                 
                 // collect hosts from crawler
@@ -227,7 +227,7 @@ public class HostBrowser {
                     int exclcount = exclscore.get(host);
                     int failcount = failscore.get(host);
                     int errors = exclcount + failcount;
-                    prop.put("hosts_list_" + c + "_count", hostscore.get(host) - errors);
+                    prop.put("hosts_list_" + c + "_count", hostscore.get(host));
                     prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
                     if (inCrawler) prop.put("hosts_list_" + c + "_crawler_pending", crawler.get(host)[0]);
                     prop.put("hosts_list_" + c + "_errors", errors > 0 ? 1 : 0);
