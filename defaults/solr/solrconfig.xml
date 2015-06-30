@@ -142,7 +142,7 @@
        index format, but hooks into the schema to provide per-field customization of
        the postings lists and per-document values in the fieldType element
        (postingsFormat/docValuesFormat). Note that most of the alternative implementations
-       are experimental, so if you choose to customize the index format, its a good
+       are experimental, so if you choose to customize the index format, it's a good
        idea to convert back to the official format e.g. via IndexWriter.addIndexes(IndexReader)
        before upgrading to a newer version to avoid unnecessary reindexing.
   -->
@@ -1072,9 +1072,9 @@
      
      Admin Handlers - This will register all the standard admin
      RequestHandlers.
-     -->
     <requestHandler name="/admin/"
     class="solr.admin.AdminHandlers" />
+    -->
     <!-- This single handler is equivalent to the following... -->
     <!--
      <requestHandler name="/admin/luke"       class="solr.admin.LukeRequestHandler" />
@@ -1244,7 +1244,6 @@
       <!-- Class name of a clustering algorithm compatible with the Carrot2 framework.
              
            Currently available open source algorithms are:
-             
              * org.carrot2.clustering.lingo.LingoClusteringAlgorithm
              * org.carrot2.clustering.stc.STCClusteringAlgorithm
              * org.carrot2.clustering.kmeans.BisectingKMeansClusteringAlgorithm
