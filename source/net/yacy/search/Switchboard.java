@@ -154,7 +154,9 @@ import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.Parser.Failure;
+import net.yacy.document.Tokenizer;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.audioTagParser;
@@ -1996,10 +1998,25 @@ public final class Switchboard extends serverSwitch {
             indexer[t] = new Thread() {
                 @Override
                 public void run() {
+                    VocabularyScraper scraper = new VocabularyScraper();
                     SolrInputDocument surrogate;
                     while ((surrogate = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
-                        // check if url is in accepted domain
                         assert surrogate != null;
+                        try {
+                            // enrich the surrogate
+                            final DigestURL root = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                            final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+                            if (text != null && text.length() > 0) {
+                                // run the tokenizer on the text to get vocabularies and synonyms
+                                final Tokenizer tokenizer = new Tokenizer(root, text, LibraryProvider.dymLib, true, scraper);
+                                final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
+                                // overwrite the given vocabularies and synonyms with new computed ones
+                                Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
+                            }
+                        } catch (MalformedURLException e) {
+                            ConcurrentLog.logException(e);
+                        }
+                        // write the surrogate into the index
                         Switchboard.this.index.putDocument(surrogate);
                         if (shallTerminate()) break;
                     }

@@ -40,8 +40,10 @@ public class VocabularyScraper {
         this.vocMap = new ConcurrentHashMap<>();
     }
     
+    /**
+     * @param init must be a property list of property lists: the key of the top property list is the name of the vocabulary, the name of the embedded property list is the entity class and the value of the embedded property is the entity name
+     */
     public VocabularyScraper(JSONObject init) {
-        // init must be a property list of property lists: the key of the top property list is the name of the vocabulary, the name of the embedded property list is the entity class and the value of the embedded property is the entity name
         this.scraperDefinition = init == null ? new JSONObject() : init;
         this.vocMap = new ConcurrentHashMap<>();
         if (this.scraperDefinition.length() == 0) {

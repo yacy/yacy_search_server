@@ -253,24 +253,23 @@ dc_rights
      * @param tags
      */
     protected void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
-        //String subject = YaCyMetadata.hashURI(this.source.hash());
-        //for (String s: this.keywords) {
-        //    tags.remove(s);
-        //}
+        this.generic_facets.putAll(computeGenericFacets(tags));
+    }
+
+    public static Map<String, Set<String>> computeGenericFacets(Map<String, Set<Tagging.Metatag>> tags) {
+        Map<String, Set<String>> gf = new HashMap<String, Set<String>>();
         for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
             Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
             if (vocabulary == null) continue;
-            //String objectspace = vocabulary.getObjectspace();
-            //StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
             Set<String> objects = new HashSet<String>();
             for (Tagging.Metatag s: e.getValue()) {
                 objects.add(s.getObject());
-                //sb.append(',').append(s.getObject());
             }
-            this.generic_facets.put(vocabulary.getName(), objects);
+            gf.put(vocabulary.getName(), objects);
         }
+        return gf;
     }
-
+    
     public String[] dc_subject() {
         // sort out doubles and empty words
         final TreeSet<String> hs = new TreeSet<String>();

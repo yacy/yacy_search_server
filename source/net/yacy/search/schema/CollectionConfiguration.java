@@ -82,6 +82,7 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.SentenceReader;
+import net.yacy.document.Tokenizer;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
@@ -301,7 +302,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         String keywords = md.dc_subject();
     	Bitfield flags = md.flags();
-    	if (flags.get(Condenser.flag_cat_indexof)) {
+    	if (flags.get(Tokenizer.flag_cat_indexof)) {
     		if (keywords == null || keywords.isEmpty()) keywords = "indexof"; else {
     			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof";
     		}
@@ -510,10 +511,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 keywords = responseHeader.get(HeaderFramework.X_YACY_MEDIA_KEYWORDS, keywords);
             }
             add(doc, CollectionSchema.keywords, keywords);
-        }
-        if (allAttr || contains(CollectionSchema.synonyms_sxt)) {
-            List<String> synonyms = condenser.synonyms();
-            add(doc, CollectionSchema.synonyms_sxt, synonyms);
         }
 
         // unique-fields; these values must be corrected during postprocessing. (the following logic is !^ (not-xor) but I prefer to write it that way as it is)
@@ -993,29 +990,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.videolinkscount_i)) add(doc, CollectionSchema.videolinkscount_i, document.getVideolinks().size());
         if (allAttr || contains(CollectionSchema.applinkscount_i)) add(doc, CollectionSchema.applinkscount_i, document.getApplinks().size());
 
-        // write generic navigation
-        // there are no pre-defined solr fields for navigation because the vocabulary is generic
-        // we use dynamically allocated solr fields for this.
-        // It must be a multi-value string/token field, therefore we use _sxt extensions for the field names
-        List<String> vocabularies = new ArrayList<>();
-        for (Map.Entry<String, Set<String>> facet: document.getGenericFacets().entrySet()) {
-            String facetName = facet.getKey();
-            Set<String> facetValues = facet.getValue();
-            int count = facetValues.size();
-            if (count == 0) continue;
-            int logcount = (int) (Math.log(count) / Math.log(2));
-            Integer[] counts = new Integer[logcount + 1]; for (int i = 0; i <= logcount; i++) counts[i] = i;
-            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_TERMS_SUFFIX, facetValues.toArray(new String[count]));
-            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_COUNT_SUFFIX, facetValues.size());
-            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_LOGCOUNT_SUFFIX, logcount);
-            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_LOGCOUNTS_SUFFIX, counts);
-            vocabularies.add(facetName);
-        }
-        if ((allAttr || contains(CollectionSchema.vocabularies_sxt)) && vocabularies.size() > 0) {
-            add(doc, CollectionSchema.vocabularies_sxt, vocabularies);
-        }
-        
-
+        // document post-processing
         if ((allAttr || contains(CollectionSchema.process_sxt)) && processTypes.size() > 0) {
             List<String> p = new ArrayList<String>();
             for (ProcessType t: processTypes) p.add(t.name());
@@ -1024,7 +999,37 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 add(doc, CollectionSchema.harvestkey_s, sourceName);
             }
         }
+        
+        // document enrichments (synonyms, facets)
+        enrich(doc, condenser.synonyms(), document.getGenericFacets());
         return doc;
+    }
+    
+    public void enrich(SolrInputDocument doc, List<String> synonyms, Map<String, Set<String>> genericFacets) {
+        if (this.isEmpty() || contains(CollectionSchema.vocabularies_sxt)) {
+            // write generic navigation
+            // there are no pre-defined solr fields for navigation because the vocabulary is generic
+            // we use dynamically allocated solr fields for this.
+            // It must be a multi-value string/token field, therefore we use _sxt extensions for the field names
+            List<String> vocabularies = new ArrayList<>();
+            for (Map.Entry<String, Set<String>> facet: genericFacets.entrySet()) {
+                String facetName = facet.getKey();
+                Set<String> facetValues = facet.getValue();
+                int count = facetValues.size();
+                if (count == 0) continue;
+                int logcount = (int) (Math.log(count) / Math.log(2));
+                Integer[] counts = new Integer[logcount + 1]; for (int i = 0; i <= logcount; i++) counts[i] = i;
+                doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_TERMS_SUFFIX, facetValues.toArray(new String[count]));
+                doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_COUNT_SUFFIX, facetValues.size());
+                doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_LOGCOUNT_SUFFIX, logcount);
+                doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_LOGCOUNTS_SUFFIX, counts);
+                vocabularies.add(facetName);
+            }
+            if (vocabularies.size() > 0) add(doc, CollectionSchema.vocabularies_sxt, vocabularies);
+        }
+        if (this.isEmpty() || contains(CollectionSchema.synonyms_sxt)) {
+            if (synonyms.size() > 0) add(doc, CollectionSchema.synonyms_sxt, synonyms);
+        }
     }
 
     public static boolean postprocessingRunning   = false;

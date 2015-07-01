@@ -237,5 +237,9 @@ public class Tokenizer {
         for (String s: this.synonyms) l.add(s);
         return l;
     }
+    
+    public Map<String, Set<Tagging.Metatag>> tags() {
+        return this.tags;
+    }
 
 }

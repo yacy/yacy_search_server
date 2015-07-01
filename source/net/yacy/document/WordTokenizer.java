@@ -72,7 +72,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         final StringBuilder r = (this.buffer == null) ? null : this.buffer;
         this.buffer = nextElement0();
         // put word to words statistics cache
-        if (this.meaningLib != null) WordCache.learn(r);
+        if (this.meaningLib != null && r != null) WordCache.learn(r);
         return r;
     }
 
