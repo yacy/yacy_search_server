@@ -24,19 +24,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
 
 import org.apache.solr.common.params.MapSolrParams;
 
@@ -45,11 +40,8 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.language.synonyms.SynonymLibrary;
-import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.language.Identificator;
@@ -59,34 +51,11 @@ import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 
+public final class Condenser extends Tokenizer {
 
-public final class Condenser {
-
-    // this is the page analysis class
-    public final static boolean pseudostemming = false; // switch for removal of words that appear in shortened form
-    public final static int wordminsize = 2;
-    public final static int wordcut = 2;
-
-    // category flags that show how the page can be distinguished in different interest groups
-    public  static final int flag_cat_indexof       =  0; // a directory listing page (i.e. containing 'index of')
-    public  static final int flag_cat_haslocation   = 19; // the page has a location metadata attached
-    public  static final int flag_cat_hasimage      = 20; // the page refers to (at least one) images
-    public  static final int flag_cat_hasaudio      = 21; // the page refers to (at least one) audio file
-    public  static final int flag_cat_hasvideo      = 22; // the page refers to (at least one) videos
-    public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
-
-    //private Properties analysis;
-    private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
-    private final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
-    private final Set<String> synonyms; // a set of synonyms to the words
     private long fuzzy_signature = 0, exact_signature = 0; // signatures for double-check detection
     private String fuzzy_signature_text = null; // signatures for double-check detection
     
-    public int RESULT_NUMB_WORDS = -1;
-    //public int RESULT_DIFF_WORDS = -1;
-    public int RESULT_NUMB_SENTENCES = -1;
-    //public int RESULT_DIFF_SENTENCES = -1;
-    public Bitfield RESULT_FLAGS = new Bitfield(4);
     private final Identificator languageIdentificator;
     public LinkedHashSet<Date> dates_in_content;
     
@@ -100,12 +69,11 @@ public final class Condenser {
             final boolean findDatesInContent,
             final int timezoneOffset
             ) {
+        super(document.dc_source(), indexText ? document.getTextString() : "", meaningLib, doAutotagging, scraper);
+        
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
-        this.words = new HashMap<String, Word>();
-        this.synonyms = new LinkedHashSet<String>();
-        this.RESULT_FLAGS = new Bitfield(4);
         this.dates_in_content = new LinkedHashSet<Date>();
         
         // construct flag set for document
@@ -125,7 +93,6 @@ public final class Condenser {
         if (indexText) {
             String text = document.getTextString();
             if (findDatesInContent) this.dates_in_content = DateDetection.parse(text, timezoneOffset);
-            createCondensement(document.dc_source(), text, meaningLib, doAutotagging, scraper);
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle
@@ -167,9 +134,7 @@ public final class Condenser {
             */
         } else {
             this.RESULT_NUMB_WORDS = 0;
-            //this.RESULT_DIFF_WORDS = 0;
             this.RESULT_NUMB_SENTENCES = 0;
-            //this.RESULT_DIFF_SENTENCES = 0;
         }
 
         if (indexMedia) {
@@ -229,14 +194,6 @@ public final class Condenser {
             document.addMetatags(this.tags);
         }
 
-        // create the synonyms set
-        if (SynonymLibrary.size() > 0) {
-            for (String word: this.words.keySet()) {
-                Set<String> syms = SynonymLibrary.getSynonyms(word);
-                if (syms != null) this.synonyms.addAll(syms);
-            }
-        }
-
         String text = document.getTextString();
 
         // create hashes for duplicate detection
@@ -250,14 +207,6 @@ public final class Condenser {
         this.fuzzy_signature = EnhancedTextProfileSignature.getSignatureLong(fuzzySignatureFactory);
         this.fuzzy_signature_text = fuzzySignatureFactory.getSignatureText().toString();
         this.exact_signature = EnhancedTextProfileSignature.getSignatureLong(text);
-    }
-
-    private Condenser(final DigestURL root, final String text, final WordCache meaningLib, final boolean doAutotagging, final VocabularyScraper scraper) {
-        this.languageIdentificator = null; // we don't need that here
-        // analysis = new Properties();
-        this.words = new TreeMap<String, Word>();
-        this.synonyms = new HashSet<String>();
-        createCondensement(root, text, meaningLib, doAutotagging, scraper);
     }
 
     private void insertTextToWords(
@@ -300,17 +249,6 @@ public final class Condenser {
         return oldsize - this.words.size();
     }
 
-    public Map<String, Word> words() {
-        // returns the words as word/indexWord relation map
-        return this.words;
-    }
-    
-    public List<String> synonyms() {
-        ArrayList<String> l = new ArrayList<String>(this.synonyms.size());
-        for (String s: this.synonyms) l.add(s);
-        return l;
-    }
-
     public long fuzzySignature() {
         return this.fuzzy_signature;
     }
@@ -325,168 +263,6 @@ public final class Condenser {
     
     public String language() {
         return this.languageIdentificator.getLanguage();
-    }
-
-    private void createCondensement(final DigestURL root, final String text, final WordCache meaningLib, boolean doAutotagging, final VocabularyScraper scraper) {
-        assert text != null;
-        final Set<String> currsentwords = new HashSet<String>();
-        String word = "";
-        String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
-        for (int i = 0; i < wordcache.length; i++) wordcache[i] = "";
-        String k;
-        Tagging.Metatag tag;
-        int wordlen;
-        Word wsp;
-        final Word wsp1;
-        int wordHandle;
-        int wordHandleCount = 0;
-        //final int sentenceHandleCount = 0;
-        int allwordcounter = 0;
-        final int allsentencecounter = 0;
-        int wordInSentenceCounter = 1;
-        boolean comb_indexof = false, last_last = false, last_index = false;
-        //final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
-        if (LibraryProvider.autotagging.isEmpty()) doAutotagging = false;
-
-        // read source
-        WordTokenizer wordenum = new WordTokenizer(new SentenceReader(text), meaningLib);
-        try {
-	        while (wordenum.hasMoreElements()) {
-	            word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
-	            if (this.languageIdentificator != null) this.languageIdentificator.add(word);
-	            if (word.length() < wordminsize) continue;
-
-	            // get tags from autotagging
-	            if (doAutotagging) {
-	                Set<String> vocabularyNames = LibraryProvider.autotagging.getVocabularyNames();
-	                //Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
-	                //assert vocabularyNames.size() == vocabularies.size();
-	                Map<String, String> vocMap = scraper == null ? null : scraper.removeVocMap(root);
-	                if (vocMap != null && vocMap.size() > 0) {
-	                    for (Map.Entry<String, String> entry: vocMap.entrySet()) {
-	                        String navigatorName = entry.getKey();
-	                        String term = entry.getValue();
-	                        vocabularyNames.remove(navigatorName); // prevent that this is used again for auto-annotation
-	                        Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(navigatorName);
-	                        if (vocabulary != null) {
-	                            // extend the vocabulary
-	                            String obj = vocabulary.getObjectlink(term);
-	                            if (obj == null) try {vocabulary.put(term, "", root.toNormalform(true));} catch (IOException e) {} // this makes IO, be careful!
-	                            // create annotation
-	                            tag = vocabulary.getMetatagFromTerm(term);
-	                            Set<Tagging.Metatag> tagset = new HashSet<>();
-	                            tagset.add(tag);
-	                            this.tags.put(navigatorName, tagset);
-	                        }
-	                    }
-	                }
-	            	if (vocabularyNames.size() > 0) for (int wordc = 1; wordc <= wordcache.length + 1; wordc++) {
-	            		// wordc is number of words that are tested
-	            		StringBuilder sb = new StringBuilder();
-	            		if (wordc == 1) {
-	            			sb.append(word);
-	            		} else {
-	            			for (int w = 0; w < wordc - 1; w++) {
-	            				sb.append(wordcache[wordcache.length - wordc + w + 1]).append(' ');
-	            			}
-	            			sb.append(word);
-	            		}
-	            		String testterm = sb.toString().trim();
-	            		//System.out.println("Testing: " + testterm);
-		                tag = LibraryProvider.autotagging.getTagFromTerm(vocabularyNames, testterm);
-		                if (tag != null) {
-		                    String navigatorName = tag.getVocabularyName();
-		                    Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
-		                    if (tagset == null) {
-		                        tagset = new HashSet<Tagging.Metatag>();
-		                        this.tags.put(navigatorName, tagset);
-		                    }
-	                        tagset.add(tag);
-		                }
-	            	}
-	            }
-	            // shift wordcache
-	            System.arraycopy(wordcache, 1, wordcache, 0, wordcache.length - 1);
-	            wordcache[wordcache.length - 1] = word;
-
-	            // distinguish punctuation and words
-	            wordlen = word.length();
-	            if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) { // TODO: wordlen == 1 never true (see earlier if < wordminsize )
-	                // store sentence
-	                currsentwords.clear();
-	                wordInSentenceCounter = 1;
-	            } else {
-	                // check index.of detection
-	                if (last_last && comb_indexof && word.equals("modified")) {
-	                    this.RESULT_FLAGS.set(flag_cat_indexof, true);
-	                    wordenum.pre(true); // parse lines as they come with CRLF
-	                }
-	                if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
-	                last_last = word.equals("last");
-	                last_index = word.equals("index");
-
-	                // store word
-	                allwordcounter++;
-	                currsentwords.add(word);
-	                wsp = this.words.get(word);
-	                if (wsp != null) {
-	                    // word already exists
-	                    wordHandle = wsp.posInText;
-	                    wsp.inc();
-	                } else {
-	                    // word does not yet exist, create new word entry
-	                    wordHandle = wordHandleCount++;
-	                    wsp = new Word(wordHandle, wordInSentenceCounter, /* sentences.size() + */ 100);
-	                    wsp.flags = this.RESULT_FLAGS.clone();
-	                    this.words.put(word.toLowerCase(), wsp);
-	                }
-	                // we now have the unique handle of the word, put it into the sentence:
-	                wordInSentenceCounter++;
-	            }
-	        }
-        } finally {
-        	wordenum.close();
-        	wordenum = null;
-        }
-
-        if (pseudostemming) {
-            Map.Entry<String, Word> entry;
-            // we search for similar words and reorganize the corresponding sentences
-            // a word is similar, if a shortened version is equal
-            final Iterator<Map.Entry<String, Word>> wi = this.words.entrySet().iterator(); // enumerates the keys in descending order
-            wordsearch: while (wi.hasNext()) {
-                entry = wi.next();
-                word = entry.getKey();
-                wordlen = word.length();
-                wsp = entry.getValue();
-                for (int i = wordcut; i > 0; i--) {
-                    if (wordlen > i) {
-                        k = word.substring(0, wordlen - i);
-                        if (this.words.containsKey(k)) {
-                            // update word counter
-                            wsp1.count = wsp1.count + wsp.count;
-                            this.words.put(k, wsp1);
-                            // remove current word
-                            wi.remove();
-                            continue wordsearch;
-                        }
-                    }
-                }
-            }
-        }
-
-        // store result
-        //this.RESULT_NUMB_TEXT_BYTES = wordenum.count();
-        this.RESULT_NUMB_WORDS = allwordcounter;
-        //this.RESULT_DIFF_WORDS = wordHandleCount;
-        this.RESULT_NUMB_SENTENCES = allsentencecounter;
-        //this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
-    }
-
-    public static Map<String, Word> getWords(final String text, final WordCache meaningLib) {
-        // returns a word/indexWord relation map
-        if (text == null) return null;
-        return new Condenser(null, text, meaningLib, false, null).words();
     }
 
     public static void main(final String[] args) {
