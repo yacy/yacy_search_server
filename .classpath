@@ -93,5 +93,7 @@
 	<classpathentry kind="lib" path="lib/jsoup-1.8.2.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/weupnp-0.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jsonic-1.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/langdetect.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
