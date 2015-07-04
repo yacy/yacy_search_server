@@ -985,7 +985,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         while ((p = t.indexOf("  ",0)) >= 0) t = t.substring(0, p) + t.substring(p + 1);
 
         // split the string into tokens and add all camel-case splitting
-        final String[] u = CommonPattern.SPACE.split(t);
+        final String[] u = CommonPattern.SPACES.split(t);
         final Set<String> token = new LinkedHashSet<String>();
         for (final String r: u) token.add(r);
         for (final String r: u) token.addAll(parseCamelCase(r));

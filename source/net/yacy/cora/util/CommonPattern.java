@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 public class CommonPattern {
 
     public final static Pattern SPACE       = Pattern.compile(" ");
+    public final static Pattern SPACES      = Pattern.compile(" +"); // pattern for one or multiple spaces
     public final static Pattern COMMA       = Pattern.compile(",");
     public final static Pattern SEMICOLON   = Pattern.compile(";");
     public final static Pattern DOUBLEPOINT = Pattern.compile(":");
