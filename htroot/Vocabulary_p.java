@@ -164,7 +164,7 @@ public class Vocabulary_p {
                                 t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
                                 if (t.isEmpty()) continue;
                                 if (discoverFromTitleSplitted) {
-                                    String[] ts = CommonPattern.SPACE.split(t);
+                                    String[] ts = CommonPattern.SPACES.split(t);
                                     for (String s: ts) {
                                         if (s.isEmpty()) continue;
                                         if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;

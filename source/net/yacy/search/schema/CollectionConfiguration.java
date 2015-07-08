@@ -284,7 +284,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.title_chars_val, cv);
         }
         if (allAttr || contains(CollectionSchema.title_words_val)) {
-            Integer[] cv = new Integer[]{new Integer(CommonPattern.SPACE.split(title).length)};
+            Integer[] cv = new Integer[]{new Integer(CommonPattern.SPACES.split(title).length)};
             add(doc, CollectionSchema.title_words_val, cv);
         }
 
@@ -297,7 +297,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.description_chars_val, description_exist ? new Integer[]{new Integer(description.length())} : new Integer[0]);
         }
         if (allAttr || contains(CollectionSchema.description_words_val)) {
-            add(doc, CollectionSchema.description_words_val, description_exist ? new Integer[]{new Integer(description.length() == 0 ? 0 : CommonPattern.SPACE.split(description).length)} : new Integer[0]);
+            add(doc, CollectionSchema.description_words_val, description_exist ? new Integer[]{new Integer(description.length() == 0 ? 0 : CommonPattern.SPACES.split(description).length)} : new Integer[0]);
         }
 
         String keywords = md.dc_subject();
@@ -460,7 +460,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         if (allAttr || contains(CollectionSchema.title_words_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(titles.size());
-            for (String s: titles) cv.add(new Integer(CommonPattern.SPACE.split(s).length));
+            for (String s: titles) cv.add(new Integer(CommonPattern.SPACES.split(s).length));
             add(doc, CollectionSchema.title_words_val, cv);
         }
 
@@ -479,7 +479,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         if (allAttr || contains(CollectionSchema.description_words_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.length);
-            for (String s: descriptions) cv.add(new Integer(CommonPattern.SPACE.split(s).length));
+            for (String s: descriptions) cv.add(new Integer(CommonPattern.SPACES.split(s).length));
             add(doc, CollectionSchema.description_words_val, cv);
         }
 
@@ -1668,7 +1668,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 sid.setField(CollectionSchema.references_exthosts_i.getSolrFieldName(), rr.getExternalHostIDs().size());
                 change = true;
             }
-            Long hostExtent = hostExtentCount == null ? Integer.MAX_VALUE : hostExtentCount.get(url.hosthash());
+            Long hostExtent = hostExtentCount == null ? Long.MAX_VALUE : hostExtentCount.get(url.hosthash());
             if (this.contains(CollectionSchema.host_extent_i) &&
                 (hostextc_old == null || hostextc_old.intValue() != hostExtent)) {
                 sid.setField(CollectionSchema.host_extent_i.getSolrFieldName(), hostExtent.intValue());

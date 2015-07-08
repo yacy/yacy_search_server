@@ -305,7 +305,7 @@ public class DidYouMean {
                                 s = snippet + (afterSnippet.length() > 0 ? " " + afterSnippet : "");
                                 for (int i = 0; i < s.length(); i++) {char c = s.charAt(i); if (c < 'A') s = s.replace(c, ' ');} // remove funny symbols
                                 s = s.replaceAll("<b>", " ").replaceAll("</b>", " ").replaceAll("  ", " ").trim(); // wipe superfluous whitespace
-                                String[] sx = CommonPattern.SPACE.split(s);
+                                String[] sx = CommonPattern.SPACES.split(s);
                                 StringBuilder sb = new StringBuilder(s.length());
                                 for (String x: sx) if (x.length() > 1 && sb.length() < 28) sb.append(x).append(' '); else break;
                                 s = sb.toString().trim();

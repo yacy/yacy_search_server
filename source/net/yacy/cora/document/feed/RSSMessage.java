@@ -199,7 +199,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         final String subject = Token.subject.valueFrom(this.map, "");
         if (subject.indexOf(',') >= 0) return CommonPattern.COMMA.split(subject);
         if (subject.indexOf(';') >= 0) return CommonPattern.SEMICOLON.split(subject);
-        return CommonPattern.SPACE.split(subject);
+        return CommonPattern.SPACES.split(subject);
     }
 
     @Override

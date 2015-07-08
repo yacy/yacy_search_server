@@ -449,7 +449,7 @@ public class ViewFile {
             words = words.substring(1, words.length() - 1);
         }
         words = UTF8.decodeURL(words);
-        if (words.indexOf(' ',0) >= 0) return CommonPattern.SPACE.split(words);
+        if (words.indexOf(' ',0) >= 0) return CommonPattern.SPACES.split(words);
         if (words.indexOf(',',0) >= 0) return CommonPattern.COMMA.split(words);
         if (words.indexOf('+',0) >= 0) return words.split("\\+");
         w = new String[1];

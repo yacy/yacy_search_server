@@ -70,7 +70,7 @@ public class yacysearch_location {
             int placemarkCounter = 0;
             if (query.length() > 0 && search_query) {
                 final Set<GeoLocation> locations = LibraryProvider.geoLoc.find(query, true);
-                for (final String qp: CommonPattern.SPACE.split(query)) {
+                for (final String qp: CommonPattern.SPACES.split(query)) {
                     locations.addAll(LibraryProvider.geoLoc.find(qp, true));
                 }
                 String ip = sb.peers.mySeed().getIP();
