@@ -61,7 +61,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
     public final static String[] htmlExtensions = new String[]{
         "htm","html","phtml","shtml","shtm","stm","xhtml","phtml","phtm",
-        "tpl","php","php2","php3","php4","php5","cfm","asp","aspx","tex","txt"
+        "tpl","php","php2","php3","php4","php5","cfm","asp","aspx","tex","txt","msg"
         }; 
     
     public final static Set<String> htmlExtensionsSet;
@@ -79,6 +79,7 @@ public class htmlParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
         this.SUPPORTED_MIME_TYPES.add("application/x-httpd-php");
         this.SUPPORTED_MIME_TYPES.add("application/x-tex");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.ms-outlook");
         this.SUPPORTED_MIME_TYPES.add("text/plain");
         this.SUPPORTED_MIME_TYPES.add("text/csv");
     }
