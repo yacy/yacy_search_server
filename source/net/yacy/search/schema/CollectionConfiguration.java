@@ -1668,7 +1668,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 sid.setField(CollectionSchema.references_exthosts_i.getSolrFieldName(), rr.getExternalHostIDs().size());
                 change = true;
             }
-            Long hostExtent = hostExtentCount == null ? Integer.MAX_VALUE : hostExtentCount.get(url.hosthash());
+            Long hostExtent = hostExtentCount == null ? Long.MAX_VALUE : hostExtentCount.get(url.hosthash());
             if (this.contains(CollectionSchema.host_extent_i) &&
                 (hostextc_old == null || hostextc_old.intValue() != hostExtent)) {
                 sid.setField(CollectionSchema.host_extent_i.getSolrFieldName(), hostExtent.intValue());
