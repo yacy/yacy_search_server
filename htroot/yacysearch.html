@@ -29,6 +29,10 @@
     }
   }
   document.onkeydown = handleArrowKeys;
+  redirect = "#[redirection]#";
+  if (redirect != "") {
+  	window.location.href = redirect;
+  }
   </script>
   <script type="text/javascript" src="/env/bootstrap/js/typeahead.jquery.min.js"></script>
   <script type="text/javascript">

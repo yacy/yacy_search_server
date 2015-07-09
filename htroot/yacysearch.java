@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -194,6 +195,7 @@ public class yacysearch {
             prop.put("geoinfo", "0");
             prop.put("rss_queryenc", "");
             prop.put("meanCount", 5);
+            prop.put("redirection", "http://google.com");
             return prop;
         }
 
@@ -896,6 +898,17 @@ public class yacysearch {
         prop.put("myhost", hostIP != null ? hostIP : Domains.LOCALHOST);
         prop.put("myport", Domains.LOCALHOST.equals(hostIP) ? sb.getLocalPort("port", 8090) : sb.getPublicPort("port", 8090));
 
+        
+        // initial support for !bangs
+        // see https://duckduckgo.com/bang for examples
+        Pattern r = Pattern.compile("(!g) (.+)$");
+        Matcher m = r.matcher(originalquerystring.replaceAll(Segment.catchallString, "*"));
+        if(m.find( )) {
+        	prop.put("redirection", "http://google.com/search?q=" + m.group(2));
+        } else {
+        	prop.put("redirection", "");
+        }
+        
         // return rewrite properties
         return prop;
     }
