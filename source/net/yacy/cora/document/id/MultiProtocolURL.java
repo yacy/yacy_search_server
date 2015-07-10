@@ -277,12 +277,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     // no host given
                     this.path = h.substring(2); // "/path"  or "/c:/path"
                 } else if (h.startsWith("//")) { // "//host/path" or "//host/c:/path"
-                    if (h.charAt(3) == ':' && h.charAt(4) != '/' && h.charAt(4) != '\\') {
+                    if (h.length() > 4 && h.charAt(3) == ':' && h.charAt(4) != '/' && h.charAt(4) != '\\') {
                         // wrong windows path, after the doublepoint there should be a backslash
                         h = h.substring(0, 4) + '\\' + h.substring(4);
                     }
                     int q = h.indexOf('/', 2);
-                    if (q < 0) {
+                    if (q < 0 || h.length() > 3 && h.charAt(3) == ':') {
                         this.path = h.substring(2); // "path"  or "c:/path"
                     } else {
                         this.host = h.substring(2, q ); // TODO: handle "c:"  ?
@@ -2314,13 +2314,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
-/*
-    public static void main(final String[] args) {
-        for (final String s: args) System.out.println(toTokens(s));
-    }
-*/
+    
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
+          new String[]{null, "file://y:/"},
+          new String[]{null, "file://y:/yacy"},
+          new String[]{null, "file://y:/yacy/"},
+          new String[]{null, "file://y:"},
           new String[]{null, "file://Z:admin\\home"}, // thats wrong but may appear
           new String[]{null, "file://Z:\\admin\\home"},
           new String[]{null, "https://www.example.com/shoe/?p=2&ps=75#t={%22san_NaviPaging%22:2}"}, // ugly strange pagination link
@@ -2394,6 +2394,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 System.out.println("Difference for environment=" + environment + ", url=" + url + ":");
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
                 System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
+            }
+            
+            if (aURL != null && jURL != null && jURL.toString().equals(aURL.toNormalform(false))) {
+                System.out.println("jURL == aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
             }
 
             // check stability: the normalform of the normalform must be equal to the normalform
