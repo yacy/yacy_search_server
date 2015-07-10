@@ -112,6 +112,14 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return this.contains(field.getSolrFieldName());
     }
 
+    public void remove(final SolrInputDocument doc, final SchemaDeclaration key) {
+        key.remove(doc);
+    }
+    
+    public void remove(final SolrInputDocument doc, final String key) {
+        doc.removeField(key);
+    }
+
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final String value) {
         assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) key.add(doc, value);

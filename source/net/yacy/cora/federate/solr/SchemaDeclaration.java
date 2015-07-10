@@ -72,5 +72,7 @@ public interface SchemaDeclaration {
     public void add(final SolrInputDocument doc, final double value);
 
     public void add(final SolrInputDocument doc, final boolean value);
+    
+    public void remove(final SolrInputDocument doc);
 
 }

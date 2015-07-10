@@ -341,7 +341,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     public final String getComment() {
         return this.comment;
     }
-
+    
     @Override
     public final void add(final SolrInputDocument doc, final String value) {
         assert !this.isMultiValued();
@@ -431,5 +431,9 @@ public enum CollectionSchema implements SchemaDeclaration {
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
+    public final void remove(final SolrInputDocument doc) {
+        doc.removeField(this.getSolrFieldName());
+    }
 }
 

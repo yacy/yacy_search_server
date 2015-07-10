@@ -68,7 +68,7 @@
 	<classpathentry kind="lib" path="lib/httpmime-4.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/solr-core-5.2.0.jar" sourcepath="/Volumes/Uno/noBackup/Downloads/solr-5.2.0/solr/core/src/java"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-5.2.0.jar" sourcepath="/Volumes/Uno/noBackup/Downloads/solr-5.2.0/solr/solrj/src/java"/>
+	<classpathentry kind="lib" path="lib/solr-solrj-5.2.0.jar" sourcepath="/Users/admin/Downloads/solr-5.2.1/solr/solrj/src/java"/>
 	<classpathentry kind="lib" path="lib/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/woodstox-core-asl-4.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-common-5.2.0.jar"/>
