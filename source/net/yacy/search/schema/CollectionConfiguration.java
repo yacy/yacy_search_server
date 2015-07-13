@@ -101,6 +101,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 
 
@@ -1006,6 +1007,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     public void enrich(SolrInputDocument doc, List<String> synonyms, Map<String, Set<String>> genericFacets) {
+        remove(doc, CollectionSchema.vocabularies_sxt); // delete old values
+        for (SolrInputField sif: doc) {
+            if (sif.getName().startsWith(CollectionSchema.VOCABULARY_PREFIX)) remove(doc, sif.getName());
+        }
         if (this.isEmpty() || contains(CollectionSchema.vocabularies_sxt)) {
             // write generic navigation
             // there are no pre-defined solr fields for navigation because the vocabulary is generic
@@ -1027,6 +1032,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             if (vocabularies.size() > 0) add(doc, CollectionSchema.vocabularies_sxt, vocabularies);
         }
+        remove(doc, CollectionSchema.synonyms_sxt); // delete old values
         if (this.isEmpty() || contains(CollectionSchema.synonyms_sxt)) {
             if (synonyms.size() > 0) add(doc, CollectionSchema.synonyms_sxt, synonyms);
         }

@@ -284,5 +284,9 @@ public enum WebgraphSchema implements SchemaDeclaration {
         doc.setField(this.getSolrFieldName(), value);
     }
 
+    @Override
+    public final void remove(final SolrInputDocument doc) {
+        doc.removeField(this.getSolrFieldName());
+    }
 }
 
