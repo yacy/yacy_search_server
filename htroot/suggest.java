@@ -102,6 +102,16 @@ public class suggest {
             prop.putHTML("query", originalquerystring);
         }
 
+        // check for JSONP
+        if ( post.containsKey("callback") ) {
+            final String jsonp = post.get("callback") + "([";
+            prop.put("jsonp-start", jsonp);
+            prop.put("jsonp-end", "])");
+        } else {
+            prop.put("jsonp-start", "");
+            prop.put("jsonp-end", "");
+        }
+
         // Adding CORS Access header for xml output
         if (xml) {
             final ResponseHeader outgoingHeader = new ResponseHeader(200);
