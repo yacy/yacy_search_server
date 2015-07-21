@@ -201,7 +201,7 @@
         <pathelement location="${lib}/jetty-util-9.2.11.v20150529.jar" />
         <pathelement location="${lib}/jetty-webapp-9.2.11.v20150529.jar" />
         <pathelement location="${lib}/jetty-xml-9.2.11.v20150529.jar" />
-    	<pathelement location="${lib}/jsch-0.1.52.jar" />
+    	<pathelement location="${lib}/jsch-0.1.53.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
     	<pathelement location="${lib}/jsoup-1.8.2.jar" />
     	<pathelement location="${lib}/log4j-over-slf4j-1.7.9.jar" />
