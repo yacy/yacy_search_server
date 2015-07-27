@@ -1,1 +1,1 @@
-["#[query]#",[#{suggestions}#"#[text]#"#(eol)#,::#(/eol)##{/suggestions}#]]
+#[jsonp-start]#["#[query]#",[#{suggestions}#"#[text]#"#(eol)#,::#(/eol)##{/suggestions}#]]#[jsonp-end]#
