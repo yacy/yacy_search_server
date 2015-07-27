@@ -205,7 +205,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         String fq = req.getParams().get(CommonParams.FQ);
         String sort = req.getParams().get(CommonParams.SORT);
         String threadname = Thread.currentThread().getName();
-        if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort)); // for debugging in Threaddump
+        if (q != null) Thread.currentThread().setName("solr query: q=" + q + (fq == null ? "" : "&fq = " + fq) + (sort == null ? "" : "&sort = " + sort)); // for debugging in Threaddump
+        ConcurrentLog.info("EmbeddedSolrConnector.query", "QUERY: q=" + q + (fq == null ? "" : "&" + fq.toString()) + (sort == null ? "" : "&sort = " + sort) + " SolrQueryRequest=" + req.toString());
         
         SolrQueryResponse rsp = new SolrQueryResponse();
         NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
@@ -334,8 +335,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         if (q != null) {
             StringBuilder fqa = new StringBuilder();
             if (fq != null) for (String f: fq) fqa.append("fq=").append(f).append(' ');
-            Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", " + fqa.toString()) + (fl == null ? "" : ", fl=" + fl));
-            //System.out.println("solr query: q = " + q + (fq == null ? "" : ", " + fqa.toString()) + (fl == null ? "" : ", fl=" + fl));
+            Thread.currentThread().setName("solr query: q=" + q + (fq == null ? "" : "&" + fqa.toString()) + (fl == null ? "" : "&fl=" + fl));
+            ConcurrentLog.info("EmbeddedSolrConnector.getResponseByParams", "QUERY: q=" + q + (fq == null ? "" : "&" + fqa.toString()) + (fl == null ? "" : "&fl=" + fl) + " PARAMS: " + params.toString());
         }
         QueryResponse rsp;
         try {
