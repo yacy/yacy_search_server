@@ -843,14 +843,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         final int q = fileName.lastIndexOf('?');
         if (q < 0) {
             return fileName.substring(p + 1).toLowerCase();
-        } else {
-            // check last dot in query part
-            if (p > q) {
-                return ""; // TODO: last . after ?  (file.ext?param=one.txt)
-            } else {
-                return fileName.substring(p + 1, q).toLowerCase();
-            }
         }
+        // check last dot in query part
+        if (p > q) {
+            return ""; // TODO: last . after ?  (file.ext?param=one.txt)
+        }
+        return fileName.substring(p + 1, q).toLowerCase();
     }
 
     public String getPath() {

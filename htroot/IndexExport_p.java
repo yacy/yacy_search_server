@@ -93,27 +93,28 @@ public class IndexExport_p {
 
         if (post.containsKey("lurlexport")) {
             // parse format
-            int format = 0;
+            Fulltext.ExportFormat format = Fulltext.ExportFormat.text;
             final String fname = post.get("format", "url-text");
             final boolean dom = fname.startsWith("dom"); // if dom== false complete urls are exported, otherwise only the domain
-            if (fname.endsWith("text")) format = 0;
-            if (fname.endsWith("html")) format = 1;
-            if (fname.endsWith("rss")) format = 2;
-            if (fname.endsWith("solr")) format = 3;
+            final boolean text = fname.startsWith("text"); 
+            if (fname.endsWith("text")) format = Fulltext.ExportFormat.text;
+            if (fname.endsWith("html")) format = Fulltext.ExportFormat.html;
+            if (fname.endsWith("rss")) format = Fulltext.ExportFormat.rss;
+            if (fname.endsWith("solr")) format = Fulltext.ExportFormat.solr;
 
             // extend export file name
             String s = post.get("exportfile", "");
             if (s.indexOf('.',0) < 0) {
-                if (format == 0) s = s + ".txt";
-                if (format == 1) s = s + ".html";
-                if (format == 2 ) s = s + "_rss.xml";
-                if (format == 3) s = s + "_full.xml";
+                if (format == Fulltext.ExportFormat.text) s = s + ".txt";
+                if (format == Fulltext.ExportFormat.html) s = s + ".html";
+                if (format == Fulltext.ExportFormat.rss ) s = s + "_rss.xml";
+                if (format == Fulltext.ExportFormat.solr) s = s + "_full.xml";
             }
             final File f = new File(s);
             f.getParentFile().mkdirs();
             final String filter = post.get("exportfilter", ".*");
             final String query = post.get("exportquery", "*:*");
-            final Fulltext.Export running = segment.fulltext().export(f, filter, query, format, dom);
+            final Fulltext.Export running = segment.fulltext().export(f, filter, query, format, dom, text);
 
             prop.put("lurlexport_exportfile", s);
             prop.put("lurlexport_urlcount", running.count());
