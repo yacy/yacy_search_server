@@ -84,28 +84,36 @@ public class gzip {
     }
 
     public static byte[] gzipString(final String in) {
-	try {
-	    final InputStream fin = new ByteArrayInputStream(in.getBytes("UTF8"));
-	    final int buffersize = Math.min(1024, in.length());
-	    final ByteArrayOutputStream baos = new ByteArrayOutputStream(buffersize);
-	    final OutputStream fout = new GZIPOutputStream(baos, Math.max(buffersize, 65536)){{def.setLevel(Deflater.BEST_COMPRESSION);}};
-	    copy(fout, fin, 1024);
-	    fin.close();
-	    fout.close();
-	    return baos.toByteArray();
-	} catch (final IOException e) {
-	    logger.warn("ERROR: IO trouble ",e);
-	    return null;
-	}
+        return gzip(UTF8.getBytes(in));
     }
 
-    public static String gunzipString(final byte[] in) throws IOException {
-	    final InputStream  fin  = new GZIPInputStream(new ByteArrayInputStream(in));
-	    final ByteArrayOutputStream fout = new ByteArrayOutputStream(in.length / 3);
-	    copy(fout, fin, 1024);
-	    fin.close();
-	    fout.close();
-	    return UTF8.String(fout.toByteArray());
+    public static String gunzipString(final byte[] in) {
+	    return UTF8.String(gunzip(in));
+    }
+    
+    public static byte[] gzip(byte[] b) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length);
+            GZIPOutputStream out = new GZIPOutputStream(baos, Math.min(65536, b.length)){{def.setLevel(Deflater.BEST_COMPRESSION);}};
+            out.write(b, 0, b.length);
+            out.finish();
+            out.close();
+            return baos.toByteArray();
+        } catch (IOException e) {}
+        return null;
+    }
+    
+    public static byte[] gunzip(byte[] b) {
+        byte[] buffer = new byte[Math.min(2^20, b.length)];
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length * 2);
+            GZIPInputStream in = new GZIPInputStream(new ByteArrayInputStream(b), Math.min(65536, b.length));
+            int l; while ((l = in.read(buffer)) > 0) baos.write(buffer, 0, l);
+            in.close();
+            baos.close();
+            return baos.toByteArray();
+        } catch (IOException e) {}
+        return null;
     }
 
     private static void copy(final OutputStream out, final InputStream in, final int bufferSize) throws IOException {
