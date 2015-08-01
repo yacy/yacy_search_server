@@ -315,7 +315,7 @@ public final class Switchboard extends serverSwitch {
 
         // set loglevel and log
         setLog(new ConcurrentLog("SWITCHBOARD"));
-        AccessTracker.setDumpFile(new File("DATA/LOG/queries.log"));
+        AccessTracker.setDumpFile(new File(dataPath, "DATA/LOG/queries.log"));
 
         // set default peer name
         Seed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
@@ -359,7 +359,7 @@ public final class Switchboard extends serverSwitch {
         this.workPath = getDataPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.workPath.mkdirs();
         // if default work files exist, copy them (don't overwrite existing!)
-        File defaultWorkPath = new File("defaults/data/work");
+        File defaultWorkPath = new File(appPath, "defaults/data/work");
         if (defaultWorkPath.list() != null) {
             for (String fs : defaultWorkPath.list()) {
                 File wf = new File(this.workPath, fs);
@@ -730,7 +730,7 @@ public final class Switchboard extends serverSwitch {
         // copy opensearch heuristic config (if not exist)
         final File osdConfig = new File(getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
         if (!osdConfig.exists()) {
-            final File osdDefaultConfig = new File("defaults/heuristicopensearch.conf");
+            final File osdDefaultConfig = new File(appPath, "defaults/heuristicopensearch.conf");
             this.log.info("heuristic.opensearch list Path = " + osdDefaultConfig.getAbsolutePath());
             try {
                 Files.copy(osdDefaultConfig, osdConfig);
@@ -781,7 +781,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // init html parser evaluation scheme
-        File parserPropertiesPath = new File("defaults/");
+        File parserPropertiesPath = new File(appPath, "defaults/");
         String[] settingsList = parserPropertiesPath.list();
         for ( final String l : settingsList ) {
             if ( l.startsWith("parser.") && l.endsWith(".properties") ) {
@@ -865,7 +865,7 @@ public final class Switchboard extends serverSwitch {
         // load oai tables
         final Map<String, File> oaiFriends =
             OAIListFriendsLoader.loadListFriendsSources(
-                new File("defaults/oaiListFriendsSource.xml"),
+                new File(appPath, "defaults/oaiListFriendsSource.xml"),
                 getDataPath());
         OAIListFriendsLoader.init(this.loader, oaiFriends, ClientIdentification.yacyInternetCrawlerAgent);
         this.crawlQueues = new CrawlQueues(this, this.queuesRoot);
@@ -2413,7 +2413,7 @@ public final class Switchboard extends serverSwitch {
                 final Properties profile = new Properties();
                 FileInputStream fileIn = null;
                 try {
-                    fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
+                    fileIn = new FileInputStream(new File(this.dataPath, "DATA/SETTINGS/profile.txt"));
                     profile.load(fileIn);
                 } catch (final IOException e ) {
                 } finally {
