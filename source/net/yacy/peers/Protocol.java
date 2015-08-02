@@ -47,7 +47,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -937,6 +939,8 @@ public final class Protocol {
             final int partitions,
             final Blacklist blacklist) {
 
+        //try {System.out.println("*** debug-query *** " + URLDecoder.decode(solrQuery.toString(), "UTF-8"));} catch (UnsupportedEncodingException e) {}
+        
         if (event.query.getQueryGoal().getQueryString(false) == null || event.query.getQueryGoal().getQueryString(false).length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
@@ -954,6 +958,7 @@ public final class Protocol {
             solrQuery.setHighlightSimplePre("<b>");
             solrQuery.setHighlightSnippets(5);
             for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
+            //System.out.println("*** debug-query-highligh ***:" + ConcurrentLog.stackTrace());
         } else {
             solrQuery.setHighlight(false);
         }
@@ -1078,6 +1083,7 @@ public final class Protocol {
             docs = new ArrayList<SolrInputDocument>(docList[0].size());
         } else docs = null;
         for (final SolrDocument doc: docList[0]) {
+            //System.out.println("***DEBUG*** " + ((String) doc.getFieldValue("sku")));
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
             }

@@ -973,7 +973,8 @@ public final class SearchEvent {
                 this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {
                     try {
-                        long score = (long) (1000000.0f * iEntry.score());
+                        long score = (long) Math.max(0, (1000000.0f * iEntry.score()) - iEntry.urllength()); // we modify the score here since the solr score is equal in many cases and then the order would simply depend on the url hash which would be silly
+                        //System.out.println("*** debug-score *** " + score + " for entry " + iEntry.urlstring());
                         this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score == 0 ? this.order.cardinal(iEntry) : score)); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch (final ArithmeticException e ) {
@@ -1519,13 +1520,15 @@ public final class SearchEvent {
             final URIMetadataNode re = this.resultList.element(item).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
             
-            if (this.localsolrsearch == null || !this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
+            /*
+            if (this.localsolrsearch == null || (!this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0)) {
                 // at the end of a list, trigger a next solr search
                 if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
+                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, this.query.itemsPerPage, null, 0, Switchboard.urlBlacklist);
                 }
                 this.localsolroffset += this.query.itemsPerPage;
             }
+            */
             return re;
         }
 

@@ -328,7 +328,9 @@ public class RemoteSearch extends Thread {
                     final Seed targetPeer,
                     final int partitions,
                     final Blacklist blacklist) {
-
+        
+        //System.out.println("*** debug-remoteSearch ***:" + ConcurrentLog.stackTrace());
+        
         assert solrQuery != null;
         // check own peer status
         if (event.peers.mySeed() == null) { return null; }

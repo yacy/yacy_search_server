@@ -787,32 +787,9 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
         return this.toString(this.textSnippet.getLineRaw());
     }
-/* 
-    taken from ResultEntry (should work without)
-
-    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+    
     @Override
     public int hashCode() {
-        if (this.hashCache == Integer.MIN_VALUE) {
-            this.hashCache = ByteArray.hashCode(this.hash());
-        }
-        return this.hashCache;
+        return this.url().hashCode();
     }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (!(obj instanceof URIMetadataNode)) return false;
-        URIMetadataNode other = (URIMetadataNode) obj;
-        return Base64Order.enhancedCoder.equal(this.hash(), other.hash());
-    }
-   @Override
-    public int compareTo(URIMetadataNode o) {
-        return Base64Order.enhancedCoder.compare(this.hash(), o.hash());
-    }
-    @Override
-    public int compare(URIMetadataNode o1, URIMetadataNode o2) {
-        return Base64Order.enhancedCoder.compare(o1.hash(), o2.hash());
-    }*/
 }
