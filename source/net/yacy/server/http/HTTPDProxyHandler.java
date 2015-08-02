@@ -722,8 +722,8 @@ public final class HTTPDProxyHandler {
         }
 
 	// only gzip-encoding is supported, remove other encodings (e. g. deflate)
-        if ((requestHeader.get(HeaderFramework.ACCEPT_ENCODING,"")).indexOf("gzip",0) != -1) {
-            requestHeader.put(HeaderFramework.ACCEPT_ENCODING, "gzip");
+        if ((requestHeader.get(HeaderFramework.ACCEPT_ENCODING,"")).indexOf(HeaderFramework.CONTENT_ENCODING_GZIP,0) != -1) {
+            requestHeader.put(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
 	} else {
             requestHeader.put(HeaderFramework.ACCEPT_ENCODING, "");
 	}

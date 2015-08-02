@@ -30,6 +30,8 @@ import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.protocol.HeaderFramework;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.HttpEntityWrapper;
@@ -38,17 +40,16 @@ import org.apache.http.protocol.HTTP;
 
 public class GzipCompressingEntity extends HttpEntityWrapper {
 
-	private static final String GZIP_CODEC = "gzip";
 //	private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
 
-	public GzipCompressingEntity(final HttpEntity entity) {
-		super(entity);
-	}
+    public GzipCompressingEntity(final HttpEntity entity) {
+        super(entity);
+    }
 
-	@Override
+    @Override
     public Header getContentEncoding() {
-		return new BasicHeader(HTTP.CONTENT_ENCODING, GZIP_CODEC);
-	}
+        return new BasicHeader(HTTP.CONTENT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
+    }
 
 	@Override
     public long getContentLength() {

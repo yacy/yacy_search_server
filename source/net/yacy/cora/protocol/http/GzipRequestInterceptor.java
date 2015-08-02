@@ -26,21 +26,18 @@
 package net.yacy.cora.protocol.http;
 
 import java.io.IOException;
-
+import net.yacy.cora.protocol.HeaderFramework;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.protocol.HttpContext;
 
 public class GzipRequestInterceptor implements HttpRequestInterceptor {
-
-    private static final String ACCEPT_ENCODING = "Accept-Encoding";
-    private static final String GZIP_CODEC = "gzip";
     
     @Override
     public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-        if (!request.containsHeader(ACCEPT_ENCODING)) {
-            request.addHeader(ACCEPT_ENCODING, GZIP_CODEC);
+        if (!request.containsHeader(HeaderFramework.ACCEPT_ENCODING)) {
+            request.addHeader(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
         }
     }
 
