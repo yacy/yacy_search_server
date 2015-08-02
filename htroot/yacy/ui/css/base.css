@@ -77,7 +77,7 @@ div.ys {
 .filter {
   width: 190px;  
   margin-bottom: .5em;
-  padding: 2px 0px 2px 0px /* top right bottom left */
+  padding: 2px 0px 2px 0px; /* top right bottom left */
   border: 1px solid #CCCCCC;
   font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
   font-size: 12px;
@@ -228,7 +228,7 @@ p.url a {
   	margin-bottom:-1em; 	
 }
 .bm_input, .bm_select { 
-  padding: 2px 0px 2px 0px /* top right bottom left */
+  padding: 2px 0px 2px 0px; /* top right bottom left */
   border: 1px solid #CCCCCC;
   margin: 0px 0px 2px 10px;
 }
