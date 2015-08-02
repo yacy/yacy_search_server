@@ -39,19 +39,21 @@
         <dt>Only Domain:</dt>
         <dd><input type="radio" name="format" value="dom-text" /> Plain Text List (domains only)<br />
             <input type="radio" name="format" value="dom-html" /> HTML (domains as URLs, no title)</dd>
+		<dt>Only Text:</dt>
+        <dd><input type="radio" name="format" value="text-text" /> Fulltext of Search Index Text</dd>
 		</dl>
 		</dd>
         <dt>&nbsp;</dt>
-        <dd><input type="submit" name="lurlexport" value="Export URLs" class="btn btn-primary" style="width:240px;"/>
+        <dd><input type="submit" name="lurlexport" value="Export" class="btn btn-primary" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
     </form>::
-    <div class="alert alert-info" style="text-decoration:blink">Export to file #[exportfile]# is running ..  #[urlcount]# URLs so far</div>::
+    <div class="alert alert-info" style="text-decoration:blink">Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far</div>::
     #(/lurlexport)#
     
 	#(lurlexportfinished)#::
-    <div class="alert alert-success">Finished export of #[urlcount]# URLs to file <a href="file://#[exportfile]#" target="_">#[exportfile]#</a><br/>
+    <div class="alert alert-success">Finished export of #[urlcount]# Documents to file <a href="file://#[exportfile]#" target="_">#[exportfile]#</a><br/>
     <em>Import this file by moving it to DATA/SURROGATES/in</em></div>::
     #(/lurlexportfinished)#
     

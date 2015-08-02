@@ -86,6 +86,15 @@ public final class Cache {
             responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 2048, 100, ' ');
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
+            // try a healing
+            if (dbfile.exists()) {
+                dbfile.delete();
+                try {
+                    responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 2048, 100, ' ');
+                } catch (final IOException ee) {
+                    ConcurrentLog.logException(e);
+                }
+            }
         }
         // open the cache file
         try {
@@ -94,8 +103,19 @@ public final class Cache {
             fileDB = new Compressor(fileDBunbuffered, 6 * 1024 * 1024);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
+            // try a healing
+            if (cachePath.exists()) {
+                cachePath.delete();
+                try {
+                    fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, 1024 * 1024 * 2, false, true);
+                    fileDBunbuffered.setMaxSize(maxCacheSize);
+                    fileDB = new Compressor(fileDBunbuffered, 6 * 1024 * 1024);
+                } catch (final IOException ee) {
+                    ConcurrentLog.logException(e);
+                }
+            }
         }
-        ConcurrentLog.info("Cache", "initialized cache database responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
+        ConcurrentLog.info("Cache", "initialized cache database responseHeaderDB.size() = " + (responseHeaderDB == null ? "NULL" : responseHeaderDB.size()) + ", fileDB.size() = " + (fileDB == null ? "NULL" : fileDB.size()));
 
         // clean up the responseHeaderDB which cannot be cleaned the same way as the cache files.
         // We do this as a concurrent job only once after start-up silently

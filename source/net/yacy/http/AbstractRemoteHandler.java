@@ -64,15 +64,28 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         new Thread() {
             @Override
             public void run() {
-                final InetAddress localInetAddress = Domains.myPublicLocalIP();
-                if (localInetAddress != null) {
-                    if (!localVirtualHostNames.contains(localInetAddress.getHostName())) {
-                        localVirtualHostNames.add(localInetAddress.getHostName());
-                        localVirtualHostNames.add(localInetAddress.getHostAddress());  // same as getServer().getURI().getHost()
-                    }
+                for (InetAddress localInetAddress : Domains.myPublicIPv4()) {
+                    if (localInetAddress != null) {
+                        if (!localVirtualHostNames.contains(localInetAddress.getHostName())) {
+                            localVirtualHostNames.add(localInetAddress.getHostName());
+                            localVirtualHostNames.add(localInetAddress.getHostAddress());  // same as getServer().getURI().getHost()
+                        }
 
-                    if (!localVirtualHostNames.contains(localInetAddress.getCanonicalHostName())) {
-                        localVirtualHostNames.add(localInetAddress.getCanonicalHostName());
+                        if (!localVirtualHostNames.contains(localInetAddress.getCanonicalHostName())) {
+                            localVirtualHostNames.add(localInetAddress.getCanonicalHostName());
+                        }
+                    }
+                }
+                for (InetAddress localInetAddress : Domains.myPublicIPv6()) {
+                    if (localInetAddress != null) {
+                        if (!localVirtualHostNames.contains(localInetAddress.getHostName())) {
+                            localVirtualHostNames.add(localInetAddress.getHostName());
+                            localVirtualHostNames.add(localInetAddress.getHostAddress());  // same as getServer().getURI().getHost()
+                        }
+
+                        if (!localVirtualHostNames.contains(localInetAddress.getCanonicalHostName())) {
+                            localVirtualHostNames.add(localInetAddress.getCanonicalHostName());
+                        }
                     }
                 }
                 if (sb.peers != null) {

@@ -103,6 +103,7 @@ filesize.max.other = 8589934591
 # In case of privately managed networks, this configuration must be changed BEFORE it is released
 # to the members of the separated network peers.
 network.unit.definition = defaults/yacy.network.freeworld.unit
+#network.unit.definition = defaults/yacy.network.webportal.unit
 #network.unit.definition = defaults/yacy.network.intranet.unit
 
 # distinguish intranet/internet IPs:

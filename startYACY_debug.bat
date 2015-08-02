@@ -17,7 +17,9 @@ if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
 :STARTJAVA
-set javacmd=%javacmd% -XX:-UseGCOverheadLimit -Djava.awt.headless=true -Dfile.encoding=UTF-8
+set javacmd=%javacmd% -XX:-UseGCOverheadLimit -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djsse.enableSNIExtension=false
+Rem    -Djsse.enableSNIExtension=false  fix a ssl problem in Java 1.7, see http://teknosrc.com/javax-net-ssl-sslprotocolexception-handshake-alert-unrecognized_name-solved/
+
 Rem Starting YaCy
 Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%

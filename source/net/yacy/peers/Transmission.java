@@ -83,13 +83,11 @@ public class Transmission {
          *   to multiple peers and to ensure that all entries in the indexContainers
          *   have a reference in the urls
          * - a set of yacy seeds which will shrink as the containers are transmitted to them
-         * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
         private final Seed                           dhtTarget;
         private final ReferenceContainerCache<WordReference> containers;
         private final HandleSet                      references;
         private final HandleSet                      badReferences;
-        private int                                  hit, miss;
 
         /**
          * generate a new dispatcher target. such a target is defined with a primary target and
@@ -103,8 +101,6 @@ public class Transmission {
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
             this.references = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.badReferences = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.hit = 0;
-            this.miss = 0;
         }
 
         /*
@@ -211,28 +207,11 @@ public class Transmission {
             return this.dhtTarget;
         }
 
-        /**
-         * return the number of successful transmissions
-         * @return
-         */
-        public int hit() {
-            return this.hit;
-        }
-
-        /**
-         * return the number of unsuccessful transmissions
-         * @return
-         */
-        public int miss() {
-            return this.miss;
-        }
-
         public boolean transmit() {
             // transferring selected words to remote peer
             if (this.dhtTarget == Transmission.this.seeds.mySeed() || this.dhtTarget.hash.equals(Transmission.this.seeds.mySeed().hash)) {
             	// target is my own peer. This is easy. Just restore the indexContainer
             	restore();
-            	this.hit++;
             	Transmission.this.log.info("Transfer of chunk to myself-target");
             	return true;
             }
@@ -256,13 +235,11 @@ public class Transmission {
                 // if the peer has set a pause time and we are in flush mode (index transfer)
                 // then we pause for a while now
                 Transmission.this.log.info("Transfer finished of chunk to target " + this.dhtTarget.hash + "/" + this.dhtTarget.getName());
-                this.hit++;
                 return true;
             }
             Transmission.this.log.info(
                     "Index transfer to peer " + this.dhtTarget.getName() + ":" + this.dhtTarget.hash +
                     " failed: " + error);
-            this.miss++;
             // write information that peer does not receive index transmissions
             Transmission.this.log.info("Transfer failed of chunk to target " + this.dhtTarget.hash + "/" + this.dhtTarget.getName() + ": " + error);
             // get possibly newer target Info

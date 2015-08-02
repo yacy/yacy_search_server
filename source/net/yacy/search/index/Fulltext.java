@@ -618,13 +618,17 @@ public final class Fulltext {
         }
     }
     
+    public static enum ExportFormat {
+        text, html, rss, solr;
+    }
+    
     // export methods
-    public Export export(final File f, final String filter, final String query, final int format, final boolean dom) {
+    public Export export(final File f, final String filter, final String query, final ExportFormat format, final boolean dom, final boolean text) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
             ConcurrentLog.warn("LURL-EXPORT", "cannot start another export thread, already one running");
             return this.exportthread;
         }
-        this.exportthread = new Export(f, filter, query, format, dom);
+        this.exportthread = new Export(f, filter, query, format, dom, text);
         this.exportthread.start();
         return this.exportthread;
     }
@@ -638,10 +642,10 @@ public final class Fulltext {
         private final Pattern pattern;
         private int count;
         private String failure, query;
-        private final int format;
-        private final boolean dom;
+        private final ExportFormat format;
+        private final boolean dom, text;
 
-        private Export(final File f, final String filter, final String query, final int format, boolean dom) {
+        private Export(final File f, final String filter, final String query, final ExportFormat format, final boolean dom, final boolean text) {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.pattern = filter == null ? null : Pattern.compile(filter);
@@ -650,6 +654,7 @@ public final class Fulltext {
             this.failure = null;
             this.format = format;
             this.dom = dom;
+            this.text = text;
             //if ((dom) && (format == 2)) dom = false;
         }
 
@@ -658,13 +663,13 @@ public final class Fulltext {
             try {
                 final File parentf = this.f.getParentFile();
                 if (parentf != null) parentf.mkdirs();
-                OutputStream os = new FileOutputStream(this.format == 3 ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
-                if (this.format == 3) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
+                OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
+                if (this.format == ExportFormat.solr) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
                 final PrintWriter pw = new PrintWriter(new BufferedOutputStream(os));
-                if (this.format == 1) {
+                if (this.format == ExportFormat.html) {
                     pw.println("<html><head></head><body>");
                 }
-                if (this.format == 2) {
+                if (this.format == ExportFormat.rss) {
                     pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                     pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
                     pw.println("<rss version=\"2.0\" xmlns:yacy=\"http://www.yacy.net/\" xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:atom=\"http://www.w3.org/2005/Atom\">");
@@ -673,7 +678,7 @@ public final class Fulltext {
                     pw.println("<description></description>");
                     pw.println("<link>http://yacy.net</link>");
                 }
-                if (this.format == 3) {
+                if (this.format == ExportFormat.solr) {
                     pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                     pw.println("<response>");
                     pw.println("<result>");
@@ -683,12 +688,25 @@ public final class Fulltext {
                     ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
                     for (final String host: stats) {
                         if (this.pattern != null && !this.pattern.matcher(host).matches()) continue;
-                        if (this.format == 0) pw.println(host);
-                        if (this.format == 1) pw.println("<a href=\"http://" + host + "\">" + host + "</a><br>");
+                        if (this.format == ExportFormat.text) pw.println(host);
+                        if (this.format == ExportFormat.html) pw.println("<a href=\"http://" + host + "\">" + host + "</a><br>");
                         this.count++;
                     }
                 } else {
-                    if (this.format < 3) {
+                    if (this.format == ExportFormat.solr || (this.text && this.format == ExportFormat.text)) {
+                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
+                        SolrDocument doc;
+                        while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                            String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                            if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
+                            CRIgnoreWriter sw = new CRIgnoreWriter();
+                            if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName())); else EnhancedXMLResponseWriter.writeDoc(sw, doc);
+                            sw.close();
+                            String d = sw.toString();
+                            pw.println(d);
+                            this.count++;
+                        }
+                    } else {
                         BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true, 
                                 CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
                                 CollectionSchema.author.getSolrFieldName(), CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
@@ -705,13 +723,13 @@ public final class Fulltext {
                             size = (Integer) doc.getFieldValue(CollectionSchema.size_i.getSolrFieldName());
                             date = (Date) doc.getFieldValue(CollectionSchema.last_modified.getSolrFieldName());
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
-                            if (this.format == 0) {
+                            if (this.format == ExportFormat.text) {
                                 pw.println(url);
                             }
-                            if (this.format == 1) {
+                            if (this.format == ExportFormat.html) {
                                 if (title != null) pw.println("<a href=\"" + MultiProtocolURL.escape(url) + "\">" + CharacterCoding.unicode2xml(title, true) + "</a>");
                             }
-                            if (this.format == 2) {
+                            if (this.format == ExportFormat.rss) {
                                 pw.println("<item>");
                                 if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml(title, true) + "</title>");
                                 pw.println("<link>" + MultiProtocolURL.escape(url) + "</link>");
@@ -724,29 +742,16 @@ public final class Fulltext {
                             }
                             this.count++;
                         }
-                    } else {
-                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
-                        SolrDocument doc;
-                        while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                            String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
-                            if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
-                            CRIgnoreWriter sw = new CRIgnoreWriter();
-                            EnhancedXMLResponseWriter.writeDoc(sw, doc);
-                            sw.close();
-                            String d = sw.toString();
-                            pw.println(d);
-                            this.count++;
-                        }
                     }
                 }
-                if (this.format == 1) {
+                if (this.format == ExportFormat.html) {
                     pw.println("</body></html>");
                 }
-                if (this.format == 2) {
+                if (this.format == ExportFormat.rss) {
                     pw.println("</channel>");
                     pw.println("</rss>");
                 }
-                if (this.format == 3) {
+                if (this.format == ExportFormat.solr) {
                     pw.println("</result>");
                     pw.println("</response>");
                 }
