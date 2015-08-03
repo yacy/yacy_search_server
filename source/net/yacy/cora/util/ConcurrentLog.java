@@ -307,7 +307,7 @@ public final class ConcurrentLog {
         private Throwable thrown;
         private Message(final Level level, final String message) {
             this.level = level;
-            this.message = message == null || message.length() <= 1024 ? message : message.substring(0, 1024);
+            this.message = message == null || message.length() <= 4096 ? message : message.substring(0, 4096);
         }
         public Message(final Logger logger, final Level level, final String message, final Throwable thrown) {
             this(level, message);

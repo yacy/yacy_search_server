@@ -22,6 +22,8 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -201,12 +203,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         final long startTime = System.currentTimeMillis();
 
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-        String q = req.getParams().get(CommonParams.Q);
-        String fq = req.getParams().get(CommonParams.FQ);
-        String sort = req.getParams().get(CommonParams.SORT);
         String threadname = Thread.currentThread().getName();
-        if (q != null) Thread.currentThread().setName("solr query: q=" + q + (fq == null ? "" : "&fq = " + fq) + (sort == null ? "" : "&sort = " + sort)); // for debugging in Threaddump
-        ConcurrentLog.info("EmbeddedSolrConnector.query", "QUERY: q=" + q + (fq == null ? "" : "&" + fq.toString()) + (sort == null ? "" : "&sort = " + sort) + " SolrQueryRequest=" + req.toString());
+        String ql = ""; try {ql = URLDecoder.decode(req.getParams().toString(), "UTF-8");} catch (UnsupportedEncodingException e) {}
+        Thread.currentThread().setName("solr query: " + ql); // for debugging in Threaddump
+        ConcurrentLog.info("EmbeddedSolrConnector.query", "QUERY: " + ql);
+        //System.out.println("EmbeddedSolrConnector.query * QUERY: " + ql); System.out.println("STACKTRACE: " + ConcurrentLog.stackTrace());
         
         SolrQueryResponse rsp = new SolrQueryResponse();
         NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
@@ -223,7 +224,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         responseHeader.add("status", status);
         responseHeader.add("QTime",(int) (System.currentTimeMillis() - startTime));
 
-        if (q != null) Thread.currentThread().setName(threadname);
+        Thread.currentThread().setName(threadname);
         // return result
         return rsp;
     }
@@ -328,21 +329,16 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-        String q = params.get(CommonParams.Q);
-        String fl = params.get(CommonParams.FL);
-        String[] fq = params.getParams(CommonParams.FQ);
         String threadname = Thread.currentThread().getName();
-        if (q != null) {
-            StringBuilder fqa = new StringBuilder();
-            if (fq != null) for (String f: fq) fqa.append("fq=").append(f).append(' ');
-            Thread.currentThread().setName("solr query: q=" + q + (fq == null ? "" : "&" + fqa.toString()) + (fl == null ? "" : "&fl=" + fl));
-            ConcurrentLog.info("EmbeddedSolrConnector.getResponseByParams", "QUERY: q=" + q + (fq == null ? "" : "&" + fqa.toString()) + (fl == null ? "" : "&fl=" + fl) + " PARAMS: " + params.toString());
-        }
+        String ql = ""; try {ql = URLDecoder.decode(params.toString(), "UTF-8");} catch (UnsupportedEncodingException e) {}
+        Thread.currentThread().setName("solr query: q=" + ql);
+        ConcurrentLog.info("EmbeddedSolrConnector.getResponseByParams", "QUERY: " + ql);
+        //System.out.println("EmbeddedSolrConnector.getResponseByParams * QUERY: " + ql); System.out.println("STACKTRACE: " + ConcurrentLog.stackTrace());
         QueryResponse rsp;
         try {
             rsp = this.server.query(params);
-            if (q != null) Thread.currentThread().setName(threadname);
-            if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
+            Thread.currentThread().setName(threadname);
+            if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for " + ql);
             return rsp;
         } catch (final SolrServerException e) {
             throw new IOException(e);
