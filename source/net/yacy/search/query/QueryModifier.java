@@ -331,20 +331,20 @@ public class QueryModifier {
      */
     public static String parseCollectionExpression(String collectionDescription) {
         String[] s0 = CommonPattern.VERTICALBAR.split(collectionDescription);
-        ArrayList<String> sites = new ArrayList<String>(2);
+        ArrayList<String> collections = new ArrayList<String>(2);
         for (String s: s0) {
             s = s.trim();
-            if (s.length() > 0) sites.add(s);
+            if (s.length() > 0) collections.add(s);
         }
         StringBuilder fq = new StringBuilder(20);
-        if (sites.size() > 1) {
-            fq.append('(').append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(0)).append('\"');
-            for (int i = 1; i < sites.size(); i++) {
-                fq.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(i)).append('\"');
+        if (collections.size() > 1) {
+            fq.append('(').append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(collections.get(0)).append('\"');
+            for (int i = 1; i < collections.size(); i++) {
+                fq.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(collections.get(i)).append('\"');
             }
             fq.append(')');
-        } else if (sites.size() == 1) {
-            fq.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(sites.get(0)).append('\"');
+        } else if (collections.size() == 1) {
+            fq.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(":\"").append(collections.get(0)).append('\"');
         }
         if (fq.length() > 0) fq.insert(0, "{!tag=" + CollectionSchema.collection_sxt.getSolrFieldName() + "}"); 
         return fq.toString();

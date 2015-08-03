@@ -30,6 +30,7 @@ import java.util.Map;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
@@ -150,7 +151,7 @@ public class RemoteInstance implements SolrInstance {
             ((org.apache.http.impl.client.DefaultHttpClient) this.client).addRequestInterceptor(new HttpRequestInterceptor() {
                 @Override
                 public void process(final HttpRequest request, final HttpContext context) throws IOException {
-                    if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
+                    if (!request.containsHeader(HeaderFramework.ACCEPT_ENCODING)) request.addHeader(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
                     if (!request.containsHeader("Connection")) request.addHeader("Connection", "close"); // prevent CLOSE_WAIT
                 }
 
@@ -164,7 +165,7 @@ public class RemoteInstance implements SolrInstance {
                         if (ceheader != null) {
                             HeaderElement[] codecs = ceheader.getElements();
                             for (HeaderElement codec : codecs) {
-                                if (codec.getName().equalsIgnoreCase("gzip")) {
+                                if (codec.getName().equalsIgnoreCase(HeaderFramework.CONTENT_ENCODING_GZIP)) {
                                     response.setEntity(new GzipDecompressingEntity(response.getEntity()));
                                     return;
                                 }

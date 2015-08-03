@@ -48,7 +48,7 @@ public class Request extends WorkflowJob
         + Word.commonHashLength
         + ", "
         + // the crawling initiator
-        "String urlstring-256, "
+        "String urlstring-2048, "
         + // the url as string
         "String refhash-"
         + Word.commonHashLength

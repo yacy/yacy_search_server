@@ -26,8 +26,7 @@
 package net.yacy.cora.protocol.http;
 
 import java.io.IOException;
-
-
+import net.yacy.cora.protocol.HeaderFramework;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -38,8 +37,6 @@ import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.protocol.HttpContext;
 
 public class GzipResponseInterceptor implements HttpResponseInterceptor {
-
-    private static final String GZIP_CODEC = "gzip";
     
     @Override
     public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
@@ -52,7 +49,7 @@ public class GzipResponseInterceptor implements HttpResponseInterceptor {
 			if (ceheader != null) {
 				HeaderElement[] codecs = ceheader.getElements();
 				for (int i = 0; i < codecs.length; i++) {
-					if (codecs[i].getName().equalsIgnoreCase(GZIP_CODEC)) {
+					if (codecs[i].getName().equalsIgnoreCase(HeaderFramework.CONTENT_ENCODING_GZIP)) {
 //						response.removeHeader(ceheader);
 						response.setEntity(new GzipDecompressingEntity(response.getEntity()));
 						return;

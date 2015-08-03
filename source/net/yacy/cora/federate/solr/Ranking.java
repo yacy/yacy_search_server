@@ -105,7 +105,7 @@ public class Ranking {
         if (!this.fieldBoosts.containsKey(CollectionSchema.description_txt)) qf.append(CollectionSchema.description_txt.getSolrFieldName()).append(' ');
         if (!this.fieldBoosts.containsKey(CollectionSchema.keywords)) qf.append(CollectionSchema.keywords.getSolrFieldName());
 
-        this.queryFields = qf.toString(); // doesn't change often, cache it
+        this.queryFields = qf.toString().trim(); // doesn't change often, cache it
         return this.queryFields;
     }
 
