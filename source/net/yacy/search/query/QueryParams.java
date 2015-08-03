@@ -448,15 +448,9 @@ public final class QueryParams {
         // add site facets
         fqs.addAll(getFacetsFilterQueries());
         if (fqs.size() > 0) {
-            StringBuilder fqsb = new StringBuilder();
             for (String f: fqs) {
-                fqsb.append(" AND ");
-                //boolean wo = f.indexOf(" OR ") >= 0;
-                //if (wo) fqsb.append('(');
-                fqsb.append(f);
-                //if (wo) fqsb.append(')');
+                params.setFilterQueries(fqs.toArray(new String[fqs.size()]));
             }
-            params.setFilterQueries(new String[]{fqsb.substring(5)});
         }
         
         // set facet query attributes
