@@ -88,41 +88,6 @@ public final class OS {
 		if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
 	}
 
-
-	/**
-	 * finds the maximum possible heap (may cause high system load)
-	 * @return heap in -Xmx<i>[heap]</i>m
-	 * @author [DW], 07.02.2009
-	 */
-	private static int getWin32MaxHeap() {
-		int maxmem = 1000;
-		while(checkWin32Heap(maxmem)) maxmem += 100;
-		while(!checkWin32Heap(maxmem)) maxmem -= 10;
-		return maxmem;
-	}
-
-	private final static ConcurrentLog memchecklog = new ConcurrentLog("MEMCHECK");
-	
-	/**
-	 * checks heap (may cause high system load)
-	 * @param mem heap to check in -Xmx<i>[heap]</i>m
-	 * @return true if possible
-	 * @author [DW], 07.02.2009
-	 */
-	private static boolean checkWin32Heap(final int mem){
-		String line = "";
-        final List<String> processArgs = new ArrayList<String>();
-        processArgs.add("java");
-        processArgs.add("-Xms4m");
-        processArgs.add("-Xmx" + Integer.toString(mem) + "m");
-        try {
-    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, memchecklog);
-		} catch (final IOException e) {
-			return false;
-		}
-		return (line.indexOf("space for object heap",0) > -1) ? false : true;
-	}
-
 	public static String infoString() {
 		String s = "System=";
 		if (systemOS == System.Unknown) s += "unknown";

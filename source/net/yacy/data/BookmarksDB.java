@@ -172,9 +172,8 @@ public class BookmarksDB {
             if (map == null) {
                 ConcurrentLog.info("BOOKMARKS", "cannot get bookmark for url hash " + urlHash);
                 return null;
-            } else {
-                return new Bookmark(map);
             }
+            return new Bookmark(map);
         } catch (final Throwable e) {
             return null;
         }

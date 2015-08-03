@@ -44,7 +44,7 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
-import net.yacy.document.Condenser;
+import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -526,11 +526,11 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urllength", entry.word().urllength());
                 prop.put(
                         "genUrlList_urlList_" + i + "_urlExists_props",
-                        ((entry.word().flags().get(Condenser.flag_cat_indexof)) ? "appears on index page, " : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasimage)) ? "contains images, " : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasaudio)) ? "contains audio, " : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasvideo)) ? "contains video, " : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasapp)) ? "contains applications, " : "")
+                        ((entry.word().flags().get(Tokenizer.flag_cat_indexof)) ? "appears on index page, " : "")
+                            + ((entry.word().flags().get(Tokenizer.flag_cat_hasimage)) ? "contains images, " : "")
+                            + ((entry.word().flags().get(Tokenizer.flag_cat_hasaudio)) ? "contains audio, " : "")
+                            + ((entry.word().flags().get(Tokenizer.flag_cat_hasvideo)) ? "contains video, " : "")
+                            + ((entry.word().flags().get(Tokenizer.flag_cat_hasapp)) ? "contains applications, " : "")
                             + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_identifier)) ? "appears in url, " : "")
                             + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_title)) ? "appears in title, " : "")
                             + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_creator)) ? "appears in author, " : "")
@@ -590,19 +590,19 @@ public class IndexControlRWIs_p {
             b.set(WordReferenceRow.flag_app_emphasized, true);
         }
         if ( post.get("image", "").equals("on") ) {
-            b.set(Condenser.flag_cat_hasimage, true);
+            b.set(Tokenizer.flag_cat_hasimage, true);
         }
         if ( post.get("audio", "").equals("on") ) {
-            b.set(Condenser.flag_cat_hasaudio, true);
+            b.set(Tokenizer.flag_cat_hasaudio, true);
         }
         if ( post.get("video", "").equals("on") ) {
-            b.set(Condenser.flag_cat_hasvideo, true);
+            b.set(Tokenizer.flag_cat_hasvideo, true);
         }
         if ( post.get("app", "").equals("on") ) {
-            b.set(Condenser.flag_cat_hasapp, true);
+            b.set(Tokenizer.flag_cat_hasapp, true);
         }
         if ( post.get("indexof", "").equals("on") ) {
-            b.set(Condenser.flag_cat_indexof, true);
+            b.set(Tokenizer.flag_cat_indexof, true);
         }
         return b;
     }
@@ -678,11 +678,11 @@ public class IndexControlRWIs_p {
             prop.put("searchresult_subject", theSearch.flagCount()[WordReferenceRow.flag_app_dc_subject]);
             prop.put("searchresult_url", theSearch.flagCount()[WordReferenceRow.flag_app_dc_identifier]);
             prop.put("searchresult_emphasized", theSearch.flagCount()[WordReferenceRow.flag_app_emphasized]);
-            prop.put("searchresult_image", theSearch.flagCount()[Condenser.flag_cat_hasimage]);
-            prop.put("searchresult_audio", theSearch.flagCount()[Condenser.flag_cat_hasaudio]);
-            prop.put("searchresult_video", theSearch.flagCount()[Condenser.flag_cat_hasvideo]);
-            prop.put("searchresult_app", theSearch.flagCount()[Condenser.flag_cat_hasapp]);
-            prop.put("searchresult_indexof", theSearch.flagCount()[Condenser.flag_cat_indexof]);
+            prop.put("searchresult_image", theSearch.flagCount()[Tokenizer.flag_cat_hasimage]);
+            prop.put("searchresult_audio", theSearch.flagCount()[Tokenizer.flag_cat_hasaudio]);
+            prop.put("searchresult_video", theSearch.flagCount()[Tokenizer.flag_cat_hasvideo]);
+            prop.put("searchresult_app", theSearch.flagCount()[Tokenizer.flag_cat_hasapp]);
+            prop.put("searchresult_indexof", theSearch.flagCount()[Tokenizer.flag_cat_indexof]);
         }
         return theSearch;
     }

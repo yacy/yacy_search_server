@@ -46,11 +46,11 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.document.SentenceReader;
+import net.yacy.document.Tokenizer;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
@@ -158,7 +158,7 @@ public class ViewFile {
             descr = urlEntry.dc_title();
             //urlEntry.wordCount();
             size = urlEntry.filesize();
-            pre = urlEntry.flags().get(Condenser.flag_cat_indexof);
+            pre = urlEntry.flags().get(Tokenizer.flag_cat_indexof);
             prop.put("moar", 1);
             prop.putHTML("moar_search", post.get("search",""));
         }

@@ -258,7 +258,6 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write(lb);
     }
 
-    @SuppressWarnings({ "static-access", "deprecation" })
     private static void writeField(final Writer writer, final String typeName, final String name, final String value) throws IOException {
         if (typeName.equals(SolrType.text_general.printName()) ||
             typeName.equals(SolrType.string.printName()) ||
@@ -279,7 +278,6 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         }
     }
 
-    @SuppressWarnings({ "static-access", "deprecation" })
     private static void writeField(final Writer writer, final String name, final Object value) throws IOException {
         if (value instanceof String) {
             writeTag(writer, "str", name, (String) value, true);

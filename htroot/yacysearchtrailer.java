@@ -56,7 +56,7 @@ public class yacysearchtrailer {
     private static final int TOPWORDS_MINSIZE = 8;
     private static final int TOPWORDS_MAXSIZE = 22;
 
-    @SuppressWarnings({ "deprecation", "static-access" })
+    @SuppressWarnings({ })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;

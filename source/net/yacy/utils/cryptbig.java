@@ -388,7 +388,7 @@ public class cryptbig {
 	return salt + ((gzFlag) ? "1" : "0") + Base64Order.enhancedCoder.encode(enc);
     }
 
-    public static String descrambleString(final String key, String s) throws IOException {
+    public static String descrambleString(final String key, String s) {
 	final String salt = s.substring(0, 8);
 	final boolean gzFlag = (s.charAt(8) == '1');
 	s = s.substring(9);
@@ -425,7 +425,7 @@ public class cryptbig {
 	return null;
     }
 
-    public static String simpleDecode(String encoded, final String key) throws IOException {
+    public static String simpleDecode(String encoded, final String key) {
 	if ((encoded == null) || (encoded.length() < 3)) return null;
 	if (encoded.charAt(1) != '|') return encoded; // not encoded
 	final char method = encoded.charAt(0);
@@ -611,12 +611,7 @@ public class cryptbig {
 	    // 'descramble' string
 	    if (s.length != 3) {help(); System.exit(-1);}
 	    final long t = System.currentTimeMillis();
-	    try {
-            System.out.println(descrambleString(s[1], s[2]));
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            ConcurrentLog.logException(e);
-        }
+	    System.out.println(descrambleString(s[1], s[2]));
 	    System.out.println("Calculation time: " + (System.currentTimeMillis() - t) + " milliseconds");
 	    System.exit(0);
 	}

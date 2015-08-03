@@ -218,7 +218,6 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         return kv;
     }
 
-    @SuppressWarnings({ "static-access", "deprecation" })
     private static String field2string(final FieldType type, final String value) {
         String typeName = type.getTypeName();
         if (typeName.equals(SolrType.bool.printName())) {

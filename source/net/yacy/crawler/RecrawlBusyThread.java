@@ -148,9 +148,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 
         if (this.urlstack.isEmpty()) {
             return processSingleQuery();
-        } else {
-            return feedToCrawler();
         }
+        return feedToCrawler();
 
     }
 

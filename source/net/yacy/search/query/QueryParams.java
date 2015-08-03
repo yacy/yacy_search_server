@@ -53,8 +53,8 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
+import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -349,7 +349,7 @@ public final class QueryParams {
      */
     private final boolean matchesText(final String text) {
         boolean ret = false;
-        QueryGoal.NormalizedWords words = new QueryGoal.NormalizedWords(Condenser.getWords(text, null).keySet());
+        QueryGoal.NormalizedWords words = new QueryGoal.NormalizedWords(Tokenizer.getWords(text, null).keySet());
         if (!SetTools.anymatchByTest(this.queryGoal.getExcludeWords(), words)) {
             ret = SetTools.totalInclusion(this.queryGoal.getIncludeWords(), words);
         }
@@ -358,7 +358,7 @@ public final class QueryParams {
     
     protected static final boolean anymatch(final String text, final Iterator<String> keywords) {
         if (keywords == null || !keywords.hasNext()) return false;
-        final SortedSet<String> textwords = (SortedSet<String>) Condenser.getWords(text, null).keySet();
+        final SortedSet<String> textwords = (SortedSet<String>) Tokenizer.getWords(text, null).keySet();
         return SetTools.anymatchByTest(keywords, textwords);
     }
 
@@ -448,9 +448,7 @@ public final class QueryParams {
         // add site facets
         fqs.addAll(getFacetsFilterQueries());
         if (fqs.size() > 0) {
-            for (String f: fqs) {
-                params.setFilterQueries(fqs.toArray(new String[fqs.size()]));
-            }
+            params.setFilterQueries(fqs.toArray(new String[fqs.size()]));
         }
         
         // set facet query attributes
@@ -463,9 +461,7 @@ public final class QueryParams {
             for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field); // params.addFacetField("{!ex=" + field + "}" + field);
             if (this.facetfields.contains(CollectionSchema.dates_in_content_dts.name())) {
                 params.setParam("facet.range", CollectionSchema.dates_in_content_dts.name());
-                @SuppressWarnings({ "static-access", "deprecation" })
                 String start = TrieDateField.formatExternal(new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L * 3));
-                @SuppressWarnings({ "static-access", "deprecation" })
                 String end = TrieDateField.formatExternal(new Date(System.currentTimeMillis() + 1000L * 60L * 60L * 24L * 3));
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.start", start);
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.end", end);

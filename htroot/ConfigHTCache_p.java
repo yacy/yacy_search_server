@@ -31,7 +31,6 @@ import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.Cache;
-import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;

@@ -321,7 +321,7 @@ public class Bookmarks {
 
 	       	count = 0;
 	       	while(count < max_count && it.hasNext()) {
-                    Bookmark bookmark = bookmark = sb.bookmarksDB.getBookmark(it.next());
+                    Bookmark bookmark = sb.bookmarksDB.getBookmark(it.next());
 
                     if (bookmark != null){
                         if (bookmark.getFeed() && isAdmin) {

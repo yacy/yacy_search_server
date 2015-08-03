@@ -59,10 +59,10 @@ import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
-import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
+import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
@@ -242,7 +242,7 @@ public class yacysearch {
                 : null;
         if ( indexof ) {
             constraint = new Bitfield(4);
-            constraint.set(Condenser.flag_cat_indexof, true);
+            constraint.set(Tokenizer.flag_cat_indexof, true);
         }
 
         // SEARCH
@@ -396,7 +396,7 @@ public class yacysearch {
                 if ( constraint == null ) {
                     constraint = new Bitfield(4);
                 }
-                constraint.set(Condenser.flag_cat_haslocation, true);
+                constraint.set(Tokenizer.flag_cat_haslocation, true);
                 modifier.add("/location");
             }
 

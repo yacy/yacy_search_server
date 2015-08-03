@@ -46,8 +46,8 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.document.Condenser;
 import net.yacy.document.SentenceReader;
+import net.yacy.document.Tokenizer;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -389,14 +389,14 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     public Bitfield flags() {
         if (flags == null) {
             this.flags = new Bitfield();
-            if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
+            if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Tokenizer.flag_cat_indexof, true);
             ContentDomain cd = getContentDomain();
-            if (lon() != 0.0d || lat() != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);
-            if (cd == ContentDomain.IMAGE || limage() > 0) this.flags.set(Condenser.flag_cat_hasimage, true);
-            if (cd == ContentDomain.AUDIO || laudio() > 0) this.flags.set(Condenser.flag_cat_hasaudio, true);
-            if (cd == ContentDomain.VIDEO || lvideo() > 0) this.flags.set(Condenser.flag_cat_hasvideo, true);
-            if (cd == ContentDomain.APP) this.flags.set(Condenser.flag_cat_hasapp, true);
-            if (lapp() > 0) this.flags.set(Condenser.flag_cat_hasapp, true);
+            if (lon() != 0.0d || lat() != 0.0d) this.flags.set(Tokenizer.flag_cat_haslocation, true);
+            if (cd == ContentDomain.IMAGE || limage() > 0) this.flags.set(Tokenizer.flag_cat_hasimage, true);
+            if (cd == ContentDomain.AUDIO || laudio() > 0) this.flags.set(Tokenizer.flag_cat_hasaudio, true);
+            if (cd == ContentDomain.VIDEO || lvideo() > 0) this.flags.set(Tokenizer.flag_cat_hasvideo, true);
+            if (cd == ContentDomain.APP) this.flags.set(Tokenizer.flag_cat_hasapp, true);
+            if (lapp() > 0) this.flags.set(Tokenizer.flag_cat_hasapp, true);
         }
         return this.flags;
     }
@@ -707,7 +707,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
                 // seed is not known from here
                 try {
                     if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(
-                        Word.words2hashesHandles(Condenser.getWords(
+                        Word.words2hashesHandles(Tokenizer.getWords(
                             ("yacyshare " +
                              path.replace('?', ' ') +
                              " " +

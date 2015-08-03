@@ -38,8 +38,8 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
+import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -253,11 +253,11 @@ public class ReferenceOrder {
            + ((flags.get(WordReferenceRow.flag_app_dc_subject))     ? 255 << this.ranking.coeff_app_dc_subject     : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_description)) ? 255 << this.ranking.coeff_app_dc_description : 0)
            + ((flags.get(WordReferenceRow.flag_app_emphasized))     ? 255 << this.ranking.coeff_appemph            : 0)
-           + ((flags.get(Condenser.flag_cat_indexof))      ? 255 << this.ranking.coeff_catindexof         : 0)
-           + ((flags.get(Condenser.flag_cat_hasimage))     ? 255 << this.ranking.coeff_cathasimage        : 0)
-           + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
-           + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
-           + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
+           + ((flags.get(Tokenizer.flag_cat_indexof))      ? 255 << this.ranking.coeff_catindexof         : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasimage))     ? 255 << this.ranking.coeff_cathasimage        : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
            + ((ByteBuffer.equals(t.getLanguage(), ASCII.getBytes(this.language))) ? 255 << this.ranking.coeff_language    : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
@@ -286,11 +286,11 @@ public class ReferenceOrder {
            + ((flags.get(WordReferenceRow.flag_app_dc_subject))     ? 255 << this.ranking.coeff_app_dc_subject     : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_description)) ? 255 << this.ranking.coeff_app_dc_description : 0)
            + ((flags.get(WordReferenceRow.flag_app_emphasized))     ? 255 << this.ranking.coeff_appemph            : 0)
-           + ((flags.get(Condenser.flag_cat_indexof))      ? 255 << this.ranking.coeff_catindexof         : 0)
-           + ((flags.get(Condenser.flag_cat_hasimage))     ? 255 << this.ranking.coeff_cathasimage        : 0)
-           + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
-           + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
-           + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
+           + ((flags.get(Tokenizer.flag_cat_indexof))      ? 255 << this.ranking.coeff_catindexof         : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasimage))     ? 255 << this.ranking.coeff_cathasimage        : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
+           + ((flags.get(Tokenizer.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
            + ((this.language.equals(t.language())) ? 255 << this.ranking.coeff_language    : 0);
         return r; // the higher the number the better the ranking.
     }

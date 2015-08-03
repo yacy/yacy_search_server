@@ -70,10 +70,10 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
-import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
+import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -601,10 +601,10 @@ public final class SearchEvent {
 
                 // check document domain
                 if (this.query.contentdom.getCode() > 0 &&
-                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Condenser.flag_cat_hasaudio))) || 
-                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Condenser.flag_cat_hasvideo))) ||
-                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Condenser.flag_cat_hasimage))) ||
-                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Condenser.flag_cat_hasapp))))) {
+                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
+                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
+                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
+                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
                     if (log.isFine()) log.fine("dropped RWI: contentdom fail");
                     continue pollloop;
                 }
@@ -926,10 +926,10 @@ public final class SearchEvent {
 
                 // check document domain
                 if (this.query.contentdom.getCode() > 0 &&
-                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Condenser.flag_cat_hasaudio))) || 
-                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Condenser.flag_cat_hasvideo))) ||
-                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Condenser.flag_cat_hasimage))) ||
-                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Condenser.flag_cat_hasapp))))) {
+                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
+                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
+                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
+                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
                     if (log.isFine()) log.fine("dropped Node: content domain does not match");
                     continue pollloop;
                 }
@@ -1201,7 +1201,7 @@ public final class SearchEvent {
             }
 
             // check index-of constraint
-            if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof)) && (!(pagetitle.startsWith("index of")))) {
+            if ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_indexof)) && (!(pagetitle.startsWith("index of")))) {
                 final Iterator<byte[]> wi = this.query.getQueryGoal().getIncludeHashes().iterator();
                 if (this.query.getSegment().termIndex() != null) {
                     while (wi.hasNext()) {
@@ -1214,7 +1214,7 @@ public final class SearchEvent {
             }
 
             // check location constraint
-            if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_haslocation)) && (page.lat() == 0.0 || page.lon() == 0.0)) {
+            if ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_haslocation)) && (page.lat() == 0.0 || page.lon() == 0.0)) {
                 if (log.isFine()) log.fine("dropped RWI: location constraint");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
@@ -1443,7 +1443,7 @@ public final class SearchEvent {
                     page,
                     this.snippetFetchWordHashes,
                     null,
-                    ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
+                    ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_indexof))),
                     SearchEvent.SNIPPET_MAX_LENGTH,
                     !this.query.isLocal());
             return page.makeResultEntry(this.query.getSegment(), this.peers, snippet); // result without snippet
@@ -1459,7 +1459,7 @@ public final class SearchEvent {
                     page,
                     this.snippetFetchWordHashes,
                     cacheStrategy,
-                    ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
+                    ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_indexof))),
                     180,
                     !this.query.isLocal());
             SearchEvent.log.info("text snippet load time for " + page.url().toNormalform(true) + ": " + (System.currentTimeMillis() - startTime) + " ms, " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
@@ -1479,7 +1479,7 @@ public final class SearchEvent {
                 }
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.deleteIfSnippetFail) {
-                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.getQueryGoal().getIncludeHashes(), reason);
+                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.getQueryGoal().getIncludeHashes());
                 }
                 SearchEvent.log.info("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
                 return null;
