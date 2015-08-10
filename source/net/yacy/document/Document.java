@@ -250,12 +250,17 @@ dc_rights
     /**
      * add the given words to the set of keywords.
      * These keywords will appear in dc_subject
-     * @param tags
+     * @param tags a map where the key is the navigator name and the value is the set of attributes as metatags
      */
     protected void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
         this.generic_facets.putAll(computeGenericFacets(tags));
     }
 
+    /**
+     * compute generic facets
+     * @param tags a map where the key is the navigator name and the value is the set of attributes as metatags
+     * @return a map where the key is the navigator name and the value is the set of attributes names
+     */
     public static Map<String, Set<String>> computeGenericFacets(Map<String, Set<Tagging.Metatag>> tags) {
         Map<String, Set<String>> gf = new HashMap<String, Set<String>>();
         for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {

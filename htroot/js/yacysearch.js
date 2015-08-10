@@ -52,8 +52,8 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
 	  	resnav += "\">&laquo;</a></li>";
 	  }
 	  
-	  numberofpages = Math.floor(Math.min(10, 1 + ((totalcount.replace(/\./g,'') - 1) / itemsperpage)));
-	  if (!numberofpages) numberofpages = 10;
+	  numberofpages = Math.floor(Math.min(9, 1 + ((totalcount.replace(/\./g,'') - 1) / itemsperpage)));
+	  if (!numberofpages) numberofpages = 9;
 	  for (i = 0; i < numberofpages; i++) {
 	      if (i == thispage) {
 	         resnav += "<li class=\"active\"><a href=\"#\">";

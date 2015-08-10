@@ -153,6 +153,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
+import net.yacy.document.ProbabilisticClassifier;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.Parser.Failure;
@@ -242,7 +243,7 @@ public final class Switchboard extends serverSwitch {
 
     // storage management
     public File htCachePath;
-    public final File dictionariesPath;
+    public final File dictionariesPath, classificationPath;
     public File listsPath;
     public File htDocsPath;
     public File workPath;
@@ -374,11 +375,20 @@ public final class Switchboard extends serverSwitch {
         }
         
         this.log.config("Work Path:    " + this.workPath.toString());
+
         this.dictionariesPath =
             getDataPath(
                 SwitchboardConstants.DICTIONARY_SOURCE_PATH,
                 SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
         this.log.config("Dictionaries Path:" + this.dictionariesPath.toString());
+        if (!this.dictionariesPath.exists()) this.dictionariesPath.mkdirs();
+        
+        this.classificationPath =
+                getDataPath(
+                    SwitchboardConstants.CLASSIFICATION_SOURCE_PATH,
+                    SwitchboardConstants.CLASSIFICATION_SOURCE_PATH_DEFAULT);
+            this.log.config("Classification Path:" + this.classificationPath.toString());
+        if (!this.classificationPath.exists()) this.classificationPath.mkdirs();
 
         CollectionConfiguration.UNIQUE_HEURISTIC_PREFER_HTTPS = this.getConfigBool("search.ranking.uniqueheuristic.preferhttps", false);
         CollectionConfiguration.UNIQUE_HEURISTIC_PREFER_WWWPREFIX = this.getConfigBool("search.ranking.uniqueheuristic.preferwwwprefix", true);
@@ -397,6 +407,9 @@ public final class Switchboard extends serverSwitch {
                     Tagging t = LibraryProvider.autotagging.getVocabulary(o);
                     if (t != null) t.setFacet(false);
                 }
+
+                Thread.currentThread().setName("ProbabilisticClassification.initialize");
+                ProbabilisticClassifier.initialize(Switchboard.this.classificationPath);
             }
         }.start();
 

@@ -36,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -72,6 +73,7 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
+import net.yacy.document.ProbabilisticClassifier;
 import net.yacy.document.TextParser;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -882,13 +884,16 @@ public final class SearchEvent {
         }
         
         // get the vocabulary navigation
-        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
-            fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
+        Set<String> genericFacets = new LinkedHashSet<>();
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) genericFacets.add(v.getName());
+        genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+        for (String v: genericFacets) {
+            fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + v + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
             if (fcts != null) {
-                ScoreMap<String> vocNav = this.vocabularyNavigator.get(v.getName());
+                ScoreMap<String> vocNav = this.vocabularyNavigator.get(v);
                 if (vocNav == null) {
                     vocNav = new ConcurrentScoreMap<String>();
-                    this.vocabularyNavigator.put(v.getName(), vocNav);
+                    this.vocabularyNavigator.put(v, vocNav);
                 }
                 vocNav.inc(fcts);
             }
@@ -1242,7 +1247,7 @@ public final class SearchEvent {
             
           
             // check vocabulary terms (metatags) {only available in Solr index as vocabulary_xxyyzzz_sxt field}
-            // TODO: vocabulary is only valid and available in local Solr index (considere to auto-switch to Searchdom.LOCAL)
+            // TODO: vocabulary is only valid and available in local Solr index (consider to auto-switch to Searchdom.LOCAL)
             if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
                 tagloop: for (Tagging.Metatag tag : this.query.metatags) {
                     SolrDocument sdoc = page;

@@ -258,6 +258,12 @@ surrogates.out = DATA/SURROGATES/out
 # this directory also contains subdirectories for input sources, the did-you-mean function and other
 dictionaries = DATA/DICTIONARIES
 
+# a path to the classification directory
+# each subdirectory is the name of a context (which becomes a navigator) with '.txt' files
+# containing texts to teach a bayesian filter. One of the files must be named 'negative.txt'.
+# The text files can be created with the Export functionality using the option "Only Text".
+classification = DATA/CLASSIFICATION
+
 # storage place for new releases
 releases = DATA/RELEASE
 

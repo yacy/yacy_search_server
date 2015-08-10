@@ -90,7 +90,7 @@ public class Tagging {
 
     }
 
-    private Tagging(String name) {
+    public Tagging(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
@@ -544,6 +544,11 @@ public class Tagging {
         return term;
     }
 
+    /**
+     * The metatag class contains the object value for a Linked Open Data RDF triple.
+     * The metatag is created in a tagging environment, which already contains the
+     * subject and the predicate. The metatag is the object of the RDF triple.
+     */
 	public class Metatag {
 	    private final String object;
 	    private Metatag(String object) {

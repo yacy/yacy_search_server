@@ -49,6 +49,7 @@ import net.yacy.cora.federate.FederateSearchManager;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.Tagging.Metatag;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -443,7 +444,12 @@ public class yacysearch {
                 if (p > 0) {
                     String k = vocabulary.substring(0, p);
                     String v = vocabulary.substring(p + 1);
-                    metatags.add(LibraryProvider.autotagging.metatag(k, v));
+                    Metatag mt = LibraryProvider.autotagging.metatag(k, v);
+                    if (mt != null) {
+                        metatags.add(mt);
+                    } else {
+                        
+                    }
                 }
             }
 

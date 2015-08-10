@@ -81,6 +81,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.ProbabilisticClassifier;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.content.DCEntry;
@@ -1006,6 +1007,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return doc;
     }
     
+    /**
+     * attach additional information to the document to enable navigation features
+     * @param doc the document to be enriched
+     * @param synonyms a list of synonyms detected for the text content
+     * @param genericFacets a map where the key is the navigator name and the value is the set of attributes names
+     */
     public void enrich(SolrInputDocument doc, List<String> synonyms, Map<String, Set<String>> genericFacets) {
         remove(doc, CollectionSchema.vocabularies_sxt); // delete old values
         for (SolrInputField sif: doc) {
@@ -1016,6 +1023,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             // there are no pre-defined solr fields for navigation because the vocabulary is generic
             // we use dynamically allocated solr fields for this.
             // It must be a multi-value string/token field, therefore we use _sxt extensions for the field names
+            
+            // add to genericFacets the probabilistic categories
+            String text = (String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+            Map<String, String> classification = ProbabilisticClassifier.getClassification(text);
+            for (Map.Entry<String, String> entry: classification.entrySet()) {
+                Set<String> facetAttrbutes = new HashSet<>();
+                facetAttrbutes.add(entry.getValue());
+                genericFacets.put(entry.getKey(), facetAttrbutes);
+            }
+            
+            // compute the document field values
             List<String> vocabularies = new ArrayList<>();
             for (Map.Entry<String, Set<String>> facet: genericFacets.entrySet()) {
                 String facetName = facet.getKey();

@@ -54,6 +54,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.LibraryProvider;
+import net.yacy.document.ProbabilisticClassifier;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -261,6 +262,9 @@ public final class QueryParams {
             if (v.isFacet()) {
                 this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
             }
+        }
+        for (String context: ProbabilisticClassifier.getContextNames()) {
+            this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + context + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
         }
         this.cachedQuery = null;
     }

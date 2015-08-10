@@ -413,6 +413,9 @@ public final class SwitchboardConstants {
 
     public static final String DICTIONARY_SOURCE_PATH         = "dictionaries";
     public static final String DICTIONARY_SOURCE_PATH_DEFAULT = "DATA/DICTIONARIES";
+    
+    public static final String CLASSIFICATION_SOURCE_PATH         = "classification";
+    public static final String CLASSIFICATION_SOURCE_PATH_DEFAULT = "DATA/CLASSIFICATION";
 
     /**
      * <p><code>public static final String <strong>HTDOCS_PATH</strong> = "htDocsPath"</code></p>
