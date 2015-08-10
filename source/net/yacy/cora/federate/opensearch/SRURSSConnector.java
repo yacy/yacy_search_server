@@ -22,78 +22,23 @@ package net.yacy.cora.federate.opensearch;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.feed.RSSReader;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.SearchAccumulator;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
-public class SRURSSConnector extends Thread implements SearchAccumulator {
+public class SRURSSConnector {
 
     private final static int recordsPerSession = 250;
-
-    final String urlBase;
-    final String query;
-    final long timeoutInit;
-    final int maximumRecordsInit;
-    final CacheStrategy verify;
-    final boolean global;
-    final Map<RSSMessage, List<Integer>> result;
-    final ClientIdentification.Agent agent;
-
-    private final BlockingQueue<RSSMessage> results;
-
-    public SRURSSConnector(
-            final Map<RSSMessage, List<Integer>> result,
-            final String query,
-            final long timeoutInit,
-            final String urlBase,
-            final int maximumRecordsInit,
-            final CacheStrategy verify,
-            final boolean global,
-            final ClientIdentification.Agent agent) {
-        this.results = new LinkedBlockingQueue<RSSMessage>();
-        this.result = result;
-        this.query = query;
-        this.timeoutInit = timeoutInit;
-        this.urlBase = urlBase;
-        this.maximumRecordsInit = maximumRecordsInit;
-        this.verify = verify;
-        this.global = global;
-        this.agent = agent;
-    }
-
-    @Override
-    public void run() {
-        searchSRURSS(this.results, this.urlBase, this.query, this.timeoutInit, this.maximumRecordsInit, this.verify, this.global, this.agent);
-        int p = 1;
-        RSSMessage message;
-        try {
-            while ((message = this.results.poll(this.timeoutInit, TimeUnit.MILLISECONDS)) != RSSMessage.POISON) {
-                if (message == null) break;
-                List<Integer> m = this.result.get(message.getLink());
-                if (m == null) m = new ArrayList<Integer>();
-                m.add(new Integer(p++));
-                this.result.put(message, m);
-            }
-        } catch (final InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static Thread searchSRURSS(
             final BlockingQueue<RSSMessage> queue,
@@ -118,7 +63,6 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
                     try {
                         feed = loadSRURSS(urlBase, query, startRecord, recordsPerSession, verify, global, agent);
                     } catch (final IOException e1) {
-                        //e1.printStackTrace();
                         break mainloop;
                     }
                     if (feed == null || feed.isEmpty()) break mainloop;
@@ -129,7 +73,6 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
                         try {
                             queue.put(message);
                         } catch (final InterruptedException e) {
-                            e.printStackTrace();
                             break innerloop;
                         }
                     }

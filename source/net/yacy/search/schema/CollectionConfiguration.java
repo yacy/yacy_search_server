@@ -337,7 +337,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	// This is necessary here since that is used to search the link when no other data (parsed text body) is available
         	StringBuilder sb = new StringBuilder(120);
         	// accText(sb, md.dc_title()); // default search field via getQueryFields(), not needed for snippet (always displayed)
-        	accText(sb, md.dc_creator());
+        	// accText(sb, md.dc_creator()); // author is in Default ranking/getQueryFields
         	accText(sb, md.dc_publisher());
         	// accText(sb, md.snippet()); // above added to description_txt, default search field via getQueryFields(), description_txt incl. in snippet calculation
         	accText(sb, md.url().toTokens());
