@@ -23,6 +23,7 @@ package net.yacy.document;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,14 +61,15 @@ public class ProbabilisticClassifier {
         public Context(String context_name, Map<String, File> categoryExampleLinesFiles, File negativeExampleLines) throws IOException {
             this.context_name = context_name;
             int requiredSize = 0;
+            Charset charset = Charset.forName("UTF-8");
             Map<String, List<String>> categoryBuffer = new HashMap<>();
             for (Map.Entry<String, File> category: categoryExampleLinesFiles.entrySet()) {
-                List<String> list = Files.readAllLines(category.getValue().toPath());
+                List<String> list = Files.readAllLines(category.getValue().toPath(), charset);
                 categoryBuffer.put(category.getKey(), list);
                 requiredSize += list.size();
             }
-            List<String> list = Files.readAllLines(negativeExampleLines.toPath());
-            categoryBuffer.put(NONE_CATEGORY_NAME, Files.readAllLines(negativeExampleLines.toPath()));
+            List<String> list = Files.readAllLines(negativeExampleLines.toPath(), charset);
+            categoryBuffer.put(NONE_CATEGORY_NAME, Files.readAllLines(negativeExampleLines.toPath(), charset));
             requiredSize += list.size();
             
             this.bayes = new BayesClassifier<>();
