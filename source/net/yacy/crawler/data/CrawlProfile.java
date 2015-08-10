@@ -255,6 +255,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
     
     public void domInc(final String domain) {
+        if (domain == null) return; // may be correct for file system crawls
         final AtomicInteger dp = this.doms.get(domain);
         if (dp == null) {
             // new domain
@@ -289,6 +290,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
     
     public AtomicInteger getCount(final String domain) {
+        if (domain == null) return new AtomicInteger(0); // in case of file indexing this is required
         AtomicInteger dp = this.doms.get(domain);
         if (dp == null) {
             // new domain
