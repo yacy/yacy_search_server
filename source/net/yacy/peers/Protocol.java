@@ -1379,11 +1379,11 @@ public final class Protocol {
         boolean gzipBody,
         final int timeout) {
         String ip = targetSeed.getIP();
-        final String address = targetSeed.getPublicAddress(ip);
-        if ( address == null ) {
+        if ( ip == null ) {
             Network.log.warn("no address for transferRWI");
             return null;
         }
+        final String address = targetSeed.getPublicAddress(ip);
 
         // prepare post values
         final String salt = crypt.randomSalt();
