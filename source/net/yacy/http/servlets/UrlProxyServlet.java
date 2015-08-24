@@ -154,6 +154,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         
         final HashMap<String, Object> prop = new HashMap<String, Object>();
         prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
+        prop.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, proxyurl.getProtocol());
         prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
         prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
         prop.put(HeaderFramework.CONNECTION_PROP_METHOD, request.getMethod()); // only needed for HTTPDeamon errormsg in case of blacklisted url
@@ -253,8 +254,11 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
             // TODO: use a template file for
             if (_stopProxyText != null) {
+                String httpsAllertMsg = "";
+                if (proxyurl.getProtocol().equalsIgnoreCase("https") && !request.getScheme().equalsIgnoreCase("https")) httpsAllertMsg = " &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>";
                 bde.prepend("<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
-                    + "<div align='center' style='font-size:11px; color:darkgrey;'><a href='" + proxyurl + "'>" + _stopProxyText + "</a></div></div>");
+                        + "<div align='center' style='font-size:11px; color:darkgrey;'><a href='" + proxyurl + "'>" + _stopProxyText + "</a> "
+                        + httpsAllertMsg + "</div></div>");
             }
 
             // 9 - deliver to client

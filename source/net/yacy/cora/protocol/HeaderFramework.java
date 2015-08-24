@@ -195,6 +195,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     /* PROPERTIES: General properties */
     public static final String CONNECTION_PROP_HTTP_VER = "HTTP";
+    public static final String CONNECTION_PROP_PROTOCOL = "PROTOCOL";
     public static final String CONNECTION_PROP_HOST = "HOST";
     public static final String CONNECTION_PROP_USER = "USER";
     public static final String CONNECTION_PROP_METHOD = "METHOD";
@@ -567,21 +568,29 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         theHeader.append("\r\n");
     }
 
+    /**
+     * Generate a url from Header properties
+     * @param conProp containing host, path, query and protocol (defaults to http if missing)
+     * @return url
+     * @throws MalformedURLException
+     */
     public static DigestURL getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
         String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
         final String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
         final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
+        String protocol = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PROTOCOL);
+        if (protocol == null) protocol = "http";
         //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
 
         int port, pos;
         if ((pos = host.lastIndexOf(':')) < 0 || host.charAt(pos - 1) != ']') {
-            port = 80;
+            port = Domains.stripToPort(protocol + "://" + host); // use stripToPort to get default ports
         } else {
             port = NumberTools.parseIntDecSubstring(host, pos + 1);
             host = host.substring(0, pos);
         }
 
-        final DigestURL url = new DigestURL("http", host, port, (args == null) ? path : path + "?" + args);
+        final DigestURL url = new DigestURL(protocol, host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
 

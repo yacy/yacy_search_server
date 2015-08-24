@@ -408,14 +408,12 @@ public final class HTTPDProxyHandler {
         try {
             final int reqID = requestHeader.hashCode();
 
-            String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-            String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
-            final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
+            final String host = url.getHost(); // conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
+            final String path = url.getPath(); // conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
+            final String args = url.getSearchpart(); // conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
             final String ip =      (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
             final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the ip from the connecting peer
-
-            int port = Domains.stripToPort(host);
-            host = Domains.stripToHostName(host);
+            final int port = url.getPort();
 
             // resolve yacy and yacyh domains
             String yAddress = resolveYacyDomains(host);
@@ -432,7 +430,7 @@ public final class HTTPDProxyHandler {
             modifyProxyHeaders(requestHeader, httpVer);
 
             final String connectHost = hostPart(host, port, yAddress);
-            final String getUrl = "http://"+ connectHost + remotePath;
+            final String getUrl = url.getProtocol() +"://"+ connectHost + remotePath;
 
             requestHeader.remove(HeaderFramework.HOST);
 
