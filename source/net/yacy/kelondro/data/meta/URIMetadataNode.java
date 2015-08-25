@@ -691,7 +691,6 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
                        SeedDB peers,
                        final TextSnippet textSnippet) {
         this.removeFields(CollectionSchema.text_t.getSolrFieldName()); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
-        //this.indexSegment = indexSegment;
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
         this.textSnippet = textSnippet;
@@ -708,8 +707,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
                 try {
                     if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(
                         Word.words2hashesHandles(Tokenizer.getWords(
-                            ("yacyshare " +
-                             path.replace('?', ' ') +
+                            (path.replace('?', ' ') +
                              " " +
                              this.dc_title()), null).keySet()),
                              this.hash());
@@ -717,10 +715,11 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
                     ConcurrentLog.logException(e);
                 }
                 indexSegment.fulltext().remove(this.hash()); // clean up
+            } else {
+                this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + path;
+                this.alternative_urlname = "http://" + seed.getName() + ".yacy" + path;
+                if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
             }
-            this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + path;
-            this.alternative_urlname = "http://" + seed.getName() + ".yacy" + path;
-            if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
         }
         return this;
     }
