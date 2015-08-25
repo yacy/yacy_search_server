@@ -750,15 +750,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * generate a public address using a given ip. This combines the ip with the port and encloses the ip
      * with square brackets if the ip is of typeIPv6
      * @param ip
-     * @return an address string which can be used as host:port part of an url
+     * @return an address string which can be used as host:port part of an url (if no port avail returns just host)
      */
     public final String getPublicAddress(final String ip) {
         if (ip == null) throw new RuntimeException("ip == NULL"); // that should not happen
         final String port = this.dna.get(Seed.PORT); // we do not use getPort() here to avoid String->Integer->toString() conversion
-        if ( port == null || port.length() < 2 || port.length() > 5 ) {
-            throw new RuntimeException("port not wellformed: " + port); // that should not happen
-        }
-        final StringBuilder sb = new StringBuilder(ip.length() + port.length() + 3);
+        final StringBuilder sb = new StringBuilder(ip.length() + 8); // / = surplus for port
         if (ip.indexOf(':') >= 0) {
             if (!ip.startsWith("[")) sb.append('[');
             sb.append(ip);
@@ -766,8 +763,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         } else {
             sb.append(ip);
         }
-        sb.append(':');
-        sb.append(port);
+        if (port == null || port.length() < 2 || port.length() > 5) {
+            //just skip port if peer didn't report it..... may finally depart
+            Network.log.severe("port not wellformed for peer" + this.getName() + ": " + port == null ? "null" : port);
+        } else {
+            sb.append(':');
+            sb.append(port);
+        }
         return sb.toString();
     }
 
