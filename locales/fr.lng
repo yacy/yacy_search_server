@@ -25,7 +25,7 @@
 #---------------------------
 Blacklist Manager==Gestionnaire des listes noire
 Used Blacklist engine:==Moteur de liste noire utilis&eacute;:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournis un filtre d'URL sur le serveur Proxy;. Toute URL provenant de la liste noire ne pourra &ecirc;tre charg&eacute;.
+This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournit un filtre d'URL sur le serveur Proxy;. Toute URL provenant de la liste noire ne pourra &ecirc;tre charg&eacute;.
 You can define several blacklists and activate them separately.==Vous pouvez d&eacute;finir de nombreuses listes noires et les activer s&eacute;par&eacute;ment.
 You may also provide your blacklist to other peers by sharing them.==Vous pouvez aussi partager vos listes noires avec d'autres noeuds du r&eacute;seau.
 in return you may collect blacklist entries from other peers.==En retour vous pourrez collectez celles des autres .
@@ -181,7 +181,7 @@ Your YaCy Peer needs some basic information to operate properly==Votre noeud YaC
 Select a language for the interface==S&eacute;lectionnez une langue pour l'interface
 Use Case: what do you want to do with YaCy:==Mode d'utilisation: que voulez-vous faire avec YaCy?
 Community-based web search==Recherche communautaire sur le Web
-Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Rejoingnez et soutenez le r&eacute;seau global \'freeworld\', effectuez des recherches sur le Web &agrave; l'aide d'un r&eacute;seau de recherche non censur&eacute; appartenant aux utilisateurs.
+Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Rejoignez et soutenez le r&eacute;seau global \'freeworld\', effectuez des recherches sur le Web &agrave; l'aide d'un r&eacute;seau de recherche non censur&eacute; appartenant aux utilisateurs.
 Search portal for your own web pages==Portail de recherche pour vos propres pages web
 Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Votre installation YaCy se comporte ind&eacute;pendemment des autres pairs et vous pouvez d&eacute;finir votre propre index lan&ccedil;ant votre propre balayage du Web. Cela peut servir &agrave; rechercher vos propres pages web ou &agrave; construire un portail de recherche th&eacute;matique.
 Files may also be shared with the YaCy server, assign a path here:==Le serveur YaCy peut aussi &ecirc;tre utilis&eacute; pour le partage de fichiers. D&eacute;finissez un chemin ici:
@@ -393,34 +393,60 @@ YaCy: Help==YaCy: Aide
 #File: index.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy \'\#\[clientname\]\#\': Page de recherche
-kiosk mode==Mode Kiosque
-"Search"=="Chercher"
+Search for #[former]#==Recherche pour  #[former]#
+YaCy Search on '#[clientname]#'==Recherche YaCy sur '#[clientname]#'
+Search</button>==Rechercher</button>
 Text==Texte
 Images==Images
-#Audio==#Audio
->Video==>Vid&eacute;o
+Audio==Audio
+Video==Vid&eacute;o
 Applications==Applications
 more options...==plus d'options...
-Max. number of results:==Nombre maximal de r&eacute;sultats:
-order by:==tri&eacute; par:
-YBR-Date-Quality==YBR-Date-Qualit&eacute;
-YBR-Quality-Date==YBR-Qualit&eacute;-Date
-Date-YBR-Quality==Date-YBR-Qualit&eacute;
-Quality-YBR-Date==Qualit&eacute;-YBR-Date
-Date-Quality-YBR==Date-Qualit&eacute;-YBR
-Quality-Date-YBR==Qualit&eacute;-Date-YBR
-Resource:==resource:
-global==global
-local==local
-Max. search time==Dur&eacute;e de recherche Max.
-\(seconds\)==\(secondes)
-URL mask:==Filtre-URL:
-restrict on==limit&eacute; &agrave;
+Results per page==R&eacute;sultats par page
+order by:==trier par:
+Resource==Origine
+the peer-to-peer network==le r&eacute;seau pair &agrave; pair
+only the local index==seulement l'index local
+Prefer mask==Masque favori
 show all==tout montrer
-#überarbeiten!!!
-Prefer mask:==Masque favori:
 Constraints:==Contraintes:
 only index pages==Pages d'index seulement
+Query Operators==Op&eacute;rateurs
+only urls with the &lt;phrase&gt; in the url==uniquement les urls contenant la &lt;phrase&gt;
+only urls with the &lt;phrase&gt; within outbound links of the document==uniquement les urls dont le document a un lien contenant la &lt;phrase&gt;
+only urls with extension &lt;ext&gt;==uniquement les urls avec l'extension &lt;ext&gt;
+only urls from host &lt;host&gt;==uniquement les urls de l'h&ocirc;te &lt;host&gt;
+only pages with as-author-anotated &lt;author&gt;==uniquement les pages avec l'auteur &lt;author&gt; indiqu&eacute;
+only pages from top-level-domains &lt;tld&gt;==uniquement les pages des domaines de premier niveau &lt;tld&gt;
+only resources from http or https servers==uniquement les ressources de serveurs http ou https
+only resources from ftp servers==uniquement les ressources de serveurs ftp
+they are rare==ils sont rares
+crawl them yourself==balayez les vous-m&ecirc;me
+only resources from smb servers==uniquement les ressources de serveurs samba
+Intranet Indexing==Indexage d'intranet
+must be selected==doit &ecirc;tre s&eacute;lectionn&eacute;
+only files from a local file system==uniquement les fichiers locaux
+ranking modifier</dt>==modificateur de classement</dt>
+sort by date \(latest first\)==trier par date (les plus r&eacute;cents en premier)
+multiple words shall appear near==les mots recherch&eacute;s doivent &ecirc;tre dans une m&ecirc;me expression
+"" \(doublequotes\)=="" (guillemets)
+prefer given language \(an ISO639 2-letter code\)==pr&eacute;f&eacute;rer le langage indiqu&eacute; (code ISO639 &agrave; 2 lettres)
+heuristics==heuristiques
+add search results from external opensearch systems==ajouter les r&eacute;sultats de syst&egrave;mes opensearch externes
+Search Navigation==Navigation dans la recherche
+keyboard shotcuts==raccourcis clavier
+tab or page-up==Tab ou D&eacute;but
+next result page==page de r&eacute;sultats suivante
+page-down==Page bas
+previous result page==page de r&eacute;sultats pr&eacute;c&eacute;dente
+automatic result retrieval==r&eacute;cup&eacute;ration automatique de r&eacute;sultats
+browser integration==int&eacute;gration navigateur
+after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search\.\."'==apr&egrave;s une recherche, cliquer sur le moteur de recherche par d&eacute;faut dans le champ de recherche en haut &agrave; droite de votre navigateur et s&eacute;lectionner 'Ajouter "YaCy ..."'
+search as rss feed==rechercher comme flux RSS
+click on the red icon in the upper right after a search\. this works good in combination with the '/date' ranking modifier\. See an ==cliquer sur l'ic&ocirc;ne rouge dans le coin en haut &agrave; droite juste apr&egrave;s une recherche. Fonctionne bien en combinaison avec le modificateur de classement '/date'. Voir un 
+example==exemple
+json search results==r&eacute;sultats de recherche json
+for ajax developers: get the search rss feed and replace the '\.rss' extension in the search result url with '\.json'==pour les d&eacute;veloppeurs ajax: rechercher comme flux RSS et dans l'URL de r&eacute;sultat remplacer l'extension '.rss' par '.json'
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -458,7 +484,7 @@ The local index currently consists of \(at least\) \#\[wcount\]\# reverse word i
 "Show Details for URL"=="Montrer les d&eacute;tails pour l'URL"
 #URL-Hash:==URL-Hash:
 "Show Details for URL-Hash"=="Montrer les d&eacute;tails pour l'URL-hash"
-DHT Transmission control:==Contrôle de transmission DHT:
+DHT Transmission control:==Contr&ocirc;le de transmission DHT:
 The transmission is necessary for the functionality of global search on other peers.==Le partage est n&eacute;cessaire, pour que la recherche globale fonctionne avec les autres noeuds.
 If you switch off distribution or receipt of RWIs you will be banned from global search.==Si vous d&eacute;sactivez la transmission ou la reception des RWIs, vous serez bannis de la recherche globale.
 Index Distribution:==Partage d'index:
@@ -547,7 +573,7 @@ From File:==Du fichier:
 From URL:==De l'URL:
 Existing start URLs are re-crawled.==Le URLs de d&eacute;part existantes seront recrawl&eacute;es.
 Other already visited URLs are sorted out as \"double\".==Les autres URLs d&eacute;j&agrave; visit&eacute;es seront class&eacute;es en doublons.
-A complete re-crawl will be available soon.==Un recrawl complet sera bientôt disponible.
+A complete re-crawl will be available soon.==Un recrawl complet sera bient&ocirc;t disponible.
 "Start New Crawl"=="D&eacute;marrer un nouvaux crawl"
 Distributed Indexing:==Indexation distribu&eacute;e:
 Crawling and indexing can be done by remote peers.==Crawl et indexation peuvent &ecirc;tre execut&eacute;s par les autres noeuds.
@@ -639,7 +665,7 @@ No more that two pages are loaded from the same host in one second \(not more th
 A second crawl for a different host increases the throughput to a maximum of 240 documents per minute ==Un second balayage sur un h&ocirc;te diff&eacute;rent augmente le d&eacute;bit jusqu'&agrave; un maximum de 240 documents par minute, 
 since the crawler balances the load over all hosts.==puisque le balayeur &eacute;quilibre la charge entre tous les h&ocirc;tes.
 >High Speed Crawling<==>Balayage &agrave; haute vitesse<
-A \'shallow crawl\' which is not limited to a single host \(or site\)==Un "balayage superficiel" non limité &agrave; un seul h&ocirc;te (ou site) 
+A \'shallow crawl\' which is not limited to a single host \(or site\)==Un "balayage superficiel" non limit&eacute; &agrave; un seul h&ocirc;te (ou site) 
 can extend the pages per minute \(ppm\) rate to unlimited documents per minute ==peut augmenter le nombre de pages par minutes (ppm) jusqu'&agrave; r&eacute;colter un nombre illimit&eacute; de documents par minute 
 when the number of target hosts is high.==lorsque le nombre d'h&ocirc;tes cibl&eacute;s est &eacute;lev&eacute;.
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==Cela peut &ecirc;tre effectu&eacute; au moyen de cette servlet: <a href="CrawlStartExpert.html">d&eacute;marrer un balayage expert</a>.
@@ -816,7 +842,7 @@ The index was crawled and contributed by other peers.==Cet index a &eacute;t&eac
 The url fetch was initiated and executed by other peers.==L'indexation d'URL a &eacute;t&eacute; initi&eacute;e et effectu&eacute;e par d'autres noeuds.
 These links here have been transmitted to you because your peer is the most appropriate for storage according to==Ces liens vous ont &eacute;t&eacute; transmis car votre noeud est le plus appropri&eacute; pour le stockage selon  
 the logic of the Global Distributed Hash Table.==la logique de la table de hachage distribu&eacute;e globale
-<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Cas d'utilisation:</em> Cette liste se remplira si l'option 'Reception d'index' de la page 'Contrôle d'index'
+<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Cas d'utilisation:</em> Cette liste se remplira si l'option 'Reception d'index' de la page 'Contr&ocirc;le d'index'
 \(4\) Index Monitor for Proxy Indexing==(4) Moniteur d'index pour le proxy d'indexation
 These web pages had been indexed as result of your proxy usage.==Ces pages web ont &eacute;t&eacute; index&eacute;es lors de l'utilisation de votre proxy d'indexation.
 No personal or protected page is indexed==Aucune page personelle ou prot&eacute;g&eacute;e n'est index&eacute;e
@@ -1041,7 +1067,7 @@ Outgoing News==Nouvelles sortantes
 Published News==Nouvelles publi&eacute;es
 News Overview==Aperçu des nouvelles
 This is the YaCyNews system \(currently under testing\).==Voici le syst&egrave;me de nouvelles YaCy (actuellement en test).
-The news service is controlled by several entry points:==Ce service de nouvelles est contrôl&eacute; par plusieurs points d'entr&eacute;e:
+The news service is controlled by several entry points:==Ce service de nouvelles est contr&ocirc;l&eacute; par plusieurs points d'entr&eacute;e:
 A crawl start with activated remote indexing will automatically create a news entry.==Un crawl d&eacute;marr&eacute; avec la fonction de crawl distant cr&eacute;e automatiquement une entr&eacute;e de nouvelles.
 Other peers may use this information to prevent double-crawls from the same start point.==Les autre noeuds peuvent utiliser cette information pour &eacute;viter les doublons dans les points de d&eacute;part de crawl.
 A table with recently started crawls is presented on the Index Create - page==Une table avec les crawls r&eacute;cemment lanc&eacute;s est visible sur la page de cr&eacute;ation d'index.
@@ -1180,11 +1206,11 @@ This cache is very important for a fast search process.==Ce cache est tr&egrave;
 Increasing the cache size will result in more search results and less IO during DHT transfer.==Augmenter la taille du cache augmente le nombre de r&eacute;sultats de recherche et diminue le nombre d'E/S pendant le transfert de DHT. 
 'noticed' URLs==URLs 'remarqu&eacute;es'
 A noticed URL is one that was discovered during crawling but was not loaded yet.==Une URL remarqu&eacute;e est celle qui est d&eacute;couverte pendant le crawl et qui n'&eacute;tait pas d&eacute;j&agrave; charg&eacute;e.
-Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Augmenter la taille du cache acc&eacute;l&egrave;re le double contrôle pendant la reconnaisance d'URL des crawls.
+Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Augmenter la taille du cache acc&eacute;l&egrave;re le double contr&ocirc;le pendant la reconnaisance d'URL des crawls.
 'error' URLs==URLs 'en erreur'
 URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.==URLs qui ne peuvent pas &ecirc;tre charg&eacute;s dans la base de donn&eacute;es.
 Increasing the cache size will most probably speed up crawling slightly, but not significantly.==Augmenter ce cache  acc&eacute;l&egrave;re l&eacute;g&egrave;rement le crawl, mais pas significativement.
-DHT Control==Contrôle DHT
+DHT Control==Contr&ocirc;le DHT
 This is simply the cache for the seed-dbs==C'est simplement le cache pour le seed-dbs
 active, passive, potential==actif, passif, potentiel
 This cache is divided into three equal parts.==Ce cache est divis&eacute; en trois parts &eacute;gales
@@ -1246,7 +1272,7 @@ The network picture below shows how the latest search query was solved by asking
 #File: ProxyIndexingMonitor_p.html
 #---------------------------
 Index Monitor for Proxy Indexing==Moniteur d'index du proxy d'indexation
-This is the control page for web pages that your peer has indexed during the current application run-time==C'est la page de contrôle des pages web index&eacute;es par votre pair durant l'ex&eacute;cution actuelle de l'application
+This is the control page for web pages that your peer has indexed during the current application run-time==C'est la page de contr&ocirc;le des pages web index&eacute;es par votre pair durant l'ex&eacute;cution actuelle de l'application
 as result of proxy fetch/prefetch.==par visites des pages.
 No personal or protected page is indexed==Aucune page personnelle ou prot&eacute;g&eacute;e
 those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==ces pages sont identifi&eacute;es par leurs propri&eacute;t&eacute;s dans l'ent&ecirc;te HTTP (par exemple: Cookies ou autorisations HTTP)
@@ -1819,7 +1845,7 @@ Hide surftips==Surftipps cach&eacute;s
 
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Peer Contrôle
+: Peer Steering==: Peer Contr&ocirc;le
 #Steering of API Actions<==Steuerung der API Aktionen<
 #This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
 #to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
@@ -2059,57 +2085,29 @@ kiosk mode==Kiosque Mode
 #File: yacysearch.html
 #---------------------------
 Search Page==Page de recherche
-"Search"=="Rechercher"
-"search again - catch up more links"=="Nouvelle recherche - plus de r&eacute;sultats" 
-more options==Plus d'options
-Text==Texte
-#Images==Images
-#Audio==Audio
-Video==Vid&eacute;o
-Applications==Applications
-The following words are stop-words and had been excluded from the search:==Les termes suivant sont des termes d'arr&ecirc;t et seront exclus de la recherche:
-No Results.==Aucun r&eacute;sultat.
-length of search words must be at least 3 characters==La longueur des mots recherch&eacute;s doit &ecirc;tre d'au moins trois caract&egrave;res
-If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Si vous 
-trouvez que ce n'est pas satisfaisant, vous pouvez supporter un index global sur votre propre proxy/noeud.
-If everybody contributes, the results will get better.==Si tout le monde contribue, le r&eacute;sultat sera meilleur.
-Other possible reasons for no result:==Autres raisons possibles de l'absence de r&eacute;sultat:
-The search time was too short. Search again with same query to catch up 'late peers'==Le temps de recherche est trop court. Refaite la  m&ecirc;me requ&ecirc;te pour obtenir les r&eacute;sultats attard&eacute;s.
-There is currently no support for german umlaute. Please use ae/oe/ue instead==Actuellement, il n'y a pas de support du Umlaut allemand. Utilisez ae/oe/ue &agrave; la place.
-Words of length < 3 are not indexed. Please omit such words==Les termes de moins de trois caract&egrave;res ne seront pas ind&eacute;x&eacute;s. S'il vous plait, omettez les.
-YaCy tries to index singular instead of plural words. Please use the singular form==YaCy n'indexe que les singuliers, utilisez donc le singulier au lieu du pluriel.
-Only complete words are indexed, not parts of words==Seuls les mots complets sont index&eacute;s, pas les parties de mots.
-Don't use stopwords as search words==N'utilisez pas de mots d'arr&ecirc;t dans la recherche.
-During this test phase the reaction time of remote peers is unknown.==Pendant cette phase de test le temp de r&eacute;action des autres noeuds est inconnu.
-Please repeat your search to see if there are late-responses from remote peers==R&eacute;p&eacute;tez votre recherche, pour voir s'il reste des r&eacute;ponses attard&eacute;es
-If you think the information you searched should exist in the global index,==Si vous pensez que les information que vous cherchez existent dans l'index global,
-then please run your own peer and start a crawl of your wanted information to make it==alors d&eacute;marrez votre noeud et lancez un crawl sur l'information recherch&eacute;e pour qu'elle
-available for everyone. Then stay online to support crawls from other peers. Thank you!==soit disponible pour tous les autres noeuds. Et restez en ligne pour permettre les crawls des autres noeuds. Merci!
-results from==Resultats de
-ordered links from==lien class&eacute;s de
-filtered links of a total number of==liens filtr&eacute;s sur un total de
-known.==connus.
-Refine your search with these topwords==Affinez votre recherche avec ces topwords
-You can enrich the search results by using the 'global' option==Vous pouvez augmenter le nombre de r&eacute;sultats obtenus en cochant l'option 'global'
-This will search also other YaCy peers==Cela utilisera les autres noeuds YaCy pour la recherche.
-You cannot get global search results because you are not connected to another YaCy peer.==Vous ne pouvez pas faire de recherche globale car vous n'&ecirc;tes pas connect&eacute; &agrave; un autre noeud YaCy.
-To connect you must first use the proxy.==Pour vous connecter, vous devez d'abord utiliser un proxy.
-See here for an==Voir ici pour
-installation guide==le guide d'installation
-Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Autrement, vous pouvez aussi utiliser le proxy en mode connect&eacute; permanent. Ce qui autorise aussi les recherches globales.
-To do this, press this button:==Pour faire cela, pressez ce bouton:
-"go online"=="connectez vous"
-you must also switch to online mode==Vous devez d'abord passer en mode connect&eacute;
-\(by using the proxy\) to contribute to the global index.==(en utilisant le proxy) pour contribuer &agrave; l'index global.
-"bookmark"=="marque-page"
-"recommend"=="recommander"
-"delete"=="supprimer"
-loading snippet==chargement d'extrait
-Pictures==Images
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==La recherche globale consiste en  #[globalresults]#, qui sont fournis par d'autres noeuds.
-YaCy is a GPL'ed project==YaCy un projet GPL
-with the target of implementing a P2P-based global search engine.==avec l'intention de r&eacute;aliser un moteur de recherche P2P.
-Architecture \(C\) by Michael Peter Christen==Architecture (C) de Michael Peter Christen
+Search for==Recherche de
+YaCy Search on==Recherche YaCy sur
+This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output\.==Le r&eacute;sultat de cette recherche peut &eacute;galement &ecirc;tre charg&eacute; en tant que flux RSS /<a href="http://www.opensearch.org" target="_blank">opensearch</a>.
+Click the RSS icon to see this search result as RSS message stream==Cliquer sur l'ic&ocirc;ne RSS pour voir le flux RSS correspondant &agrave; cette recherche
+Use the RSS search result format to add static searches to your RSS reader\, if you use one\.==Utilisez les r&eacute;sultats au format RSS pour ajouter des recherches statiques &agrave; votre lecteur de flux RSS, si vous en utilisez un.
+>search</button>==>rechercher</button>
+No Results\.==Pas de r&eacute;sultats.
+length of search words must be at least 1 character==les termes recherch&eacute;s doivent contenir au moins un caract&egrave;re
+> of <==> de <
+ local, == locaux, 
+ remote\), == distants),  
+> from <==> de <
+ remote YaCy peers\.== noeuds YaCy distants.
+Searching the web with this peer is disabled for unauthorized users\. Please <a href="Status.html\?login=">log in</a> as administrator to use the search function==La recherche avec ce noeud est d&eacute;sactiv&eacute;e pour les utilisateurs non autoris&eacute;s. Veuillez vous <a href="Status.html\?login=">connecter</a> en tant qu'administrateur pour utiliser la fonction de recherche.
+Illegal URL mask:==Masque d'URL incorrect :
+\(not a valid regular expression\), mask ignored\.==(expression r&eacute;guli&egrave;re incorrecte), masque ignor&eacute;.
+Illegal prefer mask:==Masque favori incorrect :
+Did you mean:==Vouliez-vous plut&ocirc;t dire :
+"search again"=="nouvelle recherche" 
+The following words are stop-words and had been excluded from the search:==Les termes suivant sont des termes d'arr&ecirc;t et ont &eacute;t&eacute; exclus de la recherche:
+Location -- click on map to enlarge==Lieu -- cliquez sur la carte pour agrandir
+Map \(c\) by==Carte (c) fournie par
+and contributors, CC-BY-SA==et ses contributeurs, CC-BY-SA
 #-----------------------------
 
 ### Subdirectory env/templates ###
@@ -2168,12 +2166,24 @@ Ranking and Heuristics==Classement et heuristique
 
 #File: env/templates/simpleheader.template
 #---------------------------
-Noeud Administration==Administration des noeuds
+#File: env/templates/simpleheader.template
+#---------------------------
+Toggle navigation==Activer la navigation
+Search Interfaces==Interfaces de recherche
 Web Search==Recherche Web
-Noeud Owner Profile==Impressum dieses Noeuds
-Help / Wiki==Aide / Wiki
-Surftips</a>==Surftips</a>
-Project Home==Accueil projet
+File Search==Recherche de fichiers
+Compare Search==Recherche comparative
+Index Browser==Explorateur d'index
+URL Viewer==Analyseur d'URL
+Example Calls to the Search API:==Exemples d'appels sur l'API :
+About This Page==&Agrave; propos
+YaCy Tutorials==Tutoriels YaCy
+Download YaCy==T&eacute;l&eacute;charger YaCy
+Community \(Web Forums\)==Communaut&eacute; (Forums)
+Project Wiki==Wiki du projet
+Git Repository==D&eacute;p&ocirc;t Git
+Bugtracker==Suivi des bugs
+external==lien externe
 #-----------------------------
 
 #File: env/templates/submenuComputation.template
@@ -2227,7 +2237,7 @@ Parser Configuration==Configuration de l'analyseur syntaxique
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-Index Control Menu==Menu contrôle d'index
+Index Control Menu==Menu contr&ocirc;le d'index
 Index Administration==Administration de l'index
 Index Import==Importer un index
 Index Transfer==Transferer un index
@@ -2236,7 +2246,7 @@ Index Transfer==Transferer un index
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
 Index Creation Menu==Menu cr&eacute;ation d'index
-Control Queues==Contrôle des queues
+Control Queues==Contr&ocirc;le des queues
 WWW Crawl Queues==Files d'attente de Crawl WWW Crawl
 Media Crawl Queues==Files d'attente de Crawl Media
 Crawl Start==D&eacute;marrer le crawl
