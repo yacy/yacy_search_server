@@ -1598,7 +1598,7 @@ public final class SearchEvent {
             Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
             if (imgO != null && imgO.size() > 0 && imgO instanceof List<?>) {
-                List<Object> alt = altO == null ? new ArrayList<Object>(imgO.size()) : (List<Object>) altO;
+                List<Object> alt = altO == null ? null : (List<Object>) altO;
                 List<Object> img = (List<Object>) imgO;
                 List<String> prt = CollectionConfiguration.indexedList2protocolList(doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName()), img.size());
                 Collection<Object> heightO = doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName());
@@ -1608,17 +1608,21 @@ public final class SearchEvent {
                 for (int c = 0; c < img.size(); c++) {
                     String image_urlstub =  (String) img.get(c);
                     if (image_urlstub.endsWith(".ico")) continue; // we don't want favicons, makes the result look idiotic
-                    String image_alt = alt != null && alt.size() > c ? (String) alt.get(c) : "";
-                    boolean match = (query.getQueryGoal().matches(image_urlstub) || query.getQueryGoal().matches(image_alt));
                     try {
+                        int h = height == null ? 0 : (Integer) height.get(c);
+                        int w = width == null ? 0 : (Integer) width.get(c);
+
+                        // check size good for display (parser may init unknown dimension with -1)
+                        if (h > 0 && h <= 16) continue; // to small for display
+                        if (w > 0 && w <= 16) continue; // to small for display
+                        
                         DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? prt.get(c) : "http") + "://" + image_urlstub);
-                        Integer h = height == null ? null : (Integer) height.get(c);
-                        Integer w = width == null ? null : (Integer) width.get(c);
-                        boolean sizeok = h != null && w != null && h.intValue() > 16 && w.intValue() > 16;
                         String id = ASCII.String(imageUrl.hash());
                         if (!imageViewed.containsKey(id) && !containsSpare(id)) {
-                            ImageResult imageResult = new ImageResult(doc.url(), imageUrl, "", image_alt, w == null ? 0 : w, h == null ? 0 : h, 0);
-                            if (match || sizeok) imageSpareGood.put(id, imageResult); else imageSpareBad.put(id, imageResult);
+                            String image_alt = (alt != null && alt.size() > c) ? (String) alt.get(c) : "";
+                            ImageResult imageResult = new ImageResult(doc.url(), imageUrl, "", image_alt, w, h, 0);
+                            boolean match = (query.getQueryGoal().matches(image_urlstub) || query.getQueryGoal().matches(image_alt));
+                            if (match) imageSpareGood.put(id, imageResult); else imageSpareBad.put(id, imageResult);
                         }
                     } catch (MalformedURLException e) {
                         continue;
