@@ -914,9 +914,23 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
 
         // handle image source meta data
-        if ((allAttr || contains(CollectionSchema.images_text_t)) && (document.getContentDomain() == ContentDomain.IMAGE)) {
-            add(doc, CollectionSchema.images_text_t, content); // the content may contain the exif data from the image parser
-            content = digestURL.toTokens(); // remove all other entry but the url tokens
+        if (document.getContentDomain() == ContentDomain.IMAGE) {
+            // add image pixel size if known
+            Iterator<ImageEntry> imgit = document.getImages().values().iterator();
+            if (imgit.hasNext()) {
+                ImageEntry img = imgit.next();
+                int imgpixels = (img.height() < 0 || img.width() < 0) ? -1 : img.height() * img.width();
+                if (imgpixels > 0) {
+                    if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, img.height());
+                    if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, img.width());
+                    if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
+                }
+            }
+
+            if (allAttr || contains(CollectionSchema.images_text_t))  {
+                add(doc, CollectionSchema.images_text_t, content); // the content may contain the exif data from the image parser
+                content = digestURL.toTokens(); // remove all other entry but the url tokens
+            }
         }
 
         // content (must be written after special parser data, since this can influence the content)
