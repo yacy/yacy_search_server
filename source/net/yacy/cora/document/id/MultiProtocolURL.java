@@ -1178,6 +1178,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return extension != null && extension.length() > 0 && "cgi.exe".indexOf(extension.toLowerCase()) >= 0;
     }
 
+    /**
+     * @deprecated use a mimetype considering methode (e.g. Document.getContentDomain() == ContentDomain.IMAGE)
+     */
+    @Deprecated
     public static final boolean isImage(final String extension) {
         return extension != null && extension.length() > 0 && Response.docTypeExt(extension.toLowerCase()) == Response.DT_IMAGE;
     }

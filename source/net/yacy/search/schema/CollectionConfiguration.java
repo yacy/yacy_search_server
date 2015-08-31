@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
@@ -537,14 +538,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         LinkedHashMap<DigestURL,String> outboundLinks = document.outboundLinks();
 
         Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
-        List<ImageEntry> images = new ArrayList<ImageEntry>();
         int c = 0;
         final Object parser = document.getParserObject();
         boolean containsCanonical = false;
         DigestURL canonical = null;
         if (parser instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) parser;
-            images = html.getImages();
+            List<ImageEntry> images = html.getImages();
 
             // header tags
             int h = 0;
@@ -912,12 +912,27 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     !content.endsWith(" " + r)) content += " " + r;
             }
         }
-        
-        if ((allAttr || contains(CollectionSchema.images_text_t)) && MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(digestURL.getFileName()))) {
-            add(doc, CollectionSchema.images_text_t, content); // the content may contain the exif data from the image parser
-            content = digestURL.toTokens(); // remove all other entry but the url tokens
+
+        // handle image source meta data
+        if (document.getContentDomain() == ContentDomain.IMAGE) {
+            // add image pixel size if known
+            Iterator<ImageEntry> imgit = document.getImages().values().iterator();
+            if (imgit.hasNext()) {
+                ImageEntry img = imgit.next();
+                int imgpixels = (img.height() < 0 || img.width() < 0) ? -1 : img.height() * img.width();
+                if (imgpixels > 0) {
+                    if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, img.height());
+                    if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, img.width());
+                    if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
+                }
+            }
+
+            if (allAttr || contains(CollectionSchema.images_text_t))  {
+                add(doc, CollectionSchema.images_text_t, content); // the content may contain the exif data from the image parser
+                content = digestURL.toTokens(); // remove all other entry but the url tokens
+            }
         }
-        
+
         // content (must be written after special parser data, since this can influence the content)
         if (allAttr || contains(CollectionSchema.text_t)) add(doc, CollectionSchema.text_t, content);
         if (allAttr || contains(CollectionSchema.wordcount_i)) {
