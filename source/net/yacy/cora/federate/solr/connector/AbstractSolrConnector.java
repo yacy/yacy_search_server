@@ -523,7 +523,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setFacetMinCount(1); // there are many 0-count facets in the uninverted index cache
         params.setFacetLimit(maxresults);
         params.setFacetSort(FacetParams.FACET_SORT_COUNT);
-        params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fc /*FACET_METHOD_fcs*/);
+        params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_enum); // fight the fieldcache
         params.setFields(fields);
         params.clearSorts();
         params.setIncludeScore(false);

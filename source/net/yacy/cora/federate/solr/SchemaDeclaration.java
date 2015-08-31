@@ -46,6 +46,8 @@ public interface SchemaDeclaration {
     public boolean isSearchable();
 
     public boolean isOmitNorms();
+    
+    public boolean isDocValue();
 
     public String getComment();
 

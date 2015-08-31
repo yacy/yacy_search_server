@@ -105,7 +105,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     
     private String solrFieldName = null; // solr field name in custom solr schema
     private final SolrType type;
-    private final boolean indexed, stored, multiValued, omitNorms, searchable;
+    private final boolean indexed, stored, multiValued, omitNorms, searchable, docValues;
     private String comment;
 
 
@@ -117,6 +117,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
+        this.docValues = (type == SolrType.string || type == SolrType.date);
         // verify our naming scheme
         String name = this.name();
         int p = name.indexOf('_');
@@ -190,6 +191,11 @@ public enum WebgraphSchema implements SchemaDeclaration {
         return this.searchable;
     }
     
+    @Override
+    public boolean isDocValue() {
+    	return this.docValues;
+    }
+
     @Override
     public final String getComment() {
         return this.comment;

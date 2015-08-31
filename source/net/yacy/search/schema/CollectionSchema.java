@@ -252,7 +252,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;
-    private final boolean indexed, stored, searchable, multiValued, omitNorms;
+    private final boolean indexed, stored, searchable, multiValued, omitNorms, docValues;
     private String comment;
 
     private CollectionSchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final boolean searchable, final String comment) {
@@ -263,6 +263,7 @@ public enum CollectionSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
+        this.docValues = (type == SolrType.string || type == SolrType.date);
         // verify our naming scheme
         String name = this.name();
         int p = name.indexOf('_');
@@ -335,6 +336,11 @@ public enum CollectionSchema implements SchemaDeclaration {
     @Override
     public final boolean isSearchable() {
         return this.searchable;
+    }
+    
+    @Override
+    public boolean isDocValue() {
+    	return this.docValues;
     }
 
     @Override
