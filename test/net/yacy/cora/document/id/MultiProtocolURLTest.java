@@ -3,6 +3,7 @@ package net.yacy.cora.document.id;
 import static org.junit.Assert.*;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeSet;
@@ -190,6 +191,26 @@ public class MultiProtocolURLTest {
 
             assertEquals("", attr.get(shouldBe));
             System.out.println(" -> " + resultUrl.toNormalform(false));
+        }
+    }
+
+     /**
+     * Test of getFileExtension method, of class MultiProtocolURL.
+     */
+    @Test
+    public void testGetFileExtension() throws MalformedURLException {
+        Map<String, String> testurls = new HashMap<String, String>();
+        //  key=testurl, value=result
+        testurls.put("path/file.xml","xml"); // easiest
+        testurls.put("path/file?h.pdf",""); // file w/o extension
+        testurls.put("file.html?param=h.pdf","html"); // dot in query part
+        testurls.put("url?param=h.pdf",""); // dot in query part
+        testurls.put("file.html?param", "html");
+        testurls.put("/path/","");
+        for (String s : testurls.keySet()) {
+            System.out.println("test getFileExtension: " + s + " -> " + testurls.get(s));
+            String result = MultiProtocolURL.getFileExtension(s);
+            assertEquals(testurls.get(s),result);
         }
     }
 }

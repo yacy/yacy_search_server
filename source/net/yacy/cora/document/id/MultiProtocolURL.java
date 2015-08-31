@@ -838,7 +838,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      * @return extension or ""
      */
     public static String getFileExtension(final String fileName) {
-        final int p = fileName.lastIndexOf('.');
+        int p = fileName.lastIndexOf('.');
         if (p < 0) return "";
         final int q = fileName.lastIndexOf('?');
         if (q < 0) {
@@ -846,7 +846,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
         // check last dot in query part
         if (p > q) {
-            return ""; // TODO: last . after ?  (file.ext?param=one.txt)
+            p = fileName.lastIndexOf('.', q);
+            if (p < 0) return "";
         }
         return fileName.substring(p + 1, q).toLowerCase();
     }
