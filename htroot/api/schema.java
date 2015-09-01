@@ -106,5 +106,6 @@ public class schema {
         prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
         prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);
         prop.put("fields_" + c + "_omitNormsChecked", field.isOmitNorms() ? 1 : 0);
+        prop.put("fields_" + c + "_docValueChecked", field.isDocValue() ? 1 : 0);
     }
 }

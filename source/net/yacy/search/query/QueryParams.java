@@ -461,10 +461,10 @@ public final class QueryParams {
             params.setFacetMinCount(1);
             params.setFacetLimit(FACETS_STANDARD_MAXCOUNT);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
-            params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
+            params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_enum); // fight the fieldcache
             for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field); // params.addFacetField("{!ex=" + field + "}" + field);
             if (this.facetfields.contains(CollectionSchema.dates_in_content_dts.name())) {
-                params.setParam("facet.range", CollectionSchema.dates_in_content_dts.name());
+            	params.setParam(FacetParams.FACET_RANGE, CollectionSchema.dates_in_content_dts.name());
                 String start = TrieDateField.formatExternal(new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L * 3));
                 String end = TrieDateField.formatExternal(new Date(System.currentTimeMillis() + 1000L * 60L * 60L * 24L * 3));
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.start", start);
