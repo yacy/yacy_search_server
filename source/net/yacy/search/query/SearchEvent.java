@@ -1592,8 +1592,17 @@ public final class SearchEvent {
         // boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
         // generalize above hack (regarding url with file extension but beeing a html (with html mime)
         if (doc.doctype() == Response.DT_IMAGE) {
-            String id = ASCII.String(doc.hash());
-            if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), doc.mime(), doc.title(), 0, 0, 0));
+            if (!doc.url().getFileName().endsWith(".ico")) { // we don't want favicons
+                final String id = ASCII.String(doc.hash());
+                // check image size
+                final Collection<Object> height = doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName());
+                final Collection<Object> width = doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName());
+                int h = height == null ? 0 : (Integer) height.iterator().next(); // might be -1 for unknown
+                int w = width == null ? 0 : (Integer) width.iterator().next();
+                if ((h <= 0 || h > 16) && (w <= 0 || w > 16)) { // we don't want too small images (< 16x16)
+                    if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), doc.mime(), doc.title(), w, h, 0));
+                }
+            }
         } else {
             Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
