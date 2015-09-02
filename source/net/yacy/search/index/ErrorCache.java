@@ -42,7 +42,6 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.robots.RobotsTxt;
-import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -67,7 +66,7 @@ public class ErrorCache {
                 params.setStart(0);
                 params.setRows(1000);
                 params.setFacet(false);
-                params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
+                params.setSort(new SortClause(CollectionSchema.load_date_dt.getSolrFieldName(), SolrQuery.ORDER.desc)); // load_date_dt = faildate
                 params.setFields(CollectionSchema.id.getSolrFieldName());
                 params.setQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
                 params.set(CommonParams.DF, CollectionSchema.id.getSolrFieldName()); // DisMaxParams.QF or CommonParams.DF must be given
