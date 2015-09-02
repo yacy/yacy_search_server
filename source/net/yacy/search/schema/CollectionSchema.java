@@ -34,7 +34,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     id(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash **mandatory field**"),
     sku(SolrType.string, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
     //sku(SolrType.text_en_splitting_tight, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
-    last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"),
+    last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"), // date document was last modified
     dates_in_content_dts(SolrType.date, true, true, true, false, true, "if date expressions can be found in the content, these dates are listed here as date objects in order of the appearances"),
     dates_in_content_count_i(SolrType.num_integer, true, true, false, false, false, "the number of entries in dates_in_content_sxt"),
     startDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='startDate'"),
