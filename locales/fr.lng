@@ -463,7 +463,7 @@ RWIs at Start:==RWIs au d&eacute;part:
 RWIs now:==RWIs maintenant:
 wordHash in Progress:==Mots-Hash en cours:
 last wordHash with deleted URLs:==dernier mot-hash avec URLs supprim&eacute;es:
-Number of deleted URLs in on this Hash:==Nombre d'URLs supprim&eacute;s sur ce hâchage:
+Number of deleted URLs in on this Hash:==Nombre d'URLs supprim&eacute;s sur ce hachage:
 UrldbCleaner - Clean up the database by deletion of blacklisted urls:==UrlDBCleaner - Nettoie la base de donn&eacute;es en supprimant les URLs en liste noire:
 Start/Resume==D&eacute;part/Reprise
 Stop==Arr&ecirc;t
@@ -509,7 +509,7 @@ Word-Hash:</td>==Mot-Hash:</td>
 #File: CrawlStartExpert.html
 #---------------------------
 Index Creation==Cr&eacute;er un index
-Start Crawling Job:==Tâche de d&eacute;marrage du crawl:
+Start Crawling Job:==T&acirc;che de d&eacute;marrage du crawl:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Vous pouvez  d&eacute;finir les URLs de d&eacute;part et d&eacute;marrer le crawl ici. Crawler signifie que YaCy t&eacute;l&eacute;chargera les sites de d&eacute;part et extraira tous leurs liens ainsi que leur contenu. Cela sera r&eacute;p&eacute;t&eacute; jusqu'a ce que la \"profondeur de crawl\" soit atteinte.
 #Attribut==Attribut
 Value==Valeur
@@ -764,8 +764,8 @@ Import Path:==Import-Pfad:
 "Start Import"=="Demarrer l'importation"
 Attention:==Attention:
 Always do a backup of your source and destination database before starting to use this import function.==Toujours faire une sauvegarde de vos bases source et destination avant de lancer cette fonction d'importation.
-Currently running jobs==Tâches actuellement en cours
-Job Type==Type de tâche
+Currently running jobs==T&acirc;ches actuellement en cours
+Job Type==Type de t&acirc;che
 >Path==>Chemin
 Status==Etat
 Elapsed<br />Time==Temps<br />&eacute;coul&eacute;
@@ -852,7 +852,7 @@ and automatically excluded from indexing.==et exclus automatiquement de l'indexa
 Set the proxy settings of your browser to the same port as given==Configurez les param&egrave;tres de proxy de votre brower avec le m&ecirc;me port que celui
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==du champ 'Port de proxy et d'administration' de la page de 'Configuration'. 
 \(5\) Index Monitor for Local Crawling.==(5) Moniteur d'index pour le crawl local
-These web pages had been crawled by your own crawl task.==Cette page web a &eacute;t&eacute; crawl&eacute;e par votre propre tâche de crawl. 
+These web pages had been crawled by your own crawl task.==Cette page web a &eacute;t&eacute; crawl&eacute;e par votre propre t&acirc;che de crawl. 
 <em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Cas d'utilisation:</em> Lancer un crawl en param&egrave;trant un point de d&eacute;part sur la page 'Cr&eacute;ation d'index'.
 \(6\) Index Monitor for Global Crawling==(6) Moniteur d'index pour le crawl global
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Ces pages ont &eacute;t&eacute; index&eacute;es par votre noeud, mais le crawl &eacute;tait initi&eacute; par un noeud distant.
@@ -1095,7 +1095,7 @@ Attributes==Attributs
 #File: PerformanceQueues_p.html
 #---------------------------
 Performance Settings of Queues and Processes==Param&egrave;tres de performance des files et des processus
-Scheduled tasks overview and waiting time settings:==Aperçu des tâches programm&eacute;es et param&egrave;tres d'attente:
+Scheduled tasks overview and waiting time settings:==Aperçu des t&acirc;ches programm&eacute;es et param&egrave;tres d'attente:
 Queue Size==Taille de file
 >Total==>Totale
 Block Time==Temps de blocage
@@ -1133,8 +1133,8 @@ Maximum number of Word Caches, high limit:==Nombre maximal de mots dans le cache
 This is is the number of word indexes that shall be held in the==C'est le nombre d'index de mots qui doivent &ecirc;tre gard&eacute;s dans le
 ram cache during indexing. When YaCy is shut down, this cache must be==cache m&eacute;moire pendant l'indexation. Quand YaCy est stopp&eacute;, ce cache doit
 flushed to disc; this may last some minutes.==&ecirc;tre transf&eacute;r&eacute; sur disque; cela peut durer quelques minutes.
-The low limit is valid for crawling tasks, the high limit is valid==La limite basse est valide pour les tâches de crawl, la limite haute est valide
-for search and DHT transmission tasks.==pour les tâches de recherche et de transmission de DHT. 
+The low limit is valid for crawling tasks, the high limit is valid==La limite basse est valide pour les t&acirc;ches de crawl, la limite haute est valide
+for search and DHT transmission tasks.==pour les t&acirc;ches de recherche et de transmission de DHT. 
 Enter New Cache Size==Entrer une nouvelle taille de cache
 Thread pool settings:==Param&egrave;tres du pool de threads:
 maximum Active==max. actif
@@ -1201,7 +1201,7 @@ The Response Header database stores the HTTP heades that other servers send when
 during proxy mode, when performing crawls or if it fetches pages for snippet generation.==durant le mode proxy en ex&eacute;cutant des crawl ou en parcourant les pages pour la g&eacute;n&eacute;ration d'extraits.
 Increasing this cache will be most important for a fast proxy mode.==Augmenter ce cache est important pour avoir un mode proxy rapide.  
 'loaded' URLs==URLs charg&eacute;es
-This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.==C'est la base de donn&eacute;es qui maintient la relation hâchage/url et les propri&eacute;t&eacute;s concernant l'URL comme la date de chargement et la date du serveur.
+This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.==C'est la base de donn&eacute;es qui maintient la relation hachage/url et les propri&eacute;t&eacute;s concernant l'URL comme la date de chargement et la date du serveur.
 This cache is very important for a fast search process.==Ce cache est tr&egrave;s important pour un processus de recherche rapide.
 Increasing the cache size will result in more search results and less IO during DHT transfer.==Augmenter la taille du cache augmente le nombre de r&eacute;sultats de recherche et diminue le nombre d'E/S pendant le transfert de DHT. 
 'noticed' URLs==URLs 'remarqu&eacute;es'
@@ -1672,7 +1672,7 @@ For community support, please visit our <a href="http://forum.yacy.de" target="_
 
 
 
-"Restart"=="Red&ecute;marrer"
+"Restart"=="Red&eacute;marrer"
 "Shutdown"=="Arr&Ecirc;ter"
 Public System Properties==Allgemeine Systemangaben
 System version==Version du syst&egrave;me
@@ -1806,15 +1806,15 @@ You don't have the correct access right to perform this task.==Vous n'avez pas l
 Please log in.==Veuillez vous connecter.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Vous pouvez maintenant retourner sur la page des <a href="Settings_p.html">param&egrave;tres</a> si vous voulez effectuer d'autres modifications.
 See you soon!==&Agrave; bient&ocirc;t!
-Application will terminate after working off all scheduled tasks.=L'application se terminera apr&egrave;s avoir achev&eacute; toutes les taches programm&eacute;es.
+Application will terminate after working off all scheduled tasks\.==L'application se terminera apr&egrave;s avoir achev&eacute; toutes les t&acirc;ches planifi&eacute;es. 
 Please send us feed-back!==Envoyez-nous vos commentaires!
 We don't track YaCy users, YaCy does not send 'home-pings', we do not even know how many people use YaCy as their private search engine.==Nous ne tra&ccedil;ons pas les utilisateurs de YaCy, YaCy n'envoie pas de "home-pings", nous ne savons m&ecirc;me pas combien de gens utilisent YaCy comme moteur de recherche.
-Therefore we like to ask you: do you like YaCy? Will you use it again... if not, why? Is is possible that we change a bit to suit your needs?==C'est pourquoi nous appr&eacute;cierions beaucoup que vous nous disiez ce que vous pensez de YaCy. Appr&eacute;ciez-vous YaCy? Allez-vous l'utiliser &agrave; nouveau... si non, pourquoi? Nous pouvons peut-&ecirc;tre modifier YaCy pour qu'il r&eacute;ponde &agrave; vos besoins.
+Therefore we like to ask you: do you like YaCy\? Will you use it again\.\.\. if not, why\? Is is possible that we change a bit to suit your needs\?==C'est pourquoi nous aimerions beaucoup que vous nous disiez ce que vous pensez de YaCy. Appr&eacute;ciez-vous YaCy? Allez-vous l'utiliser &agrave; nouveau... si non, pourquoi? Nous pouvons peut-&ecirc;tre modifier YaCy pour qu'il r&eacute;ponde &agrave; vos besoins.
 Please send us feed-back about your experience with an==Vous pouvez nous faire parvenir vos commentaires avec un
-<a href="http://sayat.me/YaCy" target="_blank">anonymous message</a>==<a href="http://sayat.me/YaCy" target="_blank">message anonynme</a>
-or a</br>==ou un<br/>
+anonymous message==message anonyme
+or a<br/>==ou un<br/>
 posting to our <a href="http://forum.yacy.de" target="_blank">web forums</a><br/>==message sur nos <a href="http://forum.yacy.de" target="_blank">forums</a><br/>
-<a href="http://bugs.yacy.net" target="_blank">bug report</a>!==<a href="http://bugs.yacy.net" target="_blank">rapport de bogue</a>!
+bug report==rapport de bogue
 <h2>Professional Support</h2>==<h2>Support professionnel</h2>
 If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see==Si vous souhaitez utiliser YaCy dans votre entreprise en association avec un service de consultations d'expertise par des sp&eacute;cialistes de YaCy, veuillez consulter
 Just a moment, please!==Juste un instant, s'il vous pla&icirc;t!
@@ -2078,7 +2078,7 @@ YaCy Interactive Search==YaCy Recherche interactive
 >Name==>Nom
 >Size==>Taille
 >Date==>Date
-kiosk mode==Kiosque Mode
+kiosk mode==Mode Kiosque
 >Link==>Lien
 #-----------------------------
 
@@ -2108,6 +2108,38 @@ The following words are stop-words and had been excluded from the search:==Les t
 Location -- click on map to enlarge==Lieu -- cliquez sur la carte pour agrandir
 Map \(c\) by==Carte (c) fournie par
 and contributors, CC-BY-SA==et ses contributeurs, CC-BY-SA
+#-----------------------------
+
+#File: yacysearchitem.html
+#---------------------------
+"recommend"=="recommander"
+"bookmark"=="ajouter aux favoris"
+"delete"=="supprimer"
+#-----------------------------
+
+#File: yacysearchtrailer.html
+#---------------------------
+Your search is done using peers in the YaCy P2P network\.==Recherche effectu&eacute;e gr&acirc;ce aux noeuds du r&eacute;seau P2P YaCy.
+You can switch to 'Stealth Mode' which will switch off P2P\, giving you full privacy\. Expect less results then, because then only your own search index is used\.==Vous pouvez passer en 'Mode furtif' ce qui d&eacute;sactivera le r&eacute;seau pair &agrave; pair et vous offrira une privatisation compl&egrave;te. Cependant vous obtiendrez probablement moins de r&eacute;sultats car la recherche sera alors bas&eacute;e uniquement sur votre propre index.
+"Privacy"=="Privé"
+&nbsp;Peer-to-Peer&nbsp;==&nbsp;Pair&nbsp;&agrave;&nbsp;pair&nbsp;
+Stealth&nbsp;Mode==Mode&nbsp;furtif
+Your search is done using only your own peer, locally\.==La recherche est r&eacute;alis&eacute;e uniquement sur les donn&eacute;es locales de votre noeud.
+You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network\.==Vous pouvez passer en mode 'Pair &agrave; pair' dans lequel votre recherche sera bas&eacute;e sur les autres noeuds du r&eacute;seau YaCy.
+"Peer-to-Peer"==Pair&nbsp;&agrave;&nbsp;pair
+Context Ranking==Classement contextuel
+Sort by Date==Trier par date
+Video==Vid&eacute;o
+>Apps==>Applications
+<h3>Location</h3>==<h3>Lieu</h3>
+show search results for "#\[query\]#" on map==Montrer sur la carte les r&eacute;sultats pour "#[query]#"
+click to expand facet==cliquer pour r&eacute;v&eacute;ler cet aspect
+>Provider==>Site
+>Filetype==>Type de fichier
+>Language==>Langue
+>Name Space==>Espace de noms
+>Author==>Auteur
+>Collection==>Collection
 #-----------------------------
 
 ### Subdirectory env/templates ###
