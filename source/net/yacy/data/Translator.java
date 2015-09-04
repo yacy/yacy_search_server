@@ -52,6 +52,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
+import net.yacy.utils.translation.SourceFileFilter;
 
 import java.util.*;
 
@@ -126,6 +127,13 @@ public class Translator {
         return translateFile(sourceFile, destFile, loadTranslationsLists(translationFile).get(sourceFile.getName()));
     }
 
+    /**
+     * Translate sourceFile to destFile using translationList.
+     * @param sourceFile file to translate
+     * @param destFile file to write
+     * @param translationList map of translations
+     * @return true when destFile was sucessfully written, false otherwise
+     */
     public static boolean translateFile(final File sourceFile, final File destFile, final Map<String, String> translationList){
 
         StringBuilder content = new StringBuilder();
@@ -147,11 +155,11 @@ public class Translator {
             }
         }
 
-        content = new StringBuilder(translate(content.toString(), translationList));
+        String processedContent = translate(content.toString(), translationList);
         BufferedWriter bw = null;
         try{
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile),"UTF-8"));
-            bw.write(content.toString());
+            bw.write(processedContent);
             bw.close();
         }catch(final IOException e){
             return false;
@@ -172,38 +180,28 @@ public class Translator {
 
     public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Map<String, Map<String, String>> translationLists, final String extensions){
         destDir.mkdirs();
-        final File[] sourceFiles = sourceDir.listFiles();
         final List<String> exts = ListManager.string2vector(extensions);
-        boolean rightExtension;
+        final File[] sourceFiles = sourceDir.listFiles(new SourceFileFilter(exts));
         String relativePath;
         for (final File sourceFile : sourceFiles) {
-             rightExtension=false;
-             for (final String ext : exts) {
-                 if (sourceFile.getName().endsWith(ext)) {
-                     rightExtension=true;
-                     break;
-                 }
-             }
-            if (rightExtension) {
-                try {
-                    relativePath=sourceFile.getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
-                    relativePath = relativePath.replace(File.separatorChar, '/');
-                } catch (final IndexOutOfBoundsException e) {
-                    ConcurrentLog.severe("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
-                    relativePath = "wrong path"; //not in translationLists
+            try {
+                relativePath=sourceFile.getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
+                relativePath = relativePath.replace(File.separatorChar, '/');
+            } catch (final IndexOutOfBoundsException e) {
+                 ConcurrentLog.severe("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
+                relativePath = "wrong path"; //not in translationLists
+            }
+            if (translationLists.containsKey(relativePath)) {
+                ConcurrentLog.info("TRANSLATOR", "Translating file: "+ relativePath);
+                if(!translateFile(
+                                  sourceFile,
+                                  new File(destDir, sourceFile.getName().replace('/', File.separatorChar)),
+                                  translationLists.get(relativePath)))
+                {
+                    ConcurrentLog.severe("TRANSLATOR", "File error while translating file "+relativePath);
                 }
-                if (translationLists.containsKey(relativePath)) {
-                    ConcurrentLog.info("TRANSLATOR", "Translating file: "+ relativePath);
-                    if(!translateFile(
-                                      sourceFile,
-                                      new File(destDir, sourceFile.getName().replace('/', File.separatorChar)),
-                                      translationLists.get(relativePath)))
-                    {
-                        ConcurrentLog.severe("TRANSLATOR", "File error while translating file "+relativePath);
-                    }
-                    //}else{
-                        //serverLog.logInfo("TRANSLATOR", "No translation for file: "+relativePath);
-                }
+                //}else{
+                    //serverLog.logInfo("TRANSLATOR", "No translation for file: "+relativePath);
             }
         }
         return true;
