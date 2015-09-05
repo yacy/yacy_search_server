@@ -674,7 +674,6 @@ public class CrawlQueues {
                                 if (CrawlQueues.log.isFine()) {
                                     CrawlQueues.log.fine("problem loading " + request.url().toString() + ": " + e.getMessage());
                                 }
-                                e.printStackTrace();
                                 error = "load error - " + e.getMessage();
                             }
    
@@ -693,7 +692,6 @@ public class CrawlQueues {
                         }
                     } catch (final Exception e) {
                         CrawlQueues.this.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, e.getMessage() + " - in worker", -1);
-                        ConcurrentLog.logException(e);
                         request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
                     } finally {
                         request = null;
