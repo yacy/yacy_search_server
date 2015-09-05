@@ -232,7 +232,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
 
         // track this table
-        tableTracker.put(tablefile.toString(), this);
+        synchronized (tableTracker) {tableTracker.put(tablefile.toString(), this);}
     }
 
     public synchronized void warmUp() {
