@@ -102,6 +102,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
             String docLongTitle   = null;
             String docAuthor      = null;
             String docLanguage    = null;
+            Date docModified      = null;
 
             // opening the file as zip file
             final ZipFile zipFile= new ZipFile(dest);
@@ -145,6 +146,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     docLongTitle   = metaData.getSubject();
                     docAuthor      = metaData.getCreator();
                     docLanguage    = metaData.getLanguage();
+                    docModified    = metaData.getLastModified();
                 }
             }
 
@@ -185,7 +187,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     null,
                     null,
                     false,
-                    new Date())};
+                    docModified)};
             return docs;
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;

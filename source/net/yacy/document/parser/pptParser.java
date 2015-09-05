@@ -30,7 +30,6 @@ package net.yacy.document.parser;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.document.id.AnchorURL;
@@ -103,24 +102,25 @@ public class pptParser extends AbstractParser implements Parser {
              * and set shortText and bodyText properly
              */
             final Document[] docs = new Document[]{new Document(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    this,
-                    null,
-                    keywlist,
-                    singleList(title),
-                    pptExtractor.getSummaryInformation().getAuthor(), // may be null
-                    pptExtractor.getDocSummaryInformation().getCompany(),
-                    null,
-                    descriptions,
-                    0.0f, 0.0f,
-                    contents,
-                    null,
-                    null,
-                    null,
-                    false,
-                    new Date())};
+                location,
+                mimeType,
+                "UTF-8",
+                this,
+                null,
+                keywlist,
+                singleList(title),
+                pptExtractor.getSummaryInformation().getAuthor(), // may be null
+                pptExtractor.getDocSummaryInformation().getCompany(),
+                null,
+                descriptions,
+                0.0f, 0.0f,
+                contents,
+                null,
+                null,
+                null,
+                false,
+                pptExtractor.getSummaryInformation().getLastSaveDateTime() // may be null
+                )};
             return docs;
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
