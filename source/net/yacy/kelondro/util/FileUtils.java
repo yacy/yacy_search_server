@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +45,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,12 +57,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import org.mozilla.intl.chardet.nsDetector;
-import org.mozilla.intl.chardet.nsPSMDetector;
-
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
+
+import org.mozilla.intl.chardet.nsDetector;
+import org.mozilla.intl.chardet.nsPSMDetector;
 
 public final class FileUtils {
 
@@ -667,6 +669,23 @@ public final class FileUtils {
     // same as below
     public static ArrayList<File> getDirsRecursive(final File dir, final String notdir) {
         return getDirsRecursive(dir, notdir, true);
+    }
+    
+    /**
+     * @param sourceDir source directory. Must be not null.
+     * @param notdir name of dir to exlcude. Can be null
+     * @param fileNameFilter filter to apply on file names. Can be null.
+     * @return list of all files passing fileFilter under sourceDir including sub directories 
+     */
+    public static List<File> getFilesRecursive(final File sourceDir, final String notdir, final FilenameFilter fileNameFilter) {
+		List<File> dirList = getDirsRecursive(sourceDir,
+				notdir);
+		dirList.add(sourceDir);
+		List<File> files = new ArrayList<>();
+		for (final File dir : dirList) {
+			Collections.addAll(files, dir.listFiles(fileNameFilter));
+		}
+		return files;
     }
 
     /**

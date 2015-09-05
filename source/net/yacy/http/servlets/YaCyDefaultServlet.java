@@ -460,6 +460,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         } catch (IllegalArgumentException iae) {
             if (!response.isCommitted()) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, iae.getMessage());
+                return false;
             }
             throw iae;
         }
@@ -1075,9 +1076,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         filecontent = item.getInputStream();
                         files.put(new AbstractMap.SimpleEntry<String, byte[]>(item.getFieldName(), FileUtils.read(filecontent)));
                     } catch (IOException e) {
-                        ConcurrentLog.logException(e);
+                        ConcurrentLog.info("FILEHANDLER", e.getMessage());
                     } finally {
-                        if (filecontent != null) try {filecontent.close();} catch (IOException e) {ConcurrentLog.logException(e);}
+                        if (filecontent != null) try {filecontent.close();} catch (IOException e) {ConcurrentLog.info("FILEHANDLER", e.getMessage());}
                     }
                 }
             }
@@ -1108,7 +1109,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 for (int j = 0; j < t; j++) p[j].join();
             }
         } catch (Exception ex) {
-            ConcurrentLog.logException(ex);
+            ConcurrentLog.info("FILEHANDLER", ex.getMessage());
         }
     }
 
