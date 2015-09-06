@@ -20,6 +20,7 @@
 package net.yacy.cora.federate;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -101,8 +102,10 @@ public class SolrFederateSearchConnector extends AbstractFederateSearchConnector
                     SolrDocumentList docList = solrConnector.getDocumentListByParams(msp);
                     // convert to YaCy schema documentlist
                     for (SolrDocument doc : docList) {
-                        URIMetadataNode anew = toYaCySchema(doc);
-                        docs.add(anew);
+                        try {
+                            URIMetadataNode anew = toYaCySchema(doc);
+                            docs.add(anew);
+                        } catch (MalformedURLException ex) { }
                     }
                 } catch (IOException | SolrException e) {
                 } finally {

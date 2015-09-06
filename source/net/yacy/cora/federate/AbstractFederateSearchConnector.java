@@ -21,6 +21,7 @@ package net.yacy.cora.federate;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -143,7 +144,7 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
      * @param remote result (with remote fieldnames)
      * @return SolrDocument with field names according to the YaCy schema
      */
-    protected URIMetadataNode toYaCySchema(final SolrDocument doc) {
+    protected URIMetadataNode toYaCySchema(final SolrDocument doc) throws MalformedURLException {
         // set YaCy id
         String urlstr;
         if (localcfg.contains("sku"))  {
@@ -156,7 +157,8 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
             }
         }
 
-        URIMetadataNode newdoc = new URIMetadataNode(urlstr);
+        final DigestURL url = new DigestURL(urlstr);
+        URIMetadataNode newdoc = new URIMetadataNode(url);
         Iterator<Configuration.Entry> it = localcfg.entryIterator();
         while (it.hasNext()) {
             Configuration.Entry et = it.next();
