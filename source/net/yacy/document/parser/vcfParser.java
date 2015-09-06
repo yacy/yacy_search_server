@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.order.Base64Order;
@@ -81,6 +83,7 @@ public class vcfParser extends AbstractParser implements Parser {
             final HashMap<String, String> parsedData = new HashMap<String, String>();
             final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
+            Date revDate = null; // rev=modified date
 
             boolean useLastLine = false;
             int lineNr = 0;
@@ -183,6 +186,13 @@ public class vcfParser extends AbstractParser implements Parser {
                             parsedDataText.append(value).append("\r\n");
                         }
                         parsedDataText.append("\r\n");
+                        // get specific meta data from parsed key-value
+                        value = parsedData.get("REV"); // modified date
+                        if (value != null && !value.isEmpty()) {
+                            try {
+                                revDate = ISO8601Formatter.FORMATTER.parse(value, 0).getTime();
+                            } catch(ParseException ex){ }
+                        }
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
@@ -235,7 +245,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     null,
                     null,                       // a treeset of image URLs
                     false,
-                    new Date())};
+                    revDate)};                   // modified date
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
