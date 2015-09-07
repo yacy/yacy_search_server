@@ -1159,6 +1159,13 @@ public final class SearchEvent {
                 continue;
             }
 
+            // check modifier constraint filetype (using fileextension)
+            if (this.query.modifier.filetype != null && !this.query.modifier.filetype.equals(ext)) {
+                if (log.isFine()) log.fine("dropped RWI: file type constraint = " + this.query.modifier.filetype);
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                continue;
+            }
+
             // check modifier constraint (language)
             // TODO: : page.language() never null but defaults to "en" (may cause false drop of result)
             if (this.query.modifier.language != null && !this.query.modifier.language.equals(page.language())) {
