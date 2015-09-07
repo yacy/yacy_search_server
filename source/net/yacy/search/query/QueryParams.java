@@ -205,7 +205,7 @@ public final class QueryParams {
             String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
             String defaulthostprefix = modifier.protocol == null ? "www" : modifier.protocol;
             String hostfilter = modifier.sitehost == null && tld == null ? ".*" : modifier.sitehost == null ? ".*\\." + tld : modifier.sitehost.startsWith(defaulthostprefix + ".") ? "(" + defaulthostprefix + "\\.)?" + modifier.sitehost.substring(4) : "(" + defaulthostprefix + "\\.)?" + modifier.sitehost;
-            String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*";
+            String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*"; // TODO: should be ".ext" but while/comment above suggests not -> add filetype contrain pullOneFilteredFromRWI()
             String filter = protocolfilter + "..." + hostfilter + "." + filefilter;
             if (!filter.equals(".*....*..*")) {
                 Pattern r = Pattern.compile("(\\.|(\\.\\*))\\.\\*");
