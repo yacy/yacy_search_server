@@ -70,15 +70,15 @@ public class ListNonTranslatedFiles extends TranslatorUtil {
 	 *            </ul>
 	 */
 	public static void main(String args[]) {
-		File sourceDir = getSourceDir(args);
+		File sourceDir = getSourceDir(args, 0);
 		Path sourcePath = sourceDir.toPath();
 
-		File translationFile = getTranslationFile(args);
+		File translationFile = getTranslationFile(args, 1);
 
 		List<String> extensions = ListManager
-				.string2vector(getExtensions(args));
+				.string2vector(getExtensions(args, 2));
 		
-		FilenameFilter fileFilter = new SourceFileFilter(extensions);
+		FilenameFilter fileFilter = new ExtensionsFileFilter(extensions);
 
 		String excludedDir = "locale";
 

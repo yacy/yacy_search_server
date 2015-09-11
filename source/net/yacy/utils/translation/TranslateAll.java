@@ -26,6 +26,8 @@
 package net.yacy.utils.translation;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
@@ -39,35 +41,55 @@ import net.yacy.data.Translator;
 public class TranslateAll extends TranslatorUtil {
 
 	/**
-	 * Translate all files from srcDir directory into dstDir directory using
-	 * specified locale file with specified extensions. If no argument is set,
-	 * default values are used.
+	 * Translate all files with specified extensions from srcDir directory into
+	 * dstDir directory using locale files in specified directory. If no
+	 * argument is set, default values are used.
 	 * 
 	 * @param args
 	 *            runtime arguments<br/>
 	 *            <ul>
 	 *            <li>args[0] : source dir path</li>
 	 *            <li>args[1] : destination dir path</li>
-	 *            <li>args[2] : translation file path</li>
+	 *            <li>args[2] : locale files dir path</li>
 	 *            <li>args[3] : extensions (separated by commas)</li>
 	 *            </ul>
 	 */
 	public static void main(String args[]) {
-		File sourceDir = getSourceDir(args);
+		File sourceDir = getSourceDir(args, 0);
 
 		File destDir = getDestDir(args);
 
-		File translationFile = getTranslationFile(args);
+		File localesDir = getLocalesDir(args, 2);
 
-		String extensions = getExtensions(args);
-
-		ConcurrentLog.info("TranslateAll", "Translating " + extensions
-				+ " files from " + sourceDir + " to " + destDir + " using "
-				+ translationFile);
+		String extensions = getExtensions(args, 3);
 
 		try {
-			Translator.translateFilesRecursive(sourceDir, destDir,
-					translationFile, extensions, "locale");
+			List<String> exts = new ArrayList<String>();
+			exts.add(".lng");
+			ExtensionsFileFilter localesFilter = new ExtensionsFileFilter(exts);
+			File[] translationFiles = localesDir.listFiles(localesFilter);
+			
+			if (translationFiles == null || translationFiles.length == 0) {
+				ConcurrentLog.info("TranslateAll",
+						"No translation file found in " + localesDir);
+			} else {
+
+				ConcurrentLog.info("TranslateAll", "Translating "
+						+ extensions + " files from " + sourceDir + " to "
+						+ destDir + " using all locale files in " + localesDir);
+				
+				for (File translationFile : translationFiles) {
+					
+					/* Make a sub directory with locale code in destination directory*/
+					String localeCode = translationFile.getName().substring(0, translationFile.getName().length() - exts.get(0).length());
+					
+					File localeDestDir = new File(destDir, localeCode);
+					localeDestDir.mkdirs();
+
+					Translator.translateFilesRecursive(sourceDir, localeDestDir,
+							translationFile, extensions, "locale");
+				}
+			}
 		} finally {
 			ConcurrentLog.shutdown();
 		}
@@ -95,6 +117,35 @@ public class TranslateAll extends TranslatorUtil {
 					+ TranslateAll.class.getCanonicalName());
 		}
 		return destDir;
+	}
+
+	/**
+	 * @param args
+	 *            main parameters
+	 * @parm argIndex index of translation files dir parameter
+	 * @return translation files dir from parameters or default
+	 *         (workingDir/locales)
+	 * @throws IllegalArgumentException
+	 *             when no parameters is set and default is not found
+	 */
+	protected static File getLocalesDir(String[] args, int argIndex) {
+		File localesDir;
+		if (args.length > argIndex && argIndex >= 0) {
+			localesDir = new File(args[argIndex]);
+		} else {
+			String workingDir = System.getProperty("user.dir");
+			if (workingDir == null) {
+				throw new IllegalArgumentException(
+						"No translation files directory specified, and default not found");
+			}
+			localesDir = new File(workingDir, "locales");
+			if (!localesDir.exists() && !localesDir.isDirectory()) {
+				throw new IllegalArgumentException(
+						"No translation files directory specified, and default not found : "
+								+ localesDir.getPath());
+			}
+		}
+		return localesDir;
 	}
 
 }

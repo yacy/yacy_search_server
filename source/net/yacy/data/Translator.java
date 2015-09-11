@@ -40,11 +40,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
@@ -52,9 +52,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
-import net.yacy.utils.translation.SourceFileFilter;
-
-import java.util.*;
+import net.yacy.utils.translation.ExtensionsFileFilter;
 
 /**
  * Wordlist based translator
@@ -65,22 +63,40 @@ public class Translator {
 
     public final static String LANG_FILENAME_FILTER = "^.*\\.lng$";
 
-    public static String translate(final String source, final Map<String, String> translationTable){
-        final Set<String> keys = translationTable.keySet();
-        String result = source;
-        for (final String key : keys){
-            final Pattern pattern = Pattern.compile(key);
-            final Matcher matcher = pattern.matcher(result);
-            if (matcher.find()) {
-                result = matcher.replaceAll(translationTable.get(key));
-            } else {
-                //Filename not available, but it will be printed in Log
-                //after all untranslated Strings as "Translated file: "
-                if (ConcurrentLog.isFine("TRANSLATOR")) ConcurrentLog.fine("TRANSLATOR", "Unused String: "+key);
-            }
-        }
-        return result;
-    }
+    /**
+     * Translate source using entries in translationTable
+     * @param source text to translate. Mus be non null.
+     * @param translationTable translation entries : text to translate -> translation
+     * @return source translated
+     */
+	public static String translate(final String source,
+			final Map<String, String> translationTable) {
+		final Set<Map.Entry<String, String>> entries = translationTable.entrySet();
+		StringBuilder builder = new StringBuilder(source);
+		for (final Entry<String, String> entry: entries) {
+			String key = entry.getKey();
+			/* We have to check key is not empty or indexOf would always return a positive value */
+			if (key != null && !key.isEmpty()) {
+				String translation = entry.getValue();
+				int index = builder.indexOf(key);
+				if (index < 0) {
+					// Filename not available, but it will be printed in Log
+					// after all untranslated Strings as "Translated file: "
+					if (ConcurrentLog.isFine("TRANSLATOR"))
+						ConcurrentLog.fine("TRANSLATOR", "Unused String: "
+								+ key);
+				} else {
+					while (index >= 0) {
+						builder.replace(index, index + key.length(),
+								translation);
+						index = builder.indexOf(key,
+								index + translation.length());
+					}
+				}
+			}
+		}
+		return builder.toString();
+	}
 
     /**
      * Load multiple translationLists from one File. Each List starts with #File: relative/path/to/file
@@ -181,7 +197,7 @@ public class Translator {
     public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Map<String, Map<String, String>> translationLists, final String extensions){
         destDir.mkdirs();
         final List<String> exts = ListManager.string2vector(extensions);
-        final File[] sourceFiles = sourceDir.listFiles(new SourceFileFilter(exts));
+        final File[] sourceFiles = sourceDir.listFiles(new ExtensionsFileFilter(exts));
         String relativePath;
         for (final File sourceFile : sourceFiles) {
             try {
