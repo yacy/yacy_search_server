@@ -219,8 +219,8 @@ public class Crawler_p {
                 String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
                 String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // avoid that all urls are filtered out if bad value was submitted
-                final boolean fullDomain = "domain".equals(post.get("range", "wide")); // special property in simple crawl start
-                final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
+                boolean fullDomain = "domain".equals(post.get("range", "wide")); // special property in simple crawl start
+                boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
 
                 final boolean restrictedcrawl = fullDomain || subPath || !CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch);
                 final boolean deleteage = restrictedcrawl && "age".equals(post.get("deleteold","off"));
@@ -261,6 +261,10 @@ public class Crawler_p {
                     if (p >= 8) crawlName = crawlName.substring(0, p);
                 }
                 if (crawlName.length() == 0 && sitemapURLStr.length() > 0) crawlName = "sitemap loader for " + sitemapURLStr;
+                // in case that a root url has a file protocol, then the site filter does not work, patch that:
+                if (fullDomain) {
+                    for (DigestURL u: rootURLs) if (u.isFile()) {fullDomain = false; subPath = true; break;}
+                }
                 
                 // delete old robots entries
                 for (DigestURL ru : rootURLs) {

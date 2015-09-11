@@ -48,6 +48,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1089,7 +1090,12 @@ public final class Protocol {
             if ( doc == null ) {
                 continue;
             }
-            URIMetadataNode urlEntry = new URIMetadataNode(doc);
+            URIMetadataNode urlEntry;
+            try {
+                urlEntry = new URIMetadataNode(doc);
+            } catch (MalformedURLException ex) {
+                continue;
+            }
 
             if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry.url()) ) {
                 if ( Network.log.isInfo() ) {

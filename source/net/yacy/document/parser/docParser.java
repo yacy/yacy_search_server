@@ -29,7 +29,6 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.document.id.AnchorURL;
@@ -110,24 +109,25 @@ public class docParser extends AbstractParser implements Parser {
 
         Document[] docs;
         docs = new Document[]{new Document(
-                  location,
-                  mimeType,
-                  "UTF-8",
-                  this,
-                  null,
-                  keywlist,
-                  singleList(title),
-                  extractor.getSummaryInformation().getAuthor(), // constuctor can handle null
-                  extractor.getDocSummaryInformation().getCompany(), // publisher
-                  null,
-                  descriptions,
-                  0.0f, 0.0f,
-                  contents.toString(),
-                  null,
-                  null,
-                  null,
-                  false,
-                  new Date())};
+            location,
+            mimeType,
+            "UTF-8",
+            this,
+            null,
+            keywlist,
+            singleList(title),
+            extractor.getSummaryInformation().getAuthor(), // constuctor can handle null
+            extractor.getDocSummaryInformation().getCompany(), // publisher
+            null,
+            descriptions,
+            0.0f, 0.0f,
+            contents.toString(),
+            null,
+            null,
+            null,
+            false,
+            extractor.getSummaryInformation().getLastSaveDateTime() // maybe null
+            )};
 
         return docs;
     }

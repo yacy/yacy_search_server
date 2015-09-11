@@ -26,6 +26,9 @@
 
 package net.yacy.document.parser.xml;
 
+import java.text.ParseException;
+import java.util.Date;
+import net.yacy.cora.date.ISO8601Formatter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -39,6 +42,7 @@ public class ODMetaHandler extends DefaultHandler {
 	private String docSubject = null;
 	private String docTitle = null;
 	private String docDescription = null;
+        private String docLastmodified = null;
 	
 	public ODMetaHandler() {
 	}
@@ -67,7 +71,9 @@ public class ODMetaHandler extends DefaultHandler {
 		this.docTitle  = buffer.toString();
 	    } else if ("dc:description".equals(tag)) {
 		this.docDescription  = buffer.toString();
-	    }
+	    } else if ("dcterms:modified".equals(tag) || "dc:date".equals(tag)) { // Microsoft uses <dcterms:modified>, OpenOffice <dc:date>
+                this.docLastmodified = buffer.toString();
+            }
 	}
 
 	public String getCreator() {
@@ -89,5 +95,24 @@ public class ODMetaHandler extends DefaultHandler {
 	public String getDescription() {
 	    return docDescription;
 	}
+
+    /**
+     * get the last modification date of the document
+     *
+     * @return date or null
+     */
+    public Date getLastModified() {
+        Date d;
+        if (docLastmodified != null && !docLastmodified.isEmpty()) {
+            try {
+                d = ISO8601Formatter.FORMATTER.parse(this.docLastmodified, 0).getTime();
+            } catch (ParseException ex) {
+                d = null;
+            }
+        } else {
+            d = null;
+        }
+        return d;
+    }
 }
 

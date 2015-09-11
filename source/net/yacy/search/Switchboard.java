@@ -165,6 +165,7 @@ import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Audio;
 import net.yacy.gui.Tray;
+import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -215,7 +216,6 @@ import net.yacy.visualization.CircleTool;
 
 import com.google.common.io.Files;
 
-import net.yacy.http.YaCyHttpServer;
 
 
 public final class Switchboard extends serverSwitch {
@@ -2998,8 +2998,12 @@ public final class Switchboard extends serverSwitch {
             final Seed initiatorPeer = this.peers.getConnected(queueEntry.initiator());
             if ( initiatorPeer != null ) {
                 // start a thread for receipt sending to avoid a blocking here
-                SolrDocument sd = this.index.fulltext().getDefaultConfiguration().toSolrDocument(newEntry);
-                new Thread(new receiptSending(initiatorPeer, new URIMetadataNode(sd)), "sending receipt to " + ASCII.String(queueEntry.initiator())).start();
+                try {
+                    SolrDocument sd = this.index.fulltext().getDefaultConfiguration().toSolrDocument(newEntry);
+                    new Thread(new receiptSending(initiatorPeer, new URIMetadataNode(sd)), "sending receipt to " + ASCII.String(queueEntry.initiator())).start();
+                } catch (MalformedURLException ex) {
+                    this.log.info("malformed url: "+ex.getMessage());
+                }
             }
         }
     }

@@ -90,18 +90,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     private String alternative_urlname;
     private TextSnippet textSnippet = null;
 
-    public URIMetadataNode(final Properties prop, String collection) {
+    public URIMetadataNode(final Properties prop, String collection) throws MalformedURLException {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         super();
         final String urlRaw = crypt.simpleDecode(prop.getProperty("url", ""));
-        try {
-            url = new DigestURL(urlRaw);
-        } catch (final MalformedURLException e) {
-            ConcurrentLog.logException(e);
-            this.url = null;
-        }
+        url = new DigestURL(urlRaw);
         String descr = crypt.simpleDecode(prop.getProperty("descr", "")); if (descr == null) descr = "";
         String dc_creator = crypt.simpleDecode(prop.getProperty("author", "")); if (dc_creator == null) dc_creator = "";
         String tags = crypt.simpleDecode(prop.getProperty("tags", "")); if (tags == null) tags = "";
@@ -161,7 +156,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
     }
 
-    public URIMetadataNode(final SolrDocument doc) {
+    public URIMetadataNode(final SolrDocument doc) throws MalformedURLException {
         super();
         for (String name : doc.getFieldNames()) {
             this.addField(name, doc.getFieldValue(name));
@@ -170,31 +165,15 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         this.score = scorex == null ? 0.0f : scorex.floatValue();
         final byte[] hash = ASCII.getBytes(getString(CollectionSchema.id)); // TODO: can we trust this id ?
         final String urlRaw = getString(CollectionSchema.sku);
-        try {
-            this.url = new DigestURL(urlRaw, hash);
-        } catch (final MalformedURLException e) {
-            ConcurrentLog.logException(e);
-            this.url = null;
-        }
+        this.url = new DigestURL(urlRaw, hash);
     }
 
-    public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final float scorex) {
+    public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final float scorex) throws MalformedURLException {
         this(doc);
         this.word = searchedWord;
         this.score = scorex;
     }
 
-    public URIMetadataNode (final String urlstr) {
-        super();
-        try {
-            url = new DigestURL(urlstr);
-            this.setField(CollectionSchema.sku.name(), url.toNormalform(true));
-            this.setField(CollectionSchema.id.name(), ASCII.String(url.hash()));
-        } catch (final MalformedURLException e) {
-            ConcurrentLog.logException(e);
-            this.url = null;
-        }
-    }
     public URIMetadataNode(DigestURL theurl) {
         super();
         url = theurl;
@@ -520,7 +499,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
         try {
             return new URIMetadataNode(MapTools.s2p(propStr.substring(1, propStr.length() - 1)), collection);
-        } catch (final kelondroException e) {
+        } catch (final kelondroException | MalformedURLException e) {
             // wrong format
             ConcurrentLog.severe("URIMetadataNode", e.getMessage());
             return null;
