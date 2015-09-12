@@ -23,6 +23,7 @@
  */
 package net.yacy.crawler;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,7 +55,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     private int chunkstart = 0;
     private int chunksize = 200;
     final Switchboard sb;
-    private Set<DigestURL> urlstack; // buffer of urls to recrawl
+    private final Set<DigestURL> urlstack; // buffer of urls to recrawl
     public long urlsfound = 0;
 
     public RecrawlBusyThread(Switchboard xsb) {
@@ -181,6 +182,12 @@ public class RecrawlBusyThread extends AbstractBusyThread {
                 try {
                     this.urlstack.add(new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName())));
                 } catch (MalformedURLException ex) {
+                    try { // if index entry hasn't a valid url (useless), delete it
+                        solrConnector.deleteById((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                        ConcurrentLog.severe(THREAD_NAME, "deleted index document with invalid url " + (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                    } catch (IOException ex1) {
+                        ConcurrentLog.severe(THREAD_NAME, ex1.getMessage());
+                    }
                 }
             }
             this.chunkstart = this.chunkstart + this.chunksize;
