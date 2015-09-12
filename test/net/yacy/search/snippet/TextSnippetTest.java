@@ -43,7 +43,7 @@ public class TextSnippetTest {
     }
 
     @Test
-    public void testTextSnippet() {
+    public void testTextSnippet() throws MalformedURLException {
 
         URIMetadataNode testpage = new URIMetadataNode(doc);
         testpage.addField(CollectionSchema.title.name(), "New test case");
@@ -83,7 +83,7 @@ public class TextSnippetTest {
      * Test of getLineMarked method, of class TextSnippet.
      */
     @Test
-    public void testGetLineMarked() {
+    public void testGetLineMarked() throws MalformedURLException {
         URIMetadataNode testpage = new URIMetadataNode(doc);
         testpage.addField(CollectionSchema.title.name(), "New test case");
         testpage.addField(CollectionSchema.keywords.name(), "junit");
