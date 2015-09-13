@@ -216,11 +216,14 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
+                /*
+                // with possible partial update docs, don't try to delete index doc and reinsert solrdoc
+                // as this would result in a index doc with just the updated fields
                 try {
                     this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 } catch (final SolrServerException e1) {
                     ConcurrentLog.logException(e1);
-                }
+                }*/
                 try {
                     this.server.add(solrdoc, -1);
                 } catch (final Throwable ee) {
@@ -255,13 +258,17 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
+                /*
+                // with possible partial update docs, don't try to delete index doc and reinsert solrdoc
+                // as this would result in a index doc with just the updated fields
+
                 List<String> ids = new ArrayList<String>();
                 for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 try {
                     this.server.deleteById(ids);
                 } catch (final SolrServerException e1) {
                     ConcurrentLog.logException(e1);
-                }
+                }*/
                 try {
                     this.server.commit();
                 } catch (final Throwable eee) {
@@ -272,6 +279,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     this.server.add(solrdocs, -1);
                 } catch (final Throwable ee) {
                     ConcurrentLog.logException(ee);
+                    List<String> ids = new ArrayList<String>();
+                    for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                     log.warn(e.getMessage() + " IDs=" + ids.toString());
                     throw new IOException(ee);
                 }
