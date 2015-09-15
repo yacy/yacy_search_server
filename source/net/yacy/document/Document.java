@@ -777,7 +777,7 @@ dc_rights
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             final Writer osw = new OutputStreamWriter(baos, "UTF-8");
-            writeXML(osw, new Date());
+            writeXML(osw, this.lastModified);
             osw.close();
             return UTF8.String(baos.toByteArray());
         } catch (final UnsupportedEncodingException e1) {
