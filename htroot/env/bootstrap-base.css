@@ -35,7 +35,7 @@ body {
     display: block;
     padding: 20px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
   }
 }
 
@@ -124,6 +124,5 @@ ul.nav li.dropdown:hover ul.dropdown-menu{
     z-index: 1600;
 }
 .col-md-9 {
-    width: auto;
     overflow-x: hidden;
 }
