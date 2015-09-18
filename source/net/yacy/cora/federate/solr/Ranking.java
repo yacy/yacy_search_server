@@ -177,6 +177,7 @@ public class Ranking {
      * @return
      */
     public String getBoostFunction() {
+        if (this.boostFunction.contains("last_modified")) return ""; // since solr 5.0 this does not work any more
         return this.boostFunction;
     }
     
