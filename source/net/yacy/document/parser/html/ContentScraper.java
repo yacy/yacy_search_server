@@ -115,7 +115,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         script(TagType.pair),
         span(TagType.pair),
         div(TagType.pair),
-        article(TagType.pair);
+        article(TagType.pair),
+        // tags used to capture tag content
+        // TODO: considere to use </head> or <body> as trigger to scape for text content
+        style(TagType.pair); // embedded css (if not declared as tag content is parsed as text)
 
         public TagType type;
         private TagName(final TagType type) {
