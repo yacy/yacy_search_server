@@ -118,4 +118,26 @@ public class htmlParserTest extends TestCase {
         ImageEntry img = scraper.getImages().get(1);
         assertEquals(550,img.width());
     }
+
+    /**
+     * Test of parseToScraper method, of class htmlParser
+     * for scraping tag content from text (special test to verify <style> not counted as text
+     */
+    @Test
+    public void testParseToScraper_TagTest() throws Exception {
+        final AnchorURL url = new AnchorURL("http://localhost/");
+        final String mimetype = "text/html";
+        final String textSource = "test text";
+        final String testhtml = "<html>"
+                + "<head><style type=\"text/css\"> h1 { color: #ffffff; }</style></head>"
+                + "<body>"
+                + "<p>" + textSource + "</p>"
+                + "</body></html>";
+
+        ContentScraper scraper = parseToScraper(url, mimetype, new VocabularyScraper(), 0, testhtml, 10);
+
+        String txt = scraper.getText();
+        System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");
+        assertEquals(txt, textSource);
+    }
 }

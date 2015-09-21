@@ -57,7 +57,7 @@ public class DateDetection {
 
     // to assign names for days and months, we must know what language is used to express that time
     public static enum Language {
-        GERMAN, ENGLISH, FRENCH, SPANISH, ITALIAN;
+        GERMAN, ENGLISH, FRENCH, SPANISH, ITALIAN, PORTUGUESE;
     }
     
     static {
@@ -73,6 +73,7 @@ public class DateDetection {
         Months.put(Language.FRENCH,    new String[]{"janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"});
         Months.put(Language.SPANISH,   new String[]{"enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"});
         Months.put(Language.ITALIAN,   new String[]{"gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"});
+        Months.put(Language.PORTUGUESE,new String[]{"janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"});
 
     }
     
@@ -336,7 +337,7 @@ public class DateDetection {
     private final static LanguageRecognition GERMAN_LANGUAGE = new LanguageRecognition(new Language[]{Language.GERMAN});
     private final static LanguageRecognition FRENCH_LANGUAGE = new LanguageRecognition(new Language[]{Language.FRENCH});
     private final static LanguageRecognition ENGLISH_GERMAN_LANGUAGE = new LanguageRecognition(new Language[]{Language.GERMAN, Language.ENGLISH});
-    private final static LanguageRecognition ENGLISH_GERMAN_FRENCH_SPANISH_ITALIAN_LANGUAGE = new LanguageRecognition(new Language[]{Language.GERMAN, Language.ENGLISH, Language.FRENCH, Language.SPANISH, Language.ITALIAN});
+    private final static LanguageRecognition ENGLISH_GERMAN_FRENCH_SPANISH_ITALIAN_LANGUAGE = new LanguageRecognition(new Language[]{Language.GERMAN, Language.ENGLISH, Language.FRENCH, Language.SPANISH, Language.ITALIAN, Language.PORTUGUESE});
     
     public static interface StyleParser {
         /**
@@ -597,7 +598,11 @@ public class DateDetection {
                 "on october 20 every year",
                 " on october 20 every year",
                 "on September 29,",
-                "am Karfreitag um 15:00 Uhr"
+                "am Karfreitag um 15:00 Uhr",
+                "11 fevereiro 2001", // portuguese
+                "12. fevereiro 2002", // portuguese
+                "13 de fevereiro 2003", // portuguese
+                "Fevereiro 14, 2004" // portuguese
         };
         long t = System.currentTimeMillis();
         for (String s: test) {
