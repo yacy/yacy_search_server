@@ -1180,7 +1180,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     /**
-     * @deprecated use a mimetype considering methode (e.g. Document.getContentDomain() == ContentDomain.IMAGE)
+     * @deprecated use a mimetype considering methode (e.g. Document.getContentDomain() == ContentDomain.IMAGE or else Classification.isImageExtension() )
      */
     @Deprecated
     public static final boolean isImage(final String extension) {

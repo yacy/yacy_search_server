@@ -30,6 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -159,7 +160,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                         solitaireTag(writer, "link", u);
                         solitaireTag(writer, "file", filename);
                         // get image license
-                        if (MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(filename))) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
+                        if (Classification.isImageExtension(MultiProtocolURL.getFileExtension(filename))) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
                     } catch (final MalformedURLException e) {}
                     continue;
                 }
