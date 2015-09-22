@@ -443,12 +443,10 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.filetypeNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav;
-            boolean visible = false;
             while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.filetypeNavigator.get(name);
                 if (count == 0) break;
-                visible = visible || Classification.isMediaExtension(name) || "pdf,doc,docx".indexOf(name) >= 0;
                 nav = "filetype%3A" + name;
                 if (theSearch.query.modifier.filetype == null || !theSearch.query.modifier.filetype.contains(name) ) {
                     pos++;
