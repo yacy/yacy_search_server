@@ -21,7 +21,7 @@
 #Οι άνθρωποι που συνεισέφεραν παρατίθενται κατά χρονολογική σειρά, και όχι με βάση το πόσο πολλά προσέφεραν κατ' απόλυτη έννοια.
 #Thank you for your help!
 #Σας ευχαριστούμε για τη βοήθειά σας!
-<!-- lang -->default\(english\)==Greek
+<!-- lang -->default(english)==Greek
 <!-- author -->==Constantine Mousafiris
 <!-- maintainer -->==
 #-----------------------------
@@ -35,7 +35,7 @@ from being loaded. You can define several blacklists and activate them separatel
 You may also provide your blacklist to other peers by sharing them; in return you may==Μπορείτε, επίσης, να προσφέρετε τη Μαύρη Λίστα σας στους άλλους ομότιμους χρήστες, καθιστώντας την διαμοιράσιμη. Σε αντάλλαγμα μπορείτε να
 collect blacklist entries from other peers.==συλλέγετε τις καταχωρήσεις από τις Μαύρες Λίστες των άλλων ομότιμων χρηστών.
 Edit list:==Τροποποίηση καταλόγου:
-\(active\)\#not active::active\#\(/active\)\# \#\(shared\)\#not shared::shared\#\(/shared\)==(active)#ανενεργή::ενεργή#(/active)# #(shared)#μη διαμοιρασμένη::διαμοιρασμένη#(/shared)
+(active)#not active::active#(/active)# #(shared)#not shared::shared#(/shared)==(active)#ανενεργή::ενεργή#(/active)# #(shared)#μη διαμοιρασμένη::διαμοιρασμένη#(/shared)
 "select"=="επιλέξτε"
 New list:==Νέος κατάλογος:
 "create"=="δημιουργία"
@@ -67,14 +67,14 @@ File:==Αρχείο:
 
 #File: Bookmarks.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Bookmarks
+YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
 <h2>Bookmarks==<h2>Bookmarks
 Add Bookmark==Προσθήκη Σελειδοδείκτη (Bookmark)
 Edit Bookmark==Τροποποίηση Σελειδοδείκτη (Bookmark)
 Url:==URL:
 Title:==Τίτλος:
 Description:==Περιγραφή:
-Tags \(comma separated\):==Tags (χωρισμένα με κόμματα):
+Tags (comma separated):==Tags (χωρισμένα με κόμματα):
 Public:==Δημόσιος:
 yes==ναι
 no==όχι
@@ -114,14 +114,14 @@ Comment==Σχόλιο
 
 #File: Connections_p.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Connection Tracking==YaCy '#[clientname]#': Ανίχνευση συνδέσεως
+YaCy '#[clientname]#': Connection Tracking==YaCy '#[clientname]#': Ανίχνευση συνδέσεως
 Connection Tracking==Ανίχνευση συνδέσεως
 Incoming Connections==Εισερχόμενες συνδέσεις
-Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Προβολή ενεργών συνδέσεων #[numActiveRunning]# και των εκκρεμών συνδέσεων #[numActivePending]# από ένα μέγιστο #[numMax]# επιτρεπόμενων εισερχόμενων συνδέσεων.
+Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==Προβολή ενεργών συνδέσεων #[numActiveRunning]# και των εκκρεμών συνδέσεων #[numActivePending]# από ένα μέγιστο #[numMax]# επιτρεπόμενων εισερχόμενων συνδέσεων.
 Protocol==Πρωτόκολλο
 Duration==Διάρκεια
-Source IP\[:Port\]==IP Πηγής[:Port]
-Dest. IP\[:Port\]==IP Προορισμού.[:Port]
+Source IP[:Port]==IP Πηγής[:Port]
+Dest. IP[:Port]==IP Προορισμού.[:Port]
 Command==Εντολή
 Used==Σε χρήση
 Close==Κλειστή
@@ -158,7 +158,7 @@ Status==Κατάσταση
 
 YaCy uses Regular Expressions for some functions, for example in the blacklist.==Το YaCy, σε κάποιες συναρτήσεις, χρησιμοποιεί Regular Expressions, για παράδειγμα στη Μαύρη Λίστα.
 There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Υπάρχουν διάφορα πρότυπα για τις regexps, το YaCy χρησιμοποιεί την σύνταξη της Perl 5.
-Here is a short overview about the functions, which should fir for most cases\:<==Ακολουθεί μία σύντομη επισκόπηση αυτών των συναρτήσεων, που πρέπει να επαρκούν για την πλειοψηφία των περιπτώσεων:<
+Here is a short overview about the functions, which should fir for most cases:<==Ακολουθεί μία σύντομη επισκόπηση αυτών των συναρτήσεων, που πρέπει να επαρκούν για την πλειοψηφία των περιπτώσεων:<
 
 arbitrary character==αυθαίρετοι χαρακτήρες
 character x==χαρακτήρας x
@@ -169,8 +169,8 @@ not x==όχι x
 concatenation of x and y==Concatenation των x και y
 x or y==x ή y
 String "foo" or string "bar"==String "foo" ή String "bar"
-a or b or c \(same as a\|b\|c\)==a ή b ή c \(ίδιο όπως και το a\|b\|c\)
-a or b or c \(same as above\)==a ή b ή c \(όπως και πιο πάνω\)
+a or b or c (same as a|b|c)==a ή b ή c (ίδιο όπως και το a|b|c)
+a or b or c (same as above)==a ή b ή c (όπως και πιο πάνω)
 exactly n appearances of x==ακριβώς n εμφανίσεις του  x
 at least n appearances of x==τουλάχιστον n εμφανίσεις του x
 at least n, maximum m appearanches of x==τουλάχιστον n, το ανώτερο m εμφανίσεις του x
