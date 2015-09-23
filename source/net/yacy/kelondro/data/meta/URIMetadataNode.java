@@ -222,7 +222,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     }
 
     public boolean matches(Pattern pattern) {
-        return pattern.matcher(this.url.toNormalform(true).toLowerCase()).matches();
+        return pattern.matcher(this.url.toNormalform(true)).matches();
         //CharacterRunAutomaton automaton = new CharacterRunAutomaton(matcher);
         //boolean match = automaton.run(this.url.toNormalform(true).toLowerCase());
         //return match;
