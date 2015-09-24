@@ -43,15 +43,16 @@ public abstract class TranslatorUtil {
 	/**
 	 * @param args
 	 *            main parameters
+	 * @parm argIndex index of source dir parameter
 	 * @return translation source dir from parameters or default
 	 *         (workingDir/htroot)
 	 * @throws IllegalArgumentException
 	 *             when no parameters is set and default is not found
 	 */
-	protected static File getSourceDir(String[] args) {
+	protected static File getSourceDir(String[] args, int argIndex) {
 		File sourceDir;
-		if (args.length > 0) {
-			sourceDir = new File(args[0]);
+		if (args.length > argIndex && argIndex >= 0) {
+			sourceDir = new File(args[argIndex]);
 		} else {
 			String workingDir = System.getProperty("user.dir");
 			if (workingDir == null) {
@@ -71,15 +72,16 @@ public abstract class TranslatorUtil {
 	/**
 	 * @param args
 	 *            main parameters
+	 * @parm argIndex index of translation file parameter
 	 * @return translation file from parameters or default (base on current
 	 *         Locale)
 	 * @throws IllegalArgumentException
 	 *             when no parameters is set and default is not found
 	 */
-	protected static File getTranslationFile(String[] args) {
+	protected static File getTranslationFile(String[] args, int argIndex) {
 		File translationFile;
-		if (args.length > 2) {
-			translationFile = new File(args[2]);
+		if (args.length > argIndex && argIndex >= 0) {
+			translationFile = new File(args[argIndex]);
 		} else {
 			String workingDir = System.getProperty("user.dir");
 			if (workingDir == null) {
@@ -100,13 +102,14 @@ public abstract class TranslatorUtil {
 	/**
 	 * @param args
 	 *            main parameters
+	 * @parm argIndex index of translation file parameter
 	 * @return extensions list from parameters or default (same as used in
 	 *         {@link yacy})
 	 */
-	protected static String getExtensions(String[] args) {
+	protected static String getExtensions(String[] args, int argIndex) {
 		String extensions;
-		if (args.length > 3) {
-			extensions = args[3];
+		if (args.length > argIndex && argIndex >= 0) {
+			extensions = args[argIndex];
 		} else {
 			extensions = "html,template,inc";
 		}
