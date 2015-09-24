@@ -1100,9 +1100,9 @@ public final class Protocol {
             if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry.url()) ) {
                 if ( Network.log.isInfo() ) {
                     if (localsearch) {
-                        Network.log.info("local search (solr): filtered blacklisted url " + urlEntry.url());
+                        Network.log.info("local search (solr): filtered blacklisted url " + urlEntry.url().toNormalform(true));
                     } else {
-                        Network.log.info("remote search (solr): filtered blacklisted url " + urlEntry.url() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
+                        Network.log.info("remote search (solr): filtered blacklisted url " + urlEntry.url().toNormalform(true) + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
                     }
                 }
                 continue; // block with blacklist
@@ -1112,9 +1112,9 @@ public final class Protocol {
             if ( urlRejectReason != null ) {
                 if ( Network.log.isInfo() ) {
                     if (localsearch) {
-                        Network.log.info("local search (solr): rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ")");
+                        Network.log.info("local search (solr): rejected url '" + urlEntry.url().toNormalform(true) + "' (" + urlRejectReason + ")");
                     } else {
-                        Network.log.info("remote search (solr): rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
+                        Network.log.info("remote search (solr): rejected url '" + urlEntry.url().toNormalform(true) + "' (" + urlRejectReason + ") from peer " + target.getName());
                     }
                 }
                 continue; // reject url outside of our domain

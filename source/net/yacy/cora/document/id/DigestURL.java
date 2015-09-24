@@ -357,6 +357,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return domLengthEstimation(urlHashBytes) << 8 / 20;
     }
 
+    @Deprecated
     private static final int domDomain(final byte[] urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
@@ -370,7 +371,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     @Override
     public final boolean isLocal() {
         if (this.isFile()) return true;
-        return domDomain(hash()) == 7;
+        return Domains.isLocal(this.host, this.hostAddress);
     }
 
     /**
@@ -378,6 +379,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
      * @param urlhash
      * @return
      */
+    @Deprecated
     public static final boolean isLocal(final byte[] urlhash) {
         return domDomain(urlhash) == 7;
     }

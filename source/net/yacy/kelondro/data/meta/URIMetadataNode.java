@@ -134,8 +134,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         this.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
         this.setField(CollectionSchema.wordcount_i.name(), Integer.parseInt(prop.getProperty("wc", "0")));
         final String dt = prop.getProperty("dt", "t");
-        String[] mime = Response.doctype2mime(null,dt.charAt(0));
-        this.setField(CollectionSchema.content_type.name(), mime);
+        final String mime = crypt.simpleDecode(prop.getProperty("mime")); // optional included if it is not equal to doctype2mime()
+        if (mime != null && !mime.isEmpty() && Response.docType(mime) == dt.charAt(0)) { // use supplied mime (if docType(mime) is equal it's a known valid mime)
+            this.setField(CollectionSchema.content_type.name(), mime);
+        } else {
+            final String[] mimes = Response.doctype2mime(null, dt.charAt(0));
+            this.setField(CollectionSchema.content_type.name(), mimes);
+        }
         final String flagsp = prop.getProperty("flags", "AAAAAA");
         this.flags = (flagsp.length() > 6) ? QueryParams.empty_constraint : (new Bitfield(4, flagsp));
         this.setField(CollectionSchema.language_s.name(), prop.getProperty("lang", ""));
@@ -217,7 +222,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     }
 
     public boolean matches(Pattern pattern) {
-        return pattern.matcher(this.url.toNormalform(true).toLowerCase()).matches();
+        return pattern.matcher(this.url.toNormalform(true)).matches();
         //CharacterRunAutomaton automaton = new CharacterRunAutomaton(matcher);
         //boolean match = automaton.run(this.url.toNormalform(true).toLowerCase());
         //return match;
@@ -529,7 +534,17 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             s.append(",md5=").append(this.md5());
             s.append(",size=").append(this.filesize());
             s.append(",wc=").append(this.wordCount());
-            s.append(",dt=").append(this.doctype());
+            final char dt = this.doctype();
+            s.append(",dt=").append(dt);
+            // if default revert from doctype to mime doesn't match actual mime,
+            // include mime in the properties
+            final String mime = this.mime();
+            if (mime != null) {
+                final String[] mimex = Response.doctype2mime(null,dt);
+                if (!mime.equals(mimex[0])) { // include mime if not equal to recalc by dt (to make sure correct mime is recorded)
+                    s.append(",mime=").append(crypt.simpleEncode(mime));
+                }
+            }
             s.append(",flags=").append(this.flags().exportB64());
             s.append(",lang=").append(this.language());
             s.append(",llocal=").append(this.llocal());
@@ -552,8 +567,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     }
 
     /**
-     * the toString format must be completely identical to URIMetadataRow because that is used
-     * to transport the data over p2p connections.
+     * the toString format to transport the data over p2p connections.
      */
     public String toString(String snippet) {
         // add information needed for remote transport
@@ -575,6 +589,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
      * @return the object as String.<br>
      * This e.g. looks like this:
      * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
+     * and is used in the peer to peer exchange*
      */
     @Override
     public String toString() {

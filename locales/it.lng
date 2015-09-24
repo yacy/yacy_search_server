@@ -17,7 +17,7 @@
 #Only part 1.
 #Contributors are in chronological ordern, not how much they did absolutely.
 #Thank you for your help!
-<!-- lang -->default\(english\)==Italian
+<!-- lang -->default(english)==Italian
 <!-- author -->==Riccardo Lemmi
 <!-- maintainer -->==
 #-----------------------------
@@ -31,7 +31,7 @@ from being loaded. You can define several blacklists and activate them separatel
 You may also provide your blacklist to other peers by sharing them; in return you may==Puoi fornire la tua blacklist agli altri peers rendendola condivisa; in ritorno puoi
 collect blacklist entries from other peers.==collezionare le entrate nelel blacklist degli altri peers.
 Edit list:==Modifica lista:
-\(active\)\#not active::active\#\(/active\)\# \#\(shared\)\#not shared::shared\#\(/shared\)==(active)#non attiva::attiva#(/active)# #(shared)#non condivisa::condivisa#(/shared)
+(active)#not active::active#(/active)# #(shared)#not shared::shared#(/shared)==(active)#non attiva::attiva#(/active)# #(shared)#non condivisa::condivisa#(/shared)
 "select"=="seleziona"
 New list:==Nuova lista:
 "create"=="crea"
@@ -63,14 +63,14 @@ File:==File:
 
 #File: Bookmarks.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Bookmarks
+YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
 <h2>Bookmarks==<h2>Bookmarks
 Add Bookmark==Aggiunti Bookmark
 Edit Bookmark==Modifica Bookmark
 Url:==URL:
 Title:==Titolo:
 Description:==Descrizione:
-Tags \(comma separated\):==Tags (separati da virgole):
+Tags (comma separated):==Tags (separati da virgole):
 Public:==Pubblico:
 yes==si
 no==no
@@ -110,14 +110,14 @@ Comment==Commento
 
 #File: Connections_p.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Connection Tracking==YaCy '#[clientname]#': Stato connessione
+YaCy '#[clientname]#': Connection Tracking==YaCy '#[clientname]#': Stato connessione
 Connection Tracking==Stato connessione
 Incoming Connections==Connessioni entranti
-Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Mostra le connessioni attive #[numActiveRunning]# e appese #[numActivePending]# per un massimo di #[numMax]# connessioni entranti permesse.
+Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==Mostra le connessioni attive #[numActiveRunning]# e appese #[numActivePending]# per un massimo di #[numMax]# connessioni entranti permesse.
 Protocol==Protocollo
 Duration==Durata
-Source IP\[:Port\]==IP Sorgente[:Port]
-Dest. IP\[:Port\]==IP Dest.[:Port]
+Source IP[:Port]==IP Sorgente[:Port]
+Dest. IP[:Port]==IP Dest.[:Port]
 Command==Comando
 Used==Usato
 Close==Chiuso

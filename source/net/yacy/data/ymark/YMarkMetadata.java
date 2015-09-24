@@ -121,7 +121,7 @@ public class YMarkMetadata {
         	metadata.put(METADATA.MODDATE, ISO8601Formatter.FORMATTER.format(urlEntry.moddate()));
         	metadata.put(METADATA.SNIPPET, String.valueOf(urlEntry.snippet()));
         	metadata.put(METADATA.WORDCOUNT, String.valueOf(urlEntry.wordCount()));
-        	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.doctype()));
+        	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.mime()));
         	metadata.put(METADATA.LANGUAGE, urlEntry.language());
         	metadata.put(METADATA.TITLE, urlEntry.dc_title());
         	metadata.put(METADATA.CREATOR, urlEntry.dc_creator());

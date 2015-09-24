@@ -69,7 +69,16 @@ public class ImageParser {
 
         final int handle = image.hashCode();
         mediaTracker.addImage(image, handle);
-        try {mediaTracker.waitForID(handle);} catch (final InterruptedException e) {}
+        try {
+            mediaTracker.waitForID(handle);
+            
+            if (mediaTracker.isErrorID(handle)) { // true if status ERRORD during loading (happens on not supported formats too)
+                mediaTracker.removeImage(image, handle);
+                image = null; // return null to indicate source not handled
+            }
+        } catch (final InterruptedException e) {
+            return null;
+        }
 
         return image;
     }

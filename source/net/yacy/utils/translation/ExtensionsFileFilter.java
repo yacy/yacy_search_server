@@ -31,12 +31,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * File filter for source files to translate
+ * Filter file names with an extensions list.
  * 
  * @author luc
  * 
  */
-public class SourceFileFilter implements FilenameFilter {
+public class ExtensionsFileFilter implements FilenameFilter {
 
 	/** Extensions required to pass filter */
 	private List<String> extensions;
@@ -48,7 +48,7 @@ public class SourceFileFilter implements FilenameFilter {
 	 *            extensions required. When this list is null or empty, filter
 	 *            let pass all files.
 	 */
-	public SourceFileFilter(List<String> extensions) {
+	public ExtensionsFileFilter(List<String> extensions) {
 		if (extensions == null) {
 			this.extensions = new ArrayList<>();
 		} else {
