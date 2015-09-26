@@ -114,7 +114,6 @@ public final class TextParser {
         initParser(new vsdParser());
         initParser(new xlsParser());
         initParser(new zipParser());
-        initParser(new rdfParser());
         initParser(new audioTagParser());
         
     }
