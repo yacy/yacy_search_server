@@ -29,7 +29,6 @@ import java.awt.image.Raster;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
 
@@ -116,42 +115,31 @@ public class ViewImage {
             } catch (final IOException e) {
                 ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());
             }
-            byte[] imgb = null;
+            boolean okToCache = true;
             if (resourceb == null) {
                 if (urlString.endsWith(".ico")) {
                     // load default favicon dfltfvcn.ico
                     if (defaulticonb == null) try {
-                        imgb = FileUtils.read(new File(sb.getAppPath(), defaulticon));
+                        resourceb = FileUtils.read(new File(sb.getAppPath(), defaulticon));
+                        okToCache = false;
                     } catch (final IOException e) {
                         return null;
                     } else {
-                        imgb = defaulticonb;
+                        resourceb = defaulticonb;
+                        okToCache = false;
                     }
                 } else {
                     return null;
                 }
-            } else {
-                final InputStream imgStream = new ByteArrayInputStream(resourceb);
-
-                // read image data
-                try {
-                    imgb = FileUtils.read(imgStream);
-                } catch (final IOException e) {
-                    return null;
-                } finally {
-                    try {
-                        imgStream.close();
-                    } catch (final Exception e) {}
-                }
             }
-            
+
             // gif images are not loaded because of an animated gif bug within jvm which sends java into an endless loop with high CPU
             if (ext.equals("gif") && "gif".equals(MultiProtocolURL.getFileExtension(url.getFileName()))) {
-                return new ByteArrayInputStream(imgb);
+                return new ByteArrayInputStream(resourceb);
             }
-            
+           
             // read image
-            image = ImageParser.parse(urlString, imgb);
+            image = ImageParser.parse(urlString, resourceb);
             if (image == null) {
                 return null;
             }
@@ -233,7 +221,7 @@ public class ViewImage {
                 height = h;
             }
 
-            if ((height == 16) && (width == 16) && (resourceb != null)) {
+            if ((height == 16) && (width == 16) && okToCache) {
                 // this might be a favicon, store image to cache for faster re-load later on
                 iconcache.put(urlString, image);
             }

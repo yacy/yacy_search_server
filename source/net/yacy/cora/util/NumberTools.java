@@ -27,7 +27,8 @@ public class NumberTools {
 
     /**
      * this method replaces Long.parseLong/2 where a substring of decimal numbers shall be parsed
-     * Strings are also auto-trimmed, that means parsing stops at spaces without throwing a NumberFormatException
+     * Strings are also auto-trimmed, that means parsing stops at trailing spaces without throwing a NumberFormatException
+     * leading spaces are skip'd and parse stops at first none digit character
      * @param s
      * @param startPos
      * @return the number
@@ -54,6 +55,7 @@ public class NumberTools {
         int digit;
         char c;
 
+        while (s.charAt(i) == ' ') i++; // skip leading blanks
         char firstChar = s.charAt(i);
         if (firstChar < '0') {
             if (firstChar == '-') {
@@ -66,7 +68,7 @@ public class NumberTools {
         multmin = limit / 10;
         while (i < endPos) {
             c = s.charAt(i++);
-            if (c == ' ') break;
+            if (c < '0' || c > '9') break; // stop at first non digit character
             digit = c - '0';
             if (digit < 0 || digit > 9 || result < multmin) throw new NumberFormatException(s);
             result *= 10;
@@ -97,6 +99,7 @@ public class NumberTools {
         int digit;
         char c;
 
+        while (s.charAt(i) == ' ') i++; // skip leading blanks
         char firstChar = s.charAt(i);
         if (firstChar < '0') {
             if (firstChar == '-') {
@@ -109,7 +112,7 @@ public class NumberTools {
         multmin = limit / 10;
         while (i < endPos) {
             c = s.charAt(i++);
-            if (c == ' ') break;
+            if (c < '0' || c > '9') break; // stop at first non digit character
             digit = c - '0';
             if (digit < 0  || digit > 9 || result < multmin) throw new NumberFormatException(s);
             result *= 10;
