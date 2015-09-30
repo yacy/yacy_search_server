@@ -155,6 +155,7 @@ public class svgParser extends AbstractParser implements Parser {
 
         private final StringBuilder buffer = new StringBuilder();
         private boolean scrapeMetaData = false; // true if within metadata tag
+        private boolean svgStartTagFound = false; // switch to recognize start tag processing, to cancel parsing on wrong tag
 
         private String docTitle = null; // document level title
         private String docDescription = null; // document level description
@@ -175,9 +176,10 @@ public class svgParser extends AbstractParser implements Parser {
                 // not implemented yet TODO: interprete RDF content
                 // may contain RDF + DC, DC, CC ...
             } else {
-                if (null != tag) {
+                if (tag != null) {
                     switch (tag) {
                         case "svg":
+                            svgStartTagFound = true;
                             imgHeight = atts.getValue("height");
                             imgWidth = atts.getValue("width");
                             break;
@@ -190,6 +192,11 @@ public class svgParser extends AbstractParser implements Parser {
                         case "path":
                         case "rect":
                             throw new SAXException("EOF svg Metadata", new EOFException());
+                        default : { // K.O. criteria, start tag is not svg, fail parser on none svg
+                            if (!svgStartTagFound) {
+                                throw new SAXException("not a svg file, start tag "+tag, new Failure());
+                            }
+                        }
                     }
                 }
             }
