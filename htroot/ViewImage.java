@@ -136,8 +136,11 @@ public class ViewImage {
             // gif images are not loaded because of an animated gif bug within jvm which sends java into an endless loop with high CPU
             if (ext.equals("gif") && "gif".equals(MultiProtocolURL.getFileExtension(url.getFileName()))) {
                 return new ByteArrayInputStream(resourceb);
+            } else if (ext.equals("svg") && "svg".equals(MultiProtocolURL.getFileExtension(url.getFileName()))) {
+                // svg images not supported by awt, but by most browser, deliver just content (without crop/scale)
+                return new ByteArrayInputStream(resourceb);
             }
-           
+
             // read image
             image = ImageParser.parse(urlString, resourceb);
             if (image == null) {
