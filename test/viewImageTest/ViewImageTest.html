@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+/* container style for ViewImage render */
+.thumbcontainer {
+	margin: 2px;
+	width: 128px;
+	height: 128px;
+	float: left;
+}
+/* container style for direct browser render */
+.browserthumb {
+	margin: 2px;
+	width: 128px;
+	height: 128px;
+	overflow: hidden;
+}
+</style>
+<title>ViewImage rendering tests</title>
+</head>
+<body>
+	<h1>Test page to check ViewImage rendering with diffent image
+		formats</h1>
+	<p>
+		Prerequisites :
+		<ul>
+			<li>copy /yacy/test/viewImageTest/test folder in
+				/yacy/htroot/env/grafics</li>
+			<li>run a YaCy instance on localhost and 8090 port</li>
+		</ul>
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Image format</th>
+				<th>YaCy ViewImage</th>
+				<th>Direct browser</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>PNG : <a
+					href="https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"
+					title="sample source url">sample source</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/PNG_transparency_demonstration_1.png"
+							title="ViewImage render PNG sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/PNG_transparency_demonstration_1.png"
+							width="128" height="128" alt="ViewImage PNG render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/PNG_transparency_demonstration_1.png"
+							title="Browser render PNG sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/PNG_transparency_demonstration_1.png"
+							height="100%" style="margin-left: -17%"
+							alt="Browser PNG render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>JPEG : <a
+					href="https://upload.wikimedia.org/wikipedia/commons/b/b4/JPEG_example_JPG_RIP_100.jpg"
+					title="sample source url">sample source</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/JPEG_example_JPG_RIP_100.jpg"
+							title="Render JPEG sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/JPEG_example_JPG_RIP_100.jpg"
+							width="128" height="128" alt="JPG render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/JPEG_example_JPG_RIP_100.jpg"
+							title="Render JPEG sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/JPEG_example_JPG_RIP_100.jpg"
+							height="100%" style="margin-left: -20%" alt="JPG render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>GIF : <a
+					href="https://upload.wikimedia.org/wikipedia/commons/a/a0/Sunflower_as_gif_websafe.gif"
+					title="sample source url">sample source</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.gif?url=http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
+							title="Render GIF sample in full size"> <img
+							src="http://localhost:8090/ViewImage.gif?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
+							width="128" height="128" alt="GIF render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
+							title="Render GIF sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
+							width="100%" alt="GIF render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Animated GIF : <a
+					href="https://upload.wikimedia.org/wikipedia/commons/2/2c/Rotating_earth_%28large%29.gif"
+					title="sample source url">sample source</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.gif?url=http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
+							title="Render animated GIF sample in full size"> <img
+							src="http://localhost:8090/ViewImage.gif?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
+							width="128" height="128" alt="Animated GIF render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
+							title="Render animated GIF sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
+							width="128" height="128" alt="Animated GIF render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>SVG : <a
+					href="https://upload.wikimedia.org/wikipedia/commons/0/02/SVG_logo.svg"
+					title="sample source url">sample source</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.svg?url=http://localhost:8090/env/grafics/test/SVG_logo.svg"
+							title="Render SVG sample in full size"> <img
+							src="http://localhost:8090/ViewImage.svg?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/SVG_logo.svg"
+							width="128" height="128" alt="SVG render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a href="http://localhost:8090/env/grafics/test/SVG_logo.svg"
+							title="Render SVG sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/SVG_logo.svg"
+							width="128" height="128" alt="SVG render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>CGM : <a
+					href="http://www.agocg.ac.uk/train/cgm/ralcgm/sample.cgm"
+					title="sample source url">sample source</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/sample.cgm"
+							title="Render CGM sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/sample.cgm"
+							width="128" height="128" alt="CGM render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a href="http://localhost:8090/env/grafics/test/sample.cgm"
+							title="Render CGM sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/sample.cgm"
+							width="128" height="128" alt="CGM render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>TIFF : <a
+					href="http://www.uswebsitecreations.com/images/digital_images/marbles.tif"
+					title="sample source url">sample source</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/marbles.tif"
+							title="Render TIFF sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/marbles.tif"
+							width="128" height="128" alt="TIFF render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/marbles.tif"
+							title="Render TIFF sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/marbles.tif"
+							width="128" height="128" alt="TIFF render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
