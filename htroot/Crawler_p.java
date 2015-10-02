@@ -66,6 +66,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
+import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -76,8 +77,14 @@ public class Crawler_p {
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
+
+        // clean up all search events
+        SearchEventCache.cleanupEvents(true);
+        sb.index.clearCaches(); // every time the ranking is changed we need to remove old orderings
+        
         // inital values for AJAX Elements (without JavaScript)
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);

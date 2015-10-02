@@ -995,7 +995,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         // construct a String again
         sb.setLength(0);
-        for (final String v: token) if (v.length() > 1) sb.append(v).append(' ');
+        for (final String v: token) if (v.length() >= 1) sb.append(v).append(' ');
         return sb.length() == 0 ? "" : sb.substring(0, sb.length() - 1);
     }
 

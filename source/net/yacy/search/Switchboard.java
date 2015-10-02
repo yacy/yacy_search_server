@@ -2492,6 +2492,10 @@ public final class Switchboard extends serverSwitch {
                     }
                 }
                 if (allCrawlsFinished) {
+                    // refresh the search cache
+                    SearchEventCache.cleanupEvents(true);
+                    sb.index.clearCaches(); // every time the ranking is changed we need to remove old orderings
+                    
                     if (postprocessing) {
                         // run postprocessing on all profiles
                         ReferenceReportCache rrCache = index.getReferenceReportCache();

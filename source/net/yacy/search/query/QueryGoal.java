@@ -184,6 +184,17 @@ public class QueryGoal {
                 }
             }
         }
+        // in case that the include_string contains several entries including 1-char tokens and also more-than-1-char tokens,
+        // then remove the 1-char tokens to prevent that we are to strict. This will make it possible to be a bit more fuzzy
+        // in the search where it is appropriate
+        boolean contains_single = false, contains_multiple = false;
+        for (String token: include_string) {
+            if (token.length() == 1) contains_single = true; else contains_multiple = true;
+        }
+        if (contains_single && contains_multiple) {
+            Iterator<String> i = include_string.iterator();
+            while (i.hasNext()) if (i.next().length() == 1) i.remove();
+        }
     }
 
     /**
