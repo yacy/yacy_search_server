@@ -26,7 +26,7 @@ import java.util.Date;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
-import org.apache.solr.schema.TrieDateField;
+import org.apache.solr.util.DateFormatUtil;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
@@ -355,7 +355,7 @@ public class QueryModifier {
         Date onDate = DateDetection.parseLine(onDescription, timezoneOffset);
         StringBuilder filterQuery = new StringBuilder(20);
         if (onDate != null) {
-            String dstr = TrieDateField.formatExternal(onDate);
+            String dstr = DateFormatUtil.formatExternal(onDate);
             filterQuery.append(CollectionSchema.dates_in_content_dts.getSolrFieldName()).append(":[").append(dstr).append(" TO ").append(dstr).append(']'); 
         }
         return filterQuery.toString();
@@ -366,8 +366,8 @@ public class QueryModifier {
         Date toDate = to == null || to.equals("*") ? null : DateDetection.parseLine(to, timezoneOffset);
         StringBuilder filterQuery = new StringBuilder(20);
         if (fromDate != null && toDate != null) {
-            String dstrFrom = fromDate == null ? "*" : TrieDateField.formatExternal(fromDate);
-            String dstrTo = toDate == null ? "*" : TrieDateField.formatExternal(toDate);
+            String dstrFrom = fromDate == null ? "*" : DateFormatUtil.formatExternal(fromDate);
+            String dstrTo = toDate == null ? "*" : DateFormatUtil.formatExternal(toDate);
             filterQuery.append(CollectionSchema.dates_in_content_dts.getSolrFieldName()).append(":[").append(dstrFrom).append(" TO ").append(dstrTo).append(']'); 
         }
         return filterQuery.toString();

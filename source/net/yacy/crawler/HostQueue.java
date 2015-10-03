@@ -98,7 +98,7 @@ public class HostQueue implements Balancer {
         int p = filename.lastIndexOf('.');
         if (p < 0) throw new RuntimeException("hostPath name must contain a dot: " + filename);
         this.hostName = filename.substring(0, p);
-        this.port = Integer.parseInt(filename.substring(p + 1));
+        this.port = Integer.parseInt(filename.substring(p + 1)); // consider "host.com" contains dot but no required port -> will throw exception
         init();
     }
     
