@@ -311,7 +311,6 @@ public class DCEntry extends MultiMapSolrParams {
 
     public double getLat() {
         String t = this.get("geo:lat");
-        if (t == null) t = this.get("geo:lat");
         t = stripCDATA(t);
         if (t == null) return 0.0d;
         return Double.parseDouble(t);

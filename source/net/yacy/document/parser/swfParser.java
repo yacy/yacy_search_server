@@ -81,7 +81,6 @@ public class swfParser extends AbstractParser implements Parser {
             String url = null;
             String urlnr = null;
             final String linebreak = System.getProperty("line.separator");
-            final String[] sections =  null;
             final List<String> abstrct = new ArrayList<String>();
             //TreeSet images = null;
             final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
@@ -100,7 +99,7 @@ public class swfParser extends AbstractParser implements Parser {
             while ((urlStart = contents.indexOf("http://",urlEnd)) >= 0){
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
-                urlnr = Integer.toString(++urls).toString();
+                urlnr = Integer.toString(++urls);
                 AnchorURL u = new AnchorURL(url);
                 u.setNameProperty(urlnr);
                 anchors.add(u);
@@ -122,7 +121,7 @@ public class swfParser extends AbstractParser implements Parser {
                           replaceAll("\t"," ")), // title
                     "", // TODO: AUTHOR
                     "",
-                    sections,     // an array of section headlines
+                    null,        // an array of section headlines
                     abstrct,     // an abstract
                     0.0f, 0.0f,
                     contents,     // the parsed document text
