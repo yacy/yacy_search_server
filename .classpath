@@ -43,8 +43,8 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
-	<classpathentry kind="lib" path="lib/poi-3.12-20150511.jar"/>
-	<classpathentry kind="lib" path="lib/poi-scratchpad-3.12-20150511.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.13-20150929.jar"/>
+	<classpathentry kind="lib" path="lib/poi-scratchpad-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.12.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
