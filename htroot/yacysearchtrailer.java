@@ -29,7 +29,6 @@ import java.util.Map;
 import org.apache.solr.schema.TrieDateField;
 
 import net.yacy.cora.date.AbstractFormatter;
-import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
