@@ -169,7 +169,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
             singleList(title), // title
             author == null ? "" : author, // author
             location.getHost(), // Publisher
-            new String[]{}, // sections
+            null, // sections
             descriptions, // description
             gpslon, gpslat, //  location
             imgInfotxt.toString(), // content text

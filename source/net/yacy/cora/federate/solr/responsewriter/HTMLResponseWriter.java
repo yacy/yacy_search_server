@@ -45,10 +45,10 @@ import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
-import org.apache.solr.schema.TrieDateField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.DateFormatUtil;
 
 public class HTMLResponseWriter implements QueryResponseWriter {
 
@@ -223,7 +223,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         if (typeName.equals(SolrType.bool.printName())) {
             return "F".equals(value) ? "false" : "true";
         } else if (typeName.equals(SolrType.date.printName())) {
-            return TrieDateField.formatExternal(new Date(Long.parseLong(value)));
+            return DateFormatUtil.formatExternal(new Date(Long.parseLong(value)));
         }
         return value;
     }

@@ -91,10 +91,10 @@ public class Classification {
         final String apps = "7z,ace,arc,arj,apk,asf,asx,bat,bin,bkf,bz2,cab,com,css,dcm,deb,dll,dmg,exe,java,gho,ghs,gz,hqx,img,iso,jar,lha,rar,sh,sit,sitx,tar,tbz,tgz,tib,torrent,vbs,war,zip";
         final String audio = "aac,aif,aiff,flac,m4a,m4p,mid,mp2,mp3,oga,ogg,ram,sid,wav,wma";
         final String video = "3g2,3gp,3gp2,3gpp,3gpp2,3ivx,asf,asx,avi,div,divx,dv,dvx,env,f4v,flv,hdmov,m1v,m4v,m-jpeg,mkv,moov,mov,movie,mp2v,mp4,mpe,mpeg,mpg,mpg4,mv4,ogm,ogv,qt,rm,rv,vid,swf,webm,wmv";
-        final String image = "ai,bmp,cdr,cmx,emf,eps,gif,img,jpeg,jpg,mng,pct,pdd,pdn,pict,png,psb,psd,psp,tif,tiff,wmf";
+        final String image = "ai,bmp,cdr,cmx,emf,eps,gif,img,jpeg,jpg,mng,pct,pdd,pdn,pict,png,psb,psd,psp,svg,tif,tiff,wmf";
         final String ctrl = "sha1,md5,crc32,sfv";
 
-        addSet(textExtSet, text); // image formats
+        addSet(textExtSet, text); // text formats
         addSet(imageExtSet, image); // image formats
         addSet(audioExtSet, audio); // audio formats
         addSet(videoExtSet, video); // video formats

@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.apache.solr.schema.TrieDateField;
+import org.apache.solr.util.DateFormatUtil;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -400,13 +400,13 @@ public class yacysearchtrailer {
                 String shortname = name.substring(0, 10);
                 long d;
                 Date dd;
-                try {dd = TrieDateField.parseDate(name); d = dd.getTime();} catch (ParseException e) {continue;}
+                try {dd = DateFormatUtil.parseDate(name); d = dd.getTime();} catch (ParseException e) {continue;}
                 if (fromconstraint != null && dd.before(fromconstraint)) continue;
                 if (toconstraint != null && dd.after(toconstraint)) break;
                 if (dx > 0) {
                     while (d - dx > AbstractFormatter.dayMillis) {
                         dx += AbstractFormatter.dayMillis;
-                        String sn = TrieDateField.formatExternal(new Date(dx)).substring(0, 10);
+                        String sn = DateFormatUtil.formatExternal(new Date(dx)).substring(0, 10);
                         prop.put("nav-dates_element_" + i + "_on", 0);
                         prop.put(fileType, "nav-dates_element_" + i + "_name", sn);
                         prop.put("nav-dates_element_" + i + "_count", 0);
