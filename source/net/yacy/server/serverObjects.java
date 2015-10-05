@@ -69,6 +69,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 
 
@@ -552,7 +553,7 @@ public class serverObjects implements Serializable, Cloneable {
         if (facets != null && facets.length > 0) {
             this.remove("facet");
             this.put("facet", "true");
-            for (int i = 0; i < facets.length; i++) this.add("facet.field", facets[i].getSolrFieldName());
+            for (int i = 0; i < facets.length; i++) this.add(FacetParams.FACET_FIELD, facets[i].getSolrFieldName());
         }
         return this.map;
     }
