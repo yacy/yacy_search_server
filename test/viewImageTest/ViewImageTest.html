@@ -18,12 +18,20 @@
 	height: 128px;
 	overflow: hidden;
 }
+
+td {
+	max-width: 210px;
+}
 </style>
 <title>ViewImage rendering tests</title>
 </head>
 <body>
-	<h1>Test page to check ViewImage rendering with diffent image
-		formats</h1>
+	<h2>
+		Test page to check ViewImage rendering with different image formats
+		listed in <a
+			href="http://www.iana.org/assignments/media-types/media-types.xhtml#image"
+			title="IANA Media Types">IANA Media Types page</a>.
+	</h2>
 	<p>
 		Prerequisites :
 		<ul>
@@ -36,6 +44,9 @@
 		<thead>
 			<tr>
 				<th>Image format</th>
+				<th>Mime type</th>
+				<th>File name extensions</th>
+				<th>Long name/Description</th>
 				<th>YaCy ViewImage</th>
 				<th>Direct browser</th>
 			</tr>
@@ -45,6 +56,9 @@
 				<td>PNG : <a
 					href="https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"
 					title="sample source url">sample source</a></td>
+				<td>image/png</td>
+				<td>.png</td>
+				<td>Portable Network Graphics</td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -71,6 +85,9 @@
 				<td>JPEG : <a
 					href="https://upload.wikimedia.org/wikipedia/commons/b/b4/JPEG_example_JPG_RIP_100.jpg"
 					title="sample source url">sample source</a></td>
+				<td>image/jpeg</td>
+				<td>.jpg, .jpeg, .jpe, .jif, .jfif, .jfi</td>
+				<td>Joint Photographic Experts Group</td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -96,6 +113,9 @@
 				<td>GIF : <a
 					href="https://upload.wikimedia.org/wikipedia/commons/a/a0/Sunflower_as_gif_websafe.gif"
 					title="sample source url">sample source</a></td>
+				<td>image/gif</td>
+				<td>.gif</td>
+				<td>Graphics Interchange Format</td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -121,6 +141,9 @@
 				<td>Animated GIF : <a
 					href="https://upload.wikimedia.org/wikipedia/commons/2/2c/Rotating_earth_%28large%29.gif"
 					title="sample source url">sample source</a></td>
+				<td>image/gif</td>
+				<td>.gif</td>
+				<td>Graphics Interchange Format</td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -146,6 +169,9 @@
 				<td>SVG : <a
 					href="https://upload.wikimedia.org/wikipedia/commons/0/02/SVG_logo.svg"
 					title="sample source url">sample source</a></td>
+				<td>image/svg+xml</td>
+				<td>.svg, .svgz</td>
+				<td>Scalable Vector Graphics</td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -167,9 +193,27 @@
 				</td>
 			</tr>
 			<tr>
+				<td>ICO : <a
+					href="https://upload.wikimedia.org/wikipedia/commons/0/02/SVG_logo.svg"
+					title="sample source url">sample source</a></td>
+				<td>image/vnd.microsoft.icon, image/x-icon (not registered at
+					IANA)</td>
+				<td>.ico</td>
+				<td>Graphics file format for computer icons</td>
+				<td>
+					<div class="thumbcontainer">No sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No sample</div>
+				</td>
+			</tr>
+			<tr>
 				<td>CGM : <a
 					href="http://www.agocg.ac.uk/train/cgm/ralcgm/sample.cgm"
 					title="sample source url">sample source</a></td>
+				<td>image/cgm</td>
+				<td>.cgm</td>
+				<td>Computer Graphics Metafile</td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -194,6 +238,9 @@
 				<td>TIFF : <a
 					href="http://www.uswebsitecreations.com/images/digital_images/marbles.tif"
 					title="sample source url">sample source</a></td>
+				<td>image/tiff, image/tiff-fx</td>
+				<td>.tiff, .tif</td>
+				<td>Tagged Image File Format</td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -206,13 +253,164 @@
 				</td>
 				<td>
 					<div class="browserthumb">
-						<a
-							href="http://localhost:8090/env/grafics/test/marbles.tif"
+						<a href="http://localhost:8090/env/grafics/test/marbles.tif"
 							title="Render TIFF sample in full size"> <img
 							src="http://localhost:8090/env/grafics/test/marbles.tif"
 							width="128" height="128" alt="TIFF render failed" />
 						</a>
 					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>FITS : <a
+					href="http://fits.gsfc.nasa.gov/samples/WFPC2u5780205r_c0fx.fits"
+					title="sample source url">sample source</a></td>
+				<td>image/fits, application/fits</td>
+				<td>.fits, .fit, .fts</td>
+				<td>Flexible Image Transport System</td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=WFPC2u5780205r_c0fx.fits"
+							title="Render FITS sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=WFPC2u5780205r_c0fx.fits"
+							width="128" height="128" alt="FITS render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/WFPC2u5780205r_c0fx.fits"
+							title="Render FITS sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/WFPC2u5780205r_c0fx.fits"
+							width="128" height="128" alt="FITS render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>JPEG 2000 : <a
+					href="http://www.fnordware.com/j2k/relax.jp2"
+					title="sample source url">sample source</a></td>
+				<td>image/jp2, image/jpx, image/jpm, video/mj2</td>
+				<td>.jp2, .j2k, .jpf, .jpx, .jpm, .mj2</td>
+				<td>JPEG 2000</td>
+				<td>
+					<div class="thumbcontainer">
+						<a href="http://localhost:8090/ViewImage.png?url=relax.jp2"
+							title="Render JPEG 2000 sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=relax.jp2"
+							width="128" height="128" alt="JPEG 2000 render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a href="http://localhost:8090/env/grafics/test/relax.jp2"
+							title="Render JPEG 2000 sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/relax.jp2"
+							width="128" height="128" alt="JPEG 2000 render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>KTX</td>
+				<td>image/ktx</td>
+				<td>.ktx</td>
+				<td>KTX (format for storing textures for OpenGL and OpenGL ES
+					applications)</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>NAPLPDS</td>
+				<td>image/naplps</td>
+				<td>not known</td>
+				<td>North American Presentation Layer Protocol Syntax</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>BTIF</td>
+				<td>image/prs.btif</td>
+				<td>.btif, .btf</td>
+				<td>Bank check images and ASCII text data, used by Nations Bank</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>PTI</td>
+				<td>image/prs.pti</td>
+				<td>.pti</td>
+				<td>PTI</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>PWG Raster</td>
+				<td>image/pwg-raster</td>
+				<td>none</td>
+				<td>Used for printing "raw" image data in formats acceptable to
+					printers</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>T38</td>
+				<td>image/t38</td>
+				<td>none</td>
+				<td>Only used for T.38 media stream in SDP</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>PSD</td>
+				<td>image/vnd.adobe.photoshop</td>
+				<td>.psd</td>
+				<td>Adobe Photoshop file</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>AZV</td>
+				<td>image/vnd.airzip.accelerator.azv</td>
+				<td>.azv</td>
+				<td>AirZip file</td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
 				</td>
 			</tr>
 		</tbody>
