@@ -129,6 +129,12 @@ public class genericImageParser extends AbstractParser implements Parser {
             byte[] b;
             try {
                 b = FileUtils.read(source);
+                // check jpeg file signature (magic number FF D8 FF)
+                if ((b[0] != (byte) 0xFF) // cast to signed byte (-1)
+                        || (b[1] != (byte) 0xD8) //cast to signed byte (-40)
+                        || (b[2] != (byte) 0xFF)) {
+                    throw new Parser.Failure("File has no jpeg signature", location);
+                }
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);

@@ -57,6 +57,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     final Switchboard sb;
     private final Set<DigestURL> urlstack; // buffer of urls to recrawl
     public long urlsfound = 0;
+    private String solrSortBy;
 
     public RecrawlBusyThread(Switchboard xsb) {
         super(3000, 1000); // set lower limits of cycle delay
@@ -66,6 +67,9 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 
         this.sb = xsb;
         urlstack = new HashSet<DigestURL>();
+        // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
+        // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
+        solrSortBy = null; // CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
     }
 
     /**
@@ -167,8 +171,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         if (!solrConnector.isClosed()) {
             try {
                 // query all or only httpstatus=200 depending on includefailed flag
-                docList = solrConnector.getDocumentListByQuery(this.includefailed  ? currentQuery : currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)",
-                        CollectionSchema.load_date_dt.getSolrFieldName() + " asc", this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
+                docList = solrConnector.getDocumentListByQuery(this.includefailed ? currentQuery : currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)",
+                        this.solrSortBy, this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
                 this.urlsfound = docList.getNumFound();
             } catch (Throwable e) {
                 this.urlsfound = 0;
