@@ -85,7 +85,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <td valign="top" align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
           <td valign="top">#[type]#
           #(isCrawlerStart)#::<br/><br/>
-          <a href="#[url]#" title="clone"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>::<br/><br/>
+          <a href="#[url]#" title="clone" target="_parent"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>::<br/><br/>
          
          <script>
            var f = document.createElement("form");
@@ -103,7 +103,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
            #{/attr}#
            document.body.appendChild(f);
          </script>
-         <a href="#" title="clone" onclick="document.forms['#[pk]#'].submit(); return false;"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>
+         <a href="#" title="clone" target="_parent" onclick="document.forms['#[pk]#'].submit(); return false;"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>
 
           #(/isCrawlerStart)#</td>
           <td valign="top">#[comment]#</td>
