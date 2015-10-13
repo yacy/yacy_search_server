@@ -945,6 +945,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return this.searchpart;
     }
 
+    /**
+     * Returns a search part parameter map  key=value
+     * in internal url encoded format
+     * for unescaped return values
+     * @see #getAttributes()
+     *
+     * @return key name  value
+     */
     public Map<String, String> getSearchpartMap() {
         if (this.searchpart == null) return null;
         this.searchpart = this.searchpart.replaceAll("&amp;", "&");
@@ -1027,6 +1035,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     /**
      * Evaluates url search part and returns attribute '=' value pairs
+     * the returned values are in clear text (without urlencoding).
+     * 
+     * To get the parameter map as (url-encoded key and values)
+     * @see getSearchpartMap()
      *
      * @return map key=attribue name, value=string after '='
      */
@@ -1037,9 +1049,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         for (final String element : questp) {
             int p = element.indexOf('=');
             if (p != -1) {
-                map.put(element.substring(0, p), element.substring(p + 1));
+                map.put(unescape(element.substring(0, p)), unescape(element.substring(p + 1)));
             } else {
-                if (!element.isEmpty()) map.put(element, "");
+                if (!element.isEmpty()) map.put(unescape(element), "");
             }
         }
         return map;
