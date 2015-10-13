@@ -291,8 +291,7 @@ public final class TransformerWriter extends Writer {
         }
         if (this.transformer != null && this.transformer.isTag0(tagname)) {
             // this single tag is collected at once here
-            char[] b = new char[0];
-            b = this.transformer.transformTag0(tag, quotechar);
+            char[] b = this.transformer.transformTag0(tag, quotechar);
             return b;
         } else if ((this.scraper != null && this.scraper.isTag1(tagname)) ||
                    (this.transformer != null && this.transformer.isTag1(tagname))) {
