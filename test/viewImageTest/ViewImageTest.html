@@ -30,18 +30,23 @@ td {
 		Test page to check ViewImage rendering with different image formats
 		listed in <a
 			href="http://www.iana.org/assignments/media-types/media-types.xhtml#image"
-			title="IANA Media Types">IANA Media Types page</a>.
+			title="IANA Media Types">IANA Media Types page</a>, plus BMP format.
 	</h2>
-	<p>
-		Prerequisites :
-		<ul>
-			<li>copy /yacy/test/viewImageTest/test folder in
-				/yacy/htroot/env/grafics</li>
-			<li>run a YaCy instance on localhost and 8090 port</li>
-		</ul>
-	</p>
+	<h3>Prerequisites</h3>
+	<ul>
+		<li>copy /yacy/test/viewImageTest/test folder in
+			/yacy/htroot/env/grafics</li>
+		<li>run a YaCy instance on localhost and 8090 port</li>
+	</ul>
 	<table>
 		<thead>
+			<tr>
+				<th></th>
+				<th></th>
+				<th></th>
+				<th></th>
+				<th colspan="2">Render method</th>
+			</tr>
 			<tr>
 				<th>Image format</th>
 				<th>Mime type</th>
@@ -175,26 +180,25 @@ td {
 				<td>
 					<div class="thumbcontainer">
 						<a
-							href="http://localhost:8090/ViewImage.svg?url=http://localhost:8090/env/grafics/test/SVG_logo.svg"
+							href="http://localhost:8090/ViewImage.svg?url=http://localhost:8090/env/grafics/test/SVG_Logo.svg"
 							title="Render SVG sample in full size"> <img
-							src="http://localhost:8090/ViewImage.svg?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/SVG_logo.svg"
+							src="http://localhost:8090/ViewImage.svg?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/SVG_Logo.svg"
 							width="128" height="128" alt="SVG render failed" />
 						</a>
 					</div>
 				</td>
 				<td>
 					<div class="browserthumb">
-						<a href="http://localhost:8090/env/grafics/test/SVG_logo.svg"
+						<a href="http://localhost:8090/env/grafics/test/SVG_Logo.svg"
 							title="Render SVG sample in full size"> <img
-							src="http://localhost:8090/env/grafics/test/SVG_logo.svg"
+							src="http://localhost:8090/env/grafics/test/SVG_Logo.svg"
 							width="128" height="128" alt="SVG render failed" />
 						</a>
 					</div>
 				</td>
 			</tr>
 			<tr>
-				<td>ICO : <a
-					href="https://en.wikipedia.org/favicon.ico"
+				<td>ICO : <a href="https://en.wikipedia.org/favicon.ico"
 					title="sample source url">sample source</a></td>
 				<td>image/vnd.microsoft.icon, image/x-icon (not registered at
 					IANA)</td>
@@ -224,7 +228,8 @@ td {
 				<td>BMP : <a
 					href="http://homepages.cae.wisc.edu/~ece533/images/sails.bmp"
 					title="sample source url">sample source</a></td>
-				<td>image/bmp (not registered at IANA), image/x-bmp (not registered at IANA)</td>
+				<td>image/bmp (not registered at IANA), image/x-bmp (not
+					registered at IANA)</td>
 				<td>.bmp, .dib</td>
 				<td>Windows Bitmap</td>
 				<td>
