@@ -917,14 +917,22 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (document.getContentDomain() == ContentDomain.IMAGE) {
             // add image pixel size if known
             Iterator<ImageEntry> imgit = document.getImages().values().iterator();
-            if (imgit.hasNext()) {
+            List<Integer> heights = new ArrayList<>();
+            List<Integer> widths = new ArrayList<>();
+            List<Integer> pixels = new ArrayList<>();
+            while (imgit.hasNext()) {
                 ImageEntry img = imgit.next();
                 int imgpixels = (img.height() < 0 || img.width() < 0) ? -1 : img.height() * img.width();
-                if (imgpixels > 0) {
-                    if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, img.height());
-                    if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, img.width());
-                    if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
+                if (imgpixels > 0 && (allAttr || (contains(CollectionSchema.images_height_val) && contains(CollectionSchema.images_width_val) && contains(CollectionSchema.images_pixel_val)))) {
+                    heights.add(img.height());
+                    widths.add(img.width());
+                    pixels.add(imgpixels);
                 }
+            }
+            if (heights.size() > 0) {
+                add(doc, CollectionSchema.images_height_val, heights);
+                add(doc, CollectionSchema.images_width_val, widths);
+                add(doc, CollectionSchema.images_pixel_val, pixels);
             }
 
             if (allAttr || contains(CollectionSchema.images_text_t))  {

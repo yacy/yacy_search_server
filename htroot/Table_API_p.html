@@ -93,7 +93,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
            f.setAttribute("enctype", "multipart/form-data");
            f.setAttribute("accept-charset", "UTF-8");
            f.setAttribute("action", "#[servlet]#");
+           f.setAttribute("target", "_parent");
            f.setAttribute("id", "#[pk]#");
+           f.setAttribute("name", "#[pk]#");
            #{attr}#
            var e = document.createElement("input");
            e.setAttribute("type", "hidden");
@@ -103,7 +105,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
            #{/attr}#
            document.body.appendChild(f);
          </script>
-         <a href="#" title="clone" target="_parent" onclick="document.forms['#[pk]#'].submit(); return false;"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>
+         <a href="#" title="clone" onclick="document.forms['#[pk]#'].submit(); return false;"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>
 
           #(/isCrawlerStart)#</td>
           <td valign="top">#[comment]#</td>
