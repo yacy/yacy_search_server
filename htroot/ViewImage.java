@@ -131,7 +131,7 @@ public class ViewImage {
 			if (resourceb == null) {
 				if (urlString.endsWith(".ico")) {
 					// load default favicon dfltfvcn.ico
-					// Should not do this in context of search image result of 'ico' type ?
+					// Should not do this here : we can be displaying search image result of '.ico' type and do not want to display a default
 					if (defaulticonb == null)
 						try {
 							resourceb = FileUtils.read(new File(sb.getAppPath(), defaulticon));
