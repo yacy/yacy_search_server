@@ -23,8 +23,12 @@ package net.yacy.document;
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.MediaTracker;
-import java.awt.Toolkit;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.images.bmpParser;
 import net.yacy.document.parser.images.icoParser;
 
@@ -32,7 +36,7 @@ public class ImageParser {
 
     public static final Image parse(final String filename, final byte[] source) {
         final MediaTracker mediaTracker = new MediaTracker(new Container());
-        Image image;
+        Image image = null;
         if (((filename.endsWith(".ico")) || (filename.endsWith(".bmp"))) && (bmpParser.isBMP(source))) {
             // parse image with BMP parser
             image = bmpParser.parse(source).getImage();
@@ -44,27 +48,19 @@ public class ImageParser {
                 icoparser = new icoParser(source);
                 image = icoparser.getImage(0);
             } catch (final Throwable e) {
-                image = null;
+    			if (ConcurrentLog.isFine("IMAGEPARSER")) {
+    				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : could not parse image " + filename, e);
+    			}
             }
             if (image == null) return null;
         } else {
-            // awt can handle jpg, png and gif formats, try it
-            image = Toolkit.getDefaultToolkit().createImage(source);
-            /*
-            try {
-                ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
-                image = ImageIO.read(new ByteArrayInputStream(source));
-            } catch (final IOException e) {
-                Image i = Toolkit.getDefaultToolkit().createImage(source);
-                mediaTracker.addImage(i, 0);
-                try {mediaTracker.waitForID(0);} catch (final InterruptedException ee) {}
-
-                int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
-                int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
-                image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-                image.createGraphics().drawImage(i, 0, 0, width, height, null);
-            }
-             */
+    		try {
+    			image = ImageIO.read(new ByteArrayInputStream(source));
+    		} catch(IOException e) {
+    			if (ConcurrentLog.isFine("IMAGEPARSER")) {
+    				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : could not parse image " + filename, e);
+    			}
+    		}
         }
 
         final int handle = image.hashCode();
