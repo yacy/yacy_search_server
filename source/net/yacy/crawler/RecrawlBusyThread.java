@@ -35,6 +35,7 @@ import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -53,7 +54,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     private String currentQuery = CollectionSchema.fresh_date_dt.getSolrFieldName()+":[* TO NOW/DAY-1DAY]"; // current query
     private boolean includefailed = false; // flag if docs with httpstatus_i <> 200 shall be recrawled
     private int chunkstart = 0;
-    private int chunksize = 200;
+    private final int chunksize;
     final Switchboard sb;
     private final Set<DigestURL> urlstack; // buffer of urls to recrawl
     public long urlsfound = 0;
@@ -70,6 +71,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
         solrSortBy = null; // CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
+        this.chunksize = sb.getConfigInt(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 200);
     }
 
     /**
@@ -146,8 +148,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
      */
     @Override
     public boolean job() {
-        // other crawls are running, do nothing
-        if (sb.crawlQueues.coreCrawlJobSize() > 0) {
+        // more than chunksize crawls are running, do nothing
+        if (sb.crawlQueues.coreCrawlJobSize() > this.chunksize) {
             return false;
         }
 
