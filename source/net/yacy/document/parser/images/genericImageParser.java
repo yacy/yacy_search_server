@@ -65,28 +65,23 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.GpsDirectory;
 
+/**
+ * Parser for images, bmp and jpeg and all supported by the Java Image I/O API
+ * by default java ImageIO supports bmp, gif, jpg, jpeg, png, wbmp (tif if jai-imageio is in classpath/registered)
+ * http://download.java.net/media/jai-imageio/javadoc/1.1/overview-summary.html
+ */
 public class genericImageParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public genericImageParser() {
+        super("Generic Image Parser");
+
         SUPPORTED_EXTENSIONS.add("bmp");
-        // by default java ImageIO supports bmp, gif, jpg, jpeg, png, wbmp (tif if jai-imageio is in classpath/registered)
-        // http://download.java.net/media/jai-imageio/javadoc/1.1/overview-summary.html
         SUPPORTED_EXTENSIONS.add("jpe"); // not listed in ImageIO extension but sometimes uses for jpeg
         SUPPORTED_EXTENSIONS.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
         SUPPORTED_MIME_TYPES.add("image/bmp");
-        SUPPORTED_MIME_TYPES.add("image/jpg"); // this is in fact a 'wrong' mime type. We leave it here because that is a common error that occurs in the internet frequently        
+        SUPPORTED_MIME_TYPES.add("image/jpg"); // this is in fact a 'wrong' mime type. We leave it here because that is a common error that occurs in the internet frequently
         SUPPORTED_MIME_TYPES.addAll(Arrays.asList(ImageIO.getReaderMIMETypes()));
-    }
-
-    public genericImageParser() {
-        super("Generic Image Parser");
     }
 
     @Override
@@ -129,6 +124,13 @@ public class genericImageParser extends AbstractParser implements Parser {
             byte[] b;
             try {
                 b = FileUtils.read(source);
+                // check jpeg file signature (magic number FF D8 FF)
+                if (b.length < 3
+                        || (b[0] != (byte) 0xFF) // cast to signed byte (-1)
+                        || (b[1] != (byte) 0xD8) //cast to signed byte (-40)
+                        || (b[2] != (byte) 0xFF)) {
+                    throw new Parser.Failure("File has no jpeg signature", location);
+                }
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
@@ -226,7 +228,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         return SUPPORTED_EXTENSIONS;
     }
 
-    public static ImageInfo parseJavaImage(
+    private ImageInfo parseJavaImage(
                             final AnchorURL location,
                             final InputStream sourceStream) throws Parser.Failure {
         BufferedImage image = null;
@@ -241,7 +243,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         return parseJavaImage(location, image);
     }
 
-    public static ImageInfo parseJavaImage(
+    private ImageInfo parseJavaImage(
                             final AnchorURL location,
                             final BufferedImage image) {
         final ImageInfo ii = new ImageInfo(location);
@@ -278,7 +280,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         return ii;
     }
 
-    public static class ImageInfo {
+    private class ImageInfo {
         public AnchorURL location;
         public BufferedImage image;
         public StringBuilder info;

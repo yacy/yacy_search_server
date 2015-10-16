@@ -85,7 +85,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <td valign="top" align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
           <td valign="top">#[type]#
           #(isCrawlerStart)#::<br/><br/>
-          <a href="#[url]#" title="clone"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>::<br/><br/>
+          <a href="#[url]#" title="clone" target="_parent"><img src="env/grafics/doc.gif"><img src="env/grafics/right.gif"><img src="env/grafics/doc.gif"></a>::<br/><br/>
          
          <script>
            var f = document.createElement("form");
@@ -93,7 +93,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
            f.setAttribute("enctype", "multipart/form-data");
            f.setAttribute("accept-charset", "UTF-8");
            f.setAttribute("action", "#[servlet]#");
+           f.setAttribute("target", "_parent");
            f.setAttribute("id", "#[pk]#");
+           f.setAttribute("name", "#[pk]#");
            #{attr}#
            var e = document.createElement("input");
            e.setAttribute("type", "hidden");

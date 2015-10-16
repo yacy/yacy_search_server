@@ -57,7 +57,6 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
-import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
@@ -552,23 +551,16 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             href = CharacterCoding.html2unicode(href);
             AnchorURL url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
-                final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
-                if (genericImageParser.SUPPORTED_EXTENSIONS.contains(ext)) {
-                    // special handling of such urls: put them to the image urls
-                    final ImageEntry ie = new ImageEntry(url, recursiveParse(url, tag.content.getChars()), -1, -1, -1);
-                    this.images.add(ie);
-                } else {
-                    if (followDenied()) {
-                        String rel = tag.opts.getProperty("rel", EMPTY_STRING);
-                        if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
-                        tag.opts.put("rel", rel);
-                    }
-                    tag.opts.put("text", stripAllTags(tag.content.getChars())); // strip any inline html in tag text like  "<a ...> <span>test</span> </a>"
-                    tag.opts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
-                    url.setAll(tag.opts);
-                    recursiveParse(url, tag.content.getChars());
-                    this.anchors.add(url);
+                if (followDenied()) {
+                    String rel = tag.opts.getProperty("rel", EMPTY_STRING);
+                    if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
+                    tag.opts.put("rel", rel);
                 }
+                tag.opts.put("text", stripAllTags(tag.content.getChars())); // strip any inline html in tag text like  "<a ...> <span>test</span> </a>"
+                tag.opts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
+                url.setAll(tag.opts);
+                recursiveParse(url, tag.content.getChars());
+                this.anchors.add(url);
             }
             this.evaluationScores.match(Element.apath, href);
         }
