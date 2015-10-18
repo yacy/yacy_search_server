@@ -374,6 +374,7 @@ public class htmlParser extends AbstractParser implements Parser {
             Charset[] detectedcharsetcontainer = new Charset[]{null};
             ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null), maxLinks);
             documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
+            AbstractParser.log.info("parse snapshot "+locationSnapshot.toString() + " additional to " + location.toString());
         } catch (IOException | Failure ex) { }
         return documentSnapshot;
     }
