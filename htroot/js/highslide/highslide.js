@@ -793,6 +793,12 @@ imageCreate : function() {
     img.onload = function () {
     	if (hs.expanders[exp.key]) exp.contentLoaded(); 
 	};
+	/* Manage loading or rendering error */
+    img.onerror = function () {
+    	if (hs.expanders[exp.key]) {
+    		exp.contentLoaded(); 
+    	}
+	};
     img.className = 'highslide-image';
     img.style.visibility = 'hidden'; // prevent flickering in IE
     img.style.display = 'block';
@@ -800,6 +806,10 @@ imageCreate : function() {
 	img.style.maxWidth = 'none';
     img.style.zIndex = 3;
     img.title = hs.restoreTitle;
+    /* Ensure an alternative text and minimum dimensions in case of rendering failure */
+    img.alt = 'X';
+    img.style.minWidth = '3em';
+    img.style.minHeight = '3em';
     if (hs.safari) hs.container.appendChild(img);
     // uncomment this to flush img size:
     // if (hs.ie) img.src = null;
