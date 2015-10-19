@@ -40,7 +40,6 @@ public class ImageParser {
         if (((filename.endsWith(".ico")) || (filename.endsWith(".bmp"))) && (bmpParser.isBMP(source))) {
             // parse image with BMP parser
             image = bmpParser.parse(source).getImage();
-            if (image == null) return null;
         } else if ((filename.endsWith(".ico")) && (icoParser.isICO(source))) {
             // parse image with ICO parser
             icoParser icoparser;
@@ -52,7 +51,6 @@ public class ImageParser {
     				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : could not parse image " + filename, e);
     			}
             }
-            if (image == null) return null;
         } else {
     		try {
     			image = ImageIO.read(new ByteArrayInputStream(source));
@@ -61,6 +59,9 @@ public class ImageParser {
     				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : could not parse image " + filename, e);
     			}
     		}
+        }
+        if (image == null) {
+        	return null;
         }
 
         final int handle = image.hashCode();
