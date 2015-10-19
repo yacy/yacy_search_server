@@ -315,8 +315,12 @@ public class yacysearchitem {
                 final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
                 final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
-                //sb.loader.loadIfNotExistBackground(image.imageUrl, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
-                prop.putHTML("content_item_hrefCache", "ViewImage." + (!imageUrlExt.isEmpty() && "gif.png.svg".contains(imageUrlExt) ? imageUrlExt : "png") + "?maxwidth=128&maxheight=128&code="+license+"&isStatic=true&quadratic=&url=" + imageUrlstring);
+                /* Image format ouput for ViewImage servlet : default is png, except with gif and svg images */
+                final String viewImageExt = !imageUrlExt.isEmpty() && "gif.png.svg".contains(imageUrlExt) ? imageUrlExt : "png";
+                /* Thumb URL */
+                prop.putHTML("content_item_hrefCache", "ViewImage." + viewImageExt + "?maxwidth=128&maxheight=128&code="+license+"&isStatic=true&quadratic=&url=" + imageUrlstring);
+                /* Full size preview URL */
+                prop.putHTML("content_item_hrefFullPreview", "ViewImage." + viewImageExt + "?code="+license+"&isStatic=true&url=" + imageUrlstring);
                 prop.putHTML("content_item_href", imageUrlstring);
                 prop.putHTML("content_item_target", target);
                 prop.put("content_item_code", license);
