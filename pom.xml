@@ -36,7 +36,7 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>5.3.1</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.11.v20150529</jetty.version>
+        <jetty.version>9.2.13.v20150730</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -368,7 +368,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.9</version>
+            <version>1.10</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
@@ -395,6 +395,11 @@
             <artifactId>commons-logging</artifactId>
             <version>1.2</version>
         </dependency>
+		<dependency>
+    		<groupId>com.twelvemonkeys.imageio</groupId>
+    		<artifactId>imageio-tiff</artifactId>
+    		<version>3.1.2</version>
+		</dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>fontbox</artifactId>
@@ -413,22 +418,22 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5</version>
+            <version>4.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.1</version>
+            <version>4.4.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.5</version>
+            <version>4.5.1</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
-            <version>55.1</version>
+            <version>56.1</version>
         </dependency>
         <dependency>
             <groupId>org</groupId>

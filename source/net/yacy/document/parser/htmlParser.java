@@ -40,6 +40,7 @@ import java.util.Set;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
@@ -60,7 +61,7 @@ public class htmlParser extends AbstractParser implements Parser {
     private static final int maxLinks = 10000;
 
     public final static String[] htmlExtensions = new String[]{
-        "htm","html","phtml","shtml","shtm","stm","xhtml","phtml","phtm",
+        "htm","html","shtml","shtm","stm","xhtml","phtml","phtm",
         "tpl","php","php2","php3","php4","php5","cfm","asp","aspx","tex","txt","msg"
         }; 
     
@@ -99,11 +100,26 @@ public class htmlParser extends AbstractParser implements Parser {
             final ContentScraper scraper = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
             // parseToScraper also detects/corrects/sets charset from html content tag
             final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
+            Document documentSnapshot = null;
+            try {
+                // check for ajax crawling scheme (https://developers.google.com/webmasters/ajax-crawling/docs/specification)
+                // and create a sub-document for snapshot page (which will be merged by loader)
+                // TODO: as a crawl request removes anchor part from original url getRef() is never successful - considere other handling as removeRef() in crawler
+                if (location.getRef() != null && location.getRef().startsWith("!")) {
+                    documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, vocscraper, timezoneOffset);
+                } else { // head tag fragment only allowed on url without anchor hashfragment, but there are discussions that existence of hashfragment anchor takes preference (means allow both)
+                    if (scraper.getMetas().containsKey("fragment") && scraper.getMetas().get("fragment").equals("!")) {
+                        documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, vocscraper, timezoneOffset);
+                    }
+                }
+            } catch (Exception ex1) { // ignore any exception for any issue with snapshot
+                documentSnapshot = null;
+            }
 
-            return new Document[]{document};
+            return documentSnapshot == null ? new Document[]{document} : new Document[]{document, documentSnapshot};
         } catch (final IOException e) {
-			throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
-		}
+            throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
+        }
     }
 
     /**
@@ -320,6 +336,47 @@ public class htmlParser extends AbstractParser implements Parser {
         }
 
         return encoding;
+    }
+
+    /**
+     * Implementation of ajax crawling scheme to crawl the content of html snapshot page
+     * instead of the (empty) original ajax url
+     * see https://developers.google.com/webmasters/ajax-crawling/docs/specification
+     * Ajax crawling sheme is denoted by url with anchor param starting with "!" (1)
+     * or by a header tag <meta name="fragment" content="!"/>
+     *
+     * It is expected that the check for ajax crawling scheme happend already so we can directly
+     * try to get the snapshot page
+     *
+     * @param location original url (ajax url)
+     * @param mimeType
+     * @param documentCharset
+     * @param vocscraper
+     * @param timezoneOffset
+     * @return document as result of parsed snapshot or null if not exist or on any other issue with snapshot
+     */
+    private Document parseAlternativeSnapshot(final DigestURL location, final String mimeType, final String documentCharset,
+            final VocabularyScraper vocscraper, final int timezoneOffset) {
+        Document documentSnapshot = null;
+        try {
+            // construct url for case (1) with anchor
+            final DigestURL locationSnapshot;
+            if (location.getRef() != null && !location.getRef().isEmpty() && location.getRef().startsWith("!")) {
+                if (location.getSearchpart().isEmpty()) {
+                    // according to spec hashfragment to be escaped
+                    locationSnapshot = new DigestURL(location.toNormalform(true) + "?_escaped_fragment_=" + MultiProtocolURL.escape(location.getRef().substring(1)));
+                } else {
+                    locationSnapshot = new DigestURL(location.toNormalform(true) + "&_escaped_fragment_=" + MultiProtocolURL.escape(location.getRef().substring(1)).toString());
+                }
+            } else { // construct url for case (2) - no anchor but header tag fragment="!"
+                locationSnapshot = new DigestURL(location.toNormalform(true) + "?_escaped_fragment_=");
+            }
+            Charset[] detectedcharsetcontainer = new Charset[]{null};
+            ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null), maxLinks);
+            documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
+            AbstractParser.log.info("parse snapshot "+locationSnapshot.toString() + " additional to " + location.toString());
+        } catch (IOException | Failure ex) { }
+        return documentSnapshot;
     }
 
     public static void main(final String[] args) {
