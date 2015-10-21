@@ -260,6 +260,8 @@ tt, *.tt {
   width: 128px;
   height: 128px; /* 96px thumbnail + some lines of text */
   float: left;
+  /* Cut non square images not rendered by YaCy ViewImage */
+  overflow: hidden;
 }
 
 .hides .hoverShow {
