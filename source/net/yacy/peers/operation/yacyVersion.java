@@ -9,11 +9,9 @@ import net.yacy.search.Switchboard;
 
 public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVersion> {
 
-    public static final double YACY_SUPPORTS_PORT_FORWARDING = (float) 0.383;
     public static final double YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED = (float) 0.58204761;
     public static final double YACY_HANDLES_COLLECTION_INDEX = (float) 0.486;
     public static final double YACY_POVIDES_REMOTECRAWL_LISTS = (float) 0.550;
-    public static final double YACY_STANDARDREL_IS_PRO = (float) 0.557;
     private static yacyVersion thisVersion = null;
 
     /**

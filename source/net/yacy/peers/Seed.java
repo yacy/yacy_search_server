@@ -977,7 +977,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
              this.dna.put(Seed.SOLRAVAILABLE, "OK");
          else
              this.dna.put(Seed.SOLRAVAILABLE, "NA");
-         this.bitfield = null;
     }
 
     /**
