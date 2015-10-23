@@ -46,7 +46,7 @@ public class ViewImagePerfTest {
 
 	/** Default render max height (JPEG_example_JPG_RIP_100.jpg height / 10) */
 	private static final int DEFAULT_MAX_HEIGHT = 23;
-	
+
 	/** Default encoding format */
 	private static final String DEFAUL_EXT = "png";
 
@@ -88,7 +88,7 @@ public class ViewImagePerfTest {
 	}
 
 	/**
-	 * Build post parameters to used with ViewImage
+	 * Build post parameters to use with ViewImage
 	 * 
 	 * @param args
 	 *            main parameters : second and third items may respectively
@@ -128,9 +128,22 @@ public class ViewImagePerfTest {
 	}
 
 	/**
-	 * Test image (JPEG_example_JPG_RIP_100.jpg) is scaled, and cropped.
+	 * Test image is parsed and rendered again and again until 20 seconds
+	 * elapsed. Then measured statistics are displayed.
 	 * 
+	 * @param args
+	 *            may be empty or contain parameters to override defaults :
+	 *            <ul>
+	 *            <li>args[0] : input image file URL. Default :
+	 *            viewImageTest/test/JPEG_example_JPG_RIP_100.jpg</li>
+	 *            <li>args[1] : max width (in pixels) for rendered image.
+	 *            Default : default image width divided by 10.</li>
+	 *            <li>args[2] : max height (in pixels) for rendered image.
+	 *            Default : default image height divided by 10.</li>
+	 *            <li>args[3] : output format name. Default : "png".</li>
+	 *            </ul>
 	 * @throws IOException
+	 *             when a read/write error occured
 	 */
 	public static void main(String args[]) throws IOException {
 		File imgFile = getTestFile(args);
