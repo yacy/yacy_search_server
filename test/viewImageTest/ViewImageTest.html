@@ -27,10 +27,11 @@ td {
 </head>
 <body>
 	<h2>
-		Test page to check ViewImage rendering with different image formats
-		listed in <a
+		Test page to check ViewImage PNG rendering with different image
+		formats of <a
 			href="http://www.iana.org/assignments/media-types/media-types.xhtml#image"
-			title="IANA Media Types">IANA Media Types page</a>, plus BMP format.
+			title="IANA Media Types">IANA Registered Media Types</a>, plus BMP
+		format.
 	</h2>
 	<h3>Prerequisites</h3>
 	<ul>
@@ -45,6 +46,8 @@ td {
 				<th></th>
 				<th></th>
 				<th></th>
+				<th></th>
+				<th></th>
 				<th colspan="2">Render method</th>
 			</tr>
 			<tr>
@@ -52,6 +55,8 @@ td {
 				<th>Mime type</th>
 				<th>File name extensions</th>
 				<th>Long name/Description</th>
+				<th>Specifications</th>
+				<th>Test suite(s)</th>
 				<th>YaCy ViewImage</th>
 				<th>Direct browser</th>
 			</tr>
@@ -64,6 +69,8 @@ td {
 				<td>image/png</td>
 				<td>.png</td>
 				<td>Portable Network Graphics</td>
+				<td><a href="https://tools.ietf.org/html/rfc2083">RFC 2083</a></td>
+				<td><a href="http://www.schaik.com/pngsuite/pngsuite.html">Pngsuite</a></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -87,12 +94,46 @@ td {
 				</td>
 			</tr>
 			<tr>
+				<td>Animated PNG : <a
+					href="https://en.wikipedia.org/wiki/APNG#/media/File:Animated_PNG_example_bouncing_beach_ball.png"
+					title="sample source url">sample source</a></td>
+				<td>image/png</td>
+				<td>.png, .apng</td>
+				<td>Animated Portable Network Graphics</td>
+				<td><a href="https://wiki.mozilla.org/APNG_Specification">APNG
+						Specification</a></td>
+				<td><a href="https://philip.html5.org/tests/apng/tests.html">Pngsuite</a></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/Animated_PNG_example_bouncing_beach_ball.png"
+							title="ViewImage render PNG sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Animated_PNG_example_bouncing_beach_ball.png"
+							width="128" height="128" alt="ViewImage PNG render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/Animated_PNG_example_bouncing_beach_ball.png"
+							title="Browser render PNG sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/Animated_PNG_example_bouncing_beach_ball.png"
+							height="100%" style="margin-left: -17%"
+							alt="Browser PNG render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
 				<td>JPEG : <a
 					href="https://upload.wikimedia.org/wikipedia/commons/b/b4/JPEG_example_JPG_RIP_100.jpg"
 					title="sample source url">sample source</a></td>
 				<td>image/jpeg</td>
 				<td>.jpg, .jpeg, .jpe, .jif, .jfif, .jfi</td>
 				<td>Joint Photographic Experts Group</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -121,12 +162,14 @@ td {
 				<td>image/gif</td>
 				<td>.gif</td>
 				<td>Graphics Interchange Format</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
-							href="http://localhost:8090/ViewImage.gif?url=http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
 							title="Render GIF sample in full size"> <img
-							src="http://localhost:8090/ViewImage.gif?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
 							width="128" height="128" alt="GIF render failed" />
 						</a>
 					</div>
@@ -137,7 +180,7 @@ td {
 							href="http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
 							title="Render GIF sample in full size"> <img
 							src="http://localhost:8090/env/grafics/test/Sunflower_as_gif_websafe.gif"
-							width="100%" alt="GIF render failed" />
+							width="100%" style="margin-top: -8%" alt="GIF render failed" />
 						</a>
 					</div>
 				</td>
@@ -149,12 +192,14 @@ td {
 				<td>image/gif</td>
 				<td>.gif</td>
 				<td>Graphics Interchange Format</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
-							href="http://localhost:8090/ViewImage.gif?url=http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
 							title="Render animated GIF sample in full size"> <img
-							src="http://localhost:8090/ViewImage.gif?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Rotating_earth_%28large%29.gif"
 							width="128" height="128" alt="Animated GIF render failed" />
 						</a>
 					</div>
@@ -177,12 +222,14 @@ td {
 				<td>image/svg+xml</td>
 				<td>.svg, .svgz</td>
 				<td>Scalable Vector Graphics</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
-							href="http://localhost:8090/ViewImage.svg?url=http://localhost:8090/env/grafics/test/SVG_Logo.svg"
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/SVG_Logo.svg"
 							title="Render SVG sample in full size"> <img
-							src="http://localhost:8090/ViewImage.svg?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/SVG_Logo.svg"
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/SVG_Logo.svg"
 							width="128" height="128" alt="SVG render failed" />
 						</a>
 					</div>
@@ -204,6 +251,8 @@ td {
 					IANA)</td>
 				<td>.ico</td>
 				<td>Graphics file format for computer icons</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -232,6 +281,8 @@ td {
 					registered at IANA)</td>
 				<td>.bmp, .dib</td>
 				<td>Windows Bitmap</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -247,7 +298,7 @@ td {
 						<a href="http://localhost:8090/env/grafics/test/sails.bmp"
 							title="Render BMP sample in full size"> <img
 							src="http://localhost:8090/env/grafics/test/sails.bmp"
-							width="128" height="128" alt="BMP render failed" />
+							height="100%" style="margin-left: -16%" alt="BMP render failed" />
 						</a>
 					</div>
 				</td>
@@ -259,6 +310,8 @@ td {
 				<td>image/cgm</td>
 				<td>.cgm</td>
 				<td>Computer Graphics Metafile</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -286,6 +339,12 @@ td {
 				<td>image/tiff, image/tiff-fx</td>
 				<td>.tiff, .tif</td>
 				<td>Tagged Image File Format</td>
+				<td><a
+					href="http://partners.adobe.com/public/developer/tiff/index.html">TIFF
+						6.0 Specification</a></td>
+				<td><a href="http://www.remotesensing.org/libtiff/images.html">libtiff</a>,
+					<a
+					href="https://github.com/haraldk/TwelveMonkeys/tree/master/imageio/imageio-tiff/src/test/resources/tiff">TwelveMonkeys</a></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -301,7 +360,7 @@ td {
 						<a href="http://localhost:8090/env/grafics/test/marbles.tif"
 							title="Render TIFF sample in full size"> <img
 							src="http://localhost:8090/env/grafics/test/marbles.tif"
-							width="128" height="128" alt="TIFF render failed" />
+							height="100%" style="margin-left: -13%" alt="TIFF render failed" />
 						</a>
 					</div>
 				</td>
@@ -313,6 +372,8 @@ td {
 				<td>image/fits, application/fits</td>
 				<td>.fits, .fit, .fts</td>
 				<td>Flexible Image Transport System</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
 						<a
@@ -341,11 +402,14 @@ td {
 				<td>image/jp2, image/jpx, image/jpm, video/mj2</td>
 				<td>.jp2, .j2k, .jpf, .jpx, .jpm, .mj2</td>
 				<td>JPEG 2000</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">
-						<a href="http://localhost:8090/ViewImage.png?url=relax.jp2"
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/relax.jp2"
 							title="Render JPEG 2000 sample in full size"> <img
-							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=relax.jp2"
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/relax.jp2"
 							width="128" height="128" alt="JPEG 2000 render failed" />
 						</a>
 					</div>
@@ -366,6 +430,8 @@ td {
 				<td>.ktx</td>
 				<td>KTX (format for storing textures for OpenGL and OpenGL ES
 					applications)</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
@@ -378,6 +444,8 @@ td {
 				<td>image/naplps</td>
 				<td>not known</td>
 				<td>North American Presentation Layer Protocol Syntax</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
@@ -390,6 +458,8 @@ td {
 				<td>image/prs.btif</td>
 				<td>.btif, .btf</td>
 				<td>Bank check images and ASCII text data, used by Nations Bank</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
@@ -402,6 +472,8 @@ td {
 				<td>image/prs.pti</td>
 				<td>.pti</td>
 				<td>PTI</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
@@ -415,6 +487,8 @@ td {
 				<td>none</td>
 				<td>Used for printing "raw" image data in formats acceptable to
 					printers</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
@@ -427,6 +501,8 @@ td {
 				<td>image/t38</td>
 				<td>none</td>
 				<td>Only used for T.38 media stream in SDP</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
@@ -439,6 +515,8 @@ td {
 				<td>image/vnd.adobe.photoshop</td>
 				<td>.psd</td>
 				<td>Adobe Photoshop file</td>
+				<td></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
@@ -451,6 +529,451 @@ td {
 				<td>image/vnd.airzip.accelerator.azv</td>
 				<td>.azv</td>
 				<td>AirZip file</td>
+				<td></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>image/vnd.cns.inf2</td>
+				<td>none</td>
+				<td>TRILOGUE INfinity network services platform from Comverse
+					Network Systems, Ltd</td>
+				<td></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>image/vnd.dece.graphic</td>
+				<td>.uvi, .uvvi, .uvg, .uvvg</td>
+				<td>Digital Entertainment Content Ecosystem</td>
+				<td></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>DjVu : <a
+					href="https://upload.wikimedia.org/wikipedia/commons/9/9b/Specimens_of_calligraphy_and_natural_history_illustration.djvu"
+					title="sample source url">sample source</a></td>
+				<td>image/vnd-djvu</td>
+				<td>.djvu, .djv</td>
+				<td>DjVu</td>
+				<td><a href="http://www.djvuzone.org/djvu/sci/djvuspec">DjVu
+						Image Compression Format</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/Specimens_of_calligraphy_and_natural_history_illustration.djvu"
+							title="Render DjVu sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/Specimens_of_calligraphy_and_natural_history_illustration.djvu"
+							width="128" height="128" alt="DjVu render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/Specimens_of_calligraphy_and_natural_history_illustration.djvu"
+							title="Render DjVu sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/Specimens_of_calligraphy_and_natural_history_illustration.djvu"
+							width="128" height="128" alt="DjVu render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>DWG : <a href="http://libdwg.sourceforge.net/en/index.html"
+					title="sample source url">sample source</a></td>
+				<td>image/vnd.dwg</td>
+				<td>.dwg</td>
+				<td>DWG CAD drawings</td>
+				<td><a
+					href="http://opendesign.com/files/guestdownloads/OpenDesign_Specification_for_.dwg_files.pdf">ODA
+						Open Design Specification for .dwg files</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/ACAD_r2000_sample.dwg"
+							title="Render DWG sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/ACAD_r2000_sample.dwg"
+							width="128" height="128" alt="DWG render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/ACAD_r2000_sample.dwg"
+							title="Render DWG sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/ACAD_r2000_sample.dwg"
+							width="128" height="128" alt="DWG render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>DXF</td>
+				<td>image/vnd.dxf</td>
+				<td>.dxf</td>
+				<td>AutoCAD DXF (Drawing Interchange Format, or Drawing
+					Exchange Format)</td>
+				<td><a
+					href="http://images.autodesk.com/adsk/files/autocad_2012_pdf_dxf-reference_enu.pdf">DXF
+						Reference</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/ACAD_r2000_sample_original.dxf"
+							title="Render DXF sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/ACAD_r2000_sample_original.dxf"
+							width="128" height="128" alt="DXF render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a
+							href="http://localhost:8090/env/grafics/test/ACAD_r2000_sample_original.dxf"
+							title="Render DXF sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/ACAD_r2000_sample_original.dxf"
+							width="128" height="128" alt="DXF render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>SUB</td>
+				<td>image/vnd.dvb.subtitle</td>
+				<td>.sub</td>
+				<td>Digital Video Broadcasting Subtitles</td>
+				<td></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>FBS</td>
+				<td>image/vnd.fastbidsheet</td>
+				<td>.fbs</td>
+				<td>FastBid Sheet</td>
+				<td>Raster or vector images which represents engineering or
+					architectual drawings.</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>FPX</td>
+				<td>image/vnd.fpx</td>
+				<td>.fpx</td>
+				<td>FlashPix multi resolution bitmap image file</td>
+				<td>Extended from IVUE file format by Kodak. Specs are supposed
+					to be provided by <a href="http://www.kodak.com">kodak</a>
+				</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>FST</td>
+				<td>image/vnd.fst</td>
+				<td>.fst</td>
+				<td></td>
+				<td>No specification : used by Java applet viewer from FAST
+					Search and Transfer ASA</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>FST</td>
+				<td>image/vnd.fujixerox.edmics-mmr</td>
+				<td>.mmr</td>
+				<td></td>
+				<td>For Fuji Xerox 'EDMICS 2000' and 'DocuFile' applications
+					(G4 or Modified Modified READ compression used in fax?)</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>RLC</td>
+				<td>image/vnd.fujixerox.edmics-rlc</td>
+				<td>.rlc</td>
+				<td></td>
+				<td>For Fuji Xerox 'EDMICS 2000' and 'DocuFile' applications</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>PGB</td>
+				<td>image/vnd.globalgraphics.pgb</td>
+				<td>.pgb</td>
+				<td></td>
+				<td>Limited use by tools using file reading technology licensed
+					from Global Graphics such as Global Graphics Harlequin RIP</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>MIX</td>
+				<td>image/vnd.mix</td>
+				<td>.mix</td>
+				<td>Microsoft Digital Image Document</td>
+				<td>No specification : used by Microsoft PhotoDraw 2000 and
+					Microsoft Picture-It discontinued applications</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>MODI</td>
+				<td>image/vnd.ms-modi</td>
+				<td>.mdi</td>
+				<td>Microsoft Office Document Imaging</td>
+				<td>Used by Microsoft Office Document Imaging application</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>Radiance</td>
+				<td>image/vnd.radiance</td>
+				<td>.pic, .hdr, .rgbe, .xyze</td>
+				<td>Radiance file</td>
+				<td><a href="http://radsite.lbl.gov/radiance/refer">Reference</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>SPNG</td>
+				<td>image/vnd.sealed.png</td>
+				<td>.spng, .spn, .s1n</td>
+				<td>Sealed PNG</td>
+				<td>Some information at <a
+					href="http://docs.oracle.com/cd/E29542_01/doc.1111/e12278/idtoirmreference.htm#IDTUG240">Oracle
+						IRM Desktop</a>.
+				</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>SGIF</td>
+				<td>image/vnd.sealedmedia.softseal.gif</td>
+				<td>.sgif, .sgi, .s1g</td>
+				<td>Sealed GIF</td>
+				<td>Some information at <a
+					href="http://docs.oracle.com/cd/E29542_01/doc.1111/e12278/idtoirmreference.htm#IDTUG240">Oracle
+						IRM Desktop</a>.
+				</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>SJPEG</td>
+				<td>image/vnd.sealedmedia.softseal.jpeg</td>
+				<td>.sjpg, .sjp, .s1j</td>
+				<td>Sealed JPEG</td>
+				<td>Some information at <a
+					href="http://docs.oracle.com/cd/E29542_01/doc.1111/e12278/idtoirmreference.htm#IDTUG240">Oracle
+						IRM Desktop</a>.
+				</td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>SVF : <a href="http://www.svf.org/svflogo.svf"
+					title="sample source url">sample source</a></td>
+				<td>image/vnd-svf</td>
+				<td>.svf</td>
+				<td>Simple Vector Format</td>
+				<td><a href="http://www.svf.org/spec.html">Specification
+						for Simple Vector Format (SVF) v2.0</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/svflogo.svf"
+							title="ViewImage render SVF sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/svflogo.svf"
+							width="128" height="128" alt="ViewImage SVF render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a href="http://localhost:8090/env/grafics/test/svflogo.svf"
+							title="Browser render SVF sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/svflogo.svf"
+							height="100%" style="margin-left: -17%"
+							alt="Browser SVF render failed" />
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>TAP</td>
+				<td>image/vnd.tencent.tap</td>
+				<td>.tap</td>
+				<td>Tencent TAP</td>
+				<td><a
+					href="http://tu.qq.com/spec/image.vnd.tencent.tap-spec-en.txt">A
+						file format that could represent a static image or multiple static
+						images or an animation.</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>VTF: <a href="http://www.gaming-models.de/index.php/product/413"
+					title="sample source url">sample source</a></td>
+				<td>image/vnd.valve.source.texture</td>
+				<td>.vtf</td>
+				<td>Valve source texture</td>
+				<td><a href="https://developer.valvesoftware.com/wiki/VTF">Unofficial
+						specification</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">
+						<a
+							href="http://localhost:8090/ViewImage.png?url=http://localhost:8090/env/grafics/test/stone_wall.vtf"
+							title="ViewImage render VTF sample in full size"> <img
+							src="http://localhost:8090/ViewImage.png?maxwidth=128&maxheight=128&quadratic&url=http://localhost:8090/env/grafics/test/stone_wall.vtf"
+							width="128" height="128" alt="ViewImage VTF render failed" />
+						</a>
+					</div>
+				</td>
+				<td>
+					<div class="browserthumb">
+						<a href="http://localhost:8090/env/grafics/test/stone_wall.vtf"
+							title="Browser render VTF sample in full size"> <img
+							src="http://localhost:8090/env/grafics/test/stone_wall.vtf"
+							height="100%" style="margin-left: -17%"
+							alt="Browser VTF render failed"/>
+						</a>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>WBMP</td>
+				<td>image/vnd-wap-wbmp</td>
+				<td>.wbmp</td>
+				<td>Wireless Application Protocol Bitmap Format</td>
+				<td>Page 13 in <a
+					href="http://www.wapforum.org/what/technical/SPEC-WAESpec-19990524.pdf">WAP
+						WAE Specification</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>XIF</td>
+				<td>image/vnd.xiff</td>
+				<td>.xif</td>
+				<td>eXtended Image File Format</td>
+				<td>Should be provided by <a href="http://www.xerox.com">Xerox</a></td>
+				<td></td>
+				<td>
+					<div class="thumbcontainer">No Sample</div>
+				</td>
+				<td>
+					<div class="browserthumb">No Sample</div>
+				</td>
+			</tr>
+			<tr>
+				<td>PCX</td>
+				<td>image/vnd.zbrush.pcx</td>
+				<td>.pcx</td>
+				<td>ZSoft PCX File Format</td>
+				<td><a
+					href="http://web.archive.org/web/20100206055706/http://www.qzx.com/pc-gpe/pcx.txt">ZSoft
+						PCX File Format Technical Reference Manual</a></td>
+				<td></td>
 				<td>
 					<div class="thumbcontainer">No Sample</div>
 				</td>
