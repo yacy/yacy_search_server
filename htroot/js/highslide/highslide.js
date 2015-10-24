@@ -1090,6 +1090,20 @@ imageCreate : function() {
     img.onload = function () {
     	if (hs.expanders[exp.key]) exp.contentLoaded(); 
 	};
+	/* Patch start : manage loading or rendering error to avoid 'loading...' stay indefinitely */
+    img.onerror = function () {
+    	/* Set alternative text */
+        img.alt = 'X';
+        /* Set image size to ensure it can be clicked to close popup */
+    	if(exp.content) {
+    		exp.content.width = 30;
+    		exp.content.height = 30;
+    	}
+    	if (hs.expanders[exp.key]) {
+    		exp.contentLoaded(); 
+    	}
+	};
+	/* Patch end */
     if (hs.blockRightClick) img.oncontextmenu = function() { return false; };
     img.className = 'highslide-image';
     hs.setStyles(img, {

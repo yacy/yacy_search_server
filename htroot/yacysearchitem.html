@@ -40,14 +40,10 @@
   </div>
   ::
   #(item)#::<div class="thumbcontainer">
-    <a href="#[href]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
-      <!-- <img src="ViewImage.png?maxwidth=128&amp;maxheight=128&amp;code=#[code]#&amp;isStatic=true" alt="#[name]#" /> -->
-      <img src="#[hrefCache]#" width="128" height="128" alt="#[name]#" />
+    <a href="#[hrefFullPreview]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
+      <img src="#[hrefCache]#" width="#[width]#" height="#[height]#" style="#[style]#" alt="#[name]#" />
     </a>
     <div class="highslide-caption"><a href="#[href]#" target="#[target]#">#[name]#</a><br /><a href="#[source]#" target="#[target]#">#[sourcedom]#</a></div>
-    <!--
-    <div class="TableCellDark"><a href="#[href]#">#[name]#</a><br />#[attr]#</div>
-    -->
   </div>#(/item)#
   ::
   #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#

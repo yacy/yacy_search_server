@@ -106,7 +106,6 @@ public class ViewImage {
 			return null;
 		}
 
-
 		// get the image as stream
 		if (MemoryControl.shortStatus()) {
 			iconcache.clear();
@@ -131,7 +130,9 @@ public class ViewImage {
 			if (resourceb == null) {
 				if (urlString.endsWith(".ico")) {
 					// load default favicon dfltfvcn.ico
-					// Should not do this here : we can be displaying search image result of '.ico' type and do not want to display a default
+					// Should not do this here : we can be displaying search
+					// image result of '.ico' type and do not want to display a
+					// default
 					if (defaulticonb == null)
 						try {
 							resourceb = FileUtils.read(new File(sb.getAppPath(), defaulticon));
@@ -148,50 +149,70 @@ public class ViewImage {
 				}
 			}
 
-			// gif images are not loaded because of an animated gif bug within
-			// jvm which sends java into an endless loop with high CPU
-			if (ext.equals("gif") && "gif".equals(MultiProtocolURL.getFileExtension(url.getFileName()))) {
-				return new ByteArrayInputStream(resourceb);
-			} else if (ext.equals("svg") && "svg".equals(MultiProtocolURL.getFileExtension(url.getFileName()))) {
-				// svg images not supported by awt, but by most browser, deliver
-				// just content (without crop/scale)
+			String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
+			if (ext != null && ext.equalsIgnoreCase(urlExt) && isBrowserRendered(urlExt)) {
 				return new ByteArrayInputStream(resourceb);
 			}
 
 			// read image
-			encodedImage = parseAndScale(post, auth,  urlString, ext, okToCache, resourceb);
+			encodedImage = parseAndScale(post, auth, urlString, ext, okToCache, resourceb);
 		}
 
 		return encodedImage;
 	}
 	
 	/**
-	 * Process resourceb byte array to try to produce an Image instance eventually scaled and cropped depending on post parameters 
-	 * @param post request post parameters. Must not be null. 
-	 * @param auth true when access rigths are OK.
-	 * @param urlString image source URL. Must not be null.
-	 * @param ext image file extension. May be null.
-	 * @param okToCache true when image can be cached
-	 * @param resourceb byte array. Must not be null.
+	 * @param formatName
+	 *            informal file format name. For example : "png".
+	 * @return true when image format is rendered by browser and not by
+	 *         ViewImage internals
+	 */
+	public static boolean isBrowserRendered(String formatName) {
+		/*
+		 * gif images are not loaded because of an animated gif bug within jvm
+		 * which sends java into an endless loop with high CPU
+		 */
+		/*
+		 * svg images not supported by jdk, but by most browser, deliver just
+		 * content (without crop/scale)
+		 */
+		return ("gif".equalsIgnoreCase(formatName) || "svg".equalsIgnoreCase(formatName));
+	}
+
+	/**
+	 * Process resourceb byte array to try to produce an Image instance
+	 * eventually scaled and cropped depending on post parameters
+	 * 
+	 * @param post
+	 *            request post parameters. Must not be null.
+	 * @param auth
+	 *            true when access rigths are OK.
+	 * @param urlString
+	 *            image source URL. Must not be null.
+	 * @param ext
+	 *            image file extension. May be null.
+	 * @param okToCache
+	 *            true when image can be cached
+	 * @param resourceb
+	 *            byte array. Must not be null.
 	 * @return an Image instance when parsing is OK, or null.
 	 */
-	protected static EncodedImage parseAndScale(serverObjects post, boolean auth, String urlString, String ext, boolean okToCache, byte[] resourceb) {
+	protected static EncodedImage parseAndScale(serverObjects post, boolean auth, String urlString, String ext,
+			boolean okToCache, byte[] resourceb) {
 		EncodedImage encodedImage = null;
-		
+
 		Image image = ImageParser.parse(urlString, resourceb);
 
 		if (image != null) {
-			int width = post.getInt("width", 0);
-			int height = post.getInt("height", 0);
 			int maxwidth = post.getInt("maxwidth", 0);
 			int maxheight = post.getInt("maxheight", 0);
 			final boolean quadratic = post.containsKey("quadratic");
 			boolean isStatic = post.getBoolean("isStatic");
-			if (!auth || (width != 0 && height != 0) || maxwidth != 0 || maxheight != 0) {
+			if (!auth || maxwidth != 0 || maxheight != 0) {
 
 				// find original size
-				final int h = image.getHeight(null);
-				final int w = image.getWidth(null);
+				int h = image.getHeight(null);
+				int w = image.getWidth(null);
 
 				// in case of not-authorized access shrink the image to
 				// prevent
@@ -203,9 +224,11 @@ public class ViewImage {
 				// quadratic shape
 				if (quadratic && w != h) {
 					image = makeSquare(image, h, w);
+					h = image.getHeight(null);
+					w = image.getWidth(null);
 				}
 
-				Dimension finalDimensions = calculateDimensions(w, h, width, height, maxDimensions);
+				Dimension finalDimensions = calculateDimensions(w, h, maxDimensions);
 
 				if (w != finalDimensions.width && h != finalDimensions.height) {
 					image = scale(finalDimensions.width, finalDimensions.height, image);
@@ -230,10 +253,9 @@ public class ViewImage {
 	 * 
 	 * @return dimensions to render image
 	 */
-	protected static Dimension calculateDimensions(final int originWidth, final int originHeight, final int targetWidth,
-			final int targetHeight, final Dimension max) {
-		int resultWidth = targetWidth;
-		int resultHeight = targetHeight;
+	protected static Dimension calculateDimensions(final int originWidth, final int originHeight, final Dimension max) {
+		int resultWidth;
+		int resultHeight;
 		if (max.width < originWidth || max.height < originHeight) {
 			// scale image
 			final double hs = (originWidth <= max.width) ? 1.0 : ((double) max.width) / ((double) originWidth);
@@ -321,7 +343,7 @@ public class ViewImage {
 		}
 		return image;
 	}
-
+	
 	/**
 	 * Crop image to make a square
 	 * 
@@ -335,13 +357,15 @@ public class ViewImage {
 		if (w > h) {
 			final BufferedImage dst = new BufferedImage(h, h, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g = dst.createGraphics();
-			g.drawImage(image, 0, 0, h - 1, h - 1, (w - h) / 2, 0, h + (w - h) / 2, h - 1, null);
+			final int offset = (w - h) / 2;
+			g.drawImage(image, 0, 0, h - 1, h - 1, offset, 0, h + offset, h - 1, null);
 			g.dispose();
 			image = dst;
 		} else {
 			final BufferedImage dst = new BufferedImage(w, w, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g = dst.createGraphics();
-			g.drawImage(image, 0, 0, w - 1, w - 1, 0, (h - w) / 2, w - 1, w + (h - w) / 2, null);
+			final int offset = (h - w) / 2;
+			g.drawImage(image, 0, 0, w - 1, w - 1, 0, offset, w - 1, w + offset, null);
 			g.dispose();
 			image = dst;
 		}

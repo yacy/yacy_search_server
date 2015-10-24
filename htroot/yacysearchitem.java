@@ -73,6 +73,10 @@ public class yacysearchitem {
     private static final int SHORTEN_SUFFIX_LENGTH = SHORTEN_SUFFIX.length();
     private static final int MAX_NAME_LENGTH = 60;
     private static final int MAX_URL_LENGTH = 120;
+    /** Default image item width in pixels */
+    private static final int DEFAULT_IMG_WIDTH = 128;
+    /** Default image item height in pixels */
+    private static final int DEFAULT_IMG_HEIGHT = DEFAULT_IMG_WIDTH;
 
     //private static boolean col = true;
 
@@ -81,7 +85,7 @@ public class yacysearchitem {
         final serverObjects prop = new serverObjects();
 
         final String eventID = post.get("eventID", "");
-        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final boolean authenticated = sb.verifyAuthentication(header);
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
 
@@ -306,35 +310,7 @@ public class yacysearchitem {
 
         if (theSearch.query.contentdom == Classification.ContentDomain.IMAGE) {
             // image search; shows thumbnails
-
-            prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
-            try {
-                SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout);
-                final String imageUrlstring = image.imageUrl.toNormalform(true);
-                final String imageUrlExt = MultiProtocolURL.getFileExtension(image.imageUrl.getFileName());
-                final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
-
-                final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
-                //sb.loader.loadIfNotExistBackground(image.imageUrl, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
-                prop.putHTML("content_item_hrefCache", "ViewImage." + (!imageUrlExt.isEmpty() && "gif.png.svg".contains(imageUrlExt) ? imageUrlExt : "png") + "?maxwidth=128&maxheight=128&code="+license+"&isStatic=true&quadratic=&url=" + imageUrlstring);
-                prop.putHTML("content_item_href", imageUrlstring);
-                prop.putHTML("content_item_target", target);
-                prop.put("content_item_code", license);
-                prop.putHTML("content_item_name", shorten(image.imagetext, MAX_NAME_LENGTH));
-                prop.put("content_item_mimetype", image.mimetype);
-                prop.put("content_item_fileSize", 0);
-                prop.put("content_item_width", image.width);
-                prop.put("content_item_height", image.height);
-                prop.put("content_item_attr", ""/*(ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"*/); // attributes, here: original size of image
-                prop.put("content_item_urlhash", ASCII.String(image.imageUrl.hash()));
-                prop.put("content_item_source", image.sourceUrl.toNormalform(true));
-                prop.putXML("content_item_source-xml", image.sourceUrl.toNormalform(true));
-                prop.put("content_item_sourcedom", image.sourceUrl.getHost());
-                prop.put("content_item_nl", (item == theSearch.query.offset) ? 0 : 1);
-                prop.put("content_item", 1);
-            } catch (MalformedURLException e) {
-                prop.put("content_item", "0");
-            }
+            processImage(sb, prop, item, theSearch, target_special_pattern, timeout);
             theSearch.query.transmitcount = item + 1;
             return prop;
         }
@@ -366,6 +342,79 @@ public class yacysearchitem {
 
         return prop;
     }
+    
+
+    /**
+     * Process search of image type and feed prop object. All parameters must not be null.
+     * @param sb Switchboard instance
+     * @param prop result
+     * @param item item index.
+     * @param theSearch search event
+     * @param target_special_pattern
+     * @param timeout result getting timeOut
+     */
+	private static void processImage(final Switchboard sb, final serverObjects prop, final int item,
+			final SearchEvent theSearch, final String target_special_pattern, long timeout) {
+		prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
+		try {
+		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout);
+		    final String imageUrlstring = image.imageUrl.toNormalform(true);
+		    final String imageUrlExt = MultiProtocolURL.getFileExtension(image.imageUrl.getFileName());
+		    final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+
+		    final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
+		    /* Image format ouput for ViewImage servlet : default is png, except with gif and svg images */
+		    final String viewImageExt = !imageUrlExt.isEmpty() && ViewImage.isBrowserRendered(imageUrlExt) ? imageUrlExt : "png";
+		    /* Thumb URL */
+		    prop.putHTML("content_item_hrefCache", "ViewImage." + viewImageExt + "?maxwidth=" + DEFAULT_IMG_WIDTH + "&maxheight=" + DEFAULT_IMG_HEIGHT + "&code="+license+"&isStatic=true&quadratic=&url=" + imageUrlstring);
+		    /* Full size preview URL */
+		    prop.putHTML("content_item_hrefFullPreview", "ViewImage." + viewImageExt + "?code="+license+"&isStatic=true&url=" + imageUrlstring);
+		    prop.putHTML("content_item_href", imageUrlstring);
+		    prop.putHTML("content_item_target", target);
+		    prop.put("content_item_code", license);
+		    prop.putHTML("content_item_name", shorten(image.imagetext, MAX_NAME_LENGTH));
+		    prop.put("content_item_mimetype", image.mimetype);
+		    prop.put("content_item_fileSize", 0);
+		    
+		    String itemWidth = DEFAULT_IMG_WIDTH + "px", itemHeight = DEFAULT_IMG_HEIGHT + "px", itemStyle="";
+		    /* When image content is rendered by browser :
+		     * - set smaller dimension to 100% in order to crop image on other dimension with CSS style 'overflow:hidden' on image container 
+		     * - set negative margin top behave like ViewImage which sets an offset when cutting to square */
+			if (ViewImage.isBrowserRendered(imageUrlExt)) {
+				if (image.width > image.height) {
+					/* Landscape orientation */
+					itemWidth = "";
+					itemHeight = "100%";
+					if(image.height > 0) {
+						double scale = ((double)DEFAULT_IMG_HEIGHT) / ((double)image.height);
+						int margin =  (int)((image.height - image.width) * (scale / 2.0));
+						itemStyle = "margin-left: " + margin + "px;";
+					}
+				} else {
+					/* Portrait orientation, or square or unknown dimensions (both equals zero) */
+					itemWidth = "100%";
+					itemHeight = "";
+					if(image.height > image.width && image.width > 0) {
+						double scale = ((double)DEFAULT_IMG_WIDTH) / ((double)image.width);
+						int margin =  (int)((image.width - image.height) * (scale / 2.0));
+						itemStyle = "margin-top: " + margin + "px;";
+					}
+				}
+			}
+		    prop.put("content_item_width", itemWidth);
+		    prop.put("content_item_height", itemHeight);
+		    prop.put("content_item_style", itemStyle);
+		    prop.put("content_item_attr", ""/*(ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"*/); // attributes, here: original size of image
+		    prop.put("content_item_urlhash", ASCII.String(image.imageUrl.hash()));
+		    prop.put("content_item_source", image.sourceUrl.toNormalform(true));
+		    prop.putXML("content_item_source-xml", image.sourceUrl.toNormalform(true));
+		    prop.put("content_item_sourcedom", image.sourceUrl.getHost());
+		    prop.put("content_item_nl", (item == theSearch.query.offset) ? 0 : 1);
+		    prop.put("content_item", 1);
+		} catch (MalformedURLException e) {
+		    prop.put("content_item", "0");
+		}
+	}
 
     private static String shorten(final String s, final int length) {
         final String ret;
