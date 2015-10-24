@@ -154,9 +154,9 @@ public class bmpParser {
                     else if (bitcount == 8) parseBMP8(s, offset, width, height, colortable);
                     else if (bitcount == 24) parseBMP24(s, offset, width, height);
                     else if (bitcount == 32) parseBMP32(s, offset, width, height);
-                    else System.out.println("unsupported BMP format: biCompression = " + compression + ", biBitCount = " + bitcount);
+                    else ConcurrentLog.fine("IMAGEPARSER", "unsupported BMP format: biCompression = " + compression + ", biBitCount = " + bitcount);
                 } else {
-                    System.out.println("unsupported BMP format: biCompression = " + compression + ", biBitCount = " + bitcount);
+                    ConcurrentLog.fine("IMAGEPARSER", "unsupported BMP format: biCompression = " + compression + ", biBitCount = " + bitcount);
                 }
             }
         }
