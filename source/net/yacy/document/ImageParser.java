@@ -78,6 +78,9 @@ public class ImageParser {
                 return null;
             }
         }
+        if (image == null) {
+        	return null;
+        }
 
         final int handle = image.hashCode();
         mediaTracker.addImage(image, handle);
