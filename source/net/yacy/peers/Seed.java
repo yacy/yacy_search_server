@@ -992,8 +992,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return !my;
     }
 
+    /**
+     * set unused flags to zero
+     * currently last used flag is FLAG_SSL_AVAILABLE=4 (2015-10-24)
+     */
     public final void setUnusedFlags() {
-        for ( int i = 4; i < 20; i++ ) {
+        for ( int i = 5; i < 20; i++ ) {
             setFlag(i, false);
         }
     }

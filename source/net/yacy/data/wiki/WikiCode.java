@@ -1061,7 +1061,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                         if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
                         else if (d.length == 2) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]);}
                         else if (d.length == 3) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
-                        if (d[d.length-1].toUpperCase().equals("w")) {lon = -lon; lonm = -lonm;}
+                        if (d[d.length-1].toUpperCase().equals("W")) {lon = -lon; lonm = -lonm;}
                     }
                 }
                 if (lon != 0.0d && lat != 0.0d) {

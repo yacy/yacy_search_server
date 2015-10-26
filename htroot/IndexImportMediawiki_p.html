@@ -2,8 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>YaCy '#[clientname]#': MediaWiki Dump Import</title>
-    #%env/templates/metas.template%#
-    #(import)#::<meta http-equiv="REFRESH" content="10" />#(/import)#
+    #%env/templates/metas.template%#    
+    #(import)#::<meta http-equiv="REFRESH" content="10;url=IndexImportMediawiki_p.html" />
+                <!-- the url= removes http get parameters on refresh, preventing restart of import -->
+    #(/import)#
   </head>
   <body id="IndexImportMediawiki">
     #%env/templates/header.template%#

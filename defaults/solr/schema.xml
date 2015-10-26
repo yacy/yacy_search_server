@@ -57,7 +57,7 @@
     <fields>
        <field name="_version_" type="long" indexed="true" stored="true" docValues="true" /> <!-- a mandatory solr field used for operation in SolrCloud -->
        <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/> <!-- this is default in solrconfix.xml; not used but you get errors when not defining it -->
-       
+
         <!-- primary key of document, the URL hash **mandatory field** -->
         <field name="id" type="string" indexed="true" stored="true" docValues="true"/>
 
@@ -73,9 +73,6 @@
         <!-- content of title tag -->
         <field name="title" type="text_general" indexed="true" stored="true" multiValued="true"/>
 
-        <!-- point in degrees of latitude,longitude as declared in WSG84 -->
-        <field name="coordinate_p" type="location" indexed="true" stored="true"/>
-
         <!-- content of author-tag -->
         <field name="author" type="text_general" indexed="true" stored="true"/>
 
@@ -83,8 +80,8 @@
         <field name="keywords" type="text_general" indexed="true" stored="true"/>
         
         <!-- all visible text -->
-		<field name="text_t" type="text_general" indexed="true" stored="true"/>
-	
+	<field name="text_t" type="text_general" indexed="true" stored="true"/>
+
 	<dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
 	<dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
 	<dynamicField name="*_b"  type="boolean" indexed="true" stored="true"/>
