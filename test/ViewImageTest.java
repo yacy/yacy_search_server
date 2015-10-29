@@ -138,13 +138,13 @@ public class ViewImageTest {
 	/**
 	 * 
 	 * @param args
-	 *            main parameters : fourth item may contain extension
+	 *            main parameters : second item may contain extension
 	 * @return extension to use for encoding
 	 */
 	private static String getEncodingExt(String args[]) {
 		String ext = DEFAULT_OUT_EXT;
-		if (args != null && args.length > 3) {
-			ext = args[3];
+		if (args != null && args.length > 1) {
+			ext = args[1];
 		}
 		return ext;
 	}
