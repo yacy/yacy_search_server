@@ -9,7 +9,6 @@
       "title": "Search for #[rss_query]#",
       "link": "#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#"
     },
-    "totalResults": "#[num-results_totalcount]#",
     "startIndex": "#[num-results_offset]#",
     "itemsPerPage": "#[num-results_itemsPerPage]#",
     "searchTerms": "#[rss_queryenc]#",
