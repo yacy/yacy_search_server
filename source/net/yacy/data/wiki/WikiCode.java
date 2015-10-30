@@ -1024,6 +1024,11 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     }
 
 
+    /**
+     * Process line with geo coordinate metadata
+     * @param line of wiki text
+     * @return line with geo coordinate formatted to be recogizeable by parser
+     */
     private static String processMetadata(String line) {
         int p, q, s = 0;
         while ((p = line.indexOf(WIKI_OPEN_METADATA, s)) >= 0 && (q = line.indexOf(WIKI_CLOSE_METADATA, p + 1)) >= 0) {
@@ -1041,7 +1046,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 // {{Coordinate |NS 45/37/43.0/N |EW. 07/58/41.0/E |type=landmark |region=IT-BI}} ## means: degree/minute/second
                 // {{Coordinate |NS 51.48994 |EW. 7.33249 |type=landmark |region=DE-NW}}
                 final String b[] = a.split("\\|");
-                float lon = 0.0f, lat = 0.0f;
+                float lon = Float.NaN, lat = Float.NaN;
                 float lonm = 0.0f, latm = 0.0f;
                 String lono = "E", lato = "N";
                 String name = "";
@@ -1053,18 +1058,18 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                         final String d[] = c.substring(3).split("/");
                         if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lato = "S"; l = -l;} lat = (float) Math.floor(l); latm = 60.0f * (l - lat);}
                         else if (d.length == 2) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]);}
-                        else if (d.length == 3) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
-                        if (d[d.length-1].toUpperCase().equals("S")) {}
+                        else if (d.length >= 3) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
+                        if (d[d.length-1].toUpperCase().equals("S")) {lato = "S";}
                     }
                     if (c.toUpperCase().startsWith("EW=")) {
                         final String d[] = c.substring(3).split("/");
                         if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
                         else if (d.length == 2) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]);}
-                        else if (d.length == 3) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
-                        if (d[d.length-1].toUpperCase().equals("W")) {lon = -lon; lonm = -lonm;}
+                        else if (d.length >= 3) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
+                        if (d[d.length-1].toUpperCase().equals("W")) {lato = "W";}
                     }
                 }
-                if (lon != 0.0d && lat != 0.0d) {
+                if (!Float.isNaN(lon) && !Float.isNaN(lat)) {
                     // replace this with a format that the html parser can understand
                     line = line.substring(0, p) + (name.length() > 0 ? (" " + name) : "") + " <nobr> " + lato + " " + lat + "\u00B0 " + latm + "'</nobr><nobr>" + lono + " " + lon + "\u00B0 " + lonm + "'</nobr> " + line.substring(q + WIKI_CLOSE_METADATA.length());
                     s = p;

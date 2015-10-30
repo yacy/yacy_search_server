@@ -52,7 +52,7 @@ all these locations into one search result.
 
 
 == DEPENDENCIES? WHAT OTHER SOFTWARE DO I NEED? ==
-You need java 1.6 or later to run YaCy, nothing else.
+You need java 1.7 or later to run YaCy, nothing else.
 Please download it from http://www.java.com
 
 YaCy also runs on IcedTea6.
