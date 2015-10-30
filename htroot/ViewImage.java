@@ -328,7 +328,7 @@ public class ViewImage {
 		}
 
 		// make a BufferedImage out of that
-		final BufferedImage i = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		final BufferedImage i = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		try {
 			i.createGraphics().drawImage(scaled, 0, 0, width, height, null);
 			image = i;
@@ -355,14 +355,14 @@ public class ViewImage {
 	 */
 	protected static Image makeSquare(Image image, final int h, final int w) {
 		if (w > h) {
-			final BufferedImage dst = new BufferedImage(h, h, BufferedImage.TYPE_INT_RGB);
+			final BufferedImage dst = new BufferedImage(h, h, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = dst.createGraphics();
 			final int offset = (w - h) / 2;
 			g.drawImage(image, 0, 0, h - 1, h - 1, offset, 0, h + offset, h - 1, null);
 			g.dispose();
 			image = dst;
 		} else {
-			final BufferedImage dst = new BufferedImage(w, w, BufferedImage.TYPE_INT_RGB);
+			final BufferedImage dst = new BufferedImage(w, w, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = dst.createGraphics();
 			final int offset = (h - w) / 2;
 			g.drawImage(image, 0, 0, w - 1, w - 1, 0, offset, w - 1, w + offset, null);

@@ -78,7 +78,7 @@ public class EncodedImage {
         if (height < 0) {
             height = 96; // bad hack
         }
-        final BufferedImage sourceImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        final BufferedImage sourceImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         sourceImage.createGraphics().drawImage(i, 0, 0, width, height, null);
         this.image = RasterPlotter.exportImage(sourceImage, targetExt);
     }

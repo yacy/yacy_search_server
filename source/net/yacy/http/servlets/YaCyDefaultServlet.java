@@ -866,7 +866,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     if (height < 0) {
                         height = 96; // bad hack
                     }
-                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                     bi.createGraphics().drawImage(i, 0, 0, width, height, null);
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
