@@ -35,7 +35,8 @@ public class EncodedImage {
     private boolean isStatic;
 
     /**
-     * set an encoded image; prefer this over methods with Image-source objects because png generation is faster when done from RasterPlotter sources
+     * set an encoded image; prefer this over methods with Image-source objects because png generation is faster when done from RasterPlotter sources. 
+     * Image ByteBuffer will be empty when encoding format is not supported.
      * @param sourceImage the image
      * @param targetExt the target extension of the image when converted into a file
      * @param isStatic shall be true if the image will never change, false if not
@@ -47,7 +48,7 @@ public class EncodedImage {
     }
     
     /**
-     * set an encoded image from a buffered image
+     * set an encoded image from a buffered image. Image ByteBuffer will be empty when encoding format is not supported.
      * @param sourceImage the image
      * @param targetExt the target extension of the image when converted into a file
      * @param isStatic shall be true if the image will never change, false if not
@@ -60,7 +61,7 @@ public class EncodedImage {
     }
     
     /**
-     * set an encoded image from a buffered image
+     * set an encoded image from a buffered image. Image ByteBuffer will be empty when encoding format is not supported.
      * @param sourceImage the image
      * @param targetExt the target extension of the image when converted into a file
      * @param isStatic shall be true if the image will never change, false if not
@@ -101,7 +102,7 @@ public class EncodedImage {
     }
     
     /**
-     * get the encoded image
+     * get the encoded image data (empty when encoding format is not supported)
      * @return the bytes of the image encoded into the target extension format
      */
     public ByteBuffer getImage() {
