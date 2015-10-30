@@ -242,10 +242,15 @@ public class ViewImage {
 					iconcache.put(urlString, image);
 				}
 			}
+			/* An error can still occur when transcoding from buffered image to target ext : in that case return null */
 			encodedImage = new EncodedImage(image, ext, isStatic);
+			if(encodedImage.getImage().length() == 0) {
+				encodedImage = null;
+			}
 		}
 		return encodedImage;
 	}
+	
 
 	/**
 	 * Calculate image dimensions from image original dimensions, max
