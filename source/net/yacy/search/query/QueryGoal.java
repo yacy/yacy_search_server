@@ -356,7 +356,7 @@ public class QueryGoal {
     public StringBuilder collectionTextQuery() {
 
         // parse special requests
-        if (isCatchall()) return new StringBuilder("*:*");
+        if (isCatchall()) return new StringBuilder(AbstractSolrConnector.CATCHALL_QUERY);
         
         // add goal query
         return getGoalQuery();
@@ -389,7 +389,7 @@ public class QueryGoal {
         final StringBuilder q = new StringBuilder(80);
         
         // parse special requests
-        if (isCatchall()) return new StringBuilder("*:*");
+        if (isCatchall()) return new StringBuilder(AbstractSolrConnector.CATCHALL_QUERY);
 
         // add goal query
         StringBuilder w = getGoalQuery();
