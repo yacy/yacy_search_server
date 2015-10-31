@@ -99,7 +99,7 @@ public class SettingsAck_p {
             /*
              * display port info
              */
-            prop.put("info_port", env.getLocalPort("port", 8090));
+            prop.put("info_port", env.getLocalPort());
             prop.put("info_restart", "0");
      
             // read and process data

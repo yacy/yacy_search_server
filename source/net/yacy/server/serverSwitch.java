@@ -222,16 +222,14 @@ public class serverSwitch {
 	 * Wrapper for {@link #getConfigInt(String, int)} to have a more consistent
 	 * API.
 	 * 
-	 * @param key
-	 *            original key from config (for example "port" or "port.ssl")
-	 * @param dflt
-	 *            default value which will be used if no value is found
+	 * Default value 8090 will be used if no value is found
+         * 
 	 * @return the local port of this system
 	 * @see #getPublicPort(String, int)
 	 */
-	public int getLocalPort(final String key, final int dflt) {
+	public int getLocalPort() {
 
-		return getConfigInt(key, dflt);
+		return getConfigInt("port", 8090);
 	}
 
 	// a logger for this switchboard
