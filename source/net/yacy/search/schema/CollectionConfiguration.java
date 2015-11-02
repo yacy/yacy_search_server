@@ -419,7 +419,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         final DigestURL digestURL = document.dc_source();
         boolean allAttr = this.isEmpty();
         String url = addURIAttributes(doc, allAttr, digestURL);
-        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
+        add(doc, CollectionSchema.content_type, new String[]{document.dc_format()}); // content_type (mime) is defined a schema field and we rely on it in some queries like imagequery (makes it mandatory, no need to check)
 
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         String host = digestURL.getHost();
@@ -2028,9 +2028,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             
             final SolrInputDocument doc = new SolrInputDocument();
             String url = configuration.addURIAttributes(doc, allAttr, this.getDigestURL());
-            
-            if (allAttr || configuration.contains(CollectionSchema.content_type)) configuration.add(doc, CollectionSchema.content_type, new String[]{Classification.url2mime(this.digestURL)});
-
+            // content_type (mime) is defined a schema field and we rely on it in some queries like imagequery (makes it mandatory, no need to check)
+            CollectionSchema.content_type.add(doc, new String[]{Classification.url2mime(this.digestURL)});
             if (allAttr || configuration.contains(CollectionSchema.load_date_dt)) configuration.add(doc, CollectionSchema.load_date_dt, getFailDate());
             if (allAttr || configuration.contains(CollectionSchema.crawldepth_i)) configuration.add(doc, CollectionSchema.crawldepth_i, this.crawldepth);
             

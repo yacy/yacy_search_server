@@ -304,7 +304,7 @@ public final class Switchboard extends serverSwitch {
         super(dataPath, appPath, initPath, configPath);
         sb = this;
         // check if port is already occupied
-        final int port = getLocalPort("port", 8090);
+        final int port = getLocalPort();
         if (TimeoutRequest.ping(Domains.LOCALHOST, port, 500)) {
             throw new RuntimeException(
                     "a server is already running on the YaCy port "
@@ -2200,7 +2200,7 @@ public final class Switchboard extends serverSwitch {
         startupAction = false;
         
         // execute api calls
-        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", getLocalPort("port", 8090), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", getLocalPort(), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
         for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
             this.log.info("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
         }
