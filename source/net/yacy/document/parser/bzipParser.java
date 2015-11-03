@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -40,6 +41,7 @@ import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2Utils;
 
 
 public class bzipParser extends AbstractParser implements Parser {
@@ -69,21 +71,9 @@ public class bzipParser extends AbstractParser implements Parser {
         File tempFile = null;
         Document[] docs;
         try {
-            /*
-             * First we have to consume the first two char from the stream. Otherwise
-             * the bzip decompression will fail with a nullpointerException!
-             */
-            int b = source.read();
-            if (b != 'B') {
-                throw new Exception("Invalid bz2 content.");
-            }
-            b = source.read();
-            if (b != 'Z') {
-                throw new Exception("Invalid bz2 content.");
-            }
-
             int read = 0;
             final byte[] data = new byte[1024];
+            // BZip2CompressorInputStream checks filecontent (magic start-bytes "BZh") and throws ioexception if no match
             final BZip2CompressorInputStream zippedContent = new BZip2CompressorInputStream(source);
 
             tempFile = File.createTempFile("bunzip","tmp");
@@ -100,7 +90,10 @@ public class bzipParser extends AbstractParser implements Parser {
             out.close();
 
             // creating a new parser class to parse the unzipped content
-            docs = TextParser.parseSource(location, null, null, scraper, timezoneOffset, 999, tempFile);
+            final String contentfilename = BZip2Utils.getUncompressedFilename(location.getFileName());
+            final String mime = TextParser.mimeOf(DigestURL.getFileExtension(contentfilename));
+            docs = TextParser.parseSource(location, mime, null, scraper, timezoneOffset, 999, tempFile);
+            // TODO: this could return null from content parsing, even if bz2 successful read (see zipParser for alternative coding)
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
