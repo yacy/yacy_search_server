@@ -375,9 +375,10 @@ public final class TextParser {
      * because mime types returned by web severs are sometimes wrong, we also compute the mime type again
      * from the extension that can be extracted from the url path. That means that there are 3 criteria
      * that can be used to select a parser:
-     * - the given extension
-     * - the given mime type
-     * - the mime type computed from the extension
+     * - the given mime type (1.)
+     * - the extension of url (2.)
+     * - the mime type computed from the extension (3.)
+     * finally the generic parser is added as backup if all above fail
      * @param url the given url
      * @param mimeType the given mime type
      * @return a list of Idiom parsers that may be appropriate for the given criteria
@@ -386,26 +387,30 @@ public final class TextParser {
     private static Set<Parser> parsers(final MultiProtocolURL url, String mimeType1) throws Parser.Failure {
         final Set<Parser> idioms = new LinkedHashSet<Parser>(2); // LinkedSet to maintain order (genericParser should be last)
 
-        // check extension
-        String ext = MultiProtocolURL.getFileExtension(url.getFileName());
+        // check given mime type, place this first because this is the most likely to work and the best fit to the supplied mime
         Set<Parser> idiom;
-        if (ext != null && ext.length() > 0) {
-            if (denyExtensionx.containsKey(ext)) throw new Parser.Failure("file extension '" + ext + "' is denied (1)", url);
-            idiom = ext2parser.get(ext);
-            if (idiom != null) idioms.addAll(idiom);
-        }
-
-        // check given mime type
         if (mimeType1 != null) {
             mimeType1 = normalizeMimeType(mimeType1);
             if (denyMime.containsKey(mimeType1)) throw new Parser.Failure("mime type '" + mimeType1 + "' is denied (1)", url);
             idiom = mime2parser.get(mimeType1);
-            if (idiom != null && !idioms.contains(idiom)) idioms.addAll(idiom);
+            if (idiom != null) idioms.addAll(idiom);
+        }
+
+        // check extension and add as backup (in case no, wrong or unknown/unsupported mime was suppied)
+        String ext = MultiProtocolURL.getFileExtension(url.getFileName());
+        if (ext != null && ext.length() > 0) {
+            if (denyExtensionx.containsKey(ext)) throw new Parser.Failure("file extension '" + ext + "' is denied (1)", url);
+            idiom = ext2parser.get(ext);
+            if (idiom != null && !idioms.containsAll(idiom)) { // use containsAll -> idiom is a Set of parser
+                idioms.addAll(idiom);
+            }
         }
 
         // check mime type computed from extension
         final String mimeType2 = ext2mime.get(ext);
-        if (mimeType2 != null && (idiom = mime2parser.get(mimeType2)) != null && !idioms.contains(idiom)) idioms.addAll(idiom);
+        if (mimeType2 != null && (idiom = mime2parser.get(mimeType2)) != null && !idioms.containsAll(idiom)) { // use containsAll -> idiom is a Set of parser
+            idioms.addAll(idiom);
+        }
 
         // always add the generic parser (make sure it is the last in access order)
         idioms.add(genericIdiom);
