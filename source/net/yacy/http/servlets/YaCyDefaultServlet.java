@@ -888,9 +888,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setStatus(HttpServletResponse.SC_OK);
                 byte[] buffer = new byte[4096];
                 int l, size = 0;
-                while ((l = is.read(buffer)) > 0) {response.getOutputStream().write(buffer, 0, l); size += l;}
-                response.setContentLength(size);
-                is.close();
+                try {
+                	while ((l = is.read(buffer)) > 0) {response.getOutputStream().write(buffer, 0, l); size += l;}
+                	response.setContentLength(size);
+                } finally {
+                	is.close();
+                }
                 return;
             }
 
