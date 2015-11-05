@@ -109,7 +109,7 @@ div.ys {
 img {
   vertical-align: top;
 }
-img.favicon{  
+img.favicon, object.favicon {  
   width: 16px;
   height: 16px;
   vertical-align: middle;  

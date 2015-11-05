@@ -29,9 +29,7 @@ import java.awt.MediaTracker;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Map;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -45,7 +43,6 @@ import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.URLLicense;
 import net.yacy.document.ImageParser;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.graphics.EncodedImage;
@@ -58,17 +55,30 @@ public class ViewImage {
 
 	private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000,
 			Math.max(10, Math.min(32, WorkflowProcessor.availableCPU * 2)));
-	private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
-	private static byte[] defaulticonb;
 
-	static {
-		try {
-			defaulticonb = FileUtils.read(new File(defaulticon));
-		} catch (final IOException e) {
-		}
-	}
-
-	public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+	/**
+	 * Try parsing image from post "url" parameter or from "code" parameter.
+	 * When image format is not supported, return directly image data. When
+	 * image could be parsed, try encoding to target format specified by header
+	 * "EXT".
+	 * 
+	 * @param header
+	 *            request header
+	 * @param post
+	 *            post parameters
+	 * @param env
+	 *            environment
+	 * @return an {@link EncodedImage} instance encoded in format specified in
+	 *         post, or an InputStream pointing to original image data
+	 * @throws IOException
+	 *             when specified url is malformed, or a read/write error
+	 *             occured, or input or target image format is not supported.
+	 *             Sould end in a HTTP 500 error whose processing is more
+	 *             consistent across browsers than a response with zero
+	 *             content bytes.
+	 */
+	public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env)
+			throws IOException {
 
 		final Switchboard sb = (Switchboard) env;
 
@@ -85,25 +95,13 @@ public class ViewImage {
 				|| sb.verifyAuthentication(header); // handle access rights
 
 		DigestURL url = null;
-		if ((urlString.length() > 0) && (auth))
-			try {
-				url = new DigestURL(urlString);
-			} catch (final MalformedURLException e1) {
-				url = null;
-			}
+		if ((urlString.length() > 0) && (auth)) {
+			url = new DigestURL(urlString);
+		}
 
 		if ((url == null) && (urlLicense.length() > 0)) {
 			urlString = URLLicense.releaseLicense(urlLicense);
-			try {
-				url = new DigestURL(urlString);
-			} catch (final MalformedURLException e1) {
-				url = null;
-				urlString = null;
-			}
-		}
-
-		if (urlString == null) {
-			return null;
+			url = new DigestURL(urlString);
 		}
 
 		// get the image as stream
@@ -125,28 +123,15 @@ public class ViewImage {
 							BlacklistType.SEARCH, agent);
 				} catch (final IOException e) {
 					ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());
+					throw e;
 				}
 			boolean okToCache = true;
 			if (resourceb == null) {
-				if (urlString.endsWith(".ico")) {
-					// load default favicon dfltfvcn.ico
-					// Should not do this here : we can be displaying search
-					// image result of '.ico' type and do not want to display a
-					// default
-					if (defaulticonb == null)
-						try {
-							resourceb = FileUtils.read(new File(sb.getAppPath(), defaulticon));
-							okToCache = false;
-						} catch (final IOException e) {
-							return null;
-						}
-					else {
-						resourceb = defaulticonb;
-						okToCache = false;
-					}
-				} else {
-					return null;
-				}
+				/*
+				 * Throw an exception, wich will end in a HTTP 500 response,
+				 * better handled by browsers than an empty image
+				 */
+				throw new IOException("Image could not be loaded.");
 			}
 
 			String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
@@ -160,7 +145,7 @@ public class ViewImage {
 
 		return encodedImage;
 	}
-	
+
 	/**
 	 * @param formatName
 	 *            informal file format name. For example : "png".
@@ -180,8 +165,8 @@ public class ViewImage {
 	}
 
 	/**
-	 * Process resourceb byte array to try to produce an Image instance
-	 * eventually scaled and cropped depending on post parameters
+	 * Process resourceb byte array to try to produce an EncodedImage instance
+	 * eventually scaled and cropped depending on post parameters.
 	 * 
 	 * @param post
 	 *            request post parameters. Must not be null.
@@ -195,13 +180,22 @@ public class ViewImage {
 	 *            true when image can be cached
 	 * @param resourceb
 	 *            byte array. Must not be null.
-	 * @return an Image instance when parsing is OK, or null.
+	 * @return an EncodedImage instance.
+	 * @throws IOException
+	 *             when image could not be parsed or encoded to specified format
 	 */
 	protected static EncodedImage parseAndScale(serverObjects post, boolean auth, String urlString, String ext,
-			boolean okToCache, byte[] resourceb) {
+			boolean okToCache, byte[] resourceb) throws IOException {
 		EncodedImage encodedImage = null;
 
 		Image image = ImageParser.parse(urlString, resourceb);
+		if (image == null) {
+			/*
+			 * Throw an exception, wich will end in a HTTP 500 response, better
+			 * handled by browsers than an empty image
+			 */
+			throw new IOException("Image format is not supported.");
+		}
 
 		if (image != null) {
 			int maxwidth = post.getInt("maxwidth", 0);
@@ -242,15 +236,17 @@ public class ViewImage {
 					iconcache.put(urlString, image);
 				}
 			}
-			/* An error can still occur when transcoding from buffered image to target ext : in that case return null */
+			/*
+			 * An error can still occur when transcoding from buffered image to
+			 * target ext : in that case return null
+			 */
 			encodedImage = new EncodedImage(image, ext, isStatic);
-			if(encodedImage.getImage().length() == 0) {
-				encodedImage = null;
+			if (encodedImage.getImage().length() == 0) {
+				throw new IOException("Image could not be encoded to format : " + ext);
 			}
 		}
 		return encodedImage;
 	}
-	
 
 	/**
 	 * Calculate image dimensions from image original dimensions, max
@@ -348,7 +344,7 @@ public class ViewImage {
 		}
 		return image;
 	}
-	
+
 	/**
 	 * Crop image to make a square
 	 * 
