@@ -239,8 +239,8 @@ public final class Tray {
     }
 
     private String readyMessage() {
-        if (deutsch) return "YaCy laeuft unter http://localhost:" + sb.getLocalPort("port", 8090);
-        return "YaCy is running at http://localhost:" + sb.getLocalPort("port", 8090);
+        if (deutsch) return "YaCy laeuft unter http://localhost:" + sb.getLocalPort();
+        return "YaCy is running at http://localhost:" + sb.getLocalPort();
     }
 
     private String shutdownMessage() {

@@ -224,7 +224,7 @@ public class ConfigPortal {
 
         String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) {
-            myaddress = "localhost:" + sb.getLocalPort("port", 8090);
+            myaddress = "localhost:" + sb.getLocalPort();
         }
         prop.put("myaddress", myaddress);
         return prop;

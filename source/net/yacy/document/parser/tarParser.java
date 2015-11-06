@@ -43,8 +43,8 @@ import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.FileUtils;
 
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
 
@@ -80,15 +80,14 @@ public class tarParser extends AbstractParser implements Parser {
                 throw new Parser.Failure("tar parser: " + e.getMessage(), location);
             }
         }
-        TarEntry entry;
-        final TarInputStream tis = new TarInputStream(source);
+        TarArchiveEntry entry;
+        final TarArchiveInputStream tis = new TarArchiveInputStream(source);
         File tmp = null;
 
         // loop through the elements in the tar file and parse every single file inside
         while (true) {
             try {
-                if (tis.available() <= 0) break;
-                entry = tis.getNextEntry();
+                entry = tis.getNextTarEntry();
                 if (entry == null) break;
                 if (entry.isDirectory() || entry.getSize() <= 0) continue;
                 final String name = entry.getName();
@@ -110,6 +109,7 @@ public class tarParser extends AbstractParser implements Parser {
                 break;
             }
         }
+        if (docacc.isEmpty()) return null;
         return docacc.toArray(new Document[docacc.size()]);
     }
 

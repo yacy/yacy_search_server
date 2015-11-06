@@ -330,34 +330,58 @@ public class QueryGoal {
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
 
+    /**
+     * Generate a Solr filter query to receive valid urls
+     *
+     * This filters out error-urls.
+     * On noimages=true a filter is added to exclude links to images
+     * using the content_type (as well as urls with common image file extension)
+     *
+     * @param noimages  true if filter for images should be included
+     * @return Solr filter query
+     */
     public List<String> collectionTextFilterQuery(boolean noimages) {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
         fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
-        if (noimages) fqs.add("-" + CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif)");
+        if (noimages) {
+            fqs.add("-" + CollectionSchema.content_type.getSolrFieldName() + ":(image/*)");
+            fqs.add("-" + CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif)");
+        }
         
         return fqs;
     }
-    
+
     public StringBuilder collectionTextQuery() {
 
         // parse special requests
-        if (isCatchall()) return new StringBuilder("*:*");
+        if (isCatchall()) return new StringBuilder(AbstractSolrConnector.CATCHALL_QUERY);
         
         // add goal query
         return getGoalQuery();
     }
-    
+
+    /**
+     * Generate a Solr filter query to receive valid image results.
+     *
+     * This filters error-urls out and includes urls with mime image/* as well
+     * as urls with links to images.
+     * We use the mime (image/*) only to find images as the parser assigned the
+     * best mime to index documents. This applies also to parsed file systems.
+     * This ensures that no text urls with image-fileextension is returned
+     * (as some large internet sites like to use such urls)
+     *
+     * @return Solr filter query for image urls
+     */
     public List<String> collectionImageFilterQuery() {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
         fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
         fqs.add(
-                CollectionSchema.images_urlstub_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM + " OR " +
-                CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif) OR " +
-                CollectionSchema.content_type.getSolrFieldName() + ":(image/*)");
+                CollectionSchema.content_type.getSolrFieldName() + ":(image/*) OR " +
+                CollectionSchema.images_urlstub_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
         return fqs;
     }
     
@@ -365,7 +389,7 @@ public class QueryGoal {
         final StringBuilder q = new StringBuilder(80);
         
         // parse special requests
-        if (isCatchall()) return new StringBuilder("*:*");
+        if (isCatchall()) return new StringBuilder(AbstractSolrConnector.CATCHALL_QUERY);
 
         // add goal query
         StringBuilder w = getGoalQuery();

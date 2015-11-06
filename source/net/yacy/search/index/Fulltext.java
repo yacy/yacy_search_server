@@ -649,7 +649,7 @@ public final class Fulltext {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.pattern = filter == null ? null : Pattern.compile(filter);
-            this.query = query == null? "*:*" : query;
+            this.query = query == null? AbstractSolrConnector.CATCHALL_QUERY : query;
             this.count = 0;
             this.failure = null;
             this.format = format;
