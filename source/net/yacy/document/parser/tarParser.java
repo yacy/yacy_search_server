@@ -29,8 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.encoding.UTF8;
@@ -47,7 +46,10 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
-
+/**
+ * Parses the tar file and each contained file,
+ * returns one document with combined content.
+ */
 public class tarParser extends AbstractParser implements Parser {
 
     private final static String MAGIC = "ustar"; // A magic for a tar archive, may appear at #101h-#105
@@ -70,8 +72,6 @@ public class tarParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             InputStream source) throws Parser.Failure, InterruptedException {
 
-        final List<Document> docacc = new ArrayList<Document>();
-        Document[] subDocs = null;
         final String ext = MultiProtocolURL.getFileExtension(location.getFileName());
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
@@ -82,11 +82,31 @@ public class tarParser extends AbstractParser implements Parser {
         }
         TarArchiveEntry entry;
         final TarArchiveInputStream tis = new TarArchiveInputStream(source);
-        File tmp = null;
-
+        
+        // create maindoc for this bzip container
+        Document maindoc = new Document(
+                    location,
+                    mimeType,
+                    charset,
+                    this,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    0.0d, 0.0d,
+                    (Object) null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    new Date());
         // loop through the elements in the tar file and parse every single file inside
         while (true) {
             try {
+                File tmp = null;
                 entry = tis.getNextTarEntry();
                 if (entry == null) break;
                 if (entry.isDirectory() || entry.getSize() <= 0) continue;
@@ -96,9 +116,9 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(location, "#" + name), mime, null, scraper, timezoneOffset, 999, tmp);
+                    final Document[] subDocs = TextParser.parseSource(AnchorURL.newAnchor(location, "#" + name), mime, null, scraper, timezoneOffset, 999, tmp);
                     if (subDocs == null) continue;
-                    for (final Document d: subDocs) docacc.add(d);
+                    maindoc.addSubDocuments(subDocs);
                 } catch (final Parser.Failure e) {
                     AbstractParser.log.warn("tar parser entry " + name + ": " + e.getMessage());
                 } finally {
@@ -109,8 +129,7 @@ public class tarParser extends AbstractParser implements Parser {
                 break;
             }
         }
-        if (docacc.isEmpty()) return null;
-        return docacc.toArray(new Document[docacc.size()]);
+        return new Document[]{maindoc};
     }
 
     public final static boolean isTar(File f) {

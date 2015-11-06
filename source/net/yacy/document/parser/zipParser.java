@@ -27,8 +27,7 @@ package net.yacy.document.parser;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -43,7 +42,11 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
-
+/**
+ * Parses Zip archives. Creates a main document for the zip url/file.
+ * Each file in the zip is parsed and the result added to the main document.
+ * parse returns one  document with the combined content.
+ */
 public class zipParser extends AbstractParser implements Parser {
 
     public zipParser() {
@@ -74,15 +77,33 @@ public class zipParser extends AbstractParser implements Parser {
         if (!MemoryControl.request(200 * 1024 * 1024, false))
             throw new Parser.Failure("Not enough Memory available for zip parser: " + MemoryControl.available(), location);
 
-         Document[] docs = null;
-        final List<Document> docacc = new ArrayList<Document>();
         ZipEntry entry;
         final ZipInputStream zis = new ZipInputStream(source);
-        File tmp = null;
+        // create maindoc for this zip container with supplied url and mime
+        Document maindoc = new Document(
+                location,
+                mimeType,
+                charset,
+                this,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0.0d, 0.0d,
+                (Object)null,
+                null,
+                null,
+                null,
+                false,
+                new Date());
 
         // loop through the elements in the zip file and parse every single file inside
         while (true) {
             try {
+                File tmp = null;
                 if (zis.available() <= 0) break;
                 entry = zis.getNextEntry();
                 if (entry == null) break;
@@ -95,9 +116,9 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());
                     final DigestURL virtualURL = DigestURL.newURL(location, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    docs = TextParser.parseSource(new AnchorURL(virtualURL), mime, null, scraper, timezoneOffset, 999, tmp);
+                    final Document[] docs = TextParser.parseSource(new AnchorURL(virtualURL), mime, null, scraper, timezoneOffset, 999, tmp);
                     if (docs == null) continue;
-                    for (final Document d: docs) docacc.add(d);
+                    maindoc.addSubDocuments(docs);
                 } catch (final Parser.Failure e) {
                     AbstractParser.log.warn("ZIP parser entry " + name + ": " + e.getMessage());
                 } finally {
@@ -108,7 +129,6 @@ public class zipParser extends AbstractParser implements Parser {
                 break;
             }
         }
-        if (docacc.isEmpty()) return null;
-        return docacc.toArray(new Document[docacc.size()]);
+        return new Document[]{maindoc};
     }
 }
