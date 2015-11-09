@@ -671,6 +671,19 @@ dc_rights
         return v;
     }
 
+    /**
+     * Adds the main content of subdocuments to this document.
+     * This is useful if the document is a container for other documents (like zip or other archives)
+     * to make the content of the subdocuments searcheable,
+     * but has only one url (unlike container-urls as rss).
+     *
+     * This is similar to mergeDocuments but directly joins internal content variables,
+     * uses less parsed details and keeps this documents crawl data (like crawldepth, lastmodified)
+     *
+     * @see mergeDocuments()
+     * @param docs to be included
+     * @throws IOException
+     */
     public void addSubDocuments(final Document[] docs) throws IOException {
         for (final Document doc: docs) {
             this.sections.addAll(doc.sections);
