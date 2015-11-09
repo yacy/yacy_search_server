@@ -30,6 +30,7 @@ package net.yacy.document.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
@@ -43,7 +44,10 @@ import net.yacy.kelondro.util.FileUtils;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2Utils;
 
-
+/**
+ * Parses a bz2 archive.
+ * Unzips and parses the content and adds it to the created main document
+ */
 public class bzipParser extends AbstractParser implements Parser {
 
     public bzipParser() {
@@ -69,7 +73,7 @@ public class bzipParser extends AbstractParser implements Parser {
             throws Parser.Failure, InterruptedException {
 
         File tempFile = null;
-        Document[] docs;
+        Document maindoc = null;
         try {
             int read = 0;
             final byte[] data = new byte[1024];
@@ -82,18 +86,38 @@ public class bzipParser extends AbstractParser implements Parser {
             // creating a temp file to store the uncompressed data
             final FileOutputStream out = new FileOutputStream(tempFile);
 
-            // reading gzip file and store it uncompressed
+            // reading bzip file and store it uncompressed
             while((read = zippedContent.read(data, 0, 1024)) != -1) {
                 out.write(data, 0, read);
             }
             zippedContent.close();
             out.close();
 
+             // create maindoc for this bzip container, register with supplied url & mime
+            maindoc = new Document(
+                    location,
+                    mimeType,
+                    charset,
+                    this,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    0.0d, 0.0d,
+                    (Object) null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    new Date());
             // creating a new parser class to parse the unzipped content
             final String contentfilename = BZip2Utils.getUncompressedFilename(location.getFileName());
             final String mime = TextParser.mimeOf(DigestURL.getFileExtension(contentfilename));
-            docs = TextParser.parseSource(location, mime, null, scraper, timezoneOffset, 999, tempFile);
-            // TODO: this could return null from content parsing, even if bz2 successful read (see zipParser for alternative coding)
+            final Document[] docs = TextParser.parseSource(location, mime, null, scraper, timezoneOffset, 999, tempFile);
+            if (docs != null) maindoc.addSubDocuments(docs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -102,6 +126,6 @@ public class bzipParser extends AbstractParser implements Parser {
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);
         }
-        return docs;
+        return maindoc == null ? null : new Document[]{maindoc};
     }
 }
