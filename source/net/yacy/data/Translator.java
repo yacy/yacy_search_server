@@ -105,33 +105,31 @@ public class Translator {
      * @param translationFile the File, which contains the Lists
      * @return a HashMap, which contains for each File a HashMap with translations.
      */
-    public static Map<String, Map<String, String>> loadTranslationsLists(final File translationFile){
+    public static Map<String, Map<String, String>> loadTranslationsLists(final File translationFile) {
         final Map<String, Map<String, String>> lists = new HashMap<String, Map<String, String>>(); //list of translationLists for different files.
         Map<String, String> translationList = new LinkedHashMap<String, String>(); //current Translation Table (maintaining input order)
 
         final List<String> list = FileUtils.getListArray(translationFile);
         String forFile = "";
 
-        for (final String line : list){
-            if (line.isEmpty() || line.charAt(0) != '#'){
-                final String[] split = line.split("==", 2);
-                if (split.length == 2) {
-                    translationList.put(split[0], split[1]);
-                //}else{ //Invalid line
-                }
-            } else if (line.startsWith("#File: ")) {
-                if (!forFile.equals("")){
-                    lists.put(forFile, translationList);
-                }
-                if (line.charAt(6) == ' ') {
-                    forFile=line.substring(7);
-                } else {
-                    forFile=line.substring(6);
-                }
-                if (lists.containsKey(forFile)) {
-                    translationList = lists.get(forFile);
-                } else {
-                    translationList = new LinkedHashMap<String, String>();
+        for (final String line : list) {
+            if (!line.isEmpty()) {
+                if (line.charAt(0) != '#') {
+                    final String[] split = line.split("==", 2);
+                    if (split.length == 2) {
+                        translationList.put(split[0], split[1]);
+                        //}else{ //Invalid line
+                    }
+                } else if (line.startsWith("#File:")) {
+                    if (!forFile.isEmpty()) {
+                        lists.put(forFile, translationList);
+                    }
+                    forFile = line.substring(6).trim(); //skip "#File:"
+                    if (lists.containsKey(forFile)) {
+                        translationList = lists.get(forFile);
+                    } else {
+                        translationList = new LinkedHashMap<String, String>();
+                    }
                 }
             }
         }
