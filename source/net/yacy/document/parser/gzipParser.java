@@ -35,6 +35,7 @@ import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -90,6 +91,7 @@ public class gzipParser extends AbstractParser implements Parser {
             }
             zippedContent.close();
             out.close();
+            final String filename = location.getFileName();
             // create maindoc for this gzip container, register with supplied url & mime
             maindoc = new Document(
                     location,
@@ -98,7 +100,7 @@ public class gzipParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,
-                    null,
+                    AbstractParser.singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title
                     null,
                     null,
                     null,

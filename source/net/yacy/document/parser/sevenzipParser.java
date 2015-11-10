@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -62,6 +63,8 @@ public class sevenzipParser extends AbstractParser implements Parser {
             final String charset,
             final int timezoneOffset,
             final IInStream source) throws Parser.Failure, InterruptedException {
+
+        final String filename = location.getFileName();
         final Document doc = new Document(
                 location,
                 mimeType,
@@ -69,12 +72,12 @@ public class sevenzipParser extends AbstractParser implements Parser {
                 this,
                 null,
                 null,
+                AbstractParser.singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title,
                 null,
                 null,
                 null,
                 null,
-                null,
-                0.0f, 0.0f,
+                0.0d, 0.0d,
                 (Object)null,
                 null,
                 null,
