@@ -72,7 +72,8 @@ public class tarParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             InputStream source) throws Parser.Failure, InterruptedException {
 
-        final String ext = MultiProtocolURL.getFileExtension(location.getFileName());
+        final String filename = location.getFileName();
+        final String ext = MultiProtocolURL.getFileExtension(filename);
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
                 source = new GZIPInputStream(source);
@@ -84,14 +85,14 @@ public class tarParser extends AbstractParser implements Parser {
         final TarArchiveInputStream tis = new TarArchiveInputStream(source);
         
         // create maindoc for this bzip container
-        Document maindoc = new Document(
+        final Document maindoc = new Document(
                     location,
                     mimeType,
                     charset,
                     this,
                     null,
                     null,
-                    null,
+                    AbstractParser.singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title
                     null,
                     null,
                     null,

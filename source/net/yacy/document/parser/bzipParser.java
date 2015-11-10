@@ -34,6 +34,7 @@ import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -92,7 +93,7 @@ public class bzipParser extends AbstractParser implements Parser {
             }
             zippedContent.close();
             out.close();
-
+            final String filename = location.getFileName();
              // create maindoc for this bzip container, register with supplied url & mime
             maindoc = new Document(
                     location,
@@ -101,7 +102,7 @@ public class bzipParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,
-                    null,
+                    AbstractParser.singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title
                     null,
                     null,
                     null,
