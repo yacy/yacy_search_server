@@ -79,8 +79,8 @@ public enum CollectionSchema implements SchemaDeclaration {
 
     // optional but recommended
     coordinate_p(SolrType.location, true, true, false, false, false, "point in degrees of latitude,longitude as declared in WSG84"),
-    coordinate_p_0_coordinate(SolrType.coordinate, true, true, false, false, false, "automatically created subfield, (latitude)"),
-    coordinate_p_1_coordinate(SolrType.coordinate, true, true, false, false, false, "automatically created subfield, (longitude)"),
+    coordinate_p_0_coordinate(SolrType.coordinate, true, false, false, false, false, "automatically created subfield, (latitude)"),
+    coordinate_p_1_coordinate(SolrType.coordinate, true, false, false, false, false, "automatically created subfield, (longitude)"),
     ip_s(SolrType.string, true, true, false, false, false, "ip of host of url (after DNS lookup)"),
     author(SolrType.text_general, true, true, false, false, true, "content of author-tag"),
     author_sxt(SolrType.string, true, true, true, false, false, "content of author-tag as copy-field from author. This is used for facet generation"),
@@ -263,7 +263,7 @@ public enum CollectionSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
-        this.docValues = (type == SolrType.string || type == SolrType.date);
+        this.docValues = (type == SolrType.string || type == SolrType.date || type.name().startsWith("num_"));
         // verify our naming scheme
         String name = this.name();
         int p = name.indexOf('_');
