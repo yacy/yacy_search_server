@@ -48,7 +48,8 @@ import net.yacy.search.EventTracker;
 
 public class AccessTracker {
 
-    private final static long DUMP_PERIOD = 60000L;
+    private final static long DUMP_PERIOD = 3600000L;
+    private final static int DUMP_SIZE = 50000;
 
     private static final int minSize = 100;
     private static final int maxSize = 1000;
@@ -89,6 +90,8 @@ public class AccessTracker {
     private static final LinkedList<QueryParams> remoteSearches = new LinkedList<QueryParams>();
     private static final ArrayList<String> log = new ArrayList<String>();
     private static long lastLogDump = System.currentTimeMillis();
+    private static long localCount = 0;
+    private static long remoteCount = 0;
     private static File dumpFile = null;
 
     public static void setDumpFile(File f) {
@@ -141,9 +144,9 @@ public class AccessTracker {
         return null;
     }
 
-    public static int size(final Location location) {
-        if (location == Location.local) synchronized (localSearches) {return localSearches.size();}
-        if (location == Location.remote) synchronized (remoteSearches) {return remoteSearches.size();}
+    public static long size(final Location location) {
+        if (location == Location.local) synchronized (localSearches) {return localCount + localSearches.size();}
+        if (location == Location.remote) synchronized (remoteSearches) {return remoteCount + remoteSearches.size();}
         return 0;
     }
 
@@ -155,10 +158,6 @@ public class AccessTracker {
 
     public static void addToDump(String querystring, String resultcount) {
         addToDump(querystring, resultcount, new Date());
-        if (lastLogDump + DUMP_PERIOD < System.currentTimeMillis()) {
-            lastLogDump = System.currentTimeMillis();
-            dumpLog();
-        }
     }
 
     public static void addToDump(String querystring, String resultcount, Date d) {
@@ -173,11 +172,20 @@ public class AccessTracker {
         synchronized (log) {
             log.add(sb.toString());
         }
+        if (log.size() > DUMP_SIZE || lastLogDump + DUMP_PERIOD < System.currentTimeMillis()) {
+            dumpLog();
+        }
     }
 
     public static void dumpLog() {
+        lastLogDump = System.currentTimeMillis();
+    	localCount += localSearches.size();
         while (!localSearches.isEmpty()) {
             addToDump(localSearches.removeFirst(), 0);
+        }
+        remoteCount += remoteSearches.size();
+        while (!remoteSearches.isEmpty()) {
+            addToDump(remoteSearches.removeFirst(), 0);
         }
         Thread t = new Thread() {
             @Override

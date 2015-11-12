@@ -838,7 +838,7 @@
        of SearchComponents (see below) and supports distributed
        queries across multiple shards
     -->
-  <requestHandler name="/select" class="solr.SearchHandler">
+  <requestHandler name="/select" class="solr.SearchHandler" startup="lazy">
     <!-- default values for query parameters can be specified, these
          will be overridden by parameters in the request
       -->
@@ -902,7 +902,7 @@
     </requestHandler>
 
   <!-- A request handler that returns indented JSON by default -->
-  <requestHandler name="/query" class="solr.SearchHandler">
+  <requestHandler name="/query" class="solr.SearchHandler" startup="lazy">
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <str name="wt">json</str>
@@ -923,7 +923,7 @@
        also always fetch the complete index from the leader because a partial
        sync will not be possible in the absence of this handler.
   -->
-  <requestHandler name="/get" class="solr.RealTimeGetHandler">
+  <requestHandler name="/get" class="solr.RealTimeGetHandler" startup="lazy">
      <lst name="defaults">
        <str name="omitHeader">true</str>
        <str name="wt">json</str>
@@ -936,7 +936,7 @@
     Do not change these defaults.
   -->
 
-  <requestHandler name="/export" class="solr.SearchHandler">
+  <requestHandler name="/export" class="solr.SearchHandler" startup="lazy">
     <lst name="invariants">
       <str name="rq">{!xport}</str>
       <str name="wt">xsort</str>
@@ -966,7 +966,7 @@
        This handler will pick a response format to match the input
        if the 'wt' parameter is not explicit
     -->
-  <requestHandler name="/update" class="solr.UpdateRequestHandler">
+  <requestHandler name="/update" class="solr.UpdateRequestHandler" startup="lazy">
     <!-- See below for information on defining
          updateRequestProcessorChains that can be used by name
          on each Update Request
@@ -1101,7 +1101,7 @@
      -->
     
     <!-- ping/healthcheck -->
-    <requestHandler name="/admin/ping" class="solr.PingRequestHandler">
+    <requestHandler name="/admin/ping" class="solr.PingRequestHandler" startup="lazy">
         <lst name="invariants">
             <str name="q">solrpingquery</str>
         </lst>
@@ -1117,7 +1117,7 @@
     </requestHandler>
     
     <!-- Echo the request contents back to the client -->
-    <requestHandler name="/debug/dump" class="solr.DumpRequestHandler" >
+    <requestHandler name="/debug/dump" class="solr.DumpRequestHandler" startup="lazy">
         <lst name="defaults">
             <str name="echoParams">explicit</str>
             <str name="echoHandler">true</str>
@@ -1137,7 +1137,7 @@
      
      https://wiki.apache.org/solr/SolrCloud/
      -->
-    <requestHandler name="/replication" class="solr.ReplicationHandler" >
+    <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy">
         <!--
          To enable simple master/slave replication, uncomment one of the
        sections below, depending on whether this solr instance should be

@@ -95,7 +95,7 @@ public final class QueryParams {
     private static final Map<String, CollectionSchema> defaultfacetfields = new HashMap<String, CollectionSchema>();
     static {
         // the key shall match with configuration property search.navigation
-        defaultfacetfields.put("location", CollectionSchema.coordinate_p_0_coordinate); // coordinate_p can't be used for facet (subfields), as value isn't used subfield can be used
+        // defaultfacetfields.put("location", CollectionSchema.coordinate_p_0_coordinate); // coordinate_p can't be used for facet (subfields), as value isn't used subfield can be used
         defaultfacetfields.put("hosts", CollectionSchema.host_s);
         defaultfacetfields.put("protocol", CollectionSchema.url_protocol_s);
         defaultfacetfields.put("filetype", CollectionSchema.url_file_ext_s);

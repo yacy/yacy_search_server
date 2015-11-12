@@ -33,6 +33,7 @@ import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -79,15 +80,16 @@ public class zipParser extends AbstractParser implements Parser {
 
         ZipEntry entry;
         final ZipInputStream zis = new ZipInputStream(source);
+        final String filename = location.getFileName();
         // create maindoc for this zip container with supplied url and mime
-        Document maindoc = new Document(
+        final Document maindoc = new Document(
                 location,
                 mimeType,
                 charset,
                 this,
                 null,
                 null,
-                null,
+                AbstractParser.singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title
                 null,
                 null,
                 null,

@@ -117,7 +117,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
-        this.docValues = (type == SolrType.string || type == SolrType.date);
+        this.docValues = (type == SolrType.string || type == SolrType.date || type.name().startsWith("num_"));
         // verify our naming scheme
         String name = this.name();
         int p = name.indexOf('_');
