@@ -2166,6 +2166,21 @@ reindex documents containing these fields:==Re-Indiziere Dokumente die folgende 
 #"is empty"=="ist leer"
 #"no reindex job running"=="Es läuft kein Re-Indexierungs-Job"
 #"! reindex works only with embedded Solr index !"=="! Re-Indexierung funktioniert nur mit eingebautem Solr Index !"
+Re-Crawl Index Documents==Re-Crawl Index Dokumente
+Searches the local index and selects documents to add to the crawler (recrawl the document).==Durchsucht und selektiert Dokumente im lokalen Index und fügt diese dem Crawler hinzu (Dokumente erneut crawlen).
+This runs transparent as background job.==Dies läuft transparent als Hintergrund Job.
+Documents are added to the crawler only if no other crawls are active==Dokumente werden dem Crawler hinzugefügt, wenn kein anderer Crawl-Job aktiv ist
+and are added in small chunks.==und wird in kleinen Blöcken verarbeitet.
+"start recrawl job now"=="Starte Re-Crawl-Job jetzt"
+"stop recrawl job"=="Beende Re-Crawl-Job"
+to re-crawl documents with fresh_date_dt before today.==um Dokumente mit fresh_date_dt vor Heute erneut zu crawlen.
+after starting the recrawl job you can apply a custom Solr query to select documents to be processed==nach dem Start des Re-Crawl-Jobs kann die Solr Abfrage bearbeitet werden um gewünschte Dokumente zu verarbeiten
+Re-Crawl Query Details==Re-Crawl Abfrage Details
+Documents to process==Dokumente in Warteschlange
+Current Query==Aktuelle Abfrage
+Edit Solr Query==Edit Solr Abfrage
+update==aktualisieren
+include failed urls==inklusive Fehler-Urls
 #-----------------------------
 
 #File: Load_MediawikiWiki.html
