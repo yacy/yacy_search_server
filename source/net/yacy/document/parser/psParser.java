@@ -271,7 +271,6 @@ public class psParser extends AbstractParser implements Parser {
         try {
             // creating a tempfile
             tempFile = FileUtils.createTempFile(this.getClass(), "temp.ps");
-            tempFile.deleteOnExit();
 
             // copying inputstream into file
             FileUtils.copy(source,tempFile);

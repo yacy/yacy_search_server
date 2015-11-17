@@ -971,8 +971,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return toNormalform(false);
     }
 
+    /**
+     * Tokenized url as string (without the protocol)
+     * @return example "host com path file ext"
+     */
     public String toTokens() {
-        return toTokens(unescape(this.toNormalform(true)));
+        return toTokens(unescape(this.urlstub(true,true)));
     }
 
     /**
@@ -1105,6 +1109,15 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return result;
     }
 
+    /**
+     * Generates a normal form of the url, without the protocol part,
+     * except the skipped protocol part this is identical with toNormalform()
+     * @see #toNormalform(boolean)
+     * @param excludeAnchor, exclude anchor part
+     * @param removeSessionID, exclude session id
+     * @return example "www.host.com:8080/path/file.html"
+     * @see #toNormalform(boolean, boolean)
+     */
     public String urlstub(final boolean excludeAnchor, final boolean removeSessionID) {
         // generates a normal form of the URL
         boolean defaultPort = false;

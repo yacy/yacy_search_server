@@ -790,6 +790,16 @@ public final class FileUtils {
         }
     }
 
+    /**
+     * Creates a temp file in the default system tmp directory (System property ""java.io.tmpdir"")
+     * with a name constructed by combination of class name and name.
+     * Marks the file with deleteOnExit() to be at least deleted on shutdown of jvm
+     *
+     * @param classObj name is used as prefix
+     * @param name
+     * @return temp file
+     * @throws IOException
+     */
     public static final File createTempFile(final Class<?> classObj, final String name) throws IOException {
         String parserClassName = classObj.getName();
         int idx = parserClassName.lastIndexOf('.');
@@ -809,6 +819,7 @@ public final class FileUtils {
             File.createTempFile(
                 parserClassName + "_" + ((idx > -1) ? fileName.substring(0, idx) : fileName),
                 (!fileExt.isEmpty()) ? "." + fileExt : fileExt);
+        tempFile.deleteOnExit();
         return tempFile;
     }
     

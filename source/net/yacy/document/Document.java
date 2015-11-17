@@ -46,7 +46,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,7 +70,7 @@ public class Document {
     private DigestURL source;             // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
-    private final List<String> keywords;        // most resources provide a keyword field
+    private final Set<String> keywords;         // most resources provide a keyword field
     private       List<String> titles;          // the document titles, taken from title and/or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
     private final String publisher;             // publisher
@@ -115,7 +114,7 @@ public class Document {
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
         this.parserObject = parserObject;
-        this.keywords = new LinkedList<String>();
+        this.keywords = new LinkedHashSet<String>();
         if (keywords != null) this.keywords.addAll(Arrays.asList(keywords));
         this.titles = (titles == null) ? new ArrayList<String>(1) : titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
@@ -214,6 +213,10 @@ dc_coverage
 dc_rights
      */
 
+    /**
+     * Get the main document title. This is the 1st in the list of titles.
+     * @return title_string (may return null or empty string)
+     */
     public String dc_title() {
         return (this.titles == null || this.titles.size() == 0) ? "" : this.titles.iterator().next();
     }
@@ -222,6 +225,10 @@ dc_rights
         return this.titles;
     }
 
+    /**
+     * Sets the title of the document, replacing any existing titles.
+     * @param title
+     */
     public void setTitle(final String title) {
         this.titles = new ArrayList<String>();
         if (title != null) this.titles.add(title);
@@ -239,11 +246,8 @@ dc_rights
      * @param tags
      */
     public void addTags(Set<String> tags) {
-        for (String s: this.keywords) {
-            tags.remove(s);
-        }
         for (String s: tags) {
-            this.keywords.add(s);
+            if (s != null && !s.isEmpty()) this.keywords.add(s);
         }
     }
 
@@ -274,28 +278,27 @@ dc_rights
         }
         return gf;
     }
-    
-    public String[] dc_subject() {
-        // sort out doubles and empty words
-        final TreeSet<String> hs = new TreeSet<String>();
-        String s;
-        for (int i = 0; i < this.keywords.size(); i++) {
-            if (this.keywords.get(i) == null) continue;
-            s = (this.keywords.get(i)).trim();
-            if (!s.isEmpty()) hs.add(s);
-        }
-        final String[] t = new String[hs.size()];
-        int i = 0;
-        for (final String u: hs) t[i++] = u;
-        return t;
+
+    /**
+     * Get the set of keywords associated with the document
+     * @return set of unique keywords
+     */
+    public Set<String> dc_subject() {
+        return this.keywords;
     }
 
+    /**
+     * Get the set of keywords associated with the document and string
+     * each keyword separated by the separator character
+     *
+     * @param separator character
+     * @return string of keywords or empty string
+     */
     public String dc_subject(final char separator) {
-        final String[] t = dc_subject();
-        if (t.length == 0) return "";
+        if (this.keywords.size() == 0) return "";
         // generate a new list
-        final StringBuilder sb = new StringBuilder(t.length * 8);
-        for (final String s: t) sb.append(s).append(separator);
+        final StringBuilder sb = new StringBuilder(this.keywords.size() * 8);
+        for (final String s: this.keywords) sb.append(s).append(separator);
         return sb.substring(0, sb.length() - 1);
     }
 
@@ -425,10 +428,6 @@ dc_rights
             sentences.add(sr.next());
         }
         return sentences;
-    }
-
-    public List<String> getKeywords() {
-        return this.keywords;
     }
 
     public Collection<AnchorURL> getAnchors() {
@@ -688,7 +687,7 @@ dc_rights
         for (final Document doc: docs) {
             this.sections.addAll(doc.sections);
             this.titles.addAll(doc.titles());
-            this.keywords.addAll(doc.getKeywords());
+            this.keywords.addAll(doc.dc_subject());
             for (String d: doc.dc_description()) this.descriptions.add(d);
 
             if (!(this.text instanceof ByteArrayOutputStream)) {

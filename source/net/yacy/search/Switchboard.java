@@ -3205,7 +3205,7 @@ public final class Switchboard extends serverSwitch {
         //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
         final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
         tags.add("crawlStart");
-        final String[] keywords = scraper.dc_subject();
+        final Set<String> keywords = scraper.dc_subject();
         if (keywords != null) {
             for (final String k: keywords) {
                 final String kk = BookmarkHelper.cleanTagsString(k);

@@ -118,7 +118,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
             final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
-            final int      titleLength,   // length of description/length (longer are better?)
+            final int      titlewordcount,// length of description/length (longer are better?)
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
@@ -141,7 +141,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_urlhash, urlHash);
         this.entry.setCol(col_lastModified, mddlm);
         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
-        this.entry.setCol(col_wordsInTitle, titleLength / 6); // word count estimation; TODO: change value handover to number of words
+        this.entry.setCol(col_wordsInTitle, titlewordcount);
         this.entry.setCol(col_wordsInText, wordcount);
         this.entry.setCol(col_phrasesInText, phrasecount);
         this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
@@ -163,7 +163,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public WordReferenceRow(final byte[]   urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components
-                            final int      titleLength,   // length of description/length (longer are better?)
+                            final int      titlewordcount,// length of description/length (longer are better?)
                             final int      wordcount,     // total number of words
                             final int      phrasecount,   // total number of phrases
                             final long     lastmodified,  // last-modified time of the document where word appears
@@ -180,7 +180,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_urlhash, urlHash);
                         this.entry.setCol(col_lastModified, mddlm);
                         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
-                        this.entry.setCol(col_wordsInTitle, titleLength / 6); // word count estimation; TODO: change value handover to number of words
+                        this.entry.setCol(col_wordsInTitle, titlewordcount);
                         this.entry.setCol(col_wordsInText, wordcount);
                         this.entry.setCol(col_phrasesInText, phrasecount);
                         this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
