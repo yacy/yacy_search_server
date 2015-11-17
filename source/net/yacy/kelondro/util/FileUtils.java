@@ -819,7 +819,6 @@ public final class FileUtils {
             File.createTempFile(
                 parserClassName + "_" + ((idx > -1) ? fileName.substring(0, idx) : fileName),
                 (!fileExt.isEmpty()) ? "." + fileExt : fileExt);
-        tempFile.deleteOnExit();
         return tempFile;
     }
     

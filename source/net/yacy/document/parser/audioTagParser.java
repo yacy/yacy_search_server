@@ -109,8 +109,7 @@ public class audioTagParser extends AbstractParser implements Parser {
         		f = AudioFileIO.read(location.getFSFile());
         	} else {
             	// create a temporary file, as jaudiotagger requires a file rather than an input stream 
-            	tempFile = File.createTempFile(filename,fileext);  
-                tempFile.deleteOnExit();              
+            	tempFile = File.createTempFile(filename,fileext);              
                 fout = new BufferedOutputStream(new FileOutputStream(tempFile));  
                 int c;  
                 while ((c = source.read()) != -1) {  

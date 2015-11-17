@@ -80,7 +80,6 @@ public class gzipParser extends AbstractParser implements Parser {
             final GZIPInputStream zippedContent = new GZIPInputStream(source);
 
             tempFile = File.createTempFile("gunzip","tmp");
-            tempFile.deleteOnExit();
 
             // creating a temp file to store the uncompressed data
             final FileOutputStream out = new FileOutputStream(tempFile);
