@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.server.serverObjects;
@@ -75,8 +78,9 @@ public class ViewImagePerfTest extends ViewImageTest {
 	}
 
 	/**
-	 * Process inFile image, update processedFiles list and failures map, and append measurements to results_perfs.txt. All
-	 * parameters must not be null.
+	 * Process inFile image, update processedFiles list and failures map, and
+	 * append measurements to results_perfs.txt. All parameters must not be
+	 * null.
 	 * 
 	 * @param ext
 	 *            output encoding image format
@@ -92,7 +96,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 	 *             when an read/write error occured
 	 */
 	@Override
-	protected void processFile(String ext, File outDir, serverObjects post, Map<String, Exception> failures,
+	protected void processFile(String ext, File outDir, serverObjects post, Map<String, Throwable> failures,
 			File inFile) throws IOException {
 		/* Delete eventual previous result file */
 		System.out
@@ -102,43 +106,43 @@ public class ViewImagePerfTest extends ViewImageTest {
 			outFile.delete();
 		}
 
-		byte[] resourceb = getBytes(inFile);
 		String urlString = inFile.getAbsolutePath();
 		EncodedImage img = null;
 		Exception error = null;
+		long beginTime = System.nanoTime(), time, minTime = Long.MAX_VALUE, maxTime = 0, meanTime = 0, totalTime = 0;
+		int step = 0;
+		for (step = 0; (totalTime / 1000000000) < this.minMeasureTime; step++) {
+			beginTime = System.nanoTime();
+			ImageInputStream inStream = ImageIO.createImageInputStream(inFile);
+			try {
+				img = ViewImage.parseAndScale(post, true, urlString, ext, inStream);
+			} catch (Exception e) {
+				error = e;
+			}
+			time = System.nanoTime() - beginTime;
+			minTime = Math.min(minTime, time);
+			maxTime = Math.max(maxTime, time);
+			totalTime += time;
+		}
+		if (step > 0) {
+			meanTime = totalTime / step;
+		} else {
+			meanTime = totalTime;
+		}
+		PrintWriter resultsWriter = new PrintWriter(new FileWriter(new File(outDir, "results_perfs.txt"), true));
 		try {
-			long beginTime, time, minTime = Long.MAX_VALUE, maxTime = 0, meanTime = 0, totalTime = 0;
-			int step = 0;
-			for (step = 0; (totalTime / 1000000000) < this.minMeasureTime; step++) {
-				beginTime = System.nanoTime();
-				img = ViewImage.parseAndScale(post, true, urlString, ext, false, resourceb);
-				time = System.nanoTime() - beginTime;
-				if (img == null) {
-					break;
-				}
-				minTime = Math.min(minTime, time);
-				maxTime = Math.max(maxTime, time);
-				totalTime += time;
+			writeMessage("Measured ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext,
+					resultsWriter);
+			if(img == null) {
+				writeMessage("Image could not be rendered! Measurement show time needed to read and parse image data until error detection.", resultsWriter);
 			}
-			if (img == null) {
-				System.out.println("Image could not be rendered!");
-			} else {
-				meanTime = totalTime / step;
-				PrintWriter resultsWriter = new PrintWriter(new FileWriter(new File(outDir, "results_perfs.txt"), true));
-				try {
-					writeMessage("Measured ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : "
-							+ ext, resultsWriter);
-					writeMessage("Render total time (ms) : " + (totalTime) / 1000000 + " on " + step + " steps.",
-							resultsWriter);
-					writeMessage("Render mean time (ms) : " + (meanTime) / 1000000, resultsWriter);
-					writeMessage("Render min time (ms) : " + (minTime) / 1000000, resultsWriter);
-					writeMessage("Render max time (ms) : " + (maxTime) / 1000000, resultsWriter);
-				} finally {
-					resultsWriter.close();
-				}
-			}
-		} catch (Exception e) {
-			error = e;
+			writeMessage("Render total time (ms) : " + (totalTime) / 1000000 + " on " + step + " steps.",
+					resultsWriter);
+			writeMessage("Render mean time (ms) : " + (meanTime) / 1000000, resultsWriter);
+			writeMessage("Render min time (ms) : " + (minTime) / 1000000, resultsWriter);
+			writeMessage("Render max time (ms) : " + (maxTime) / 1000000, resultsWriter);
+		} finally {
+			resultsWriter.close();
 		}
 
 		if (img == null) {
@@ -218,7 +222,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 		System.out.println("Rendered images will be written in dir : " + outDir.getAbsolutePath());
 
 		List<File> processedFiles = new ArrayList<File>();
-		Map<String, Exception> failures = new TreeMap<>();
+		Map<String, Throwable> failures = new TreeMap<>();
 		try {
 			long time = System.nanoTime();
 			test.processFiles(ext, recursive, outDir, post, inFiles, processedFiles, failures);

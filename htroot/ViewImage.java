@@ -28,9 +28,12 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -42,11 +45,11 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.URLLicense;
-import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -74,8 +77,8 @@ public class ViewImage {
 	 *             when specified url is malformed, or a read/write error
 	 *             occured, or input or target image format is not supported.
 	 *             Sould end in a HTTP 500 error whose processing is more
-	 *             consistent across browsers than a response with zero
-	 *             content bytes.
+	 *             consistent across browsers than a response with zero content
+	 *             bytes.
 	 */
 	public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env)
 			throws IOException {
@@ -113,37 +116,79 @@ public class ViewImage {
 		if (image != null) {
 			encodedImage = new EncodedImage(image, ext, post.getBoolean("isStatic"));
 		} else {
-			byte[] resourceb = null;
-			if (url != null)
-				try {
-					String agentName = post.get("agentName", auth ? ClientIdentification.yacyIntranetCrawlerAgentName
-							: ClientIdentification.yacyInternetCrawlerAgentName);
-					ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
-					resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST,
-							BlacklistType.SEARCH, agent);
-				} catch (final IOException e) {
-					ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());
-					throw e;
-				}
-			boolean okToCache = true;
-			if (resourceb == null) {
-				/*
-				 * Throw an exception, wich will end in a HTTP 500 response,
-				 * better handled by browsers than an empty image
-				 */
-				throw new IOException("Image could not be loaded.");
-			}
 
 			String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
 			if (ext != null && ext.equalsIgnoreCase(urlExt) && isBrowserRendered(urlExt)) {
-				return new ByteArrayInputStream(resourceb);
+				return openInputStream(post, sb.loader, auth, url);
 			}
 
-			// read image
-			encodedImage = parseAndScale(post, auth, urlString, ext, okToCache, resourceb);
+			ImageInputStream imageInStream = null;
+			InputStream inStream = null;
+			/*
+			 * When opening a file, the most efficient is to open
+			 * ImageInputStream directly on file
+			 */
+			if (url.isFile()) {
+				imageInStream = ImageIO.createImageInputStream(url.getFSFile());
+			} else {
+				inStream = openInputStream(post, sb.loader, auth, url);
+				imageInStream = ImageIO.createImageInputStream(inStream);
+			}
+			try {
+				// read image
+				encodedImage = parseAndScale(post, auth, urlString, ext, imageInStream);
+			} finally {
+				/*
+				 * imageInStream.close() method doesn't close source input
+				 * stream
+				 */
+				if (inStream != null) {
+					try {
+						inStream.close();
+					} catch (IOException ignored) {
+					}
+				}
+			}
 		}
 
 		return encodedImage;
+	}
+
+	/**
+	 * Open input stream on image url using provided loader. All parameters must
+	 * not be null.
+	 * 
+	 * @param post
+	 *            post parameters.
+	 * @param loader.
+	 *            Resources loader.
+	 * @param auth
+	 *            true when user has credentials to load full images.
+	 * @param url
+	 *            image url.
+	 * @return an open input stream instance (don't forget to close it).
+	 * @throws IOException
+	 *             when a read/write error occured.
+	 */
+	private static InputStream openInputStream(final serverObjects post, final LoaderDispatcher loader,
+			final boolean auth, DigestURL url) throws IOException {
+		InputStream inStream = null;
+		if (url != null) {
+			try {
+				String agentName = post.get("agentName", auth ? ClientIdentification.yacyIntranetCrawlerAgentName
+						: ClientIdentification.yacyInternetCrawlerAgentName);
+				ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
+				inStream = loader.openInputStream(loader.request(url, false, true), CacheStrategy.IFEXIST,
+						BlacklistType.SEARCH, agent);
+			} catch (final IOException e) {
+				ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());
+				throw e;
+			}
+		}
+		if (inStream == null) {
+			throw new IOException("Input stream could no be open");
+		}
+		return inStream;
 	}
 
 	/**
@@ -165,31 +210,35 @@ public class ViewImage {
 	}
 
 	/**
-	 * Process resourceb byte array to try to produce an EncodedImage instance
-	 * eventually scaled and cropped depending on post parameters.
+	 * Process source image to try to produce an EncodedImage instance
+	 * eventually scaled and clipped depending on post parameters. When
+	 * processed, imageInStream is closed.
 	 * 
 	 * @param post
 	 *            request post parameters. Must not be null.
 	 * @param auth
 	 *            true when access rigths are OK.
 	 * @param urlString
-	 *            image source URL. Must not be null.
+	 *            image source URL as String. Must not be null.
 	 * @param ext
-	 *            image file extension. May be null.
-	 * @param okToCache
-	 *            true when image can be cached
-	 * @param resourceb
-	 *            byte array. Must not be null.
+	 *            target image file format. May be null.
+	 * @param imageInStream
+	 *            open stream on image content. Must not be null.
 	 * @return an EncodedImage instance.
 	 * @throws IOException
 	 *             when image could not be parsed or encoded to specified format
 	 */
 	protected static EncodedImage parseAndScale(serverObjects post, boolean auth, String urlString, String ext,
-			boolean okToCache, byte[] resourceb) throws IOException {
+			ImageInputStream imageInStream) throws IOException {
 		EncodedImage encodedImage = null;
 
-		Image image = ImageParser.parse(urlString, resourceb);
+		Image image = ImageIO.read(imageInStream);
 		if (image == null) {
+			try {
+				/* When a null image is returned, we have to close the stream */
+				imageInStream.close();
+			} catch (IOException ignoredException) {
+			}
 			/*
 			 * Throw an exception, wich will end in a HTTP 500 response, better
 			 * handled by browsers than an empty image
@@ -197,53 +246,52 @@ public class ViewImage {
 			throw new IOException("Image format is not supported.");
 		}
 
-		if (image != null) {
-			int maxwidth = post.getInt("maxwidth", 0);
-			int maxheight = post.getInt("maxheight", 0);
-			final boolean quadratic = post.containsKey("quadratic");
-			boolean isStatic = post.getBoolean("isStatic");
-			if (!auth || maxwidth != 0 || maxheight != 0) {
+		int maxwidth = post.getInt("maxwidth", 0);
+		int maxheight = post.getInt("maxheight", 0);
+		final boolean quadratic = post.containsKey("quadratic");
+		boolean isStatic = post.getBoolean("isStatic");
+		if (!auth || maxwidth != 0 || maxheight != 0) {
 
-				// find original size
-				int h = image.getHeight(null);
-				int w = image.getWidth(null);
+			// find original size
+			final int originWidth = image.getWidth(null);
+			final int originHeigth = image.getHeight(null);
 
-				// in case of not-authorized access shrink the image to
-				// prevent
-				// copyright problems, so that images are not larger than
-				// thumbnails
-				Dimension maxDimensions = calculateMaxDimensions(auth, w, h, maxwidth, maxheight);
+			// in case of not-authorized access shrink the image to
+			// prevent
+			// copyright problems, so that images are not larger than
+			// thumbnails
+			Dimension maxDimensions = calculateMaxDimensions(auth, originWidth, originHeigth, maxwidth, maxheight);
 
-				// if a quadratic flag is set, we cut the image out to be in
-				// quadratic shape
-				if (quadratic && w != h) {
-					image = makeSquare(image, h, w);
-					h = image.getHeight(null);
-					w = image.getWidth(null);
-				}
-
-				Dimension finalDimensions = calculateDimensions(w, h, maxDimensions);
-
-				if (w != finalDimensions.width && h != finalDimensions.height) {
-					image = scale(finalDimensions.width, finalDimensions.height, image);
-
-				}
-
-				if ((finalDimensions.width == 16) && (finalDimensions.height == 16) && okToCache) {
-					// this might be a favicon, store image to cache for
-					// faster
-					// re-load later on
-					iconcache.put(urlString, image);
-				}
+			// if a quadratic flag is set, we cut the image out to be in
+			// quadratic shape
+			int w = originWidth;
+			int h = originHeigth;
+			if (quadratic && originWidth != originHeigth) {
+				image = makeSquare(image, originHeigth, originWidth);
+				h = image.getHeight(null);
+				w = image.getWidth(null);
 			}
-			/*
-			 * An error can still occur when transcoding from buffered image to
-			 * target ext : in that case return null
-			 */
-			encodedImage = new EncodedImage(image, ext, isStatic);
-			if (encodedImage.getImage().length() == 0) {
-				throw new IOException("Image could not be encoded to format : " + ext);
+
+			Dimension finalDimensions = calculateDimensions(w, h, maxDimensions);
+
+			if (w != finalDimensions.width && h != finalDimensions.height) {
+				image = scale(finalDimensions.width, finalDimensions.height, image);
 			}
+
+			if (finalDimensions.width == 16 && finalDimensions.height == 16) {
+				// this might be a favicon, store image to cache for
+				// faster
+				// re-load later on
+				iconcache.put(urlString, image);
+			}
+		}
+		/*
+		 * An error can still occur when transcoding from buffered image to
+		 * target ext : in that case return null
+		 */
+		encodedImage = new EncodedImage(image, ext, isStatic);
+		if (encodedImage.getImage().length() == 0) {
+			throw new IOException("Image could not be encoded to format : " + ext);
 		}
 		return encodedImage;
 	}

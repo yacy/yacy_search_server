@@ -1,9 +1,7 @@
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
@@ -11,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.graphics.EncodedImage;
@@ -51,24 +52,6 @@ public class ViewImageTest {
 
 	/** Default output encoding format */
 	private static final String DEFAULT_OUT_EXT = "png";
-
-	/**
-	 * @param testFile
-	 *            file to load
-	 * @return testFile content as a bytes array
-	 * @throws IOException
-	 *             when an error occured while loading
-	 */
-	protected byte[] getBytes(File testFile) throws IOException {
-		InputStream inStream = new FileInputStream(testFile);
-		byte[] res = new byte[inStream.available()];
-		try {
-			inStream.read(res);
-		} finally {
-			inStream.close();
-		}
-		return res;
-	}
 
 	/**
 	 * @param args
@@ -207,7 +190,7 @@ public class ViewImageTest {
 	 * @param processedFiles
 	 *            all processed image files
 	 * @param failures
-	 *            map input file url which failed with eventual cause exception
+	 *            map input file url which failed with eventual cause error
 	 * @param time
 	 *            total processing time in nanoseconds
 	 * @param outDir
@@ -215,7 +198,7 @@ public class ViewImageTest {
 	 * @throws IOException
 	 *             when a write error occured writing the results file
 	 */
-	protected void displayResults(List<File> processedFiles, Map<String, Exception> failures, long time, File outDir)
+	protected void displayResults(List<File> processedFiles, Map<String, Throwable> failures, long time, File outDir)
 			throws IOException {
 		PrintWriter resultsWriter = new PrintWriter(new FileWriter(new File(outDir, "results.txt")));
 		try {
@@ -226,7 +209,7 @@ public class ViewImageTest {
 				} else {
 					writeMessage("Some input files could not be processed :", resultsWriter);
 				}
-				for (Entry<String, Exception> entry : failures.entrySet()) {
+				for (Entry<String, Throwable> entry : failures.entrySet()) {
 					writeMessage(entry.getKey(), resultsWriter);
 					if (entry.getValue() != null) {
 						writeMessage("cause : " + entry.getValue(), resultsWriter);
@@ -266,7 +249,7 @@ public class ViewImageTest {
 	 *             when an read/write error occured
 	 */
 	protected void processFiles(String ext, boolean recursive, File outDir, serverObjects post, File[] inFiles,
-			List<File> processedFiles, Map<String, Exception> failures) throws IOException {
+			List<File> processedFiles, Map<String, Throwable> failures) throws IOException {
 		for (File inFile : inFiles) {
 			if (inFile.isDirectory()) {
 				if (recursive) {
@@ -291,7 +274,7 @@ public class ViewImageTest {
 	 * @param inFile file image to process
 	 * @throws IOException when an read/write error occured
 	 */
-	protected void processFile(String ext, File outDir, serverObjects post, Map<String, Exception> failures, File inFile)
+	protected void processFile(String ext, File outDir, serverObjects post, Map<String, Throwable> failures, File inFile)
 			throws IOException {
 		/* Delete eventual previous result file */
 		File outFile = new File(outDir, inFile.getName() + "." + ext);
@@ -299,13 +282,13 @@ public class ViewImageTest {
 			outFile.delete();
 		}
 
-		byte[] resourceb = getBytes(inFile);
+		ImageInputStream inStream = ImageIO.createImageInputStream(inFile);
 		String urlString = inFile.getAbsolutePath();
 		EncodedImage img = null;
-		Exception error = null;
+		Throwable error = null;
 		try {
-			img = ViewImage.parseAndScale(post, true, urlString, ext, false, resourceb);
-		} catch (Exception e) {
+			img = ViewImage.parseAndScale(post, true, urlString, ext, inStream);
+		} catch (Throwable e) {
 			error = e;
 		}
 
@@ -383,7 +366,7 @@ public class ViewImageTest {
 		System.out.println("Rendered images will be written in dir : " + outDir.getAbsolutePath());
 
 		List<File> processedFiles = new ArrayList<File>();
-		Map<String, Exception> failures = new TreeMap<>();
+		Map<String, Throwable> failures = new TreeMap<>();
 		try {
 			long time = System.nanoTime();
 			test.processFiles(ext, recursive, outDir, post, inFiles, processedFiles, failures);
