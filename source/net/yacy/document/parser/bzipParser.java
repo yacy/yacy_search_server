@@ -82,7 +82,6 @@ public class bzipParser extends AbstractParser implements Parser {
             final BZip2CompressorInputStream zippedContent = new BZip2CompressorInputStream(source);
 
             tempFile = File.createTempFile("bunzip","tmp");
-            tempFile.deleteOnExit();
 
             // creating a temp file to store the uncompressed data
             final FileOutputStream out = new FileOutputStream(tempFile);

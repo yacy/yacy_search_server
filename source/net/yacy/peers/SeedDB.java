@@ -832,7 +832,6 @@ public final class SeedDB implements AlternativeDomainNames {
         try {
             // create a seed file which for uploading ...
             seedFile = File.createTempFile("seedFile",".txt", seedDB.myOwnSeedFile.getParentFile());
-            seedFile.deleteOnExit();
             if (Network.log.isFine()) Network.log.fine("SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             final ArrayList<String> uv = storeSeedList(seedFile, true);
 

@@ -229,7 +229,6 @@ public class odtParser extends AbstractParser implements Parser {
         try {
             // creating a tempfile
             dest = File.createTempFile("OpenDocument", ".odt");
-            dest.deleteOnExit();
 
             // copying the stream into a file
             FileUtils.copy(source, dest);

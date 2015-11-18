@@ -63,6 +63,7 @@ import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import org.apache.pdfbox.pdfparser.PDFParser;
 
 
 public class pdfParser extends AbstractParser implements Parser {
@@ -100,13 +101,13 @@ public class pdfParser extends AbstractParser implements Parser {
 
         // create a pdf parser
         PDDocument pdfDoc;
-        //final PDFParser pdfParser;
         try {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY); // the pdfparser is a big pain
-            pdfDoc = PDDocument.load(source);
-            //PDFParser pdfParser = new PDFParser(source);
-            //pdfParser.parse();
-            //pdfDoc = pdfParser.getPDDocument();
+            //pdfDoc = PDDocument.load(source);
+            final PDFParser pdfParser = new PDFParser(source);
+            pdfParser.setTempDirectory(new File(System.getProperty("java.io.tmpdir")));
+            pdfParser.parse();
+            pdfDoc = pdfParser.getPDDocument();
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         } finally {

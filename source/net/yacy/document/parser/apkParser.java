@@ -74,7 +74,6 @@ public class apkParser extends AbstractParser implements Parser  {
         Document[] docs = null;
         try {
             File tempFile = File.createTempFile("apk" + System.currentTimeMillis(), "jar");
-            tempFile.deleteOnExit();
             final FileOutputStream out = new FileOutputStream(tempFile);
             int read = 0;
             final byte[] data = new byte[1024];
