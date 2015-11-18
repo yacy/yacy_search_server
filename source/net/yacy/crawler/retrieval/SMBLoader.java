@@ -155,7 +155,6 @@ public class SMBLoader {
         // load the resource
         InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null);
         byte[] b = FileUtils.read(is);
-        is.close();
 
         // create response with loaded content
         final CrawlProfile profile = this.sb.crawler.get(request.profileHandle().getBytes());
