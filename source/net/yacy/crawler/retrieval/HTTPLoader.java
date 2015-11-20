@@ -191,7 +191,7 @@ public final class HTTPLoader {
 			 * When content is not large (less than 1MB), we have better cache it if cache is enabled and url is not local
 			 */
 			long contentLength = client.getHttpResponse().getEntity().getContentLength();
-			if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (1024 * 1024) && !url.isLocal()) {
+			if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (Response.CRAWLER_MAX_SIZE_TO_CACHE) && !url.isLocal()) {
 				byte[] content = HTTPClient.getByteArray(client.getHttpResponse().getEntity(), maxFileSize);
 
 				try {
