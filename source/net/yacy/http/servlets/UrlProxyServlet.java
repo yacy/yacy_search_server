@@ -252,13 +252,20 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
                 }
 
             // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
-            // TODO: use a template file for
             if (_stopProxyText != null) {
-                String httpsAllertMsg = "";
-                if (proxyurl.getProtocol().equalsIgnoreCase("https") && !request.getScheme().equalsIgnoreCase("https")) httpsAllertMsg = " &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>";
-                bde.prepend("<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
-                        + "<div align='center' style='font-size:11px; color:darkgrey;'><a href='" + proxyurl + "'>" + _stopProxyText + "</a> "
-                        + httpsAllertMsg + "</div></div>");
+
+                String httpsAlertMsg = "";
+                if (proxyurl.getProtocol().equalsIgnoreCase("https") && !request.getScheme().equalsIgnoreCase("https")) httpsAlertMsg = " &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>";
+
+                // use a template file, to allow full servlet functionallity header as iframe included
+                String hdrtemplate = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/proxymsg/urlproxyheader.html?url=" + proxyurl.toString();
+                hdrtemplate = "<iframe src='" + hdrtemplate +"' width='98%' height='50px' >"
+                        // alternative for no-frame supporting browser
+                        + "<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
+                        + "<div align='center' style='font-size:11px;'><a style='font-size:11px; color:black;' href='" + proxyurl + "'>" + _stopProxyText + "</a> "
+                        + httpsAlertMsg + "</div></div>"
+                        + "</iframe>";
+                bde.prepend(hdrtemplate); // put as 1st element in body
             }
 
             // 9 - deliver to client
