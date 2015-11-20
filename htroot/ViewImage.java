@@ -289,7 +289,7 @@ public class ViewImage {
 		 * An error can still occur when transcoding from buffered image to
 		 * target ext : in that case return null
 		 */
-		encodedImage = new EncodedImage((Image)image, ext, isStatic);
+		encodedImage = new EncodedImage(image, ext, isStatic);
 		if (encodedImage.getImage().length() == 0) {
 			throw new IOException("Image could not be encoded to format : " + ext);
 		}
