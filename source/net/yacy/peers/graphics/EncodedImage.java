@@ -22,6 +22,7 @@ package net.yacy.peers.graphics;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -56,6 +57,15 @@ public class EncodedImage {
     public EncodedImage(final BufferedImage bi, final String targetExt, final boolean isStatic) {
         this.extension = targetExt;
         this.image = RasterPlotter.exportImage(bi, targetExt);
+        if(this.image == null || this.image.length() == 0) {
+			/*
+			 * Buffered image rendering to targetExt format might fail because
+			 * no image writer support source image color model. Let's try
+			 * converting source image to RGB before rendering
+			 */
+        	BufferedImage converted = convertToRGB(bi);
+            this.image = RasterPlotter.exportImage(converted, targetExt);
+        }
         this.isStatic = isStatic;
         
     }
@@ -124,4 +134,25 @@ public class EncodedImage {
     public boolean isStatic() {
         return this.isStatic;
     }
+    
+	/**
+	 * If source source image colorspace is not RGB or ARGB, convert it to RGB or ARGB when alpha channel is present.
+	 * @param image source image. Must not be null.
+	 * @return converted image or source image when already RGB.
+	 */
+	public static BufferedImage convertToRGB(BufferedImage image) {
+		BufferedImage converted = image;
+		if(image.getType() != BufferedImage.TYPE_INT_RGB && image.getType() != BufferedImage.TYPE_INT_ARGB) {
+			int targetType;
+			if(image.getColorModel() != null && image.getColorModel().hasAlpha()) {
+				targetType = BufferedImage.TYPE_INT_ARGB;
+			} else {
+				targetType = BufferedImage.TYPE_INT_RGB;
+			}
+			BufferedImage target = new BufferedImage(image.getWidth(), image.getHeight(), targetType);
+			ColorConvertOp convertOP = new ColorConvertOp(null);
+			converted = convertOP.filter(image, target);
+		}
+		return converted;
+	}
 }

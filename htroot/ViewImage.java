@@ -232,7 +232,7 @@ public class ViewImage {
 			ImageInputStream imageInStream) throws IOException {
 		EncodedImage encodedImage = null;
 
-		Image image = ImageIO.read(imageInStream);
+		BufferedImage image = ImageIO.read(imageInStream);
 		if (image == null) {
 			try {
 				/* When a null image is returned, we have to close the stream */
@@ -289,7 +289,7 @@ public class ViewImage {
 		 * An error can still occur when transcoding from buffered image to
 		 * target ext : in that case return null
 		 */
-		encodedImage = new EncodedImage(image, ext, isStatic);
+		encodedImage = new EncodedImage((Image)image, ext, isStatic);
 		if (encodedImage.getImage().length() == 0) {
 			throw new IOException("Image could not be encoded to format : " + ext);
 		}
@@ -366,9 +366,9 @@ public class ViewImage {
 	 *            image to scale. Must not be null.
 	 * @return a scaled image
 	 */
-	protected static Image scale(final int width, final int height, Image image) {
+	protected static BufferedImage scale(final int width, final int height, final BufferedImage image) {
 		// compute scaled image
-		final Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
+		Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
 		final MediaTracker mediaTracker = new MediaTracker(new Container());
 		mediaTracker.addImage(scaled, 0);
 		try {
@@ -377,20 +377,40 @@ public class ViewImage {
 		}
 
 		// make a BufferedImage out of that
-		final BufferedImage i = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		try {
-			i.createGraphics().drawImage(scaled, 0, 0, width, height, null);
-			image = i;
+			result.createGraphics().drawImage(scaled, 0, 0, width, height, null);
 			// check outcome
-			final Raster raster = i.getData();
-			int[] pixel = new int[3];
+			final Raster raster = result.getData();
+			int[] pixel = new int[raster.getSampleModel().getNumBands()];
 			pixel = raster.getPixel(0, 0, pixel);
-			if (pixel[0] != 0 || pixel[1] != 0 || pixel[2] != 0)
-				image = i;
 		} catch (final Exception e) {
-			// java.lang.ClassCastException: [I cannot be cast to [B
+			/*
+			 * Exception may be caused by source image color model : try now to
+			 * convert to RGB before scaling
+			 */
+			try {
+				BufferedImage converted = EncodedImage.convertToRGB(image);
+				scaled = converted.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
+				mediaTracker.addImage(scaled, 1);
+				try {
+					mediaTracker.waitForID(1);
+				} catch (final InterruptedException e2) {
+				}
+				result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+				result.createGraphics().drawImage(scaled, 0, 0, width, height, null);
+
+				// check outcome
+				final Raster raster = result.getData();
+				int[] pixel = new int[result.getSampleModel().getNumBands()];
+				pixel = raster.getPixel(0, 0, pixel);
+			} catch (Exception e2) {
+				result = image;
+			}
+
+			ConcurrentLog.fine("ViewImage", "Image could not be scaled");
 		}
-		return image;
+		return result;
 	}
 
 	/**
@@ -402,7 +422,7 @@ public class ViewImage {
 	 * @param w
 	 * @return
 	 */
-	protected static Image makeSquare(Image image, final int h, final int w) {
+	protected static BufferedImage makeSquare(BufferedImage image, final int h, final int w) {
 		if (w > h) {
 			final BufferedImage dst = new BufferedImage(h, h, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = dst.createGraphics();
