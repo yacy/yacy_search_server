@@ -46,6 +46,13 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.lang.GeoLocation;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
+import com.drew.metadata.exif.GpsDirectory;
+
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -55,15 +62,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.util.FileUtils;
-
-import com.drew.imaging.jpeg.JpegMetadataReader;
-import com.drew.lang.GeoLocation;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
-import com.drew.metadata.exif.GpsDirectory;
 
 /**
  * Parser for images, bmp and jpeg and all supported by the Java Image I/O API
@@ -75,11 +74,9 @@ public class genericImageParser extends AbstractParser implements Parser {
     public genericImageParser() {
         super("Generic Image Parser");
 
-        SUPPORTED_EXTENSIONS.add("bmp");
         SUPPORTED_EXTENSIONS.add("jpe"); // not listed in ImageIO extension but sometimes uses for jpeg
         SUPPORTED_EXTENSIONS.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
-        SUPPORTED_MIME_TYPES.add("image/bmp");
         SUPPORTED_MIME_TYPES.add("image/jpg"); // this is in fact a 'wrong' mime type. We leave it here because that is a common error that occurs in the internet frequently
         SUPPORTED_MIME_TYPES.addAll(Arrays.asList(ImageIO.getReaderMIMETypes()));
     }
@@ -102,21 +99,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         String ext = MultiProtocolURL.getFileExtension(filename);
         double gpslat = 0;
         double gpslon = 0;        
-        if (mimeType.equals("image/bmp") || ext.equals("bmp")) {
-            byte[] b;
-            try {
-                b = FileUtils.read(source);
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-                throw new Parser.Failure(e.getMessage(), location);
-            }
-            if (bmpParser.isBMP(b)) {
-                final IMAGEMAP imap = bmpParser.parse(b);
-                ii = parseJavaImage(location, imap.getImage());
-            } else {
-                throw new Parser.Failure("Not supported by bmpParser", location);
-            }
-        } else if (mimeType.equals("image/jpeg") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("jpe")) {
+        if (mimeType.equals("image/jpeg") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("jpe")) {
             // use the exif parser from
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
             // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/

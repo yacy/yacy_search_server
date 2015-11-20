@@ -32,9 +32,17 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.twelvemonkeys.imageio.plugins.bmp.ICOImageReader;
+
 import net.yacy.cora.util.ConcurrentLog;
 
-
+/**
+*
+* @deprecated use ImageIO {@link ICOImageReader} from github.com/haraldk/TwelveMonkeys
+*             library (imageio-bmp-3.2.jar), which as better BMP format
+*             variants support, and support PNG encoded icons.
+*/
+@Deprecated
 public class icoParser {
 
     // this is a implementation of http://msdn2.microsoft.com/en-us/library/ms997538(d=printer).aspx

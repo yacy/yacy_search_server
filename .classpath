@@ -31,7 +31,11 @@
 	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.12.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.12.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.12.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.4.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="https://hc.apache.org/httpcomponents-core-ga/httpcore/apidocs"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/xmpcore-5.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar"/>
@@ -46,10 +50,18 @@
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.13-20150929.jar"/>
-	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="https://commons.apache.org/proper/commons-io/javadocs/api-release/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.12.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-client-9.2.13.v20150730.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-client-9.2.13.v20150730.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://download.eclipse.org/jetty/stable-9/apidocs/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/jetty-continuation-9.2.13.v20150730.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-deploy-9.2.13.v20150730.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-http-9.2.13.v20150730.jar"/>
@@ -97,6 +109,11 @@
 	<classpathentry kind="lib" path="lib/common-lang-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-core-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-metadata-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://search.maven.org/remotecontent?filepath=com/twelvemonkeys/imageio/imageio-tiff/3.2/imageio-tiff-3.2-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/imageio-bmp-3.2.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

@@ -20,82 +20,43 @@
 
 package net.yacy.document;
 
-import java.awt.Container;
 import java.awt.Image;
-import java.awt.MediaTracker;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.document.parser.images.bmpParser;
-import net.yacy.document.parser.images.icoParser;
 
 public class ImageParser {
 
-    public static final Image parse(final String filename, final byte[] source) {
-        final MediaTracker mediaTracker = new MediaTracker(new Container());
-        Image image = null;
-        if (((filename.endsWith(".ico")) || (filename.endsWith(".bmp"))) && (bmpParser.isBMP(source))) {
-            // parse image with BMP parser
-            image = bmpParser.parse(source).getImage();
-            if (image == null) {
-                if (ConcurrentLog.isFine("IMAGEPARSER")) {
-                    ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : bmpParser failed for " + filename);
-                }
-                return null;
-            }
-        } else if ((filename.endsWith(".ico")) && (icoParser.isICO(source))) {
-            // parse image with ICO parser
-            icoParser icoparser;
-            try {
-                icoparser = new icoParser(source);
-                image = icoparser.getImage(0);
-            } catch (final Throwable e) {
-    			if (ConcurrentLog.isFine("IMAGEPARSER")) {
-    				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : could not parse image " + filename, e);
-    			}
-            }
-            if (image == null) {
-                if (ConcurrentLog.isFine("IMAGEPARSER")) {
-                    ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : icoParser failed for " + filename);
-                }
-                return null;
-            }
-        } else {
-    		try {
-    			image = ImageIO.read(new ByteArrayInputStream(source));
-    		} catch(IOException e) {
-    			if (ConcurrentLog.isFine("IMAGEPARSER")) {
-    				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : could not parse image " + filename, e);
-    			}
-    		}
-            if (image == null) {
-                if (ConcurrentLog.isFine("IMAGEPARSER")) {
-                    ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : ImageIO failed for " + filename);
-                }
-                return null;
-            }
-        }
-        if (image == null) {
-        	return null;
-        }
+	/**
+	 * @param filename source image file url
+	 * @param source image content as bytes
+	 * @return an Image instance parsed from image content bytes, or null if no parser can handle image format or an error occured
+	 */
+	public static final Image parse(final String filename, final byte[] source) {
+		BufferedImage image = null;
+		try {
+			image = ImageIO.read(new ByteArrayInputStream(source));
+			/*
+			 * With ImageIO.read, image is already loaded as a complete BufferedImage, no need to wait
+			 * full loading with a MediaTracker
+			 */
+		} catch (IOException e) {
+			if (ConcurrentLog.isFine("IMAGEPARSER")) {
+				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : could not parse image " + filename, e);
+			}
+		}
+		if (image == null) {
+			if (ConcurrentLog.isFine("IMAGEPARSER")) {
+				ConcurrentLog.fine("IMAGEPARSER", "IMAGEPARSER.parse : ImageIO failed for " + filename);
+			}
+			return null;
+		}
 
-        final int handle = image.hashCode();
-        mediaTracker.addImage(image, handle);
-        try {
-            mediaTracker.waitForID(handle);
-            
-            if (mediaTracker.isErrorID(handle)) { // true if status ERRORD during loading (happens on not supported formats too)
-                mediaTracker.removeImage(image, handle);
-                image = null; // return null to indicate source not handled
-            }
-        } catch (final InterruptedException e) {
-            return null;
-        }
-
-        return image;
-    }
+		return image;
+	}
 
 }

@@ -32,8 +32,17 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.twelvemonkeys.imageio.plugins.bmp.BMPImageReader;
+
 import net.yacy.cora.util.ConcurrentLog;
 
+/**
+ *
+ * @deprecated use ImageIO {@link BMPImageReader} from github.com/haraldk/TwelveMonkeys
+ *             library (imageio-bmp-3.2.jar), which as better BMP format
+ *             variants support
+ */
+@Deprecated
 public class bmpParser {
 
     // this is a implementation of http://de.wikipedia.org/wiki/Windows_Bitmap

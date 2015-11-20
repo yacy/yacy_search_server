@@ -182,6 +182,7 @@
         <pathelement location="${lib}/httpcore-4.4.4.jar" />
         <pathelement location="${lib}/httpmime-4.5.1.jar" />
         <pathelement location="${lib}/icu4j-56_1.jar" />
+    	<pathelement location="${lib}/imageio-bmp-3.2.jar" />
     	<pathelement location="${lib}/imageio-core-3.2.jar" />
     	<pathelement location="${lib}/imageio-metadata-3.2.jar" />
     	<pathelement location="${lib}/imageio-tiff-3.2.jar" />
