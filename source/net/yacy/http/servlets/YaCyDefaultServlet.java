@@ -882,18 +882,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             if (tmp instanceof InputStream) {
-                final InputStream is = (InputStream) tmp;
-                final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
-                response.setContentType(mimeType);
-                response.setStatus(HttpServletResponse.SC_OK);
-                byte[] buffer = new byte[4096];
-                int l, size = 0;
-                try {
-                	while ((l = is.read(buffer)) > 0) {response.getOutputStream().write(buffer, 0, l); size += l;}
-                	response.setContentLength(size);
-                } finally {
-                	is.close();
-                }
+                writeInputStream(response, targetExt, (InputStream)tmp);
                 return;
             }
 
@@ -993,6 +982,35 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
     }
+
+
+    /**
+     * Write input stream content to response and close input stream.
+     * @param response servlet response. Must not be null.
+     * @param targetExt response file format
+     * @param tmp
+     * @throws IOException when a read/write error occured.
+     */
+	private void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)
+			throws IOException {
+		final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+		response.setContentType(mimeType);
+		response.setStatus(HttpServletResponse.SC_OK);
+		byte[] buffer = new byte[4096];
+		int l, size = 0;
+		try {
+			while ((l = inStream.read(buffer)) > 0) {
+				response.getOutputStream().write(buffer, 0, l);
+				size += l;
+			}
+			response.setContentLength(size);
+		} finally {
+			try {
+				inStream.close();
+			} catch(IOException ignored) {
+			}
+		}
+	}
     
     private static String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;
