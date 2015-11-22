@@ -77,7 +77,7 @@ public class HostQueue implements Balancer {
             final String hostName,
             final int port,
             final boolean onDemand,
-            final boolean exceed134217727) {
+            final boolean exceed134217727) throws MalformedURLException {
         this.onDemand = onDemand;
         this.exceed134217727 = exceed134217727;
         this.hostName = (hostName == null)  ? "localhost" : hostName; // might be null (file://) but hostqueue needs a name (for queue file)
@@ -89,7 +89,7 @@ public class HostQueue implements Balancer {
     public HostQueue (
             final File hostPath,
             final boolean onDemand,
-            final boolean exceed134217727) {
+            final boolean exceed134217727) throws MalformedURLException {
         this.onDemand = onDemand;
         this.exceed134217727 = exceed134217727;
         this.hostPath = hostPath;
@@ -102,7 +102,7 @@ public class HostQueue implements Balancer {
         init();
     }
     
-    private final void init() {
+    private final void init() throws MalformedURLException {
         try {
             if (this.hostName == null)
                 this.hostHash="";
@@ -111,7 +111,12 @@ public class HostQueue implements Balancer {
         } catch (MalformedURLException e) {
             this.hostHash = "";
         }
-        if (!(this.hostPath.exists())) this.hostPath.mkdirs();
+        if (!(this.hostPath.exists())) {
+            this.hostPath.mkdirs();
+            if (!this.hostPath.exists()) { // check if directory created (if not, likely a name violation)
+                throw new MalformedURLException("hostPath could not be created: " + this.hostPath.toString());
+            }
+        }
         this.depthStacks = new TreeMap<Integer, Index>();
         int size = openAllStacks();
         if (log.isInfo()) log.info("opened HostQueue " + this.hostPath.getAbsolutePath() + " with " + size + " urls.");
