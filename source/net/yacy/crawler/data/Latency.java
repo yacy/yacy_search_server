@@ -343,9 +343,15 @@ public class Latency {
         public long robotsDelay() {
             return this.robotsMinDelay;
         }
+        /**
+         * Used by crawler to calculate additional access delay time for often accessed hosts
+         * (access count > 10000 returns half of the range parameter) linear incrementet from 0 up to (range div 2)
+         * @param range the current delay time
+         * @return the additional delay in ms (max: range div 2)
+         */
         public int flux(final int range) {
-            return this.count.get() >= 10000 ? range * Math.min(5000, this.count.get()) / 10000 : range / (10000 - this.count.get());
+            return this.count.get() >= 10000 ? range >> 1 : (range * this.count.get() / 10000) >> 1;
         }
     }
-
+    
 }
