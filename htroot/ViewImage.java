@@ -26,13 +26,17 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -232,10 +236,11 @@ public class ViewImage {
 			ImageInputStream imageInStream) throws IOException {
 		EncodedImage encodedImage = null;
 
-		BufferedImage image = ImageIO.read(imageInStream);
-		if (image == null) {
+		// BufferedImage image = ImageIO.read(imageInStream);
+		Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInStream);
+		if (!readers.hasNext()) {
 			try {
-				/* When a null image is returned, we have to close the stream */
+				/* When no reader can be found, we have to close the stream */
 				imageInStream.close();
 			} catch (IOException ignoredException) {
 			}
@@ -245,16 +250,20 @@ public class ViewImage {
 			 */
 			throw new IOException("Image format is not supported.");
 		}
+		ImageReader reader = readers.next();
+		reader.setInput(imageInStream, true, true);
 
 		int maxwidth = post.getInt("maxwidth", 0);
 		int maxheight = post.getInt("maxheight", 0);
 		final boolean quadratic = post.containsKey("quadratic");
 		boolean isStatic = post.getBoolean("isStatic");
+		BufferedImage image = null;
+		boolean returnRaw = true;
 		if (!auth || maxwidth != 0 || maxheight != 0) {
 
 			// find original size
-			final int originWidth = image.getWidth(null);
-			final int originHeigth = image.getHeight(null);
+			final int originWidth = reader.getWidth(0);
+			final int originHeigth = reader.getHeight(0);
 
 			// in case of not-authorized access shrink the image to
 			// prevent
@@ -267,33 +276,113 @@ public class ViewImage {
 			int w = originWidth;
 			int h = originHeigth;
 			if (quadratic && originWidth != originHeigth) {
-				image = makeSquare(image, originHeigth, originWidth);
-				h = image.getHeight(null);
-				w = image.getWidth(null);
+				Rectangle square = getMaxSquare(originHeigth, originWidth);
+				h = square.height;
+				w = square.width;
 			}
 
 			Dimension finalDimensions = calculateDimensions(w, h, maxDimensions);
 
-			if (w != finalDimensions.width && h != finalDimensions.height) {
+			if (originWidth != finalDimensions.width || originHeigth != finalDimensions.height) {
+				returnRaw = false;
+				image = readImage(reader);
+				if (quadratic && originWidth != originHeigth) {
+					image = makeSquare(image);
+				}
 				image = scale(finalDimensions.width, finalDimensions.height, image);
 			}
-
 			if (finalDimensions.width == 16 && finalDimensions.height == 16) {
 				// this might be a favicon, store image to cache for
 				// faster
 				// re-load later on
+				if (image == null) {
+					returnRaw = false;
+					image = readImage(reader);
+				}
 				iconcache.put(urlString, image);
 			}
 		}
-		/*
-		 * An error can still occur when transcoding from buffered image to
-		 * target ext : in that case return null
-		 */
-		encodedImage = new EncodedImage(image, ext, isStatic);
-		if (encodedImage.getImage().length() == 0) {
-			throw new IOException("Image could not be encoded to format : " + ext);
+		/* Image do not need to be scaled or cropped */
+		if (returnRaw) {
+			if (!reader.getFormatName().equalsIgnoreCase(ext) || imageInStream.getFlushedPosition() != 0) {
+				/*
+				 * image parsing and reencoding is only needed when source image
+				 * and target formats differ, or when first bytes have been discarded
+				 */
+				returnRaw = false;
+				image = readImage(reader);
+			}
 		}
+		if (returnRaw) {
+			byte[] imageData = readRawImage(imageInStream);
+			encodedImage = new EncodedImage(imageData, ext, isStatic);
+		} else {
+			/*
+			 * An error can still occur when transcoding from buffered image to
+			 * target ext : in that case return null
+			 */
+			encodedImage = new EncodedImage(image, ext, isStatic);
+			if (encodedImage.getImage().length() == 0) {
+				throw new IOException("Image could not be encoded to format : " + ext);
+			}
+		}
+
 		return encodedImage;
+	}
+
+	/**
+	 * Read image using specified reader and close ImageInputStream source.
+	 * Input must have bean set before using
+	 * {@link ImageReader#setInput(Object)}
+	 * 
+	 * @param reader
+	 *            image reader. Must not be null.
+	 * @return buffered image
+	 * @throws IOException
+	 *             when an error occured
+	 */
+	private static BufferedImage readImage(ImageReader reader) throws IOException {
+		BufferedImage image;
+		try {
+			image = reader.read(0);
+		} finally {
+			reader.dispose();
+			Object input = reader.getInput();
+			if (input instanceof ImageInputStream) {
+				try {
+					((ImageInputStream) input).close();
+				} catch (IOException ignoredException) {
+				}
+			}
+		}
+		return image;
+	}
+
+	/**
+	 * Read image data without parsing.
+	 * 
+	 * @param inStream
+	 *            image source. Must not be null. First bytes must not have been marked discarded ({@link ImageInputStream#getFlushedPosition()} must be zero)
+	 * @return image data as bytes
+	 * @throws IOException
+	 *             when a read/write error occured.
+	 */
+	private static byte[] readRawImage(ImageInputStream inStream) throws IOException {
+		byte[] buffer = new byte[4096];
+		int l = 0;
+		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+		inStream.seek(0);
+		try {
+			while ((l = inStream.read(buffer)) >= 0) {
+				outStream.write(buffer, 0, l);
+			}
+			return outStream.toByteArray();
+		} finally {
+			try {
+				inStream.close();
+			} catch (IOException ignored) {
+			}
+		}
 	}
 
 	/**
@@ -414,28 +503,54 @@ public class ViewImage {
 	}
 
 	/**
+	 * 
+	 * @param h
+	 *            image height
+	 * @param w
+	 *            image width
+	 * @return max square area fitting inside dimensions
+	 */
+	protected static Rectangle getMaxSquare(final int h, final int w) {
+		Rectangle square;
+		if (w > h) {
+			final int offset = (w - h) / 2;
+			square = new Rectangle(offset, 0, h, h);
+		} else {
+			final int offset = (h - w) / 2;
+			square = new Rectangle(0, offset, w, w);
+		}
+		return square;
+	}
+
+	/**
 	 * Crop image to make a square
 	 * 
 	 * @param image
 	 *            image to crop
-	 * @param h
-	 * @param w
 	 * @return
 	 */
-	protected static BufferedImage makeSquare(BufferedImage image, final int h, final int w) {
+	protected static BufferedImage makeSquare(BufferedImage image) {
+		final int w = image.getWidth();
+		final int h = image.getHeight();
 		if (w > h) {
 			final BufferedImage dst = new BufferedImage(h, h, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = dst.createGraphics();
 			final int offset = (w - h) / 2;
-			g.drawImage(image, 0, 0, h - 1, h - 1, offset, 0, h + offset, h - 1, null);
-			g.dispose();
+			try {
+				g.drawImage(image, 0, 0, h - 1, h - 1, offset, 0, h + offset, h - 1, null);
+			} finally {
+				g.dispose();
+			}
 			image = dst;
 		} else {
 			final BufferedImage dst = new BufferedImage(w, w, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = dst.createGraphics();
 			final int offset = (h - w) / 2;
-			g.drawImage(image, 0, 0, w - 1, w - 1, 0, offset, w - 1, w + offset, null);
-			g.dispose();
+			try {
+				g.drawImage(image, 0, 0, w - 1, w - 1, 0, offset, w - 1, w + offset, null);
+			} finally {
+				g.dispose();
+			}
 			image = dst;
 		}
 		return image;

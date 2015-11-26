@@ -34,6 +34,26 @@ public class EncodedImage {
     private ByteBuffer image;
     private String extension;
     private boolean isStatic;
+    
+    /**
+     * Instanciates an encoded image with raw image data. 
+     * Image ByteBuffer will be empty when encoding format is not supported.
+     * @param imageData the image data encode in format specified. Must not be null.
+     * @param format the image format of imageData. Must not be null.
+     * @param isStatic shall be true if the image will never change, false if not
+     * @throws IllegalArgumentException when imageData or format parameter is null
+     */
+    public EncodedImage(final byte[] imageData, final String format, final boolean isStatic) {
+    	if(imageData == null) {
+    		throw new IllegalArgumentException("imageData parameter is null");
+    	}
+    	if(format == null) {
+    		throw new IllegalArgumentException("format parameter is null");
+    	}
+        this.image = new ByteBuffer(imageData);
+        this.extension = format;
+        this.isStatic = isStatic;
+    }
 
     /**
      * set an encoded image; prefer this over methods with Image-source objects because png generation is faster when done from RasterPlotter sources. 
