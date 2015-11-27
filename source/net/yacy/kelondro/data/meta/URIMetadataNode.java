@@ -130,7 +130,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             this.setField(CollectionSchema.fresh_date_dt.name(), new Date());
         }
         this.setField(CollectionSchema.referrer_id_s.name(), prop.getProperty("referrer", ""));
-        this.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", ""));
+        // this.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", "")); // always 0 (not used / calculated)
         this.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
         this.setField(CollectionSchema.wordcount_i.name(), Integer.parseInt(prop.getProperty("wc", "0")));
         final String dt = prop.getProperty("dt", "t");
@@ -531,7 +531,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             s.append(",load=").append(formatter.format(this.loaddate()));
             s.append(",fresh=").append(formatter.format(this.freshdate()));
             s.append(",referrer=").append(this.referrerHash() == null ? "" : ASCII.String(this.referrerHash()));
-            s.append(",md5=").append(this.md5());
+            //s.append(",md5=").append(this.md5()); // md5 never calculated / not used, also removed from this(prop) 2015-11-27
             s.append(",size=").append(this.filesize());
             s.append(",wc=").append(this.wordCount());
             final char dt = this.doctype();

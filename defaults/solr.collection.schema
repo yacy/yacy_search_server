@@ -51,8 +51,8 @@ title
 ## id of the host, a 6-byte hash that is part of the document id (mandatory field)
 host_id_s
 
-## the md5 of the raw source (mandatory field)
-md5_s
+## the md5 of the raw source
+#md5_s
 
 ## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t
 exact_signature_l
