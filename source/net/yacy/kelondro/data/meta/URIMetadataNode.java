@@ -335,6 +335,10 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return x;
     }
 
+    /**
+     * @deprecated obsolete, never assigned a value
+     */
+    @Deprecated
     public String md5() {
         return getString(CollectionSchema.md5_s);
     }

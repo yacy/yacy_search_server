@@ -402,7 +402,6 @@ public class ViewFile {
             prop.putHTML("error_dc_creator", "");
             prop.putHTML("error_dc_publisher", "");
             prop.putHTML("error_dc_subject", "");
-            prop.put("error_md5", "");
             prop.put("error_lat", "");
             prop.put("error_lon", "");
             prop.put("error_language", "");
@@ -424,7 +423,6 @@ public class ViewFile {
             prop.putHTML("error_dc_creator", urlEntry.dc_creator());
             prop.putHTML("error_dc_publisher", urlEntry.dc_publisher());
             prop.putHTML("error_dc_subject", urlEntry.dc_subject());
-            prop.put("error_md5", urlEntry.md5());
             prop.put("error_lat", urlEntry.lat());
             prop.put("error_lon", urlEntry.lon());
             prop.put("error_language", urlEntry.language());
