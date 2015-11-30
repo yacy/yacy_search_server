@@ -1,5 +1,3 @@
-package proxymsg;
-
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
