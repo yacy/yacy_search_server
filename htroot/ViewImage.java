@@ -107,8 +107,13 @@ public class ViewImage {
 		}
 
 		if ((url == null) && (urlLicense.length() > 0)) {
-			urlString = URLLicense.releaseLicense(urlLicense);
-			url = new DigestURL(urlString);
+                    urlString = URLLicense.releaseLicense(urlLicense);
+                    if (urlString != null) {
+                        url = new DigestURL(urlString);
+                    } else { // license is gone (e.g. released/remove in prev calls)
+                        ConcurrentLog.fine("ViewImage", "image urlLicense not found key=" + urlLicense);
+                        return null; //TODO: maybe favicon accessed again, check iconcache
+                    }
 		}
 
 		// get the image as stream
