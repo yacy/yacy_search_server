@@ -47,7 +47,7 @@
   <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
   <property name="test" location="test"/>
-  <property name="langstats" location="langstats"/>
+  <property name="langdetect" location="langdetect"/>
   <property name="locales" location="locales"/>
   <property name="skins" location="skins"/>
   <property name="release" location="RELEASE"/>
@@ -227,6 +227,8 @@
     	<pathelement location="${lib}/lucene-queryparser-5.3.1.jar" />
     	<pathelement location="${lib}/lucene-spatial-5.3.1.jar" />
     	<pathelement location="${lib}/lucene-suggest-5.3.1.jar" />
+	<pathelement location="${lib}/jsonic-1.2.0.jar" />
+	<pathelement location="${lib}/langdetect.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.8.1.jar" />
     	<pathelement location="${lib}/noggit-0.5.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
@@ -389,8 +391,8 @@
     </copy>
 
     <!-- copy language statistics files -->
-    <copy todir="${release_main}/langstats">
-      <fileset dir="${langstats}">
+    <copy todir="${release_main}/langdetect">
+      <fileset dir="${langdetect}">
         <include name="*"/>
       </fileset>
     </copy>
@@ -576,8 +578,8 @@
     </copy>
 
     <!-- copy language statistics files -->
-    <copy todir="${DESTDIR}/usr/share/yacy/langstats">
-      <fileset dir="${langstats}">
+    <copy todir="${DESTDIR}/usr/share/yacy/langdetect">
+      <fileset dir="${langdetect}">
         <include name="*"/>
       </fileset>
     </copy>

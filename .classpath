@@ -100,5 +100,7 @@
 	<classpathentry kind="lib" path="lib/imageio-metadata-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-bmp-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/jsonic-1.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/langdetect.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
