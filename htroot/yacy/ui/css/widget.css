@@ -27,7 +27,7 @@ a.favicon {
   	color:#20A020;
   	text-decoration:none;
 }
-img.favicon{  
+img.favicon, object.favicon {  
   width: 16px;
   height: 16px;
   vertical-align: middle;

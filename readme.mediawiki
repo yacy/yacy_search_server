@@ -55,7 +55,7 @@ all these locations into one search result.
 You need java 1.7 or later to run YaCy, nothing else.
 Please download it from http://www.java.com
 
-YaCy also runs on IcedTea6.
+YaCy also runs on IcedTea7.
 See http://icedtea.classpath.org
 
 NO OTHER SOFTWARE IS REQUIRED!

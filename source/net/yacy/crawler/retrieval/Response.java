@@ -69,6 +69,9 @@ public class Response {
     private        byte[]             content;
     private        int                status;          // tracker indexing status, see status defs below
     private final  boolean            fromCache;
+    
+    /** Maximum file size to put in cache for crawler */
+    public static final long CRAWLER_MAX_SIZE_TO_CACHE = 10 * 1024L * 1024L;
 
     /**
      * doctype calculation by file extension
@@ -387,7 +390,7 @@ public class Response {
     public String shallStoreCacheForCrawler() {
         // check storage size: all files will be handled in RAM before storage, so they must not exceed
         // a given size, which we consider as 1MB
-        if (size() > 10 * 1024L * 1024L) return "too_large_for_caching_" + size();
+        if (size() > CRAWLER_MAX_SIZE_TO_CACHE) return "too_large_for_caching_" + size();
 
         // check status code
         if (!validResponseStatus()) {

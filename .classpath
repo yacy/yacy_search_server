@@ -99,5 +99,6 @@
 	<classpathentry kind="lib" path="lib/imageio-core-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-metadata-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-bmp-3.2.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

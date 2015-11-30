@@ -268,8 +268,24 @@ public final class FileUtils {
         copy(new ByteArrayInputStream(source), dest);
     }
 
+    /**
+     * Read fully source stream and close it.
+     * @param source must not be null
+     * @return source content as a byte array.
+     * @throws IOException when a read/write error occured
+     */
     public static byte[] read(final InputStream source) throws IOException {
-        return read(source, -1);
+    	byte[] content;
+    	try {
+    		content = read(source, -1);
+    	} finally {
+    		/* source input stream must be closed here in all cases */
+    		try {
+    			source.close();
+    		} catch(IOException ignoredException) {
+    		}
+    	}
+    	return content;
     }
 
     public static byte[] read(final InputStream source, final int count) throws IOException {

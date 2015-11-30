@@ -712,31 +712,62 @@ public class HTTPClient {
         }
     }
 
-    private static byte[] getByteArray(final HttpEntity entity, final int maxBytes) throws IOException {
-        final InputStream instream = entity.getContent();
-        if (instream == null) {
-            return null;
-        }
-        try {
-            int i = maxBytes < 0 ?  (int)entity.getContentLength() : Math.min(maxBytes, (int)entity.getContentLength());
-            if (i < 0) {
-                i = 4096;
-            }
-            final ByteArrayBuffer buffer = new ByteArrayBuffer(i);
-            byte[] tmp = new byte[4096];
-            int l, sum = 0;
-            while((l = instream.read(tmp)) != -1) {
-            	sum += l;
-            	if (maxBytes >= 0 && sum > maxBytes) throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
-                buffer.append(tmp, 0, l);
-            }
-            return buffer.toByteArray();
-        } catch (final OutOfMemoryError e) {
-            throw new IOException(e.toString());
-        } finally {
-            instream.close();
-        }
-    }
+    /**
+     * Return entity content loaded as a byte array
+     * @param entity HTTP entity
+     * @param maxBytes maximum bytes to read. -1 means no maximum limit.
+     * @return content bytes or null when entity content is null.
+     * @throws IOException when a read error occured or content length is over maxBytes
+     */
+	public static byte[] getByteArray(final HttpEntity entity, int maxBytes) throws IOException {
+		final InputStream instream = entity.getContent();
+		if (instream == null) {
+			return null;
+		}
+		try {
+			long contentLength = entity.getContentLength();
+			/*
+			 * When no maxBytes is specified, the default limit is
+			 * Integer.MAX_VALUE as a byte array size can not be over
+			 */
+			if (maxBytes < 0) {
+				maxBytes = Integer.MAX_VALUE;
+			}
+			/*
+			 * Content length may already be known now : check it before
+			 * downloading
+			 */
+			if (contentLength > maxBytes) {
+				throw new IOException("Content to download exceed maximum value of " + maxBytes + " bytes");
+			}
+			int initialSize = Math.min(maxBytes, (int) contentLength);
+			/* ContentLenght may be negative because unknown for now */
+			if (initialSize < 0) {
+				initialSize = 4096;
+			}
+			final ByteArrayBuffer buffer = new ByteArrayBuffer(initialSize);
+			byte[] tmp = new byte[4096];
+			int l = 0;
+			/* Sum is a long to enable check against Integer.MAX_VALUE */
+			long sum = 0;
+			while ((l = instream.read(tmp)) != -1) {
+				sum += l;
+				/*
+				 * Check total length while downloading as content lenght might
+				 * not be known at beginning
+				 */
+				if (sum > maxBytes) {
+					throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
+				}
+				buffer.append(tmp, 0, l);
+			}
+			return buffer.toByteArray();
+		} catch (final OutOfMemoryError e) {
+			throw new IOException(e.toString());
+		} finally {
+			instream.close();
+		}
+	}
 
     private void setHeaders(final HttpUriRequest httpUriRequest) {
     	if (this.headers != null) {
