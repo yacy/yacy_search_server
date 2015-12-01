@@ -851,6 +851,13 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else if (tmp instanceof EncodedImage) {
                     final EncodedImage yp = (EncodedImage) tmp;
                     result = yp.getImage();
+                    /** When encodedImage is empty, return a code 500 rather than only an empty response 
+                     * as it is better handled across different browsers */
+                    if(result == null || result.length() == 0) {
+                    	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    	result.close();
+                    	return;
+                    }
                     if (yp.isStatic()) {
                         response.setDateHeader(HeaderFramework.EXPIRES, now + 600000); // expires in ten minutes
                     }
@@ -1004,6 +1011,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
 				size += l;
 			}
 			response.setContentLength(size);
+		} catch(IOException e){
+			/** No need to log full stack trace (in most cases resource is not available because of a network error) */
+			ConcurrentLog.fine("FILEHANDLER", "YaCyDefaultServlet: resource content stream could not be written to response.");
+        	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	return;
 		} finally {
 			try {
 				inStream.close();

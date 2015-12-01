@@ -121,26 +121,30 @@ public class ViewImage {
 			encodedImage = new EncodedImage(image, ext, post.getBoolean("isStatic"));
 		} else {
 
-			String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
-			if (ext != null && ext.equalsIgnoreCase(urlExt) && isBrowserRendered(urlExt)) {
-				return openInputStream(post, sb.loader, auth, url);
-			}
-
 			ImageInputStream imageInStream = null;
 			InputStream inStream = null;
-			/*
-			 * When opening a file, the most efficient is to open
-			 * ImageInputStream directly on file
-			 */
-			if (url.isFile()) {
-				imageInStream = ImageIO.createImageInputStream(url.getFSFile());
-			} else {
-				inStream = openInputStream(post, sb.loader, auth, url);
-				imageInStream = ImageIO.createImageInputStream(inStream);
-			}
 			try {
+				String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
+				if (ext != null && ext.equalsIgnoreCase(urlExt) && isBrowserRendered(urlExt)) {
+					return openInputStream(post, sb.loader, auth, url);
+				}
+				/*
+				 * When opening a file, the most efficient is to open
+				 * ImageInputStream directly on file
+				 */
+				if (url.isFile()) {
+					imageInStream = ImageIO.createImageInputStream(url.getFSFile());
+				} else {
+					inStream = openInputStream(post, sb.loader, auth, url);
+					imageInStream = ImageIO.createImageInputStream(inStream);
+				}
 				// read image
 				encodedImage = parseAndScale(post, auth, urlString, ext, imageInStream);
+			} catch(Exception e) {
+				/* Exceptions are not propagated here : many error causes are possible, network errors, 
+				 * incorrect or unsupported format, bad ImageIO plugin...
+				 * Instead return an empty EncodedImage. Caller is responsible for handling this correctly */
+				encodedImage = new EncodedImage(new byte[0], ext, true);
 			} finally {
 				/*
 				 * imageInStream.close() method doesn't close source input
@@ -172,7 +176,7 @@ public class ViewImage {
 	 *            image url.
 	 * @return an open input stream instance (don't forget to close it).
 	 * @throws IOException
-	 *             when a read/write error occured.
+	 *             when a read/write error occured. 
 	 */
 	private static InputStream openInputStream(final serverObjects post, final LoaderDispatcher loader,
 			final boolean auth, DigestURL url) throws IOException {
@@ -185,7 +189,8 @@ public class ViewImage {
 				inStream = loader.openInputStream(loader.request(url, false, true), CacheStrategy.IFEXIST,
 						BlacklistType.SEARCH, agent);
 			} catch (final IOException e) {
-				ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());
+				/** No need to log full stack trace (in most cases resource is not available because of a network error) */
+				ConcurrentLog.fine("ViewImage", "cannot load image. URL : " + url);
 				throw e;
 			}
 		}
@@ -230,11 +235,11 @@ public class ViewImage {
 	 *            open stream on image content. Must not be null.
 	 * @return an EncodedImage instance.
 	 * @throws IOException
-	 *             when image could not be parsed or encoded to specified format
+	 *             when image could not be parsed or encoded to specified format.
 	 */
 	protected static EncodedImage parseAndScale(serverObjects post, boolean auth, String urlString, String ext,
 			ImageInputStream imageInStream) throws IOException {
-		EncodedImage encodedImage = null;
+		EncodedImage encodedImage;
 
 		// BufferedImage image = ImageIO.read(imageInStream);
 		Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInStream);
@@ -244,11 +249,13 @@ public class ViewImage {
 				imageInStream.close();
 			} catch (IOException ignoredException) {
 			}
+			String errorMessage = "Image format (" + ext + ") is not supported.";
+			ConcurrentLog.fine("ViewImage", errorMessage + "Image URL : " + urlString);
 			/*
 			 * Throw an exception, wich will end in a HTTP 500 response, better
 			 * handled by browsers than an empty image
 			 */
-			throw new IOException("Image format is not supported.");
+			throw new IOException(errorMessage);
 		}
 		ImageReader reader = readers.next();
 		reader.setInput(imageInStream, true, true);
@@ -319,11 +326,13 @@ public class ViewImage {
 		} else {
 			/*
 			 * An error can still occur when transcoding from buffered image to
-			 * target ext : in that case return null
+			 * target ext : in that case EncodedImage.getImage() is empty.
 			 */
 			encodedImage = new EncodedImage(image, ext, isStatic);
 			if (encodedImage.getImage().length() == 0) {
-				throw new IOException("Image could not be encoded to format : " + ext);
+				String errorMessage = "Image could not be encoded to format : " + ext;
+				ConcurrentLog.fine("ViewImage", errorMessage + ". Image URL : " + urlString);
+				throw new IOException(errorMessage);
 			}
 		}
 
