@@ -76,10 +76,11 @@ public class ViewImage {
 	 * @param env
 	 *            environment
 	 * @return an {@link EncodedImage} instance encoded in format specified in
-	 *         post, or an InputStream pointing to original image data
+	 *         post, or an InputStream pointing to original image data. 
+	 *         Return and EncodedImage with empty data when image format is not supported, 
+	 *         a read/write or any other error occured while loading resource.  
 	 * @throws IOException
-	 *             when specified url is malformed, or a read/write error
-	 *             occured, or input or target image format is not supported.
+	 *             when specified url is malformed.
 	 *             Sould end in a HTTP 500 error whose processing is more
 	 *             consistent across browsers than a response with zero content
 	 *             bytes.
@@ -107,13 +108,15 @@ public class ViewImage {
 		}
 
 		if ((url == null) && (urlLicense.length() > 0)) {
-                    urlString = URLLicense.releaseLicense(urlLicense);
-                    if (urlString != null) {
-                        url = new DigestURL(urlString);
-                    } else { // license is gone (e.g. released/remove in prev calls)
-                        ConcurrentLog.fine("ViewImage", "image urlLicense not found key=" + urlLicense);
-                        return null; //TODO: maybe favicon accessed again, check iconcache
-                    }
+			urlString = URLLicense.releaseLicense(urlLicense);
+			if (urlString != null) {
+				url = new DigestURL(urlString);
+			} else { // license is gone (e.g. released/remove in prev calls)
+				ConcurrentLog.fine("ViewImage", "image urlLicense not found key=" + urlLicense);
+				/* Return an empty EncodedImage. Caller is responsible for handling this correctly (500 status code response) */
+				return new EncodedImage(new byte[0], ext, post.getBoolean("isStatic")); // TODO: maybe favicon accessed again, check
+								// iconcache
+			}
 		}
 
 		// get the image as stream
@@ -148,8 +151,8 @@ public class ViewImage {
 			} catch(Exception e) {
 				/* Exceptions are not propagated here : many error causes are possible, network errors, 
 				 * incorrect or unsupported format, bad ImageIO plugin...
-				 * Instead return an empty EncodedImage. Caller is responsible for handling this correctly */
-				encodedImage = new EncodedImage(new byte[0], ext, true);
+				 * Instead return an empty EncodedImage. Caller is responsible for handling this correctly (500 status code response) */
+				encodedImage = new EncodedImage(new byte[0], ext, post.getBoolean("isStatic"));
 			} finally {
 				/*
 				 * imageInStream.close() method doesn't close source input
