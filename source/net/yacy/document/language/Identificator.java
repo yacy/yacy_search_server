@@ -64,7 +64,8 @@ public final class Identificator {
             if(probabilities.isEmpty()) return null;
             this.language = this.detector.getProbabilities().get(0);
         } catch (LangDetectException e) {
-            ConcurrentLog.logException(e);
+            // this contains mostly the message "no features in text"
+            //ConcurrentLog.logException(e);
             return null;
         }
         // Return language only if probability is higher than 30% to account for missing language profiles
