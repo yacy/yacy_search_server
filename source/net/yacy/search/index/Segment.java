@@ -506,11 +506,13 @@ public class Segment {
                 if (!language.equals(url.language())) {
                     // see if we have a hint in the url that the statistic was right
                     final String u = urlNormalform.toLowerCase();
-                    if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
+                    String ISO639_country = ISO639.country(language);
+                    if (u.contains("/" + language + "/") ||
+                        (ISO639_country != null && u.contains("/" + ISO639.country(language).toLowerCase() + "/"))) {
+                        // this is a strong hint that the statistics was in fact correct
+                    } else {
                         // no confirmation using the url, use the TLD
                         language = url.language();
-                    } else {
-                        // this is a strong hint that the statistics was in fact correct
                     }
                 }
             } else {
