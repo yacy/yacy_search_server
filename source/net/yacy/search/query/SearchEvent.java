@@ -1159,6 +1159,9 @@ public final class SearchEvent {
                 continue;
             }
 
+            // filter query modifiers variables (these are host, filetype, protocol, language, author, collection, dates_in_content(on,from,to,timezone) )
+            // while ( protocol, host, filetype ) currently maybe incorporated in (this.query.urlMaskPattern)  queryparam
+
             // check modifier constraint filetype (using fileextension)
             if (this.query.modifier.filetype != null && !this.query.modifier.filetype.equals(ext)) {
                 if (log.isFine()) log.fine("dropped RWI: file type constraint = " + this.query.modifier.filetype);
@@ -1180,7 +1183,20 @@ public final class SearchEvent {
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
-            
+
+            // check modifier constraint collection
+            // this is not available in pure RWI entries (but in local or via solr query received metadate/entries), 
+            if (this.query.modifier.collection != null) {
+                Collection<Object> docCols = page.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName()); // get multivalued value
+                if (docCols == null) { // no collection info
+                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    continue;
+                } else if (!docCols.contains(this.query.modifier.collection)) {
+                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    continue;
+                }
+            }
+
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page.url())) {
                 if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
@@ -1252,7 +1268,7 @@ public final class SearchEvent {
                 continue;
             }
             
-          
+                
             // check vocabulary terms (metatags) {only available in Solr index as vocabulary_xxyyzzz_sxt field}
             // TODO: vocabulary is only valid and available in local Solr index (consider to auto-switch to Searchdom.LOCAL)
             if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
