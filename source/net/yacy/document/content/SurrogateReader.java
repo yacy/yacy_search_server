@@ -75,7 +75,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private boolean parsingValue;
     private DCEntry dcEntry;
     private String elementName;
-    private final BlockingQueue<SolrInputDocument> surrogates;
+    /** Surrogates are either SolrInputDocument or DCEntry instances*/
+    private final BlockingQueue<Object> surrogates;
     private SAXParser saxParser;
     private final InputSource inputSource;
     private final PushbackInputStream inputStream;
@@ -145,7 +146,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                                 DigestURL url = new DigestURL(u);
                                 final String urlRejectReason = this.crawlStacker.urlInAcceptedDomain(url);
                                 if ( urlRejectReason == null ) {
-                                    // convert DCEntry to SolrInputDocument
+                                    // convert SolrDocument to SolrInputDocument
                                     this.surrogates.put(this.configuration.toSolrInputDocument(doc));
                                 }
                             } catch (MalformedURLException e) {
@@ -238,8 +239,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                 // check if url is in accepted domain
                 final String urlRejectReason = this.crawlStacker.urlInAcceptedDomain(this.dcEntry.getIdentifier(true));
                 if ( urlRejectReason == null ) {
-                    // convert DCEntry to SolrInputDocument
-                    this.surrogates.put(this.configuration.toSolrInputDocument(this.dcEntry));
+                    // DCEntry can not be converted to SolrInputDocument as DC schema has nothing to do with Solr collection schema
+                    this.surrogates.put(this.dcEntry);
                 }
             } catch (final InterruptedException e) {
                 ConcurrentLog.logException(e);
@@ -293,7 +294,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
 
-    public SolrInputDocument take() {
+    public Object take() {
         try {
             return this.surrogates.take();
         } catch (final InterruptedException e) {
