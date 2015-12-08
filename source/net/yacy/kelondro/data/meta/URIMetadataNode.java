@@ -151,7 +151,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         this.videoc = Integer.parseInt(prop.getProperty("lvideo", "0"));
         this.appc = Integer.parseInt(prop.getProperty("lapp", "0"));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
-        this.score = Float.parseFloat(prop.getProperty("score", "0.0"));
+        this.score = Float.parseFloat(prop.getProperty("score", "0.0")); // we don't use the remote rwi ranking but the local rwi ranking profile
         List<String> cs = new ArrayList<String>();
         cs.add(collection);
         this.setField(CollectionSchema.collection_sxt.name(), cs);
@@ -166,8 +166,11 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         for (String name : doc.getFieldNames()) {
             this.addField(name, doc.getFieldValue(name));
         }
-        Float scorex = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
+        /* score shall contain the YaCy score, getFieldValue("score") moved to
+        *  SearchEvent.addNodes() where the YaCy ranking for nodes is calculated
+        Float scorex = (Float) doc.getFieldValue("score"); // this is a special Solr field containing the ranking score of a search result
         this.score = scorex == null ? 0.0f : scorex.floatValue();
+        */
         final byte[] hash = ASCII.getBytes(getString(CollectionSchema.id)); // TODO: can we trust this id ?
         final String urlRaw = getString(CollectionSchema.sku);
         this.url = new DigestURL(urlRaw, hash);
@@ -314,8 +317,22 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return this.lon;
     }
 
+    /**
+     * Get the YaCy ranking score for this entry
+     * (the value is updated while adding to the result queue where score calc takes place)
+     * @return YaCy calculated score (number > 0)
+     */
     public float score() {
         return this.score;
+    }
+
+    /**
+     * Set the YaCy ranking score to make it accessible in the search interface/api
+     * (should be set to the effective value of result queues getWeight)
+     * @param theScore YaCy ranking of search results
+     */
+    public void setScore(float theScore) {
+        this.score = theScore;
     }
 
     public Date loaddate() {
