@@ -158,6 +158,7 @@ import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.Tokenizer;
+import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.audioTagParser;
@@ -2012,25 +2013,50 @@ public final class Switchboard extends serverSwitch {
                 @Override
                 public void run() {
                     VocabularyScraper scraper = new VocabularyScraper();
-                    SolrInputDocument surrogate;
-                    while ((surrogate = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
-                        assert surrogate != null;
-                        try {
-                            // enrich the surrogate
-                            final DigestURL root = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName())));
-                            final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                            if (text != null && text.length() > 0) {
-                                // run the tokenizer on the text to get vocabularies and synonyms
-                                final Tokenizer tokenizer = new Tokenizer(root, text, LibraryProvider.dymLib, true, scraper);
-                                final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
-                                // overwrite the given vocabularies and synonyms with new computed ones
-                                Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
-                            }
-                        } catch (MalformedURLException e) {
-                            ConcurrentLog.logException(e);
+                    Object surrogateObj;
+                    while ((surrogateObj = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
+                        assert surrogateObj != null;
+                        /* When parsing a full-text Solr xml data dump Surrogate reader produces SolrInputDocument instances */
+                        if(surrogateObj instanceof SolrInputDocument) {
+                        	SolrInputDocument surrogate = (SolrInputDocument)surrogateObj;
+                        	try {
+                        		// enrich the surrogate
+                        		final String id = (String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                        		final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+                        		if (text != null && text.length() > 0 && id != null ) {
+                            		final DigestURL root = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes(id));
+                        			// run the tokenizer on the text to get vocabularies and synonyms
+                        			final Tokenizer tokenizer = new Tokenizer(root, text, LibraryProvider.dymLib, true, scraper);
+                        			final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
+                        			// overwrite the given vocabularies and synonyms with new computed ones
+                        			Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
+                        		}
+                        	} catch (MalformedURLException e) {
+                        		ConcurrentLog.logException(e);
+                        	}
+                        	// write the surrogate into the index
+                        	Switchboard.this.index.putDocument(surrogate);
+                        } else if(surrogateObj instanceof DCEntry) {
+                        	/* When parsing a MediaWiki dump Surrogate reader produces DCEntry instances */
+                            // create a queue entry
+                        	final DCEntry entry = (DCEntry)surrogateObj;
+                            final Document document = entry.document();
+                            final Request request =
+                                new Request(
+                                    ASCII.getBytes(peers.mySeed().hash),
+                                    entry.getIdentifier(true),
+                                    null,
+                                    "",
+                                    entry.getDate(),
+                                    crawler.defaultSurrogateProfile.handle(),
+                                    0,
+                                    crawler.defaultSurrogateProfile.timezoneOffset());
+                            final Response response = new Response(request, null, null, crawler.defaultSurrogateProfile, false, null);
+                            final IndexingQueueEntry queueEntry =
+                                new IndexingQueueEntry(response, new Document[] {document}, null);
+                
+                            indexingCondensementProcessor.enQueue(queueEntry);
                         }
-                        // write the surrogate into the index
-                        Switchboard.this.index.putDocument(surrogate);
                         if (shallTerminate()) break;
                     }
                 }

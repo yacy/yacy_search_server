@@ -748,61 +748,68 @@ public class MediawikiImporter extends Thread implements Importer {
 
     }
 
-    public static void main(final String[] s) {
-        if (s.length == 0) {
-            ConcurrentLog.info("WIKITRANSLATION", "usage:");
-            ConcurrentLog.info("WIKITRANSLATION", " -index <wikipedia-dump>");
-            ConcurrentLog.info("WIKITRANSLATION", " -read  <start> <len> <idx-file>");
-            ConcurrentLog.info("WIKITRANSLATION", " -find  <title> <wikipedia-dump>");
-            ConcurrentLog.info("WIKITRANSLATION", " -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
-            System.exit(0);
-        }
+	public static void main(final String[] s) {
+		if (s.length == 0) {
+			System.out.println("usage:");
+			System.out.println(" -index <wikipedia-dump>");
+			System.out.println(" -read  <start> <len> <idx-file>");
+			System.out.println(" -find  <title> <wikipedia-dump>");
+			System.out.println(" -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
+			ConcurrentLog.shutdown();
+			return;
+		}
 
-        // example:
-        // java -Xmx2000m -cp classes:lib/bzip2.jar de.anomic.tools.mediawikiIndex -convert DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2 DATA/SURROGATES/in/ http://de.wikipedia.org/wiki/
+		try {
+			// example:
+			// java -Xmx2000m -cp classes:lib/bzip2.jar
+			// de.anomic.tools.mediawikiIndex -convert
+			// DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2
+			// DATA/SURROGATES/in/ http://de.wikipedia.org/wiki/
 
-        if (s[0].equals("-convert") && s.length > 2) {
-            final File sourcefile = new File(s[1]);
-            final File targetdir = new File(s[2]);
-            //String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
-            //String language = urlStub.substring(7,9);
-            try {
-                final MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir);
-                mi.start();
-                mi.join();
-            } catch (final InterruptedException e) {
-                ConcurrentLog.logException(e);
-            }
-        }
+			if (s[0].equals("-convert") && s.length > 2) {
+				final File sourcefile = new File(s[1]);
+				final File targetdir = new File(s[2]);
+				// String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
+				// String language = urlStub.substring(7,9);
+				try {
+					final MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir);
+					mi.start();
+					mi.join();
+				} catch (final InterruptedException e) {
+					ConcurrentLog.logException(e);
+				}
+			}
 
-        if (s[0].equals("-index")) {
-            try {
-                createIndex(new File(s[1]));
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-            }
-        }
+			if (s[0].equals("-index")) {
+				try {
+					createIndex(new File(s[1]));
+				} catch (final IOException e) {
+					ConcurrentLog.logException(e);
+				}
+			}
 
-        if (s[0].equals("-read")) {
-            final long start = Integer.parseInt(s[1]);
-            final int  len   = Integer.parseInt(s[2]);
-            System.out.println(UTF8.String(read(new File(s[3]), start, len)));
-        }
+			if (s[0].equals("-read")) {
+				final long start = Integer.parseInt(s[1]);
+				final int len = Integer.parseInt(s[2]);
+				System.out.println(UTF8.String(read(new File(s[3]), start, len)));
+			}
 
-        if (s[0].equals("-find")) {
-            try {
-                final wikisourcerecord w = find(s[1], new File(s[2] + ".idx.xml"));
-                if (w == null) {
-                    ConcurrentLog.info("WIKITRANSLATION", "not found");
-                } else {
-                    System.out.println(UTF8.String(read(new File(s[2]), w.start, (int) (w.end - w.start))));
-                }
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-            }
+			if (s[0].equals("-find")) {
+				try {
+					final wikisourcerecord w = find(s[1], new File(s[2] + ".idx.xml"));
+					if (w == null) {
+						ConcurrentLog.info("WIKITRANSLATION", "not found");
+					} else {
+						System.out.println(UTF8.String(read(new File(s[2]), w.start, (int) (w.end - w.start))));
+					}
+				} catch (final IOException e) {
+					ConcurrentLog.logException(e);
+				}
 
-        }
-        System.exit(0);
-    }
+			}
+		} finally {
+			ConcurrentLog.shutdown();
+		}
+	}
 
 }
