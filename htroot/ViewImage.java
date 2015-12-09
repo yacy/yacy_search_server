@@ -198,7 +198,7 @@ public class ViewImage {
 						BlacklistType.SEARCH, agent);
 			} catch (final IOException e) {
 				/** No need to log full stack trace (in most cases resource is not available because of a network error) */
-				ConcurrentLog.fine("ViewImage", "cannot load image. URL : " + url);
+				ConcurrentLog.fine("ViewImage", "cannot load image. URL : " + url.toNormalform(true));
 				throw e;
 			}
 		}
