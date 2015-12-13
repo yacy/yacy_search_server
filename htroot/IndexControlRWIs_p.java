@@ -659,7 +659,6 @@ public class IndexControlRWIs_p {
                 sb.index,
                 sb.getRanking(),
                 "",//userAgent
-                false,
                 0.0d, 0.0d, 0.0d,
                 new String[0]);       
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE);       
@@ -670,8 +669,7 @@ public class IndexControlRWIs_p {
         } else {
             prop.put("searchresult", 3);
             prop.put("searchresult_allurl", theSearch.local_rwi_available.get());
-            prop
-                .put("searchresult_description", theSearch.flagCount()[WordReferenceRow.flag_app_dc_description]);
+            prop.put("searchresult_description", theSearch.flagCount()[WordReferenceRow.flag_app_dc_description]);
             prop.put("searchresult_title", theSearch.flagCount()[WordReferenceRow.flag_app_dc_title]);
             prop.put("searchresult_creator", theSearch.flagCount()[WordReferenceRow.flag_app_dc_creator]);
             prop.put("searchresult_subject", theSearch.flagCount()[WordReferenceRow.flag_app_dc_subject]);
