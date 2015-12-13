@@ -672,7 +672,6 @@ public class yacysearch {
                     sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, false)
                         && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
-                    false,
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
             EventTracker.delete(EventTracker.EClass.SEARCH);

@@ -660,7 +660,6 @@ public class IndexControlRWIs_p {
                 sb.getRanking(),
                 "",//userAgent
                 false,
-                false,
                 0.0d, 0.0d, 0.0d,
                 new String[0]);       
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE);       

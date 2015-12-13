@@ -141,7 +141,7 @@ public final class QueryParams {
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public final String userAgent;
-    protected boolean filterfailurls, filterscannerfail;
+    protected boolean filterfailurls;
     protected double lat, lon, radius;
     public LinkedHashSet<String> facetfields;
     private SolrQuery cachedQuery;
@@ -174,7 +174,6 @@ public final class QueryParams {
         final RankingProfile ranking,
         final String userAgent,
         final boolean filterfailurls,
-        final boolean filterscannerfail,
         final double lat,
         final double lon,
         final double radius,
@@ -242,7 +241,6 @@ public final class QueryParams {
         this.userAgent = userAgent;
         this.transmitcount = 0;
         this.filterfailurls = filterfailurls;
-        this.filterscannerfail = filterscannerfail;
         // we normalize here the location and radius because that should cause a better caching
         // and as surplus it will increase privacy
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;

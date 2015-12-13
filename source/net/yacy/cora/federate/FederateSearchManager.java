@@ -206,8 +206,7 @@ public class FederateSearchManager {
                 sb.getRanking(),
                 "",//userAgent
                 false,
-                false,
-                0.0, 0.0, -1.0,
+                0.0d, 0.0d, -1.0d,
                 new String[0]);
 
         return query(query);

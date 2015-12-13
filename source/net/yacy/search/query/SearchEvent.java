@@ -58,7 +58,6 @@ import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -1266,14 +1265,6 @@ public final class SearchEvent {
                     continue;
                 }
             }
-
-            // check Scanner
-            if (this.query.filterscannerfail && !Scanner.acceptURL(page.url())) {
-                if (log.isFine()) log.fine("dropped RWI: url not accepted by scanner");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
-                continue;
-            }
-            
                 
             // check vocabulary terms (metatags) {only available in Solr index as vocabulary_xxyyzzz_sxt field}
             // TODO: vocabulary is only valid and available in local Solr index (consider to auto-switch to Searchdom.LOCAL)
