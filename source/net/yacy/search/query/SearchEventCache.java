@@ -170,7 +170,8 @@ public class SearchEventCache {
             
             // start a new event
             Switchboard sb = Switchboard.getSwitchboard();
-            final boolean delete = sb == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true);
+            final boolean delete = sb == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true)
+                    || (sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false) && sb.peers.mySeed().getFlagAcceptRemoteIndex());
             final boolean addToLocalIdx = sb == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, true);
             event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, delete, addToLocalIdx);
             MemoryControl.request(100 * 1024 * 1024, false); // this may trigger a short memory status which causes a reducing of cache space of other threads
