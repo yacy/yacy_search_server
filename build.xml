@@ -702,6 +702,12 @@
       <jvmarg line="-Xnoagent"/>
       <jvmarg line="-Djava.compiler=none"/>
       <jvmarg line="-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"/>
+      <!-- Dump memory heap when an OutOfMemoryError occurs -->
+      <!-- <jvmarg line="-XX:+HeapDumpOnOutOfMemoryError"/> -->
+      <!-- Dump path -->
+      <!-- <jvmarg line="-XX:HeapDumpPath=/your_path/"/> -->
+      <!-- Log JAXP XML parsers Debug information -->
+      <!-- <jvmarg line="-Djaxp.debug=1"/> -->
     </java>
   </target>
 
