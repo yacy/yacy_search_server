@@ -224,11 +224,19 @@ public class ConfigPortal {
         prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
+        /* Addresse used in code template */
         String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getLocalPort();
         }
         prop.put("myaddress", myaddress);
+        
+        /* Adress used to display iframe preview : no need to use public adress when coming from local */
+        String myPreviewAddress = myaddress;
+        if(header.accessFromLocalhost()) {
+        	myPreviewAddress = "localhost:" + sb.getLocalPort();
+        }
+        prop.put("myPreviewAddress", myPreviewAddress);
         return prop;
     }
 
