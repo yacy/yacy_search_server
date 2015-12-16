@@ -491,6 +491,9 @@ dc_rights
         return this.lat;
     }
 
+    /**
+     * sorts all links (anchors) into individual collections
+     */
     private void resortLinks() {
         if (this.resorted) return;
         synchronized (this) {
@@ -513,6 +516,14 @@ dc_rights
             }
             for (final AnchorURL url: this.anchors) {
                 if (url == null) continue;
+                u = url.toNormalform(true);
+                final String name = url.getNameProperty();
+                // check mailto scheme first (not suppose to get into in/outboundlinks or hyperlinks -> crawler can't process)
+                if (url.getProtocol().equals("mailto")) {
+                    this.emaillinks.put(u.substring(7), name); // TODO: check why key as string instead of Disgest/AnchorURL
+                    continue;
+                }
+
                 final boolean noindex = url.getRelProperty().toLowerCase().indexOf("noindex",0) >= 0;
                 final boolean nofollow = url.getRelProperty().toLowerCase().indexOf("nofollow",0) >= 0;
                 if ((thishost == null && url.getHost() == null) ||
@@ -523,31 +534,24 @@ dc_rights
                 } else {
                     this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
-                u = url.toNormalform(true);
-                final String name = url.getNameProperty();
-                if (u.startsWith("mailto:")) {
-                    this.emaillinks.put(u.substring(7), name);
-                } else {
-                    extpos = u.lastIndexOf('.');
-                    if (extpos > 0) {
-                        if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
-                            ext = u.substring(extpos + 1, qpos).toLowerCase();
-                        } else {
-                            ext = u.substring(extpos + 1).toLowerCase();
-                        }
-                        if (Classification.isMediaExtension(ext)) {
-                            // this is not a normal anchor, its a media link
-                            if (Classification.isImageExtension(ext)) {
-                                collectedImages.put(url, new ImageEntry(url, name, -1, -1, -1));
-                            }
-                            else if (Classification.isAudioExtension(ext)) this.audiolinks.put(url, name);
-                            else if (Classification.isVideoExtension(ext)) this.videolinks.put(url, name);
-                            else if (Classification.isApplicationExtension(ext)) this.applinks.put(url, name);
-                        }
+                extpos = u.lastIndexOf('.');
+                if (extpos > 0) {
+                    if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
+                        ext = u.substring(extpos + 1, qpos).toLowerCase();
+                    } else {
+                        ext = u.substring(extpos + 1).toLowerCase();
                     }
-                    // in any case we consider this as a link and let the parser decide if that link can be followed
-                    this.hyperlinks.put(url, name);
+                    if (Classification.isMediaExtension(ext)) {
+                        // this is not a normal anchor, its a media link
+                        if (Classification.isImageExtension(ext)) { // TODO: guess on a-tag href extension (may not be correct)
+                            collectedImages.put(url, new ImageEntry(url, name, -1, -1, -1));
+                        } else if (Classification.isAudioExtension(ext)) this.audiolinks.put(url, name);
+                          else if (Classification.isVideoExtension(ext)) this.videolinks.put(url, name);
+                          else if (Classification.isApplicationExtension(ext)) this.applinks.put(url, name);
+                    }
                 }
+                // in any case we consider this as a link and let the parser decide if that link can be followed
+                this.hyperlinks.put(url, name);
             }
 
             // add image links that we collected from the anchors to the image map

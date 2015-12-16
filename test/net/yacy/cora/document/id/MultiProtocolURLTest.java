@@ -145,6 +145,28 @@ public class MultiProtocolURLTest {
     }
 
     /**
+     * Test getProtocol()
+     */
+    @Test
+    public void testGetProtocol() throws MalformedURLException {
+        Map<String, String> testurls = new HashMap<String, String>();
+        // ( 1. parameter = urlstring to test, 2. parameter = expected protocol)
+        testurls.put("http://host.com",  "http");
+        testurls.put("HTTPS://host.com", "https");
+        testurls.put("Ftp://host.com",   "ftp");
+        testurls.put("SMB://host.com",   "smb");
+        testurls.put("/file.com",        "file");
+        testurls.put("file://host.com/file.com", "file");
+        testurls.put("MailTo:Abc@host.com",      "mailto");
+
+        for (String txt : testurls.keySet()) {
+            MultiProtocolURL url = new MultiProtocolURL(txt);
+            assertEquals("test " + txt, url.getProtocol(), testurls.get(txt));
+
+        }
+    }
+
+    /**
      * Test of toNormalform method, of class MultiProtocolURL.
      */
     @Test

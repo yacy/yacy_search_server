@@ -204,7 +204,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         int p = url.indexOf("://");
         if (p < 0) {
-            if (url.startsWith("mailto:")) {
+            if (url.length() > 7 && url.substring(0,7).equalsIgnoreCase("mailto:")) {
                 p = 6;
             } else {
                 url = "http://" + url;
