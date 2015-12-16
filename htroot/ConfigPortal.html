@@ -66,7 +66,11 @@
           
           <dt>Index remote results</dt>
           <dd>
-              <input type="checkbox" name="remotesearch.result.store" value="true" #(remotesearch.result.store)#::checked="checked"#(/remotesearch.result.store)# /> add remote search results to the local index <b>( default=on, it is recommended to enable this option ! )</b>                     
+              <input type="checkbox" name="remotesearch.result.store" value="true" #(remotesearch.result.store)#::checked="checked"#(/remotesearch.result.store)# /> add remote search results to the local index <b>( default=on, it is recommended to enable this option ! )</b>
+          </dd>
+          <dt>Limit size of indexed remote results</dt>
+          <dd>
+			  <input type="text" name="remotesearch.result.store.maxsize" value="#[remotesearch.result.store.maxsize]#" size="10" /> maximum allowed size in kbytes for each remote search result to be added to the local index (for example, a 1000kbytes limit might be useful if you are running YaCy with a low memory setup)
           </dd>
           
           <dt>Default Pop-Up Page</dt>

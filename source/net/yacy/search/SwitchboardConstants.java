@@ -332,6 +332,8 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
     public static final String REMOTESEARCH_RESULT_STORE        = "remotesearch.result.store"; // add remote results to local index
+    /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
+    public static final String REMOTESEARCH_RESULT_STORE_MAXSIZE= "remotesearch.result.store.maxsize";
     public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
     public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
 

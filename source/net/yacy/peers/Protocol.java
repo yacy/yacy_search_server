@@ -62,6 +62,15 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
+
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
@@ -119,15 +128,6 @@ import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
-
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.FacetField.Count;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrInputDocument;
 
 
 public final class Protocol {
@@ -929,6 +929,18 @@ public final class Protocol {
 
     private final static CollectionSchema[] snippetFields = new CollectionSchema[]{CollectionSchema.description_txt, CollectionSchema.h4_txt, CollectionSchema.h3_txt, CollectionSchema.h2_txt, CollectionSchema.h1_txt, CollectionSchema.text_t};
     
+    /**
+     * Execute solr query against specified target.
+     * @param event search event ot feed with results
+     * @param solrQuery solr query
+     * @param offset pagination start indice
+     * @param count expected maximum results
+     * @param target target peer to query. May be null : in that case, local peer is queried.
+     * @param partitions
+     * @param blacklist url list to exclude from results
+     * @return the size of results list
+     * @throws InterruptedException when interrupt status on calling thread is detected while processing
+     */
     protected static int solrQuery(
             final SearchEvent event,
             final SolrQuery solrQuery,
@@ -1125,12 +1137,17 @@ public final class Protocol {
                 
                 // put the remote documents to the local index. We must convert the solr document to a solr input document:
                 if (event.addResultsToLocalIndex) {
-                    final SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+                	/* Check document size, only if a limit is set on remote documents size allowed to be stored to local index */
+                	if(checkDocumentSize(doc, event.getRemoteDocStoredMaxSize() * 1024)) {
+                		final SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
 
-                    // the input document stays untouched because it contains top-level cloned objects
-                    docs.add(sid);
-                    // will be stored to index, and is a full solr document, can be added to firstseen
-                    event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
+                		// the input document stays untouched because it contains top-level cloned objects
+                		docs.add(sid);
+                		// will be stored to index, and is a full solr document, can be added to firstseen
+                		event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
+                	} else {
+                		Network.log.info("Document size greater than " + event.getRemoteDocStoredMaxSize() + " kbytes, excludes it from being stored to local index. Url : " + urlEntry.urlstring());
+                	}
                 }
 
                 // after this conversion we can remove the largest and not used field text_t and synonyms_sxt from the document
@@ -1172,6 +1189,33 @@ public final class Protocol {
         }
         return dls;
     }
+    
+	/**
+	 * Only when maxSize is greater than zero, check that doc size is lower. To
+	 * process in a reasonable amount of time, document size is not evaluated
+	 * summing all fields sizes, but only against text_t field which is quite representative and might weigh
+	 * some MB.
+	 * 
+	 * @param doc
+	 *            document to verify. Must not be null.
+	 * @param maxSize
+	 *            maximum allowed size in bytes
+	 * @return true when document evaluated size is lower or equal than maxSize, or when
+	 *         maxSize is lower or equal than zero.
+	 */
+	protected static boolean checkDocumentSize(SolrDocument doc, long maxSize) {
+		if (maxSize > 0) {
+			/* All text field is often the largest */
+			Object value = doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+			if(value instanceof String) {
+				/* Each char uses 2 bytes */
+				if(((String)value).length() > (maxSize /2)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
     public static Map<String, String> permissionMessage(final String targetAddress, final String targetHash) {
         // ask for allowed message size and attachment size
