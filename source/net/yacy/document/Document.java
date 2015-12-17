@@ -765,7 +765,7 @@ dc_rights
         return this.crawldepth;
     }
     
-    public void writeXML(final Writer os, final Date date) throws IOException {
+    public void writeXML(final Writer os) throws IOException {
         os.write("<record>\n");
         final String title = dc_title();
         if (title != null && title.length() > 0) os.write("<dc:title><![CDATA[" + title + "]]></dc:title>\n");
@@ -783,7 +783,7 @@ dc_rights
         }
         final String language = dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + dc_language() + "</dc:language>\n");
-        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
+        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(getLastModified()) + "</dc:date>\n");
         if (this.lon != 0.0 && this.lat != 0.0) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
         os.write("</record>\n");
     }
@@ -793,7 +793,7 @@ dc_rights
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             final Writer osw = new OutputStreamWriter(baos, "UTF-8");
-            writeXML(osw, this.lastModified);
+            writeXML(osw);
             osw.close();
             return UTF8.String(baos.toByteArray());
         } catch (final UnsupportedEncodingException e1) {

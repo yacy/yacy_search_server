@@ -353,7 +353,7 @@ public class DCEntry extends MultiMapSolrParams {
     public void writeXML(OutputStreamWriter os) throws IOException {
         Document doc = document();
         if (doc != null) {
-            doc.writeXML(os, this.getDate());
+            doc.writeXML(os);
         }
     }
 }
