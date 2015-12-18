@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -325,6 +326,24 @@ public class ViewFile {
                 prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
                 boolean dark = true;
                 int i = 0;
+
+                if (document.getEmaillinks() != null) {
+                    Iterator<Entry<String, String>> emailit = document.getEmaillinks().entrySet().iterator();
+                    while (emailit.hasNext()) {
+                        Entry<String, String> eentry = emailit.next();
+                        prop.put("viewMode_links_" + i + "_nr", i);
+                        prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
+                        prop.put("viewMode_links_" + i + "_type", "email");
+                        prop.put("viewMode_links_" + i + "_text", (eentry.getValue().isEmpty()) ? "&nbsp;" : eentry.getValue());
+                        prop.put("viewMode_links_" + i + "_url", "#");
+                        prop.put("viewMode_links_" + i + "_link", eentry.getKey());
+                        prop.put("viewMode_links_" + i + "_rel", "");
+                        prop.put("viewMode_links_" + i + "_name", "");
+                        dark = !dark;
+                        i++;
+                    }
+                }
+
                 i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);

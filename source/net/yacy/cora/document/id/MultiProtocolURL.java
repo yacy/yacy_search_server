@@ -258,7 +258,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 }
                 this.userInfo = url.substring(p + 1, q);
                 this.host = url.substring(q + 1);
-                this.path = null;
+                this.path = ""; // TODO: quick fix, as not always checked for path != null
                 this.port = -1;
                 this.searchpart = null;
                 this.anchor = null;
