@@ -83,9 +83,9 @@ public class Document {
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks;
+    private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
-    private Map<String, String> emaillinks;
+    private Set<AnchorURL> emaillinks; // mailto: links
     private MultiProtocolURL favicon;
     private boolean resorted;
     private final Set<String> languages;
@@ -473,7 +473,10 @@ dc_rights
         return this.applinks;
     }
 
-    public Map<String, String> getEmaillinks() {
+    /**
+     * @return mailto links
+     */
+    public Set<AnchorURL> getEmaillinks() {
         // this is part of the getAnchor-set: only links to email addresses
         if (!this.resorted) resortLinks();
         return this.emaillinks;
@@ -509,7 +512,7 @@ dc_rights
             this.videolinks = new LinkedHashMap<AnchorURL, String>();
             this.audiolinks = new LinkedHashMap<AnchorURL, String>();
             this.applinks   = new LinkedHashMap<AnchorURL, String>();
-            this.emaillinks = new LinkedHashMap<String, String>();
+            this.emaillinks = new LinkedHashSet<AnchorURL>();
             final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
             for (final Map.Entry<DigestURL, ImageEntry> entry: this.images.entrySet()) {
                 if (entry.getKey() != null && entry.getKey().getHost() != null && entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
@@ -520,7 +523,7 @@ dc_rights
                 final String name = url.getNameProperty();
                 // check mailto scheme first (not suppose to get into in/outboundlinks or hyperlinks -> crawler can't process)
                 if (url.getProtocol().equals("mailto")) {
-                    this.emaillinks.put(u.substring(7), name); // TODO: check why key as string instead of Disgest/AnchorURL
+                    this.emaillinks.add(url);
                     continue;
                 }
 
