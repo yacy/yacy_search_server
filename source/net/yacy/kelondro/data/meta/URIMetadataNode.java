@@ -371,9 +371,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return mime == null || mime.size() == 0 ? null : mime.get(0);
     }
 
+    /**
+     * Content language
+     * @return 2-char language code or empty string
+     */
     public String language() {
         String language = getString(CollectionSchema.language_s);
-        if (language == null || language.length() == 0) return "en";
+        if (language == null || language.length() == 0) return "";
         return language;
     }
 
