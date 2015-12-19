@@ -1122,7 +1122,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
-            return this.protocol + ":" + this.userInfo + "@" + this.host;
+            return this.userInfo + "@" + this.host;
         } else if (isHTTP()) {
             if (this.port < 0 || this.port == 80)  { defaultPort = true; }
         } else if (isHTTPS()) {

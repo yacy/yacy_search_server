@@ -1175,7 +1175,6 @@ public final class SearchEvent {
             }
 
             // check modifier constraint (language)
-            // TODO: : page.language() never null but defaults to "en" (may cause false drop of result)
             if (this.query.modifier.language != null && !this.query.modifier.language.equals(page.language())) {
                 if (log.isFine()) log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
