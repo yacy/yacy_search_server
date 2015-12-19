@@ -178,13 +178,13 @@ linksnofollowcount_i
 inboundlinkscount_i
 
 ## number of outgoing inbound (to same domain) links with nofollow tag, int
-inboundlinksnofollowcount_i
+#inboundlinksnofollowcount_i
 
 ## number of outgoing outbound (to other domain) links, including outboundlinksnofollowcount_i, int
 outboundlinkscount_i
 
 ## number of outgoing outbound (to other domain) links with nofollow tag, int
-outboundlinksnofollowcount_i
+#outboundlinksnofollowcount_i
 
 ## number of images, int
 imagescount_i
