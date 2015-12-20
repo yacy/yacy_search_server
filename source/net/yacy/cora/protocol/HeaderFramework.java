@@ -413,13 +413,23 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
       Connection=close
       Content-Encoding=gzip
       Content-Length=7281
-      Content-Type=text/html
+      Content-Type=text/html; charset=UTF-8
       Date=Mon, 05 Jan 2004 11:55:10 GMT
       Server=Apache/1.3.26
     */
 
+    /**
+     * Get mime type from header field content-type
+     * stripps any parameter (denoted by ';' see RFC 2616)
+     * @return mime or on missing header field "application/octet-stream"
+     */
     public String mime() {
-        return get(CONTENT_TYPE, "application/octet-stream");
+        final String tmpstr = get(CONTENT_TYPE, "application/octet-stream");
+        if (tmpstr.indexOf(';') > 0) {
+            return tmpstr.substring(0,tmpstr.indexOf(';')).trim();
+        } else {
+            return tmpstr;
+        }
     }
 
     /*
@@ -429,7 +439,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * org.apache.commons.fileupload.RequestContext#getCharacterEncoding()
      */
     public String getCharacterEncoding() {
-        final String mimeType = mime();
+        final String mimeType = getContentType();
         if (mimeType == null) return null;
 
         final String[] parts = CommonPattern.SEMICOLON.split(mimeType);
@@ -482,12 +492,12 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         return -1;
     }
 
-    /*
-     * (non-Javadoc)
-     *
+    /**
+     * Get header field content-type (unmodified)
+     * which may include additional parameter (RFC 2616)
+     * see also mime()
      * @see org.apache.commons.fileupload.RequestContext#getContentType()
      */
-    //@Override
     public String getContentType() {
         return get(CONTENT_TYPE);
     }
