@@ -568,10 +568,10 @@ public final class LoaderDispatcher {
         if (responseHeader == null) throw new IOException("responseHeader == null");
 
         Document[] documents = null;
-        final String supportError = TextParser.supports(url, responseHeader.mime());
+        final String supportError = TextParser.supports(url, responseHeader.getContentType());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
+            documents = TextParser.parseSource(url, responseHeader.getContentType(), responseHeader.getCharacterEncoding(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

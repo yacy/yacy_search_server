@@ -425,8 +425,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      */
     public String mime() {
         final String tmpstr = get(CONTENT_TYPE, "application/octet-stream");
-        if (tmpstr.indexOf(';') > 0) {
-            return tmpstr.substring(0,tmpstr.indexOf(';')).trim();
+        final int pos = tmpstr.indexOf(';');
+        if (pos > 0) {
+            return tmpstr.substring(0, pos).trim();
         } else {
             return tmpstr;
         }
