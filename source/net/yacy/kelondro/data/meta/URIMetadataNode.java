@@ -171,9 +171,21 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         Float scorex = (Float) doc.getFieldValue("score"); // this is a special Solr field containing the ranking score of a search result
         this.score = scorex == null ? 0.0f : scorex.floatValue();
         */
-        final byte[] hash = ASCII.getBytes(getString(CollectionSchema.id)); // TODO: can we trust this id ?
+        final String hashstr = getString(CollectionSchema.id); // id or empty string
         final String urlRaw = getString(CollectionSchema.sku);
-        this.url = new DigestURL(urlRaw, hash);
+        this.url = new DigestURL(urlRaw);
+        if (!hashstr.isEmpty()) { // remote id might not correspond in all cases
+            final String myhash = ASCII.String(this.url.hash());
+            if (!hashstr.equals(myhash)) {
+                this.addField(CollectionSchema.id.getSolrFieldName(), myhash);
+                ConcurrentLog.fine("URIMetadataNode", "updated document.ID of " + urlRaw + " from " + hashstr + " to " + myhash);
+                // ususally the hosthash matches but just to be on the safe site
+                final String hostidstr = getString(CollectionSchema.host_id_s); // id or empty string
+                if (!hostidstr.isEmpty() && !hostidstr.equals(this.url.hosthash())) {
+                    this.addField(CollectionSchema.host_id_s.getSolrFieldName(), this.url.hosthash());
+                }
+            }
+        }
     }
 
     public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final float scorex) throws MalformedURLException {
@@ -377,7 +389,6 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
      */
     public String language() {
         String language = getString(CollectionSchema.language_s);
-        if (language == null || language.length() == 0) return "";
         return language;
     }
 
