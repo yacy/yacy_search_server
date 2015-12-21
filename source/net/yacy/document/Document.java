@@ -430,6 +430,11 @@ dc_rights
         return sentences;
     }
 
+    /**
+     * All anchor links of the document
+     * (this includes mailto links)
+     * @return all links embedded as anchors (clickeable entities)
+     */
     public Collection<AnchorURL> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
@@ -445,6 +450,11 @@ dc_rights
 
     // the next three methods provide a calculated view on the getAnchors/getImages:
 
+    /**
+     * List of links to resources (pages, images, files, media ...)
+     * (Hyperlinks do not include mailto: links)
+     * @return a subset of the getAnchor-set: only links to other hyperrefs
+     */
     public Map<AnchorURL, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!this.resorted) resortLinks();

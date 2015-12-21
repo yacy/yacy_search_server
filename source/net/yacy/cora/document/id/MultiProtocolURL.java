@@ -202,7 +202,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "file://" + url;
         }
 
-        int p = url.indexOf("://");
+        int p = url.lastIndexOf("://",5); // lastindexof to look only at the begin of url, up to "https://",
         if (p < 0) {
             if (url.length() > 7 && url.substring(0,7).equalsIgnoreCase("mailto:")) {
                 p = 6;
