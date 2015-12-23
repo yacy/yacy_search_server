@@ -197,6 +197,9 @@ public class yacysearchitem {
             prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
+            prop.put("content_showExplain", theSearch.query.ranking.enable_explain ? 1 : 0);
+            prop.put("content_showExplain_explain-xml", result.postExplain() == null ? "null" : result.postExplainStringXML());
+            prop.put("content_showExplain_explain-json", result.postExplain() == null ? "null" : result.postExplainStringJSON());
             Date[] events = result.events();
             boolean showEvent = events != null && events.length > 0 && sb.getConfig("search.navigation", "").indexOf("date",0) >= 0;
             prop.put("content_showEvent", showEvent ? 1 : 0);

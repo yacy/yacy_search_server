@@ -59,13 +59,14 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.ranking.ExplainUtil;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.utils.crypt;
 
 import org.apache.solr.common.SolrDocument;
-
+import org.apache.solr.common.util.NamedList;
 
 /**
  * This is the URIMetadata object implementation for Solr documents.
@@ -82,6 +83,12 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     protected int imagec = -1, audioc = -1, videoc = -1, appc = -1;
     protected double lat = Double.NaN, lon = Double.NaN;
     protected float score = 0; // during generation of a search result this value is set
+    protected NamedList preExplain = null;
+    protected NamedList postExplain = null;
+    protected String preExplainStringXML = null;
+    protected String postExplainStringXML = null;
+    protected String preExplainStringJSON = null;
+    protected String postExplainStringJSON = null;
     protected String snippet = null;
     protected WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
 
@@ -345,6 +352,58 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
      */
     public void setScore(float theScore) {
         this.score = theScore;
+    }
+    
+    public NamedList preExplain() {
+        return this.preExplain;
+    }
+    
+    public void setPreExplain(NamedList preExplain) {
+        this.preExplain = preExplain;
+        this.preExplainStringXML = null;
+        this.preExplainStringJSON = null;
+    }
+    
+    public NamedList postExplain() {
+        return this.postExplain;
+    }
+    
+    public void setPostExplain(NamedList postExplain) {
+        this.postExplain = postExplain;
+        this.postExplainStringXML = null;
+        this.postExplainStringJSON = null;
+    }
+
+    public String preExplainStringXML() {
+        if (this.preExplainStringXML == null) {
+            this.preExplainStringXML = ExplainUtil.stringXML("preExplain", this.preExplain);
+        }
+        
+        return this.preExplainStringXML;
+    }
+    
+    public String postExplainStringXML() {
+        if (this.postExplainStringXML == null) {
+            this.postExplainStringXML = ExplainUtil.stringXML("explain", this.postExplain);
+        }
+        
+        return this.postExplainStringXML;
+    }
+
+    public String preExplainStringJSON() {
+        if (this.preExplainStringJSON == null) {
+            this.preExplainStringJSON = ExplainUtil.stringJSON(this.preExplain);
+        }
+        
+        return this.preExplainStringJSON;
+    }
+    
+    public String postExplainStringJSON() {
+        if (this.postExplainStringJSON == null) {
+            this.postExplainStringJSON = ExplainUtil.stringJSON(this.postExplain);
+        }
+        
+        return this.postExplainStringJSON;
     }
 
     public Date loaddate() {

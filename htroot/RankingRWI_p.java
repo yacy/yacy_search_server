@@ -103,6 +103,7 @@ public class RankingRWI_p {
     private static void putRanking(final serverObjects prop, final RankingProfile rankingProfile, final String prefix) {
     	putRanking(prop, rankingProfile.preToExternalMap(prefix), prefix, "Pre");
     	putRanking(prop, rankingProfile.postToExternalMap(prefix), prefix, "Post");
+    	prop.put("explain", rankingProfile.enable_explain ? "1" : "0");
     }
 
     private static void putRanking(final serverObjects prop, final Map<String, String> map, final String prefix, final String attrExtension) {

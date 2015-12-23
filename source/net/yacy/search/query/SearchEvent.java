@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,6 +98,7 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.ranking.ExplainUtil;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -104,6 +106,7 @@ import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.util.NamedList;
 
 public final class SearchEvent {
 
@@ -1001,8 +1004,28 @@ public final class SearchEvent {
                         // determine nodestack ranking (will be altered by postranking)
                         // so far Solr score is used (with abitrary factor to get value similar to rwi ranking values)
                         Float scorex = (Float) iEntry.getFieldValue("score"); // this is a special field containing the ranking score of a Solr search result
-                        if (scorex != null && scorex > 0)
+                        if (scorex != null && scorex > 0) {
                             score = (long) ((1000000.0f * scorex) - iEntry.urllength()); // we modify the score here since the solr score is equal in many cases and then the order would simply depend on the url hash which would be silly
+                            if (this.query.ranking.enable_explain) {
+                                NamedList explain = iEntry.preExplain();
+                                if (explain == null) {
+                                    NamedList solrexplain = (NamedList)iEntry.getFieldValue( "[explain]" );
+                                    if (solrexplain != null) {
+                                        // The terms of the score
+                                        NamedList explainscorexterm = ExplainUtil.product2("solrComponentOfPreRanking",  "solrToRwiScale", 1000000.0, solrexplain);
+                                        NamedList explainlengthterm = ExplainUtil.product2("weight(urlLength)", "boost",      -1.0, "urlLength", (double) iEntry.urllength());
+                                        
+                                        // Sum the terms
+                                        NamedList explainsum = ExplainUtil.sum("floatPreRanking", new NamedList[] {explainscorexterm, explainlengthterm});
+                                        
+                                        // Floor the sum
+                                        explain = ExplainUtil.floor("preRanking", explainsum);
+                                        
+                                        iEntry.setPreExplain(explain);
+                                    }
+                                }
+                            }
+                        }    
                         else
                             score = this.order.cardinal(iEntry);
                         this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score)); // inserts the element and removes the worst (which is smallest)
@@ -1464,19 +1487,38 @@ public final class SearchEvent {
     private long postRanking(final URIMetadataNode rentry, final ScoreMap<String> topwords) {
         long r = 0;
 
+        // explain
+        LinkedList<NamedList> explainlist = new LinkedList<NamedList>();
+
         // for media search: prefer pages with many links
         switch (this.query.contentdom) {
             case IMAGE:
                 r += rentry.limage() << this.query.ranking.coeff_cathasimage;
+                if (this.query.ranking.enable_explain) {
+                    // explain
+                    explainlist.add(ExplainUtil.leftshift("weight(cathasimage)", "cathasimage", rentry.limage(), "boost", this.query.ranking.coeff_cathasimage));
+                }
                 break;
             case AUDIO:
                 r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
+                if (this.query.ranking.enable_explain) {
+                    // explain
+                    explainlist.add(ExplainUtil.leftshift("weight(cathasaudio)", "cathasaudio", rentry.laudio(), "boost", this.query.ranking.coeff_cathasaudio));
+                }
                 break;
             case VIDEO:
                 r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
+                if (this.query.ranking.enable_explain) {
+                    // explain
+                    explainlist.add(ExplainUtil.leftshift("weight(cathasvideo)", "cathasvideo", rentry.lvideo(), "boost", this.query.ranking.coeff_cathasvideo));
+                }
                 break;
             case APP:
                 r += rentry.lapp() << this.query.ranking.coeff_cathasapp;
+                if (this.query.ranking.enable_explain) {
+                    // explain
+                    explainlist.add(ExplainUtil.leftshift("weight(cathasapp)", "cathasapp", rentry.lapp(), "boost", this.query.ranking.coeff_cathasapp));
+                }
         }
 
         // apply citation count
@@ -1484,10 +1526,21 @@ public final class SearchEvent {
         if (this.query.getSegment().connectedCitation()) {
             int referencesCount = this.query.getSegment().urlCitation().count(rentry.hash());
             r += (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
+
+            if (this.query.ranking.enable_explain) {
+                // explain
+                explainlist.add(ExplainUtil.leftshift("weight(citation)", "citation", (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())), "boost", this.query.ranking.coeff_citation));
+            }
         } /* else r += 0; */
         // prefer hit with 'prefer' pattern
         if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 256 << this.query.ranking.coeff_prefer;
         if (this.query.prefer.matcher(rentry.title()).matches()) r += 256 << this.query.ranking.coeff_prefer;
+
+        if (this.query.ranking.enable_explain) {
+            // explain
+            explainlist.add(ExplainUtil.leftshift("weight(preferUrl)", "preferUrl", (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches() ? 256 : 0), "boost", this.query.ranking.coeff_prefer));
+            explainlist.add(ExplainUtil.leftshift("weight(preferTitle)", "preferTitle", (this.query.prefer.matcher(rentry.title()).matches() ? 256 : 0), "boost", this.query.ranking.coeff_prefer));
+        }
 
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true);
@@ -1502,10 +1555,20 @@ public final class SearchEvent {
         for (final String urlcomp : urlcompmap) {
             int tc = topwords.get(urlcomp);
             if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_urlcompintoplist;
+
+            if (this.query.ranking.enable_explain) {
+                // explain
+                explainlist.add(ExplainUtil.leftshift("weight(urlCompInTopList:\"" + urlcomp + "\")", "urlCompInTopList", (tc > 0 ? Math.max(1, tc) : 0), "boost", this.query.ranking.coeff_urlcompintoplist));
+            }
         }
         for (final String descrcomp : descrcompmap) {
             int tc = topwords.get(descrcomp);
             if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_descrcompintoplist;
+
+            if (this.query.ranking.enable_explain) {
+                // explain
+                explainlist.add(ExplainUtil.leftshift("weight(descrCompInTopList:\"" + descrcomp + "\")", "descrCompInTopList", (tc > 0 ? Math.max(1, tc) : 0), "boost", this.query.ranking.coeff_descrcompintoplist));
+            }
         }
 
         final Iterator<String> shi = this.query.getQueryGoal().getIncludeWords();
@@ -1514,7 +1577,31 @@ public final class SearchEvent {
             queryword = shi.next();
             if (urlcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_appurl;
             if (descrcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_app_dc_title;
+
+            if (this.query.ranking.enable_explain) {
+                // explain
+                explainlist.add(ExplainUtil.leftshift("weight(appUrl:" + queryword + ")", "appUrl", (urlcompmap.contains(queryword) ? 256 : 0), "boost", this.query.ranking.coeff_appurl));
+                explainlist.add(ExplainUtil.leftshift("weight(appDcTitle:" + queryword + ")", "appDcTitle", (descrcompmap.contains(queryword) ? 256 : 0), "boost", this.query.ranking.coeff_app_dc_title));
+            }
         }
+
+        if (this.query.ranking.enable_explain) {
+            // explain
+
+            // sum of the above terms
+            NamedList explainsum = ExplainUtil.sum("postRanking", explainlist);
+
+            // TODO: remove the check for null once RWI pre-ranking supports explain data
+            if ((NamedList)rentry.preExplain() != null) {
+                // weighted preExplain term, floored
+                NamedList preexplainterm = ExplainUtil.floor("weightedPreRanking", ExplainUtil.product2("weightedFloatPreRanking", "preRankingWeight", 128.0, rentry.preExplain()));
+
+                // overall ranking
+                NamedList explain = ExplainUtil.sum("ranking", new NamedList[] {preexplainterm, explainsum});
+                rentry.setPostExplain(explain);
+            }
+        }
+
         return r;
     }
     

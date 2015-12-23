@@ -476,7 +476,12 @@ public final class QueryParams {
         } else {
             params.setFacet(false);
         }
-        params.setFields("*", "score"); // we need the score for post-ranking
+        if (ranking.enable_explain) {
+            params.setFields("*", "score", "[explain style=nl]"); // we need the score for post-ranking
+        }
+        else {
+            params.setFields("*", "score"); // we need the score for post-ranking
+        }
         return params;
     }
     

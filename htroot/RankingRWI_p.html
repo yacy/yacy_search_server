@@ -60,6 +60,12 @@
         </dl>
       </fieldset>
       <fieldset>
+        <legend>Explanation</legend>
+        
+        <label><input type="checkbox" name="localexplain" value="1" #(explain)#:: checked="checked"#(/explain)#> Generate explanation of how ranking was calculated for each result.  (This may decrease performance.)</label>
+        
+      </fieldset>
+      <fieldset>
         <input type="submit" name="EnterRanking" class="btn btn-primary" value="Set as Default Ranking" />
         <input type="submit" name="ResetRanking" class="btn btn-primary" value="Re-Set to Built-In Ranking" />
       </fieldset>

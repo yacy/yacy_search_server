@@ -14,7 +14,8 @@
       "path": "#[path]#",
       "file": "#[file]#",
       "urlhash": "#[urlhash]#",
-      "ranking": "#[ranking]#"
+      "ranking": "#[ranking]#",
+      #(showExplain)#::"explain": #[explain-json]##(/showExplain)#
     }::#(item)#::#(nl)#::    ,#(/nl)#
     {
       "title": "#[name]#",

@@ -14,6 +14,10 @@
 <yacy:file>#[file]#</yacy:file>
 <guid isPermaLink="false">#[urlhash]#</guid>
 #(loc)#::<geo:lat>#[lat]#</geo:lat><geo:long>#[lon]#</geo:long>#(/loc)#
+<yacy:ranking>#[ranking]#</yacy:ranking>
+#(showExplain)#::<yacy:explain>
+#[explain-xml]#
+</yacy:explain>#(/showExplain)#
 </item>::
 #(item)#::<item>
 <title>#[name]#</title>

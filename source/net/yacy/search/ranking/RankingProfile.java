@@ -73,6 +73,8 @@ public class RankingProfile {
     public static final String DESCRCOMPINTOPLIST = "descrcompintoplist";
     public static final String PREFER             = "prefer";
     public static final String CITATION           = "citation";
+    
+    public static final String EXPLAIN            = "explain";
 
     // coefficient max/min values
     public static final int COEFF_MIN =  0;
@@ -86,6 +88,8 @@ public class RankingProfile {
         coeff_catindexof, coeff_cathasimage, coeff_cathasaudio, coeff_cathasvideo, coeff_cathasapp,
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer,
         coeff_termfrequency, coeff_language, coeff_citation;
+    
+    public boolean enable_explain;
 
     public RankingProfile(final Classification.ContentDomain mediatype) {
         // set default-values
@@ -122,6 +126,8 @@ public class RankingProfile {
         this.coeff_descrcompintoplist = 2;
         this.coeff_prefer             = 0;
         this.coeff_citation           = 10;
+        
+        this.enable_explain           = false;
     }
 
     public RankingProfile(final String prefix, String profile) {
@@ -184,6 +190,7 @@ public class RankingProfile {
             this.coeff_prefer             = parseMap(coeff, PREFER, this.coeff_prefer);
             this.coeff_language           = parseMap(coeff, LANGUAGE, this.coeff_language);
             this.coeff_citation           = parseMap(coeff, CITATION, this.coeff_citation);
+            this.enable_explain           = parseMap(coeff, EXPLAIN, this.enable_explain ? 1 : 0) == 0 ? false : true;
         }
     }
 
@@ -230,6 +237,7 @@ public class RankingProfile {
         this.coeff_prefer             = 0;
         this.coeff_language           = 0;
         this.coeff_citation           = 0;
+        // NOTE: this.enable_explain is not touched here, because we still want explain data to be reported even if the user enables /near or /date or something similar.
     }
     
     private String externalStringCache = null;
@@ -242,6 +250,7 @@ public class RankingProfile {
     public Map<String, String> toExternalMap(final String prefix) {
     	final Map<String, String> ext = preToExternalMap(prefix);
     	ext.putAll(postToExternalMap(prefix));
+    	ext.put(EXPLAIN, Integer.toString(this.enable_explain ? 1 : 0) );
     	return ext;
     }
 
