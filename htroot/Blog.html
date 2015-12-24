@@ -77,9 +77,9 @@
           </dd>
         </dl>
         <input type="hidden" name="page" value="#[pageid]#" />
-        <input type="submit" name="submit" value="Submit" />
-        <input type="submit" name="preview" value="Preview" />
-        <input type="submit" name="discard" value="Discard" />
+        <input type="submit" name="submit" class="btn btn-primary" value="Submit" />
+        <input type="submit" name="preview" class="btn btn-default" value="Preview" />
+        <input type="submit" name="discard" class="btn btn-danger" value="Discard" />
       </fieldset>
     </form>
     ::
@@ -121,9 +121,9 @@
           </dd>
         </dl>
         <input type="hidden" name="page" value="#[pageid]#" />
-        <input type="submit" name="submit" value="Submit" />
-        <input type="submit" name="preview" value="Preview" />
-        <input type="submit" name="discard" value="Discard" />
+        <input type="submit" name="submit" class="btn btn-primary" value="Submit" />
+        <input type="submit" name="preview" class="btn btn-default" value="Preview" />
+        <input type="submit" name="discard" class="btn btn-danger" value="Discard" />
       </fieldset>
     </form>
     ::
@@ -138,10 +138,10 @@
       <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <input type="hidden" name="delete" value="sure" />
         <input type="hidden" name="page" value="#[pageid]#" />
-        <input type="submit" value="Yes, delete it." />
+        <input type="submit" class="btn btn-danger" value="Yes, delete it." />
       </form>
       <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-        <input type="submit" value="No, leave it." />
+        <input type="submit" class="btn btn-primary" value="No, leave it." />
       </form>
     </fieldset>
     ::
@@ -157,7 +157,7 @@
     <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
         <input type="file" size="50" name="xmlfile" />
-        <input type="submit" name="importxml" value="Import" />
+        <input type="submit" name="importxml" class="btn btn-primary" value="Import" />
       </fieldset>
     </form>
     #(/mode)#
