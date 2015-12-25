@@ -60,7 +60,7 @@ document.write("<div id=\"api\"><a href=\"/Tables_p.xml" + window.location.searc
         <dt>reverse:</dt>
         <dd><input type="checkbox" name="reverse" #(reverse)#::checked="check"#(/reverse)# onchange='this.form.submit()'></dd>
         <dt>search rows for</dt>
-        <dd><input type="text" name="search" value="#[pattern]#" /><input type="submit" name="edittable" value="Search" /></dd>
+        <dd><input type="text" name="search" value="#[pattern]#" /> <input type="submit" name="edittable" class="btn btn-default" value="Search" /></dd>
       </dl>
     </fieldset>
     </form>
@@ -90,10 +90,10 @@ document.write("<div id=\"api\"><a href=\"/Tables_p.xml" + window.location.searc
       <p>
       <input type="hidden" name="table" value="#[table]#" />
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="submit" name="editrow" value="Edit Selected Row" />
-      <input type="submit" name="addrow" value="Add a new Row" />&nbsp;&nbsp;&nbsp;&nbsp;
-      <input type="submit" name="deleterows" value="Delete Selected Rows" />
-      <input type="submit" name="deletetable" value="Delete Table" />
+      <input type="submit" name="editrow" class="btn btn-primary" value="Edit Selected Row" />
+      <input type="submit" name="addrow" class="btn btn-primary" value="Add a new Row" />&nbsp;&nbsp;&nbsp;&nbsp;
+      <input type="submit" name="deleterows" class="btn btn-danger" value="Delete Selected Rows" />
+      <input type="submit" name="deletetable" class="btn btn-danger" value="Delete Table" />
       </p>
       </fieldset>
     </form>

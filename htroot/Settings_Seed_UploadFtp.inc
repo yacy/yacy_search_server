@@ -31,7 +31,7 @@
     <td><i>The password</i></td>
   </tr>
   <tr>
-    <td colspan="3"><input type="submit" name="seedFtpSettings" value="Submit" /></td>
+    <td colspan="3"><input type="submit" name="seedFtpSettings" class="btn btn-primary" value="Submit" /></td>
   </tr>
 </table>
 </form>

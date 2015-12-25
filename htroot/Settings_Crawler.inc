@@ -44,7 +44,7 @@
   
   <tr valign="top">
     <td>&nbsp;</td>
-    <td><input type="submit" name="crawlerSettings" value="Submit" /></td>
+    <td><input type="submit" name="crawlerSettings" class="btn btn-primary" value="Submit" /></td>
     <td><em>Changes will take effect immediately.</em></td>
   </tr>  
 </table>

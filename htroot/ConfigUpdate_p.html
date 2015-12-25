@@ -28,8 +28,8 @@
         <option #(selected)#::selected="selected"#(/selected)# value="#[url]#">#[name]# #(signatures)#(unsigned)::(signed)#(/signatures)#</option>
         #{/availreleases}#
         </select>
-    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" value="Download Release"/>
-    	&nbsp;&nbsp;<input type="submit" name="checkRelease" value="Check for new Release"/>
+    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" class="btn btn-primary" value="Download Release"/>
+    	&nbsp;&nbsp;<input type="submit" name="checkRelease" class="btn btn-default" value="Check for new Release"/>
       </p></form></dd>
       <dt><br />Downloaded Releases</dt>
       <dd><form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8"><p>
@@ -43,14 +43,14 @@
         #{/downloadedreleases}#
         #(downloadsAvailable)#::</select>#(/downloadsAvailable)#
         #(deployenabled)#::no&nbsp;automated installation on development environments::
-    	&nbsp;&nbsp;<input type="submit" name="update" value="Install Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
-        &nbsp;&nbsp;<input type="submit" name="deleteRelease" value="Delete Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
+    	&nbsp;&nbsp;<input type="submit" name="update" class="btn btn-primary" value="Install Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
+        &nbsp;&nbsp;<input type="submit" name="deleteRelease" class="btn btn-danger" value="Delete Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
         #(/deployenabled)#		
       </p></form></dd>
       <dt><br />Automatic Update</dt>
       <dd><form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8"><p>
         &nbsp;check for new releases, download if available and restart with downloaded release<br />
-        &nbsp;&nbsp;<input type="submit" name="autoUpdate" value="Check + Download + Install Release Now" /><br />
+        &nbsp;&nbsp;<input type="submit" name="autoUpdate" class="btn btn-primary" value="Check + Download + Install Release Now" /><br />
         #(autoUpdate)#::
         <div class="commit">Download of release #[downloadedRelease]# finished. Restart Initiated.</div>::
         <div class="error">No more recent release found.</div>::
@@ -99,7 +99,7 @@
         <input type="checkbox" name="onlySignedFiles" value="true" #(onlySignedFiles)#::checked="checked" #(/onlySignedFiles)#/>
         only accept signed files
       </dd>
-      <dt><input type="submit" name="configSubmit" value="Submit" /></dt>
+      <dt><input type="submit" name="configSubmit" class="btn btn-primary" value="Submit" /></dt>
       <dd>#(configCommit)#&nbsp;::<div class="commit">Accepted Changes.</div>#(/configCommit)#</dd>
       </dl>
       </fieldset>
