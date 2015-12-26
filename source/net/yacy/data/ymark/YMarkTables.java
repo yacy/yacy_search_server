@@ -398,6 +398,52 @@ public class YMarkTables {
 		this.worktables.bookmarks.addBookmark(bmk_user, bmk_entry, true, true);
     }
 
+    /**
+     * Create YMark bookmark from a loaded document
+     * this is identical to {@link #createBookmark(net.yacy.repository.LoaderDispatcher, net.yacy.cora.document.id.DigestURL, net.yacy.cora.protocol.ClientIdentification.Agent, java.lang.String, boolean, java.lang.String, java.lang.String) }
+     * without try calling a loader
+     * 
+     * @param document to create the YMark bookmark for
+     * @param bmk_user
+     * @param autotag
+     * @param tagsString
+     * @param foldersString
+     * @throws IOException
+     * @throws net.yacy.document.Parser.Failure 
+     */
+    public void createBookmark(final Document document, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
+
+        if (document != null) {
+            final YMarkEntry bmk_entry = new YMarkEntry(false);
+            final YMarkMetadata meta = new YMarkMetadata(document);
+
+            final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();
+            final String urls = document.dc_identifier();
+            bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), urls);
+            if (!this.worktables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(urls))) {
+                bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
+                bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), metadata.get(YMarkMetadata.METADATA.TITLE));
+                bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), metadata.get(YMarkMetadata.METADATA.DESCRIPTION));
+            }
+            final String fs = YMarkUtil.cleanFoldersString(foldersString);
+            if (fs.isEmpty())
+                bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkEntry.BOOKMARK.FOLDERS.deflt());
+            else
+                bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), fs);
+            final StringBuilder strb = new StringBuilder();
+            if (autotag) {
+                final String autotags = YMarkAutoTagger.autoTag(document, 3, this.worktables.bookmarks.getTags(bmk_user));
+                strb.append(autotags);
+            }
+            if (!tagsString.isEmpty()) {
+                strb.append(YMarkUtil.TAGS_SEPARATOR);
+                strb.append(tagsString);
+            }
+            bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(strb.toString()));
+            this.worktables.bookmarks.addBookmark(bmk_user, bmk_entry, true, true);
+        }
+    }
+
     public boolean hasBookmark(final String bmk_user, final String urlhash) {
         final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         try {

@@ -3228,7 +3228,6 @@ public final class Switchboard extends serverSwitch {
         if (reasonString != null) return reasonString;
         
         // create a bookmark from crawl start url
-        //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
         final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
         tags.add("crawlStart");
         final Set<String> keywords = scraper.dc_subject();
@@ -3238,8 +3237,10 @@ public final class Switchboard extends serverSwitch {
                 if (kk.length() > 0) tags.add(kk);
             }
         }
-        String tagStr = tags.toString();
-        if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
+
+        // TODO: what to do with the result ?
+        //String tagStr = tags.toString();
+        //if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
 
         // we will create always a bookmark to use this to track crawled hosts
         final BookmarksDB.Bookmark bookmark = this.bookmarksDB.createorgetBookmark(url.toNormalform(true), "admin");
@@ -3254,7 +3255,7 @@ public final class Switchboard extends serverSwitch {
         // do the same for ymarks
         // TODO: could a non admin user add crawls?
         try {
-            this.tables.bookmarks.createBookmark(this.loader, url, profile.getAgent(), YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
+            this.tables.bookmarks.createBookmark(scraper, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } catch (final Failure e) {
