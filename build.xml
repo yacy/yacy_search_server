@@ -780,7 +780,7 @@
   	</copy>
   	<copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
   	<move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/Resources/Java" verbose="false" />
-    <chmod file="${release_mac}/YaCy.app/Contents/MacOS/JavaApplicationStub" perm="755"/>
+    <chmod file="${release_mac}/YaCy.app/Contents/MacOS/JavaAppLauncher" perm="755"/>
   	<chmod file="${release_mac}/YaCy.app/Contents/Resources/Java/startYACY.sh" perm="755"/>
   	<exec executable="hdiutil">
   	  	<arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
