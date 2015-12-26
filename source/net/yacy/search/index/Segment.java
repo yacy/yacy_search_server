@@ -56,6 +56,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
@@ -505,11 +506,13 @@ public class Segment {
                 if (!language.equals(url.language())) {
                     // see if we have a hint in the url that the statistic was right
                     final String u = urlNormalform.toLowerCase();
-                    if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
+                    String ISO639_country = ISO639.country(language);
+                    if (u.contains("/" + language + "/") ||
+                        (ISO639_country != null && u.contains("/" + ISO639.country(language).toLowerCase() + "/"))) {
+                        // this is a strong hint that the statistics was in fact correct
+                    } else {
                         // no confirmation using the url, use the TLD
                         language = url.language();
-                    } else {
-                        // this is a strong hint that the statistics was in fact correct
                     }
                 }
             } else {
@@ -686,10 +689,10 @@ public class Segment {
 
         // create a word prototype which is re-used for all entries
         if ((this.termIndex != null && storeToRWI) || searchEvent != null) {
-            final int len = (document == null) ? urlLength : document.dc_title().length();
+            final int wordsintitle = CommonPattern.SPACES.split(dc_title).length; // same calculation as for CollectionSchema.title_words_val
             final WordReferenceRow ientry = new WordReferenceRow(
                             url.hash(),
-                            urlLength, urlComps, len,
+                            urlLength, urlComps, wordsintitle,
                             condenser.RESULT_NUMB_WORDS,
                             condenser.RESULT_NUMB_SENTENCES,
                             modDate.getTime(),

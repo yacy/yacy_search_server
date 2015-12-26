@@ -268,8 +268,24 @@ public final class FileUtils {
         copy(new ByteArrayInputStream(source), dest);
     }
 
+    /**
+     * Read fully source stream and close it.
+     * @param source must not be null
+     * @return source content as a byte array.
+     * @throws IOException when a read/write error occured
+     */
     public static byte[] read(final InputStream source) throws IOException {
-        return read(source, -1);
+    	byte[] content;
+    	try {
+    		content = read(source, -1);
+    	} finally {
+    		/* source input stream must be closed here in all cases */
+    		try {
+    			source.close();
+    		} catch(IOException ignoredException) {
+    		}
+    	}
+    	return content;
     }
 
     public static byte[] read(final InputStream source, final int count) throws IOException {
@@ -790,6 +806,16 @@ public final class FileUtils {
         }
     }
 
+    /**
+     * Creates a temp file in the default system tmp directory (System property ""java.io.tmpdir"")
+     * with a name constructed by combination of class name and name.
+     * Marks the file with deleteOnExit() to be at least deleted on shutdown of jvm
+     *
+     * @param classObj name is used as prefix
+     * @param name
+     * @return temp file
+     * @throws IOException
+     */
     public static final File createTempFile(final Class<?> classObj, final String name) throws IOException {
         String parserClassName = classObj.getName();
         int idx = parserClassName.lastIndexOf('.');

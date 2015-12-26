@@ -30,17 +30,24 @@ package net.yacy.document.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.util.FileUtils;
+import org.apache.commons.compress.compressors.gzip.GzipUtils;
 
-
+/**
+ * Parses a gz archive.
+ * Unzips and parses the content and adds it to the created main document
+ */
 public class gzipParser extends AbstractParser implements Parser {
 
     public gzipParser() {
@@ -65,7 +72,7 @@ public class gzipParser extends AbstractParser implements Parser {
             final InputStream source) throws Parser.Failure, InterruptedException {
 
         File tempFile = null;
-        Document[] docs = null;
+        Document maindoc = null;
         try {
             int read = 0;
             final byte[] data = new byte[1024];
@@ -73,7 +80,6 @@ public class gzipParser extends AbstractParser implements Parser {
             final GZIPInputStream zippedContent = new GZIPInputStream(source);
 
             tempFile = File.createTempFile("gunzip","tmp");
-            tempFile.deleteOnExit();
 
             // creating a temp file to store the uncompressed data
             final FileOutputStream out = new FileOutputStream(tempFile);
@@ -84,9 +90,32 @@ public class gzipParser extends AbstractParser implements Parser {
             }
             zippedContent.close();
             out.close();
-
+            final String filename = location.getFileName();
+            // create maindoc for this gzip container, register with supplied url & mime
+            maindoc = new Document(
+                    location,
+                    mimeType,
+                    charset,
+                    this,
+                    null,
+                    null,
+                    AbstractParser.singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title
+                    null,
+                    null,
+                    null,
+                    null,
+                    0.0d, 0.0d,
+                    (Object) null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    new Date());
             // creating a new parser class to parse the unzipped content
-            docs = TextParser.parseSource(location, null, null, scraper, timezoneOffset, 999, tempFile);
+            final String contentfilename = GzipUtils.getUncompressedFilename(location.getFileName());
+            final String mime = TextParser.mimeOf(DigestURL.getFileExtension(contentfilename));
+            Document[] docs = TextParser.parseSource(location, mime, null, scraper, timezoneOffset, 999, tempFile);
+            if (docs != null) maindoc.addSubDocuments(docs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -95,7 +124,7 @@ public class gzipParser extends AbstractParser implements Parser {
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);
         }
-        return docs;
+        return maindoc == null ? null : new Document[]{maindoc};
     }
 
 }

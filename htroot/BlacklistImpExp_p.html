@@ -23,7 +23,7 @@
             <option value="#[hash]#">#[name]#</option>
             #{/otherHosts}#
           </select>
-          <input type="submit" value="Load new blacklist items" />
+          <input type="submit" class="btn btn-primary" value="Load new blacklist items" />
         </fieldset>
       </form>
 
@@ -33,7 +33,7 @@
           <legend>URL:</legend>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
           <input type="text" name="url" />
-          <input type="submit" value="Load new blacklist items" />
+          <input type="submit" class="btn btn-primary" value="Load new blacklist items" />
         </fieldset>
       </form>
 
@@ -45,7 +45,7 @@
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
           <input type="hidden" name="type" value="plaintext" />
           <input type="file" name="file" />
-          <input type="submit" value="Load new blacklist items" />
+          <input type="submit" class="btn btn-primary" value="Load new blacklist items" />
         </fieldset>
       </form>
 
@@ -57,7 +57,7 @@
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
           <input type="hidden" name="type" value="xml" />
           <input type="file" name="file" />
-          <input type="submit" value="Load new blacklist items" />
+          <input type="submit" class="btn btn-primary" value="Load new blacklist items" />
         </fieldset>
       </form>
     </fieldset>::#(/disabled)#
@@ -76,7 +76,7 @@
                     #{/blackListNames}#
                     <option value="">all</option>
           </select>
-                <input type="submit" value="Export list as XML" />
+                <input type="submit" class="btn btn-primary" value="Export list as XML" />
             </fieldset>
         </form>
 
@@ -92,7 +92,7 @@
                     <option value="">all</option>
                 </select>
                 <input type="hidden" name="col" value="black" />
-                <input type="submit" value="Export list as text" />
+                <input type="submit" class="btn btn-primary" value="Export list as text" />
             </fieldset>
         </form>
 

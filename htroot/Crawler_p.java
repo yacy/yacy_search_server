@@ -377,7 +377,7 @@ public class Crawler_p {
                         try {
                             scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, agent);
                             // get links and generate filter
-                            for (DigestURL u: scraper.getAnchors()) {
+                            for (DigestURL u: scraper.getHyperlinks().keySet()) {
                                 newRootURLs.add(u);
                             }
                         } catch (final IOException e) {

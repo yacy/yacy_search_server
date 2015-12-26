@@ -51,7 +51,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long free() {
-        return getUsage(eden, false).getCommitted() - getUsage(eden, false).getUsed();
+        return youngAvailable();
     }
     
     /**
@@ -61,7 +61,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long available() {
-    	return available(true);
+    	return available(false);
     }
     
     /**
@@ -70,7 +70,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes
      */
     private final long available(final boolean force) {
-    	return force & properState(force) ? Math.max(youngAvailable(), oldAvailable()) : Math.min(youngAvailable(), Math.max(M, oldAvailable()));
+    	return force & properState(force) ? Math.max(youngAvailable(), oldAvailable()) : oldAvailable();
     }
     
     /**
@@ -98,6 +98,14 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
     @Override
     protected final long maxMemory() {
 		return heap.getHeapMemoryUsage().getMax();
+    }
+    
+    /**
+     * get the memory that needs to be available for properState
+     */
+    protected final long minMemory()
+    {
+    	return getUsage(eden, true).getUsed();
     }
 
 	/**
@@ -151,7 +159,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return if survivor fits into old space
      */
     private boolean properState(final boolean force) {
-    	final long surv = force? Math.max(M, getUsage(survivor, false).getUsed()) : getUsage(survivor, false).getCommitted();
+    	final long surv = force? M + getUsage(survivor, false).getUsed() : getUsage(survivor, false).getCommitted();
     	return surv < oldAvailable();
     }
     

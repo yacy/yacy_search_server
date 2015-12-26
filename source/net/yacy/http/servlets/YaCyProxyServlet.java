@@ -172,7 +172,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         response.setContentType(mimeType);
         response.setStatus(httpStatus);
         
-        if ((mimeType != null) && (mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
+        if ((mimeType != null) && (mimeType.startsWith("text"))) {
             final StringWriter buffer = new StringWriter();
 
             if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {

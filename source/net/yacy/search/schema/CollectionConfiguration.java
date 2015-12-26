@@ -419,7 +419,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         final DigestURL digestURL = document.dc_source();
         boolean allAttr = this.isEmpty();
         String url = addURIAttributes(doc, allAttr, digestURL);
-        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
+        add(doc, CollectionSchema.content_type, new String[]{document.dc_format()}); // content_type (mime) is defined a schema field and we rely on it in some queries like imagequery (makes it mandatory, no need to check)
 
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         String host = digestURL.getHost();
@@ -965,7 +965,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Boolean canonical_equal_sku = canonical == null ? null : canonical.toNormalform(true).equals(url);  
         if (webgraph != null && (!containsCanonical || (canonical_equal_sku != null && (canonical_equal_sku.booleanValue())))) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            List<SolrInputDocument> edges = webgraph.getEdges(subgraph, digestURL, responseHeader, collections, crawldepth, processTypes, document.getAnchors(), sourceName);
+            List<SolrInputDocument> edges = webgraph.getEdges(subgraph, digestURL, responseHeader, collections, crawldepth, processTypes, document.getHyperlinks().keySet(), sourceName);
             // this also enriched the subgraph
             doc.webgraphDocuments.addAll(edges);
         } else {
@@ -976,7 +976,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 contains(CollectionSchema.outboundlinks_protocol_sxt) ||
                 contains(CollectionSchema.outboundlinks_urlstub_sxt) ||
                 contains(CollectionSchema.outboundlinks_anchortext_txt)) {
-                for (final AnchorURL target_url: document.getAnchors()) {
+                for (final AnchorURL target_url: document.getHyperlinks().keySet()) {
                     enrichSubgraph(subgraph, digestURL, target_url);
                 }
             }
@@ -2028,9 +2028,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             
             final SolrInputDocument doc = new SolrInputDocument();
             String url = configuration.addURIAttributes(doc, allAttr, this.getDigestURL());
-            
-            if (allAttr || configuration.contains(CollectionSchema.content_type)) configuration.add(doc, CollectionSchema.content_type, new String[]{Classification.url2mime(this.digestURL)});
-
+            // content_type (mime) is defined a schema field and we rely on it in some queries like imagequery (makes it mandatory, no need to check)
+            CollectionSchema.content_type.add(doc, new String[]{Classification.url2mime(this.digestURL)});
             if (allAttr || configuration.contains(CollectionSchema.load_date_dt)) configuration.add(doc, CollectionSchema.load_date_dt, getFailDate());
             if (allAttr || configuration.contains(CollectionSchema.crawldepth_i)) configuration.add(doc, CollectionSchema.crawldepth_i, this.crawldepth);
             

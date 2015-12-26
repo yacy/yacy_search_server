@@ -794,9 +794,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
         long now = System.currentTimeMillis();
         response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
         if (target.endsWith(".css")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 4000); // expires in 4 seconds (which is still too often)
+            response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour (which is still often, others use 1 week, month or year)
         } else if (target.endsWith(".png")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 1000); // expires in 1 seconds (reduce heavy image creation load)
+            response.setDateHeader(HeaderFramework.EXPIRES, now + 60000); // expires in 1 minute (reduce heavy image creation load)
         } else {
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
         }
@@ -851,8 +851,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else if (tmp instanceof EncodedImage) {
                     final EncodedImage yp = (EncodedImage) tmp;
                     result = yp.getImage();
-                    if (yp.isStatic()) {
-                        response.setDateHeader(HeaderFramework.EXPIRES, now + 600000); // expires in ten minutes
+                    /** When encodedImage is empty, return a code 500 rather than only an empty response 
+                     * as it is better handled across different browsers */
+                    if(result == null || result.length() == 0) {
+                    	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    	result.close();
+                    	return;
+                    }
+                    if (yp.isStatic()) { // static image never expires
+                        response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour
                     }
                 } else if (tmp instanceof Image) {
                     final Image i = (Image) tmp;
@@ -866,7 +873,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     if (height < 0) {
                         height = 96; // bad hack
                     }
-                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                     bi.createGraphics().drawImage(i, 0, 0, width, height, null);
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
@@ -882,15 +889,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             if (tmp instanceof InputStream) {
-                final InputStream is = (InputStream) tmp;
-                final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
-                response.setContentType(mimeType);
-                response.setStatus(HttpServletResponse.SC_OK);
-                byte[] buffer = new byte[4096];
-                int l, size = 0;
-                while ((l = is.read(buffer)) > 0) {response.getOutputStream().write(buffer, 0, l); size += l;}
-                response.setContentLength(size);
-                is.close();
+                writeInputStream(response, targetExt, (InputStream)tmp);
                 return;
             }
 
@@ -990,6 +989,40 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
     }
+
+
+    /**
+     * Write input stream content to response and close input stream.
+     * @param response servlet response. Must not be null.
+     * @param targetExt response file format
+     * @param tmp
+     * @throws IOException when a read/write error occured.
+     */
+	private void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)
+			throws IOException {
+		final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+		response.setContentType(mimeType);
+		response.setStatus(HttpServletResponse.SC_OK);
+		byte[] buffer = new byte[4096];
+		int l, size = 0;
+		try {
+			while ((l = inStream.read(buffer)) > 0) {
+				response.getOutputStream().write(buffer, 0, l);
+				size += l;
+			}
+			response.setContentLength(size);
+		} catch(IOException e){
+			/** No need to log full stack trace (in most cases resource is not available because of a network error) */
+			ConcurrentLog.fine("FILEHANDLER", "YaCyDefaultServlet: resource content stream could not be written to response.");
+        	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	return;
+		} finally {
+			try {
+				inStream.close();
+			} catch(IOException ignored) {
+			}
+		}
+	}
     
     private static String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;

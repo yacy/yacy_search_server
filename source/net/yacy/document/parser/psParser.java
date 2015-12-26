@@ -113,7 +113,7 @@ public class psParser extends AbstractParser implements Parser {
                     "",       // publisher
                     null,     // sections
                     null,     // abstract
-                    0.0f, 0.0f,
+                    0.0d, 0.0d,
                     outputFile, // fulltext
                     null,     // anchors
                     null,     // rss
@@ -125,12 +125,11 @@ public class psParser extends AbstractParser implements Parser {
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-
-            // delete temp file
-            if (outputFile != null) FileUtils.deletedelete(outputFile);
-
             // throw exception
             throw new Parser.Failure("Unexpected error while parsing ps file. " + e.getMessage(),location);
+        } finally {
+            // delete temp file
+            if (outputFile != null) FileUtils.deletedelete(outputFile);
         }
     }
 
@@ -271,7 +270,6 @@ public class psParser extends AbstractParser implements Parser {
         try {
             // creating a tempfile
             tempFile = FileUtils.createTempFile(this.getClass(), "temp.ps");
-            tempFile.deleteOnExit();
 
             // copying inputstream into file
             FileUtils.copy(source,tempFile);

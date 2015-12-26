@@ -58,7 +58,6 @@ import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -978,9 +977,15 @@ public final class SearchEvent {
                 this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {
                     try {
-                        long score = (long) Math.max(0, (1000000.0f * iEntry.score()) - iEntry.urllength()); // we modify the score here since the solr score is equal in many cases and then the order would simply depend on the url hash which would be silly
-                        //System.out.println("*** debug-score *** " + score + " for entry " + iEntry.urlstring());
-                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score == 0 ? this.order.cardinal(iEntry) : score)); // inserts the element and removes the worst (which is smallest)
+                        long score;
+                        // determine nodestack ranking (will be altered by postranking)
+                        // so far Solr score is used (with abitrary factor to get value similar to rwi ranking values)
+                        Float scorex = (Float) iEntry.getFieldValue("score"); // this is a special field containing the ranking score of a Solr search result
+                        if (scorex != null && scorex > 0)
+                            score = (long) ((1000000.0f * scorex) - iEntry.urllength()); // we modify the score here since the solr score is equal in many cases and then the order would simply depend on the url hash which would be silly
+                        else
+                            score = this.order.cardinal(iEntry);
+                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score)); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch (final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
@@ -1008,7 +1013,7 @@ public final class SearchEvent {
      * If the sjupDoubleDom option is selected, only different hosts are returned until no such rwi exists.
      * Then the best entry from domain stacks are returned.
      * @param skipDoubleDom
-     * @return a node from a rwi entry if one exist or null if not
+     * @return a node from a rwi entry if one exist or null if not (with score value set)
      */
     private URIMetadataNode pullOneRWI(final boolean skipDoubleDom) {
 
@@ -1119,7 +1124,7 @@ public final class SearchEvent {
      * the future by calling this.feedingIsFinished()
      *
      * @param skipDoubleDom should be true if it is wanted that double domain entries are skipped
-     * @return a metadata entry for a url
+     * @return a metadata entry for a url (with score value set)
      */
     public URIMetadataNode pullOneFilteredFromRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
@@ -1159,6 +1164,9 @@ public final class SearchEvent {
                 continue;
             }
 
+            // filter query modifiers variables (these are host, filetype, protocol, language, author, collection, dates_in_content(on,from,to,timezone) )
+            // while ( protocol, host, filetype ) currently maybe incorporated in (this.query.urlMaskPattern)  queryparam
+
             // check modifier constraint filetype (using fileextension)
             if (this.query.modifier.filetype != null && !this.query.modifier.filetype.equals(ext)) {
                 if (log.isFine()) log.fine("dropped RWI: file type constraint = " + this.query.modifier.filetype);
@@ -1167,7 +1175,6 @@ public final class SearchEvent {
             }
 
             // check modifier constraint (language)
-            // TODO: : page.language() never null but defaults to "en" (may cause false drop of result)
             if (this.query.modifier.language != null && !this.query.modifier.language.equals(page.language())) {
                 if (log.isFine()) log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
@@ -1180,7 +1187,20 @@ public final class SearchEvent {
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
-            
+
+            // check modifier constraint collection
+            // this is not available in pure RWI entries (but in local or via solr query received metadate/entries), 
+            if (this.query.modifier.collection != null) {
+                Collection<Object> docCols = page.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName()); // get multivalued value
+                if (docCols == null) { // no collection info
+                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    continue;
+                } else if (!docCols.contains(this.query.modifier.collection)) {
+                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    continue;
+                }
+            }
+
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page.url())) {
                 if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
@@ -1244,15 +1264,7 @@ public final class SearchEvent {
                     continue;
                 }
             }
-
-            // check Scanner
-            if (this.query.filterscannerfail && !Scanner.acceptURL(page.url())) {
-                if (log.isFine()) log.fine("dropped RWI: url not accepted by scanner");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
-                continue;
-            }
-            
-          
+                
             // check vocabulary terms (metatags) {only available in Solr index as vocabulary_xxyyzzz_sxt field}
             // TODO: vocabulary is only valid and available in local Solr index (consider to auto-switch to Searchdom.LOCAL)
             if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
@@ -1308,8 +1320,8 @@ public final class SearchEvent {
     public boolean drainStacksToResult() {
         // we take one entry from both stacks at the same time
         boolean success = false;
-        Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
-        URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
+        final Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
+        final URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
         if (node != null) {
             LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
             if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
@@ -1325,16 +1337,16 @@ public final class SearchEvent {
                 final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
                 final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
                 URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
-                addResult(re);
+                addResult(re, localEntryElement.getWeight());
                 success = true;
             } else {
                 // we don't have a snippet from solr, try to get it in our way (by reloading, if necessary)
                 if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
                     // too many concurrent processes
-                    addResult(getSnippet(node, null));
+                    addResult(getSnippet(node, null), localEntryElement.getWeight());
                     success = true;
                 } else {
-                    final URIMetadataNode node1 = node;
+
                     new Thread() {
                         @Override
                         public void run() {
@@ -1342,7 +1354,7 @@ public final class SearchEvent {
                             try {
                                 SearchEvent.this.snippetFetchAlive.incrementAndGet();
                                 try {
-                                    addResult(getSnippet(node1, SearchEvent.this.query.snippetCacheStrategy));
+                                    addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy), localEntryElement.getWeight());
                                 } catch (final Throwable e) {} finally {
                                     SearchEvent.this.snippetFetchAlive.decrementAndGet();
                                 }
@@ -1356,9 +1368,9 @@ public final class SearchEvent {
         }
         if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus()) {
             // too many concurrent processes
-            node = pullOneFilteredFromRWI(true);
-            if (node != null) {
-                addResult(getSnippet(node, null));
+            final URIMetadataNode noderwi = pullOneFilteredFromRWI(true);
+            if (noderwi != null) {
+                addResult(getSnippet(noderwi, null), noderwi.score());
                 success = true;
             }
         } else {
@@ -1367,11 +1379,11 @@ public final class SearchEvent {
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
                     try {
-                        final URIMetadataNode node = pullOneFilteredFromRWI(true);
-                        if (node != null) {
+                        final URIMetadataNode noderwi = pullOneFilteredFromRWI(true);
+                        if (noderwi != null) {
                             SearchEvent.this.snippetFetchAlive.incrementAndGet();
                             try {
-                                addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy));
+                                addResult(getSnippet(noderwi, SearchEvent.this.query.snippetCacheStrategy), noderwi.score());
                             } catch (final Throwable e) {
                                 ConcurrentLog.logException(e);
                             } finally {    
@@ -1390,12 +1402,14 @@ public final class SearchEvent {
     
     /**
      * place the result to the result vector and apply post-ranking
-     * @param resultEntry
+     * post-ranking is added to the current score, 
+     * @param resultEntry to add
+     * @param score current ranking
      */
-    public void addResult(URIMetadataNode resultEntry) {
+    public void addResult(URIMetadataNode resultEntry, final float score) {
         if (resultEntry == null) return;
-        float score = resultEntry.score();
         final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
+        resultEntry.setScore(ranking); // update the score of resultEntry for access by search interface / api
         this.resultList.put(new ReverseElement<URIMetadataNode>(resultEntry, ranking)); // remove smallest in case of overflow
         if (pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
         this.addTopics(resultEntry);

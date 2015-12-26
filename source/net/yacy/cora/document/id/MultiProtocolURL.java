@@ -202,9 +202,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "file://" + url;
         }
 
-        int p = url.indexOf("://");
+        int p = url.lastIndexOf("://",5); // lastindexof to look only at the begin of url, up to "https://",
         if (p < 0) {
-            if (url.startsWith("mailto:")) {
+            if (url.length() > 7 && url.substring(0,7).equalsIgnoreCase("mailto:")) {
                 p = 6;
             } else {
                 url = "http://" + url;
@@ -258,7 +258,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 }
                 this.userInfo = url.substring(p + 1, q);
                 this.host = url.substring(q + 1);
-                this.path = null;
+                this.path = ""; // TODO: quick fix, as not always checked for path != null
                 this.port = -1;
                 this.searchpart = null;
                 this.anchor = null;
@@ -971,8 +971,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return toNormalform(false);
     }
 
+    /**
+     * Tokenized url as string (without the protocol)
+     * @return example "host com path file ext"
+     */
     public String toTokens() {
-        return toTokens(unescape(this.toNormalform(true)));
+        return toTokens(unescape(this.urlstub(true,true)));
     }
 
     /**
@@ -1105,11 +1109,20 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return result;
     }
 
+    /**
+     * Generates a normal form of the url, without the protocol part,
+     * except the skipped protocol part this is identical with toNormalform()
+     * @see #toNormalform(boolean)
+     * @param excludeAnchor, exclude anchor part
+     * @param removeSessionID, exclude session id
+     * @return example "www.host.com:8080/path/file.html"
+     * @see #toNormalform(boolean, boolean)
+     */
     public String urlstub(final boolean excludeAnchor, final boolean removeSessionID) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
-            return this.protocol + ":" + this.userInfo + "@" + this.host;
+            return this.userInfo + "@" + this.host;
         } else if (isHTTP()) {
             if (this.port < 0 || this.port == 80)  { defaultPort = true; }
         } else if (isHTTPS()) {

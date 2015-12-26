@@ -35,8 +35,9 @@ import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.util.ConcurrentLog;
 
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.IOUtils;
 
 
 public class tarTools {
@@ -69,19 +70,19 @@ public class tarTools {
 	public static void unTar(final InputStream in, final String untarDir) throws Exception{
 		ConcurrentLog.info("UNTAR", "starting");
 		if(new File(untarDir).exists()){
-			final TarInputStream tin = new TarInputStream(in);
-			TarEntry tarEntry = tin.getNextEntry();
+			final TarArchiveInputStream tin = new TarArchiveInputStream(in);
+			TarArchiveEntry tarEntry = tin.getNextTarEntry();
 			while(tarEntry != null){
 				final File destPath = new File(untarDir + File.separator + tarEntry.getName());
 				if (!tarEntry.isDirectory()) {
 					new File(destPath.getParent()).mkdirs(); // create missing subdirectories
 					final FileOutputStream fout = new FileOutputStream(destPath);
-					tin.copyEntryContents(fout);
+                                        IOUtils.copyLarge(tin,fout,0,tarEntry.getSize());
 					fout.close();
 				} else {
 					destPath.mkdir();
 				}
-				tarEntry = tin.getNextEntry();
+				tarEntry = tin.getNextTarEntry();
 			}
 			tin.close();
 		} else { // untarDir doesn't exist

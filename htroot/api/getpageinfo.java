@@ -114,12 +114,11 @@ public class getpageinfo {
                     prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
 
                     // put keywords
-                    final String list[] = scraper.dc_subject();
+                    final Set<String> list = scraper.dc_subject();
                     int count = 0;
                     for (final String element: list) {
-                        final String tag = element;
-                        if (!tag.equals("")) {
-                            prop.putXML("tags_"+count+"_tag", tag);
+                        if (!element.equals("")) {
+                            prop.putXML("tags_"+count+"_tag", element);
                             count++;
                         }
                     }

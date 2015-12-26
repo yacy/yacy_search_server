@@ -82,20 +82,37 @@ public class HostBalancer implements Balancer {
         // create a stack for newly entered entries
         if (!(hostsPath.exists())) hostsPath.mkdirs(); // make the path
         this.queues = new ConcurrentHashMap<String, HostQueue>();
-        String[] list = this.hostsPath.list();
-        for (String address: list) try {
-            File queuePath = new File(this.hostsPath, address);
-            HostQueue queue = new HostQueue(queuePath, this.queues.size() > this.onDemandLimit, this.exceed134217727);
-            if (queue.isEmpty()) {
-                queue.close();
-                FileUtils.deletedelete(queuePath);
-            } else {
-                this.queues.put(DigestURL.hosthash(queue.getHost(), queue.getPort()), queue);
-            }
-        } catch (MalformedURLException|RuntimeException e) {
-            ConcurrentLog.logException(e);
-        }
         this.roundRobinHostHashes = new HashSet<String>();
+        init(); // return without wait but starts a thread to fill the queues
+    }
+
+    /**
+     * fills the queue with by scanning the hostsPath directory in a thread to
+     * return immediately (as large unfinished crawls may take longer to load)
+     */
+    private void init() {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                final String[] hostlist = hostsPath.list();
+                for (String hoststr : hostlist) {
+                    try {
+                        File queuePath = new File(hostsPath, hoststr);
+                        HostQueue queue = new HostQueue(queuePath, queues.size() > onDemandLimit, exceed134217727);
+                        if (queue.isEmpty()) {
+                            queue.close();
+                            FileUtils.deletedelete(queuePath);
+                        } else {
+                            queues.put(DigestURL.hosthash(queue.getHost(), queue.getPort()), queue);
+                        }
+                    } catch (MalformedURLException | RuntimeException e) {
+                        log.warn("init error for " + hostsPath.getName() + " host=" + hoststr + " " + e.getLocalizedMessage());
+                    }
+                }
+            }
+        };
+
+        t.start();
     }
 
     @Override

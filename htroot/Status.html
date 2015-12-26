@@ -127,11 +127,7 @@
     <dd class="hint">Latest public version is v#[latestVersion]#.
       You can download a more recent version of YaCy. Click here to install this update and restart YaCy: 
       <form action="Status.html" method="get" class="PeerControl" accept-charset="UTF-8">
-
-<!-- Is this line here on purpose or by accident?
-      <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist">
--->
-        <button type="submit" name="aquirerelease" value="Update YaCy">
+        <button type="submit" name="aquirerelease" class="btn btn-primary" value="Update YaCy">
           <img src="env/grafics/lock.gif" alt="lock icon"/>
           Install YaCy v#[latestVersion]#
         </button>

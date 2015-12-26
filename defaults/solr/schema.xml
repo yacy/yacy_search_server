@@ -90,8 +90,8 @@
 	<dynamicField name="*_dt"  type="date"    indexed="true"  stored="true"/>
 	<dynamicField name="*_dts" type="date"    indexed="true"  stored="true" multiValued="true"/>
 	<dynamicField name="*_t"  type="text_general"    indexed="true"  stored="true"/>
-        <dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
-	<dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="true" />
+	<dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
+	<dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false" />
 	<dynamicField name="*_txt" type="text_general"   indexed="true"  stored="true" multiValued="true"/>
 	<dynamicField name="*_val" type="int" indexed="true" stored="true" multiValued="true"/> <!-- YaCy special -->
 	<!-- unused dynamicFields?

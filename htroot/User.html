@@ -14,7 +14,7 @@
         <input type="hidden" name="returnto" value="#[returnto]#" />
         Username: <input type="text" name="username" value="#[username]#" /><br />
         Password: <input type="password" name="password" /><br />
-        <input type="submit" value="login" />
+        <input type="submit" class="btn btn-primary" value="login" />
       </form>
     </p>
     ::
@@ -22,7 +22,7 @@
       You are currently logged in as #[username]#.<br />
       (Identified by #(identified-by)#IP::Username/Password::Cookie#(/identified-by)#)<br />
       <form action="User.html" accept-charset="UTF-8">
-        <input type="submit" name="logout" value="logout">
+        <input type="submit" name="logout" class="btn btn-primary" value="logout">
       </form>
       #(limit)#::
       #{percent}#<img src="env/grafics/red-block.png" alt="red bar" />#{/percent}##{percent2}#<img src="env/grafics/green-block.png" alt="green bar" />#{/percent2}#
@@ -45,14 +45,14 @@
           <td><input type="password" name="newpass2" id="newpass2" /></td>
         </tr>
         <tr>
-          <td colspan="2"><input type="submit" name="changepass" value="Change" /></td>
+          <td colspan="2"><input type="submit" name="changepass" class="btn btn-primary" value="Change" /></td>
         </tr>
       </table>
     </form>
     ::
     You are currently logged in as admin.<br />
     <form action="User.html" accept-charset="UTF-8">
-      <input type="submit" name="logout" value="logout">
+      <input type="submit" name="logout" class="btn btn-primary" value="logout">
     </form>
     <br />
     <p>(after logout you will be prompted for your password again. simply click "cancel")</p>

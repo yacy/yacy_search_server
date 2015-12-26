@@ -8,7 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.util.regex.PatternSyntaxException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -122,22 +122,18 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         }
         // 2 -  get target url
         URL proxyurl = null;
-        String strARGS = request.getQueryString();
-        if (strARGS == null) {
+        final String strUrl = request.getParameter("url");
+        if (strUrl == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
             return;
         }
 
-        if (strARGS.startsWith("url=")) {
-            final String strUrl = strARGS.substring(4); // strip "url="
-
-            try {
-                proxyurl = new URL(strUrl);
-            } catch (final MalformedURLException e) {
-                proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
-
-            }
+        try {
+            proxyurl = new URL(strUrl);
+        } catch (final MalformedURLException e) {
+            proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
         }
+        
         if (proxyurl == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
             return;
@@ -252,13 +248,20 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
                 }
 
             // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
-            // TODO: use a template file for
             if (_stopProxyText != null) {
-                String httpsAllertMsg = "";
-                if (proxyurl.getProtocol().equalsIgnoreCase("https") && !request.getScheme().equalsIgnoreCase("https")) httpsAllertMsg = " &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>";
-                bde.prepend("<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
-                        + "<div align='center' style='font-size:11px; color:darkgrey;'><a href='" + proxyurl + "'>" + _stopProxyText + "</a> "
-                        + httpsAllertMsg + "</div></div>");
+
+                String httpsAlertMsg = "";
+                if (proxyurl.getProtocol().equalsIgnoreCase("https") && !request.getScheme().equalsIgnoreCase("https")) httpsAlertMsg = " &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>";
+
+                // use a template file, to allow full servlet functionallity header as iframe included
+                String hdrtemplate = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/proxymsg/urlproxyheader.html?url=" + proxyurl.toString();
+                hdrtemplate = "<iframe src='" + hdrtemplate +"' width='98%' height='50px' >"
+                        // alternative for no-frame supporting browser
+                        + "<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
+                        + "<div align='center' style='font-size:11px;'><a style='font-size:11px; color:black;' href='" + proxyurl + "'>" + _stopProxyText + "</a> "
+                        + httpsAlertMsg + "</div></div>"
+                        + "</iframe>";
+                bde.prepend(hdrtemplate); // put as 1st element in body
             }
 
             // 9 - deliver to client
@@ -327,16 +330,17 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
     private boolean proxyippatternmatch(final String key) {
         // the cfgippattern is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
-        final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyURL.access", "*");
-        if (cfgippattern.equals("*")) {
+        final String[] cfgippattern = Switchboard.getSwitchboard().getConfigArray("proxyURL.access", "*");
+        if (cfgippattern[0].equals("*")) {
             return true;
         }
-        final StringTokenizer st = new StringTokenizer(cfgippattern, ",");
-        String pattern;
-        while (st.hasMoreTokens()) {
-            pattern = st.nextToken();
-            if (key.matches(pattern)) {
-                return true;
+        for (String pattern : cfgippattern) {
+            try {
+                if (key.matches(pattern)) {
+                    return true;
+                }
+            } catch (PatternSyntaxException ex) {
+                this._log.warn("wrong ip pattern in url proxy config", ex.getMessage() );
             }
         }
         return false;

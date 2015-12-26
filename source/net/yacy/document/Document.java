@@ -46,7 +46,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,7 +70,7 @@ public class Document {
     private DigestURL source;             // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
-    private final List<String> keywords;        // most resources provide a keyword field
+    private final Set<String> keywords;         // most resources provide a keyword field
     private       List<String> titles;          // the document titles, taken from title and/or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
     private final String publisher;             // publisher
@@ -84,9 +83,9 @@ public class Document {
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks;
+    private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
-    private Map<String, String> emaillinks;
+    private Set<AnchorURL> emaillinks; // mailto: links
     private MultiProtocolURL favicon;
     private boolean resorted;
     private final Set<String> languages;
@@ -115,7 +114,7 @@ public class Document {
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
         this.parserObject = parserObject;
-        this.keywords = new LinkedList<String>();
+        this.keywords = new LinkedHashSet<String>();
         if (keywords != null) this.keywords.addAll(Arrays.asList(keywords));
         this.titles = (titles == null) ? new ArrayList<String>(1) : titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
@@ -214,6 +213,10 @@ dc_coverage
 dc_rights
      */
 
+    /**
+     * Get the main document title. This is the 1st in the list of titles.
+     * @return title_string (may return null or empty string)
+     */
     public String dc_title() {
         return (this.titles == null || this.titles.size() == 0) ? "" : this.titles.iterator().next();
     }
@@ -222,6 +225,10 @@ dc_rights
         return this.titles;
     }
 
+    /**
+     * Sets the title of the document, replacing any existing titles.
+     * @param title
+     */
     public void setTitle(final String title) {
         this.titles = new ArrayList<String>();
         if (title != null) this.titles.add(title);
@@ -239,11 +246,8 @@ dc_rights
      * @param tags
      */
     public void addTags(Set<String> tags) {
-        for (String s: this.keywords) {
-            tags.remove(s);
-        }
         for (String s: tags) {
-            this.keywords.add(s);
+            if (s != null && !s.isEmpty()) this.keywords.add(s);
         }
     }
 
@@ -274,28 +278,27 @@ dc_rights
         }
         return gf;
     }
-    
-    public String[] dc_subject() {
-        // sort out doubles and empty words
-        final TreeSet<String> hs = new TreeSet<String>();
-        String s;
-        for (int i = 0; i < this.keywords.size(); i++) {
-            if (this.keywords.get(i) == null) continue;
-            s = (this.keywords.get(i)).trim();
-            if (!s.isEmpty()) hs.add(s);
-        }
-        final String[] t = new String[hs.size()];
-        int i = 0;
-        for (final String u: hs) t[i++] = u;
-        return t;
+
+    /**
+     * Get the set of keywords associated with the document
+     * @return set of unique keywords
+     */
+    public Set<String> dc_subject() {
+        return this.keywords;
     }
 
+    /**
+     * Get the set of keywords associated with the document and string
+     * each keyword separated by the separator character
+     *
+     * @param separator character
+     * @return string of keywords or empty string
+     */
     public String dc_subject(final char separator) {
-        final String[] t = dc_subject();
-        if (t.length == 0) return "";
+        if (this.keywords.size() == 0) return "";
         // generate a new list
-        final StringBuilder sb = new StringBuilder(t.length * 8);
-        for (final String s: t) sb.append(s).append(separator);
+        final StringBuilder sb = new StringBuilder(this.keywords.size() * 8);
+        for (final String s: this.keywords) sb.append(s).append(separator);
         return sb.substring(0, sb.length() - 1);
     }
 
@@ -427,10 +430,11 @@ dc_rights
         return sentences;
     }
 
-    public List<String> getKeywords() {
-        return this.keywords;
-    }
-
+    /**
+     * All anchor links of the document
+     * (this includes mailto links)
+     * @return all links embedded as anchors (clickeable entities)
+     */
     public Collection<AnchorURL> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
@@ -446,6 +450,11 @@ dc_rights
 
     // the next three methods provide a calculated view on the getAnchors/getImages:
 
+    /**
+     * List of links to resources (pages, images, files, media ...)
+     * (Hyperlinks do not include mailto: links)
+     * @return a subset of the getAnchor-set: only links to other hyperrefs
+     */
     public Map<AnchorURL, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!this.resorted) resortLinks();
@@ -474,7 +483,10 @@ dc_rights
         return this.applinks;
     }
 
-    public Map<String, String> getEmaillinks() {
+    /**
+     * @return mailto links
+     */
+    public Set<AnchorURL> getEmaillinks() {
         // this is part of the getAnchor-set: only links to email addresses
         if (!this.resorted) resortLinks();
         return this.emaillinks;
@@ -492,6 +504,9 @@ dc_rights
         return this.lat;
     }
 
+    /**
+     * sorts all links (anchors) into individual collections
+     */
     private void resortLinks() {
         if (this.resorted) return;
         synchronized (this) {
@@ -507,13 +522,21 @@ dc_rights
             this.videolinks = new LinkedHashMap<AnchorURL, String>();
             this.audiolinks = new LinkedHashMap<AnchorURL, String>();
             this.applinks   = new LinkedHashMap<AnchorURL, String>();
-            this.emaillinks = new LinkedHashMap<String, String>();
+            this.emaillinks = new LinkedHashSet<AnchorURL>();
             final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
             for (final Map.Entry<DigestURL, ImageEntry> entry: this.images.entrySet()) {
                 if (entry.getKey() != null && entry.getKey().getHost() != null && entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
             for (final AnchorURL url: this.anchors) {
                 if (url == null) continue;
+                u = url.toNormalform(true);
+                final String name = url.getNameProperty();
+                // check mailto scheme first (not suppose to get into in/outboundlinks or hyperlinks -> crawler can't process)
+                if (url.getProtocol().equals("mailto")) {
+                    this.emaillinks.add(url);
+                    continue;
+                }
+
                 final boolean noindex = url.getRelProperty().toLowerCase().indexOf("noindex",0) >= 0;
                 final boolean nofollow = url.getRelProperty().toLowerCase().indexOf("nofollow",0) >= 0;
                 if ((thishost == null && url.getHost() == null) ||
@@ -524,31 +547,24 @@ dc_rights
                 } else {
                     this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
-                u = url.toNormalform(true);
-                final String name = url.getNameProperty();
-                if (u.startsWith("mailto:")) {
-                    this.emaillinks.put(u.substring(7), name);
-                } else {
-                    extpos = u.lastIndexOf('.');
-                    if (extpos > 0) {
-                        if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
-                            ext = u.substring(extpos + 1, qpos).toLowerCase();
-                        } else {
-                            ext = u.substring(extpos + 1).toLowerCase();
-                        }
-                        if (Classification.isMediaExtension(ext)) {
-                            // this is not a normal anchor, its a media link
-                            if (Classification.isImageExtension(ext)) {
-                                collectedImages.put(url, new ImageEntry(url, name, -1, -1, -1));
-                            }
-                            else if (Classification.isAudioExtension(ext)) this.audiolinks.put(url, name);
-                            else if (Classification.isVideoExtension(ext)) this.videolinks.put(url, name);
-                            else if (Classification.isApplicationExtension(ext)) this.applinks.put(url, name);
-                        }
+                extpos = u.lastIndexOf('.');
+                if (extpos > 0) {
+                    if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
+                        ext = u.substring(extpos + 1, qpos).toLowerCase();
+                    } else {
+                        ext = u.substring(extpos + 1).toLowerCase();
                     }
-                    // in any case we consider this as a link and let the parser decide if that link can be followed
-                    this.hyperlinks.put(url, name);
+                    if (Classification.isMediaExtension(ext)) {
+                        // this is not a normal anchor, its a media link
+                        if (Classification.isImageExtension(ext)) { // TODO: guess on a-tag href extension (may not be correct)
+                            collectedImages.put(url, new ImageEntry(url, name, -1, -1, -1));
+                        } else if (Classification.isAudioExtension(ext)) this.audiolinks.put(url, name);
+                          else if (Classification.isVideoExtension(ext)) this.videolinks.put(url, name);
+                          else if (Classification.isApplicationExtension(ext)) this.applinks.put(url, name);
+                    }
                 }
+                // in any case we consider this as a link and let the parser decide if that link can be followed
+                this.hyperlinks.put(url, name);
             }
 
             // add image links that we collected from the anchors to the image map
@@ -671,11 +687,24 @@ dc_rights
         return v;
     }
 
+    /**
+     * Adds the main content of subdocuments to this document.
+     * This is useful if the document is a container for other documents (like zip or other archives)
+     * to make the content of the subdocuments searcheable,
+     * but has only one url (unlike container-urls as rss).
+     *
+     * This is similar to mergeDocuments but directly joins internal content variables,
+     * uses less parsed details and keeps this documents crawl data (like crawldepth, lastmodified)
+     *
+     * @see mergeDocuments()
+     * @param docs to be included
+     * @throws IOException
+     */
     public void addSubDocuments(final Document[] docs) throws IOException {
         for (final Document doc: docs) {
             this.sections.addAll(doc.sections);
             this.titles.addAll(doc.titles());
-            this.keywords.addAll(doc.getKeywords());
+            this.keywords.addAll(doc.dc_subject());
             for (String d: doc.dc_description()) this.descriptions.add(d);
 
             if (!(this.text instanceof ByteArrayOutputStream)) {
@@ -749,7 +778,7 @@ dc_rights
         return this.crawldepth;
     }
     
-    public void writeXML(final Writer os, final Date date) throws IOException {
+    public void writeXML(final Writer os) throws IOException {
         os.write("<record>\n");
         final String title = dc_title();
         if (title != null && title.length() > 0) os.write("<dc:title><![CDATA[" + title + "]]></dc:title>\n");
@@ -767,7 +796,7 @@ dc_rights
         }
         final String language = dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + dc_language() + "</dc:language>\n");
-        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
+        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(getLastModified()) + "</dc:date>\n");
         if (this.lon != 0.0 && this.lat != 0.0) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
         os.write("</record>\n");
     }
@@ -777,7 +806,7 @@ dc_rights
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             final Writer osw = new OutputStreamWriter(baos, "UTF-8");
-            writeXML(osw, this.lastModified);
+            writeXML(osw);
             osw.close();
             return UTF8.String(baos.toByteArray());
         } catch (final UnsupportedEncodingException e1) {

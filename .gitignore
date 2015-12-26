@@ -4,7 +4,7 @@ lib/yacycore.jar
 libbuild/svnRevNr.jar
 libbuild/GitRevTask.jar
 gen/**
-DATA/
+/DATA
 classes/
 RELEASE/
 /yacy.pid

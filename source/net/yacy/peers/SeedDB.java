@@ -832,7 +832,6 @@ public final class SeedDB implements AlternativeDomainNames {
         try {
             // create a seed file which for uploading ...
             seedFile = File.createTempFile("seedFile",".txt", seedDB.myOwnSeedFile.getParentFile());
-            seedFile.deleteOnExit();
             if (Network.log.isFine()) Network.log.fine("SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             final ArrayList<String> uv = storeSeedList(seedFile, true);
 
@@ -959,7 +958,7 @@ public final class SeedDB implements AlternativeDomainNames {
             if (this.mySeed == null) initMySeed();
             if (seed == this.mySeed && !(seed.isOnline())) {
                 // take local ip instead of external
-                return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getLocalPort("port", 8090) + ((subdom == null) ? "" : ("/" + subdom));
+                return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getLocalPort() + ((subdom == null) ? "" : ("/" + subdom));
             }
             return seed.getPublicAddress(seed.getIP()) + ((subdom == null) ? "" : ("/" + subdom));
         } else {

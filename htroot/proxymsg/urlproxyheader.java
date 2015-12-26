@@ -1,0 +1,48 @@
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+
+
+/**
+ * Servlet to be included as header (via iframe) on top of a page viewed via urlproxyservlet
+ */
+public class urlproxyheader {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader requestHeader, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+        final serverObjects prop = new serverObjects();
+        final Switchboard sb = (Switchboard) env;
+
+        final String proxyurlstr = post.get("url",""); // the url of remote page currently viewed
+        prop.put("proxyurl", proxyurlstr);
+
+        if (proxyurlstr.startsWith("https")) {
+            prop.put("httpsAlertMsg", "1");
+        } else {
+            prop.put("httpsAlertMsg", "0");
+        }
+        
+        // TODO: get some index data to display
+        /*
+        if (post.containsKey("hash")) {
+            try {
+                String hashstr = post.get("hash");
+                final SolrDocument idxdoc = sb.index.fulltext().getDefaultEmbeddedConnector().getDocumentById(hashstr);
+                if (idxdoc != null) {
+                    String keywords = (String) idxdoc.getFieldValue(CollectionSchema.keywords.getSolrFieldName());
+                    if (keywords != null && !keywords.isEmpty()) {
+                        keytxt += keywords;
+                    }
+                    Collection cols = idxdoc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
+                    if (cols != null && !cols.isEmpty()) {
+                        for (Object sx : cols) {
+                            coltxt += sx.toString();
+                        }
+                    }
+                }catch (IOException ex) { }
+            }
+        */
+        return prop;
+    }
+
+}

@@ -40,12 +40,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.CrawlStacker;
-import net.yacy.search.schema.CollectionConfiguration;
-
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -55,6 +49,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.CrawlStacker;
+import net.yacy.search.schema.CollectionConfiguration;
 
 
 public class SurrogateReader extends DefaultHandler implements Runnable {
@@ -76,13 +75,15 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private boolean parsingValue;
     private DCEntry dcEntry;
     private String elementName;
-    private final BlockingQueue<SolrInputDocument> surrogates;
+    /** Surrogates are either SolrInputDocument or DCEntry instances*/
+    private final BlockingQueue<Object> surrogates;
     private SAXParser saxParser;
     private final InputSource inputSource;
     private final PushbackInputStream inputStream;
     private final CrawlStacker crawlStacker;
     private final CollectionConfiguration configuration;
     private final int concurrency;
+    private String charsetName = "UTF-8";
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
@@ -112,9 +113,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.elementName = null;
         this.surrogates = new ArrayBlockingQueue<>(queueSize);
         
-        Reader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        Reader reader = new BufferedReader(new InputStreamReader(stream, this.charsetName));
         this.inputSource = new InputSource(reader);
-        this.inputSource.setEncoding("UTF-8");
+        this.inputSource.setEncoding(this.charsetName);
         this.inputStream = stream;
         
         try {
@@ -130,7 +131,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         // test the syntax of the stream by reading parts of the beginning
         try {
             if (isSolrDump()) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream, "UTF-8"));
+                BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream, this.charsetName));
                 String line;
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("<doc>")) continue;
@@ -145,7 +146,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                                 DigestURL url = new DigestURL(u);
                                 final String urlRejectReason = this.crawlStacker.urlInAcceptedDomain(url);
                                 if ( urlRejectReason == null ) {
-                                    // convert DCEntry to SolrInputDocument
+                                    // convert SolrDocument to SolrInputDocument
                                     this.surrogates.put(this.configuration.toSolrInputDocument(doc));
                                 }
                             } catch (MalformedURLException e) {
@@ -180,27 +181,34 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
     
-    private boolean isSolrDump() {
-        try {
-            byte[] b = new byte[100];
-            this.inputStream.read(b);
-            try {
-                String s = UTF8.String(b);
-                if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
-                    this.inputStream.unread(b);
-                    return true;
-                }
-            } catch (IOException e) {
-                ConcurrentLog.logException(e);
-                this.inputStream.unread(b);
-                return false;
-            }
-        } catch (IOException e) {
-            ConcurrentLog.logException(e);
-            return false;
-        }
-        return false;
-    }
+    /**
+     * @return true when inputStream is likely to contain a rich and full-text Solr xml data dump (see IndexExport_p.html)
+     */
+	private boolean isSolrDump() {
+		boolean res = false;
+		byte[] b = new byte[100];
+		int nbRead = -1;
+		try {
+			nbRead = this.inputStream.read(b);
+			if(nbRead > 0) {
+				String s = new String(b, 0, nbRead, this.charsetName);
+				if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
+					res = true;
+				}
+			}
+		} catch (IOException e) {
+			ConcurrentLog.logException(e);
+		} finally {
+			if (nbRead > 0) {
+				try {
+					this.inputStream.unread(b, 0, nbRead);
+				} catch (IOException e2) {
+					ConcurrentLog.logException(e2);
+				}
+			}
+		}
+		return res;
+	}
     
     @Override
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
@@ -231,8 +239,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                 // check if url is in accepted domain
                 final String urlRejectReason = this.crawlStacker.urlInAcceptedDomain(this.dcEntry.getIdentifier(true));
                 if ( urlRejectReason == null ) {
-                    // convert DCEntry to SolrInputDocument
-                    this.surrogates.put(this.configuration.toSolrInputDocument(this.dcEntry));
+                    // DCEntry can not be converted to SolrInputDocument as DC schema has nothing to do with Solr collection schema
+                    this.surrogates.put(this.dcEntry);
                 }
             } catch (final InterruptedException e) {
                 ConcurrentLog.logException(e);
@@ -286,7 +294,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
 
-    public SolrInputDocument take() {
+    public Object take() {
         try {
             return this.surrogates.take();
         } catch (final InterruptedException e) {

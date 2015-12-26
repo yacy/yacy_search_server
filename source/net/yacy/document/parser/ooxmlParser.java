@@ -178,10 +178,10 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     docKeywords,
                     singleList(docLongTitle),
                     docAuthor,
-                    "",
+                    null,
                     null,
                     descriptions,
-                    0.0f, 0.0f,
+                    0.0d, 0.0d,
                     contentBytes,
                     null,
                     null,
@@ -215,7 +215,6 @@ public class ooxmlParser extends AbstractParser implements Parser {
         try {
             // creating a tempfile
             dest = File.createTempFile("OpenDocument", ".odt");
-            dest.deleteOnExit();
 
             // copying the stream into a file
             FileUtils.copy(source, dest);

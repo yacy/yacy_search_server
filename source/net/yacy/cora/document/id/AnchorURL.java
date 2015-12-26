@@ -102,8 +102,8 @@ public class AnchorURL extends DigestURL {
             isHTTPS(relPath) ||
             isFTP(relPath) ||
             isFile(relPath) ||
-            isSMB(relPath)/*||
-            relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
+            isSMB(relPath) ||
+            relPath.startsWith("mailto:")) {
             return new AnchorURL(relPath);
         }
         return new AnchorURL(baseURL, relPath);

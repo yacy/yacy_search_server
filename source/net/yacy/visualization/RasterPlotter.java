@@ -906,11 +906,18 @@ public class RasterPlotter {
         return dest;
     }
 
+    /**
+     * Encode buffered image using specified format to a new ByteBuffer
+     * @param image image to encode
+     * @param targetExt format name. For example "png".
+     * @return a ByteBuffer instance containing encoded data, or empty if an error occured or target format is not supported.
+     */
     public static ByteBuffer exportImage(final BufferedImage image, final String targetExt) {
     	// generate an byte array from the given image
     	final ByteBuffer baos = new ByteBuffer();
     	ImageIO.setUseCache(false); // because we write into ram here
     	try {
+    		/* When no ImageIO writer is found image might no be written*/
     		ImageIO.write(image, targetExt, baos);
     		return baos;
     	} catch (final IOException e) {

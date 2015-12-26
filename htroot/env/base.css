@@ -389,7 +389,7 @@ h4.linktitle {
   padding-left: 20px;
 }
 
-img.favicon{
+img.favicon, object.favicon {
   margin: 0px 4px 0px -20px;
   width: 16px;
   height: 16px;

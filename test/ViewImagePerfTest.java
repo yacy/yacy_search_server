@@ -1,8 +1,15 @@
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.graphics.EncodedImage;
@@ -36,145 +43,191 @@ import net.yacy.server.serverObjects;
  * @author luc
  *
  */
-public class ViewImagePerfTest {
+public class ViewImagePerfTest extends ViewImageTest {
 
-	/** Default image */
-	private static final String DEFAULT_IMG_RESOURCE = "/viewImageTest/test/JPEG_example_JPG_RIP_100.jpg";
+	/** Default minimum measurement time */
+	private static final int DEFAULT_MIN_MEASURE_TIME = 10;
 
-	/** Default render max width (JPEG_example_JPG_RIP_100.jpg width / 10) */
-	private static final int DEFAULT_MAX_WIDTH = 31;
-
-	/** Default render max height (JPEG_example_JPG_RIP_100.jpg height / 10) */
-	private static final int DEFAULT_MAX_HEIGHT = 23;
-
-	/** Default encoding format */
-	private static final String DEFAUL_EXT = "png";
-
-	/**
-	 * @param testFile
-	 *            file to load
-	 * @return testFile content as a bytes array
-	 * @throws IOException
-	 *             when an error occured while loading
-	 */
-	private static byte[] getBytes(File testFile) throws IOException {
-		InputStream inStream = new FileInputStream(testFile);
-		byte[] res = new byte[inStream.available()];
-		try {
-			inStream.read(res);
-		} finally {
-			inStream.close();
-		}
-		return res;
-	}
+	/** Minimum measurement time */
+	private int minMeasureTime;
 
 	/**
 	 * @param args
-	 *            first item may contain file URL
-	 * @return file to be used : specified as first in args or default one
+	 *            main parameters : args[7] may contain minimum measurement time
+	 *            in secondes. Default : 10.
 	 */
-	private static File getTestFile(String args[]) {
-		String fileURL;
-		if (args != null && args.length > 0) {
-			fileURL = args[0];
-		} else {
-			URL defaultURL = ViewImagePerfTest.class.getResource(DEFAULT_IMG_RESOURCE);
-			if (defaultURL == null) {
-				throw new IllegalArgumentException("File not found : " + DEFAULT_IMG_RESOURCE);
-			}
-			fileURL = defaultURL.getFile();
-		}
-		return new File(fileURL);
-	}
-
-	/**
-	 * Build post parameters to use with ViewImage
-	 * 
-	 * @param args
-	 *            main parameters : second and third items may respectively
-	 *            contain max width and max height
-	 * @return a serverObjects instance
-	 */
-	private static serverObjects makePostParams(String args[]) {
-		serverObjects post = new serverObjects();
-		int maxWidth = DEFAULT_MAX_WIDTH;
-		if (args != null && args.length > 1) {
-			maxWidth = Integer.parseInt(args[1]);
-		}
-		post.put("maxwidth", String.valueOf(maxWidth));
-
-		int maxHeight = DEFAULT_MAX_HEIGHT;
-		if (args != null && args.length > 2) {
-			maxHeight = Integer.parseInt(args[2]);
-		}
-		post.put("maxheight", String.valueOf(maxHeight));
-		/* Make it square by default */
-		post.put("quadratic", "");
-		return post;
+	public ViewImagePerfTest(String args[]) {
+		this.minMeasureTime = getMinMeasurementTime(args);
 	}
 
 	/**
 	 * 
 	 * @param args
-	 *            main parameters : fourth item may contain extension
+	 *            main parameters : args[7] may contain minimum measurement time
+	 *            in secondes. Default : 10.
 	 * @return extension to use for encoding
 	 */
-	private static String getEncodingExt(String args[]) {
-		String ext = DEFAUL_EXT;
-		if (args != null && args.length > 3) {
-			ext = args[3];
+	protected int getMinMeasurementTime(String args[]) {
+		int time;
+		if (args != null && args.length > 7) {
+			time = Integer.parseInt(args[7]);
+		} else {
+			time = DEFAULT_MIN_MEASURE_TIME;
 		}
-		return ext;
+		return time;
 	}
 
 	/**
-	 * Test image is parsed and rendered again and again until 20 seconds
-	 * elapsed. Then measured statistics are displayed.
+	 * Process inFile image, update processedFiles list and failures map, and
+	 * append measurements to results_perfs.txt. All parameters must not be
+	 * null.
+	 * 
+	 * @param ext
+	 *            output encoding image format
+	 * @param outDir
+	 *            output directory
+	 * @param post
+	 *            ViewImage post parameters
+	 * @param failures
+	 *            map failed file urls to eventual exception
+	 * @param inFile
+	 *            file image to process
+	 * @throws IOException
+	 *             when an read/write error occured
+	 */
+	@Override
+	protected void processFile(String ext, File outDir, serverObjects post, Map<String, Throwable> failures,
+			File inFile) throws IOException {
+		/* Delete eventual previous result file */
+		System.out
+				.println("Measuring ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext);
+		File outFile = new File(outDir, inFile.getName() + "." + ext);
+		if (outFile.exists()) {
+			outFile.delete();
+		}
+
+		String urlString = inFile.getAbsolutePath();
+		EncodedImage img = null;
+		Exception error = null;
+		long beginTime = System.nanoTime(), time, minTime = Long.MAX_VALUE, maxTime = 0, meanTime = 0, totalTime = 0;
+		int step = 0;
+		for (step = 0; (totalTime / 1000000000) < this.minMeasureTime; step++) {
+			beginTime = System.nanoTime();
+			ImageInputStream inStream = ImageIO.createImageInputStream(inFile);
+			try {
+				img = ViewImage.parseAndScale(post, true, urlString, ext, inStream);
+			} catch (Exception e) {
+				error = e;
+			}
+			time = System.nanoTime() - beginTime;
+			minTime = Math.min(minTime, time);
+			maxTime = Math.max(maxTime, time);
+			totalTime += time;
+		}
+		if (step > 0) {
+			meanTime = totalTime / step;
+		} else {
+			meanTime = totalTime;
+		}
+		PrintWriter resultsWriter = new PrintWriter(new FileWriter(new File(outDir, "results_perfs.txt"), true));
+		try {
+			writeMessage("Measured ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext,
+					resultsWriter);
+			if(img == null) {
+				writeMessage("Image could not be rendered! Measurement show time needed to read and parse image data until error detection.", resultsWriter);
+			}
+			writeMessage("Render total time (ms) : " + (totalTime) / 1000000 + " on " + step + " steps.",
+					resultsWriter);
+			writeMessage("Render mean time (ms) : " + (meanTime) / 1000000, resultsWriter);
+			writeMessage("Render min time (ms) : " + (minTime) / 1000000, resultsWriter);
+			writeMessage("Render max time (ms) : " + (maxTime) / 1000000, resultsWriter);
+		} finally {
+			resultsWriter.close();
+		}
+
+		if (img == null) {
+			failures.put(urlString, error);
+		} else {
+			FileOutputStream outFileStream = null;
+			try {
+				outFileStream = new FileOutputStream(outFile);
+				img.getImage().writeTo(outFileStream);
+			} finally {
+				if (outFileStream != null) {
+					outFileStream.close();
+				}
+				img.getImage().close();
+			}
+		}
+	}
+
+	/**
+	 * Test image(s) (default : classpath resource folder /viewImageTest/test/)
+	 * are parsed and rendered again and again until specified time (default :
+	 * 10 seconds) elapsed. Then rendered image is written to outDir for visual
+	 * check and measured statistics are displayed.
 	 * 
 	 * @param args
 	 *            may be empty or contain parameters to override defaults :
 	 *            <ul>
-	 *            <li>args[0] : input image file URL. Default :
-	 *            viewImageTest/test/JPEG_example_JPG_RIP_100.jpg</li>
-	 *            <li>args[1] : max width (in pixels) for rendered image.
-	 *            Default : default image width divided by 10.</li>
-	 *            <li>args[2] : max height (in pixels) for rendered image.
-	 *            Default : default image height divided by 10.</li>
-	 *            <li>args[3] : output format name. Default : "png".</li>
+	 *            <li>args[0] : input image file URL or folder containing image
+	 *            files URL. Default : classpath resource /viewImageTest/test/
+	 *            </li>
+	 *            <li>args[1] : output format name (for example : "jpg") for
+	 *            rendered image. Defaut : "png".</li>
+	 *            <li>args[2] : ouput folder URL. Default :
+	 *            "[system tmp dir]/ViewImageTest".</li>
+	 *            <li>args[3] : max width (in pixels) for rendered image. May be
+	 *            set to zero to specify no max width. Default : no value.</li>
+	 *            <li>args[4] : max height (in pixels) for rendered image. May
+	 *            be set to zero to specify no max height. Default : no value.
+	 *            </li>
+	 *            <li>args[5] : set to "quadratic" to render square output
+	 *            image. May be set to any string to specify no quadratic shape.
+	 *            Default : false.</li>
+	 *            <li>args[6] : set to "recursive" to process recursively sub
+	 *            folders. Default : false.</li>
+	 *            <li>args[7] : minimum measurement time in secondes. Default :
+	 *            10.</li>
 	 *            </ul>
 	 * @throws IOException
 	 *             when a read/write error occured
 	 */
 	public static void main(String args[]) throws IOException {
-		File imgFile = getTestFile(args);
-		byte[] resourceb = getBytes(imgFile);
-		String ext = getEncodingExt(args);
-		serverObjects post = makePostParams(args);
+		ViewImagePerfTest test = new ViewImagePerfTest(args);
+		File inFile = test.getInputURL(args);
+		String ext = test.getEncodingExt(args);
+		File outDir = test.getOuputDir(args);
+		boolean recursive = test.isRecursive(args);
+		serverObjects post = test.makePostParams(args);
+		outDir.mkdirs();
 
-		String urlString = imgFile.getAbsolutePath();
+		File[] inFiles;
+		if (inFile.isFile()) {
+			inFiles = new File[1];
+			inFiles[0] = inFile;
+			System.out.println(
+					"Measuring ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext);
+		} else if (inFile.isDirectory()) {
+			inFiles = inFile.listFiles();
+			System.out.println("Measuring ViewImage render with files in folder : " + inFile.getAbsolutePath()
+					+ " encoded To : " + ext);
+		} else {
+			inFiles = new File[0];
+		}
+		if (inFiles.length == 0) {
+			throw new IllegalArgumentException(inFile.getAbsolutePath() + " is not a valid file or folder url.");
+		}
 
-		System.out.println("Measuring ViewImage render with file : " + urlString + " encoded To : " + ext);
+		System.out.println("Rendered images will be written in dir : " + outDir.getAbsolutePath());
+
+		List<File> processedFiles = new ArrayList<File>();
+		Map<String, Throwable> failures = new TreeMap<>();
 		try {
-			/* Max test total time (s) */
-			int maxTotalTime = 20;
-			long beginTime, time, minTime = Long.MAX_VALUE, maxTime = 0, meanTime = 0, totalTime = 0;
-			int step = 0;
-			for (step = 0; (totalTime / 1000000000) < maxTotalTime; step++) {
-				beginTime = System.nanoTime();
-				EncodedImage img = ViewImage.parseAndScale(post, true, urlString, ext, false, resourceb);
-				time = System.nanoTime() - beginTime;
-				minTime = Math.min(minTime, time);
-				maxTime = Math.max(maxTime, time);
-				totalTime += time;
-				if (img == null) {
-					throw new IOException("Image render failed");
-				}
-			}
-			meanTime = totalTime / step;
-			System.out.println("Render total time (ms) : " + (totalTime) / 1000000 + " on " + step + " steps.");
-			System.out.println("Render mean time (ms) : " + (meanTime) / 1000000);
-			System.out.println("Render min time (ms) : " + (minTime) / 1000000);
-			System.out.println("Render max time (ms) : " + (maxTime) / 1000000);
+			long time = System.nanoTime();
+			test.processFiles(ext, recursive, outDir, post, inFiles, processedFiles, failures);
+			time = System.nanoTime() - time;
+			test.displayResults(processedFiles, failures, time, outDir);
 		} finally {
 			ConcurrentLog.shutdown();
 		}

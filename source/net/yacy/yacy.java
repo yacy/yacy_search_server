@@ -128,6 +128,7 @@ public final class yacy {
     * @param startupFree free memory at startup time, to be used later for statistics
     */
     private static void startup(final File dataHome, final File appHome, final long startupMemFree, final long startupMemTotal, final boolean gui) {
+        String tmpdir=null;
         try {
             // start up
             System.out.println(copyright);
@@ -202,6 +203,12 @@ public final class yacy {
             	lock = channel.tryLock(); // lock yacy.running
             } catch (final Exception e) { }
 
+            // set jvm tmpdir to a subdir for easy cleanup (as extensive use file.deleteonexit waists memory during long runs, as todelete files names are collected and never cleaned up during runtime)
+            try { 
+                tmpdir = java.nio.file.Files.createTempDirectory("yacy-tmp-").toString(); // creates sub dir in jvm's temp (see System.property "java.io.tempdir")
+                System.setProperty("java.io.tmpdir", tmpdir);
+            } catch (IOException ex) { }
+
             try {
                 sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), conf);
             } catch (final RuntimeException e) {
@@ -218,7 +225,7 @@ public final class yacy {
             sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
 
             // start gui if wanted
-            if (gui) YaCyApp.start("localhost", sb.getLocalPort("port", 8090));
+            if (gui) YaCyApp.start("localhost", sb.getLocalPort());
 
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
@@ -293,7 +300,7 @@ public final class yacy {
             HTTPClient.setDefaultUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
             // start main threads
-            final int port = sb.getLocalPort("port", 8090);
+            final int port = sb.getLocalPort();
             try {
                 // start http server
             	YaCyHttpServer httpServer;
@@ -385,6 +392,8 @@ public final class yacy {
             ConcurrentLog.severe("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
         }
+
+        if (tmpdir != null) FileUtils.deletedelete(new File(tmpdir)); // clean up temp dir (set at startup as subdir of system.propery "java.io.tmpdir")
 
         ConcurrentLog.config("SHUTDOWN", "goodbye. (this is the last line)");
         ConcurrentLog.shutdown();
@@ -618,7 +627,7 @@ public final class yacy {
 	        if (OS.isWindows) headless = false;
 	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
 	        System.setProperty("java.awt.headless", headless ? "true" : "false");
-            
+
 	        String s = ""; for (final String a: args) s += a + " ";
 	        yacyRelease.startParameter = s.trim();
 

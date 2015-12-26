@@ -76,8 +76,6 @@ public class vsdParser extends AbstractParser implements Parser {
             final InputStream source)
             throws Parser.Failure, InterruptedException {
 
-    	Document theDoc = null;
-
         try {
             String contents = "";
             SummaryInformation summary = null;
@@ -92,16 +90,21 @@ public class vsdParser extends AbstractParser implements Parser {
             String author = null;
             String[] keywords = null;
             String title = null;
+            List<String> descriptions = null;
+            Date lastModified = null;
             if (summary != null) {
                 author = summary.getAuthor();
                 if (summary.getKeywords() != null) {
                     keywords = summary.getKeywords().split("[ ,;]");
                 }
                 title = summary.getTitle();
+                final String subject = summary.getSubject();
+                if (subject != null && !subject.isEmpty()) {
+                    descriptions = new ArrayList<String>();
+                    descriptions.add(subject);
+                }
+                lastModified = summary.getLastSaveDateTime();
             }
-
-            List<String> abstrct = new ArrayList<String>();
-            if (contents.length() > 0) abstrct.add(((contents.length() > 80) ? contents.substring(0, 80) : contents.trim()).replaceAll("\r\n"," ").replaceAll("\n"," ").replaceAll("\r"," ").replaceAll("\t"," "));
 
             if (title == null) title = location.toNormalform(true);
 
@@ -115,16 +118,16 @@ public class vsdParser extends AbstractParser implements Parser {
                     keywords,
                     singleList(title),
                     author,
-                    "",
+                    null,
                     null,         // an array of section headlines
-                    abstrct,      // an abstract
-                    0.0f, 0.0f,
+                    descriptions, // an abstract
+                    0.0d, 0.0d,
                     contents,     // the parsed document text
                     null,         // a map of extracted anchors
                     null,
                     null,         // a treeset of image URLs
                     false,
-                    new Date())};
+                    lastModified)};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
@@ -132,14 +135,6 @@ public class vsdParser extends AbstractParser implements Parser {
             final String errorMsg = "Unable to parse the vsd document '" + location + "':" + e.getMessage();
             AbstractParser.log.severe(errorMsg);
             throw new Parser.Failure(errorMsg, location);
-        } finally {
-            if (theDoc == null) {
-                // if an unexpected error occures just log the error and raise a new Parser.Failure
-                final String errorMsg = "Unable to parse the vsd document '" + location + "': possibly out of memory";
-                AbstractParser.log.severe(errorMsg);
-                throw new Parser.Failure(errorMsg, location);
-            }
         }
     }
-
 }

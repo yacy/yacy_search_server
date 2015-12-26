@@ -208,7 +208,7 @@ public class Table_API_p {
             }
 
             // now call the api URLs and store the result status
-            final Map<String, Integer> l = sb.tables.execAPICalls(Domains.LOCALHOST, sb.getLocalPort("port", 8090), pks, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+            final Map<String, Integer> l = sb.tables.execAPICalls(Domains.LOCALHOST, sb.getLocalPort(), pks, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
 
             // construct result table
             prop.put("showexec", l.isEmpty() ? 0 : 1);

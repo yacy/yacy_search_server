@@ -158,6 +158,7 @@ import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.Tokenizer;
+import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.audioTagParser;
@@ -304,7 +305,7 @@ public final class Switchboard extends serverSwitch {
         super(dataPath, appPath, initPath, configPath);
         sb = this;
         // check if port is already occupied
-        final int port = getLocalPort("port", 8090);
+        final int port = getLocalPort();
         if (TimeoutRequest.ping(Domains.LOCALHOST, port, 500)) {
             throw new RuntimeException(
                     "a server is already running on the YaCy port "
@@ -2012,25 +2013,50 @@ public final class Switchboard extends serverSwitch {
                 @Override
                 public void run() {
                     VocabularyScraper scraper = new VocabularyScraper();
-                    SolrInputDocument surrogate;
-                    while ((surrogate = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
-                        assert surrogate != null;
-                        try {
-                            // enrich the surrogate
-                            final DigestURL root = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName())));
-                            final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-                            if (text != null && text.length() > 0) {
-                                // run the tokenizer on the text to get vocabularies and synonyms
-                                final Tokenizer tokenizer = new Tokenizer(root, text, LibraryProvider.dymLib, true, scraper);
-                                final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
-                                // overwrite the given vocabularies and synonyms with new computed ones
-                                Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
-                            }
-                        } catch (MalformedURLException e) {
-                            ConcurrentLog.logException(e);
+                    Object surrogateObj;
+                    while ((surrogateObj = reader.take()) != SurrogateReader.POISON_DOCUMENT ) {
+                        assert surrogateObj != null;
+                        /* When parsing a full-text Solr xml data dump Surrogate reader produces SolrInputDocument instances */
+                        if(surrogateObj instanceof SolrInputDocument) {
+                        	SolrInputDocument surrogate = (SolrInputDocument)surrogateObj;
+                        	try {
+                        		// enrich the surrogate
+                        		final String id = (String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                        		final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+                        		if (text != null && text.length() > 0 && id != null ) {
+                            		final DigestURL root = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes(id));
+                        			// run the tokenizer on the text to get vocabularies and synonyms
+                        			final Tokenizer tokenizer = new Tokenizer(root, text, LibraryProvider.dymLib, true, scraper);
+                        			final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
+                        			// overwrite the given vocabularies and synonyms with new computed ones
+                        			Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
+                        		}
+                        	} catch (MalformedURLException e) {
+                        		ConcurrentLog.logException(e);
+                        	}
+                        	// write the surrogate into the index
+                        	Switchboard.this.index.putDocument(surrogate);
+                        } else if(surrogateObj instanceof DCEntry) {
+                        	/* When parsing a MediaWiki dump Surrogate reader produces DCEntry instances */
+                            // create a queue entry
+                        	final DCEntry entry = (DCEntry)surrogateObj;
+                            final Document document = entry.document();
+                            final Request request =
+                                new Request(
+                                    ASCII.getBytes(peers.mySeed().hash),
+                                    entry.getIdentifier(true),
+                                    null,
+                                    "",
+                                    entry.getDate(),
+                                    crawler.defaultSurrogateProfile.handle(),
+                                    0,
+                                    crawler.defaultSurrogateProfile.timezoneOffset());
+                            final Response response = new Response(request, null, null, crawler.defaultSurrogateProfile, false, null);
+                            final IndexingQueueEntry queueEntry =
+                                new IndexingQueueEntry(response, new Document[] {document}, null);
+                
+                            indexingCondensementProcessor.enQueue(queueEntry);
                         }
-                        // write the surrogate into the index
-                        Switchboard.this.index.putDocument(surrogate);
                         if (shallTerminate()) break;
                     }
                 }
@@ -2200,7 +2226,7 @@ public final class Switchboard extends serverSwitch {
         startupAction = false;
         
         // execute api calls
-        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", getLocalPort("port", 8090), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
+        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", getLocalPort(), pks, getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
         for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
             this.log.info("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
         }
@@ -3202,18 +3228,19 @@ public final class Switchboard extends serverSwitch {
         if (reasonString != null) return reasonString;
         
         // create a bookmark from crawl start url
-        //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
         final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
         tags.add("crawlStart");
-        final String[] keywords = scraper.dc_subject();
+        final Set<String> keywords = scraper.dc_subject();
         if (keywords != null) {
             for (final String k: keywords) {
                 final String kk = BookmarkHelper.cleanTagsString(k);
                 if (kk.length() > 0) tags.add(kk);
             }
         }
-        String tagStr = tags.toString();
-        if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
+
+        // TODO: what to do with the result ?
+        //String tagStr = tags.toString();
+        //if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
 
         // we will create always a bookmark to use this to track crawled hosts
         final BookmarksDB.Bookmark bookmark = this.bookmarksDB.createorgetBookmark(url.toNormalform(true), "admin");
@@ -3228,7 +3255,7 @@ public final class Switchboard extends serverSwitch {
         // do the same for ymarks
         // TODO: could a non admin user add crawls?
         try {
-            this.tables.bookmarks.createBookmark(this.loader, url, profile.getAgent(), YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
+            this.tables.bookmarks.createBookmark(scraper, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } catch (final Failure e) {

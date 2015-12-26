@@ -34,11 +34,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
@@ -50,11 +48,11 @@ import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars>, Comparator<WordReferenceVars> {
 
-	/**
-	 * object for termination of concurrent blocking queue processing
-	 */
-	public static final WordReferenceVars poison = new WordReferenceVars();
-	protected static final byte[] default_language = UTF8.getBytes("en");
+    /**
+     * object for termination of concurrent blocking queue processing
+     */
+    public static final WordReferenceVars poison = new WordReferenceVars();
+    protected static final byte[] default_language = UTF8.getBytes("en");
 
     private final Bitfield flags;
     private long lastModified;
@@ -70,31 +68,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     private final Queue<Integer> positions;
     private double termFrequency;
     private final boolean local;
-
-    public WordReferenceVars(final URIMetadataNode md, final boolean local) {
-        this.language = md.language();
-        this.flags = md.flags();
-        this.lastModified = md.moddate().getTime();
-        this.urlHash = md.hash();
-        this.type = md.doctype();
-        this.llocal = md.llocal();
-        this.lother = md.lother();
-        this.positions = new LinkedBlockingQueue<Integer>();
-        this.positions.add(1);
-        String urlNormalform = md.url().toNormalform(true);
-        this.urlcomps = MultiProtocolURL.urlComps(urlNormalform).length;
-        this.urllength = urlNormalform.length();
-        this.virtualAge = -1; // compute that later
-        // the following fields cannot be computed here very easy and are just filled with dummy values
-        this.phrasesintext = 1;
-        this.hitcount = 1;
-        this.posinphrase = 1;
-        this.posofphrase = 1;
-        this.wordsintext = 1;
-        this.wordsintitle = 1;
-        this.termFrequency = 1;
-        this.local = local;
-    }
 
     public WordReferenceVars(
             final byte[]   urlHash,

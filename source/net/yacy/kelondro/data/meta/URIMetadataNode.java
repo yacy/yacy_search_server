@@ -130,7 +130,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             this.setField(CollectionSchema.fresh_date_dt.name(), new Date());
         }
         this.setField(CollectionSchema.referrer_id_s.name(), prop.getProperty("referrer", ""));
-        this.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", ""));
+        // this.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", "")); // always 0 (not used / calculated)
         this.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
         this.setField(CollectionSchema.wordcount_i.name(), Integer.parseInt(prop.getProperty("wc", "0")));
         final String dt = prop.getProperty("dt", "t");
@@ -151,7 +151,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         this.videoc = Integer.parseInt(prop.getProperty("lvideo", "0"));
         this.appc = Integer.parseInt(prop.getProperty("lapp", "0"));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
-        this.score = Float.parseFloat(prop.getProperty("score", "0.0"));
+        this.score = Float.parseFloat(prop.getProperty("score", "0.0")); // we don't use the remote rwi ranking but the local rwi ranking profile
         List<String> cs = new ArrayList<String>();
         cs.add(collection);
         this.setField(CollectionSchema.collection_sxt.name(), cs);
@@ -166,11 +166,26 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         for (String name : doc.getFieldNames()) {
             this.addField(name, doc.getFieldValue(name));
         }
-        Float scorex = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
+        /* score shall contain the YaCy score, getFieldValue("score") moved to
+        *  SearchEvent.addNodes() where the YaCy ranking for nodes is calculated
+        Float scorex = (Float) doc.getFieldValue("score"); // this is a special Solr field containing the ranking score of a search result
         this.score = scorex == null ? 0.0f : scorex.floatValue();
-        final byte[] hash = ASCII.getBytes(getString(CollectionSchema.id)); // TODO: can we trust this id ?
+        */
+        final String hashstr = getString(CollectionSchema.id); // id or empty string
         final String urlRaw = getString(CollectionSchema.sku);
-        this.url = new DigestURL(urlRaw, hash);
+        this.url = new DigestURL(urlRaw);
+        if (!hashstr.isEmpty()) { // remote id might not correspond in all cases
+            final String myhash = ASCII.String(this.url.hash());
+            if (!hashstr.equals(myhash)) {
+                this.addField(CollectionSchema.id.getSolrFieldName(), myhash);
+                ConcurrentLog.fine("URIMetadataNode", "updated document.ID of " + urlRaw + " from " + hashstr + " to " + myhash);
+                // ususally the hosthash matches but just to be on the safe site
+                final String hostidstr = getString(CollectionSchema.host_id_s); // id or empty string
+                if (!hostidstr.isEmpty() && !hostidstr.equals(this.url.hosthash())) {
+                    this.addField(CollectionSchema.host_id_s.getSolrFieldName(), this.url.hosthash());
+                }
+            }
+        }
     }
 
     public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final float scorex) throws MalformedURLException {
@@ -314,8 +329,22 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return this.lon;
     }
 
+    /**
+     * Get the YaCy ranking score for this entry
+     * (the value is updated while adding to the result queue where score calc takes place)
+     * @return YaCy calculated score (number > 0)
+     */
     public float score() {
         return this.score;
+    }
+
+    /**
+     * Set the YaCy ranking score to make it accessible in the search interface/api
+     * (should be set to the effective value of result queues getWeight)
+     * @param theScore YaCy ranking of search results
+     */
+    public void setScore(float theScore) {
+        this.score = theScore;
     }
 
     public Date loaddate() {
@@ -335,6 +364,10 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return x;
     }
 
+    /**
+     * @deprecated obsolete, never assigned a value
+     */
+    @Deprecated
     public String md5() {
         return getString(CollectionSchema.md5_s);
     }
@@ -350,9 +383,12 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return mime == null || mime.size() == 0 ? null : mime.get(0);
     }
 
+    /**
+     * Content language
+     * @return 2-char language code or empty string
+     */
     public String language() {
         String language = getString(CollectionSchema.language_s);
-        if (language == null || language.length() == 0) return "en";
         return language;
     }
 
@@ -531,7 +567,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             s.append(",load=").append(formatter.format(this.loaddate()));
             s.append(",fresh=").append(formatter.format(this.freshdate()));
             s.append(",referrer=").append(this.referrerHash() == null ? "" : ASCII.String(this.referrerHash()));
-            s.append(",md5=").append(this.md5());
+            //s.append(",md5=").append(this.md5()); // md5 never calculated / not used, also removed from this(prop) 2015-11-27
             s.append(",size=").append(this.filesize());
             s.append(",wc=").append(this.wordCount());
             final char dt = this.doctype();

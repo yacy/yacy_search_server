@@ -475,7 +475,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 final String type = tag.opts.getProperty("type", EMPTY_STRING);
                 final String hreflang = tag.opts.getProperty("hreflang", EMPTY_STRING);
 
-                if (rel.equalsIgnoreCase("shortcut icon")) {
+                if (rel.equalsIgnoreCase("shortcut icon") || rel.equalsIgnoreCase("icon")) { // html5 -> rel="icon")
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
                     this.images.add(ie);
                     this.favicon = newLink;

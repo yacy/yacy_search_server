@@ -171,12 +171,6 @@ public class ConfigPortal {
         
         prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, true) ? 1 : 0);
 
-        prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.collections", sb.getConfig("search.navigation", "").indexOf("collections",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics",0) >= 0 ? 1 : 0);
-
         prop.put("search.verify.nocache", sb.getConfig("search.verify", "").equals("nocache") ? 1 : 0);
         prop.put("search.verify.iffresh", sb.getConfig("search.verify", "").equals("iffresh") ? 1 : 0);
         prop.put("search.verify.ifexist", sb.getConfig("search.verify", "").equals("ifexist") ? 1 : 0);
@@ -224,7 +218,7 @@ public class ConfigPortal {
 
         String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) {
-            myaddress = "localhost:" + sb.getLocalPort("port", 8090);
+            myaddress = "localhost:" + sb.getLocalPort();
         }
         prop.put("myaddress", myaddress);
         return prop;
