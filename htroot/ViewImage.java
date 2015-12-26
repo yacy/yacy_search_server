@@ -30,6 +30,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -49,6 +50,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.URLLicense;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.graphics.EncodedImage;
@@ -60,8 +62,11 @@ import net.yacy.server.serverSwitch;
 
 public class ViewImage {
 
-	private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000,
-			Math.max(10, Math.min(32, WorkflowProcessor.availableCPU * 2)));
+    private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000,
+            Math.max(10, Math.min(32, WorkflowProcessor.availableCPU * 2)));
+
+    private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
+    private static byte[] defaulticonb = null;
 
 	/**
 	 * Try parsing image from post "url" parameter or from "code" parameter.
@@ -132,7 +137,7 @@ public class ViewImage {
 			ImageInputStream imageInStream = null;
 			InputStream inStream = null;
 			try {
-				String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
+                        String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
 				if (ext != null && ext.equalsIgnoreCase(urlExt) && isBrowserRendered(urlExt)) {
 					return openInputStream(post, sb.loader, auth, url);
 				}
@@ -149,10 +154,23 @@ public class ViewImage {
 				// read image
 				encodedImage = parseAndScale(post, auth, urlString, ext, imageInStream);
 			} catch(Exception e) {
-				/* Exceptions are not propagated here : many error causes are possible, network errors, 
-				 * incorrect or unsupported format, bad ImageIO plugin...
-				 * Instead return an empty EncodedImage. Caller is responsible for handling this correctly (500 status code response) */
-				encodedImage = new EncodedImage(new byte[0], ext, post.getBoolean("isStatic"));
+                            /* Exceptions are not propagated here : many error causes are possible, network errors,
+                             * incorrect or unsupported format, bad ImageIO plugin...
+                             * Instead return an empty EncodedImage. Caller is responsible for handling this correctly (500 status code response) */
+
+                            if ("favicon.ico".equalsIgnoreCase(url.getFileName())) { // but on missing favicon just present a default (occures frequently by call from searchitem.html)
+                                // currently yacysearchitem assigns "hosturl/favicon.ico" (to look for the filename should not much interfere with other situatios)
+                                if (defaulticonb == null) { // load the default icon once
+                                    try {
+                                        defaulticonb = FileUtils.read(new File(sb.getAppPath(), defaulticon));
+                                    } catch (final IOException initicon) {
+                                        defaulticonb = new byte[0];
+                                    }
+                                }
+                                encodedImage = new EncodedImage(defaulticonb, ext, post.getBoolean("isStatic"));
+                            } else {
+                                encodedImage = new EncodedImage(new byte[0], ext, post.getBoolean("isStatic"));
+                            }
 			} finally {
 				/*
 				 * imageInStream.close() method doesn't close source input

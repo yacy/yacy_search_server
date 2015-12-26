@@ -1187,9 +1187,6 @@ public final class HTTPDProxyHandler {
         if (conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
             final HeaderFramework proxyRespondHeader = (HeaderFramework) conProp.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER);
             mime = proxyRespondHeader.mime();
-            if (mime.indexOf(';') != -1) {
-                mime = mime.substring(0,mime.indexOf(';'));
-            }
         }
         logMessage.append(mime);
 

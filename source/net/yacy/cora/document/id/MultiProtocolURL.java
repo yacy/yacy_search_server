@@ -202,9 +202,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "file://" + url;
         }
 
-        int p = url.indexOf("://");
+        int p = url.lastIndexOf("://",5); // lastindexof to look only at the begin of url, up to "https://",
         if (p < 0) {
-            if (url.startsWith("mailto:")) {
+            if (url.length() > 7 && url.substring(0,7).equalsIgnoreCase("mailto:")) {
                 p = 6;
             } else {
                 url = "http://" + url;
@@ -258,7 +258,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 }
                 this.userInfo = url.substring(p + 1, q);
                 this.host = url.substring(q + 1);
-                this.path = null;
+                this.path = ""; // TODO: quick fix, as not always checked for path != null
                 this.port = -1;
                 this.searchpart = null;
                 this.anchor = null;
@@ -1122,7 +1122,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
-            return this.protocol + ":" + this.userInfo + "@" + this.host;
+            return this.userInfo + "@" + this.host;
         } else if (isHTTP()) {
             if (this.port < 0 || this.port == 80)  { defaultPort = true; }
         } else if (isHTTPS()) {

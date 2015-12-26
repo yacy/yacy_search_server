@@ -794,9 +794,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
         long now = System.currentTimeMillis();
         response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
         if (target.endsWith(".css")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 4000); // expires in 4 seconds (which is still too often)
+            response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour (which is still often, others use 1 week, month or year)
         } else if (target.endsWith(".png")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 1000); // expires in 1 seconds (reduce heavy image creation load)
+            response.setDateHeader(HeaderFramework.EXPIRES, now + 60000); // expires in 1 minute (reduce heavy image creation load)
         } else {
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
         }
@@ -858,8 +858,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     	result.close();
                     	return;
                     }
-                    if (yp.isStatic()) {
-                        response.setDateHeader(HeaderFramework.EXPIRES, now + 600000); // expires in ten minutes
+                    if (yp.isStatic()) { // static image never expires
+                        response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour
                     }
                 } else if (tmp instanceof Image) {
                     final Image i = (Image) tmp;

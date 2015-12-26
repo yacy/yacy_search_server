@@ -93,7 +93,7 @@ public class htmlParserTest extends TestCase {
         // test link with inline html in text
         // expectation to deliver pure text as it is possibly indexed in outboundlinks_anchortext_txt/inboundlinks_anchortext_txt
         final AnchorURL url = new AnchorURL("http://localhost/");
-        final String mimetype = "text/html";
+        final String charset = "UTF-8";
         final String testhtml = "<html><body>"
                 + "<a href='x1.html'><span>testtext</span></a>" // "testtext"
                 + "<a href=\"http://localhost/x2.html\">   <i id=\"home-icon\" class=\"img-sprite\"></i>Start</a>" // "Start"
@@ -101,7 +101,7 @@ public class htmlParserTest extends TestCase {
                 + "<figure><img width=\"550px\" title=\"image as exemple\" alt=\"image as exemple\" src=\"./img/my_image.png\"></figrue>" // + img width 550 (+html5 figure)
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, mimetype, new VocabularyScraper(), 0, testhtml, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10);
         List<AnchorURL> anchorlist = scraper.getAnchors();
 
         String linktxt = anchorlist.get(0).getTextProperty();
@@ -126,7 +126,7 @@ public class htmlParserTest extends TestCase {
     @Test
     public void testParseToScraper_TagTest() throws Exception {
         final AnchorURL url = new AnchorURL("http://localhost/");
-        final String mimetype = "text/html";
+        final String charset = "UTF-8";
         final String textSource = "test text";
         final String testhtml = "<html>"
                 + "<head><style type=\"text/css\"> h1 { color: #ffffff; }</style></head>"
@@ -134,7 +134,7 @@ public class htmlParserTest extends TestCase {
                 + "<p>" + textSource + "</p>"
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, mimetype, new VocabularyScraper(), 0, testhtml, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10);
 
         String txt = scraper.getText();
         System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");

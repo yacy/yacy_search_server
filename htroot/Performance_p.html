@@ -28,7 +28,7 @@
         <dl>
           <dt><label for="Xmx">Memory reserved for JVM</label></dt>
           <dd><input name="Xmx" id="Xmx" type="text" size="5" maxlength="5" value="#[Xmx]#" /> MByte&nbsp;
-              <input type="submit" name="setStartup" value="Set" />&nbsp;
+              <input type="submit" class="btn btn-primary" name="setStartup" value="Set" />&nbsp;
               #(setStartupCommit)#::<div class="commit">Accepted change. This will take effect after <strong>restart</strong> of YaCy. <br/><a href="Steering.html?restart=" onclick="return confirm('Confirm Restart')">restart now</a></div>::<div class="error"></div>#(/setStartupCommit)#
           </dd>
         </dl>
@@ -47,7 +47,7 @@
           <dt><label for="memoryAcceptDHT">RAM</label></dt>
           <dd>disable DHT-in below <input name="memoryAcceptDHT" id="memoryAcceptDHT" type="text" size="4" value="#[memoryAcceptDHT]#" /> MiB free space</dd>
           <dt>&nbsp;</dt>
-          <dd><input type="submit" name="setObserver" value="Save" /></dd>
+          <dd><input type="submit" class="btn btn-primary" name="setObserver" value="Save" /></dd>
         </dl>
       </fieldset>
     </form>
@@ -79,7 +79,7 @@
 	        <td align="right"><input id="crawlPauseRemotesearch" name="crawlPauseRemotesearch" type="text" size="20" maxlength="100" value="#[crawlPauseRemotesearch]#" /></td>
 	      </tr>
 	      <tr class="TableCellLight">
-	        <td align="left" colspan="2"><input type="submit" name="onlineCautionSubmit" value="Enter New Parameters" />
+	        <td align="left" colspan="2"><input type="submit" class="btn btn-sm btn-primary"name="onlineCautionSubmit" value="Enter New Parameters" />
 	        Changes take effect immediately</td>
 	      </tr>
 	    </table>

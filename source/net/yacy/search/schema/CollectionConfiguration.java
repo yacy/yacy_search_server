@@ -965,7 +965,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Boolean canonical_equal_sku = canonical == null ? null : canonical.toNormalform(true).equals(url);  
         if (webgraph != null && (!containsCanonical || (canonical_equal_sku != null && (canonical_equal_sku.booleanValue())))) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            List<SolrInputDocument> edges = webgraph.getEdges(subgraph, digestURL, responseHeader, collections, crawldepth, processTypes, document.getAnchors(), sourceName);
+            List<SolrInputDocument> edges = webgraph.getEdges(subgraph, digestURL, responseHeader, collections, crawldepth, processTypes, document.getHyperlinks().keySet(), sourceName);
             // this also enriched the subgraph
             doc.webgraphDocuments.addAll(edges);
         } else {
@@ -976,7 +976,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 contains(CollectionSchema.outboundlinks_protocol_sxt) ||
                 contains(CollectionSchema.outboundlinks_urlstub_sxt) ||
                 contains(CollectionSchema.outboundlinks_anchortext_txt)) {
-                for (final AnchorURL target_url: document.getAnchors()) {
+                for (final AnchorURL target_url: document.getHyperlinks().keySet()) {
                     enrichSubgraph(subgraph, digestURL, target_url);
                 }
             }

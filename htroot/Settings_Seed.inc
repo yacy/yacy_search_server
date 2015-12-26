@@ -19,7 +19,7 @@
 		<option value="#[name]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>
 #{/seedUploadMethods}#
 		</select>
-		<input type="submit" name="seedSettings" value="Submit" />
+		<input type="submit" name="seedSettings" class="btn btn-primary" value="Submit" />
     </td>
     <td><em>Here you can specify which upload method should be used. Select 'none' to deactivate uploading.</em></td>
   </tr>
@@ -34,7 +34,7 @@
     </td>
   </tr>
   <tr>
-    <td colspan="3"><input type="submit" name="seedUploadRetry" value="Retry Uploading" /></td>
+    <td colspan="3"><input type="submit" name="seedUploadRetry" class="btn btn-primary" value="Retry Uploading" /></td>
   </tr>
 </table>
 </form>

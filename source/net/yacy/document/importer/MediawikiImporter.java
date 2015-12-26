@@ -523,7 +523,7 @@ public class MediawikiImporter extends Thread implements Importer {
 			}
         }
         public void writeXML(final OutputStreamWriter os) throws IOException {
-            this.document.writeXML(os, new Date());
+            this.document.writeXML(os);
         }
     }
 
@@ -710,7 +710,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                     ConcurrentLog.info("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
-                    record.document.writeXML(this.osw, new Date());
+                    record.document.writeXML(this.osw);
                     this.rc++;
                     if (this.rc >= 10000) {
                         this.osw.write("</surrogates>\n");
