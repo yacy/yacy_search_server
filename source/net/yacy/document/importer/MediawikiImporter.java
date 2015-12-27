@@ -39,7 +39,6 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -713,7 +712,7 @@ public class MediawikiImporter extends Thread implements Importer {
                     record.document.writeXML(this.osw);
                     this.rc++;
                     if (this.rc >= 10000) {
-                        this.osw.write("</surrogates>\n");
+                        this.osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
                         this.osw.close();
                         final String finalfilename = this.targetstub + "." + this.fc + ".xml";
                         new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
@@ -733,14 +732,14 @@ public class MediawikiImporter extends Thread implements Importer {
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             } finally {
-	            try {
-					this.osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
-		            this.osw.close();
-		            final String finalfilename = this.targetstub + "." + this.fc + ".xml";
-		            new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
-				} catch (final IOException e) {
-				    ConcurrentLog.logException(e);
-				}
+                try {
+                    this.osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
+                    this.osw.close();
+                    final String finalfilename = this.targetstub + "." + this.fc + ".xml";
+                    new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
+                }
             }
             ConcurrentLog.info("WIKITRANSLATION", "*** convertWriter has terminated");
             return Integer.valueOf(0);
