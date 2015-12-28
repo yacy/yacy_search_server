@@ -873,6 +873,8 @@ search.verify.delete = true
 remotesearch.maxcount = 10
 remotesearch.maxtime = 3000
 remotesearch.result.store=true
+# Maximum size allowed (in bytes) for a remote document result to be stored to local index. Defaults to -1, which means no limit.
+remotesearch.result.store.maxsize=-1
 remotesearch.maxload.rwi=8.0
 remotesearch.maxload.solr=4.0
 

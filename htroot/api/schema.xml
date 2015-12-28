@@ -69,7 +69,9 @@
     </fields>
     
     <uniqueKey>#[solruniquekey]#</uniqueKey>
+    <!-- defaultSearchField element is deprecated in Solr versions 3.6 and higher. Instead, df request parameter should be used-->
     <defaultSearchField>#[solrdefaultsearchfield]#</defaultSearchField>
+    <!-- default operator parameter has been deprecated in Solr versions 3.6 and higher. Instead, the query parser q.op parameter should be used in request handler. -->
     <solrQueryParser defaultOperator="AND"/>
     
     <!-- if you are using a search client using the default search field "text", then use this line to get to all indexed documents -->

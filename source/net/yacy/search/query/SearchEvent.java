@@ -161,6 +161,8 @@ public final class SearchEvent {
     private ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
     private final boolean remote;
     public final boolean addResultsToLocalIndex; // add received results to local index (defult=true)
+    /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
+    private long remoteStoredDocMaxSize;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
     private final long maxtime;
@@ -196,6 +198,22 @@ public final class SearchEvent {
                 this.remote_solr_available.get() + this.local_solr_stored.get(),
                 imageViewed.size() + sizeSpare()
                );
+    }
+    
+    /**
+     * Set maximum size allowed (in kbytes) for a remote document result to be stored to local index.
+     * @param maxSize document content max size in kbytes. Zero or negative value means no limit. 
+     */
+    public void setRemoteDocStoredMaxSize(long maxSize) {
+    	this.remoteStoredDocMaxSize = maxSize;
+    }
+    
+    /**
+     * @return maximum size allowed (in kbytes) for a remote document result to be stored to local index.
+     * Zero or negative value means no limit. 
+     */
+    public long getRemoteDocStoredMaxSize() {
+    	return this.remoteStoredDocMaxSize;
     }
     
     protected SearchEvent(
@@ -261,6 +279,8 @@ public final class SearchEvent {
         this.IAneardhthash = null;
         this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false)));
         this.addResultsToLocalIndex = addResultsToLocalIdx;
+        /* Défault : no size limit to store remote result documents to local index. Use setter to eventually modify it. */
+        this.remoteStoredDocMaxSize = -1;
         this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
         this.local_rwi_stored     = new AtomicInteger(0);
         this.local_solr_available = new AtomicInteger(0);

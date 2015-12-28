@@ -93,6 +93,7 @@ public class ConfigPortal {
                 
                 final boolean storeresult = post.getBoolean(SwitchboardConstants.REMOTESEARCH_RESULT_STORE);
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, storeresult);
+                sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, post.getLong(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, -1));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete"));
@@ -148,6 +149,7 @@ public class ConfigPortal {
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, config.getProperty(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE));
+                sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, config.getProperty(SwitchboardConstants.SEARCH_VERIFY,"iffresh"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, config.getProperty(SwitchboardConstants.SEARCH_VERIFY_DELETE,"true"));
                 sb.setConfig("about.headline", config.getProperty("about.headline",""));
@@ -170,6 +172,12 @@ public class ConfigPortal {
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));
         
         prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, true) ? 1 : 0);
+        long resultStoredMaxSize = sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, -1);
+        if(resultStoredMaxSize > 0) {
+        	prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, resultStoredMaxSize);
+    	} else {
+    		prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, "");
+    	}
 
         prop.put("search.verify.nocache", sb.getConfig("search.verify", "").equals("nocache") ? 1 : 0);
         prop.put("search.verify.iffresh", sb.getConfig("search.verify", "").equals("iffresh") ? 1 : 0);
@@ -216,11 +224,19 @@ public class ConfigPortal {
         prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
+        /* Addresse used in code template */
         String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getLocalPort();
         }
         prop.put("myaddress", myaddress);
+        
+        /* Adress used to display iframe preview : no need to use public adress when coming from local */
+        String myPreviewAddress = myaddress;
+        if(header.accessFromLocalhost()) {
+        	myPreviewAddress = "localhost:" + sb.getLocalPort();
+        }
+        prop.put("myPreviewAddress", myPreviewAddress);
         return prop;
     }
 

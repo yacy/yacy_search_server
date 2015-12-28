@@ -27,6 +27,8 @@ package net.yacy.kelondro.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import net.yacy.cora.util.ConcurrentLog;
+
 /**
  * Use this to get information about memory usage or try to free some memory
  */
@@ -183,33 +185,54 @@ public class MemoryControl {
      * main
      * @param args use 'force' to request by force, use 'std' / 'gen' to specify strategy
      */
-    public static void main(final String[] args) {
-        // try this with different strategy and compare results
-        final int mb = 1024 * 1024;
-        boolean force = false;
-        for (final String arg : args) {
-        	if (arg.equals("force")) force = true;
-        	if (arg.equalsIgnoreCase("gen")) usingStandardStrategy = false;
-        	if (arg.equalsIgnoreCase("std")) usingStandardStrategy = true;
-        }
-        System.out.println("vm: " + System.getProperty("java.vm.version"));
-        System.out.println("computed max = " + (maxMemory() / mb) + " mb");
-        System.out.println("using " + getStrategyName());
-        final byte[][] x = new byte[100000][];
+	public static void main(final String[] args) {
+		long beginTime = System.nanoTime();
+		int i = 0;
+		try {
+			// try this with different strategy and compare results
+			final int mb = 1024 * 1024;
+			boolean force = false;
+			for (final String arg : args) {
+				if (arg.equals("force"))
+					force = true;
+				if (arg.equalsIgnoreCase("gen"))
+					usingStandardStrategy = false;
+				if (arg.equalsIgnoreCase("std"))
+					usingStandardStrategy = true;
+			}
+			System.out.println("vm: " + System.getProperty("java.vm.version"));
+			System.out.println("computed max = " + (maxMemory() / mb) + " mb");
+			System.out.println("using " + getStrategyName());
+			if(force) {
+				System.out.println("forcing garbage collector when requesting");
+			} else {
+				System.out.println("not forcing garbage collector when requesting");
+			}
+			final byte[][] x = new byte[100000][];
 
-        for (int i = 0; i < 100000; i++) {
-        	if (request(mb, force))
-        	{
-	            x[i] = new byte[mb];
-	            System.out.println("used = " + i + " / " + (used() /mb) +
-	                    ", total = " + (total() / mb) +
-	                    ", free = " + (free() / mb) +
-	                    ", max = " + (maxMemory() / mb) +
-	                    ", avail = " + (available() / mb) +
-	                    (usingStandardStrategy? ", averageGC = " + ((StandardMemoryStrategy)getStrategy()).getAverageGCFree() : ""));
-        	} else System.exit(0);
-        }
+			for (i = 0; i < 100000; i++) {
+				if (request(mb, force)) {
+					x[i] = new byte[mb];
+					System.out
+							.println("used = " + i + " / " + (used() / mb) + ", total = " + (total() / mb) + ", free = "
+									+ (free() / mb) + ", max = " + (maxMemory() / mb) + ", avail = "
+									+ (available() / mb)
+									+ (usingStandardStrategy
+											? ", averageGC = "
+													+ ((StandardMemoryStrategy) getStrategy()).getAverageGCFree()
+											: ""));
+				} else {
+					System.out.println("No more memory available!");
+					break;
+				}
+			}
+		} finally {
+			long time = System.nanoTime() - beginTime;
+			System.out.println("Test run in " + time / 1000000 + " ms");
+			ConcurrentLog.shutdown();
+			System.out.println("Succesfull requests : " + i);
+		}
 
-    }
+	}
 
 }

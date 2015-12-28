@@ -121,6 +121,8 @@ public class RemoteSearch extends Thread {
             } else {
                 Network.log.info("REMOTE SEARCH - no answer from remote peer " + this.targetPeer.hash + ":" + this.targetPeer.getName());
             }
+        } catch(InterruptedException e) {
+        	Network.log.info("REMOTE SEARCH - interrupted search to remote peer " + this.targetPeer.hash + ":" + this.targetPeer.getName());
         } catch (final Exception e) {
             ConcurrentLog.logException(e);
         } finally {
@@ -309,6 +311,8 @@ public class RemoteSearch extends Thread {
                     } else {
                         Network.log.info("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
                     }
+                } catch (final InterruptedException e) {
+                	Network.log.info("REMOTE SEARCH - interrupted search to remote peer " + targetPeer.hash + ":" + targetPeer.getName());
                 } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 } finally {
@@ -359,6 +363,8 @@ public class RemoteSearch extends Thread {
                                 Network.log.info("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
                             }
                         }
+                    } catch (final InterruptedException e) {
+                    	Network.log.info("REMOTE SEARCH - interrupted search to remote peer " + targetPeer.hash + ":" + targetPeer.getName());
                     } catch (final Exception e) {
                         ConcurrentLog.logException(e);
                     } finally {
