@@ -1653,7 +1653,7 @@ or to set up a 'virtual server' in your router settings (often called DMZ).==ou 
 Please be fair, contribute your own index to the global index.==Jouez le jeu: contribuez &agrave; l'index global &agrave; l'aide de votre index personnel.
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==L'espace disque disponible est inf&eacute;rieur &agrave; #[minSpace]#. Le balayage a &eacute;t&eacute; d&eacute;sactiv&eacute;. Veuillez r&eacute;soudre 
 it as soon as possible and restart YaCy.==ce probl&egrave;me aussi vite que possible et red&eacute;marrer YaCy.
-Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix==La quantit&eacute; de m&eacute;moire disponible est inf&eacute;rieure &agrave; #[minSpace]#. La DHT a &eacute;t&eacute; d&eacute;sactiv&eacute;e. Veuillez r&eacute;soudre
+Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==La quantit&eacute; de m&eacute;moire disponible est inf&eacute;rieure &agrave; #[minSpace]#. La DHT-in a &eacute;t&eacute; d&eacute;sactiv&eacute;e. Veuillez r&eacute;soudre
 Crawling is paused! If the crawling was paused automatically, please check your disk space.==Le balayage est en pause! Si le balayage a &eacute;t&eacute; mis en pause automatiquement, veuillez v&eacute;rifier votre espace disque.
 Latest public version is==La version stable la plus r&eacute;cente est
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Vous pouvez t&eacute;l&eacute;charger une version de YaCy plus r&eacute;cente. Cliquer ici pour installer cette mise &agrave; jour et red&eacute;marrer YaCy.

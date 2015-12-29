@@ -3207,7 +3207,7 @@ or to set up a 'virtual server' in your router settings (often called DMZ).==ode
 Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
 it as soon as possible and restart YaCy.==dieses Problem so schnell wie möglich und starten Sie YaCy neu.
-Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT wurde deaktiviert. Bitte beheben Sie 
+Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT Empfang wurde deaktiviert. Bitte beheben Sie 
 Crawling is paused! If the crawling was paused automatically, please check your disk space.==Crawling wurde pausiert! Wenn das Crawling automatisch pausiert wurde, prüfen Sie bitte Ihrer Festplattenspeicher.
 Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:

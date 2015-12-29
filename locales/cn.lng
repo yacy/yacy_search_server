@@ -2655,7 +2655,7 @@ or to set up a 'virtual server' in your router settings (often called DMZ).==或
 Please be fair, contribute your own index to the global index.==请公平地贡献您的索引给全球索引.
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==空闲磁盘空间低于 #[minSpace]#. crawl已被关闭,
 it as soon as possible and restart YaCy.==请尽快修复并重启YaCy.
-Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT已被关闭,
+Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT-in已被关闭,
 Latest public version is==最新版本为
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==您可以下载最新版本YaCy, 点此进行升级并重启:
 #"Update YaCy"=="Update YaCy"

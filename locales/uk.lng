@@ -2838,7 +2838,7 @@ or to set up a 'virtual server' in your router settings (often called DMZ).==а�
 Please be fair, contribute your own index to the global index.==Будь-ласка, будьте справедливими і зробіть свій внесок у загальний індекс!
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==Вільного простору на жорсткому диску менше #[minSpace]#. Сканування було вимкнене. Будь ласка, виправте
 it as soon as possible and restart YaCy.==цю проблему якомога швидше і перезапустіть YaCy.
-Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix==Залишилось менше, ніж #[minSpace]# пам’яті. DHT вимкнений. Будь ласка, виправте
+Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==Залишилось менше, ніж #[minSpace]# пам’яті. DHT-in вимкнений. Будь ласка, виправте
 Latest public version is==Остання стабільна версія
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Ви можете завантажити нову версію YaCy. Натисніть тут, щоб встановити це оновлення і перезапустити YaCy:
 "Update YaCy"=="Оновити YaCy"

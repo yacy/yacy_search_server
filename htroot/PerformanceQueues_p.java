@@ -293,7 +293,7 @@ public class PerformanceQueues_p {
 
         final long diskFree = sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, 3000L);
         final long diskFreeHardlimit = sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, 1000L);
-        final long memoryAcceptDHT = sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 50000L);
+        final long memoryAcceptDHT = sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 50L);
         final boolean observerTrigger = !MemoryControl.properState();
         prop.put("diskFree", diskFree);
         prop.put("diskFreeHardlimit", diskFreeHardlimit);
