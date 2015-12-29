@@ -1229,31 +1229,6 @@ contentcontrol.smwimport.purgelistoninit = true
 contentcontrol.smwimport.targetlist = contentcontrol
 contentcontrol.smwimport.defaultcategory = yacy
 
-# Interaction settings
-interaction.enabled = false
-interaction.target = yacy
-
-interaction.feedback.enabled = true
-interaction.feedback.url = 
-interaction.feedback.accept = false
-interaction.usertracking.enabled = true
-interaction.addcontent.enabled = false
-interaction.approvelist.enabled = false
-interaction.suggestrejected.enabled = false
-
-interaction.globalmenu.enabled = true
-interaction.portalconfigbutton.enabled = true
-interaction.crawltraces.enabled = false
-interaction.userselfregistration.enabled = false
-interaction.forcebookmarkimport = 
-interaction.visiblecategories = all
-
-interaction.dontimportbookmarks = 
-
-interaction.autocrawler.enabled = false
-interaction.autocrawler.domainfilter = .*
-interaction.autocrawler.categoryfilter = .*
-
 # host browser settings
 browser.autoload = false
 browser.load4everyone = false

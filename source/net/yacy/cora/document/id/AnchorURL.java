@@ -28,7 +28,7 @@ public class AnchorURL extends DigestURL {
 
     private static final long serialVersionUID = 1586579902179962086L;
 
-    private String nameProperty, relProperty, hrefProperty, textBody; // may contain additional url properties, such as given in html a href-links
+    private String nameProperty, relProperty, textBody; // may contain additional url properties, such as given in html a href-links
     private DigestURL imageURL; // in case that the anchor contains an image link, store image url; if there is no image then set this to null
     private String imageAlt; // in case that the anchor contains an image link, store the alt property; if there is no image then set this to null
 
@@ -37,7 +37,6 @@ public class AnchorURL extends DigestURL {
         this.textBody = "";
         this.nameProperty = "";
         this.relProperty = "";
-        this.hrefProperty = "";
         this.imageURL = null;
         this.imageAlt = null;
     }
@@ -47,7 +46,6 @@ public class AnchorURL extends DigestURL {
         this.textBody = url.textBody;
         this.nameProperty = url.nameProperty;
         this.relProperty = url.relProperty;
-        this.hrefProperty = url.hrefProperty;
         this.imageURL = url.imageURL;
         this.imageAlt = url.imageAlt;
     }
@@ -57,7 +55,6 @@ public class AnchorURL extends DigestURL {
         this.textBody = "";
         this.nameProperty = "";
         this.relProperty = "";
-        this.hrefProperty = "";
         this.imageURL = null;
         this.imageAlt = null;
     }
@@ -67,7 +64,6 @@ public class AnchorURL extends DigestURL {
         this.textBody = "";
         this.nameProperty = "";
         this.relProperty = "";
-        this.hrefProperty = "";
         this.imageURL = null;
         this.imageAlt = null;
     }
@@ -77,7 +73,6 @@ public class AnchorURL extends DigestURL {
         this.textBody = "";
         this.nameProperty = "";
         this.relProperty = "";
-        this.hrefProperty = "";
         this.imageURL = null;
         this.imageAlt = null;
     }
@@ -87,7 +82,6 @@ public class AnchorURL extends DigestURL {
         this.textBody = "";
         this.nameProperty = "";
         this.relProperty = "";
-        this.hrefProperty = "";
         this.imageURL = imageURL;
         this.imageAlt = imageAlt;
     }
@@ -133,14 +127,6 @@ public class AnchorURL extends DigestURL {
         this.relProperty = rel;
     }
 
-    public String getHrefProperty() {
-        return hrefProperty;
-    }
-
-    public void setHrefProperty(String href) {
-        this.hrefProperty = href;
-    }
-
     public DigestURL getImageURL() {
         return imageURL;
     }
@@ -161,7 +147,6 @@ public class AnchorURL extends DigestURL {
         this.nameProperty = tagopts.getProperty("name", "");
         this.textBody = tagopts.getProperty("text", "");
         this.relProperty = tagopts.getProperty("rel", "");
-        this.hrefProperty = tagopts.getProperty("href", "");
     }
 
     public Properties getAll() {
@@ -169,7 +154,6 @@ public class AnchorURL extends DigestURL {
         tagopts.setProperty("name", this.nameProperty);
         tagopts.setProperty("text", this.textBody);
         tagopts.setProperty("rel", this.relProperty);
-        tagopts.setProperty("href", this.hrefProperty);
         return tagopts;
     }
     
