@@ -88,17 +88,9 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import static org.eclipse.jetty.http.HttpHeader.CONTENT_RANGE;
-import static org.eclipse.jetty.http.HttpHeader.IF_MODIFIED_SINCE;
-import static org.eclipse.jetty.http.HttpHeader.IF_UNMODIFIED_SINCE;
-import static org.eclipse.jetty.http.HttpHeader.REQUEST_RANGE;
-import static org.eclipse.jetty.http.HttpMethod.HEAD;
-
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
-
-import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML;
-import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML_UTF_8;
-
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.util.MultiPartOutputStream;
@@ -431,12 +423,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
             throws IOException {
         try {
-            if (!request.getMethod().equals(HEAD.asString())) {
+            if (!request.getMethod().equals(HttpMethod.HEAD.asString())) {
 
-                String ifms = request.getHeader(IF_MODIFIED_SINCE.asString());
+                String ifms = request.getHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
                 if (ifms != null) {
 
-                    long ifmsl = request.getDateHeader(IF_MODIFIED_SINCE.asString());
+                    long ifmsl = request.getDateHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
                     if (ifmsl != -1) {
                         if (resource.lastModified() / 1000 <= ifmsl / 1000) {
                             response.reset();
@@ -448,7 +440,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
 
                 // Parse the if[un]modified dates and compare to resource
-                long date = request.getDateHeader(IF_UNMODIFIED_SINCE.asString());
+                long date = request.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE.asString());
 
                 if (date != -1) {
                     if (resource.lastModified() / 1000 > date / 1000) {
@@ -487,7 +479,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
 
         byte[] data = dir.getBytes("UTF-8");
-        response.setContentType(TEXT_HTML_UTF_8.asString());
+        response.setContentType(MimeTypes.Type.TEXT_HTML_UTF_8.asString());
         response.setContentLength(data.length);
         response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
         response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 10000); // consider that directories are not modified that often
@@ -542,7 +534,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (ranges == null || ranges.isEmpty()) {
                 writeHeaders(response, resource, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                response.setHeader(CONTENT_RANGE.asString(),
+                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
                         InclusiveByteRange.to416HeaderRangeString(content_length));
                 resource.writeTo(out, 0, content_length);
                 out.close();
@@ -557,7 +549,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 long singleLength = singleSatisfiableRange.getSize(content_length);
                 writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                response.setHeader(CONTENT_RANGE.asString(),
+                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
                         singleSatisfiableRange.toHeaderRangeString(content_length));
                 resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
                 out.close();
@@ -580,7 +572,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             // send an old style multipart/x-byteranges Content-Type. This
             // keeps Netscape and acrobat happy. This is what Apache does.
             String ctp;
-            if (request.getHeader(REQUEST_RANGE.asString()) != null) {
+            if (request.getHeader(HttpHeader.REQUEST_RANGE.asString()) != null) {
                 ctp = "multipart/x-byteranges; boundary=";
             } else {
                 ctp = "multipart/byteranges; boundary=";
@@ -878,7 +870,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
-                final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+                final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -965,7 +957,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 
-                String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+                String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 
                 InputStream fis;
                 long fileSize = targetFile.length();
@@ -1000,7 +992,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      */
 	private void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)
 			throws IOException {
-		final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+		final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 		response.setContentType(mimeType);
 		response.setStatus(HttpServletResponse.SC_OK);
 		byte[] buffer = new byte[4096];
@@ -1068,8 +1060,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /**
      * TODO: add same functionality & checks as in HTTPDemon.parseMultipart
      *
-     * parse multi-part form data for formfields (only), see also original
+     * parse multi-part form data for formfields, see also original
      * implementation in HTTPDemon.parseMultipart
+     *
+     * For file data the parameter for the formfield contains the filename and a
+     * additional parameter with appendix [fieldname]$file conteins the upload content
+     * (e.g. <input type="file" name="upload">  upload="local/filename" upload$file=[content])
      *
      * @param request
      * @param args found fields/values are added to the map
@@ -1104,6 +1100,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                 } else {
                     // read file upload
+                    args.add(item.getFieldName(), item.getName()); // add the filename to the parameters
                     InputStream filecontent = null;
                     try {
                         filecontent = item.getInputStream();
@@ -1115,10 +1112,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                 }
             }
-            if (files.size() <= 1) {
-                for (Map.Entry<String, byte[]> fe: files) {
-                    // the file is written in base64 encoded form to a string
-                    args.put(fe.getKey(), Base64Order.standardCoder.encode(fe.getValue()));
+            if (files.size() <= 1) { // TODO: should include additonal checks to limit parameter.size below rel. large SIZE_FILE_THRESHOLD
+                for (Map.Entry<String, byte[]> fe: files) { // add the file content to parameter fieldname$file
+                    args.put(fe.getKey()+"$file", (fe.getValue()));
                 }
             } else {
                 // do this concurrently (this would all be superfluous if serverObjects could store byte[] instead only String)
