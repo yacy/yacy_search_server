@@ -46,7 +46,6 @@ import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -102,7 +101,7 @@ public class ConfigLanguage_p {
                 Iterator<String> it;
                 try {
                     final DigestURL u = new DigestURL(url);
-                    it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "")));
+                    it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, null, null));
                 } catch(final IOException e) {
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);
