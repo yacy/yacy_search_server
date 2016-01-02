@@ -190,11 +190,6 @@ public final class SwitchboardConstants {
      */
     public static final String RAM_CACHE_NURL_TIME      = "ramCacheNURL_time";
     /**
-     * <p><code>public static final String <strong>RAM_CACHE_EURL</strong> = "ramCacheEURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Erroneous URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_EURL_TIME      = "ramCacheEURL_time";
-    /**
      * <p><code>public static final String <strong>RAM_CACHE_RWI</strong> = "ramCacheRWI"</code></p>
      * <p>Name of the setting how much memory in bytes should be assigned to the RWIs DB for caching purposes</p>
      */
@@ -584,5 +579,5 @@ public final class SwitchboardConstants {
      */
     public static final String DECORATION_AUDIO                    = "decoration.audio";
     public static final String DECORATION_GRAFICS_LINKSTRUCTURE    = "decoration.grafics.linkstructure";
-    
+
 }
