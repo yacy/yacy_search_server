@@ -121,6 +121,8 @@ public class EmbeddedSolrConnectorTest {
      * Test for partial update for document containing a multivalued date field
      * this is a Solr issue (2015-09-12)
      * the test case is just to demonstrate the effect on YaCy (currently catching the solr exception and reinserting a document with fields missing)
+     *
+     * Solr 5.4.0 bugfix @see http://issues.apache.org/jira/browse/SOLR-8050 Partial update on document with multivalued date field fails
      */
     @Test
     public void testUdate_withMultivaluedDateField() throws SolrException, IOException {
@@ -142,7 +144,7 @@ public class EmbeddedSolrConnectorTest {
         fieldnames.addAll(doc.getFieldNames());
 
         SolrInputDocument sid = new SolrInputDocument();
-        sid.addField(CollectionSchema.id.name(), doc.getFieldValue(CollectionSchema.id.name()));
+        sid.addField(CollectionSchema.id.name(), id);
         sid.addField(CollectionSchema.host_s.name(), "yacy.yacy");
         solr.update(sid);
         solr.commit(true);

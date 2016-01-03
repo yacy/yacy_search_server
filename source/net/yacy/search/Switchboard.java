@@ -2512,11 +2512,15 @@ public final class Switchboard extends serverSwitch {
                 // 2015-09-12 Solr v5.2.1 & v5.3
                 // this hack switches partial update off (if multivalued datefield _dts exists, like: dates_in_content_dts startDates_dts endDates_dts)
                 boolean partialUpdate = getConfigBool("postprocessing.partialUpdate", true);
+
+                /* Solr 5.4.0 bugfix see http://issues.apache.org/jira/browse/SOLR-8050 Partial update on document with multivalued date field fails
+                *
                 for (String sf : index.fulltext().getDefaultConfiguration().keySet()) {
                     if (sf.endsWith("_dts")) {
                         partialUpdate = false;
                     }
                 }
+                */
                 if (allCrawlsFinished) {
                     // refresh the search cache
                     SearchEventCache.cleanupEvents(true);
