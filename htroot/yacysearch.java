@@ -476,8 +476,8 @@ public class yacysearch {
                 }
             }
 
-            final int heuristicBlekko = querystring.indexOf("/heuristic", 0);
-            if ( heuristicBlekko >= 0 ) {
+            final int heuristicOS = querystring.indexOf("/heuristic", 0);
+            if ( heuristicOS >= 0 ) {
                 querystring = querystring.replace("/heuristic", "");
                 modifier.add("/heuristic");
             }
@@ -721,14 +721,11 @@ public class yacysearch {
                         SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
                         sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)));
 
-            if ( startRecord == 0 ) {
-                if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) && authenticated && !stealthmode) {
+            if ( startRecord == 0 && authenticated && !stealthmode ) {
+                if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) ) {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
-                if ( heuristicBlekko >= 0  && authenticated && !stealthmode ) {
-                    FederateSearchManager.getManager().search(theSearch);
-                }
-                if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && authenticated && !stealthmode) {
+                if ( heuristicOS >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) ) {
                     FederateSearchManager.getManager().search(theSearch);
                 }
             }

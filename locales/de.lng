@@ -1603,7 +1603,7 @@ doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
 an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
 heuristics==Heuristiken
-add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
+add search results from external opensearch systems==Benutze zusätzliche Ergebnisse von externen Opensearchsystemen
 Search Navigation==Such-Navigation
 keyboard shotcuts==Tastatur-Kürzel
 tab or page-up==Tab oder Bild hoch
