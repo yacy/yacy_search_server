@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -153,7 +154,7 @@ public class Translator {
         StringBuilder content = new StringBuilder();
         BufferedReader br = null;
         try{
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile),"UTF-8"));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile), StandardCharsets.UTF_8));
             String line = null;
             while( (line = br.readLine()) != null){
                 content.append(line).append(net.yacy.server.serverCore.CRLF_STRING);
@@ -172,7 +173,7 @@ public class Translator {
         String processedContent = translate(content.toString(), translationList);
         BufferedWriter bw = null;
         try{
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile),"UTF-8"));
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile), StandardCharsets.UTF_8));
             bw.write(processedContent);
             bw.close();
         }catch(final IOException e){

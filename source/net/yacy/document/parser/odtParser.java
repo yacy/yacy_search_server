@@ -29,6 +29,7 @@ package net.yacy.document.parser;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -188,7 +189,7 @@ public class odtParser extends AbstractParser implements Parser {
             docs = new Document[]{new Document(
                     location,
                     mimeType,
-                    "UTF-8",
+                    StandardCharsets.UTF_8.name(),
                     this,
                     languages,
                     docKeywords,

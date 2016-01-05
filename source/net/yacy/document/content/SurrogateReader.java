@@ -32,6 +32,8 @@ import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -83,7 +85,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private final CrawlStacker crawlStacker;
     private final CollectionConfiguration configuration;
     private final int concurrency;
-    private String charsetName = "UTF-8";
+    private Charset charset = StandardCharsets.UTF_8;
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
@@ -113,9 +115,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.elementName = null;
         this.surrogates = new ArrayBlockingQueue<>(queueSize);
         
-        Reader reader = new BufferedReader(new InputStreamReader(stream, this.charsetName));
+        Reader reader = new BufferedReader(new InputStreamReader(stream, this.charset));
         this.inputSource = new InputSource(reader);
-        this.inputSource.setEncoding(this.charsetName);
+        this.inputSource.setEncoding(this.charset.name());
         this.inputStream = stream;
         
         try {
@@ -131,7 +133,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         // test the syntax of the stream by reading parts of the beginning
         try {
             if (isSolrDump()) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream, this.charsetName));
+                BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream, this.charset));
                 String line;
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("<doc>")) continue;
@@ -191,7 +193,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
 		try {
 			nbRead = this.inputStream.read(b);
 			if(nbRead > 0) {
-				String s = new String(b, 0, nbRead, this.charsetName);
+				String s = new String(b, 0, nbRead, this.charset);
 				if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
 					res = true;
 				}

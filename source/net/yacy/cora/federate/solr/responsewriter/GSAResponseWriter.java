@@ -22,6 +22,7 @@ package net.yacy.cora.federate.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -178,8 +179,8 @@ public class GSAResponseWriter implements QueryResponseWriter {
         OpensearchResponseWriter.solitaireTag(writer, "Q", query);
         paramTag(writer, "sort", sort);
         paramTag(writer, "output", "xml_no_dtd");
-        paramTag(writer, "ie", "UTF-8");
-        paramTag(writer, "oe", "UTF-8");
+        paramTag(writer, "ie", StandardCharsets.UTF_8.name());
+        paramTag(writer, "oe", StandardCharsets.UTF_8.name());
         paramTag(writer, "client", client);
         paramTag(writer, "q", query);
         paramTag(writer, "site", site);

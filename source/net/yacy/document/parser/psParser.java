@@ -34,6 +34,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
@@ -104,7 +105,7 @@ public class psParser extends AbstractParser implements Parser {
             final Document[] docs = new Document[]{new Document(
                     location, // url
                     mimeType, // mime
-                    "UTF-8",  // charset
+                    StandardCharsets.UTF_8.name(),  // charset
                     this,
                     null,     // languages
                     null,     // keywords

@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +60,7 @@ public class KeyList implements Iterable<String> {
             if (file.getName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
             }
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String l;
             try {
                 while ((l = reader.readLine()) != null) {

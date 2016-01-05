@@ -28,6 +28,7 @@ package net.yacy.document.content;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.text.Collator;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -332,7 +333,7 @@ public class DCEntry extends MultiMapSolrParams {
         return new Document(
             getIdentifier(true),
             "text/html",
-            "UTF-8",
+            StandardCharsets.UTF_8.name(),
             this,
             languages,
             getSubject(), // might be null

@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.nio.charset.StandardCharsets;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -415,7 +416,7 @@ public final class TemplateEngine {
                         BufferedReader br = null;
                         try{
                             //br = new BufferedReader(new InputStreamReader(new FileInputStream( filename ))); //Simple Include
-                            br = new BufferedReader( new InputStreamReader(new FileInputStream( HTTPDFileHandler.getLocalizedFile(UTF8.String(filename))),"UTF-8") ); //YaCy (with Locales)
+                            br = new BufferedReader( new InputStreamReader(new FileInputStream( HTTPDFileHandler.getLocalizedFile(UTF8.String(filename))), StandardCharsets.UTF_8) ); //YaCy (with Locales)
                             //Read the Include
                             String line = "";
                             while ((line = br.readLine()) != null) {

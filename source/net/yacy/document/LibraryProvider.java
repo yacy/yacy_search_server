@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -280,7 +281,7 @@ public class LibraryProvider {
 
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(derewoTxtEntry, "UTF-8"));
+            reader = new BufferedReader(new InputStreamReader(derewoTxtEntry, StandardCharsets.UTF_8));
             String line;
 
             // read until text starts

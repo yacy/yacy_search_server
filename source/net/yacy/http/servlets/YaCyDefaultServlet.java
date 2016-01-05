@@ -34,6 +34,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -478,7 +479,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             return;
         }
 
-        byte[] data = dir.getBytes("UTF-8");
+        byte[] data = dir.getBytes(StandardCharsets.UTF_8);
         response.setContentType(MimeTypes.Type.TEXT_HTML_UTF_8.asString());
         response.setContentLength(data.length);
         response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
@@ -1093,7 +1094,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     // simple text
                     if (item.getContentType() == null || !item.getContentType().contains("charset")) {
                         // old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
-                        args.add(item.getFieldName(), item.getString("UTF-8"));
+                        args.add(item.getFieldName(), item.getString(StandardCharsets.UTF_8.name()));
                     } else {
                         // use default encoding (given as header or ISO-8859-1)
                         args.add(item.getFieldName(), item.getString());

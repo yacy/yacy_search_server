@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -299,7 +300,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         if (b == -1) {
             return null;
         }
-        return buf.toString("UTF-8");
+        return buf.toString(StandardCharsets.UTF_8.name());
     }
 
     /**

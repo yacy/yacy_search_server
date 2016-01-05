@@ -39,6 +39,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -161,7 +162,7 @@ public class MediawikiImporter extends Thread implements Importer {
             } else if (this.sourcefile.getName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
             }
-            final BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 4 * 1024 * 1024);
+            final BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, StandardCharsets.UTF_8), 4 * 1024 * 1024);
             String t;
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;
@@ -520,7 +521,7 @@ public class MediawikiImporter extends Thread implements Importer {
         public void genDocument() throws Parser.Failure {
             try {
 				this.url = new AnchorURL(this.urlStub + this.title);
-				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html));
+				final Document[] parsed = TextParser.parseSource(this.url, "text/html", StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html));
 				this.document = Document.mergeDocuments(this.url, "text/html", parsed);
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				this.document.setTitle(this.title);
@@ -712,7 +713,7 @@ public class MediawikiImporter extends Thread implements Importer {
                     if (this.osw == null) {
                         // start writing a new file
                         this.outputfilename = this.targetstub + "." + this.fc + ".xml.prt";
-                        this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), "UTF-8");
+                        this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), StandardCharsets.UTF_8);
                         this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                     ConcurrentLog.info("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
@@ -726,7 +727,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         this.rc = 0;
                         this.fc++;
                         this.outputfilename = this.targetstub + "." + this.fc + ".xml.prt";
-                        this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), "UTF-8");
+                        this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), StandardCharsets.UTF_8);
                         this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                 }

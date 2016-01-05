@@ -24,6 +24,7 @@ package net.yacy.document;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class ProbabilisticClassifier {
         public Context(String context_name, Map<String, File> categoryExampleLinesFiles, File negativeExampleLines) throws IOException {
             this.context_name = context_name;
             int requiredSize = 0;
-            Charset charset = Charset.forName("UTF-8");
+            Charset charset = StandardCharsets.UTF_8;
             Map<String, List<String>> categoryBuffer = new HashMap<>();
             for (Map.Entry<String, File> category: categoryExampleLinesFiles.entrySet()) {
                 List<String> list = Files.readAllLines(category.getValue().toPath(), charset);

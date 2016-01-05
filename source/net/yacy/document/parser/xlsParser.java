@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
@@ -123,7 +124,7 @@ public class xlsParser extends AbstractParser implements Parser {
                 return new Document[]{new Document(
                         location,
                         mimeType,
-                        "UTF-8",
+                        StandardCharsets.UTF_8.name(),
                         this,
                         null,
                         null,

@@ -28,6 +28,7 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -1154,7 +1155,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), "UTF-8", new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), StandardCharsets.UTF_8.name(), new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();

@@ -33,6 +33,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -169,7 +170,7 @@ public class pdfParser extends AbstractParser implements Parser {
             pdflinks = extractPdfLinks(pdfDoc);
             
             // get the fulltext (either per document or for each page)
-            final PDFTextStripper stripper = new PDFTextStripper("UTF-8");
+            final PDFTextStripper stripper = new PDFTextStripper(StandardCharsets.UTF_8.name());
 
             if (individualPages) {
                 // this is a hack which stores individual pages of the source pdf into individual index documents
@@ -193,7 +194,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     result[page] = new Document(
                             new AnchorURL(loc + (loc.indexOf('?') > 0 ? '&' : '?') + individualPagePropertyname + '=' + (page + 1)), // these are virtual new pages; we cannot combine them with '#' as that would be removed when computing the urlhash
                             mimeType,
-                            "UTF-8",
+                            StandardCharsets.UTF_8.name(),
                             this,
                             null,
                             docKeywords,
@@ -243,7 +244,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 result = new Document[]{new Document(
                         location,
                         mimeType,
-                        "UTF-8",
+                        StandardCharsets.UTF_8.name(),
                         this,
                         null,
                         docKeywords,

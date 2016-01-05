@@ -26,7 +26,7 @@ package net.yacy.document.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +88,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
                 return new Document[]{new Document(
                         location,
                         mimeType,
-                        "UTF-8",
+                        StandardCharsets.UTF_8.name(),
                         this,
                         null,
                         null,
@@ -134,9 +134,9 @@ public class sidAudioParser extends AbstractParser implements Parser {
 
         Map<String, String> ret = new HashMap<String, String>();
 
-        ret.put("name", new String(name, Charset.forName("ISO-8859-1")).trim());
-        ret.put("author", new String(author, Charset.forName("ISO-8859-1")).trim());
-        ret.put("publisher", new String(copyright, Charset.forName("ISO-8859-1")).trim());
+        ret.put("name", new String(name, StandardCharsets.ISO_8859_1).trim());
+        ret.put("author", new String(author, StandardCharsets.ISO_8859_1).trim());
+        ret.put("publisher", new String(copyright, StandardCharsets.ISO_8859_1).trim());
 
         return ret;
     }

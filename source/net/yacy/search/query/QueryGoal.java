@@ -23,6 +23,7 @@ package net.yacy.search.query;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -209,7 +210,7 @@ public class QueryGoal {
         String ret;
         if (encodeHTML){
             try {
-                ret = URLEncoder.encode(this.query_original, "UTF-8");
+                ret = URLEncoder.encode(this.query_original, StandardCharsets.UTF_8.name());
             } catch (final UnsupportedEncodingException e) {
                 ret = this.query_original;
             }

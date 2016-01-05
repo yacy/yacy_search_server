@@ -25,6 +25,7 @@
 package net.yacy.cora.document.encoding;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 
 import org.apache.http.entity.ContentType;
@@ -43,7 +44,7 @@ public class UTF8 implements Comparator<String> {
 
     public final static Charset charset;
     static {
-        charset = Charset.forName("UTF-8");
+        charset = StandardCharsets.UTF_8;
     }
     private final static ContentType contentType = ContentType.TEXT_PLAIN.withCharset(charset);
 

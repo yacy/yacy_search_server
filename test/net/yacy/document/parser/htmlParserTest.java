@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
@@ -24,15 +25,15 @@ public class htmlParserTest extends TestCase {
 	       new String[]{null,null},
 	       new String[]{"windows1250","windows-1250"},
 	       new String[]{"windows_1250","windows-1250"},
-	       new String[]{"ISO-8859-1","ISO-8859-1"},
-	       new String[]{"ISO8859-1","ISO-8859-1"},
-	       new String[]{"ISO-88591","ISO-8859-1"},
-	       new String[]{"ISO88591","ISO-8859-1"},
-	       new String[]{"iso_8859_1","ISO-8859-1"},
+	       new String[]{"ISO-8859-1", StandardCharsets.ISO_8859_1.name()},
+	       new String[]{"ISO8859-1", StandardCharsets.ISO_8859_1.name()},
+	       new String[]{"ISO-88591", StandardCharsets.ISO_8859_1.name()},
+	       new String[]{"ISO88591", StandardCharsets.ISO_8859_1.name()},
+	       new String[]{"iso_8859_1", StandardCharsets.ISO_8859_1.name()},
 	       new String[]{"cp-1252","windows-1252"},
 	       new String[]{"gb_2312","gb2312"},           // was: x-EUC-CN
 	       new String[]{"gb_2312-80","gb2312"},           // was: x-EUC-CN
-	       new String[]{"UTF-8;","UTF-8"}
+	       new String[]{"UTF-8;", StandardCharsets.UTF_8.name()}
 		};
 		
 		for (int i=0; i < testStrings.length; i++) {
@@ -93,7 +94,7 @@ public class htmlParserTest extends TestCase {
         // test link with inline html in text
         // expectation to deliver pure text as it is possibly indexed in outboundlinks_anchortext_txt/inboundlinks_anchortext_txt
         final AnchorURL url = new AnchorURL("http://localhost/");
-        final String charset = "UTF-8";
+        final String charset = StandardCharsets.UTF_8.name();
         final String testhtml = "<html><body>"
                 + "<a href='x1.html'><span>testtext</span></a>" // "testtext"
                 + "<a href=\"http://localhost/x2.html\">   <i id=\"home-icon\" class=\"img-sprite\"></i>Start</a>" // "Start"
@@ -126,7 +127,7 @@ public class htmlParserTest extends TestCase {
     @Test
     public void testParseToScraper_TagTest() throws Exception {
         final AnchorURL url = new AnchorURL("http://localhost/");
-        final String charset = "UTF-8";
+        final String charset = StandardCharsets.UTF_8.name();
         final String textSource = "test text";
         final String testhtml = "<html>"
                 + "<head><style type=\"text/css\"> h1 { color: #ffffff; }</style></head>"
