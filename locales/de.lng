@@ -2454,7 +2454,6 @@ this peer==Ihr Peer
 >DHT-out<==>DHT ausgehend<
 >green lines<==>grüne Linien<
 >DHT-in<==>DHT eingehend<
-#DHT-out==DHT-out
 #You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
 #Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
 #You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, drücken Sie diesen Knopf:

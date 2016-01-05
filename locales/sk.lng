@@ -36,7 +36,7 @@ collect blacklist entries from other peers.==zaznamy z blacklistov inych peerov 
 #(active)#not active::active#(/active)# #(shared)#not shared::shared#(/shared)==(aktivny)#neaktivny::aktivny#(/aktivny)# #(zdielany)#nezdielany::zdielany#(/zdielany)
 "select"=="vyber"
 New list:==Novy zoznam:
-"create"==vytvor
+"create"=="vytvor"
 Enable/disable this list==Aktivuj/deaktivuj zoznam
 Share/don't share this list==Povol/zakaz zdielanie zoznamu
 # NOT USED Change==Zmen
@@ -57,14 +57,12 @@ Add URL pattern==Pridaj URL masku
 #Import blacklist items from other YaCy peers:==Importuj blacklist ineho peera:
 # NOT USED
 #Host:==Host:
-"Load new blacklist items"==Nahraj novy blacklist
+"Load new blacklist items"=="Nahraj novy blacklist"
 # NOT USED
 #Import blacklist items from URL:==Importuj blacklist z URL adresy:
 URL:==URL:
-"Load new blacklist items"==Nahraj novy blacklist
 # NOT USED
 #Import blacklist items from file:==Importuj blacklist zo suboru: 
-"Load new blacklist items"==Nahraj novy blacklist
 was removed from blacklist==bol z blacklistu vymazany
 was added to the blacklist==bol do blacklistu pridany
 # NOT USED
@@ -155,7 +153,7 @@ Advanced Config==Pokrocile nastavenia
 Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
 For explanation please look into defaults/yacy.init==Vysvetlenie najdete v subore defaults/yacy.init
-"Save"==Uloz
+"Save"=="Uloz"
 #-----------------------------
 
 #File: ConfigBasic.html
@@ -213,9 +211,9 @@ Send additions to maintainer:==Pros&iacute;m po&scaron;lite zmeny maintainerovy 
 Available Languages:==Podporovan&eacute; jazyky:
 Install new language from URL:==Nain&scaron;taluj nov&yacute; jazyk z URL adresy:
 Use this language==Tento jazyk ihned pouzit
-"Use"==Pouzi
-"Delete"==Zmaz
-"Install"==In&scaron;taluj
+"Use"=="Pouzi"
+"Delete"=="Zmaz"
+"Install"=="In&scaron;taluj"
 Unable to get URL:==Nie je mozn&eacute; nain&scaron;talovat s&uacute;bor z tejto URL adresy::
 Error saving the language file.==Pri nahr&aacute;van&iacute; s&uacute;boru do&scaron;lo k chybe.
 #-----------------------------
@@ -235,7 +233,7 @@ Jabber==Jabber
 Yahoo!==Yahoo!
 MSN==MSN
 Comment==Koment&aacute;r
-"Save"==Uloz profil
+"Save"=="Uloz profil"
 #-----------------------------
 
 #File: ConfigSkins_p.html
@@ -244,11 +242,11 @@ Skin Selection==Vyber skinov
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Vzhlad YaCy mozete zmenit pomocou skinov. Zvolte jeden z predvytvorenych skinov, stiahnite si nove, alebo vytvorte vlastne skiny.
 Current skin:==Pouzity skin:
 Available Skins:==Dostupne skiny:
-"Use"==Pouzi
-"Delete"==Zmaz
+"Use"=="Pouzi"
+"Delete"=="Zmaz"
 Install new skin from URL:==Nainstaluj novy skin z URL adresy:
 Use this skin==Pouzi tento skin
-"install"==Nainstaluj
+"install"=="Nainstaluj"
 Unable to get URL:==Nie je mozne nainstalovat pozadovany subor z URL adresy:
 Error saving the skin.==Chyba pri stahovani skinu.
 #-----------------------------
@@ -885,9 +883,9 @@ Send additions to maintainer:==Prosim poslite zmeny maintainerovy
 Available Languages:==Podporovane jazyky:
 Install new language from URL:==Naistaluj novy jazyk:
 Use this language==Pouzi tento jazyk
-"Use"==Pouzi
-"Delete"==Vymaz
-"Install"==Instaluj
+"Use"=="Pouzi"
+"Delete"=="Vymaz"
+"Install"=="Instaluj"
 Unable to get URL:==Nie je mozne nainstalovat subor z URL adresy:
 Error saving the language file.==Pri ukladani jazykoveho suboru doslo k chybe. 
 #-----------------------------
@@ -1048,7 +1046,7 @@ To get connection to the YaCy network, you must use the proxy by setting your br
 here</a>==tu</a>
 for an installation guide) or you can go online by activating the permanent online mode.==Mozete sa vsak prejst do online modu tak, ze aktivujete permanentny online mod.
 To do this, press this button:==Na prechod do online stavu, kliknite prosim na toto tlacitko:
-"go online"==Online mod
+"go online"=="Online mod"
 Progress towards the next peer:==Postup k dalsiemu peeru:
 At current PPM you will reach him==Pri sucasnom pocte stranok za minutu (PPM - Pages Per Minute) dosiahnete dalsieho peera
 in an unknown time:==za neznamy cas
@@ -1097,8 +1095,8 @@ Category==Kategoria
 Received==Obdrzania
 Distributed==Distribuovane
 Attributes==Atribut
-"#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#"==#(page)#::Oznac&nbsp;vybrate&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vybrate&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;oznacenych&nbsp;sprav::Zmaz&nbsp;oznacene&nbsp;spravy#(/page)#
-"#(page)#::Process All News::Delete All News::Abort Publication of All News::Delete All News#(/page)#"==#(page)#::Oznac&nbsp;vsetky&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vsetky&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;vsetkych&nbsp;sprav::Zmaz&nbsp;vsetky&nbsp;spravy#(/page)#
+"#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#"=="#(page)#::Oznac&nbsp;vybrate&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vybrate&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;oznacenych&nbsp;sprav::Zmaz&nbsp;oznacene&nbsp;spravy#(/page)#"
+"#(page)#::Process All News::Delete All News::Abort Publication of All News::Delete All News#(/page)#"=="#(page)#::Oznac&nbsp;vsetky&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vsetky&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;vsetkych&nbsp;sprav::Zmaz&nbsp;vsetky&nbsp;spravy#(/page)#"
 #-----------------------------
 
 #File: PerformanceQueues_p.html
@@ -1686,7 +1684,7 @@ Auto pop-up of status page on start-up:==Automaticky pop-up stranky stavu pri st
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
 "Search for #[former]#"=="Hladaj #[former]#"
 	P2P WEB SEARCH==P2P Internetov&eacute; Vyhlad&aacute;vanie
-"Search"==Hladaj
+"Search"=="Hladaj"
 Max. number of results:==Max. pocet vysledkov:
 No Results.==Ziadne vysledky.
 length of search words must be at least 3 characters==Vyhladavane slova musia mat najmenej 3 znaky
@@ -1899,7 +1897,7 @@ Original Resource Content==Originalny obsah zdroja
 #---------------------------
 Lines==Riadkov
 reversed order==v prevratenom poradi
-"refresh"==aktualizuj
+"refresh"=="aktualizuj"
 #-----------------------------
 
 #File: ViewProfile.html
@@ -1974,7 +1972,7 @@ See here for an==Tu najdete
 installation guide==instalacnu prirucku
 Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativne mozete nechat bezat proxy permanentne v online mode. Tento mod garantuje globalne vyhladavanie.
 To do this, press this button:==Kliknite prosim na nasledujuce tlacitko na prechod do online modu:
-"go online"==pripoj online
+"go online"=="pripoj online"
 you must also switch to online mode==najprv sa vsak musite prepnut do online modu
 (by using the proxy) to contribute to the global index.==(v ktorom pouzivate proxy) aby ste mohli prehladavat globalny index.
 The global search resulted in #[globalresults]# link contributions from other YaCy peers.==Globalne vyhladavanie obsahuje #[globalresults]# vysledkov, ktore boli vytvorene za prispenia ostatnych peerov.  

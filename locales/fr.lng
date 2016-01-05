@@ -1044,9 +1044,9 @@ crawling activity==activit&eacute; due au balayages en cours
 green radiation==radiation verte
 strong query activity==forte activit&eacute; due aux requ&ecirc;tes
 red lines==lignes rouges
-DHT-out==DHT sortante
+>DHT-out<==>DHT sortante<
 green lines==lignes vertes
-DHT-in==DHT entrante
+>DHT-in<==>DHT entrante<
 
 You are in online mode, but probably no internet resource is available. Please check your internet connection.==Vous &ecirc;tes en mode connect&eacute;, mais aucune ressource internet n'est disponible. V&eacute;rifiez votre connexion internet.
 You are either not in online mode or you do not use the proxy option.==Vous n'&ecirc;tes pas en mode En Ligne ni n'utilisez l'option Proxy.

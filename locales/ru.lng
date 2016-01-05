@@ -2571,7 +2571,6 @@ this peer==Ваш узел
 >DHT-out<==>DHT-выход<
 >green lines<==>зелёные линии<
 >DHT-in<==>DHT-вход<
-#DHT-out==DHT-выход
 #You are in online mode, but probably no internet resource is available.==Вы в сети, но возможно интернет-ресурс недоступен.
 #Please check your internet connection.==Пожалуйста, проверьте ваше соединение с интернетом.
 #You are not in online mode. To get online, press this button:==Вы не в сети. Для входа в сеть, нажмите эту кнопку:

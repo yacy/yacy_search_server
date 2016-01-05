@@ -108,7 +108,6 @@ a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Patt
 Activate this list for==为以下条目激活此名单
 Show entries:==显示条目:
 Entries per page:==页面条目:
-"Go"=="Go"
 Edit existing pattern(s):==编辑现有规则:
 "Save URL pattern(s)"=="保存URL规则"
 #-----------------------------
@@ -1959,7 +1958,6 @@ this peer==本机peer
 >DHT-out<==>DHT输出<
 >green lines<==>绿线<
 >DHT-in<==>DHT输入<
-#DHT-out==DHT-out
 #You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
 #Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
 #You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, drücken Sie diesen Knopf:
