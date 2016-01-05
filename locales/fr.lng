@@ -118,14 +118,6 @@ Show==Montrer
 Bookmarks per page.==Marque-pages par page.
 #-----------------------------
 
-#File: CacheAdmin_p.html
-#---------------------------
-Local Cache Management==Gestion du cache local
->Local Cache==>Cache local
-The current cache size is==La taille actuelle du cache est
-The maximum cache size is==La taille maximale du cache est
-#-----------------------------
-
 #File: ConfigAccounts_p.html
 #---------------------------
 User Accounts==Comptes des utilisateurs

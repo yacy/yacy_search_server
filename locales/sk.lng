@@ -139,14 +139,6 @@ Show==Zobraz
 Bookmarks per page.==z&aacute;loziek na str&aacute;nku.
 #-----------------------------
 
-#File: CacheAdmin_p.html
-#---------------------------
-Local Cache Management==Sprava lokalnej cache
->Local Cache==Lokalna cache
-The current cache size is==Aktualna velkost cache je
-The maximum cache size is==Maximalna velkost cache je
-#-----------------------------
-
 #File: ConfigAdvanced_p.html
 #---------------------------
 Advanced Config==Pokrocile nastavenia

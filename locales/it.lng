@@ -83,14 +83,6 @@ next page==prossima pagina
 All==Tutto
 #-----------------------------
 
-#File: CacheAdmin_p.html
-#---------------------------
-Local Cache Management==Gestione Cache locale
-Local Cache==Cache locale
-The current cache size is==La dimensione corrente della cache &egrave;
-The maximum cache size is==La dimensione massima della cache &egrave;
-#-----------------------------
-
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Il tuo profilo personale

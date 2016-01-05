@@ -436,8 +436,8 @@ The generic skin 'generic_pd' can be configured here with custom colors:==Der al
 >Table&nbsp;Item&nbsp;2<==>Tabellen&nbsp;Zelle&nbsp;2<
 >Table&nbsp;Bottom<==>Tabellen&nbsp;Unterseite<
 >Border&nbsp;Line<==>Rand&nbsp;Linie<
->Sign&nbsp;'bad'<==>Zeichen&nbsp;'gut'<
->Sign&nbsp;'good'<==>Zeichen&nbsp;'schlecht'<
+>Sign&nbsp;'bad'<==>Zeichen&nbsp;'schlecht'<
+>Sign&nbsp;'good'<==>Zeichen&nbsp;'gut'<
 >Sign&nbsp;'other'<==>Zeichen&nbsp;'andere'<
 >Search&nbsp;Headline<==>Suche&nbsp;Kopfzeile<
 >Search&nbsp;URL==>Suche&nbsp;URL

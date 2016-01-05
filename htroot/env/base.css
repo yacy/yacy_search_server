@@ -870,10 +870,6 @@ body#watchCrawler table.watchCrawler {float:left; margin: 0px 5px 5px 0px;}
 body#watchCrawler p.watchCrawler {clear:both;}
 body#watchCrawler p#crawlingQueues{clear:both; margin: 20px 0px 0px 0px;}
 
-/* CacheAdmin_p.html */
-div.CacheAdminInfo {margin-top:1em;}
-div.CacheAdminTree{}
-
 /* BlogComments.html */
 div.BlogCommentPost {
 margin: 0px 30px 0px 30px;

@@ -87,14 +87,6 @@ next page==επόμενη σελίδα
 All==Όλα
 #-----------------------------
 
-#File: CacheAdmin_p.html
-#---------------------------
-Local Cache Management==Διαχείριση τοπικής Cache
-Local Cache==Τοπική Cache
-The current cache size is==Το μέγεθος που έχει τώρα η cache είναι
-The maximum cache size is==Το ανώτατο μέγεθος της cache είναι
-#-----------------------------
-
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Το Προσωπικό σας Προφίλ
