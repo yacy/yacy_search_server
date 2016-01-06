@@ -1507,6 +1507,21 @@ With this file it is possible to find cities with a population > 1000 all over t
 >With this file it is possible to find locations in Germany using the location (city) name, a zip code, a car sign or a telephone pre-dial number.<==>使用此插件, 则能通过查询城市名, 邮编, 车牌号或者电话区号得到德国任何地点的位置信息.<
 #-----------------------------
 
+#File: IndexCreateQueues_p.html
+#---------------------------
+#Crawl Queue<==Crawl Queue<
+#Click on this API button to see an XML with information about the crawler latency and other statistics.==Click on this API button to see an XML with information about the crawler latency and other statistics.
+#This crawler queue is empty==This crawler queue is empty
+Delete Entries:==已删除条目:
+"Delete"=="删除"
+#>Count<==>Count<
+>Initiator<==>发起者<
+>Profile<==>资料<
+>Depth<==>深度<
+Modified Date==修改日期
+Anchor Name==祖先名
+#-----------------------------
+
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 Global Crawl Queue==全球crawl队列
@@ -2378,7 +2393,7 @@ Submit==提交
 Changes will take effect immediately==改变立即生效
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==HTTP网络
 Transparent Proxy==透明代理
@@ -3019,7 +3034,7 @@ Error with file input==文件输入错误
 started.==已开始.
 Please wait some seconds,==请稍等,
 it may take some seconds until the first result appears there.==在出现第一个搜索结果前需要几秒钟时间.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==如果您crawl了不需要的页面, 您可以 <a href="IndexCreateWWWLocalQueue_p.html">点这</a> 删除它们.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==如果您crawl了不需要的页面, 您可以 <a href="IndexCreateQueues_p.html?stack=LOCAL">点这</a> 删除它们.
 Crawl Queue:==crawl队列:
 Queue</th>==队列</th>
 Profile</th>==资料</th>

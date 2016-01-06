@@ -1633,6 +1633,21 @@ Suggestion dictionaries will help YaCy to provide better suggestions during the 
 This file provides 100000 most common german words for suggestions==Цей файл надає 100000 найбільш вживаних німецьких слів для підказок.
 #-----------------------------
 
+#File: IndexCreateQueues_p.html
+#---------------------------
+#Crawl Queue<==Crawl Queue<
+#Click on this API button to see an XML with information about the crawler latency and other statistics.==Click on this API button to see an XML with information about the crawler latency and other statistics.
+#This crawler queue is empty==This crawler queue is empty
+Delete Entries:==Видалити записи:
+"Delete"=="Видалити"
+#>Count<==>Count<
+>Initiator<==>Зачинщик<
+>Profile<==>Профіль<
+>Depth<==>Глибина<
+Modified Date==Дата зміни
+Anchor Name==Ім’я якоря
+#-----------------------------
+
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 Global Crawl Queue==Загальна черга сканування
@@ -2554,7 +2569,7 @@ Submit==Зберегти
 Changes will take effect immediately==Зміни набирають чинності негайно
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==Мережа HTTP
 Transparent Proxy==Прозорий проксі
@@ -3226,7 +3241,7 @@ Error with file input==Помилка з файлом
 started.==запущене.
 Please wait some seconds,==Будь ласка, зачекайте кілька секунд,
 it may take some seconds until the first result appears there.==незабаром будуть перші результати.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Якщо ви просканували якусь небажану сторінку, її можна видалити <a href="IndexCreateWWWLocalQueue_p.html"> тут</a>.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==Якщо ви просканували якусь небажану сторінку, її можна видалити <a href="IndexCreateQueues_p.html?stack=LOCAL"> тут</a>.
 Crawl Queue:==Черга сканера:
 Queue</th>==Черга</th>
 Profile</th>==Профіль</th>

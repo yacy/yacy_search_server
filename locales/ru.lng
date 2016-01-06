@@ -50,7 +50,7 @@ Date<==Дата<
 Access Count During==Количество запросов
 last Second==последняя секунда
 last Minute==последняя минута
-last Minutes==последние 10 минут
+last 10 Minutes==последние 10 минут
 last Hour==последний час
 The following hosts are registered as source for brute-force requests to protected pages==Следующие хосты зарегистрированы, как пытающиеся получить доступ к защищенным страницам с помощью перебора пароля.
 #>Host==>Хост
@@ -2029,64 +2029,6 @@ Suggestion dictionaries will help YaCy to provide better suggestions during the 
 This file provides 100000 most common german words for suggestions==Этот файл содержит более 100000 наиболее распространённых немецких слов.
 #-----------------------------
 
-#File: IndexCreateWWWGlobalQueue_p.html
-#---------------------------
-Global Crawl Queue==Очередь глобального индексатора
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Эта очередь содержит ссылки, отправленные другим узлам для выполнения удалённого индексирования.
-If there is no peer for remote crawling available, the links are crawled locally.==Если нет узлов для удалённого индексирования, то ссылки индексируются локально.
-The global crawler queue is empty==Очередь глобального индексатора пуста.
-"clear global crawl queue"=="очистить очередь глобального индексатора"
-There are <strong>#[num]#</strong> entries in the global crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Число записей в очереди глобального индексатора <strong>#[num]#</strong>. Показано <strong>#[show-num]#</strong> последних записей.
-Show last==Показать последние
-</a> entries.==</a> записи.
-Initiator==Инициатор
-Profile==Профиль
-Depth==Глубина
-Modified Date==Дата изменения
-Anchor Name==Anker Name
-#URL==URL-адрес
-#-----------------------------
-
-#File: IndexCreateWWWLocalQueue_p.html
-#---------------------------
-Local Crawl Queue==Очередь локального индексатора
-This queue stores the urls that shall be crawled localy by this peer.==Эта очередь содержит ссылки, проиндексированные локально вашим узлом.
-It may also contain urls that are computed by the proxy-prefetch.==Также здесь могут указываться ссылки, полученные предварительной выборкой через прокси.
-The local crawler queue is empty==Очередь локального индексатора пуста.
-There are <strong>#[num]#</strong> entries in the local crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Число записей в очереди локального индексатора <strong>#[num]#</strong>. Показано <strong>#[show-num]#</strong> последних записей.
-Show last==Показать последние
-</a> entries.==</a> записи.
-Initiator==Инициатор
-Profile==Профиль
-Depth==Глубина
-Modified Date==Дата изменения
-Anchor Name==Anker Name
-#URL==URL-адрес
-[Delete]==[Удалить]
-Delete Entries:==Удалить записи:
-"Delete"=="Удалить"
-This may take a quite long time.==Это может занять некоторое время.
-#-----------------------------
-
-#File: IndexCreateWWWRemoteQueue_p.html
-#---------------------------
-Remote Crawl Queue==Очередь удалённого индексатора
-This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.==Эта очередь содержит ссылки, отправленные другими узлами для выполнения удалённого индексирования.
-The remote crawler queue is empty==Очередь удалённого индексатора пуста
-"clear remote crawl queue"=="очистить очередь удалённого индексатора"
-There are <strong>#[num]#</strong> entries in the remote crawler queue.==Число записей в очереди удалённого индексатора <strong>#[num]#</strong>.
-Showing <strong>#[show-num]#</strong> most recent entries.==Показано <strong>#[show-num]#</strong> последних записей.
-Show last==Показать последние
-</a> entries.==</a> записи.
-Initiator==Инициатор
-Profile==Профиль
-Depth==Глубина
-Modified Date==Дата изменения
-Anchor Name==Anker Name
-#URL==URL-адрес
-Delete==Удалить
-#-----------------------------        
-
 #File: IndexDeletion_p.html
 #---------------------------
 Index Deletion<==Удаление индекса<
@@ -3059,11 +3001,6 @@ Please note that if the crawler uses content compression, this limit is used to 
 Submit==Сохранить
 Changes will take effect immediately==Изменения будут применены немедленно
 Timeout:==Ожидание:
-#-----------------------------
-
-#File: Settings_Http.inc
-#---------------------------
-
 #-----------------------------
 
 #File: Settings_Proxy.inc

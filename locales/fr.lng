@@ -1,4 +1,4 @@
-﻿#fra.lng
+﻿#fr.lng
 # English-->French
 # -----------------------
 # part of YaCy
@@ -701,6 +701,21 @@ Depth==Profondeur
 #URL==URL
 #-----------------------------
 
+#File: IndexCreateQueues_p.html
+#---------------------------
+#Crawl Queue<==Crawl Queue<
+#Click on this API button to see an XML with information about the crawler latency and other statistics.==Click on this API button to see an XML with information about the crawler latency and other statistics.
+This crawler queue is empty==Cette file d'attente est vide
+Delete Entries:==Entr&eacute;es supprim&eacute;es:
+"Delete"=="Supprimer"
+>Count<==>Nombre<
+>Initiator<==>Initiateur<
+>Profile<==>Profil<
+>Depth<==>Profondeur<
+Modified Date==Date de modification
+Anchor Name==Nom d'ancre
+#-----------------------------
+
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 Index Creation: WWW Global Crawl Queue==Cr&eacute;ation d'index: file de crawl WWW globale
@@ -881,25 +896,6 @@ Start/Stop Transfer==D&eacute;marrer/Arreter le transfert
 "Start Index Transfer"=="D&eacute;marrer le transfert d'index"
 "Stop Index Transfer"=="Arreter le transfert d'index"
 "Start New Index Transfer"=="D&eacute;marrer un nouveau transfert d'index"
-#-----------------------------
-
-#File: Language_p.html
-#---------------------------
-Language selection==S&eacute;lection de la langue
-Language selection==S&eacute;lection de la langue
-You can change the language of the YaCy-webinterface with translation files.==Vous pouvez changer la langue de l'interface web de YaCy avec les fichiers de traduction.
-Current language:==Langue courante
-default(english)==Français
-Languagefile Author(s) (chronological):==Auteur(s) des donn&eacute;es de traduction: 
-Send additions to maintainer:==Envoyer les ajouts &agrave; la maintenance:
-Available Languages:==Langues disponibles
-Install new language from URL:==T&eacute;l&eacute;charger une nouvelle langue depuis l'URL:
-Use this language==Utiliser cette langue
-"Use"==Utiliser
-"Delete"==Supprimer
-"Install"==Installer
-Unable to get URL:==Impossible d'atteindre l'URL:
-Error saving the language file.==Erreur en enregistrant les donn&eacute;es de langue.
 #-----------------------------
 
 #File: Lab.html
@@ -1374,7 +1370,7 @@ IP-Number filter==IP-Adressen Filter
 Use <a==Nutze <a
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==HTTP Netzwerk
 Transparent Proxy:==Transparenter Proxy:
@@ -1965,7 +1961,7 @@ Error with URL input==Erreur avec l'URL entr&eacute;e
 Error with file input==Erreur avec le fichier entr&eacute;
 started.==d&eacute;marr&eacute;.
 Please wait some seconds, it may take some seconds until the first result appears there.==Patientez quelques secondes pour obtenir votre r&eacute;sultat. 
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Si votre crawl indexe des pages que vous ne voulez pas indexer, vous pouvez les supprimmer <a href="IndexCreateWWWLocalQueue_p.html">ici</a>.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==Si votre crawl indexe des pages que vous ne voulez pas indexer, vous pouvez les supprimmer <a href="IndexCreateQueues_p.html?stack=LOCAL">ici</a>.
 Crawl Profiles:==Crawl Profile:
 Crawl Thread==Crawl Art
 Start URL==URL de d&eacute;marrage

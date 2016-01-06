@@ -65,8 +65,6 @@ URL:==URL:
 #Import blacklist items from file:==Importuj blacklist zo suboru: 
 was removed from blacklist==bol z blacklistu vymazany
 was added to the blacklist==bol do blacklistu pridany
-# NOT USED
-#File:==Subor:
 or==alebo
 Activate this list for==Tento zoznam je platny pre
 #-----------------------------
@@ -192,7 +190,6 @@ location</a> in 10 seconds.==adresu</a> za 10 sekund.
 
 #File: ConfigLanguage_p.html
 #---------------------------
-Language selection==V&yacute;ber jazyka
 Language selection==V&yacute;ber jazyka
 You can change the language of the YaCy-webinterface with translation files.==Jazyk YaCy web rozhrania m&ocirc;zete zmenit pomocou prekladov&yacute;ch s&uacute;borov. Vyberte zvolen&yacute; jazyk zo zoznamu.
 Current language:==Aktu&aacute;lny jazyk
@@ -650,6 +647,21 @@ Depth==Hlbka
 URL==URL adresa
 #-----------------------------
 
+#File: IndexCreateQueues_p.html
+#-----------------------------
+#Crawl Queue<==Crawl Queue<
+#Click on this API button to see an XML with information about the crawler latency and other statistics.==Click on this API button to see an XML with information about the crawler latency and other statistics.
+#This crawler queue is empty==This crawler queue is empty
+Delete Entries:==Zmaz zaznami:
+"Delete"=="Zmaz"
+#>Count<==>Count<
+>Initiator<==>Iniciator<
+>Profile<==>Profil<
+>Depth<==>Hlbka<
+Modified Date==Datum poslednej zmeny
+Anchor Name==Meno kotvy
+#-----------------------------
+
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 # NOT USED
@@ -861,25 +873,6 @@ Start/Stop Transfer==Start/Stop prenosu
 "Start New Index Transfer"=="Odstartuj novy prenos indexu"
 # NOT USED
 #Remote<br>Peer==Vzdialeny<br>peer
-#-----------------------------
-
-#File: Language_p.html
-#---------------------------
-Language selection==Vyber jazyka
-Language selection==Vyber jazyka
-You can change the language of the YaCy-webinterface with translation files.==Mozete zmenit jazyk YaCy web rozhrania pomocou prekladoveho suboru. Vyberte zvoleny jazyk zo zoznamu.
-Current language:==Zvoleny jazyk
-default(english)==Predvoleny jazyk (anglictina)
-Languagefile Author(s) (chronological):==Autor(y) jazykoveho suboru (chronologicky):
-Send additions to maintainer:==Prosim poslite zmeny maintainerovy
-Available Languages:==Podporovane jazyky:
-Install new language from URL:==Naistaluj novy jazyk:
-Use this language==Pouzi tento jazyk
-"Use"=="Pouzi"
-"Delete"=="Vymaz"
-"Install"=="Instaluj"
-Unable to get URL:==Nie je mozne nainstalovat subor z URL adresy:
-Error saving the language file.==Pri ukladani jazykoveho suboru doslo k chybe. 
 #-----------------------------
 
 #File: Lab.html
@@ -1435,7 +1428,7 @@ IP-Number filter:==Filter IP adries:
 Use <a==Pouzi <a
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==HTTP Siet
 Transparent&nbsp;Proxy:==Transparentne proxy:

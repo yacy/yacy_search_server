@@ -105,37 +105,6 @@ Enables or disables augmented browsing. If enabled, all websites will be modifie
 #"Submit"=="Absenden"
 #-----------------------------
 
-#File: AugmentedBrowsingFilters_p.html
-#---------------------------
-Augmented Browsing - Filters and Modules==Angereichertes Browsen - Filter und Module
-Augmented Browsing Filters<==Filter für angereichertes Browsen<
-Select the desired functionality.==Wählen Sie die gewünschte Funktionalität.
-External REFLECT:<==Externed REFLECT:<
->Enabled<==>Aktiviert<
-Send webpages to REFLECT (==Sende Webseiten zu (
-Select the desired inbuilt functionality==Wählen Sie die gewünschte eingebaute Funktionalität.
-Add DOCTYPE:==Füge DOCTYPE hinzu:
-Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.==Füge DOCTYPE Informatione hinzu wenn nicht angegeben. Das ist notwendig für den IE damit position:absolute korrekt angezeigt wird.
-Reparse webpage:==Parse Webseite erneut:
-Put webpage back into schema (htmlparser document) to allow node by node manipulation.==Setze Webseite zurück ins Schema (htmlpaser Dokuement), um Knoten bei Knoten Manipulation zu ermöglichen.
-Show overlay interaction buttons:==Zeige Overlay Schaltflächen zur Interaktion:
-Show overlay interaction buttons.==Zeige Overlay Schaltflächen zur Interaktion.
-"Submit"=="Absenden"
-#-----------------------------
-
-#File: AugmentedParsing_p.html
-#---------------------------
-Augmented Parsing<==Angereichertes Parsen<
-Global Status==Globaler Status
-With this settings you can activate or deactivate augmented parsing which combines the documents with information from external sources (tags etc.).==Mit dieser Einstellung können Sie angereichertes Parsen an- oder abschalten das Dokumente mit Informationen von externen Webseiten kombiniert (z.B. Tags, etc.).
-Augmented Parser:==Angereicherter Parser:
->Enabled<==>Aktiviert<
-Globally enables or disables the augmented parser. This setting requires a restart.==Schaltet den angereicherten Parser global an oder ab. Diese Einstellung erfordert einen Neustart.
-Augmented Parser - RDFa:==Angereicherter Parser - RDFa:
-Globally enables or disables the RDFa parser. This setting requires a restart.==Schaltet den RDFs Parser global ein oder aus. Diese Einstellung erfordert einen Neustart.
-"Submit"=="Absenden"
-#-----------------------------
-
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Administration==Blacklist Verwaltung
@@ -255,7 +224,6 @@ next entries==nächste  Einträge
 new entry==Neuer Eintrag
 import XML-File==XML-Datei importieren
 export as XML==als XML exportieren
-Comments</a>==Kommentare</a>
 Blog-Home==Blog-Startseite
 Author:==Autor:
 Subject:==Titel:
@@ -883,7 +851,6 @@ menu.=Menü geändert werden.
 #>Administration<==>Administration<
 >Web Search<==>Websuche<
 >File Search<==>Dateisuche<
->IndexBrowser<==>Index Browser<
 >About Us<==>Über Uns<
 >Help / YaCy Wiki<==>Hilfe / YaCy Wiki<
 "Search"=="Suche"
@@ -1369,24 +1336,6 @@ using the 'site' operator.==durch Verwendung des 'site' Befehls.
 To use this option, the 'collection_sxt'-field must be switched on in the==Um diese Option zu verwenden, muss das 'collection_sxt'-Feld eingeschalten werden auf der Seite für das
 #Solr Schema==Solr Schema
 "Start New Crawl Job"=="Neuen Crawl Job starten"
-#-----------------------------
-
-#File: CrawlStartIntranet_p.html
-#---------------------------
-#Intranet Crawl Start==Intranet Crawl Start
-When an index domain is configured to contain intranet links,==Wenn eine Index Domain konfiguriert wurde die Intranet Links enthält,
-the intranet may be scanned for available servers.==kann dieses Intranet auf verfügbare Server gescannt werden.
-Please select below the servers in your intranet that you want to fetch into the search index.==Bitte in der folgenden Server Liste aus Ihrem Intranet auswählen, welche Sie in den Suchindex aufnehmen wollen.
-This network definition does not allow intranet links.==Diese Netzwerk Konfiguration erlaubt keine Intranet Links.
-A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Eine Liste mit Servern aus dem Intranet ist nur verfügbar, wenn Sie YaCy auch konfiguriert haben Intranetseiten zu indexieren.
-To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.==Um diese Einstellung vorzunehmen, bitte im Servlet <a href="ConfigBasic.html">Basis Konfiguration</a> den Anwendungsfall 'Intranet Indexierung' auswählen.
-Available Intranet Server==Verfügbare Intranet Server
-#>IP<==>IP<
-#>URL<==>URL<
->Process<==>Status<
->not in index<==>Nicht im Index<
->indexed<==>Indexiert<
-"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawler hinzu"
 #-----------------------------
 
 #File: CrawlStartScanner_p.html
@@ -1924,62 +1873,19 @@ Suggestion dictionaries will help YaCy to provide better suggestions during the 
 This file provides 100000 most common german words for suggestions==Diese Datei stell die 100000 häufigsten deutschen Wörter für Suchvorschläge bereit
 #-----------------------------
 
-#File: IndexCreateWWWGlobalQueue_p.html
+#File: IndexCreateQueues_p.html
 #---------------------------
-Global Crawl Queue==Globaler Crawl-Puffer
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Dieser Puffer enthält URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuführen.
-If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
-The global crawler queue is empty==Der globale Crawler-Puffer ist leer.
-"clear global crawl queue"=="Lösche globalen Crawler-Puffer"
-There are <strong>#[num]#</strong> entries in the global crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Einträge in dem globalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
-Show last==Zeige die letzten
-</a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
-Anchor Name==Anker Name
-#URL==URL
-#-----------------------------
-
-#File: IndexCreateWWWLocalQueue_p.html
-#---------------------------
-Local Crawl Queue==Lokaler Crawl-Puffer
-This queue stores the urls that shall be crawled localy by this peer.==Dieser Puffer enthält URLs, die von diesem Peer lokal gecrawlt werden sollen.
-It may also contain urls that are computed by the proxy-prefetch.==Sie enthält auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
-The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
-There are <strong>#[num]#</strong> entries in the local crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Einträge in dem lokalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
-Show last==Zeige die letzten
-</a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
-Anchor Name==Anker Name
-URL==URL
-[Delete]==[Löschen]
+Crawl Queue<==Crawl-Puffer<
+Click on this API button to see an XML with information about the crawler latency and other statistics.==Klick auf API Icon für statistische Kennwerte des Crawlers als XML.
+This crawler queue is empty==Dieser Crawl-Puffer ist leer
 Delete Entries:==Lösche Einträge:
 "Delete"=="Löschen"
-This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
-#-----------------------------
-
-#File: IndexCreateWWWRemoteQueue_p.html
-#---------------------------
-Remote Crawl Queue==Remote Crawl Puffer
-This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.==Dieser Puffer enthält die URLS, die Ihnen andere Peers zugeschickt haben, um für diese einen Remote Crawl durchzuführen.
-The remote crawler queue is empty==Der Remote Crawler-Puffer ist leer
-"clear remote crawl queue"=="leere Remote Crawl Puffer"
-There are <strong>#[num]#</strong> entries in the remote crawler queue.==Es befinden sich <strong>#[num]#</strong> Einträge in dem Remote Crawler-Puffer.
-Showing <strong>#[show-num]#</strong> most recent entries.==Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
-Show last==Zeige die letzten
-</a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
+>Count<==>Anzahl<
+>Initiator<==>Initiator<
+>Profile<==>Profil<
+>Depth<==>Tiefe<
 Modified Date==Änderungsdatum
 Anchor Name==Anker Name
-URL==URL
-Delete==Löschen
 #-----------------------------
 
 #File: IndexDeletion_p.html
@@ -2770,35 +2676,6 @@ Unable to create new crawling profile for URL:==Es ist nicht möglich für diese
 Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
 #-----------------------------
 
-#File: Ranking_p.html
-#---------------------------
-Ranking Configuration==Ranking Einstellungen
-The document ranking influences the order of the search result entities.==Das Dokument Ranking beeinflusst die Reihenfolge der Suchergebnis Datensätze.
-A ranking is computed using a number of attributes from the documents that match with the search word.==Ein Ranking wird berechnet mit einer Anzahl von Attributen aus den Dokumenten die das gesuchte Wort enthalten.
-The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.==Die Attribute werden zuerst über alle Suchergebnisse normalisiert und dann wird das normalisierte Attribut multpliziert mit dem Ranking Koeffizienten der aus dieser Liste errechnet wird.
-The ranking coefficient grows exponentially with the ranking levels given in the following table.==Der Ranking Koeffizient wächst exponential mit den Ranking Werten die in der folgenden Tabelle festgelegt werden.
-If you increase a single value by one, then the strength of the parameter doubles.==Wenn Sie einen einzelnen Wert um eins erhöhen wird die Stärke des Parameters verdoppelt.
-Pre-Ranking==Vor-Ranking
-
-# Aktuell sind die Werte und Hover over Information in der Ranking_p.java hartcodiert und können nicht übersetzt werden
-#
-#Date==Datum
-#a higher ranking level prefers younger documents.==Ein höherer Ranking Level bevorzugt jüngere Dokumente
-#The age of a document is measured using the date submitted by the remote server as document date==Das Alter eines Dokuments wird gemessen anhand des Dokument Datums das der Remote Server übermittelt
-
-There are two ranking stages:==Es gibt zwei Phasen beim Ranking.
-first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==Zuerst werden alle Resultate nach dem Vor-Ranking geranked und aus der resultierenden Liste werden die Dokumente erneut im Nach-Ranking sortiert.
-The two stages are separated because they need statistical information from the result of the pre-ranking.==Die zwei Phasen sind getrennt weil statistische Informationen aus dem Ergebnis des Vor-Rankings benötigt werden.
-
-Post-Ranking==Nach-Ranking
-
-#Application Of Prefer Pattern==Anwendung eines bevorzugten Musters
-#a higher ranking level prefers documents where the url matches the prefer pattern given in a search request.==Ein höherer Ranking Level bevorzugt Dokumente deren URL auf das bevorzugte Muster einer Suchanfrage passt.
-
-"Set as Default Ranking"=="Als Standard Ranking speichern"
-"Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
-#-----------------------------
-
 #File: RankingRWI_p.html
 #---------------------------
 RWI Ranking Configuration<==RWI Ranking Konfiguration<
@@ -2928,7 +2805,7 @@ Submit==Speichern
 Changes will take effect immediately==Änderungen sind sofort aktiv
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==HTTP Netzwerk
 Transparent Proxy==Transparenter Proxy
