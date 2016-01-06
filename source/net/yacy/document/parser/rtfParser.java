@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import javax.swing.text.DefaultStyledDocument;
@@ -73,7 +74,7 @@ public class rtfParser extends AbstractParser implements Parser {
             return new Document[]{new Document(
                     location,
                     mimeType,
-                    "UTF-8",
+                    StandardCharsets.UTF_8.name(),
                     this,
                     null,
                     null,

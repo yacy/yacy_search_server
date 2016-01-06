@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -285,7 +286,7 @@ public class PhpBB3Dao implements Dao {
                     outputfile = new File(targetdir, targethost + "." + versioninfo + "." + fc + ".xml");
                     if (outputfiletmp.exists()) outputfiletmp.delete();
                     if (outputfile.exists()) outputfile.delete();
-                    osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outputfiletmp)), "UTF-8");
+                    osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outputfiletmp)), StandardCharsets.UTF_8);
                     osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                 }
                 e.writeXML(osw);

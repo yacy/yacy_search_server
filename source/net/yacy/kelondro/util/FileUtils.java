@@ -44,6 +44,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -430,7 +431,7 @@ public final class FileUtils {
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
         try {
-            pw = new PrintWriter(tf, "UTF-8");
+            pw = new PrintWriter(tf, StandardCharsets.UTF_8.name());
             pw.println("# " + comment);
             String key, value;
             for ( final Map.Entry<String, String> entry : props.entrySet() ) {
@@ -518,11 +519,7 @@ public final class FileUtils {
         if ( a == null ) {
             return new ArrayList<String>().iterator();
         }
-        try {
-            return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
-        } catch (final UnsupportedEncodingException e ) {
-            return null;
-        }
+        return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), StandardCharsets.UTF_8)));
     }
 
     /**
@@ -536,7 +533,7 @@ public final class FileUtils {
         final ArrayList<String> list = new ArrayList<String>();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile), "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile), StandardCharsets.UTF_8));
 
             while ( (line = br.readLine()) != null ) {
                 list.add(line);

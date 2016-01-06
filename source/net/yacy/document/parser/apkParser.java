@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -411,7 +412,7 @@ public class apkParser extends AbstractParser implements Parser  {
         final byte[] asa = new byte[arscStream.available()];
         arscStream.read(asa);
         int pos = 0;
-        final Charset charset = Charset.forName("UTF-8");
+        final Charset charset = StandardCharsets.UTF_8;
         final List<String> s = new ArrayList<>();
         parseloop: while (pos < asa.length) {
             while (pos < asa.length && asa[pos] != 0) pos++;

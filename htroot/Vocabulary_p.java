@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -82,7 +83,7 @@ public class Vocabulary_p {
                     final boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
                     final boolean discoverFromCSV = post.get("discovermethod", "").equals("csv");
                     final String discoverFromCSVPath = post.get("discoverpath", "").replaceAll("%20", " ");
-                    final String discoverFromCSVCharset = post.get("charset", "UTF-8");
+                    final String discoverFromCSVCharset = post.get("charset", StandardCharsets.UTF_8.name());
                     final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
                     final int discovercolumnsynonyms = post.getInt("discovercolumnsynonyms", -1);
                     final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);

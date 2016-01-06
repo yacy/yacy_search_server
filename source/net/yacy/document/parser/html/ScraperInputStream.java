@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -77,12 +78,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
         try {
 	    this.reader = (inputStreamCharset == null) ? new InputStreamReader(this) : new InputStreamReader(this,inputStreamCharset);
 	} catch (final UnsupportedEncodingException e) {
-	    try {
-		this.reader = new InputStreamReader(this, "UTF-8");
-	    } catch (final UnsupportedEncodingException e1) {
-		// how is that possible?
-		this.reader = new InputStreamReader(this);
-	    }
+		this.reader = new InputStreamReader(this, StandardCharsets.UTF_8);
 	}
         this.writer = new TransformerWriter(null,null,scraper,transformer,passbyIfBinarySuspect);
     }

@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -291,8 +292,8 @@ public class htmlParser extends AbstractParser implements Parser {
         encoding = CommonPattern.UNDERSCORE.matcher(encoding).replaceAll("-");
 
         if (encoding.matches("GB[_-]?2312([-_]80)?")) return "GB2312";
-        if (encoding.matches(".*UTF[-_]?8.*")) return "UTF-8";
-        if (encoding.startsWith("US")) return "US-ASCII";
+        if (encoding.matches(".*UTF[-_]?8.*")) return StandardCharsets.UTF_8.name();
+        if (encoding.startsWith("US")) return StandardCharsets.US_ASCII.name();
         if (encoding.startsWith("KOI")) return "KOI8-R";
 
         // patch missing '-'
@@ -385,7 +386,7 @@ public class htmlParser extends AbstractParser implements Parser {
         try {
             url = new AnchorURL(args[0]);
             final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent, null, null);
-            final Document[] document = new htmlParser().parse(url, "text/html", "utf-8", new VocabularyScraper(), 0, new ByteArrayInputStream(content));
+            final Document[] document = new htmlParser().parse(url, "text/html", StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();
             System.out.println(title);
         } catch (final MalformedURLException e) {

@@ -36,7 +36,10 @@ package net.yacy.server.http;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+import org.eclipse.jetty.http.HttpMethod;
 
 
 /**
@@ -292,16 +295,12 @@ public class ChunkedInputStream extends InputStream {
      *
      * @since 3.0
      */
-    private static String getAsciiString(final byte[] data) throws IOException {
+    private static String getAsciiString(final byte[] data) {
         if (data == null) {
             throw new IllegalArgumentException("Parameter may not be null");
         }
 
-        try {
-            return new String(data, 0, data.length, "US-ASCII");
-        } catch (final UnsupportedEncodingException e) {
-            throw new IOException("HttpClient requires ASCII support");
-        }
+        return new String(data, 0, data.length, StandardCharsets.US_ASCII);
     }
 
     /**
@@ -310,7 +309,7 @@ public class ChunkedInputStream extends InputStream {
      */
     private void skipTrailerHeaders() throws IOException {
         for (; ;) {
-            String line = readLine(this.in, "US-ASCII");
+            String line = readLine(this.in, StandardCharsets.US_ASCII);
             if ((line == null) || (line.trim().length() < 1)) break;
         }
     }
@@ -330,7 +329,7 @@ public class ChunkedInputStream extends InputStream {
      *
      * @since 3.0
      */
-    private static String readLine(InputStream inputStream, String charset) throws IOException {
+    private static String readLine(InputStream inputStream, Charset charset) throws IOException {
         byte[] rawdata = readRawLine(inputStream);
         if (rawdata == null) {
             return null;
@@ -354,9 +353,7 @@ public class ChunkedInputStream extends InputStream {
 
 
     /**
-     * Converts the byte array of HTTP content characters to a string. If
-     * the specified charset is not supported, default system encoding
-     * is used.
+     * Converts the byte array of HTTP content characters to a string.
      *
      * @param data the byte array to be encoded
      * @param offset the index of the first byte to encode
@@ -370,22 +367,18 @@ public class ChunkedInputStream extends InputStream {
         final byte[] data,
         int offset,
         int length,
-        String charset
+        Charset charset
     ) {
 
         if (data == null) {
             throw new IllegalArgumentException("Parameter may not be null");
         }
 
-        if (charset == null || charset.isEmpty()) {
-            throw new IllegalArgumentException("charset may not be null or empty");
+        if (charset == null) {
+            throw new IllegalArgumentException("charset may not be null");
         }
 
-        try {
-            return new String(data, offset, length, charset);
-        } catch (final UnsupportedEncodingException e) {
-            return new String(data, offset, length);
-        }
+        return new String(data, offset, length, charset);
     }
 
     /**

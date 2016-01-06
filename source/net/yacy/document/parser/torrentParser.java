@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -126,7 +127,7 @@ public class torrentParser extends AbstractParser implements Parser {
         try {
             byte[] b = FileUtils.read(new File(args[0]));
             torrentParser parser = new torrentParser();
-            Document[] d = parser.parse(new AnchorURL("http://localhost/test.torrent"), null, "UTF-8", new VocabularyScraper(), 0, new ByteArrayInputStream(b));
+            Document[] d = parser.parse(new AnchorURL("http://localhost/test.torrent"), null, StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, new ByteArrayInputStream(b));
             Condenser c = new Condenser(d[0], null, true, true, LibraryProvider.dymLib, false, false, 0);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);

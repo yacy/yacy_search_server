@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 abstract class AbstractWikiParser implements WikiParser {
 
@@ -50,7 +51,7 @@ abstract class AbstractWikiParser implements WikiParser {
 
     @Override
     public String transform(String hostport, final byte[] content) throws UnsupportedEncodingException {
-        return transform(hostport, content, "UTF-8");
+        return transform(hostport, content, StandardCharsets.UTF_8.name());
     }
 
     @Override

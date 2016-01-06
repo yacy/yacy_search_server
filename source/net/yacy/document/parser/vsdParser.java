@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -112,7 +113,7 @@ public class vsdParser extends AbstractParser implements Parser {
             return new Document[]{new Document(
                     location,     // url of the source document
                     mimeType,     // the documents mime type
-                    "UTF-8",      // charset of the document text
+                    StandardCharsets.UTF_8.name(),      // charset of the document text
                     this,
                     null,         // language
                     keywords,

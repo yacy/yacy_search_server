@@ -34,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -183,7 +184,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         return new Document[]{new Document(
              location,
              mimeType,
-             "UTF-8",
+             StandardCharsets.UTF_8.name(),
              this,
              languages,
              keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords
@@ -302,7 +303,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         AnchorURL uri;
         try {
             uri = new AnchorURL("http://localhost/" + image.getName());
-            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), "UTF-8", new VocabularyScraper(), 0, new FileInputStream(image));
+            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {
             e.printStackTrace();

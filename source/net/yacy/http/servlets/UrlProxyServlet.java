@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
 import javax.servlet.Servlet;
@@ -321,7 +322,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         if (b == -1) {
             return null;
         }
-        return buf.toString("UTF-8");
+        return buf.toString(StandardCharsets.UTF_8.name());
     }
 
     /**

@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -805,7 +806,7 @@ dc_rights
     public String toString() {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            final Writer osw = new OutputStreamWriter(baos, "UTF-8");
+            final Writer osw = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
             writeXML(osw);
             osw.close();
             return UTF8.String(baos.toByteArray());

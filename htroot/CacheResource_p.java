@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -87,10 +88,17 @@ public class CacheResource_p {
 
         // because for display a servlet html variable is use
         // which is internally processed using utf-8, we need to convert encoding of cached resource
-        final String charset = responseHeader.getCharacterEncoding();
-        if (charset != null && !charset.equalsIgnoreCase("utf-8")) {
-            CharBuffer cb = Charset.forName(charset).decode(ByteBuffer.wrap(resource));
-            ByteBuffer x = Charset.forName("UTF-16").encode(cb); // encode to a default java string (which uses utf-16 and is handled correct for servlet content)
+        final String charsetName = responseHeader.getCharacterEncoding();
+        if (charsetName != null && !charsetName.equalsIgnoreCase(StandardCharsets.UTF_8.name())) {
+        	Charset decoderCharset;
+        	/* Specified charset might be incorrect or not supported */
+        	if(Charset.isSupported(charsetName)) {
+        		decoderCharset = Charset.forName(charsetName);
+        	} else {
+        		decoderCharset = StandardCharsets.UTF_8;
+        	}
+            CharBuffer cb = decoderCharset.decode(ByteBuffer.wrap(resource));
+            ByteBuffer x = StandardCharsets.UTF_16.encode(cb); // encode to a default java string (which uses utf-16 and is handled correct for servlet content)
             prop.put("resource", x.asCharBuffer().toString());
 
         } else {

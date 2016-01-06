@@ -29,6 +29,7 @@ package net.yacy.document.parser;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,7 +105,7 @@ public class pptParser extends AbstractParser implements Parser {
             final Document[] docs = new Document[]{new Document(
                 location,
                 mimeType,
-                "UTF-8",
+                StandardCharsets.UTF_8.name(),
                 this,
                 null,
                 keywlist,

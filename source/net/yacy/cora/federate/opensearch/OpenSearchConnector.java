@@ -21,6 +21,7 @@ package net.yacy.cora.federate.opensearch;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,8 +64,8 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
         tmps = tmps.replace("{startPage}", "");
         tmps = tmps.replace("{count}", Integer.toString(rows));
         tmps = tmps.replace("{language}", "");
-        tmps = tmps.replace("{inputEncoding}", "UTF-8");
-        tmps = tmps.replace("{outputEncoding}", "UTF-8");
+        tmps = tmps.replace("{inputEncoding}", StandardCharsets.UTF_8.name());
+        tmps = tmps.replace("{outputEncoding}", StandardCharsets.UTF_8.name());
         return tmps.replace("{searchTerms}", query);
     }
 

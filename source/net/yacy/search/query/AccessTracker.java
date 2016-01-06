@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -240,7 +241,7 @@ public class AccessTracker {
             raf.readFully(buffer); // we make a copy because that dramatically speeds up reading lines; RandomAccessFile.readLine is very slow
             raf.close();
             ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(bais, "UTF-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(bais, StandardCharsets.UTF_8));
             String line;
             while ((line = reader.readLine()) != null) {
                 // parse the line

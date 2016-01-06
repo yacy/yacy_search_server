@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -73,7 +74,7 @@ public class WordCache {
             if (file.getName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
             }
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String l;
             StringBuilder sb;
             try {
