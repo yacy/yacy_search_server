@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -252,7 +253,7 @@ public class SolrSelectServlet extends HttpServlet {
                 if (responseWriter instanceof BinaryResponseWriter) {
                     ((BinaryResponseWriter) responseWriter).write(response.getOutputStream(), req, rsp);
                 } else {
-                    out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
+                    out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8));
                     responseWriter.write(out, req, rsp);
                     out.flush();
                 }

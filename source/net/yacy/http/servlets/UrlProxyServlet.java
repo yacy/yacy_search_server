@@ -132,7 +132,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         try {
             proxyurl = new URL(strUrl);
         } catch (final MalformedURLException e) {
-            proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
+            proxyurl = new URL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
         }
         
         if (proxyurl == null) {
@@ -269,7 +269,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             byte[] sbb;
             if (doc.charset() == null) {
                 sbb = UTF8.getBytes(doc.toString());
-                response.setCharacterEncoding(UTF8.charset.name());
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             } else { // keep orig charset
                 sbb = doc.toString().getBytes(doc.charset());
                 response.setCharacterEncoding(doc.charset().name());

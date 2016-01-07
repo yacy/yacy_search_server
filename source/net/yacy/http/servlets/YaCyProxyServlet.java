@@ -104,7 +104,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             try {
                 proxyurl = new URL(strUrl);
             } catch (final MalformedURLException e) {
-                proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
+                proxyurl = new URL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
 
             }
         }
@@ -177,9 +177,9 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             final StringWriter buffer = new StringWriter();
 
             if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
-                FileUtils.copy(new ChunkedInputStream(proxyout), buffer, UTF8.charset);
+                FileUtils.copy(new ChunkedInputStream(proxyout), buffer, StandardCharsets.UTF_8);
             } else {
-                FileUtils.copy(proxyout, buffer, UTF8.charset);
+                FileUtils.copy(proxyout, buffer, StandardCharsets.UTF_8);
             }
             final String sbuffer = buffer.toString();
 
