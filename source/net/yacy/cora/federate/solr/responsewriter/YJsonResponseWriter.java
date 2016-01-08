@@ -30,14 +30,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.data.URLLicense;
-import net.yacy.search.schema.CollectionSchema;
-import net.yacy.server.serverObjects;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.apache.solr.common.util.NamedList;
@@ -49,6 +41,13 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.server.serverObjects;
 
 
 /**
@@ -159,8 +158,6 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                         String filename = url.getFileName();
                         solitaireTag(writer, "link", u);
                         solitaireTag(writer, "file", filename);
-                        // get image license
-                        if (Classification.isImageExtension(MultiProtocolURL.getFileExtension(filename))) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
                     } catch (final MalformedURLException e) {}
                     continue;
                 }
@@ -221,7 +218,9 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }
-            } catch (final Throwable ee) {}
+            } catch (final Throwable ee) {
+            	ConcurrentLog.fine("YJsonResponseWriter", "Document writing error : " + ee.getMessage());
+            }
         }
         writer.write("],\n".toCharArray());
         

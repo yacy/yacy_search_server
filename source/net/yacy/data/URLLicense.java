@@ -28,36 +28,53 @@ package net.yacy.data;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.storage.SizeLimitedMap;
 
-
+/**
+ * This class defines a license-generation for URLs.
+ * It is used in case of preview-Image-fetching to grant also non-authorized users the usage of a image-fetcher servlet,
+ * but to prevent them to use this servlet as a proxy.
+ */
 public class URLLicense {
 
-    // this class defines a license-generation for URLs
-    // it is used in case of snippet- and preview-Image-fetching to grant also non-authorized users the usage of a image-fetcher servlet
+	
     private static final int maxQueue = 10000;
+    
+    /** Map URLs by licence keys */
     private static final Map<String, String> permissions = Collections.synchronizedMap(new SizeLimitedMap<String, String>(maxQueue));
-
+    
+    /**
+     * Generates and stores a unique licence key for delayed url data fetching.
+     * @param url URL for whose data should be fectched later
+     * @return licence key generated or null when url is null
+     */
     public static String aquireLicense(final DigestURL url) {
-        if (url == null) return "";
-        // generate license key
-        String license = ASCII.String(url.hash());
-        // store reference to url with license key
+        if (url == null) return null;
+        /* Generate license key : it must absolutely be a unique key, not related to url parameter (thus url.hash can not be used).
+         * If the same key is generated for each call of this method with the same url parameter, 
+         * problem may occur concurrent non authorized users try to fetch same url content.
+         * Example scenario (emulated in URLLicenseConcurrentTest) : 
+         * 1 - userA aquireLicence for url
+         * 2 - userB aquireLicence for same url as A 
+         * 3 - userA releaseLicense : he can now fetch url content
+         * 4 - userB releaseLicense : if the same license was generated, it has been already released and url content can not be fetched! */
+        String license = UUID.randomUUID().toString();
+
         permissions.put(license, url.toNormalform(true));
+        
         // return the license key
         return license;
     }
 
-    public static String aquireLicense(final String license, final String url) {
-        // store reference to url with license key
-        permissions.put(license, url);
-        // return the license key
-        return license;
-    }
-
+    /**
+     * Use it to retrieve source url and to ensures YaCy url containing this licence code can not be reused by non-authorized users. 
+     * @param license unique code associated to source url
+     * @return source url or null licence is no more valid
+     * @throws NullPointerException when license is null
+     */
     public static String releaseLicense(final String license) {
         return permissions.remove(license);
     }
