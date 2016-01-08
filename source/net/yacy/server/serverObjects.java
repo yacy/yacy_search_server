@@ -288,16 +288,24 @@ public class serverObjects implements Serializable, Cloneable {
         put(key, toJSON(value));
     }
 
+    /**
+     * Convert string value to be usable in JSON ouput
+     * @param value value to encode
+     * @return encoded value, empty string when value is null
+     */
     public static String toJSON(String value) {
-        // value = value.replaceAll("\\", "\\\\");
-        value = patternDoublequote.matcher(value).replaceAll("'");
-        value = patternSlash.matcher(value).replaceAll("\\/");
-        value = patternB.matcher(value).replaceAll("\\b");
-        value = patternF.matcher(value).replaceAll("\\f");
-        value = patternNewline.matcher(value).replaceAll("\\r");
-        value = patternR.matcher(value).replaceAll("\\r");
-        value = patternT.matcher(value).replaceAll("\\t");
-        return value;
+		if (value != null) {
+			value = patternDoublequote.matcher(value).replaceAll("'");
+			value = patternSlash.matcher(value).replaceAll("\\/");
+			value = patternB.matcher(value).replaceAll("\\b");
+			value = patternF.matcher(value).replaceAll("\\f");
+			value = patternNewline.matcher(value).replaceAll("\\r");
+			value = patternR.matcher(value).replaceAll("\\r");
+			value = patternT.matcher(value).replaceAll("\\t");
+		} else {
+			value = "";
+		}
+		return value;
     }
 
     /**
