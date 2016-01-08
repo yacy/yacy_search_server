@@ -49,7 +49,9 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.InvalidURLLicenceException;
 import net.yacy.data.URLLicense;
+import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -69,7 +71,7 @@ public class ViewImage {
     private static byte[] defaulticonb = null;
 
 	/**
-	 * Try parsing image from post "url" parameter or from "code" parameter.
+	 * Try parsing image from post "url" parameter (authenticated users) or from "code" parameter (non authenticated users).
 	 * When image format is not supported, return directly image data. When
 	 * image could be parsed, try encoding to target format specified by header
 	 * "EXT".
@@ -95,12 +97,9 @@ public class ViewImage {
 
 		final Switchboard sb = (Switchboard) env;
 
-		// the url to the image can be either submitted with an url in clear
-		// text, or using a license key
-		// if the url is given as clear text, the user must be authorized as
-		// admin
-		// the license can be used also from non-authorized users
-
+		if(post == null) {
+			throw new TemplateMissingParameterException("please fill at least url or code parameter");
+		}
 		String urlString = post.get("url", "");
 		final String urlLicense = post.get("code", "");
 		String ext = header.get("EXT", null);
@@ -108,20 +107,27 @@ public class ViewImage {
 				|| sb.verifyAuthentication(header); // handle access rights
 
 		DigestURL url = null;
-		if ((urlString.length() > 0) && (auth)) {
-			url = new DigestURL(urlString);
-		}
-
-		if ((url == null) && (urlLicense.length() > 0)) {
-			urlString = URLLicense.releaseLicense(urlLicense);
-			if (urlString != null) {
+		if(auth) {
+			/* Authenticated user : rely on url parameter*/
+			if (urlString.length() > 0) {
 				url = new DigestURL(urlString);
-			} else { // license is gone (e.g. released/remove in prev calls)
-				ConcurrentLog.fine("ViewImage", "image urlLicense not found key=" + urlLicense);
-				/* Return an empty EncodedImage. Caller is responsible for handling this correctly (500 status code response) */
-				return new EncodedImage(new byte[0], ext, post.getBoolean("isStatic")); // TODO: maybe favicon accessed again, check
-								// iconcache
+			} else {
+				throw new TemplateMissingParameterException("missing required url parameter");
 			}
+		} else {
+			/* Non authenticated user : rely on urlLicense parameter */
+			if((urlLicense.length() > 0)) {
+				urlString = URLLicense.releaseLicense(urlLicense);
+				if (urlString != null) {
+					url = new DigestURL(urlString);
+				} else { // license is gone (e.g. released/remove in prev calls)
+					ConcurrentLog.fine("ViewImage", "image urlLicense not found key=" + urlLicense);
+					/* Caller is responsible for handling this with appropriate HTTP status code */
+					throw new InvalidURLLicenceException();
+				}
+			} else {
+				throw new TemplateMissingParameterException("missing required code parameter");
+			}			
 		}
 
 		// get the image as stream
