@@ -120,9 +120,9 @@ Select the desired inbuilt functionality==Выберите нужный встр
 Add DOCTYPE:==Добавить DOCTYPE:
 Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.==Добавить информацию DOCTYPE, если не задано. Это может потребоваться для просмотра позиции через Internet Explorer.
 Reparse webpage:==Повторная обработка вэб-страницы:
-Put webpage back into schema (htmlparser document) to allow node by node manipulation.==Setze Webseite zurück ins Schema (htmlpaser Dokuement), um Knoten bei Knoten Manipulation zu ermöglichen.
-Show overlay interaction buttons:==Zeige Overlay Schaltflächen zur Interaktion:
-Show overlay interaction buttons.==Zeige Overlay Schaltflächen zur Interaktion.
+#Put webpage back into schema (htmlparser document) to allow node by node manipulation.==Setze Webseite zurück ins Schema (htmlpaser Dokuement), um Knoten bei Knoten Manipulation zu ermöglichen.
+#Show overlay interaction buttons:==Zeige Overlay Schaltflächen zur Interaktion:
+#Show overlay interaction buttons.==Zeige Overlay Schaltflächen zur Interaktion.
 "Submit"=="Сохранить"
 #-----------------------------
 
@@ -1175,16 +1175,16 @@ Edit Profile==Изменить профиль
 "Submit changes"=="Подтвердить изменения"
 Name==Название
 Collections (comma-separated list)==Хранилища (список через запятую)
-URL Must-Match Filter
-URL Must-Not-Match Filter
-IP Must-Match Filter
-IP Must-Not-Match Filter
-Country Must-Match Filter
-URL No-Depth-Limit Must-Match Filter
-Indexing URL Must-Match Filter
-Indexing URL Must-Not-Match Filter
-Indexing Content Must-Match Filter
-Indexing Content Must-Not-Match Filter
+#URL Must-Match Filter
+#URL Must-Not-Match Filter
+#IP Must-Match Filter
+#IP Must-Not-Match Filter
+#Country Must-Match Filter
+#URL No-Depth-Limit Must-Match Filter
+#Indexing URL Must-Match Filter
+#Indexing URL Must-Not-Match Filter
+#Indexing Content Must-Match Filter
+#Indexing Content Must-Not-Match Filter
 Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)==Использование кэша (без кэша, если новее, если сушествует, только кэш)
 Crawl Depth==Глубина индексации
 Recrawl If Older==Переиндексировать, если старше
@@ -1443,12 +1443,12 @@ Solr Schema==Схема Solr
 #File: CrawlStartIntranet_p.html
 #---------------------------
 #Intranet Crawl Start==Запустить индексирование интранета
-When an index domain is configured to contain intranet links,==Wenn eine Index Domain konfiguriert wurde die Intranet Links enthält,
-the intranet may be scanned for available servers.==kann dieses Intranet auf verfügbare Server gescannt werden.
-Please select below the servers in your intranet that you want to fetch into the search index.==Bitte in der folgenden Server Liste aus Ihrem Intranet auswählen, welche Sie in den Suchindex aufnehmen wollen.
-This network definition does not allow intranet links.==Diese Netzwerk Konfiguration erlaubt keine Intranet Links.
-A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Eine Liste mit Servern aus dem Intranet ist nur verfügbar, wenn Sie YaCy auch konfiguriert haben Intranetseiten zu indexieren.
-To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.==Um diese Einstellung vorzunehmen, bitte im Servlet <a href="ConfigBasic.html">Basis Konfiguration</a> den Anwendungsfall 'Intranet Indexierung' auswählen.
+#When an index domain is configured to contain intranet links,==Wenn eine Index Domain konfiguriert wurde die Intranet Links enthält,
+#the intranet may be scanned for available servers.==kann dieses Intranet auf verfügbare Server gescannt werden.
+#Please select below the servers in your intranet that you want to fetch into the search index.==Bitte in der folgenden Server Liste aus Ihrem Intranet auswählen, welche Sie in den Suchindex aufnehmen wollen.
+#This network definition does not allow intranet links.==Diese Netzwerk Konfiguration erlaubt keine Intranet Links.
+#A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Eine Liste mit Servern aus dem Intranet ist nur verfügbar, wenn Sie YaCy auch konfiguriert haben Intranetseiten zu indexieren.
+#To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.==Um diese Einstellung vorzunehmen, bitte im Servlet <a href="ConfigBasic.html">Basis Konfiguration</a> den Anwendungsfall 'Intranet Indexierung' auswählen.
 Available Intranet Server==Доступный интранет-сервер
 #>IP<==>IP-адрес<
 #>URL<==>URL-адрес<
@@ -1897,7 +1897,7 @@ No entry found for URL-hash==Не найдено для хэш URL-адреса
 "Delete URL"=="Удалить URL-адрес"
 this may produce unresolved references at other word indexes but they do not harm==это может привести к неразрешённым ссылкам на другие слова индексов, но это не нанесёт вреда
 "Delete URL and remove all references from words"=="Удалить ссылки, включая ссылки из слов"
-delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)==löscht die Referenz zu dieser URL und jedem anderen Wort, wo die Referenz existiert (sehr umfassend, aber bewahrt vor ungelösten Referenzen)
+#delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)==löscht die Referenz zu dieser URL und jedem anderen Wort, wo die Referenz existiert (sehr umfassend, aber bewahrt vor ungelösten Referenzen)
 #-----------------------------
 
 #File: IndexCreateLoaderQueue_p.html
@@ -2075,24 +2075,24 @@ This is the most generic option: select a set of documents using a solr query.==
 #---------------------------
 YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Index Import
 #Crawling Queue Import==Crawling Puffer Import
-Index DB Import==Index Datenbank Import
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==Der lokale Index besteht zur Zeit aus (mindestens) #[wcount]# Wörtern und #[ucount]# URLs.
-Import Job with the same path already started.==Ein Import mit dem selben Pfad ist bereits gestartet.
+#Index DB Import==Index Datenbank Import
+#The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==Der lokale Index besteht zur Zeit aus (mindestens) #[wcount]# Wörtern und #[ucount]# URLs.
+#Import Job with the same path already started.==Ein Import mit dem selben Pfad ist bereits gestartet.
 Starting new Job==Начать новое задание
 Import&nbsp;Type:==Импорт типа:
 Cache Size==Размер кэша
-Usage Examples==Benutzungs-<br />beispiele
-"Path to the PLASMADB directory of the foreign peer"=="Pfad zum PLASMADB Verzeichnis des fremden Peer"
+#Usage Examples==Benutzungs-<br />beispiele
+#"Path to the PLASMADB directory of the foreign peer"=="Pfad zum PLASMADB Verzeichnis des fremden Peer"
 Import&nbsp;Path:==Путь импорта:
 "Start Import"=="Импорт начат"
 Attention:==Внимание:
-Always do a backup of your source and destination database before starting to use this import function.==Machen Sie immer ein Backup von Ihrer Quell- und Zieldatenbank, bevor Sie die Import-Funktion nutzen.
+#Always do a backup of your source and destination database before starting to use this import function.==Machen Sie immer ein Backup von Ihrer Quell- und Zieldatenbank, bevor Sie die Import-Funktion nutzen.
 Currently running jobs==Выполняющиеся задания
 Job Type==Тип задания
 >Path==>Путь
 Status==Состояние
-Elapsed<br />Time==Verstrichene<br />Zeit
-Time<br />Left==verbl.<br />Zeit
+#Elapsed<br />Time==Verstrichene<br />Zeit
+#Time<br />Left==verbl.<br />Zeit
 Abort Import==Прервать импорт
 Pause Import==Приостановить импорт
 Finished::Running::Paused==Завершено::Запущено::Приостановлено
@@ -2112,21 +2112,21 @@ You need to have at least the following directories and files in this path:==В�
 >Directory==>Директория
 >Yes<==>Да<
 >No<==>Нет<
-The LoadedURL Database containing all loaded and indexed URLs==Die 'geladene URLs'-Datenbank, enthält alle geladenen und indexierten URLs
-The assortment directory containing parts of the word index.==Das Assortment-Verzeichnis, enthält Teile des Wort-Index.
-The words directory containing parts of the word index.==Das Wort-Verzeichnis, enthält Teile des Wort-Index.
-The assortment file that should be imported.==Die Assortment-Datei die importiert werden soll.
-The assortment file must have the postfix==Die Assortment-Datei muss den Suffix
-.db".==.db" haben.
-If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>== Wenn Sie eine Assortment-Datei aus <tt>PLASMADBACLUSTERABKP</tt> importieren wollen,
-you have to rename it first.==müssen Sie sie zuerst umbenennen.
->Notes:==>Anmerkung:
-Please note that the imported words are useless if the destination peer doesn't know==Bitte bedenken Sie, dass die importierten Wörter nutzlos sind, wenn der Ziel-Peer nicht weiß,
-the URLs the imported words belongs to.==zu welchen URLs sie gehören.
-Crawling Queue Import:==Crawler-Puffer-Import:
-Contains data about the crawljob an URL belongs to==Enthält Daten über den Crawljob, zu dem eine URL gehört
-The crawling queue==Der Crawler-Puffer
-Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer gehören
+#The LoadedURL Database containing all loaded and indexed URLs==Die 'geladene URLs'-Datenbank, enthält alle geladenen und indexierten URLs
+#The assortment directory containing parts of the word index.==Das Assortment-Verzeichnis, enthält Teile des Wort-Index.
+#The words directory containing parts of the word index.==Das Wort-Verzeichnis, enthält Teile des Wort-Index.
+#The assortment file that should be imported.==Die Assortment-Datei die importiert werden soll.
+#The assortment file must have the postfix==Die Assortment-Datei muss den Suffix
+#.db".==.db" haben.
+#If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>== Wenn Sie eine Assortment-Datei aus <tt>PLASMADBACLUSTERABKP</tt> importieren wollen,
+#you have to rename it first.==müssen Sie sie zuerst umbenennen.
+#>Notes:==>Anmerkung:
+#Please note that the imported words are useless if the destination peer doesn't know==Bitte bedenken Sie, dass die importierten Wörter nutzlos sind, wenn der Ziel-Peer nicht weiß,
+#the URLs the imported words belongs to.==zu welchen URLs sie gehören.
+#Crawling Queue Import:==Crawler-Puffer-Import:
+#Contains data about the crawljob an URL belongs to==Enthält Daten über den Crawljob, zu dem eine URL gehört
+#The crawling queue==Der Crawler-Puffer
+#Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer gehören
 #-----------------------------
 
 #File: IndexImportMediawiki_p.html
@@ -2352,24 +2352,24 @@ Available after successful loading of rss feed in preview==Станет дост
 
 #File: Messages_p.html
 #---------------------------
->Messages==>Nachrichten
-Date</td>==Datum</td>
-From</td>==Von</td>
-To</td>==An</td>
->Subject==>Betreff
-Action==Aktion
-From:==Von:
-To:==An:
-Date:==Datum:
+#>Messages==>Nachrichten
+#Date</td>==Datum</td>
+#From</td>==Von</td>
+#To</td>==An</td>
+#>Subject==>Betreff
+#Action==Aktion
+#From:==Von:
+#To:==An:
+#Date:==Datum:
 #Subject:==Betreff:
->view==>anzeigen
-reply==antworten
->delete==>löschen
-Compose Message==Nachrichtenerstellung
-Send message to peer==Sende eine Nachricht an Peer
-"Compose"=="Erstellen"
-Message:==Nachricht:
-inbox==Posteingang
+#>view==>anzeigen
+#reply==antworten
+#>delete==>löschen
+#Compose Message==Nachrichtenerstellung
+#Send message to peer==Sende eine Nachricht an Peer
+#"Compose"=="Erstellen"
+#Message:==Nachricht:
+#inbox==Posteingang
 #-----------------------------
 
 #File: MessageSend_p.html
@@ -2394,8 +2394,8 @@ The message has not been sent yet!==Сообщение еще не отправ�
 The peer is alive but cannot respond. Sorry.==Узел в сети, но не отвечает.
 Your message has been sent. The target peer responded:==Ваше сообщение отправлено. Узел получателя ответил:
 The target peer is alive but did not receive your message. Sorry.==Узел получателя в сети, но не смог получить ваше сообщение.
-Here is a copy of your message, so you can copy it to save it for further attempts:==Hier ist eine Kopie Ihrer Nachricht. Sie können diese kopieren, speichern und es später nochmal versuchen:
-You cannot call this page directly. Instead, use a link on the <a href="Network.html">Network</a> page.==Sie können diese Seite nicht direkt aufrufen. Benutzen Sie stattdessen einen Link auf der <a href="Network.html">Netzwerk</a> Seite.
+#Here is a copy of your message, so you can copy it to save it for further attempts:==Hier ist eine Kopie Ihrer Nachricht. Sie können diese kopieren, speichern und es später nochmal versuchen:
+#You cannot call this page directly. Instead, use a link on the <a href="Network.html">Network</a> page.==Sie können diese Seite nicht direkt aufrufen. Benutzen Sie stattdessen einen Link auf der <a href="Network.html">Netzwerk</a> Seite.
 #-----------------------------
 
 #File: Network.html
@@ -2826,10 +2826,10 @@ Page.==
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-Quick Crawl Link==Schnell Crawl Link
+#Quick Crawl Link==Schnell Crawl Link
 Quickly adding Bookmarks:==Быстрое добавление закладок:
-Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
-If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
+#Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
+#If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
 Crawl with YaCy==Индексировать с YaCy
 Title:==Заголовок:
 Link:==Ссылка:
@@ -2838,35 +2838,6 @@ URL successfully added to Crawler Queue==Ссылка успешно добав�
 Malformed URL==Некорректная ссылка
 Unable to create new crawling profile for URL:==Невозможно создать новый профиль индексирования для ссылки:
 Unable to add URL to crawler queue:==Невозможно добавить ссылку в очередь индексатора:
-#-----------------------------
-
-#File: Ranking_p.html
-#---------------------------
-Ranking Configuration==Ranking Einstellungen
-The document ranking influences the order of the search result entities.==Das Dokument Ranking beeinflusst die Reihenfolge der Suchergebnis Datensätze.
-A ranking is computed using a number of attributes from the documents that match with the search word.==Ein Ranking wird berechnet mit einer Anzahl von Attributen aus den Dokumenten die das gesuchte Wort enthalten.
-The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.==Die Attribute werden zuerst über alle Suchergebnisse normalisiert und dann wird das normalisierte Attribut multpliziert mit dem Ranking Koeffizienten der aus dieser Liste errechnet wird.
-The ranking coefficient grows exponentially with the ranking levels given in the following table.==Der Ranking Koeffizient wächst exponential mit den Ranking Werten die in der folgenden Tabelle festgelegt werden.
-If you increase a single value by one, then the strength of the parameter doubles.==Wenn Sie einen einzelnen Wert um eins erhöhen wird die Stärke des Parameters verdoppelt.
-Pre-Ranking==Vor-Ranking
-
-# Aktuell sind die Werte und Hover over Information in der Ranking_p.java hartcodiert und können nicht übersetzt werden
-#
-#Date==Datum
-#a higher ranking level prefers younger documents.==Ein höherer Ranking Level bevorzugt jüngere Dokumente
-#The age of a document is measured using the date submitted by the remote server as document date==Das Alter eines Dokuments wird gemessen anhand des Dokument Datums das der Remote Server übermittelt
-
-There are two ranking stages:==Es gibt zwei Phasen beim Ranking.
-first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==Zuerst werden alle Resultate nach dem Vor-Ranking geranked und aus der resultierenden Liste werden die Dokumente erneut im Nach-Ranking sortiert.
-The two stages are separated because they need statistical information from the result of the pre-ranking.==Die zwei Phasen sind getrennt weil statistische Informationen aus dem Ergebnis des Vor-Rankings benötigt werden.
-
-Post-Ranking==Nach-Ranking
-
-#Application Of Prefer Pattern==Anwendung eines bevorzugten Musters
-#a higher ranking level prefers documents where the url matches the prefer pattern given in a search request.==Ein höherer Ranking Level bevorzugt Dokumente deren URL auf das bevorzugte Muster einer Suchanfrage passt.
-
-"Set as Default Ranking"=="Als Standard Ranking speichern"
-"Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
 #-----------------------------
 
 #File: RankingRWI_p.html
@@ -3435,7 +3406,7 @@ YaCy will be restarted after installation==YaCy будет перезапуще�
 #File: Supporter.html
 #---------------------------
 Supporter<==Спонсор<
-"Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"
+#"Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"
 Supporter are switched off for users without authorization==Спонсоры отключены для пользователей, не прошедших авторизацию
 "bookmark"=="Закладки"
 "Add to bookmarks"=="Добавить в закладки"
@@ -3443,7 +3414,7 @@ Supporter are switched off for users without authorization==Спонсоры о�
 "Give positive vote"=="Ссылка понравилась"
 "negative vote"=="Не понравилось"
 "Give negative vote"=="Ссылка не понравилась"
-provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==bereitgestellt durch YaCy Peers mit einer URL in ihrem Profil. Es werden nur URLs von Peers angezeigt, die online sind.
+#provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==bereitgestellt durch YaCy Peers mit einer URL in ihrem Profil. Es werden nur URLs von Peers angezeigt, die online sind.
 #-----------------------------
 
 #File: Surftips.html
@@ -3683,7 +3654,7 @@ Sorry, the function you have requested is not yet available!==Извините, 
 #File: Table_YMark_p.html
 #---------------------------
 Table Viewer==Просмотр таблиц
-YMark Table Administration==YMark Tabellen Administration
+#YMark Table Administration==YMark Tabellen Administration
 Table Editor: showing table==Редактор таблицы: показать таблицу
 "Edit Selected Row"=="Изменить выбранную строку"
 "Add a new Row"=="Добавить новую строку"
@@ -3750,8 +3721,8 @@ Password: <input==Пароль: <input
 "login"=="логин"
 You are currently logged in as #[username]#.==Вы зашли как #[username]#.
 You have used==Вы можете использовать
-minutes of your onlinetime limit of==Minuten Ihres Online-Zeitlimits von
-minutes per day.==Minuten pro Tag verbraucht.
+#minutes of your onlinetime limit of==Minuten Ihres Online-Zeitlimits von
+#minutes per day.==Minuten pro Tag verbraucht.
 old Password==старый пароль
 new Password<==новый пароль<
 new Password(repetition)==новый пароль повторно
@@ -4501,7 +4472,7 @@ Processing Queues==Состояние очередей
 Local<==Локальный<
 Global<==Глобальный<
 #Remote<==Удалённый<
-Overhang<==Überhang<
+#Overhang<==Überhang<
 Media Crawl Queues==Очереди индексирования медиа-файлов
 >Images==>Картинки
 >Movies==>Фильмы

@@ -48,10 +48,10 @@ Showing #[num]# requests.==Gezeigt werden #[num]# Anfragen.
 >Path<==>Pfad<
 Date<==Datum<
 Access Count During==Erfasster Zugriff während der
-last Second==letzten Sekunde
-last Minute==letzten Minute
+last Second==letzte Sekunde
+last Minute==letzte Minute
 last 10 Minutes==letzten 10 Minuten
-last Hour==letzten Stunde
+last Hour==letzte Stunde
 The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf geschützte Seiten erkannt
 #>Host==>Host
 Access Times==Zugriffszeiten
@@ -3710,6 +3710,8 @@ Pictures==Bilder
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "#[query]#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
+>Documents==>Text
+>Images==>Bilder
 >Protocol==>Netzdienste
 >Provider==>Anbieter
 >Filetype==>Dateityp
