@@ -163,6 +163,7 @@
                     <excludes>
                         htroot/*.java
                     </excludes>
+                    <failOnError>false</failOnError>
                 </configuration>
             </plugin>
             
