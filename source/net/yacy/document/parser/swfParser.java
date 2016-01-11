@@ -71,6 +71,19 @@ public class swfParser extends AbstractParser implements Parser {
             final SWF2HTML swf2html = new SWF2HTML();
             String contents = "";
             try {
+                // read and check file signature (library expect stream positioned after signature)
+                // magic bytes according to specification http://wwwimages.adobe.com/www.adobe.com/content/dam/Adobe/en/devnet/swf/pdf/swf-file-format-spec.pdf
+                // 0x46, 0x57, 0x53 (“FWS”) signature indicates an uncompressed SWF file
+                // 0x43, 0x57, 0x53 (“CWS”) indicates that the entire file after the first 8 bytes  was compressed by using the ZLIB
+                // 0x5a, 0x57, 0x53 (“ZWS”) indicates that the entire file after the first 8 bytes was compressed by using the LZMA
+                int magic = source.read();
+                if (magic != 'F') // F=uncompressed, C= ZIP-compressed Z=LZMA-compressed
+                    throw new Parser.Failure("compressed swf file not supported", location); // compressed not supported yet
+                magic = source.read(); // always 'W'
+                if (magic != 'W') throw new Parser.Failure("not a swf file (wrong file signature)", location);
+                magic = source.read(); // always 'S'
+                if (magic != 'S') throw new Parser.Failure("not a swf file (wrong file signature)", location);
+
             	contents = swf2html.convertSWFToHTML(source);
             } catch (final NegativeArraySizeException e) {
                 throw new Parser.Failure(e.getMessage(), location);
@@ -82,8 +95,6 @@ public class swfParser extends AbstractParser implements Parser {
             String url = null;
             String urlnr = null;
             final String linebreak = System.getProperty("line.separator");
-            final List<String> abstrct = new ArrayList<String>();
-            //TreeSet images = null;
             final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
             int urls = 0;
             int urlStart = -1;
@@ -120,17 +131,17 @@ public class swfParser extends AbstractParser implements Parser {
                           replaceAll("\n"," ").
                           replaceAll("\r"," ").
                           replaceAll("\t"," ")), // title
-                    "", // TODO: AUTHOR
-                    "",
+                    null, // TODO: AUTHOR
+                    null,
                     null,        // an array of section headlines
-                    abstrct,     // an abstract
-                    0.0f, 0.0f,
+                    null,        // an abstract
+                    0.0d, 0.0d,
                     contents,     // the parsed document text
                     anchors,      // a map of extracted anchors
                     null,
                     null,
                     false,
-                    new Date())};      // a treeset of image URLs
+                    new Date())};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
