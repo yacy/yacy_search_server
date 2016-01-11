@@ -103,11 +103,11 @@ public class Status
                 redirect = true;
             } else if ( post.containsKey("popup") ) {
                 final boolean trigger_enabled = post.getBoolean("popup");
-                sb.setConfig("browserPopUpTrigger", trigger_enabled);
+                sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, trigger_enabled);
                 redirect = true;
             } else if ( post.containsKey("tray") ) {
                 final boolean trigger_enabled = post.getBoolean("tray");
-                sb.setConfig("trayIcon", trigger_enabled);
+                sb.setConfig(SwitchboardConstants.TRAY_ICON_ENABLED, trigger_enabled);
                 redirect = true;
             }
 
@@ -303,7 +303,7 @@ public class Status
             prop.put("otherPeers", "0"); // not online
         }
 
-        if ( !sb.getConfigBool("browserPopUpTrigger", false) ) {
+        if ( !sb.getConfigBool(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, false) ) {
             prop.put("popup", "0");
         } else {
             prop.put("popup", "1");
@@ -311,7 +311,7 @@ public class Status
 
         if ( !OS.isWindows ) {
             prop.put("tray", "2");
-        } else if ( !sb.getConfigBool("trayIcon", false) ) {
+        } else if ( !sb.getConfigBool(SwitchboardConstants.TRAY_ICON_ENABLED, false) ) {
             prop.put("tray", "0");
         } else {
             prop.put("tray", "1");

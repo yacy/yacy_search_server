@@ -120,27 +120,6 @@
                     </filesets>
                 </configuration>
             </plugin>
-            
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.5.3</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
-                    <finalName>yacy_v${project.version}_${DSTAMP}_${releaseNr}</finalName>
-                    <outputDirectory>RELEASE</outputDirectory>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 
            <!-- compile htroot -->
             <plugin>
@@ -184,6 +163,7 @@
                     <excludes>
                         htroot/*.java
                     </excludes>
+                    <failOnError>false</failOnError>
                 </configuration>
             </plugin>
             
@@ -265,7 +245,7 @@
 
                     <execution>
                         <id>install-webcat-jar</id>
-                        <phase>clean</phase>
+                        <phase>validate</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -281,7 +261,7 @@
 
                     <execution>
                         <id>install-J7Zip-jar</id>
-                        <phase>clean</phase>
+                        <phase>validate</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -301,6 +281,35 @@
     </build>
 
     <profiles>
+        <profile>
+            <!-- profile to create a release archive -->
+            <id>release-profile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.5.3</version>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>assembly.xml</descriptor>
+                            </descriptors>
+                            <finalName>yacy_v${project.version}_${DSTAMP}_${releaseNr}</finalName>
+                            <outputDirectory>RELEASE</outputDirectory>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+                
         <profile>
             <id>report</id>
             <build>
