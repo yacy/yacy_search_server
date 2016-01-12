@@ -24,6 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.Set;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -38,8 +40,14 @@ public class Load_PHPBB3 {
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        String a = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
-        if (a == null) a = "localhost:" + sb.getLocalPort();
+        String a;
+        Set<String> ips = sb.peers.mySeed().getIPs();
+        /* There may eventually have no registered ip in mySeed, for example in Robinson mode : this shouldn't prevent crawling a MediaWiki */
+        if(ips != null && !ips.isEmpty()) {
+        	a = sb.peers.mySeed().getPublicAddress(ips.iterator().next());
+        } else {
+        	a = "localhost:" + sb.getLocalPort();
+        }
         final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
         final String repository = "http://" + a + "/repository/";
         prop.put("starturl", (intranet) ? repository : "http://");
