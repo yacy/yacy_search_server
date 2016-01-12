@@ -538,6 +538,15 @@ proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
 proxyURL.rewriteURLs=domainlist
 proxyURL.useforresults=false
 
+# Autocrawl configuration
+autocrawl=false
+autocrawl.index.text=true
+autocrawl.index.meia=true
+autocrawl.deep.depth=3
+autocrawl.deep.recrawl=43200
+autocrawl.shallow.depth=1
+autocrawl.shallow.recrawl=1440
+
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to
 # assign a different crawling depth.

@@ -308,6 +308,15 @@ public final class SwitchboardConstants {
      * @see Switchboard#PROXY_CACHE_LAYOUT_HASH
      */
     public static final String PROXY_YACY_ONLY                 = "proxyYacyOnly";
+    
+    public static final String AUTOCRAWL                       = "autocrawl";
+    public static final String AUTOCRAWL_INDEX_TEXT            = "autocrawl.index.text";
+    public static final String AUTOCRAWL_INDEX_MEDIA           = "autocrawl.index.media";
+    public static final String AUTOCRAWL_DEEP_DEPTH            = "autocrawl.deep.depth";
+    public static final String AUTOCRAWL_DEEP_RECRAWL          = "autocrawl.deep.recrawl";
+    public static final String AUTOCRAWL_SHALLOW_DEPTH         = "autocrawl.shallow.depth";
+    public static final String AUTOCRAWL_SHALLOW_RECRAWL       = "autocrawl.shallow.recrawl";
+    
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Cluster settings
