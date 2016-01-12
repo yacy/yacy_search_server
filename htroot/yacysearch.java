@@ -267,13 +267,6 @@ public class yacysearch {
         // find search domain
         final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
 
-        // patch until better search profiles are available
-        if (contentdom == ContentDomain.IMAGE && (itemsPerPage == 10 || itemsPerPage == 100)) {
-            itemsPerPage = 64;
-        } else if ( contentdom != ContentDomain.IMAGE && itemsPerPage > 50 && itemsPerPage < 100 ) {
-            itemsPerPage = 10;
-        }
-
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
         if ( trackerHandles == null ) {
