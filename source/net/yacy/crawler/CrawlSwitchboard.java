@@ -291,7 +291,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
                 Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, "3")),
                 true,
-                CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DEEP_RECRAWL, "43200"))),
+                CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
                 -1,
                 true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                 sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true),
@@ -324,7 +324,7 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
                 Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_SHALLOW_DEPTH, "1")),
                 true,
-                CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_SHALLOW_RECRAWL, "1440"))),
+                CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
                 -1,
                 true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                 sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true),

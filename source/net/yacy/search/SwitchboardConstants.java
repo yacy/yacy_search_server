@@ -106,6 +106,17 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_LOADPREREQ                  = "50_localcrawl_loadprereq";    
+    // 55_autocrawl
+    /**
+     * <p><code>public static final String <string>CRAWLJOB_AUTOCRAWL</strong> = "55_autocrawl"</code></p>
+     * <p>Name of the autocrawl thread</p>
+     */
+    public static final String CRAWLJOB_AUTOCRAWL                               = "55_autocrawl";
+    public static final String CRAWLJOB_AUTOCRAWL_METHOD_START                  = "autocrawlJob";
+    public static final String CRAWLJOB_AUTOCRAWL_METHOD_JOBCOUNT               = null;
+    public static final String CRAWLJOB_AUTOCRAWL_METHOD_FREEMEM                = null;
+    public static final String CRAWLJOB_AUTOCRAWL_IDLESLEEP                     = "55_autocrawl_idlesleep";
+    public static final String CRAWLJOB_AUTOCRAWL_BUSYSLEEP                     = "55_autocrawl_busysleep";
     // 60_remotecrawlloader
     /**
      * <p><code>public static final String <strong>CRAWLJOB_REMOTE_CRAWL_LOADER</strong> = "60_remotecrawlloader"</code></p>
@@ -312,10 +323,12 @@ public final class SwitchboardConstants {
     public static final String AUTOCRAWL                       = "autocrawl";
     public static final String AUTOCRAWL_INDEX_TEXT            = "autocrawl.index.text";
     public static final String AUTOCRAWL_INDEX_MEDIA           = "autocrawl.index.media";
+    public static final String AUTOCRAWL_RATIO                 = "autocrawl.ratio";
+    public static final String AUTOCRAWL_ROWS                  = "autocrawl.rows";
+    public static final String AUTOCRAWL_DAYS                  = "autocrawl.days";
+    public static final String AUTOCRAWL_QUERY                 = "autocrawl.query";
     public static final String AUTOCRAWL_DEEP_DEPTH            = "autocrawl.deep.depth";
-    public static final String AUTOCRAWL_DEEP_RECRAWL          = "autocrawl.deep.recrawl";
     public static final String AUTOCRAWL_SHALLOW_DEPTH         = "autocrawl.shallow.depth";
-    public static final String AUTOCRAWL_SHALLOW_RECRAWL       = "autocrawl.shallow.recrawl";
     
 
     //////////////////////////////////////////////////////////////////////////////////////////////
