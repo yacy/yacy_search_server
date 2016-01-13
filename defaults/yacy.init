@@ -813,7 +813,7 @@ search.audio = false
 search.video = false
 search.app = false
 
-# number of search results displayed by default
+# number of search results per page displayed by default
 search.items = 10
 
 # target for search results; this is the href target attribute inside every search result link
