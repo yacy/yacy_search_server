@@ -38,6 +38,11 @@
     			<dd><input id="autocrawlShallow" name="autocrawlShallow" type="number" min="0" max="2" step="1" size="1" maxlength="1" value="#[autocrawlShallow]#" /></dd>
     			<dt>Deep crawl depth (1 to 5):</dt>
     			<dd><input id="autocrawlDeep" name="autocrawlDeep" type="number" min="1" max="5" step="1" size="1" maxlength="1" value="#[autocrawlDeep]#" /></dd>
+    			<dt>Index text:</dt>
+    			<dd><input id="autocrawlText" name="autocrawlText" type="checkbox" #(autocrawlText)#::checked="checked"#(/autocrawlText)# /></dd>
+    			<dt>Index media:</dt>
+    			<dd><input id="autocrawlMedia" name="autocrawlMedia" type="checkbox" #(autocrawlMedia)#::checked="checked"#(/autocrawlMedia)# /></dd>
+    			
     			<dt><input type="submit" name="save" class="btn btn-primary" value="Save" /></dt>
     		</dl>
     	</form>

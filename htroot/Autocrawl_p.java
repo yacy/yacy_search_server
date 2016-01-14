@@ -18,6 +18,8 @@ public class Autocrawl_p {
         String autocrawlQuery = sb.getConfig(SwitchboardConstants.AUTOCRAWL_QUERY, "*:*");
         int autocrawlShallow = Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_SHALLOW_DEPTH, "1"));
         int autocrawlDeep = Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, "3"));
+        boolean autocrawlText = sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true);
+        boolean autocrawlMedia = sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, true);
         
         if (post != null) {
             autocrawlEnable = post.getBoolean("autocrawlEnable");
@@ -39,6 +41,8 @@ public class Autocrawl_p {
             if (post.containsKey("autocrawlDeep")) {
                 autocrawlDeep = post.getInt("autocrawlDeep", 3);
             }
+            autocrawlText = post.getBoolean("autocrawlText");
+            autocrawlMedia = post.getBoolean("autocrawlMedia");
         }
         
         if (autocrawlRatio > 500) {
@@ -75,6 +79,8 @@ public class Autocrawl_p {
             sb.setConfig(SwitchboardConstants.AUTOCRAWL_QUERY, autocrawlQuery);
             sb.setConfig(SwitchboardConstants.AUTOCRAWL_SHALLOW_DEPTH, autocrawlShallow);
             sb.setConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, autocrawlDeep);
+            sb.setConfig(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, autocrawlText);
+            sb.setConfig(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, autocrawlMedia);
             
             sb.initAutocrawl(autocrawlEnable);
             
@@ -88,6 +94,8 @@ public class Autocrawl_p {
         prop.put("autocrawlQuery", autocrawlQuery);
         prop.put("autocrawlShallow", autocrawlShallow);
         prop.put("autocrawlDeep", autocrawlDeep);
+        prop.put("autocrawlText", autocrawlText);
+        prop.put("autocrawlMedia", autocrawlMedia);
         
         return prop;
     }
