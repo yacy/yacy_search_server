@@ -3932,6 +3932,13 @@ Scheduler and Profile Editor<==Scheduler und Profil Editor<
 #robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Load Web Pages==Webseiten laden
+Site Crawling==Webseiten Crawlen
+Parser Configuration==Parser Konfiguration
+#-----------------------------
+
 #File: env/templates/submenuDesign.template
 #-----------------------------
 >Appearance==>Erscheinungsbild
@@ -3956,42 +3963,15 @@ Parser Configuration==Parser Konfiguration
 
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
-#Web Crawler Control==Web Crawler Steuerung
-#Start a Web Crawl==Starte einen Web Crawl
-#Crawl Start==Crawl starten
-#Crawl Profile Editor==Crawl Profil Editor
-#Crawler Queues==Crawler Puffer
-#Indexing<==Indexierung<
-#Loader<==Lader<
-#URLs to be processed==zu verarbeitende URLs
-#Processing Queues==Warteschlangen
-#Local<==Lokal<
-#Global<==Global<
-#Remote<==Remote<
-#Overhang<==Überhang<
-#Media Crawl Queues==Medien Crawl-Puffer
-#>Images==>Bilder
-#>Movies==>Filme
-#>Music==>Musik
-#--- New menu items ---
-Index Creation==Indexerzeugung
-#Crawler/Spider<==Crawler/Spider<
-Full Site Crawl==Vollständiger Seiten Crawl
-Sitemap Loader==Sitemap Lader
-Crawl Start<br/>(Expert)==Crawl Start<br/>(Experte)
-Network<br/>Scanner==Netzwerk<br/>Scanner
-#>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
-Crawling of==Crawlen von
-#MediaWikis==MediaWikis
->phpBB3 Forums<==>phpBB3 Foren<
-Index Export/Import<==Content Importer<
+Advanced Crawler==Experten Crawler
+Crawl Start (Expert)==Crawl Start (Experte)
+Crawling of MediaWikis==Crawlen von MediaWikis
+Crawling of phpBB3 Forums==Crawlen von phpBB3 Foren
 Network Harvesting<==Netzwerk Harvesting<
-#Remote<br/>Crawling==Remote<br/>Crawling
-#Scraping<br/>Proxy==Scraping<br/>Proxy
-Database Reader<==Datenbank Leser<
-for phpBB3 Forums==für phpBB3 Foren
-Dump Reader for==Dump Leser für
-#MediaWiki dumps==MediaWiki dumps
+Network Scanner==Netzwerk Scanner
+Remote Crawling==Remote Crawling
+Scraping Proxy==Scraping Proxy
+#Autocrawl==Autocrawler
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template
