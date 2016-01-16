@@ -50,7 +50,7 @@
 
     <build>
         <sourceDirectory>source</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
+        <testSourceDirectory>test/java</testSourceDirectory>
         <finalName>yacycore</finalName>
 
         <plugins>

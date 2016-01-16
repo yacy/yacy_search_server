@@ -46,7 +46,7 @@
   <property name="build" location="classes"/>
   <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
-  <property name="test" location="test"/>
+  <property name="test" location="test/java"/>
   <property name="langdetect" location="langdetect"/>
   <property name="locales" location="locales"/>
   <property name="skins" location="skins"/>
