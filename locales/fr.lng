@@ -2288,6 +2288,14 @@ Memory Settings for Database Caches==Param&egrave;tres de la m&eacute;moire cach
 Timing Settings for Search Sequence==Param&egrave;tres temporels la recherche
 #-----------------------------
 
+#File: env/templates/submenuRanking.template
+#---------------------------
+Ranking and Heuristics==Classement et heuristique
+#Solr Ranking Config==Solr Ranking Config
+#RWI Ranking Config==RWI Ranking Config
+>Heuristics<==>==Heuristiques<
+#---------------------------
+
 #File: env/templates/submenuUseCaseAccount.template
 #---------------------------
 Use Case &amp; Accounts==Mode d'utilisation et comptes

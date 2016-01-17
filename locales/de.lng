@@ -2753,7 +2753,9 @@ To find appropriate fields for this query, see the ==Um passende Felder für die
 "Set Boost Query"=="Setze Boost Abfrage"
 #"Re-Set to default"=="Reset auf Standardwerte"
 #>Solr Boosts<==>Solr Boosts<
-This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
+This is the set of searchable fields (see==Dies ist der Satz der durchsuchbaren Felder (siehe
+Entries without a boost value are not searched.==Einträge ohne Boost Werte werden nicht durchsucht.
+Boost values make hits inside the corresponding field more important.==Boost Werte erhöhen die Wichtigkeit der Treffer im entsprechdem Feld.
 field not in local index (boost has no effect)==Feld ist nicht im lokalen Index (Boost hat keinen Effekt)
 "Set Field Boosts"=="Setze Feld Boosts"
 #"Re-Set to default"=="Reset auf Standardwerte"
@@ -3990,18 +3992,13 @@ Publication==Veröffentlichung
 File Hosting==Datei Freigabe
 #-----------------------------
 
-#File: env/templates/submenuSearchConfiguration.template
+#File: env/templates/submenuRanking.template
 #---------------------------
-Integrated Search Configuration==Integrierte Suchkonfiguration
-Generic Search Portal==Generisches Suchportal
-Search Page Layout==Suchseite Layout
->Appearance<==>Darstellung<
->Language<==>Sprache<
-User Profile==Benutzerprofil
->Heuristics<==>Heuristik<
+Ranking and Heuristics==Ranking und Heuristiken
 Solr Ranking Config==Solr Ranking Konfiguration
 RWI Ranking Config==RWI Ranking Konfiguration
-#-----------------------------
+>Heuristics<==>Heuristiken<
+#---------------------------
 
 #File: env/templates/submenuSearchIntegration.template
 #---------------------------
