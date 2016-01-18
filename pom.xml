@@ -244,22 +244,6 @@
                 <executions>
 
                     <execution>
-                        <id>install-webcat-jar</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <file>${basedir}/lib/webcat-0.1-swf.jar</file>
-                            <groupId>net.yacy.extlib</groupId>
-                            <artifactId>webcat</artifactId>
-                            <version>0.1</version>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-
-                    <execution>
                         <id>install-J7Zip-jar</id>
                         <phase>validate</phase>
                         <goals>
@@ -615,6 +599,11 @@
             <version>${jetty.version}</version>
         </dependency>
         <dependency>
+            <groupId>pt.tumba</groupId>
+            <artifactId>webcat-swf</artifactId>
+            <version>0.1</version>
+        </dependency>        
+        <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
             <version>0.1.3</version>
@@ -636,11 +625,6 @@
             <groupId>net.yacy.extlib</groupId>
             <artifactId>J7Zip-modified</artifactId>
             <version>1.02</version>
-        </dependency>
-        <dependency>
-            <groupId>net.yacy.extlib</groupId>
-            <artifactId>webcat</artifactId>
-            <version>0.1</version>
         </dependency>
     </dependencies>
 </project>
