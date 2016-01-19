@@ -1069,6 +1069,7 @@ public final class Switchboard extends serverSwitch {
             10000);
 
         this.initRemoteCrawler(this.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+        this.initAutocrawl(this.getConfigBool(SwitchboardConstants.AUTOCRAWL, false));
 
         deployThread(
             SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL,
@@ -1535,6 +1536,37 @@ public final class Switchboard extends serverSwitch {
             }
             rcl.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, 1000));
             rcl.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, 10000));
+        }
+    }
+    
+    /**
+     * Initialise the Autocrawl thread
+     * @param activate true=enable, false=disable
+     */
+    public void initAutocrawl(final boolean activate) {
+        this.setConfig(SwitchboardConstants.AUTOCRAWL, activate);
+        if (activate) {
+            BusyThread acr = getThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL);
+            if (acr == null) {
+                deployThread(
+                        SwitchboardConstants.CRAWLJOB_AUTOCRAWL,
+                        "Autocrawl",
+                        "Thread that selects and automatically adds crawling jobs to the local queue",
+                        null,
+                        new InstantBusyThread(
+                                this.crawlQueues,
+                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_START,
+                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_JOBCOUNT,
+                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_FREEMEM,
+                                10000,
+                                10000),
+                        10000);
+                
+                acr = getThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL);
+            }
+            
+            acr.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_BUSYSLEEP, 10000));
+            acr.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_IDLESLEEP, 10000));
         }
     }
 

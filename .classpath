@@ -16,7 +16,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
-	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
+	<classpathentry kind="lib" path="lib/webcat-swf-0.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/jsch-0.1.53.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>

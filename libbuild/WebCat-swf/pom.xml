@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>pt.tumba</groupId>
+    <artifactId>webcat-swf</artifactId>
+    <version>0.1</version>
+    <packaging>jar</packaging>
+    <name>WebCat swf parser</name>
+    <description>extract of swf parser from WebCat source package</description>
+    <parent>
+        <groupId>net.yacy</groupId>
+        <artifactId>extlib</artifactId>
+        <version>1.0</version>
+    </parent>    
+    <url>http://webcat.sourceforge.net/</url>
+    <licenses>
+        <license>
+            <name>BSD</name>
+            <url>http://opensource.org/licenses/bsd-license.php</url>
+        </license>
+    </licenses>
+    <scm>
+        <url>http://webcat.cvs.sourceforge.net/viewvc/webcat/</url>
+    </scm>
+    <developers>
+        <developer>
+            <name>Bruno Martins</name>
+        </developer>
+    </developers>    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+    </build>
+</project>
