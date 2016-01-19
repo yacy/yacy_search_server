@@ -5,8 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.InflaterInputStream;
 
 /**
  *  Input Stream Wrapper
@@ -15,23 +16,11 @@ import java.util.Vector;
  *@created    15 de Setembro de 2002
  */
 public class InStream {
-	/**
-	 *  Description of the Field
-	 */
-	protected InputStream in;
-	/**
-	 *  Description of the Field
-	 */
-	protected long bytesRead = 0L;
 
+	protected InputStream in;
+	protected long bytesRead = 0L;
 	//--Bit buffer..
-	/**
-	 *  Description of the Field
-	 */
 	protected int bitBuf;
-	/**
-	 *  Description of the Field
-	 */
 	protected int bitPos;
 
 	/**
@@ -54,42 +43,34 @@ public class InStream {
 		this(new ByteArrayInputStream(bytes));
 	}
 
-	/**
-	 *  Read a string from the input stream
-	 *
-	 *@return                  Description of the Return Value
-	 *@exception  IOException  Description of the Exception
-	 */
-	public byte[] readStringBytes() throws IOException {
-		synchBits();
+    /**
+     * Read a string from the input stream
+     *
+     * @return Description of the Return Value
+     * @exception IOException Description of the Exception
+     */
+    public byte[] readStringBytes() throws IOException {
+        synchBits();
 
-		Vector chars = new Vector();
-		byte[] aChar = new byte[1];
-		int num = 0;
+        List<Byte> chars = new ArrayList();
+        byte[] aChar = new byte[1];
+        int num = 0;
 
-		while ((num = in.read(aChar)) == 1) {
-			bytesRead++;
+        while ((num = in.read(aChar)) == 1) {
+            bytesRead++;
+            if (aChar[0] == 0) { //end of string
+                byte[] string = new byte[chars.size()];
+                int i = 0;
+                for (Object b : chars) {
+                    string[i++] = ((Byte) b).byteValue();
+                }
+                return string;
+            }
+            chars.add(new Byte(aChar[0]));
+        }
 
-			if (aChar[0] == 0) {
-				//end of string
-
-				byte[] string = new byte[chars.size()];
-
-				int i = 0;
-				for (Enumeration enumerator = chars.elements();
-					enumerator.hasMoreElements();
-					) {
-					string[i++] = ((Byte) enumerator.nextElement()).byteValue();
-				}
-
-				return string;
-			}
-
-			chars.addElement(new Byte(aChar[0]));
-		}
-
-		throw new IOException("Unterminated string - reached end of input before null char");
-	}
+        throw new IOException("Unterminated string - reached end of input before null char");
+    }
 
 	/**
 	 *  Read a null terminated string using the default character encoding
@@ -443,6 +424,14 @@ public class InStream {
 
 		return new DataInputStream(bin).readDouble();
 	}
+
+    /**
+     * Start reading compressed data - all further input is assumed to come from
+     * a zip compressed stream.
+     */
+    public void readCompressed() {
+        in = new InflaterInputStream(in);
+    }
 
 	/**
 	 *  Util to convert an unsigned byte to an unsigned int

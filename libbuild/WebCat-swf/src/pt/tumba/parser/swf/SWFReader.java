@@ -1,5 +1,6 @@
 package pt.tumba.parser.swf;
 
+import com.anotherbigidea.flash.SWFConstants;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,22 +13,11 @@ import java.io.InputStream;
  *@created    15 de Setembro de 2002
  */
 public class SWFReader {
-    /**
-     *  Description of the Field
-     */
-    protected SWFTags consumer;
-    /**
-     *  Description of the Field
-     */
-    protected InStream in;
-    /**
-     *  Description of the Field
-     */
-    protected InputStream inputstream;
 
-    /**
-     *  Description of the Field
-     */
+    protected SWFTags consumer;
+    protected InStream in;
+    protected InputStream inputstream;
+    protected boolean zipCompressed = false; // flag swf zip compressed
     public int size;
 
 
@@ -76,8 +66,9 @@ public class SWFReader {
 
 
     /**
-     *  Drive the consumer by reading a SWF File - including the header and all
-     *  tags
+     * Drive the consumer by reading a SWF File - including the header and all
+     * tags. Reading first the file signature (3 byte) and throws IOException if
+     * no match or file version not supported
      *
      *@exception  IOException  Description of the Exception
      */
@@ -127,18 +118,44 @@ public class SWFReader {
 
 
     /**
-     *  Only read the SWF file header
-     *
-     *@exception  IOException  Description of the Exception
+     * Read the SWF file header - including the signature.
      */
     public void readHeader() throws IOException {
         //--Verify File Signature
-        //if ((in.readUI8() != 0x46) || (in.readUI8() != 0x57) || (in.readUI8() != 0x53)) {
-//            throw new IOException("Invalid SWF File Signature");
-        //}
+        // magic bytes according to specification http://wwwimages.adobe.com/www.adobe.com/content/dam/Adobe/en/devnet/swf/pdf/swf-file-format-spec.pdf
+        // 0x46, 0x57, 0x53 (“FWS”) signature indicates an uncompressed SWF file
+        // 0x43, 0x57, 0x53 (“CWS”) indicates that the entire file after the first 8 bytes  was compressed by using the ZLIB
+        // 0x5a, 0x57, 0x53 (“ZWS”) indicates that the entire file after the first 8 bytes was compressed by using the LZMA
+        int magic = in.readUI8();
+        switch (magic) { // F=uncompressed, C= ZIP-compressed Z=LZMA-compressed
+            case 'C':
+                zipCompressed = true;
+                break;
+            case 'F':
+                break;
+            case 'Z':
+                throw new IOException("LZMA compressed SWF file not supported"); // lzma compressed not supported yet
+            default:
+                throw new IOException("Invalid SWF File Signature");
+        }
+
+        magic = in.readUI8(); // always 'W'
+        if (magic != 'W') {
+            throw new IOException("Invalid SWF File Signature");
+        }
+        magic = in.readUI8(); // always 'S'
+        if (magic != 'S') {
+            throw new IOException("Invalid SWF File Signature");
+        }
 
         int version = in.readUI8();
         long length = in.readUI32();
+
+        //may be compressed from this point onwards
+        if (zipCompressed) {
+            in.readCompressed();
+        }
+
         Rect frameSize = new Rect(in);
         int frameRate = in.readUI16() >> 8;
         int frameCount = in.readUI16();

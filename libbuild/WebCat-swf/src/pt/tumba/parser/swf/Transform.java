@@ -1,5 +1,6 @@
 package pt.tumba.parser.swf;
 
+import com.anotherbigidea.flash.SWFConstants;
 
 /**
  *  A Transformation matrix that has translation coordinates in pixels

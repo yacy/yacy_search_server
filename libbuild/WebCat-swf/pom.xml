@@ -24,7 +24,11 @@
     </scm>
     <developers>
         <developer>
-            <name>Bruno Martins</name>
+            <name>Bruno Martins</name> <!-- WebCat -->
+        </developer>
+        <developer>
+            <name>David N. Main</name> <!-- JavaSWF2 -->
+            <url>http://anotherbigidea.com/</url>
         </developer>
     </developers>    
     <properties>
@@ -35,4 +39,18 @@
     <build>
         <sourceDirectory>src</sourceDirectory>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.10</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.tukaani</groupId>
+            <artifactId>xz</artifactId>
+            <version>1.5</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 </project>
