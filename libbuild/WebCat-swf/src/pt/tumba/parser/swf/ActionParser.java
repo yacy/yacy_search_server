@@ -1,5 +1,6 @@
 package pt.tumba.parser.swf;
 
+import com.anotherbigidea.flash.SWFActionCodes;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -510,21 +511,9 @@ public class ActionParser implements SWFActionCodes {
          *  Description of the Field
          */
         public int code;
-        /**
-         *  Description of the Field
-         */
         public String label;
-        /**
-         *  Description of the Field
-         */
         public String jumpLabel;
-        /**
-         *  Description of the Field
-         */
         public byte[] data;
-        /**
-         *  Description of the Field
-         */
         public int blockDepth = 0;
 
 

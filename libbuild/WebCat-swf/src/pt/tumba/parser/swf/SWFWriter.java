@@ -1,5 +1,6 @@
 package pt.tumba.parser.swf;
 
+import com.anotherbigidea.flash.SWFConstants;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

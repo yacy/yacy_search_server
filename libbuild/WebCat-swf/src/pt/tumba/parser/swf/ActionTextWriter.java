@@ -1,5 +1,6 @@
 package pt.tumba.parser.swf;
 
+import com.anotherbigidea.flash.SWFActionCodes;
 import java.io.IOException;
 import java.io.PrintWriter;
 
