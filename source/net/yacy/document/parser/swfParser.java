@@ -30,15 +30,13 @@ package net.yacy.document.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.ContentScraper;
 import pt.tumba.parser.swf.SWF2HTML;
 
 public class swfParser extends AbstractParser implements Parser {
@@ -70,8 +68,10 @@ public class swfParser extends AbstractParser implements Parser {
         try {
             final SWF2HTML swf2html = new SWF2HTML();
             String contents = "";
+            ContentScraper htmlscraper=null;
             try {
             	contents = swf2html.convertSWFToHTML(source);
+                htmlscraper =  htmlParser.parseToScraper(location, charset, scraper, timezoneOffset, contents, 100);
             } catch (final NegativeArraySizeException e) {
                 throw new Parser.Failure(e.getMessage(), location);
             } catch (final IOException e) {
@@ -79,6 +79,7 @@ public class swfParser extends AbstractParser implements Parser {
             } catch (final Exception e) {
                 throw new Parser.Failure(e.getMessage(), location);
             }
+            /*
             String url = null;
             String urlnr = null;
             final String linebreak = System.getProperty("line.separator");
@@ -87,12 +88,6 @@ public class swfParser extends AbstractParser implements Parser {
             int urlStart = -1;
             int urlEnd = 0;
             int p0 = 0;
-
-            //getting rid of HTML-Tags
-            p0 = contents.indexOf("<html><body>",0);
-            contents = contents.substring(p0+12);
-            p0 = contents.indexOf("</body></html>",0);
-            contents = contents.substring(0,p0);
 
             //extracting urls
             while ((urlStart = contents.indexOf("http://",urlEnd)) >= 0){
@@ -104,31 +99,28 @@ public class swfParser extends AbstractParser implements Parser {
                 anchors.add(u);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
+            */
 
            // As the result of parsing this function must return a plasmaParserDocument object
             return new Document[]{new Document(
-                    location,     // url of the source document
-                    mimeType,     // the documents mime type
-                    StandardCharsets.UTF_8.name(),      // charset of the document text
-                    this,
-                    null,
-                    null,          //keywords
-                    singleList(((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
-                          replaceAll("\r\n"," ").
-                          replaceAll("\n"," ").
-                          replaceAll("\r"," ").
-                          replaceAll("\t"," ")), // title
-                    null, // TODO: AUTHOR
-                    null,
-                    null,        // an array of section headlines
-                    null,        // an abstract
-                    0.0d, 0.0d,
-                    contents,     // the parsed document text
-                    anchors,      // a map of extracted anchors
-                    null,
-                    null,
-                    false,
-                    new Date())};
+                location, // url of the source document
+                mimeType, // the documents mime type
+                StandardCharsets.UTF_8.name(), // charset of the document text
+                this,
+                htmlscraper.getContentLanguages(),
+                htmlscraper.getKeywords(),
+                htmlscraper.getTitles(),
+                htmlscraper.getAuthor(),
+                htmlscraper.getPublisher(),
+                null, // sections
+                htmlscraper.getDescriptions(),
+                htmlscraper.getLon(), htmlscraper.getLat(),
+                htmlscraper.getText(),
+                htmlscraper.getAnchors(),
+                htmlscraper.getRSS(),
+                null, // images
+                false,
+                htmlscraper.getDate())};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
