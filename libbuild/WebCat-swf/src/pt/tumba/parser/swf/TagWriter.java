@@ -4,9 +4,9 @@ import com.anotherbigidea.flash.SWFConstants;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.zip.DeflaterOutputStream;
 
 /**
@@ -17,30 +17,13 @@ import java.util.zip.DeflaterOutputStream;
  *@created    15 de Setembro de 2002
  */
 public class TagWriter implements SWFTagTypes, SWFConstants {
-    /**
-     *  Description of the Field
-     */
+
     protected SWFTags tags;
 
-    /**
-     *  Description of the Field
-     */
     protected OutStream out;
-    /**
-     *  Description of the Field
-     */
     protected ByteArrayOutputStream bytes;
-    /**
-     *  Description of the Field
-     */
     protected int tagType;
-    /**
-     *  Description of the Field
-     */
     protected boolean longTag;
-    /**
-     *  Description of the Field
-     */
     protected int version;
 
 
@@ -1233,7 +1216,7 @@ public class TagWriter implements SWFTagTypes, SWFConstants {
         /**
          *  Description of the Field
          */
-        protected List offsets = new Vector();
+        protected List offsets = new ArrayList();
         /**
          *  Description of the Field
          */
@@ -1370,7 +1353,7 @@ public class TagWriter implements SWFTagTypes, SWFConstants {
         /**
          *  Description of the Field
          */
-        protected List recs = new Vector();
+        protected List recs = new ArrayList();
         /**
          *  Description of the Field
          */
@@ -1696,11 +1679,11 @@ public class TagWriter implements SWFTagTypes, SWFConstants {
         /**
          *  Description of the Field
          */
-        protected List lineStyles = new Vector();
+        protected List lineStyles = new ArrayList();
         /**
          *  Description of the Field
          */
-        protected List fillStyles = new Vector();
+        protected List fillStyles = new ArrayList();
 
         /**
          *  Description of the Field
@@ -1760,7 +1743,7 @@ public class TagWriter implements SWFTagTypes, SWFConstants {
             this.glyphCount = glyphCount;
             bout = new ByteArrayOutputStream();
             out = new OutStream(bout);
-            glyphByteArrays = new Vector();
+            glyphByteArrays = new ArrayList();
 
             fill1Index = 1;
             lineIndex = 0;

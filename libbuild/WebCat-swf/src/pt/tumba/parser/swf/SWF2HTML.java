@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import pt.tumba.parser.DocFilter;
 
 /**
  *  Description of the Class
@@ -20,7 +19,7 @@ import pt.tumba.parser.DocFilter;
  *@author     bmartins
  *@created    22 de Agosto de 2002
  */
-public class SWF2HTML extends SWFTagTypesImpl implements DocFilter {
+public class SWF2HTML extends SWFTagTypesImpl {
 
     private int sizeCount = 0;
 
