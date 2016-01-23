@@ -120,6 +120,7 @@ public class TagParser implements SWFTags, SWFConstants {
                 parseFontInfo(in, length);
                 break;
             case TAG_DEFINEFONT2:
+            case TAG_DEFINEFONT3:
                 parseDefineFont2(in);
                 break;
             case TAG_DEFINETEXTFIELD:
@@ -199,7 +200,7 @@ public class TagParser implements SWFTags, SWFConstants {
                 parseDefineBits(in);
                 break;
             case TAG_JPEGTABLES:
-                parseDefineJPEGTables(in);
+                //parseDefineJPEGTables(in); // TODO: content length=0 (in==null) occurs for unknown reason - find out!
                 break;
             case TAG_DEFINEBITSJPEG3:
                 parseDefineBitsJPEG3(in);
