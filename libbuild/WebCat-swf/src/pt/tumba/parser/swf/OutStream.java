@@ -12,23 +12,12 @@ import java.io.OutputStream;
  *@created    15 de Setembro de 2002
  */
 public class OutStream {
-    /**
-     *  Description of the Field
-     */
+
     protected OutputStream out;
-    /**
-     *  Description of the Field
-     */
     protected long bytesWritten = 0L;
 
     //--Bit buffer..
-    /**
-     *  Description of the Field
-     */
     protected int bitBuf;
-    /**
-     *  Description of the Field
-     */
     protected int bitPos;
 
 
@@ -104,6 +93,7 @@ public class OutStream {
      *@exception  IOException  Description of the Exception
      */
     public void close() throws IOException {
+        flushBits();
         out.close();
     }
 
@@ -325,8 +315,7 @@ public class OutStream {
         if (string != null) {
             out.write(string);
         }
-        out.write(0);
-        //terminate string
+        out.write(0); //terminate string
 
         bytesWritten += string.length + 1;
     }
@@ -343,8 +332,7 @@ public class OutStream {
         if (string == null) {
             return 1;
         }
-        return string.length + 1;
-        //to include the terminating null
+        return string.length + 1; //to include the terminating null
     }
 
 
@@ -361,8 +349,7 @@ public class OutStream {
         }
         byte[] bytes = string.getBytes();
 
-        return bytes.length + 1;
-        //to include the terminating null
+        return bytes.length + 1; //to include the terminating null
     }
 
 

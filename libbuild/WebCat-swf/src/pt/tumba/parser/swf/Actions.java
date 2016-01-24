@@ -2,7 +2,7 @@ package pt.tumba.parser.swf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  *  A set of actions
@@ -11,13 +11,8 @@ import java.util.Vector;
  *@created    15 de Setembro de 2002
  */
 public class Actions extends ActionWriter {
-    /**
-     *  Description of the Field
-     */
+
     protected int conditions;
-    /**
-     *  Description of the Field
-     */
     protected byte[] bytes;
 
 
@@ -34,7 +29,7 @@ public class Actions extends ActionWriter {
         count = 0;
         bout = new ByteArrayOutputStream();
         out = new OutStream(bout);
-        pushValues = new Vector();
+        pushValues = new ArrayList();
         labels = null;
         jumps = null;
         skips = null;

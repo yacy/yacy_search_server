@@ -1,9 +1,9 @@
 package pt.tumba.parser.swf;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 /**
  *  Description of the Class
@@ -12,9 +12,7 @@ import java.util.Vector;
  *@created    15 de Setembro de 2002
  */
 public class ButtonRecord2 extends ButtonRecord {
-    /**
-     *  Description of the Field
-     */
+
     protected AlphaTransform transform;
 
 
@@ -46,11 +44,11 @@ public class ButtonRecord2 extends ButtonRecord {
      *@exception  IOException  Description of the Exception
      */
     public static List read(InStream in) throws IOException {
-        Vector records = new Vector();
+        List records = new ArrayList();
 
         int firstByte = 0;
         while ((firstByte = in.readUI8()) != 0) {
-            records.addElement(new ButtonRecord2(in, firstByte));
+            records.add(new ButtonRecord2(in, firstByte));
         }
 
         return records;

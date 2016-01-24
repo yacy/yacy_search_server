@@ -3,8 +3,7 @@ package pt.tumba.parser.swf;
 import com.anotherbigidea.flash.SWFActionCodes;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -550,7 +549,7 @@ public class ActionParser implements SWFActionCodes {
         List records = new ArrayList();
         List<ActionRecord> jumpers = new ArrayList();
         List<Integer> skippers = new ArrayList();
-        Hashtable offsetTable = new Hashtable();
+        HashMap offsetTable = new HashMap();
 
         Stack blockSizes = new Stack();
 

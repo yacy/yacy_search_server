@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Vector;
 
 /**
  *  A Flash Movie
@@ -19,63 +18,24 @@ import java.util.Vector;
  *@created    15 de Setembro de 2002
  */
 public class Movie implements TimeLine {
-    /**
-     *  Description of the Field
-     */
+
     protected int width;
-    /**
-     *  Description of the Field
-     */
     protected int height;
-    /**
-     *  Description of the Field
-     */
     protected int frameRate;
-    /**
-     *  Description of the Field
-     */
     protected Color backColor;
-    /**
-     *  Description of the Field
-     */
     protected int version;
-    /**
-     *  Description of the Field
-     */
     protected boolean isProtected;
 
-    /**
-     *  Description of the Field
-     */
-    protected Map importLibraries;
-    /**
-     *  Description of the Field
-     */
-    protected List exportedSymbols;
+    protected Map<String, List> importLibraries;
+    protected List<ExportedSymbol> exportedSymbols;
 
-    /**
-     *  Description of the Field
-     */
-    protected SortedMap frames = new TreeMap();
-    /**
-     *  Description of the Field
-     */
+    protected SortedMap<Integer, Frame> frames = new TreeMap();
     protected int frameCount = 0;
 
     //--Table of characters defined so far in the movie - while writing out
-    /**
-     *  Description of the Field
-     */
     protected Map definedSymbols = new HashMap();
 
-    /**
-     *  Description of the Field
-     */
-    protected int depth = 1;
-    //the next available depth
-    /**
-     *  Description of the Field
-     */
+    protected int depth = 1; //the next available depth
     protected int maxId = 1;
 
 
@@ -357,20 +317,16 @@ public class Movie implements TimeLine {
             return new ImportedSymbol[0];
         }
 
-        Vector imports = new Vector();
+        List imports = new ArrayList();
 
-        for (Iterator iter = importLibraries.values().iterator(); iter.hasNext(); ) {
-            List list = (List) iter.next();
-
+        for (List list : importLibraries.values()) {
             for (Iterator i2 = list.iterator(); i2.hasNext(); ) {
                 imports.add(i2.next());
             }
         }
 
         ImportedSymbol[] imps = new ImportedSymbol[imports.size()];
-        imports.copyInto(imps);
-
-        return imps;
+        return (ImportedSymbol[])imports.toArray(imps);
     }
 
 
@@ -383,7 +339,7 @@ public class Movie implements TimeLine {
      */
     public void exportSymbols(String[] exportNames, Symbol[] symbols) {
         if (exportedSymbols == null) {
-            exportedSymbols = new Vector();
+            exportedSymbols = new ArrayList();
         }
 
         for (int i = 0; i < exportNames.length && i < symbols.length; i++) {

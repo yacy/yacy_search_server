@@ -11,7 +11,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /**
  *  Base64 encoding/decoding utilities
@@ -31,9 +31,6 @@ public class Base64 {
 		}
 
     
-    /**
-     *  Description of the Field
-     */
     public final static char[] charset =
             {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
@@ -46,15 +43,9 @@ public class Base64 {
             '4', '5', '6', '7', '8', '9', '+', '/'
             };
 
-    /**
-     *  Description of the Field
-     */
     public final static char paddingChar = '=';
 
-    /**
-     *  Description of the Field
-     */
-    protected static Hashtable charLookup = new Hashtable();
+    protected static HashMap charLookup = new HashMap();
 
     static {
         //initialize the hashtable
