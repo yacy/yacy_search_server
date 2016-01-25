@@ -66,7 +66,7 @@ import net.yacy.kelondro.util.ISO639;
 public class ContentScraper extends AbstractScraper implements Scraper {
 
     private final static int MAX_TAGSIZE = 1024 * 1024;
-	public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
+    public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
 
     private final char degree = '\u00B0';
     private final char[] minuteCharsHTML = "&#039;".toCharArray();
@@ -1096,10 +1096,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.embeds.clear();
         this.images.clear();
         this.metas.clear();
+        this.hreflang.clear();
+        this.navigation.clear();
         this.titles.clear();
+        this.articles.clear();
+        this.startDates.clear();
+        this.endDates.clear();
         this.headlines = null;
         this.bold.clear();
         this.italic.clear();
+        this.underline.clear();
+        this.li.clear();
+        this.dt.clear();
+        this.dd.clear();
         this.content.clear();
         this.root = null;
     }
