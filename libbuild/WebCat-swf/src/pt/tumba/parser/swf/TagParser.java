@@ -5,9 +5,8 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.zip.InflaterInputStream;
 
 /**
@@ -17,9 +16,7 @@ import java.util.zip.InflaterInputStream;
  *@created    15 de Setembro de 2002
  */
 public class TagParser implements SWFTags, SWFConstants {
-    /**
-     *  Description of the Field
-     */
+
     protected SWFTagTypes tagtypes;
 
 
@@ -123,6 +120,7 @@ public class TagParser implements SWFTags, SWFConstants {
                 parseFontInfo(in, length);
                 break;
             case TAG_DEFINEFONT2:
+            case TAG_DEFINEFONT3:
                 parseDefineFont2(in);
                 break;
             case TAG_DEFINETEXTFIELD:
@@ -202,7 +200,7 @@ public class TagParser implements SWFTags, SWFConstants {
                 parseDefineBits(in);
                 break;
             case TAG_JPEGTABLES:
-                parseDefineJPEGTables(in);
+                //parseDefineJPEGTables(in); // TODO: content length=0 (in==null) occurs for unknown reason - find out!
                 break;
             case TAG_DEFINEBITSJPEG3:
                 parseDefineBitsJPEG3(in);
@@ -817,7 +815,7 @@ public class TagParser implements SWFTags, SWFConstants {
         String name = new String(in.read(nameLength));
 
         int glyphCount = in.readUI16();
-        Vector glyphs = new Vector();
+        List<byte[]> glyphs = new ArrayList();
 
         int[] offsets = new int[glyphCount + 1];
         boolean is32 = (flags & FONT2_32OFFSETS) != 0;
@@ -828,7 +826,7 @@ public class TagParser implements SWFTags, SWFConstants {
         for (int i = 1; i <= glyphCount; i++) {
             int glyphSize = offsets[i] - offsets[i - 1];
             byte[] glyphBytes = in.read(glyphSize);
-            glyphs.addElement(glyphBytes);
+            glyphs.add(glyphBytes);
         }
 
         boolean isWide = ((flags & FONT2_WIDECHARS) != 0) || (glyphCount > 256);
@@ -891,11 +889,8 @@ public class TagParser implements SWFTags, SWFConstants {
         if (glyphs.isEmpty()) {
             vectors.done();
         } else {
-            for (Enumeration enumerator = glyphs.elements(); enumerator.hasMoreElements(); ) {
-                byte[] glyphBytes = (byte[]) enumerator.nextElement();
-
+            for (byte[] glyphBytes : glyphs) {
                 InStream glyphIn = new InStream(glyphBytes);
-
                 parseShape(glyphIn, vectors, false, false);
             }
         }
@@ -1051,10 +1046,8 @@ public class TagParser implements SWFTags, SWFConstants {
      */
     protected void parsePlaceObject(InStream in, int length) throws IOException {
         tagtypes.tagPlaceObject(
-                in.readUI16(),
-        //char id
-                in.readUI16(),
-        //depth
+                in.readUI16(), //char id
+                in.readUI16(), //depth
                 new Matrix(in),
                 (in.getBytesRead() < length) ? new AlphaTransform(in) : null);
     }
@@ -1073,8 +1066,7 @@ public class TagParser implements SWFTags, SWFConstants {
             return;
         }
 
-        actions.start(0);
-        //no conditions
+        actions.start(0); //no conditions
         ActionParser parser = new ActionParser(actions);
         parser.parse(in);
         actions.done();

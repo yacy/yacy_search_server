@@ -3,11 +3,11 @@ package pt.tumba.parser.swf;
 import com.anotherbigidea.flash.SWFActionCodes;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
-import java.util.Vector;
 
 /**
  *  A writer that implements the SWFActions interface and writes action bytes to
@@ -17,53 +17,21 @@ import java.util.Vector;
  *@created    15 de Setembro de 2002
  */
 public class ActionWriter implements SWFActions, SWFActionCodes {
-    /**
-     *  Description of the Field
-     */
+
     protected TagWriter tagWriter;
-    /**
-     *  Description of the Field
-     */
     protected OutStream out;
-    /**
-     *  Description of the Field
-     */
     protected ByteArrayOutputStream bout;
-    /**
-     *  Description of the Field
-     */
     protected int count;
-    /**
-     *  Description of the Field
-     */
     protected int flashVersion;
 
-    /**
-     *  Description of the Field
-     */
     protected List pushValues;
 
-    /**
-     *  Description of the Field
-     */
-    protected Hashtable labels;
-    /**
-     *  Description of the Field
-     */
+    protected HashMap labels;
     protected List jumps;
-    /**
-     *  Description of the Field
-     */
     protected List skips;
 
     //--for fixing up functions and WITH blocks..
-    /**
-     *  Description of the Field
-     */
     protected List blocks;
-    /**
-     *  Description of the Field
-     */
     protected Stack blockStack;
 
 
@@ -106,7 +74,7 @@ public class ActionWriter implements SWFActions, SWFActionCodes {
         count = 0;
         bout = new ByteArrayOutputStream();
         out = new OutStream(bout);
-        pushValues = new Vector();
+        pushValues = new ArrayList();
         labels = null;
         jumps = null;
         skips = null;
@@ -315,7 +283,7 @@ public class ActionWriter implements SWFActions, SWFActionCodes {
         int offset = (int) out.getBytesWritten();
 
         if (labels == null) {
-            labels = new Hashtable();
+            labels = new HashMap();
         }
         labels.put(label, new int[]{offset, count + 1});
     }
@@ -452,7 +420,7 @@ public class ActionWriter implements SWFActions, SWFActionCodes {
 
         //--save jump info for later fix-up logic
         if (jumps == null) {
-            jumps = new Vector();
+            jumps = new ArrayList();
         }
         jumps.add(new Object[]{label, new Integer(here)});
     }
@@ -498,7 +466,7 @@ public class ActionWriter implements SWFActions, SWFActionCodes {
 
         //--save skip info for later fix-up logic
         if (skips == null) {
-            skips = new Vector();
+            skips = new ArrayList();
         }
         skips.add(new Object[]{jumpLabel, new int[]{count, here}});
     }
@@ -520,7 +488,7 @@ public class ActionWriter implements SWFActions, SWFActionCodes {
 
         //--save skip info for later fix-up logic
         if (skips == null) {
-            skips = new Vector();
+            skips = new ArrayList();
         }
         skips.add(new Object[]{jumpLabel, new int[]{count, here}});
     }
@@ -1032,7 +1000,7 @@ public class ActionWriter implements SWFActions, SWFActionCodes {
         int[] blockInfo = (int[]) blockStack.pop();
 
         if (blocks == null) {
-            blocks = new Vector();
+            blocks = new ArrayList();
         }
 
         int offset = blockInfo[0];

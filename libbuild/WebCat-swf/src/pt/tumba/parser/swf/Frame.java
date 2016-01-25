@@ -1,9 +1,8 @@
 package pt.tumba.parser.swf;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  *  A Movie or Movie Clip frame
@@ -12,29 +11,12 @@ import java.util.Vector;
  *@created    15 de Setembro de 2002
  */
 public class Frame {
-	/**
-	 *  Description of the Field
-	 */
+
 	protected int frameNumber;
-	/**
-	 *  Description of the Field
-	 */
 	protected String label;
-	/**
-	 *  Description of the Field
-	 */
-	protected List placements = new Vector();
-	/**
-	 *  Description of the Field
-	 */
+	protected List<Placement> placements = new ArrayList();
 	protected boolean stop;
-	/**
-	 *  Description of the Field
-	 */
 	protected TimeLine timeline;
-	/**
-	 *  Description of the Field
-	 */
 	protected Actions actions;
 
 	/**
@@ -402,19 +384,15 @@ public class Frame {
 	 *@param  definitionWriter  Description of the Parameter
 	 *@exception  IOException   Description of the Exception
 	 */
-	protected void flushDefinitions(
-		Movie movie,
-		SWFTagTypes timelineWriter,
-		SWFTagTypes definitionWriter)
-		throws IOException {
-		for (Iterator enumerator = placements.iterator();
-			enumerator.hasNext();
-			) {
-			Placement placement = (Placement) enumerator.next();
-
-			placement.flushDefinitions(movie, timelineWriter, definitionWriter);
-		}
-	}
+        protected void flushDefinitions(
+                Movie movie,
+                SWFTagTypes timelineWriter,
+                SWFTagTypes definitionWriter)
+                throws IOException {
+            for (Placement placement : placements) {
+                placement.flushDefinitions(movie, timelineWriter, definitionWriter);
+            }
+        }
 
 	/**
 	 *  Write the frame
@@ -424,38 +402,34 @@ public class Frame {
 	 *@param  timelineTagWriter  Description of the Parameter
 	 *@exception  IOException    Description of the Exception
 	 */
-	protected void write(
-		Movie movie,
-		SWFTagTypes movieTagWriter,
-		SWFTagTypes timelineTagWriter)
-		throws IOException {
-		if (actions != null) {
-			SWFActions acts = timelineTagWriter.tagDoAction();
-			acts.start(0);
-			acts.blob(actions.bytes);
-			acts.done();
-		}
+        protected void write(
+                Movie movie,
+                SWFTagTypes movieTagWriter,
+                SWFTagTypes timelineTagWriter)
+                throws IOException {
+            if (actions != null) {
+                SWFActions acts = timelineTagWriter.tagDoAction();
+                acts.start(0);
+                acts.blob(actions.bytes);
+                acts.done();
+            }
 
-		if (stop) {
-			SWFActions actions = timelineTagWriter.tagDoAction();
+            if (stop) {
+                SWFActions actions = timelineTagWriter.tagDoAction();
 
-			actions.start(0);
-			actions.stop();
-			actions.end();
-			actions.done();
-		}
+                actions.start(0);
+                actions.stop();
+                actions.end();
+                actions.done();
+            }
 
-		for (Iterator enumumerator = placements.iterator();
-			enumumerator.hasNext();
-			) {
-			Placement placement = (Placement) enumumerator.next();
+            for (Placement placement : placements) {
+                placement.write(movie, movieTagWriter, timelineTagWriter);
+            }
 
-			placement.write(movie, movieTagWriter, timelineTagWriter);
-		}
-
-		if (label != null) {
-			timelineTagWriter.tagFrameLabel(label);
-		}
-		timelineTagWriter.tagShowFrame();
-	}
+            if (label != null) {
+                timelineTagWriter.tagFrameLabel(label);
+            }
+            timelineTagWriter.tagShowFrame();
+        }
 }

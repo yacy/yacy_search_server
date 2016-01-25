@@ -2,12 +2,11 @@ package pt.tumba.parser.swf;
 
 import com.anotherbigidea.flash.SWFActionCodes;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
-import java.util.Vector;
 
 /**
  *  Parse action bytes and drive a SWFActions interface
@@ -16,13 +15,8 @@ import java.util.Vector;
  *@created    15 de Setembro de 2002
  */
 public class ActionParser implements SWFActionCodes {
-    /**
-     *  Description of the Field
-     */
+
     protected SWFActions actions;
-    /**
-     *  Description of the Field
-     */
     protected int blockDepth = 0;
 
 
@@ -552,10 +546,10 @@ public class ActionParser implements SWFActionCodes {
      *@exception  IOException  Description of the Exception
      */
     protected List createRecords(InStream in) throws IOException {
-        Vector records = new Vector();
-        Vector jumpers = new Vector();
-        Vector skippers = new Vector();
-        Hashtable offsetTable = new Hashtable();
+        List records = new ArrayList();
+        List<ActionRecord> jumpers = new ArrayList();
+        List<Integer> skippers = new ArrayList();
+        HashMap offsetTable = new HashMap();
 
         Stack blockSizes = new Stack();
 
@@ -573,7 +567,7 @@ public class ActionParser implements SWFActionCodes {
             //System.out.println( "size=" + dataLength ); System.out.flush();
 
             ActionRecord rec = new ActionRecord(offset, code, data);
-            records.addElement(rec);
+            records.add(rec);
             offsetTable.put(new Integer(offset), rec);
 
             if (!blockSizes.isEmpty()) {
@@ -616,15 +610,14 @@ public class ActionParser implements SWFActionCodes {
                 int blockSize = in2.readUI16();
                 blockSizes.push(new int[]{blockSize});
             } else if (code == WAIT_FOR_FRAME || code == WAIT_FOR_FRAME_2) {
-                skippers.addElement(new Integer(records.size() - 1));
+                skippers.add(new Integer(records.size() - 1));
             } else if (code == IF || code == JUMP) {
-                jumpers.addElement(rec);
+                jumpers.add(rec);
             }
         }
 
         //--Tie up the jumpers with the offsets
-        for (Enumeration enumumerator = jumpers.elements(); enumumerator.hasMoreElements(); ) {
-            ActionRecord rec = (ActionRecord) enumumerator.nextElement();
+        for (ActionRecord rec : jumpers) {
 
             InStream in2 = new InStream(rec.data);
             int jumpOffset = in2.readSI16();
@@ -644,10 +637,9 @@ public class ActionParser implements SWFActionCodes {
         }
 
         //--Tie up the skippers with labels
-        for (Enumeration enumumerator = skippers.elements(); enumumerator.hasMoreElements(); ) {
-            int idx = ((Integer) enumumerator.nextElement()).intValue();
+        for (Integer idx : skippers) {
 
-            ActionRecord rec = (ActionRecord) records.elementAt(idx);
+            ActionRecord rec = (ActionRecord) records.get(idx);
 
             InStream in2 = new InStream(rec.data);
 
@@ -659,7 +651,7 @@ public class ActionParser implements SWFActionCodes {
             int skipIndex = idx + skip + 1;
 
             if (skipIndex < records.size()) {
-                ActionRecord target = (ActionRecord) records.elementAt(skipIndex);
+                ActionRecord target = (ActionRecord) records.get(skipIndex);
 
                 if (target.label == null) {
                     target.label = rec.jumpLabel = "label" + (labelIndex++);

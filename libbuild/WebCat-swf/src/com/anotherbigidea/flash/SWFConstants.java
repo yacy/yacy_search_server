@@ -56,28 +56,36 @@ public interface SWFConstants
     public static final int TAG_DEFINEFONTINFO       = 13;
     public static final int TAG_DEFINESOUND          = 14; 
     public static final int TAG_STARTSOUND           = 15;
-    //???    public static final int TAG_DEFINEBUTTONSOUND    = 17;
+    //???
+    public static final int TAG_DEFINEBUTTONSOUND    = 17;
     public static final int TAG_SOUNDSTREAMHEAD      = 18;
     public static final int TAG_SOUNDSTREAMBLOCK     = 19;
     public static final int TAG_DEFINEBITSLOSSLESS   = 20;  
     public static final int TAG_DEFINEBITSJPEG2      = 21;  
     public static final int TAG_DEFINESHAPE2         = 22;
     public static final int TAG_DEFINEBUTTONCXFORM   = 23;
-    public static final int TAG_PROTECT              = 24;      //???
-    public static final int TAG_PLACEOBJECT2         = 26;      //???
-    public static final int TAG_REMOVEOBJECT2        = 28;      //???
+    public static final int TAG_PROTECT              = 24;  
+    //???
+    public static final int TAG_PLACEOBJECT2         = 26;  
+    //???
+    public static final int TAG_REMOVEOBJECT2        = 28;  
+    //???
     public static final int TAG_DEFINESHAPE3         = 32;  
     public static final int TAG_DEFINETEXT2          = 33;  
     public static final int TAG_DEFINEBUTTON2        = 34;  
     public static final int TAG_DEFINEBITSJPEG3      = 35;  
-    public static final int TAG_DEFINEBITSLOSSLESS2  = 36;      public static final int TAG_DEFINETEXTFIELD      = 37;  
+    public static final int TAG_DEFINEBITSLOSSLESS2  = 36;  
+    public static final int TAG_DEFINETEXTFIELD      = 37;  
     public static final int TAG_DEFINEQUICKTIMEMOVIE = 38;
     public static final int TAG_DEFINESPRITE         = 39;  
-    public static final int TAG_NAMECHARACTER        = 40;      public static final int TAG_SERIALNUMBER         = 41;  
+    public static final int TAG_NAMECHARACTER        = 40;  
+    public static final int TAG_SERIALNUMBER         = 41;  
     public static final int TAG_GENERATOR_TEXT       = 42;  
-    public static final int TAG_FRAMELABEL           = 43;      //???
+    public static final int TAG_FRAMELABEL           = 43;  
+    //???
     public static final int TAG_SOUNDSTREAMHEAD2     = 45;  
-    public static final int TAG_DEFINEMORPHSHAPE     = 46;      //???
+    public static final int TAG_DEFINEMORPHSHAPE     = 46;  
+    //???
     public static final int TAG_DEFINEFONT2          = 48;  
     public static final int TAG_TEMPLATECOMMAND      = 49;  
     //???
@@ -89,12 +97,38 @@ public interface SWFConstants
     public static final int TAG_EXPORT               = 56;  
     public static final int TAG_IMPORT               = 57;      
     public static final int TAG_ENABLEDEBUG          = 58;      
-	public static final int TAG_DOINITACTION         = 59;
-	//???
-	//???
-	public static final int TAG_DEFINEFONTINFO2      = 62;
-	//???
-	public static final int TAG_ENABLEDEBUGGER2      = 64;      
+    public static final int TAG_DOINITACTION         = 59;
+    public static final int TAG_DEFINEVIDEOSTREAM    = 60;
+    public static final int TAG_VIDEOFRAME           = 61;
+    public static final int TAG_DEFINEFONTINFO2      = 62;
+    //???
+    public static final int TAG_ENABLEDEBUGGER2      = 64;
+    public static final int TAG_SCRIPTLIMITS         = 65;
+    public static final int TAG_SETTABINDEX          = 66;
+
+    public static final int TAG_FILEATTRIBUTES       = 69;
+    public static final int TAG_PLACEOBJECT3         = 70;
+    public static final int TAG_IMPORTASSETS2        = 71;
+
+    public static final int TAG_DEFINEFONTALIGNZONES = 73;
+    public static final int TAG_CSMTEXTSETTINGS      = 74;
+    public static final int TAG_DEFINEFONT3          = 75;
+    public static final int TAG_SYMBOLCLASS          = 76;
+    public static final int TAG_METADATA             = 77;
+    public static final int TAG_DEFINESCALINGGRID    = 78;
+
+    public static final int TAG_DOABC                = 82;
+    public static final int TAG_DEFINESHAPE4         = 83;
+    public static final int TAG_DEFINEMORPHSHAPE2    = 84;
+
+    public static final int TAG_DEFINESCENEANDFRAMELABELDATA = 86;
+    public static final int TAG_DEFINEBINARYDATA     = 87;
+    public static final int TAG_DEFINEFONTNAME       = 88;
+    public static final int TAG_STARTSOUND2          = 89;
+    public static final int TAG_DEFINEBITSJPEG4      = 90;
+    public static final int TAG_DEFINEFONT4          = 91;
+
+    public static final int TAG_ENABLETELEMETRY      = 93;
     
     //--Fill Types
     public static final int FILL_SOLID           = 0x00;
@@ -179,8 +213,8 @@ public interface SWFConstants
     public static final int SOUND_FORMAT_RAW              = 0;
     public static final int SOUND_FORMAT_ADPCM            = 1;
     public static final int SOUND_FORMAT_MP3              = 2;
-	public static final int SOUND_FORMAT_RAW_LITTLEENDIAN = 3;
-	public static final int SOUND_FORMAT_NELLYMOSER       = 6;
+    public static final int SOUND_FORMAT_RAW_LITTLEENDIAN = 3;
+    public static final int SOUND_FORMAT_NELLYMOSER       = 6;
 	            
     public static final int SOUND_FREQ_5_5KHZ = 0;  //5.5 kHz
     public static final int SOUND_FREQ_11KHZ  = 1;
@@ -188,18 +222,18 @@ public interface SWFConstants
     public static final int SOUND_FREQ_44KHZ  = 3;         
     
     //--Language Codes for DefineFontInfo2       
-	public static final int LANGUAGE_CODE_NONE                = 0;         
-	public static final int LANGUAGE_CODE_LATIN               = 1;         
-	public static final int LANGUAGE_CODE_JAPANESE            = 2;         
-	public static final int LANGUAGE_CODE_KOREAN              = 3;         
-	public static final int LANGUAGE_CODE_SIMPLIFIED_CHINESE  = 4;         
-	public static final int LANGUAGE_CODE_TRADITIONAL_CHINESE = 5;         
+    public static final int LANGUAGE_CODE_NONE                = 0;
+    public static final int LANGUAGE_CODE_LATIN               = 1;
+    public static final int LANGUAGE_CODE_JAPANESE            = 2;
+    public static final int LANGUAGE_CODE_KOREAN              = 3;
+    public static final int LANGUAGE_CODE_SIMPLIFIED_CHINESE  = 4;
+    public static final int LANGUAGE_CODE_TRADITIONAL_CHINESE = 5;
 	
-	//--String Encodings
-	public static final String STRING_ENCODING_PRE_MX = "US-ASCII";
-	public static final String STRING_ENCODING_MX     = "UTF-8";
+    //--String Encodings
+    public static final String STRING_ENCODING_PRE_MX = "US-ASCII";
+    public static final String STRING_ENCODING_MX     = "UTF-8";
 	
-	//--MX Version number
-	public static final int FLASH_MX_VERSION = 6;         
+    //--MX Version number
+    public static final int FLASH_MX_VERSION = 6;
 	
 }
