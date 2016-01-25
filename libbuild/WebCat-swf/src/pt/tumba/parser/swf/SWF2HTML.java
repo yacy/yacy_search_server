@@ -1,5 +1,10 @@
 package pt.tumba.parser.swf;
 
+import com.adobe.xmp.XMPConst;
+import com.adobe.xmp.XMPException;
+import com.adobe.xmp.XMPMeta;
+import com.adobe.xmp.XMPMetaFactory;
+import com.adobe.xmp.properties.XMPProperty;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,15 +39,9 @@ public class SWF2HTML extends SWFTagTypesImpl {
     }
 
 
-    /**
-     *  Description of the Field
-     */
     protected Map fontCodes = new HashMap();
-
-    /**
-     *  Description of the Field
-     */
-    protected PrintWriter output;
+    protected String headerstr ="";
+    protected PrintWriter output; // body of html output (containing all text)
 
     //private HTMLParser aux;
 
@@ -159,6 +158,65 @@ public class SWF2HTML extends SWFTagTypesImpl {
         return new TextDumper();
     }
 
+    /**
+     * Parse and interprete Metadata string (xmp rdf format) and create a
+     * html header tags for the html output
+     *
+     * @param xml Metadata
+     * @throws IOException
+     */
+    @Override
+    public void tagMetaData(String xml) throws IOException {
+
+        try {
+            XMPMeta xmpmeta = XMPMetaFactory.parseFromString(xml);
+            XMPProperty xp = xmpmeta.getProperty(XMPConst.NS_DC, "title");
+            if (xp != null) {
+                headerstr = "<title>" + xp.getValue() + "</title>";
+            }
+
+            xp = xmpmeta.getProperty(XMPConst.NS_DC, "creator");
+            if (xp != null) {
+                headerstr += "<meta name=\"author\" content=\"" + xp.getValue() + "\">";
+            }
+
+            xp = xmpmeta.getProperty(XMPConst.NS_DC, "description");
+            if (xp != null) {
+                headerstr += "<meta name=\"description\" content=\"" + xp.getValue() + "\">";
+            }
+            xp = xmpmeta.getProperty(XMPConst.NS_DC, "subject");
+            if (xp != null) {
+                headerstr += "<meta name=\"keywords\" content=\"" + xp.getValue() + "\">";
+            }
+
+            // get a date (modified , created)
+            xp = xmpmeta.getProperty(XMPConst.NS_XMP, "ModifyDate");
+            if (xp != null) {
+                headerstr += "<meta name=\"date\" content=\"" + xp.getValue() + "\">";
+            } else {
+                xp = xmpmeta.getProperty(XMPConst.NS_XMP, "CreateDate");
+                if (xp != null) {
+                    headerstr += "<meta name=\"date\" content=\"" + xp.getValue() + "\">";
+                } else {
+                    xp = xmpmeta.getProperty(XMPConst.NS_DC, "date");
+                    if (xp != null) {
+                        headerstr += "<meta name=\"date\" content=\"" + xp.getValue() + "\">";
+                    }
+                }
+            }
+
+            xp = xmpmeta.getProperty(XMPConst.NS_XMP, "CreatorTool");
+            if (xp != null) {
+                headerstr += "<meta name=\"generator\" content=\"" + xp.getValue() + "\">";
+            }
+
+            xp = xmpmeta.getProperty(XMPConst.NS_DC, "publisher");
+            if (xp != null) {
+                headerstr += "<meta name=\"publisher\" content=\"" + xp.getValue() + "\">";
+            }
+
+        } catch (XMPException ex) { }
+    }
 
     /**
      *  Description of the Class
@@ -167,13 +225,8 @@ public class SWF2HTML extends SWFTagTypesImpl {
      *@created    15 de Setembro de 2002
      */
     public class TextDumper implements SWFText {
-        /**
-         *  Description of the Field
-         */
+
         protected Integer fontId;
-        /**
-         *  Description of the Field
-         */
         protected boolean firstY = true;
 
 
@@ -285,23 +338,26 @@ public class SWF2HTML extends SWFTagTypesImpl {
 
 
     /**
-     *  Arguments are: 0. Name of input SWF
+     * Parses swf input and extracts text and wrap it as html
      *
-     *@param  in             Description of the Parameter
-     *@return                Description of the Return Value
-     *@exception  Exception  Description of the Exception
+     * @param in SWF inputstream
+     * @return html of text in swf
+     * @exception Exception Description of the Exception
      */
     public String convertSWFToHTML(InputStream in) throws Exception {
         StringWriter out1 = new StringWriter();
         output = new PrintWriter(out1);
-        output.println("<html><body>");
         TagParser parser = new TagParser(this);
         SWFReader reader = new SWFReader(parser, in);
         reader.readFile();
         in.close();
-        output.println("</body></html>");
         sizeCount = reader.size;
-        return out1.toString();
+        // generate html output string
+        final String ret = "<html>"
+                + (headerstr.isEmpty() ? "<body>" :  "<header>" + headerstr + "</header><body>")
+                + out1.toString()
+                + "</body></html>";
+        return ret;
     }
 
 

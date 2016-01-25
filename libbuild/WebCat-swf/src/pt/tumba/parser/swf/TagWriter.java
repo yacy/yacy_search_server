@@ -1203,6 +1203,12 @@ public class TagWriter implements SWFTagTypes, SWFConstants {
     }
 
 
+    @Override
+    public void tagMetaData (String xml) throws IOException {
+        startTag(TAG_METADATA, true);
+        out.writeString(xml);
+        completeTag();
+    }
     //-----------------------------------------------------------------------
 
     /**
