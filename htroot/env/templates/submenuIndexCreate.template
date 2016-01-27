@@ -17,6 +17,7 @@
       <li><a href="CrawlStartScanner_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Network Scanner</a></li>
       <li><a href="RemoteCrawl_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Remote Crawling</a></li>
       <li><a href="ProxyIndexingMonitor_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Scraping Proxy</a></li>
+      <li><a href="Autocrawl_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Autocrawl</a></li>
     </ul>
   </div>
   

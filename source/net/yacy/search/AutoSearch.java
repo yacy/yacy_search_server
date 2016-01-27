@@ -157,31 +157,33 @@ public class AutoSearch extends AbstractBusyThread {
      * @return true if new query from bookmark was added
      */
     private boolean checkBookmarkDB() {
-        int added = 0;
-        Iterator<Bookmark> it = Switchboard.getSwitchboard().bookmarksDB.getBookmarksIterator();
-        if (it != null) {
-            while (it.hasNext()) {
-                Bookmark bmk = it.next();
-                // get search bookmarks only
-                if (bmk.getFoldersString().startsWith("/search")) {
-                    // take only new created or edited bookmarks
-                    if (bmk.getTimeStamp() >= this.lastInitTime) {
-                        final String query = bmk.getQuery();
-                        if (query != null && !query.isEmpty()) {
-                            {
-                                querystack.add(query);
-                                added++;
-                                ConcurrentLog.info(AutoSearch.class.getName(), "add query from Bookmarks: query=" + query);
+        if (Switchboard.getSwitchboard().bookmarksDB != null) {
+            int added = 0;
+            Iterator<Bookmark> it = Switchboard.getSwitchboard().bookmarksDB.getBookmarksIterator();
+            if (it != null) {
+                while (it.hasNext()) {
+                    Bookmark bmk = it.next();
+                    // get search bookmarks only
+                    if (bmk.getFoldersString().startsWith("/search")) {
+                        // take only new created or edited bookmarks
+                        if (bmk.getTimeStamp() >= this.lastInitTime) {
+                            final String query = bmk.getQuery();
+                            if (query != null && !query.isEmpty()) {
+                                {
+                                    querystack.add(query);
+                                    added++;
+                                    ConcurrentLog.info(AutoSearch.class.getName(), "add query from Bookmarks: query=" + query);
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        if (added > 0) {
-            this.lastInitTime = System.currentTimeMillis();
-            saveasPropFile();
-            return true;
+            if (added > 0) {
+                this.lastInitTime = System.currentTimeMillis();
+                saveasPropFile();
+                return true;
+            }
         }
         return false;
     }
@@ -243,7 +245,7 @@ public class AutoSearch extends AbstractBusyThread {
             // use remote defaults and ranking (to query their index right)
             solrQuery.set(CommonParams.Q, currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)"); // except this yacy special
             solrQuery.set("q.op", "AND"); // except ... no one word matches please
-            solrQuery.set(CommonParams.ROWS, "20");
+            solrQuery.set(CommonParams.ROWS, sb.getConfig(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER, "20"));
             this.setName("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + seed.hash + ")");
             try {
                 RemoteInstance instance = new RemoteInstance("http://" + seed.getPublicAddress(seed.getIP()) + "/solr/", null, null, 10000); // this is a 'patch configuration' which considers 'solr' as default collection
@@ -278,7 +280,7 @@ public class AutoSearch extends AbstractBusyThread {
                         rssSearchServiceURL,
                         currentQuery,
                         0,
-                        20,
+                        sb.getConfigInt(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER, 20),
                         CacheStrategy.IFFRESH,
                         false, // just local, as we ask others too
                         ClientIdentification.yacyInternetCrawlerAgent);
