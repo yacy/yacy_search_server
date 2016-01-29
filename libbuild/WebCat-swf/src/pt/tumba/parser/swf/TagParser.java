@@ -200,10 +200,13 @@ public class TagParser implements SWFTags, SWFConstants {
                 parseDefineBits(in);
                 break;
             case TAG_JPEGTABLES:
-                //parseDefineJPEGTables(in); // TODO: content length=0 (in==null) occurs for unknown reason - find out!
+                if (in != null) parseDefineJPEGTables(in); // TODO: content length=0 (in==null) occurs for unknown reason - find out!
                 break;
             case TAG_DEFINEBITSJPEG3:
                 parseDefineBitsJPEG3(in);
+                break;
+            case TAG_METADATA:
+                if (in != null) parseMetaData(in);
                 break;
             default:
                 //--Unknown Tag Type
@@ -366,6 +369,15 @@ public class TagParser implements SWFTags, SWFConstants {
         tagtypes.tagDefineBitsJPEG3(id, imageData, alphaData);
     }
 
+    /**
+     * parse METADATA tag (TAG_METADATA = 77)
+     * @param in
+     * @throws IOException
+     */
+    protected void parseMetaData(InStream in) throws IOException {
+        String xmlMetaData = in.readString();
+        tagtypes.tagMetaData(xmlMetaData);
+    }
 
     /**
      *  Description of the Method

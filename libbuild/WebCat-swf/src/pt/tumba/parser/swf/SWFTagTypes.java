@@ -425,4 +425,14 @@ public interface SWFTagTypes extends SWFSpriteTagTypes {
      *@exception  IOException  Description of the Exception
      */
     public void tagGeneratorFont(byte[] data) throws IOException;
+
+    /**
+     * Metadata such as title in xml format
+     * The format of the metadata is RDF that is compliant with Adobe’s
+     * Extensible Metadata Platform (XMP™) specification.
+     *
+     * @param data xml data as string
+     * @throws IOException
+     */
+    public void tagMetaData(String data) throws IOException;
 }

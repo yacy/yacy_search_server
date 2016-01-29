@@ -881,4 +881,20 @@ public class SWFTagTypesImpl implements SWFTagTypes {
                     colors, imageData);
         }
     }
+
+    /**
+     * SWFTagTypes METADATA
+     * Metadata such as title in xml format
+     * The format of the metadata is RDF that is compliant with Adobe’s
+     * Extensible Metadata Platform (XMP™) specification.
+     *
+     * @param data xml data as string
+     * @throws IOException
+     */
+    @Override
+    public void tagMetaData (String xml) throws IOException {
+        if (tags != null) {
+            tags.tagMetaData(xml);
+        }
+    }
 }
