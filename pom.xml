@@ -386,7 +386,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>fontbox</artifactId>
-            <version>1.8.10</version>
+            <version>1.8.11</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -451,7 +451,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>jempbox</artifactId>
-            <version>1.8.10</version>
+            <version>1.8.11</version>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -496,7 +496,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>1.8.10</version>
+            <version>1.8.11</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
