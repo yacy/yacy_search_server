@@ -28,6 +28,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.http.StatusLine;
+
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -142,14 +144,16 @@ public final class HTTPLoader {
 
 		// send request
 		client.GET(url, false);
-		final int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+		final StatusLine statusline = client.getHttpResponse().getStatusLine();
+		final int statusCode = statusline.getStatusCode();
 		final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
 		String requestURLString = request.url().toNormalform(true);
 
 		// check redirection
 		if (statusCode > 299 && statusCode < 310) {
-
-			final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, client, statusCode,
+			client.finish();
+			
+			final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, statusline,
 					responseHeader, requestURLString);
 
 			if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
@@ -182,7 +186,7 @@ public final class HTTPLoader {
 			// we don't want to follow redirects
 			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
 					FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
-			throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine()
+			throw new IOException("REJECTED UNWANTED REDIRECTION '" + statusline
 					+ "' for URL '" + requestURLString + "'$");
 		} else if (statusCode == 200 || statusCode == 203) {
 			// the transfer is ok
@@ -192,12 +196,14 @@ public final class HTTPLoader {
 			 */
 			long contentLength = client.getHttpResponse().getEntity().getContentLength();
 			if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (Response.CRAWLER_MAX_SIZE_TO_CACHE) && !url.isLocal()) {
-				byte[] content = HTTPClient.getByteArray(client.getHttpResponse().getEntity(), maxFileSize);
-
+				byte[] content = null;
 				try {
+					content = HTTPClient.getByteArray(client.getHttpResponse().getEntity(), maxFileSize);
 					Cache.store(url, responseHeader, content);
 				} catch (final IOException e) {
 					this.log.warn("cannot write " + url + " to Cache (3): " + e.getMessage(), e);
+				} finally {
+					client.finish();
 				}
 
 				return new ByteArrayInputStream(content);
@@ -209,10 +215,11 @@ public final class HTTPLoader {
 			 */
 			return new HTTPInputStream(client);
 		} else {
+			client.finish();
 			// if the response has not the right response type then reject file
 			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
 					FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
-			throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine()
+			throw new IOException("REJECTED WRONG STATUS TYPE '" + statusline
 					+ "' for URL '" + requestURLString + "'$");
 		}
 	}
@@ -223,7 +230,7 @@ public final class HTTPLoader {
 	 * @throws IOException when an error occured
 	 */
 	private DigestURL extractRedirectURL(final Request request, CrawlProfile profile, DigestURL url,
-			final HTTPClient client, final int statusCode, final ResponseHeader responseHeader, String requestURLString)
+			final StatusLine statusline, final ResponseHeader responseHeader, String requestURLString)
 					throws IOException {
 		// read redirection URL
 		String redirectionUrlString = responseHeader.get(HeaderFramework.LOCATION);
@@ -232,8 +239,8 @@ public final class HTTPLoader {
 		if (redirectionUrlString.isEmpty()) {
 			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
 					FailCategory.TEMPORARY_NETWORK_FAILURE,
-					"no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
-			throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine()
+					"no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusline.getStatusCode());
+			throw new IOException("REJECTED EMTPY REDIRECTION '" + statusline
 					+ "' for URL '" + requestURLString + "'$");
 		}
 
@@ -241,7 +248,7 @@ public final class HTTPLoader {
 		final DigestURL redirectionUrl = DigestURL.newURL(request.url(), redirectionUrlString);
 
 		// restart crawling with new url
-		this.log.info("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL "
+		this.log.info("CRAWLER Redirection detected ('" + statusline + "') for URL "
 				+ requestURLString);
 		this.log.info("CRAWLER ..Redirecting request to: " + redirectionUrl.toNormalform(false));
 
@@ -249,7 +256,7 @@ public final class HTTPLoader {
 
 		if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_RECORD_REDIRECTS, true)) {
 			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
-					FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusCode);
+					FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusline.getStatusCode());
 		}
 		return redirectionUrl;
 	}
@@ -335,7 +342,7 @@ public final class HTTPLoader {
         // check redirection
     	if (statusCode > 299 && statusCode < 310) {
 
-    	    final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, client, statusCode,
+    	    final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, client.getHttpResponse().getStatusLine(),
 					responseHeader, requestURLString);
 
     	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {

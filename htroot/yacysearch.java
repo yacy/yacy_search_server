@@ -220,14 +220,15 @@ public class yacysearch {
         
         // collect search attributes
 
-        int itemsPerPage =
-            Math.min(
-                (authenticated)
-                    ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()
-                        ? 100
-                        : 5000) : (snippetFetchStrategy != null
-                        && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000),
-                post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10))))); // SRU syntax with old property as alternative
+        // check an determine items per page (max of [100 or configured default]}
+        final int defaultItemsPerPage = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);
+        int itemsPerPage = post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", defaultItemsPerPage))); // requested or default // SRU syntax with old property as alternative
+        // whatever admin has set as default, that's always ok
+        if (itemsPerPage > defaultItemsPerPage && itemsPerPage > 100) { // if above hardcoded 100 limit restrict request (except default allows more)
+            // search option (index.html) offers up to 100 (that defines the lower limit available to request)
+            itemsPerPage = Math.max((snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000), defaultItemsPerPage);
+        }
+
         int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
 
         final boolean indexof = (post != null && post.get("indexof", "").equals("on"));
@@ -266,13 +267,6 @@ public class yacysearch {
 
         // find search domain
         final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
-
-        // patch until better search profiles are available
-        if (contentdom == ContentDomain.IMAGE && (itemsPerPage == 10 || itemsPerPage == 100)) {
-            itemsPerPage = 64;
-        } else if ( contentdom != ContentDomain.IMAGE && itemsPerPage > 50 && itemsPerPage < 100 ) {
-            itemsPerPage = 10;
-        }
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);

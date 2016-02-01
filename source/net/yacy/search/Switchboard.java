@@ -1069,6 +1069,7 @@ public final class Switchboard extends serverSwitch {
             10000);
 
         this.initRemoteCrawler(this.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+        this.initAutocrawl(this.getConfigBool(SwitchboardConstants.AUTOCRAWL, false));
 
         deployThread(
             SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL,
@@ -1485,7 +1486,9 @@ public final class Switchboard extends serverSwitch {
 
     /**
      * Initialisize and perform all settings to enable remote crawls
-     * (if remote crawl is not in use, save the resources)
+     * (if remote crawl is not in use, save the resources) If called with
+     * activate==false worker threads are closed and removed (to free resources)
+     *
      * @param activate true=enable, false=disable
      */
     public void initRemoteCrawler(final boolean activate) {
@@ -1535,6 +1538,40 @@ public final class Switchboard extends serverSwitch {
             }
             rcl.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, 1000));
             rcl.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, 10000));
+        } else { // activate==false, terminate and remove threads
+            terminateThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, true);
+            terminateThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, true);
+        }
+    }
+    
+    /**
+     * Initialise the Autocrawl thread
+     * @param activate true=enable, false=disable
+     */
+    public void initAutocrawl(final boolean activate) {
+        this.setConfig(SwitchboardConstants.AUTOCRAWL, activate);
+        if (activate) {
+            BusyThread acr = getThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL);
+            if (acr == null) {
+                deployThread(
+                        SwitchboardConstants.CRAWLJOB_AUTOCRAWL,
+                        "Autocrawl",
+                        "Thread that selects and automatically adds crawling jobs to the local queue",
+                        null,
+                        new InstantBusyThread(
+                                this.crawlQueues,
+                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_START,
+                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_JOBCOUNT,
+                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_FREEMEM,
+                                10000,
+                                10000),
+                        10000);
+                
+                acr = getThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL);
+            }
+            
+            acr.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_BUSYSLEEP, 10000));
+            acr.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_IDLESLEEP, 10000));
         }
     }
 
@@ -3399,6 +3436,10 @@ public final class Switchboard extends serverSwitch {
                 Switchboard.this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
             }
         }
+    }
+
+    public void initBookmarks(boolean b) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public class receiptSending implements Runnable

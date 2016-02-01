@@ -538,6 +538,17 @@ proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
 proxyURL.rewriteURLs=domainlist
 proxyURL.useforresults=false
 
+# Autocrawl configuration
+autocrawl=false
+autocrawl.index.text=true
+autocrawl.index.media=true
+autocrawl.ratio=50
+autocrawl.rows=100
+autocrawl.days=1
+autocrawl.query=*:*
+autocrawl.deep.depth=3
+autocrawl.shallow.depth=1
+
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to
 # assign a different crawling depth.
@@ -627,6 +638,10 @@ collection=user
 50_localcrawl_memprereq=25165824
 50_localcrawl_loadprereq=6.0
 50_localcrawl_isPaused=false
+55_autocrawl_idlesleep=10000
+55_autocrawl_busysleep=10000
+55_autocrawl_memprereq=25165824
+55_autocrawl_loadprereq=6.0
 60_remotecrawlloader_idlesleep=4000
 60_remotecrawlloader_busysleep=800
 60_remotecrawlloader_memprereq=12582912
@@ -813,7 +828,7 @@ search.audio = false
 search.video = false
 search.app = false
 
-# number of search results displayed by default
+# number of search results per page displayed by default
 search.items = 10
 
 # target for search results; this is the href target attribute inside every search result link

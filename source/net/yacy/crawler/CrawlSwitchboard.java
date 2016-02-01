@@ -58,7 +58,9 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 public final class CrawlSwitchboard {
-
+	
+	public static final String CRAWL_PROFILE_AUTOCRAWL_DEEP = "autocrawlDeep";
+	public static final String CRAWL_PROFILE_AUTOCRAWL_SHALLOW = "autocrawlShallow";
     public static final String CRAWL_PROFILE_PROXY = "proxy";
     public static final String CRAWL_PROFILE_REMOTE = "remote";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT = "snippetLocalText";
@@ -70,6 +72,8 @@ public final class CrawlSwitchboard {
 
     public static Set<String> DEFAULT_PROFILES = new HashSet<String>();
     static {
+    	DEFAULT_PROFILES.add(CRAWL_PROFILE_AUTOCRAWL_DEEP);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_AUTOCRAWL_SHALLOW);
         DEFAULT_PROFILES.add(CRAWL_PROFILE_PROXY);
         DEFAULT_PROFILES.add(CRAWL_PROFILE_REMOTE);
         DEFAULT_PROFILES.add(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
@@ -98,6 +102,7 @@ public final class CrawlSwitchboard {
     private final Map<String, RowHandleSet> profilesActiveCrawlsCounter;
     public CrawlProfile defaultProxyProfile, defaultRemoteProfile, defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public CrawlProfile defaultTextGreedyLearningProfile, defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile, defaultSurrogateProfile;
+    public CrawlProfile defaultAutocrawlDeepProfile, defaultAutocrawlShallowProfile;
     private Map<String, CrawlProfile> defaultPushProfiles; // for each collection one profile
     private final File queuesRoot;
     private Switchboard switchboard;
@@ -268,8 +273,75 @@ public final class CrawlSwitchboard {
     
     
     private void initActiveCrawlProfiles() {
-        // generate new default entry for proxy crawling
     	final Switchboard sb = Switchboard.getSwitchboard();
+    	
+    	// generate new default entry for deep auto crawl
+    	this.defaultAutocrawlDeepProfile =
+    	    new CrawlProfile(
+    	        CRAWL_PROFILE_AUTOCRAWL_DEEP,
+    	        CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, "3")),
+                true,
+                CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
+                -1,
+                true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
+                sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true),
+                sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, true),
+                false,
+                false,
+                -1,
+                false, true, CrawlProfile.MATCH_NEVER_STRING,
+                CacheStrategy.NOCACHE,
+                "robot_" + CRAWL_PROFILE_AUTOCRAWL_DEEP,
+                ClientIdentification.yacyInternetCrawlerAgentName,
+                null,
+                0);
+    	this.profilesActiveCrawls.put(
+    	    UTF8.getBytes(this.defaultAutocrawlDeepProfile.handle()),
+    	    this.defaultAutocrawlDeepProfile);
+    	// generate new default entry for shallow auto crawl
+        this.defaultAutocrawlShallowProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_AUTOCRAWL_SHALLOW,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_SHALLOW_DEPTH, "1")),
+                true,
+                CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
+                -1,
+                true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
+                sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true),
+                sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, true),
+                false,
+                false,
+                -1,
+                false, true, CrawlProfile.MATCH_NEVER_STRING,
+                CacheStrategy.NOCACHE,
+                "robot_" + CRAWL_PROFILE_AUTOCRAWL_SHALLOW,
+                ClientIdentification.yacyInternetCrawlerAgentName,
+                null,
+                0);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultAutocrawlShallowProfile.handle()),
+            this.defaultAutocrawlShallowProfile);
+        // generate new default entry for proxy crawling
         this.defaultProxyProfile =
             new CrawlProfile(
                 CRAWL_PROFILE_PROXY,

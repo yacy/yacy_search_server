@@ -48,10 +48,10 @@ Showing #[num]# requests.==Gezeigt werden #[num]# Anfragen.
 >Path<==>Pfad<
 Date<==Datum<
 Access Count During==Erfasster Zugriff während der
-last Second==letzten Sekunde
-last Minute==letzten Minute
+last Second==letzte Sekunde
+last Minute==letzte Minute
 last 10 Minutes==letzten 10 Minuten
-last Hour==letzten Stunde
+last Hour==letzte Stunde
 The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf geschützte Seiten erkannt
 #>Host==>Host
 Access Times==Zugriffszeiten
@@ -1786,6 +1786,39 @@ There are #[num]# entries in the rejected-queue:==Es befinden sich #[num]# Eintr
 Fail-Reason==Fehlermeldung
 #-----------------------------
 
+#File: IndexExport_p.html
+#---------------------------
+#URL Database Administration==URL Database Administration
+#Index Export
+The local index currently contains #[ucount]# documents.==Der lokale Index enthält im Moment #[ucount]# Dokumente.
+Loaded URL Export==Export geladener URLs
+Export File==Export-Datei
+#URL Filter
+#>query<
+#Export Format
+Full Data Records:==Komplette Datensätze
+(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)==(vollständige Solr Daten, ein Dokument pro Zeile in einer grossen xml Datei, kann mit Kommandozeilentools bearbeitet werden, kann aus DATA/SURROGATE/in/ importiert werden)
+#> XML (RSS)<
+Full URL List:==Liste mit vollständiger URL:
+Plain Text List (URLs only)==Einfache Text Liste (nur URLs)
+HTML (URLs with title)==HTML (URLs mit Titel)
+Only Domain:==Liste mit nur Domainnamen:
+Plain Text List (domains only)==Einfache Text Liste (nur Domains)
+HTML (domains as URLs, no title)==HTML (Domains als URLs, kein Titel)
+>Only Text:==>Nur Text:
+Fulltext of Search Index Text==Voller Text der Indexdokumente
+#"Export"
+Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# Dokumente bisher
+Finished export of #[urlcount]# Documents to file==Export beendet und #[urlcount]# Dokumente gespeichert in Datei
+Import this file by moving it to DATA/SURROGATES/in==Verschiebe diese Datei nach DATA/SURROGATES/in um sie zu importieren
+Export to file #[exportfile]# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
+Dump and Restore of Solr Index==Dump und Wiederherstellen des Solr Index
+"Create Dump"=="Erstelle Dump"
+Dump File==Dump Datei
+"Restore Dump"=="Stelle Dump wieder her"
+Stored a solr dump to file==Solr Dump gespeichert in Datei
+#-----------------------------
+
 #File: ContentIntegrationPHPBB3_p.html
 #---------------------------
 Content Integration: Retrieval from phpBB3 Databases==Integration von Inhalt: Import aus phpBB3 Datenbanken
@@ -2720,7 +2753,9 @@ To find appropriate fields for this query, see the ==Um passende Felder für die
 "Set Boost Query"=="Setze Boost Abfrage"
 #"Re-Set to default"=="Reset auf Standardwerte"
 #>Solr Boosts<==>Solr Boosts<
-This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
+This is the set of searchable fields (see==Dies ist der Satz der durchsuchbaren Felder (siehe
+Entries without a boost value are not searched.==Einträge ohne Boost Werte werden nicht durchsucht.
+Boost values make hits inside the corresponding field more important.==Boost Werte erhöhen die Wichtigkeit der Treffer im entsprechdem Feld.
 field not in local index (boost has no effect)==Feld ist nicht im lokalen Index (Boost hat keinen Effekt)
 "Set Field Boosts"=="Setze Feld Boosts"
 #"Re-Set to default"=="Reset auf Standardwerte"
@@ -3710,6 +3745,8 @@ Pictures==Bilder
 #File: yacysearchtrailer.html
 #---------------------------
 Show search results for "#[query]#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
+>Documents==>Text
+>Images==>Bilder
 >Protocol==>Netzdienste
 >Provider==>Anbieter
 >Filetype==>Dateityp
@@ -3897,6 +3934,13 @@ Scheduler and Profile Editor<==Scheduler und Profil Editor<
 #robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Load Web Pages==Webseiten laden
+Site Crawling==Webseiten Crawlen
+Parser Configuration==Parser Konfiguration
+#-----------------------------
+
 #File: env/templates/submenuDesign.template
 #-----------------------------
 >Appearance==>Erscheinungsbild
@@ -3921,42 +3965,15 @@ Parser Configuration==Parser Konfiguration
 
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
-#Web Crawler Control==Web Crawler Steuerung
-#Start a Web Crawl==Starte einen Web Crawl
-#Crawl Start==Crawl starten
-#Crawl Profile Editor==Crawl Profil Editor
-#Crawler Queues==Crawler Puffer
-#Indexing<==Indexierung<
-#Loader<==Lader<
-#URLs to be processed==zu verarbeitende URLs
-#Processing Queues==Warteschlangen
-#Local<==Lokal<
-#Global<==Global<
-#Remote<==Remote<
-#Overhang<==Überhang<
-#Media Crawl Queues==Medien Crawl-Puffer
-#>Images==>Bilder
-#>Movies==>Filme
-#>Music==>Musik
-#--- New menu items ---
-Index Creation==Indexerzeugung
-#Crawler/Spider<==Crawler/Spider<
-Full Site Crawl==Vollständiger Seiten Crawl
-Sitemap Loader==Sitemap Lader
-Crawl Start<br/>(Expert)==Crawl Start<br/>(Experte)
-Network<br/>Scanner==Netzwerk<br/>Scanner
-#>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
-Crawling of==Crawlen von
-#MediaWikis==MediaWikis
->phpBB3 Forums<==>phpBB3 Foren<
-Index Export/Import<==Content Importer<
+Advanced Crawler==Experten Crawler
+Crawl Start (Expert)==Crawl Start (Experte)
+Crawling of MediaWikis==Crawlen von MediaWikis
+Crawling of phpBB3 Forums==Crawlen von phpBB3 Foren
 Network Harvesting<==Netzwerk Harvesting<
-#Remote<br/>Crawling==Remote<br/>Crawling
-#Scraping<br/>Proxy==Scraping<br/>Proxy
-Database Reader<==Datenbank Leser<
-for phpBB3 Forums==für phpBB3 Foren
-Dump Reader for==Dump Leser für
-#MediaWiki dumps==MediaWiki dumps
+Network Scanner==Netzwerk Scanner
+Remote Crawling==Remote Crawling
+Scraping Proxy==Scraping Proxy
+#Autocrawl==Autocrawler
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template
@@ -3975,18 +3992,13 @@ Publication==Veröffentlichung
 File Hosting==Datei Freigabe
 #-----------------------------
 
-#File: env/templates/submenuSearchConfiguration.template
+#File: env/templates/submenuRanking.template
 #---------------------------
-Integrated Search Configuration==Integrierte Suchkonfiguration
-Generic Search Portal==Generisches Suchportal
-Search Page Layout==Suchseite Layout
->Appearance<==>Darstellung<
->Language<==>Sprache<
-User Profile==Benutzerprofil
->Heuristics<==>Heuristik<
+Ranking and Heuristics==Ranking und Heuristiken
 Solr Ranking Config==Solr Ranking Konfiguration
 RWI Ranking Config==RWI Ranking Konfiguration
-#-----------------------------
+>Heuristics<==>Heuristiken<
+#---------------------------
 
 #File: env/templates/submenuSearchIntegration.template
 #---------------------------
