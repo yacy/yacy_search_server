@@ -168,7 +168,7 @@ public class ChartPlotter extends RasterPlotter {
             }
             setColor(colorNaming);
             line(x - 3, y, x + 3, y, 100);
-            s1 = (s >= 1000000 && s % 10000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
+            s1 = (s >= 1000000 && s % 1000000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
             PrintTool.print(this, (left) ? this.leftborder - 4 : this.width - this.rightborder + 4, y, 0, s1, (left) ? 1 : -1, 80);
             y -= pixelperscale;
