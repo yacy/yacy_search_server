@@ -1486,7 +1486,9 @@ public final class Switchboard extends serverSwitch {
 
     /**
      * Initialisize and perform all settings to enable remote crawls
-     * (if remote crawl is not in use, save the resources)
+     * (if remote crawl is not in use, save the resources) If called with
+     * activate==false worker threads are closed and removed (to free resources)
+     *
      * @param activate true=enable, false=disable
      */
     public void initRemoteCrawler(final boolean activate) {
@@ -1536,6 +1538,9 @@ public final class Switchboard extends serverSwitch {
             }
             rcl.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, 1000));
             rcl.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, 10000));
+        } else { // activate==false, terminate and remove threads
+            terminateThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, true);
+            terminateThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, true);
         }
     }
     
@@ -3431,6 +3436,10 @@ public final class Switchboard extends serverSwitch {
                 Switchboard.this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
             }
         }
+    }
+
+    public void initBookmarks(boolean b) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public class receiptSending implements Runnable
