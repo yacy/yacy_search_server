@@ -20,6 +20,7 @@
 
 package net.yacy.document.parser.html;
 
+import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
 import java.io.File;
@@ -31,12 +32,16 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -52,6 +57,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.storage.SizeLimitedMap;
 import net.yacy.cora.storage.SizeLimitedSet;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
@@ -66,7 +72,7 @@ import net.yacy.kelondro.util.ISO639;
 public class ContentScraper extends AbstractScraper implements Scraper {
 
     private final static int MAX_TAGSIZE = 1024 * 1024;
-    public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
+	public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
 
     private final char degree = '\u00B0';
     private final char[] minuteCharsHTML = "&#039;".toCharArray();
@@ -194,10 +200,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private int breadcrumbs;
 
 
-    /**
-     * {@link MultiProtocolURL} to the favicon that belongs to the document
-     */
-    private MultiProtocolURL favicon;
+    /** links to icons that belongs to the document (mapped by absolute URL)*/
+    private final Map<DigestURL, IconEntry> icons;
 
     /**
      * The document root {@link MultiProtocolURL}
@@ -230,6 +234,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.css = new SizeLimitedMap<DigestURL, String>(maxLinks);
         this.anchors = new ArrayList<AnchorURL>();
         this.images = new ArrayList<ImageEntry>();
+        this.icons = new HashMap<>();
         this.embeds = new SizeLimitedMap<AnchorURL, EmbedEntry>(maxLinks);
         this.frames = new SizeLimitedSet<AnchorURL>(maxLinks);
         this.iframes = new SizeLimitedSet<AnchorURL>(maxLinks);
@@ -405,6 +410,69 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             }
         }
     }
+    
+	/**
+	 * Parses sizes icon link attribute. (see
+	 * http://www.w3.org/TR/html5/links.html#attr-link-sizes) Eventual
+	 * duplicates are removed.
+	 * 
+	 * @param sizesAttr
+	 *            sizes attribute string, may be null
+	 * @return a set of sizes eventually empty.
+	 */
+	public static Set<Dimension> parseSizes(String sizesAttr) {
+		Set<Dimension> sizes = new HashSet<Dimension>();
+		Set<String> tokens = parseSpaceSeparatedTokens(sizesAttr);
+		for (String token : tokens) {
+			/*
+			 * "any" keyword may be present, but doesn't have to produce a
+			 * dimension result
+			 */
+			if (token != null) {
+				Matcher matcher = IconEntry.SIZE_PATTERN.matcher(token);
+				if (matcher.matches()) {
+					/* With given pattern no NumberFormatException can occur */
+					sizes.add(new Dimension(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))));
+				}
+			}
+		}
+		return sizes;
+	}
+
+	/**
+	 * Parses a space separated tokens attribute value (see
+	 * http://www.w3.org/TR/html5/infrastructure.html#space-separated-tokens).
+	 * Eventual duplicates are removed.
+	 * 
+	 * @param attr
+	 *            attribute string, may be null
+	 * @return a set of tokens eventually empty
+	 */
+	public static Set<String> parseSpaceSeparatedTokens(String attr) {
+		Set<String> tokens = new HashSet<>();
+		/* Check attr string is not empty to avoid adding a single empty string
+		 * in result */
+		if (attr != null && !attr.trim().isEmpty()) {
+			String[] items = attr.trim().split(CommonPattern.SPACES.pattern());
+			Collections.addAll(tokens, items);
+		}
+		return tokens;
+	}
+    
+    /**
+     * Retain only icon relations (standard and non standard) from tokens .
+     * @param relTokens relationship tokens (parsed from a rel attribute)
+     * @return a Set of icon relations, eventually empty
+     */
+    public Set<String> retainIconRelations(Collection<String> relTokens) {
+    	HashSet<String> iconRels = new HashSet<>();
+    	for(String token : relTokens) {
+    		if(IconLinkRelations.isIconRel(token)) {
+    			iconRels.add(token.toLowerCase(Locale.ENGLISH));
+    		}
+    	}
+    	return iconRels;
+    }
 
     @Override
     public void scrapeTag0(Tag tag) {
@@ -473,14 +541,28 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (newLink != null) {
                 tag.opts.put("href", newLink.toNormalform(true));
                 String rel = tag.opts.getProperty("rel", EMPTY_STRING);
+                /* Rel attribute is supposed to be a set of space-separated tokens */
+                Set<String> relTokens = parseSpaceSeparatedTokens(rel);
+
                 final String linktitle = tag.opts.getProperty("title", EMPTY_STRING);
                 final String type = tag.opts.getProperty("type", EMPTY_STRING);
                 final String hreflang = tag.opts.getProperty("hreflang", EMPTY_STRING);
 
-                if (rel.equalsIgnoreCase("shortcut icon") || rel.equalsIgnoreCase("icon")) { // html5 -> rel="icon")
-                    final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
-                    this.images.add(ie);
-                    this.favicon = newLink;
+                Set<String> iconRels = retainIconRelations(relTokens);
+                /* Distinguish icons from images. It will enable for example to later search only images and no icons */
+                if (!iconRels.isEmpty()) {
+                	String sizesAttr = tag.opts.getProperty("sizes", EMPTY_STRING);
+                	Set<Dimension> sizes = parseSizes(sizesAttr);
+                	IconEntry icon = this.icons.get(newLink);
+                	/* There is already an icon with same URL for this document : 
+                	 * they may have different rel attribute or different sizes (multi sizes ico file) or this may be a duplicate */
+                	if(icon != null) {
+                		icon.getRel().addAll(iconRels);
+                		icon.getSizes().addAll(sizes);
+                	} else {
+                		icon = new IconEntry(newLink, iconRels, sizes);
+                		this.icons.put(newLink, icon);
+                	}
                 } else if (rel.equalsIgnoreCase("canonical")) {
                     tag.opts.put("name", this.titles.size() == 0 ? "" : this.titles.iterator().next());
                     newLink.setAll(tag.opts);
@@ -879,10 +961,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     /**
-     * @return the {@link MultiProtocolURL} to the favicon that belongs to the document
+     * @return all icons links
      */
-    public MultiProtocolURL getFavicon() {
-        return this.favicon;
+    public Map<DigestURL, IconEntry> getIcons() {
+        return this.icons;
     }
 
     /*
@@ -939,7 +1021,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     private final static Pattern commaSepPattern = Pattern.compile(" |,");
     private final static Pattern semicSepPattern = Pattern.compile(" |;");
-
+    
     public Set<String> getContentLanguages() {
         // i.e. <meta name="DC.language" content="en" scheme="DCTERMS.RFC3066">
         // or <meta http-equiv="content-language" content="en">
@@ -1096,6 +1178,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.iframes.clear();
         this.embeds.clear();
         this.images.clear();
+        this.icons.clear();
         this.metas.clear();
         this.hreflang.clear();
         this.navigation.clear();

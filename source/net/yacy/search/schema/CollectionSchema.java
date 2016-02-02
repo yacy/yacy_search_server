@@ -139,6 +139,12 @@ public enum CollectionSchema implements SchemaDeclaration {
     outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "external links, the url only without the protocol"),
     outboundlinks_anchortext_txt(SolrType.text_general, true, true, true, false, true, "external links, the visible anchor text"),
     
+    icons_urlstub_sxt(SolrType.string, true, true, true, false, true, "all icon links without the protocol and '://'"),
+    /** All icon links protocols : split from icons_urlstub to provide some compression, as http protocol is implied as default and not stored */
+    icons_protocol_sxt(SolrType.string, true, true, true, false, false, "all icon links protocols"),
+    icons_rel_sxt(SolrType.string, true, true, true, false, false, "all icon links relationships space separated (e.g.. 'icon apple-touch-icon')"),
+    icons_sizes_sxt(SolrType.num_integer, true, true, true, false, false, "all icon sizes space separated (e.g. '16x16 32x32')"),
+    
     images_text_t(SolrType.text_general, true, true, false, false, true, "all text/words appearing in image alt texts or the tokenized url"),
     images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'"),
     images_protocol_sxt(SolrType.string, true, true, true, false, false, "all image link protocols"),

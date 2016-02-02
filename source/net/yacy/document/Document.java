@@ -32,7 +32,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +61,7 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -87,7 +87,8 @@ public class Document {
     private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
     private Set<AnchorURL> emaillinks; // mailto: links
-    private MultiProtocolURL favicon;
+    /** links to icons that belongs to the document (mapped by absolute URL) */
+    private Map<DigestURL, IconEntry> icons;
     private boolean resorted;
     private final Set<String> languages;
     private boolean indexingDenied;
@@ -139,6 +140,7 @@ public class Document {
         this.videolinks = null;
         this.applinks = null;
         this.emaillinks = null;
+        this.icons = new HashMap<>();
         this.resorted = false;
         this.inboundlinks = null;
         this.outboundlinks = null;
@@ -576,6 +578,7 @@ dc_rights
             // that can be calculated from given hyperlinks and imagelinks
 
             this.hyperlinks.putAll(allReflinks(this.images.values()));
+            this.hyperlinks.putAll(allReflinks(this.icons.keySet()));
             this.hyperlinks.putAll(allReflinks(this.audiolinks.keySet()));
             this.hyperlinks.putAll(allReflinks(this.videolinks.keySet()));
             this.hyperlinks.putAll(allReflinks(this.applinks.keySet()));
@@ -658,6 +661,8 @@ dc_rights
                     url = new AnchorURL((String) o);
                 else if (o instanceof ImageEntry)
                     url = new AnchorURL(((ImageEntry) o).url());
+                else if (o instanceof IconEntry)
+                    url = new AnchorURL(((IconEntry) o).getUrl());
                 else {
                     assert false;
                     continue loop;
@@ -718,20 +723,26 @@ dc_rights
             this.images.putAll(doc.getImages());
         }
     }
-
+    
     /**
-     * @return the {@link URL} to the favicon that belongs to the document
+     * @return links to icons that belongs to the document (mapped by absolute URL)
      */
-    public MultiProtocolURL getFavicon() {
-    	return this.favicon;
-    }
-
+    public Map<DigestURL, IconEntry> getIcons() {
+		return icons;
+	}
+    
     /**
-     * @param faviconURL the {@link URL} to the favicon that belongs to the document
+     * Set links to icons that belongs to the document (mapped by absolute URL)
+     * @param icons
      */
-    public void setFavicon(final MultiProtocolURL faviconURL) {
-    	this.favicon = faviconURL;
-    }
+    public void setIcons(Map<DigestURL, IconEntry> icons) {
+    	/* Better to ensure now icons property will not be null */
+    	if(icons != null) {
+    		this.icons = icons;	
+    	} else {
+    		this.icons = new HashMap<>();
+    	}
+	}
 
     public int inboundLinkNofollowCount() {
         if (this.inboundlinks == null) resortLinks();
@@ -836,9 +847,13 @@ dc_rights
     }
 
     /**
-     * merge documents: a helper method for all parsers that return multiple documents
-     * @param docs
-     * @return
+     * merge documents: a helper method for all parsers that return multiple documents.
+     * Note : when docs contains more than one item, eventual icons in each docs are not merged in result doc, 
+     * as their scope is limited to only one document.
+     * @param location url of merged document
+     * @param globalMime Mime type of merged document
+     * @param docs documents to merge
+     * @return document resulting of merge, or original document when docs contains only one item.
      */
     public static Document mergeDocuments(final DigestURL location, final String globalMime, final Document[] docs) {
         if (docs == null || docs.length == 0) return null;

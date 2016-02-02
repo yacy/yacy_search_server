@@ -22,17 +22,23 @@
 
 package net.yacy.kelondro.data.meta;
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.apache.solr.common.SolrDocument;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.MicroDate;
@@ -49,6 +55,8 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.parser.pdfParser;
+import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -63,8 +71,6 @@ import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.utils.crypt;
-
-import org.apache.solr.common.SolrDocument;
 
 
 /**
@@ -506,7 +512,79 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
         return list.iterator();
     }
+    
+    /**
+     * Extracts icon entries from this solr document
+     * @return icon entries collection eventually empty
+     */
+	public final Collection<IconEntry> getIcons() {
+		Collection<IconEntry> icons = new ArrayList<>();
+		List<?> iconsUrlStubsList = getFieldValuesAsList(CollectionSchema.icons_urlstub_sxt.getSolrFieldName());
+		if (iconsUrlStubsList != null) {
 
+			List<String> ports = CollectionConfiguration.indexedList2protocolList(
+					getFieldValues(CollectionSchema.icons_protocol_sxt.getSolrFieldName()), iconsUrlStubsList.size());
+			List<?> allSizes = getFieldValuesAsList(CollectionSchema.icons_sizes_sxt.getSolrFieldName());
+			List<?> allRels = getFieldValuesAsList(CollectionSchema.icons_rel_sxt.getSolrFieldName());
+
+			Object item;
+			for (int index = 0; index < iconsUrlStubsList.size(); index++) {
+				item = iconsUrlStubsList.get(index);
+				String urlStub = null;
+				if (item instanceof String) {
+					urlStub = (String) item;
+					String iconURLStr = (ports != null && ports.size() > index ? ports.get(index) : "http") + "://" + urlStub;
+					
+					DigestURL iconURL;
+					try {
+						iconURL = new DigestURL(iconURLStr);
+					} catch (MalformedURLException e) {
+						continue;
+					}
+
+					Set<String> rels = null;
+					if (allRels.size() > index) {
+						item = allRels.get(index);
+						if (item instanceof String) {
+							rels = ContentScraper.parseSpaceSeparatedTokens((String) item);
+						}
+					}
+					/* This may happen when icons_rel_sxt field has been disabled in solr schema */
+					if(rels == null) {
+						rels = new HashSet<>();
+						rels.add("unknown");
+					}
+
+					Set<Dimension> sizes = null;
+					if (allSizes.size() > index) {
+						item = allSizes.get(index);
+						if (item instanceof String) {
+							sizes = ContentScraper.parseSizes((String) item);
+						}
+					}
+					
+					icons.add(new IconEntry(iconURL, rels, sizes));
+				}
+			}
+		}
+		return icons;
+	}
+    
+    /**
+     * @param name field name
+     * @return field values from field name eventually immutable empty list when field has no values or is not a List
+     */
+    public List<?> getFieldValuesAsList(String name) {
+		Collection<Object> fieldValues = getFieldValues(name);
+		List<?> list;
+		if (fieldValues instanceof List<?>) {
+			list = (List<?>) fieldValues;
+		} else {
+			list = Collections.EMPTY_LIST;
+		}
+		return list;
+    }
+    
     public static Date getDate(SolrDocument doc, final CollectionSchema key) {
         Date x = doc == null ? null : (Date) doc.getFieldValue(key.getSolrFieldName());
         Date now = new Date();

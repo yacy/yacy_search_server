@@ -24,6 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.awt.Dimension;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Collection;
@@ -48,6 +49,7 @@ import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.data.Transactions.State;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.URLLicense;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.NewsPool;
@@ -127,14 +129,6 @@ public class yacysearchitem {
             final DigestURL resultURL = result.url();
             final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
-            final int port = resultURL.getPort();
-            DigestURL faviconURL = null;
-            if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) try {
-                faviconURL = new DigestURL(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
-            } catch (final MalformedURLException e1) {
-                ConcurrentLog.logException(e1);
-                faviconURL = null;
-            }
             final String resource = theSearch.query.domType.toString();
             final String origQ = theSearch.query.getQueryGoal().getQueryString(true);
             prop.put("content", 1); // switch on specific content
@@ -194,6 +188,7 @@ public class yacysearchitem {
             boolean isAtomFeed = header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("atom");
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
+            DigestURL faviconURL = getFaviconURL(sb.isIntranetMode(), fileType, result, new Dimension(16, 16));
             prop.putHTML("content_faviconUrl", processFaviconURL(authenticated, faviconURL));
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
@@ -341,6 +336,68 @@ public class yacysearchitem {
 
         return prop;
     }
+
+	/**
+	 * Tries to retrieve favicon url from solr result document, or generates
+	 * default favicon URL (i.e. "http://host/favicon.ico") from resultURL and
+	 * port.
+	 * 
+	 * @param isIntranetMode
+	 *            when true returns null
+	 * @param fileType
+	 *            file type result as specified in request header
+	 * @param result
+	 *            solr document result. Must not be null.
+	 * @param preferredSize preferred icon size. If no one matches, most close icon is returned.
+	 * @return favicon URL or null when even default favicon URL can not be generated
+	 * @throws NullPointerException when one requested parameter is null
+	 */
+	protected static DigestURL getFaviconURL(final boolean isIntranetMode, final RequestHeader.FileType fileType,
+			final URIMetadataNode result, Dimension preferredSize) {
+		DigestURL faviconURL = null;
+		if ((fileType == FileType.HTML || fileType == FileType.JSON) && !isIntranetMode) {
+			try {
+				String defaultFaviconURL = result.url().getProtocol() + "://" + result.url().getHost()
+						+ ((result.url().getPort() != -1) ? (":" + result.url().getPort()) : "") + "/favicon.ico";
+				IconEntry faviconEntry = null;
+
+				/* We look preferably for a standard icon with preferred size, but accept as a fallback other icons below 128x128 or with no known size*/
+				boolean foundStandard = false;
+				double closestDistance = Double.MAX_VALUE;
+				for(IconEntry icon : result.getIcons()) {
+					boolean isStandard = icon.isStandardIcon();
+					double distance = IconEntry.getDistance(icon.getClosestSize(preferredSize), preferredSize);
+					boolean match = false;
+					if(foundStandard) {
+						/* Already found a standard icon : now must find a standard icon with closer size */
+						match = isStandard && distance < closestDistance;
+					} else {
+						/* No standard icon yet found : prefer a standard icon, or check size */
+						match = isStandard || distance < closestDistance;
+					}
+					if(match) {
+						faviconEntry = icon;
+						closestDistance = distance;
+						foundStandard = isStandard;
+						if(isStandard && distance == 0.0) {
+							break;
+						}
+					}
+				}
+
+				if (faviconEntry == null) {
+					faviconURL = new DigestURL(defaultFaviconURL);
+				} else {
+					faviconURL = faviconEntry.getUrl();
+				}
+
+			} catch (final MalformedURLException e1) {
+				ConcurrentLog.logException(e1);
+				faviconURL = null;
+			}
+		}
+		return faviconURL;
+	}
 
 	/**
 	 * @param authenticated

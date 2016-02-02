@@ -35,6 +35,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -46,11 +51,6 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 
 public class getpageinfo {
@@ -110,8 +110,13 @@ public class getpageinfo {
                     // put the document title
                     prop.putXML("title", removelinebreaks(scraper.dc_title()));
 
+					DigestURL favicon = null;
+					if (scraper.getIcons() != null && !scraper.getIcons().isEmpty()) {
+						favicon = scraper.getIcons().keySet().iterator().next();
+					}
+
                     // put the favicon that belongs to the document
-                    prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
+                    prop.put("favicon", (favicon == null) ? "" : favicon.toString());
 
                     // put keywords
                     final Set<String> list = scraper.dc_subject();
