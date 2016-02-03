@@ -48,11 +48,11 @@ public class compare_yacy {
         searchengines.put("metager2.de (web)", "http://www.metager2.de/search.php?ses=web&q=");
         searchengines.put("metager2.de (international)", "http://www.metager2.de/search.php?ses=international&q=");
         searchengines.put("yahoo.com", "http://search.yahoo.com/search?p=");
-        searchengines.put("romso.de", "http://romso.de/?q=");
+        //searchengines.put("romso.de", "http://romso.de/?q="); // no serach service 2016-01-02
         searchengines.put("Wikipedia English", "http://en.wikipedia.org/wiki/");
         searchengines.put("Wikipedia Deutsch", "http://de.wikipedia.org/wiki/");
         searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?verify=true&resource=global&nav=all&display=2&meanCount=5&query=");
-        searchengines.put("dbpedia", "http://dbpedia.neofonie.de/browse/~:");
+        //searchengines.put("dbpedia", "http://dbpedia.neofonie.de/browse/~:"); // no search service 2016-01-02
         searchengines.put("wolfram alpha", "http://www.wolframalpha.com/input/?i=");
         searchengines.put("OAIster@OCLC", "http://oaister.worldcat.org/search?q=");
         searchengines.put("oai.yacy.net", "http://oai.yacy.net/yacysearch.html?verify=true&resource=local&nav=all&display=2&meanCount=5&query=");
