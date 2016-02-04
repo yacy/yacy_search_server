@@ -2265,9 +2265,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public String[] list() throws IOException {
         if (isFile() && !isHidden()) return getFSFile().list();
-        if (isSMB() && !isHidden()) try {
+        if (isSMB()) try {
             final SmbFile sf = getSmbFile();
-            if (!sf.isDirectory()) return null;
+            if (!sf.isDirectory() || sf.isHidden()) return null;
             try {
                 return TimeoutRequest.list(sf, SMB_TIMEOUT);
             } catch (final SmbException e) {
