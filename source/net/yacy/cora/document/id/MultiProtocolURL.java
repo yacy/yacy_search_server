@@ -2256,9 +2256,16 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return null;
     }
 
+    /**
+     * Get directory listing of file or smb url
+     * respects the hidden attribute of a directory (return null if hidden)
+     * 
+     * @return names of files and directories or null
+     * @throws IOException
+     */
     public String[] list() throws IOException {
-        if (isFile()) return getFSFile().list();
-        if (isSMB()) try {
+        if (isFile() && !isHidden()) return getFSFile().list();
+        if (isSMB() && !isHidden()) try {
             final SmbFile sf = getSmbFile();
             if (!sf.isDirectory()) return null;
             try {
