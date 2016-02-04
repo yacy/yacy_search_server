@@ -188,7 +188,10 @@ public class yacysearchitem {
             boolean isAtomFeed = header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("atom");
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
-            DigestURL faviconURL = getFaviconURL(sb.isIntranetMode(), fileType, result, new Dimension(16, 16));
+            DigestURL faviconURL = null;
+            if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) {
+            	faviconURL = getFaviconURL(result, new Dimension(16, 16));
+            }
             prop.putHTML("content_faviconUrl", processFaviconURL(authenticated, faviconURL));
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
@@ -342,59 +345,59 @@ public class yacysearchitem {
 	 * default favicon URL (i.e. "http://host/favicon.ico") from resultURL and
 	 * port.
 	 * 
-	 * @param isIntranetMode
-	 *            when true returns null
-	 * @param fileType
-	 *            file type result as specified in request header
 	 * @param result
 	 *            solr document result. Must not be null.
 	 * @param preferredSize preferred icon size. If no one matches, most close icon is returned.
 	 * @return favicon URL or null when even default favicon URL can not be generated
 	 * @throws NullPointerException when one requested parameter is null
 	 */
-	protected static DigestURL getFaviconURL(final boolean isIntranetMode, final RequestHeader.FileType fileType,
-			final URIMetadataNode result, Dimension preferredSize) {
-		DigestURL faviconURL = null;
-		if ((fileType == FileType.HTML || fileType == FileType.JSON) && !isIntranetMode) {
-			try {
+	protected static DigestURL getFaviconURL(final URIMetadataNode result, Dimension preferredSize) {
+		/*
+		 * We look preferably for a standard icon with preferred size, but
+		 * accept as a fallback other icons below 128x128 or with no known size
+		 */
+		IconEntry faviconEntry = null;
+		boolean foundStandard = false;
+		double closestDistance = Double.MAX_VALUE;
+		for (IconEntry icon : result.getIcons()) {
+			boolean isStandard = icon.isStandardIcon();
+			double distance = IconEntry.getDistance(icon.getClosestSize(preferredSize), preferredSize);
+			boolean match = false;
+			if (foundStandard) {
+				/*
+				 * Already found a standard icon : now must find a standard icon
+				 * with closer size
+				 */
+				match = isStandard && distance < closestDistance;
+			} else {
+				/*
+				 * No standard icon yet found : prefer a standard icon, or check
+				 * size
+				 */
+				match = isStandard || distance < closestDistance;
+			}
+			if (match) {
+				faviconEntry = icon;
+				closestDistance = distance;
+				foundStandard = isStandard;
+				if (isStandard && distance == 0.0) {
+					break;
+				}
+			}
+		}
+		DigestURL faviconURL;
+		try {
+			if (faviconEntry == null) {
 				String defaultFaviconURL = result.url().getProtocol() + "://" + result.url().getHost()
 						+ ((result.url().getPort() != -1) ? (":" + result.url().getPort()) : "") + "/favicon.ico";
-				IconEntry faviconEntry = null;
-
-				/* We look preferably for a standard icon with preferred size, but accept as a fallback other icons below 128x128 or with no known size*/
-				boolean foundStandard = false;
-				double closestDistance = Double.MAX_VALUE;
-				for(IconEntry icon : result.getIcons()) {
-					boolean isStandard = icon.isStandardIcon();
-					double distance = IconEntry.getDistance(icon.getClosestSize(preferredSize), preferredSize);
-					boolean match = false;
-					if(foundStandard) {
-						/* Already found a standard icon : now must find a standard icon with closer size */
-						match = isStandard && distance < closestDistance;
-					} else {
-						/* No standard icon yet found : prefer a standard icon, or check size */
-						match = isStandard || distance < closestDistance;
-					}
-					if(match) {
-						faviconEntry = icon;
-						closestDistance = distance;
-						foundStandard = isStandard;
-						if(isStandard && distance == 0.0) {
-							break;
-						}
-					}
-				}
-
-				if (faviconEntry == null) {
-					faviconURL = new DigestURL(defaultFaviconURL);
-				} else {
-					faviconURL = faviconEntry.getUrl();
-				}
-
-			} catch (final MalformedURLException e1) {
-				ConcurrentLog.logException(e1);
-				faviconURL = null;
+				faviconURL = new DigestURL(defaultFaviconURL);
+			} else {
+				faviconURL = faviconEntry.getUrl();
 			}
+
+		} catch (final MalformedURLException e1) {
+			ConcurrentLog.logException(e1);
+			faviconURL = null;
 		}
 		return faviconURL;
 	}

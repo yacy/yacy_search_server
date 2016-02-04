@@ -28,7 +28,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -64,14 +63,12 @@ public class yacysearchitemTest {
 				new String[] { "16x16", "32x32", "64x64", "128x128" });
 
 		/* Search for a size present in icons collection */
-		DigestURL faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(32, 32));
+		DigestURL faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(32, 32));
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/icon32.png", faviconURL.toNormalform(false));
 
 		/* Search for a size not in icons collection */
-		faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(40, 40));
+		faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(40, 40));
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/icon32.png", faviconURL.toNormalform(false));
 
@@ -79,8 +76,7 @@ public class yacysearchitemTest {
 		 * Search for a size equals to non-standard : standard icon is stil
 		 * preffered
 		 */
-		faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(128, 128));
+		faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(128, 128));
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/icon64.png", faviconURL.toNormalform(false));
 	}
@@ -107,12 +103,11 @@ public class yacysearchitemTest {
 				new String[] { "32x32", "64x64", "128x128" });
 
 		/* Non standard icon is returned as fallback */
-		DigestURL faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(32, 32));
+		DigestURL faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(32, 32));
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/mask32.png", faviconURL.toNormalform(false));
 	}
-	
+
 	/**
 	 * One standard icon with multiple sizes
 	 * 
@@ -121,30 +116,26 @@ public class yacysearchitemTest {
 	@Test
 	public final void testGetFaviconURLMultiSizes() throws MalformedURLException {
 		URIMetadataNode metadataNode = new URIMetadataNode(new DigestURL("http://somehost.org"));
-		metadataNode
-				.setField(CollectionSchema.icons_urlstub_sxt.getSolrFieldName(),
-						new String[] { "somehost.org/static/images/favicon.ico"});
+		metadataNode.setField(CollectionSchema.icons_urlstub_sxt.getSolrFieldName(),
+				new String[] { "somehost.org/static/images/favicon.ico" });
 		List<String> protocols = CollectionConfiguration
-				.protocolList2indexedList(Arrays.asList(new String[] { "http"}));
+				.protocolList2indexedList(Arrays.asList(new String[] { "http" }));
 		metadataNode.setField(CollectionSchema.icons_protocol_sxt.getSolrFieldName(), protocols);
-		metadataNode.setField(CollectionSchema.icons_rel_sxt.getSolrFieldName(),
-				new String[] { "icon"});
+		metadataNode.setField(CollectionSchema.icons_rel_sxt.getSolrFieldName(), new String[] { "icon" });
 		metadataNode.setField(CollectionSchema.icons_sizes_sxt.getSolrFieldName(),
-				new String[] { "16x16 32x32 64x64",});
+				new String[] { "16x16 32x32 64x64", });
 
 		/* Search for a size in sizes set */
-		DigestURL faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(32, 32));
+		DigestURL faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(32, 32));
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/favicon.ico", faviconURL.toNormalform(false));
 
 		/* Search for a size not in sizes set */
-		faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(40, 40));
+		faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(40, 40));
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/favicon.ico", faviconURL.toNormalform(false));
 	}
-	
+
 	/**
 	 * One standard icon with no size
 	 * 
@@ -153,22 +144,18 @@ public class yacysearchitemTest {
 	@Test
 	public final void testGetFaviconURLNoSize() throws MalformedURLException {
 		URIMetadataNode metadataNode = new URIMetadataNode(new DigestURL("http://somehost.org"));
-		metadataNode
-				.setField(CollectionSchema.icons_urlstub_sxt.getSolrFieldName(),
-						new String[] { "somehost.org/static/images/favicon.ico"});
+		metadataNode.setField(CollectionSchema.icons_urlstub_sxt.getSolrFieldName(),
+				new String[] { "somehost.org/static/images/favicon.ico" });
 		List<String> protocols = CollectionConfiguration
-				.protocolList2indexedList(Arrays.asList(new String[] { "http"}));
+				.protocolList2indexedList(Arrays.asList(new String[] { "http" }));
 		metadataNode.setField(CollectionSchema.icons_protocol_sxt.getSolrFieldName(), protocols);
-		metadataNode.setField(CollectionSchema.icons_rel_sxt.getSolrFieldName(),
-				new String[] { "icon"});
+		metadataNode.setField(CollectionSchema.icons_rel_sxt.getSolrFieldName(), new String[] { "icon" });
 
-		DigestURL faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(32, 32));
+		DigestURL faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(32, 32));
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/favicon.ico", faviconURL.toNormalform(false));
 	}
-	
-	
+
 	/**
 	 * No icon in document
 	 * 
@@ -179,8 +166,7 @@ public class yacysearchitemTest {
 		URIMetadataNode metadataNode = new URIMetadataNode(new DigestURL("http://someHost.org"));
 
 		/* Default fallback favicon URL should be generated */
-		DigestURL faviconURL = yacysearchitem.getFaviconURL(false, RequestHeader.FileType.HTML, metadataNode,
-				new Dimension(32, 32));
+		DigestURL faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(32, 32));
 		Assert.assertEquals("http://somehost.org/favicon.ico", faviconURL.toNormalform(false));
 	}
 
