@@ -65,8 +65,8 @@ public class URIMetadataNodeTest {
 		Collection<IconEntry> icons = metadataNode.getIcons();
 		int nb = 0;
 		/* Check results consistency */
-		for(IconEntry icon : icons) {
-			if("http://somehost.org/static/images/icon16.png".equals(icon.getUrl().toNormalform(false))) {
+		for (IconEntry icon : icons) {
+			if ("http://somehost.org/static/images/icon16.png".equals(icon.getUrl().toNormalform(false))) {
 				Assert.assertEquals(1, icon.getSizes().size());
 				Dimension size = icon.getSizes().iterator().next();
 				Assert.assertEquals(16, size.width);
@@ -74,7 +74,7 @@ public class URIMetadataNodeTest {
 				Assert.assertEquals(1, icon.getRel().size());
 				Assert.assertEquals("icon", icon.getRel().iterator().next());
 				nb++;
-			} else if("https://somehost.org/static/images/icon32.png".equals(icon.getUrl().toNormalform(false))) {
+			} else if ("https://somehost.org/static/images/icon32.png".equals(icon.getUrl().toNormalform(false))) {
 				Assert.assertEquals(1, icon.getSizes().size());
 				Dimension size = icon.getSizes().iterator().next();
 				Assert.assertEquals(32, size.width);
@@ -82,7 +82,7 @@ public class URIMetadataNodeTest {
 				Assert.assertEquals(1, icon.getRel().size());
 				Assert.assertEquals("icon", icon.getRel().iterator().next());
 				nb++;
-			} else if("https://somehost.org/static/images/icon64.png".equals(icon.getUrl().toNormalform(false))) {
+			} else if ("https://somehost.org/static/images/icon64.png".equals(icon.getUrl().toNormalform(false))) {
 				Assert.assertEquals(1, icon.getSizes().size());
 				Dimension size = icon.getSizes().iterator().next();
 				Assert.assertEquals(58, size.width);
@@ -90,7 +90,7 @@ public class URIMetadataNodeTest {
 				Assert.assertEquals(1, icon.getRel().size());
 				Assert.assertEquals("icon", icon.getRel().iterator().next());
 				nb++;
-			} else if("http://somehost.org/static/images/iconApple128.png".equals(icon.getUrl().toNormalform(false))) {
+			} else if ("http://somehost.org/static/images/iconApple128.png".equals(icon.getUrl().toNormalform(false))) {
 				Assert.assertEquals(1, icon.getSizes().size());
 				Dimension size = icon.getSizes().iterator().next();
 				Assert.assertEquals(128, size.width);
@@ -151,6 +151,62 @@ public class URIMetadataNodeTest {
 		URIMetadataNode metadataNode = new URIMetadataNode(new DigestURL("http://somehost.org"));
 
 		Collection<IconEntry> icons = metadataNode.getIcons();
+		Assert.assertEquals(0, icons.size());
+	}
+
+	/**
+	 * Check encoding/decoding consistency
+	 * 
+	 * @throws MalformedURLException
+	 */
+	@Test
+	public final void testEncodeDecode() throws MalformedURLException {
+		URIMetadataNode metadataNode = new URIMetadataNode(new DigestURL("http://somehost.org"));
+		metadataNode
+				.setField(CollectionSchema.icons_urlstub_sxt.getSolrFieldName(),
+						new String[] { "somehost.org/static/images/icon16.png", "somehost.org/static/images/icon32.png",
+								"somehost.org/static/images/icon64.png",
+								"somehost.org/static/images/iconApple128.png" });
+		List<String> protocols = CollectionConfiguration
+				.protocolList2indexedList(Arrays.asList(new String[] { "http", "https", "https", "http" }));
+		metadataNode.setField(CollectionSchema.icons_protocol_sxt.getSolrFieldName(), protocols);
+		metadataNode.setField(CollectionSchema.icons_rel_sxt.getSolrFieldName(),
+				new String[] { "icon", "icon", "icon", "apple-touch-icon" });
+		metadataNode.setField(CollectionSchema.icons_sizes_sxt.getSolrFieldName(),
+				new String[] { "16x24", "32x32", "58x64", "128x128" });
+
+		String encoded = metadataNode.toString();
+		URIMetadataNode decoded = URIMetadataNode.importEntry(encoded, "dht");
+		Collection<IconEntry> icons = decoded.getIcons();
+
+		/*
+		 * Only icon which is the closest to 16x16 pixels is encoded, and sizes
+		 * and rel attribute are not encoded
+		 */
+		Assert.assertEquals(1, icons.size());
+		IconEntry icon = icons.iterator().next();
+
+		Assert.assertEquals(0, icon.getSizes().size());
+
+		Assert.assertEquals("http://somehost.org/static/images/icon16.png", icon.getUrl().toNormalform(false));
+
+		Assert.assertEquals(1, icon.getRel().size());
+		Assert.assertEquals("icon", icon.getRel().iterator().next());
+	}
+	
+	/**
+	 * Check encoding/decoding consistency when document has no indexed icon
+	 * 
+	 * @throws MalformedURLException
+	 */
+	@Test
+	public final void testEncodeDecodeNoIcon() throws MalformedURLException {
+		URIMetadataNode metadataNode = new URIMetadataNode(new DigestURL("http://somehost.org"));
+
+		String encoded = metadataNode.toString();
+		URIMetadataNode decoded = URIMetadataNode.importEntry(encoded, "dht");
+		Collection<IconEntry> icons = decoded.getIcons();
+
 		Assert.assertEquals(0, icons.size());
 	}
 

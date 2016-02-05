@@ -356,49 +356,21 @@ public class yacysearchitem {
 		 * We look preferably for a standard icon with preferred size, but
 		 * accept as a fallback other icons below 128x128 or with no known size
 		 */
-		IconEntry faviconEntry = null;
-		boolean foundStandard = false;
-		double closestDistance = Double.MAX_VALUE;
-		for (IconEntry icon : result.getIcons()) {
-			boolean isStandard = icon.isStandardIcon();
-			double distance = IconEntry.getDistance(icon.getClosestSize(preferredSize), preferredSize);
-			boolean match = false;
-			if (foundStandard) {
-				/*
-				 * Already found a standard icon : now must find a standard icon
-				 * with closer size
-				 */
-				match = isStandard && distance < closestDistance;
-			} else {
-				/*
-				 * No standard icon yet found : prefer a standard icon, or check
-				 * size
-				 */
-				match = isStandard || distance < closestDistance;
-			}
-			if (match) {
-				faviconEntry = icon;
-				closestDistance = distance;
-				foundStandard = isStandard;
-				if (isStandard && distance == 0.0) {
-					break;
-				}
-			}
-		}
+		IconEntry faviconEntry = result.getFavicon(preferredSize);
 		DigestURL faviconURL;
-		try {
-			if (faviconEntry == null) {
+		if (faviconEntry == null) {
+			try {
 				String defaultFaviconURL = result.url().getProtocol() + "://" + result.url().getHost()
 						+ ((result.url().getPort() != -1) ? (":" + result.url().getPort()) : "") + "/favicon.ico";
 				faviconURL = new DigestURL(defaultFaviconURL);
-			} else {
-				faviconURL = faviconEntry.getUrl();
+			} catch (final MalformedURLException e1) {
+				ConcurrentLog.logException(e1);
+				faviconURL = null;
 			}
-
-		} catch (final MalformedURLException e1) {
-			ConcurrentLog.logException(e1);
-			faviconURL = null;
+		} else {
+			faviconURL = faviconEntry.getUrl();
 		}
+
 		return faviconURL;
 	}
 

@@ -1633,6 +1633,8 @@ public final class SearchEvent {
         // boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
         // generalize above hack (regarding url with file extension but beeing a html (with html mime)
         if (doc.doctype() == Response.DT_IMAGE) {
+        	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
+        	 * or documents coming from previous versions peers */
             if (!doc.url().getFileName().endsWith(".ico")) { // we don't want favicons
                 final String id = ASCII.String(doc.hash());
                 // check image size
@@ -1657,6 +1659,8 @@ public final class SearchEvent {
                 List<Object> width = widthO == null ? null : (List<Object>) widthO;
                 for (int c = 0; c < img.size(); c++) {
                     String image_urlstub =  (String) img.get(c);
+                	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
+                	 * or documents coming from previous versions peers */
                     if (image_urlstub.endsWith(".ico")) continue; // we don't want favicons, makes the result look idiotic
                     try {
                         int h = height == null ? 0 : (Integer) height.get(c);
