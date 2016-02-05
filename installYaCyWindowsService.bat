@@ -26,7 +26,7 @@ Echo JRE Parameters:%javacmd%
 Echo Startpath %~dp0
 
 REM Install YaCy as Windows Service
-%exepath%\prunsrv.exe //IS//YaCy --Jvm=auto --StartMode=jvm --StartClass=net.yacy.yacy --Classpath=htroot;lib/yacycore.jar --StartPath=%~dp0 --JvmOptions=%javaopts% --Startup=auto --JvmMx=%jmx% --JvmMs=%jms% --StopMode=jvm --StopClass=net.yacy.yacy --StopParams=-shutdown --Description=%servicedesc%
+%exepath%\prunsrv.exe //IS//YaCy --Jvm=auto --StartMode=jvm --StartClass=net.yacy.yacy --Classpath=lib/yacycore.jar --StartPath=%~dp0 --JvmOptions=%javaopts% --Startup=auto --JvmMx=%jmx% --JvmMs=%jms% --StopMode=jvm --StopClass=net.yacy.yacy --StopParams=-shutdown --Description=%servicedesc%
 
 if not errorlevel 1 goto installed
 Echo Failed installing YaCy service
