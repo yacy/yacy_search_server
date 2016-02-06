@@ -34,7 +34,7 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>5.4.0</solr.version> 
+        <solr.version>5.4.1</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
         <jetty.version>9.2.14.v20151106</jetty.version>
                 
