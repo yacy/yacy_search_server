@@ -195,6 +195,7 @@ public final class Condenser extends Tokenizer {
         }
 
         String text = document.getTextString();
+        this.languageIdentificator.add(text); // use content text for language detection (before we added already title etc. for best identification content text is valuable)
 
         // create hashes for duplicate detection
         // check dups with http://localhost:8090/solr/select?q=*:*&start=0&rows=3&fl=sku,fuzzy_signature_text_t,fuzzy_signature_l,fuzzy_signature_unique_b

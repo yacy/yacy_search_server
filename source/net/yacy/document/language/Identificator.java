@@ -38,7 +38,6 @@ import net.yacy.cora.util.ConcurrentLog;
  */
 public final class Identificator {
 
-    private StringBuilder text;
     private Detector detector;
     private Language language;
 
@@ -46,7 +45,6 @@ public final class Identificator {
         try {
             if(DetectorFactory.getLangList().isEmpty()) DetectorFactory.loadProfile(new File("langdetect").toString());
             this.detector = DetectorFactory.create();
-            this.text = new StringBuilder();
         } catch (LangDetectException e) {
             ConcurrentLog.logException(e);
         }
@@ -54,11 +52,10 @@ public final class Identificator {
 
     public void add(final String word) {
         if (word == null) return;
-        this.text.append(" " + word);
+        this.detector.append(" " + word); // detector internally caches text up to maxtextlen = default = 10000 chars
     }
 
     public String getLanguage() {
-        this.detector.append(this.text.toString());
         try {
             ArrayList<Language> probabilities = this.detector.getProbabilities();
             if(probabilities.isEmpty()) return null;
