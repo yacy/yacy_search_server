@@ -266,6 +266,14 @@ public final class Condenser extends Tokenizer {
         return this.languageIdentificator.getLanguage();
     }
 
+    /**
+     * get the probability of the detected language received by {@link #language()}
+     * @return 0.0 to 1.0
+     */
+    public double languageProbability() {
+        return this.languageIdentificator.getProbability();
+    }
+
     public static void main(final String[] args) {
         // read a property file and convert them into configuration lines
         try {

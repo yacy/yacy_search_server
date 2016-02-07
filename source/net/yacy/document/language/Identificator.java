@@ -55,6 +55,12 @@ public final class Identificator {
         this.detector.append(" " + word); // detector internally caches text up to maxtextlen = default = 10000 chars
     }
 
+    /**
+     * Get the detected language with highest probability
+     * if detection probability is above 0.3 (30%)
+     * Underlaying detector differentiates zh-cn and zh-tw, these are returned as zh here.
+     * @return 2 char language code (ISO 639-1)
+     */
     public String getLanguage() {
         try {
             ArrayList<Language> probabilities = this.detector.getProbabilities();
@@ -67,11 +73,25 @@ public final class Identificator {
         }
         // Return language only if probability is higher than 30% to account for missing language profiles
         if (this.language.prob > 0.3) {
-            return this.language.lang;
+            if (this.language.lang.length() == 2)
+                return this.language.lang;
+            else
+                return this.language.lang.substring(0,2);
         }
 
         return null;
 
+    }
+
+    /**
+     * Get the probability of the detected language (returned by {@link #getLanguage()})
+     * @return 0.0 to 1.0
+     */
+    public double getProbability() {
+        if (language != null) {
+            return language.prob;
+        } else
+            return 0.0;
     }
 
 }
