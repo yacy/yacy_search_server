@@ -51,7 +51,7 @@ public class PerformanceMemory_p {
     private static final long MB = 1024 * KB;
     
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
-    	// return variable that accumulates replacements
+        // return variable that accumulates replacements
         Switchboard sb = (Switchboard) env;
         
         final serverObjects prop = new serverObjects();
@@ -59,19 +59,17 @@ public class PerformanceMemory_p {
         prop.put("gc", "0");
         prop.put("autoreload.checked", "0");
         if (post != null) {
-        	if (post.containsKey("gc")) {
+            if (post.containsKey("gc")) {
                 System.gc();
                 prop.put("gc", "1");
                 prop.put("autoreload.checked", "1");
-            } else {
-            	if (post.containsKey("dummy")) {
-            		boolean simulatedshortmemory = post.containsKey("simulatedshortmemory");
-            		MemoryControl.setSimulatedShortStatus(simulatedshortmemory);
-            		if (simulatedshortmemory) prop.put("autoreload.checked", "1");
-            		final boolean std = post.containsKey("useStandardmemoryStrategy");
-            		env.setConfig("memory.standardStrategy", std);
-            		MemoryControl.setStandardStrategy(std);
-            	}
+            } else if (post.containsKey("dummy")) {
+                boolean simulatedshortmemory = post.containsKey("simulatedshortmemory");
+                MemoryControl.setSimulatedShortStatus(simulatedshortmemory);
+            	if (simulatedshortmemory) prop.put("autoreload.checked", "1");
+            	final boolean std = post.containsKey("useStandardmemoryStrategy");
+            	env.setConfig("memory.standardStrategy", std);
+            	MemoryControl.setStandardStrategy(std);
             }
         }
         
