@@ -66,10 +66,10 @@ public class PerformanceMemory_p {
             } else if (post.containsKey("dummy")) {
                 boolean simulatedshortmemory = post.containsKey("simulatedshortmemory");
                 MemoryControl.setSimulatedShortStatus(simulatedshortmemory);
-            	if (simulatedshortmemory) prop.put("autoreload.checked", "1");
-            	final boolean std = post.containsKey("useStandardmemoryStrategy");
-            	env.setConfig("memory.standardStrategy", std);
-            	MemoryControl.setStandardStrategy(std);
+                if (simulatedshortmemory) prop.put("autoreload.checked", "1");
+                final boolean std = post.containsKey("useStandardmemoryStrategy");
+                env.setConfig("memory.standardStrategy", std);
+                MemoryControl.setStandardStrategy(std);
             }
         }
         
