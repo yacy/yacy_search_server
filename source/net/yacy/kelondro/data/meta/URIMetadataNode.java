@@ -608,7 +608,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 				 * No standard icon yet found : prefer a standard icon, or check
 				 * size
 				 */
-				match = isStandard || distance < closestDistance;
+				match = isStandard || distance <= closestDistance;
 			}
 			if (match) {
 				faviconEntry = icon;

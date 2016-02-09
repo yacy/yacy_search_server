@@ -68,6 +68,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
 import net.yacy.utils.nxTools;
+import net.yacy.visualization.ImageViewer;
 
 public class yacysearchitem {
 
@@ -383,10 +384,14 @@ public class yacysearchitem {
 	 *         is null
 	 */
 	private static String processFaviconURL(final boolean authenticated, DigestURL faviconURL) {
+		final String iconUrlExt = MultiProtocolURL.getFileExtension(faviconURL.getFileName());
+	    /* Image format ouput for ViewFavicon servlet : default is png, except with gif and svg icons */
+	    final String viewFaviconExt = !iconUrlExt.isEmpty() && ImageViewer.isBrowserRendered(iconUrlExt) ? iconUrlExt : "png";
+		
 		/* Only use licence code for non authentified users. For authenticated users licence would never be released and would unnecessarily fill URLLicense.permissions. */
 		StringBuilder contentFaviconURL = new StringBuilder();
 		if (faviconURL != null) {
-			contentFaviconURL.append("ViewImage.png?width=16&height=16&isStatic=true");
+			contentFaviconURL.append("ViewFavicon.").append(viewFaviconExt).append("?maxwidth=16&maxheight=16&isStatic=true&quadratic");
 			if (authenticated) {
 				contentFaviconURL.append("&url=").append(faviconURL.toNormalform(true));
 			} else {
@@ -418,7 +423,7 @@ public class yacysearchitem {
 
 		    final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
 		    /* Image format ouput for ViewImage servlet : default is png, except with gif and svg images */
-		    final String viewImageExt = !imageUrlExt.isEmpty() && ViewImage.isBrowserRendered(imageUrlExt) ? imageUrlExt : "png";
+		    final String viewImageExt = !imageUrlExt.isEmpty() && ImageViewer.isBrowserRendered(imageUrlExt) ? imageUrlExt : "png";
 		    /* Thumb URL */
 			StringBuilder thumbURLBuilder = new StringBuilder("ViewImage.").append(viewImageExt).append("?maxwidth=")
 					.append(DEFAULT_IMG_WIDTH).append("&maxheight=").append(DEFAULT_IMG_HEIGHT)
@@ -449,7 +454,7 @@ public class yacysearchitem {
 		    /* When image content is rendered by browser :
 		     * - set smaller dimension to 100% in order to crop image on other dimension with CSS style 'overflow:hidden' on image container 
 		     * - set negative margin top behave like ViewImage which sets an offset when cutting to square */
-			if (ViewImage.isBrowserRendered(imageUrlExt)) {
+			if (ImageViewer.isBrowserRendered(imageUrlExt)) {
 				if (image.width > image.height) {
 					/* Landscape orientation */
 					itemWidth = "";

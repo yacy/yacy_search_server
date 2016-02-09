@@ -155,6 +155,26 @@ public class yacysearchitemTest {
 		Assert.assertNotNull(faviconURL);
 		Assert.assertEquals("http://somehost.org/static/images/favicon.ico", faviconURL.toNormalform(false));
 	}
+	
+	/**
+	 * One non-standard icon with no size
+	 * 
+	 * @throws MalformedURLException
+	 */
+	@Test
+	public final void testGetFaviconURLNonStandardNoSize() throws MalformedURLException {
+		URIMetadataNode metadataNode = new URIMetadataNode(new DigestURL("http://somehost.org"));
+		metadataNode.setField(CollectionSchema.icons_urlstub_sxt.getSolrFieldName(),
+				new String[] { "somehost.org/static/images/favicon.png" });
+		List<String> protocols = CollectionConfiguration
+				.protocolList2indexedList(Arrays.asList(new String[] { "http" }));
+		metadataNode.setField(CollectionSchema.icons_protocol_sxt.getSolrFieldName(), protocols);
+		metadataNode.setField(CollectionSchema.icons_rel_sxt.getSolrFieldName(), new String[] { "appel-touch-icon" });
+
+		DigestURL faviconURL = yacysearchitem.getFaviconURL(metadataNode, new Dimension(32, 32));
+		Assert.assertNotNull(faviconURL);
+		Assert.assertEquals("http://somehost.org/static/images/favicon.png", faviconURL.toNormalform(false));
+	}
 
 	/**
 	 * No icon in document
