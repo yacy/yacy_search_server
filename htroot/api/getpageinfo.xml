@@ -8,7 +8,11 @@
   #{sitemaps}#
   <sitemap>#[sitemap]#</sitemap>
   #{/sitemaps}#
-  <favicon>#[favicon]#</favicon>
+  <icons>
+  	#{icons}#
+  	<icon>#[icon]#</icon>
+  	#{/icons}#
+  </icons>
   <sitelist>#[sitelist]#</sitelist>
   <filter>#[filter]#</filter>
   <tags>
