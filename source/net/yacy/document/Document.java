@@ -576,9 +576,16 @@ dc_rights
             // expand the hyperlinks:
             // we add artificial hyperlinks to the hyperlink set
             // that can be calculated from given hyperlinks and imagelinks
+            
+			/*
+			 * Should we also include icons ? with
+			 * this.hyperlinks.putAll(allReflinks(this.icons.keySet())); It is
+			 * problematic as allReflinks will modify icons set set, removing those whose URL is
+			 * starting with "/www" but it is not desired for icons such as
+			 * www.wikipedia.org/static/favicon/wikipedia.ico
+			 */
 
             this.hyperlinks.putAll(allReflinks(this.images.values()));
-            this.hyperlinks.putAll(allReflinks(this.icons.keySet()));
             this.hyperlinks.putAll(allReflinks(this.audiolinks.keySet()));
             this.hyperlinks.putAll(allReflinks(this.videolinks.keySet()));
             this.hyperlinks.putAll(allReflinks(this.applinks.keySet()));

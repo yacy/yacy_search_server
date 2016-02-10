@@ -53,6 +53,7 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
@@ -322,54 +323,7 @@ public class ViewFile {
                 prop.put("viewMode_words", i);
 
             } else if (viewMode.equals("links")) {
-                prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
-                boolean dark = true;
-                int i = 0;
-
-                if (document.getEmaillinks() != null) {
-                    Iterator<AnchorURL> emailit = document.getEmaillinks().iterator();
-                    while (emailit.hasNext()) {
-                        AnchorURL eentry = emailit.next();
-                        prop.put("viewMode_links_" + i + "_nr", i);
-                        prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
-                        prop.put("viewMode_links_" + i + "_type", "email");
-                        prop.put("viewMode_links_" + i + "_text", (eentry.getTextProperty().isEmpty()) ? "&nbsp;" : eentry.getTextProperty());
-                        prop.put("viewMode_links_" + i + "_url", "#");
-                        prop.put("viewMode_links_" + i + "_link", eentry.toNormalform(true));
-                        prop.put("viewMode_links_" + i + "_rel", "");
-                        prop.put("viewMode_links_" + i + "_name", eentry.getNameProperty());
-                        dark = !dark;
-                        i++;
-                    }
-                }
-
-                i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
-                i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
-                dark = (i % 2 == 0);
-
-                final Map<DigestURL, ImageEntry> ts = document.getImages();
-                final Iterator<ImageEntry> tsi = ts.values().iterator();
-                ImageEntry entry;
-                while (tsi.hasNext()) {
-                    entry = tsi.next();
-                    prop.put("viewMode_links_" + i + "_nr", i);
-                    prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
-                    prop.put("viewMode_links_" + i + "_type", "image");
-                    prop.put("viewMode_links_" + i + "_text", (entry.alt().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.alt()));
-                    prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(true));
-                    prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(true)));
-                    if (entry.width() > 0 && entry.height() > 0) {
-                        prop.put("viewMode_links_" + i + "_rel", entry.width() + "x" + entry.height() + " Pixel");
-                    } else {
-                        prop.put("viewMode_links_" + i + "_rel", "");
-                    }
-                    prop.put("viewMode_links_" + i + "_name", "");
-                    dark = !dark;
-                    i++;
-                }
-                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
-                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0));
-                prop.put("viewMode_links", i);
+                putLinks(prop, wordArray, document);
 
             }
             // optional: generate snippet
@@ -458,6 +412,65 @@ public class ViewFile {
         return prop;
     }
 
+    /**
+     * Fill prop object with document links.
+     * @param prop object to be filled. Must not be null
+     * @param wordArray aray of words from word post parameter
+     * @param document document to process
+     */
+	private static void putLinks(final serverObjects prop, final String[] wordArray, Document document) {
+		prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
+		boolean dark = true;
+		int i = 0;
+
+		if (document.getEmaillinks() != null) {
+		    Iterator<AnchorURL> emailit = document.getEmaillinks().iterator();
+		    while (emailit.hasNext()) {
+		        AnchorURL eentry = emailit.next();
+		        prop.put("viewMode_links_" + i + "_nr", i);
+		        prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
+		        prop.put("viewMode_links_" + i + "_type", "email");
+		        prop.put("viewMode_links_" + i + "_text", (eentry.getTextProperty().isEmpty()) ? "&nbsp;" : eentry.getTextProperty());
+		        prop.put("viewMode_links_" + i + "_url", "#");
+		        prop.put("viewMode_links_" + i + "_link", eentry.toNormalform(true));
+		        prop.put("viewMode_links_" + i + "_rel", "");
+		        prop.put("viewMode_links_" + i + "_name", eentry.getNameProperty());
+		        dark = !dark;
+		        i++;
+		    }
+		}
+
+		i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
+		i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
+		dark = (i % 2 == 0);
+		i += putIconsInfos(prop, wordArray, i, document.getIcons().values(), (i % 2 == 0));
+		dark = (i % 2 == 0);
+
+		final Map<DigestURL, ImageEntry> ts = document.getImages();
+		final Iterator<ImageEntry> tsi = ts.values().iterator();
+		ImageEntry entry;
+		while (tsi.hasNext()) {
+		    entry = tsi.next();
+		    prop.put("viewMode_links_" + i + "_nr", i);
+		    prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
+		    prop.put("viewMode_links_" + i + "_type", "image");
+		    prop.put("viewMode_links_" + i + "_text", (entry.alt().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.alt()));
+		    prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(true));
+		    prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(true)));
+		    if (entry.width() > 0 && entry.height() > 0) {
+		        prop.put("viewMode_links_" + i + "_rel", entry.width() + "x" + entry.height() + " Pixel");
+		    } else {
+		        prop.put("viewMode_links_" + i + "_rel", "");
+		    }
+		    prop.put("viewMode_links_" + i + "_name", "");
+		    dark = !dark;
+		    i++;
+		}
+		i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
+		i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0));
+		prop.put("viewMode_links", i);
+	}
+
     private static final String[] wordArray(String words) {
         String[] w = new String[0];
         if (words == null || words.isEmpty()) return w;
@@ -489,6 +502,16 @@ public class ViewFile {
         return message;
     }
 
+    /**
+     * Fill prop object with media links.
+     * @param prop object ot be filled
+     * @param wordArray words array
+     * @param c current links count
+     * @param media media links
+     * @param type type of media link
+     * @param dark current result line style
+     * @return number of links added to prop
+     */
     private static int putMediaInfo(
                     final serverObjects prop,
                     final String[] wordArray,
@@ -508,6 +531,42 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_text", text);
             prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true)));
             prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true));
+            prop.put("viewMode_links_" + c + "_rel", rel);
+            prop.put("viewMode_links_" + c + "_name", name);
+            dark = !dark;
+            c++;
+            i++;
+        }
+        return i;
+    }
+    
+    /**
+     * Fill prop object with icon links.
+     * @param prop object ot be filled
+     * @param wordArray words array
+     * @param c current links count
+     * @param icons icon links
+     * @param dark current result line style
+     * @return number of links added to prop
+     */
+    private static int putIconsInfos(
+                    final serverObjects prop,
+                    final String[] wordArray,
+                    int c,
+                    final Collection<IconEntry> icons,
+                    boolean dark) {
+        int i = 0;
+        for (final IconEntry entry : icons) {
+            final String name = ""; // the name attribute
+            final String rel = entry.relToString();   // the rel-attribute
+            final String text = ""; // the text between the <a></a> tag
+
+            prop.put("viewMode_links_" + c + "_nr", c);
+            prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
+            prop.putHTML("viewMode_links_" + c + "_type", "icon");
+            prop.put("viewMode_links_" + c + "_text", text);
+            prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getUrl().toNormalform(true)));
+            prop.put("viewMode_links_" + c + "_url", entry.getUrl().toNormalform(true));
             prop.put("viewMode_links_" + c + "_rel", rel);
             prop.put("viewMode_links_" + c + "_name", name);
             dark = !dark;
