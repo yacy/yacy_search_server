@@ -316,6 +316,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	add(doc, CollectionSchema.keywords, keywords);
         }
 
+        /* Metadata node may contain one favicon url when transmitted as dht chunk */
+        processIcons(doc, allAttr, md.getIcons());
         if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, md.limage());
         if (allAttr || contains(CollectionSchema.linkscount_i)) add(doc, CollectionSchema.linkscount_i, md.llocal() + md.lother());
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, md.llocal());
@@ -999,58 +1001,79 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     
 	/**
 	 * Add icons metadata to Solr doc when corresponding schema attributes are
-	 * enabled. Remove images urls from inboudLinks and outboundLinks.
+	 * enabled.
 	 * 
 	 * @param doc
-	 *            solr document to fill
+	 *            solr document to fill. Must not be null.
 	 * @param allAttr
-	 *            all attributes are enabled
-	 * @param inboundLinks
-	 *            all document inbound links
-	 * @param outboundLinks
-	 *            all document outbound links
+	 *            all attributes are enabled.
 	 * @param icons
-	 *            document icon entries
+	 *            document icon entries.
 	 */
-	private void processIcons(SolrVector doc, boolean allAttr, LinkedHashMap<DigestURL, String> inboundLinks,
+	private void processIcons(SolrInputDocument doc, boolean allAttr, Collection<IconEntry> icons) {
+		processIcons(doc, allAttr, null, null, icons);
+	}
+    
+	/**
+	 * Add icons metadata to Solr doc when corresponding schema attributes are
+	 * enabled. Remove icons urls from inboudLinks and outboundLinks.
+	 * 
+	 * @param doc
+	 *            solr document to fill. Must not be null.
+	 * @param allAttr
+	 *            all attributes are enabled.
+	 * @param inboundLinks
+	 *            all document inbound links.
+	 * @param outboundLinks
+	 *            all document outbound links.
+	 * @param icons
+	 *            document icon entries.
+	 */
+	private void processIcons(SolrInputDocument doc, boolean allAttr, LinkedHashMap<DigestURL, String> inboundLinks,
 			LinkedHashMap<DigestURL, String> outboundLinks, Collection<IconEntry> icons) {
-		final List<String> protocols = new ArrayList<String>(icons.size());
-		final String[] sizes = new String[icons.size()];
-		final String[] stubs = new String[icons.size()];
-		final String[] rels = new String[icons.size()];
-		int i = 0;
-		/* Prepare solr field values */
-		for (final IconEntry ie : icons) {
-			final DigestURL url = ie.getUrl();
-			
-		    inboundLinks.remove(url);
-		    outboundLinks.remove(url);
-			
-			String protocol = url.getProtocol();
-			protocols.add(protocol);
+		if (icons != null) {
+			final List<String> protocols = new ArrayList<String>(icons.size());
+			final String[] sizes = new String[icons.size()];
+			final String[] stubs = new String[icons.size()];
+			final String[] rels = new String[icons.size()];
+			int i = 0;
+			/* Prepare solr field values */
+			for (final IconEntry ie : icons) {
+				final DigestURL url = ie.getUrl();
 
-			/*
-			 * There may be multiple sizes and multiple rels for one icon : we
-			 * store this as flat string as currently solr doesn't support
-			 * multidimensionnal array fields
-			 */
-			sizes[i] = ie.sizesToString();
-			stubs[i] = url.toString().substring(protocol.length() + 3);
-			rels[i] = ie.relToString();
+				if(inboundLinks != null) {
+					inboundLinks.remove(url);
+				}
+				if(outboundLinks != null) {
+					outboundLinks.remove(url);
+				}
 
-			i++;
-		}
-		if (allAttr || contains(CollectionSchema.icons_protocol_sxt)) {
-			add(doc, CollectionSchema.icons_protocol_sxt, protocolList2indexedList(protocols));
-		}
-		if (allAttr || contains(CollectionSchema.icons_urlstub_sxt)) {
-			add(doc, CollectionSchema.icons_urlstub_sxt, stubs);
-		}
-		if (allAttr || contains(CollectionSchema.icons_rel_sxt)) {
-			add(doc, CollectionSchema.icons_rel_sxt, rels);
-		}
-		if (allAttr || contains(CollectionSchema.icons_sizes_sxt)) {
-			add(doc, CollectionSchema.icons_sizes_sxt, sizes);
+				String protocol = url.getProtocol();
+				protocols.add(protocol);
+
+				/*
+				 * There may be multiple sizes and multiple rels for one icon :
+				 * we store this as flat string as currently solr doesn't
+				 * support multidimensionnal array fields
+				 */
+				sizes[i] = ie.sizesToString();
+				stubs[i] = url.toString().substring(protocol.length() + 3);
+				rels[i] = ie.relToString();
+
+				i++;
+			}
+			if (allAttr || contains(CollectionSchema.icons_protocol_sxt)) {
+				add(doc, CollectionSchema.icons_protocol_sxt, protocolList2indexedList(protocols));
+			}
+			if (allAttr || contains(CollectionSchema.icons_urlstub_sxt)) {
+				add(doc, CollectionSchema.icons_urlstub_sxt, stubs);
+			}
+			if (allAttr || contains(CollectionSchema.icons_rel_sxt)) {
+				add(doc, CollectionSchema.icons_rel_sxt, rels);
+			}
+			if (allAttr || contains(CollectionSchema.icons_sizes_sxt)) {
+				add(doc, CollectionSchema.icons_sizes_sxt, sizes);
+			}
 		}
 	}
 
