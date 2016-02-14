@@ -329,6 +329,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
         }
         if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, 200);
+        if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, md.dc_publisher());
 
         // fields that are in URIMetadataRow additional to yacy2solr basic requirement
         if (allAttr || contains(CollectionSchema.audiolinkscount_i)) add(doc, CollectionSchema.audiolinkscount_i, md.laudio());
@@ -340,7 +341,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	StringBuilder sb = new StringBuilder(120);
         	// accText(sb, md.dc_title()); // default search field via getQueryFields(), not needed for snippet (always displayed)
         	// accText(sb, md.dc_creator()); // author is in Default ranking/getQueryFields
-        	accText(sb, md.dc_publisher());
+        	// accText(sb, md.dc_publisher()); // has it's own metadata field publisher_t (not part of default queryfields) and mostly N/A
         	// accText(sb, md.snippet()); // above added to description_txt, default search field via getQueryFields(), description_txt incl. in snippet calculation
         	accText(sb, md.url().toTokens());
         	// accText(sb, keywords); // default search field via getQueryFields(), keywords not incl. in snippet calculation
