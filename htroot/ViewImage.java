@@ -137,7 +137,7 @@ public class ViewImage {
 			ImageInputStream imageInStream = null;
 			InputStream inStream = null;
 			try {
-                        String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
+                String urlExt = MultiProtocolURL.getFileExtension(url.getFileName());
 				if (ext != null && ext.equalsIgnoreCase(urlExt) && isBrowserRendered(urlExt)) {
 					return openInputStream(post, sb.loader, auth, url);
 				}
@@ -158,7 +158,7 @@ public class ViewImage {
                              * incorrect or unsupported format, bad ImageIO plugin...
                              * Instead return an empty EncodedImage. Caller is responsible for handling this correctly (500 status code response) */
 
-                            if ("favicon.ico".equalsIgnoreCase(url.getFileName())) { // but on missing favicon just present a default (occures frequently by call from searchitem.html)
+                            if (url != null && "favicon.ico".equalsIgnoreCase(url.getFileName())) { // but on missing favicon just present a default (occures frequently by call from searchitem.html)
                                 // currently yacysearchitem assigns "hosturl/favicon.ico" (to look for the filename should not much interfere with other situatios)
                                 if (defaulticonb == null) { // load the default icon once
                                     try {
