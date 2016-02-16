@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -47,7 +47,7 @@ public class rdfParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -65,8 +65,8 @@ public class rdfParser extends AbstractParser implements Parser {
         Document doc;
 
         String all = "rdfdatasource";
-		doc = new Document(location, mimeType, charset, null, null, null, singleList(""), "",
-					"", null, new ArrayList<String>(0), 0, 0, all, null, null, null, false, new Date());
+		doc = new Document(location, mimeType, charset, null, null, null, singleList(""), null,
+					"", null, null, 0, 0, all, null, null, null, false, new Date());
 
         docs.add(doc);
 

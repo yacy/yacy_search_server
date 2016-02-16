@@ -3755,42 +3755,57 @@ public final class Switchboard extends serverSwitch {
         }.start();
     }
 
-    public final void heuristicSearchResults(final String url) {
+    /**
+     * Get the outbound links of the result and add each unique link to crawler queue
+     * Is input resulturl a full index document with outboundlinks these will be used
+     * otherwise url is loaded and links are extracted/parsed
+     *
+     * @param resulturl the result doc which outbound links to add to crawler
+     */
+    public final void heuristicSearchResults(final URIMetadataNode resulturl) {
         new Thread() {
 
             @Override
             public void run() {
 
                 // get the links for a specific site
-                final AnchorURL startUrl;
-                try {
-                    startUrl = new AnchorURL(url);
-                } catch (final MalformedURLException e) {
-                    ConcurrentLog.logException(e);
-                    return;
-                }
+                final DigestURL startUrl = resulturl.url();
 
-                final Map<AnchorURL, String> links;
-                DigestURL url;
-                try {
-                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent, 0);
-                    if (links != null) {
-                        if (links.size() < 1000) { // limit to 1000 to skip large index pages
-                            final Iterator<AnchorURL> i = links.keySet().iterator();
-                            final boolean globalcrawljob = Switchboard.this.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL,false);
-                            Collection<DigestURL> urls = new ArrayList<DigestURL>();
-                            while (i.hasNext()) {
-                                url = i.next();
-                                boolean islocal = (url.getHost() == null && startUrl.getHost() == null) || (url.getHost() != null && startUrl.getHost() != null && url.getHost().contentEquals(startUrl.getHost()));
-                                // add all external links or links to different page to crawler
-                                if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
-                                    urls.add(url);
+                // result might be rich metadata, try to get outbout links directly from result
+                Set<DigestURL> urls;
+                Iterator<String> outlinkit = URIMetadataNode.getLinks(resulturl, false);
+                if (outlinkit.hasNext()) {
+                    urls = new HashSet<DigestURL>();
+                    while (outlinkit.hasNext()) {
+                        try {
+                            urls.add(new DigestURL(outlinkit.next()));
+                        } catch (MalformedURLException ex) { }
+                    }
+                } else { // otherwise get links from loader
+                    urls = null;
+
+                    try {
+                        final Map<AnchorURL, String> links;
+                        links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent, 0);
+                        if (links != null) {
+                            if (links.size() < 1000) { // limit to 1000 to skip large index pages
+                                final Iterator<AnchorURL> i = links.keySet().iterator();
+                                if (urls == null) urls = new HashSet<DigestURL>();
+                                while (i.hasNext()) {
+                                    DigestURL url = i.next();
+                                    boolean islocal = (url.getHost() == null && startUrl.getHost() == null) || (url.getHost() != null && startUrl.getHost() != null && url.getHost().contentEquals(startUrl.getHost()));
+                                    // add all external links or links to different page to crawler
+                                    if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
+                                        urls.add(url);
+                                    }
                                 }
                             }
-                            addToCrawler(urls, globalcrawljob);
                         }
-                    }
-                } catch (final Throwable e) {
+                    } catch (final Throwable e) { }
+                }
+                if (urls != null && urls.size() > 0) {
+                    final boolean globalcrawljob = Switchboard.this.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL,false);
+                    addToCrawler(urls, globalcrawljob);
                 }
             }
         }.start();

@@ -32,7 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -60,7 +60,7 @@ public class docParser extends AbstractParser implements Parser {
     @SuppressWarnings("deprecation")
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -121,7 +121,7 @@ public class docParser extends AbstractParser implements Parser {
             extractor.getDocSummaryInformation().getCompany(), // publisher
             null,
             descriptions,
-            0.0f, 0.0f,
+            0.0d, 0.0d,
             contents.toString(),
             null,
             null,

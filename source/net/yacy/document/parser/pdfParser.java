@@ -55,6 +55,7 @@ import org.apache.pdfbox.util.PDFTextStripper;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -89,7 +90,7 @@ public class pdfParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -253,7 +254,7 @@ public class pdfParser extends AbstractParser implements Parser {
                         docPublisher,
                         null,
                         null,
-                        0.0f, 0.0f,
+                        0.0d, 0.0d,
                         contentBytes,
                         pdflinksCombined,
                         null,

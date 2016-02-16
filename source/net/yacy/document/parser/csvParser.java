@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -54,7 +54,7 @@ public class csvParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -77,11 +77,11 @@ public class csvParser extends AbstractParser implements Parser {
 		        null,
 		        null,
 		        singleList(concatRow(table.get(0))),
-		        "",
+		        null,
 		        "",
 		        null,
 		        null,
-		        0.0f, 0.0f,
+		        0.0d, 0.0d,
 		        sb.toString(),
 		        null,
 		        null,
