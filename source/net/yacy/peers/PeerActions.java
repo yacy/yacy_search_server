@@ -37,14 +37,12 @@ public class PeerActions {
 
     private final SeedDB seedDB;
     private Map<String, String> userAgents;
-    public  long disconnects;
     private final NewsPool newsPool;
 
     public PeerActions(final SeedDB seedDB, final NewsPool newsPool) {
         this.seedDB = seedDB;
         this.newsPool = newsPool;
         this.userAgents = new ConcurrentARC<String, String>(10000, Runtime.getRuntime().availableProcessors() + 1);
-        this.disconnects = 0;
     }
 
     public void close() {
@@ -223,7 +221,6 @@ public class PeerActions {
                     }
                 } else {
                     // disconnect the peer anyway
-                    if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
                     peer.put(Seed.DCT, Long.toString(System.currentTimeMillis()));
                     this.seedDB.addDisconnected(peer);
                 }
@@ -244,7 +241,6 @@ public class PeerActions {
         // we do this if we did not get contact with the other peer
         if (Network.log.isFine()) Network.log.fine("connect: no contact to a " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getIPs() + ". Cause: " + cause);
         synchronized (this.seedDB) {
-            if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
             peer.put(Seed.DCT, Long.toString(System.currentTimeMillis()));
             this.seedDB.addDisconnected(peer); // update info
         }
