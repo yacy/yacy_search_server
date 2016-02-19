@@ -66,7 +66,7 @@ public class IndexExport_p {
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
-            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/" + GenericFormatter.SHORT_SECOND_FORMATTER.format());
+            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/yacy_export_" + sb.peers.myID() + "_" + GenericFormatter.SHORT_SECOND_FORMATTER.format());
             if (export == null) {
                 // there has never been an export
                 prop.put("lurlexportfinished", 0);
