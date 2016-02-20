@@ -967,7 +967,6 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     @Override
     public String toString() {
-        assert false; // this shall not be used to avoid confusion with AnchorURL.toString
         return toNormalform(false);
     }
 
