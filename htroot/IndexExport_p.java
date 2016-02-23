@@ -22,9 +22,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
-import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
@@ -53,9 +53,10 @@ public class IndexExport_p {
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
+        prop.putNum("ucount", ucount);
         
         // show export messages
-        final Fulltext.Export export = segment.fulltext().export();
+        Fulltext.Export export = segment.fulltext().export();
         if ((export != null) && (export.isAlive())) {
             // there is currently a running export
             prop.put("lurlexport", 2);
@@ -66,7 +67,7 @@ public class IndexExport_p {
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
-            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/yacy_export_" + sb.peers.myID() + "_" + GenericFormatter.SHORT_SECOND_FORMATTER.format());
+            prop.put("lurlexport_exportfilepath", sb.getDataPath() + "/DATA/EXPORT/");
             if (export == null) {
                 // there has never been an export
                 prop.put("lurlexportfinished", 0);
@@ -87,7 +88,6 @@ public class IndexExport_p {
         }
 
         if (post == null || env == null) {
-            prop.putNum("ucount", ucount);
             return prop; // nothing to do
         }
 
@@ -102,23 +102,25 @@ public class IndexExport_p {
             if (fname.endsWith("rss")) format = Fulltext.ExportFormat.rss;
             if (fname.endsWith("solr")) format = Fulltext.ExportFormat.solr;
 
-            // extend export file name
-            String s = post.get("exportfile", "");
-            if (s.indexOf('.',0) < 0) {
-                if (format == Fulltext.ExportFormat.text) s = s + ".txt";
-                if (format == Fulltext.ExportFormat.html) s = s + ".html";
-                if (format == Fulltext.ExportFormat.rss ) s = s + "_rss.xml";
-                if (format == Fulltext.ExportFormat.solr) s = s + "_full.xml";
-            }
-            final File f = new File(s);
-            f.getParentFile().mkdirs();
             final String filter = post.get("exportfilter", ".*");
             final String query = post.get("exportquery", "*:*");
-            final Fulltext.Export running = segment.fulltext().export(f, filter, query, format, dom, text);
-
-            prop.put("lurlexport_exportfile", s);
-            prop.put("lurlexport_urlcount", running.count());
-            if ((running != null) && (running.failed() == null)) {
+            final int maxseconds = post.getInt("exportmaxseconds", -1);
+            final String path = post.get("exportfilepath", "");
+            
+            // start the export
+            try {
+                export = sb.index.fulltext().export(format, filter, query, maxseconds, new File(path), dom, text);
+            } catch (IOException e) {
+                prop.put("lurlexporterror", 1);
+                prop.put("lurlexporterror_exportfile", "-no export-");
+                prop.put("lurlexporterror_exportfailmsg", e.getMessage());
+                return prop;
+            }
+            
+            // show result
+            prop.put("lurlexport_exportfile", export.file().toString());
+            prop.put("lurlexport_urlcount", export.count());
+            if ((export != null) && (export.failed() == null)) {
                 prop.put("lurlexport", 2);
             }
             prop.put("reload", 1);
