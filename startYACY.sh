@@ -188,6 +188,13 @@ CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH=".:htroot:$CLASSPATH"
 
+# check core jar exists to avoid failing silently later
+if [ ! -f lib/yacycore.jar ]
+then
+   echo "Error: lib/yacycore.jar was not found! Please first build from sources using Apache Ant."
+   exit 1
+fi
+
 cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
 if [ $GUI -eq 1 ] #gui
 then

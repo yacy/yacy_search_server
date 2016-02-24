@@ -7,6 +7,11 @@ echo . >DATA\yacy.noconsole
 
 Rem Setting the classpath
 Set CLASSPATH=lib\yacycore.jar
+Rem Check core jar exists to avoid failing silently later
+if not exist lib/yacycore.jar (
+	Echo "Error : lib/yacycore.jar was not found! Please first build from sources using Apache Ant."
+	Exit /b 1
+)
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
