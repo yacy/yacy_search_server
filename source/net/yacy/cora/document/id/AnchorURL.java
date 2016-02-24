@@ -168,9 +168,4 @@ public class AnchorURL extends DigestURL {
                 ">" + this.textBody + "</a>";
     }
     
-    @Override
-    public String toString() {
-        return this.toNormalform(false);
-    }
-    
 }

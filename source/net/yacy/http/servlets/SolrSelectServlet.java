@@ -39,7 +39,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -50,6 +49,7 @@ import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.SnapshotImagesReponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
@@ -122,7 +122,8 @@ public class SolrSelectServlet extends HttpServlet {
             MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString());
 
             Switchboard sb = Switchboard.getSwitchboard();
-            boolean authenticated = true;
+            // TODO: isUserInRole needs a login to jetty container (not done automatically on admin from localhost)
+            boolean authenticated = hrequest.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString());;
             
             // count remote searches if this was part of a p2p search
             if (mmsp.getMap().containsKey("partitions")) {
