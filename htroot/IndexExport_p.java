@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
@@ -106,6 +107,9 @@ public class IndexExport_p {
             final String query = post.get("exportquery", "*:*");
             final int maxseconds = post.getInt("exportmaxseconds", -1);
             final String path = post.get("exportfilepath", "");
+
+            // store this call as api call: we do this even if there is a chance that it fails because recurring calls may do not fail
+            if (maxseconds != -1) sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_DUMP, format + "-dump, q=" + query + ", maxseconds=" + maxseconds);
             
             // start the export
             try {
