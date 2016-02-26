@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 JAVA="`which java`"
-CONFIGFILE="DATA/SETTINGS/yacy.conf"
-LOGFILE="yacy.log"
-PIDFILE="yacy.pid"
+PROGRAMDIR="`dirname $0`/"
+DATADIR="${PROGRAMDIR}DATA/"
+CONFIGFILE="${DATADIR}SETTINGS/yacy.conf"
+LOGFILE="${PROGRAMDIR}yacy.log"
+PIDFILE="${PROGRAMDIR}yacy.pid"
 OS="`uname`"
 
 #get javastart args
@@ -36,8 +38,8 @@ usage() {
 startscript for YaCy on UNIX-like systems
 Options
   -h, --help		show this help
-  -t, --tail-log	show the output of "tail -f DATA/LOG/yacy00.log" after starting YaCy
-  -l, --logging		save the output of YaCy to yacy.log
+  -t, --tail-log	show the output of "tail -f ${DATADIR}LOG/yacy00.log" after starting YaCy
+  -l, --logging		save the output of YaCy to $LOGFILE
   -d, --debug		show the output of YaCy on the console
   -p, --print-out	only print the command, which would be executed to start YaCy
   -g, --gui		start a gui for YaCy
@@ -45,7 +47,7 @@ USAGE
 }
 
 #startup YaCy
-cd "`dirname $0`"
+#cd "`dirname $0`"
 
 if [ $OS = "OpenBSD" ]
 then
@@ -149,10 +151,10 @@ fi
 #turn on MMap for Solr if OS is a 64bit OS
 if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
 
-if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
+if [ ! -f $CONFIGFILE -a -f ${DATADIR}SETTINGS/httpProxy.conf ]
 then
 	# old config if new does not exist
-	CONFIGFILE="DATA/SETTINGS/httpProxy.conf"
+	CONFIGFILE="${DATADIR}SETTINGS/httpProxy.conf"
 fi
 if [ -f $CONFIGFILE ]
 then
@@ -180,13 +182,14 @@ else
     PORT="8090"
 fi
 
+JAVA_ARGS="$JAVA_ARGS -Duser.dir=$PROGRAMDIR"
+
 #echo "JAVA_ARGS: $JAVA_ARGS"
 #echo "JAVA: $JAVA"
 
 # generating the proper classpath
-CLASSPATH=""
-for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
-CLASSPATH=".:htroot:$CLASSPATH"
+CLASSPATH=".:$PROGRAMDIR:htroot"
+for N in ${PROGRAMDIR}lib/*.jar; do CLASSPATH="${CLASSPATH}:$N"; done
 
 cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
 if [ $GUI -eq 1 ] #gui
@@ -197,7 +200,7 @@ if [ $DEBUG -eq 1 ] #debug
 then
 	cmdline=$cmdline
 elif [ $LOGGING -eq 1 ];then #logging
-	cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
+	cmdline="$cmdline >> $LOGFILE & echo \$! > $PIDFILE"
 else
 	cmdline="$cmdline >/dev/null 2>/dev/null &"
 fi
@@ -207,7 +210,7 @@ else
 	echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
 	echo "**** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****"
 	echo "****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****"
-	echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **"
+	echo "**  LOG of       YaCy: ${DATADIR}LOG/yacy00.log (and yacy<xx>.log)                **"
 	echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
     echo "**  GET HELP for YaCy: see http://wiki.yacy.net and http://forum.yacy.de     **"
 	echo "*******************************************************************************"
@@ -215,6 +218,6 @@ else
 	eval $cmdline
 	if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
 		sleep 1
-		tail -f DATA/LOG/yacy00.log
+		tail -f ${DATADIR}LOG/yacy00.log
 	fi
 fi

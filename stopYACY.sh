@@ -1,14 +1,15 @@
 #!/usr/bin/env sh
-cd `dirname $0`
+PROGRAMDIR="`dirname $0`/"
+DATADIR="${PROGRAMDIR}DATA/"
 
-bin/apicall.sh "Steering.html?shutdown=true" > /dev/null
+${PROGRAMDIR}bin/apicall.sh "Steering.html?shutdown=true" > /dev/null
 
 echo "Please wait until the YaCy daemon process terminates [wget]"
-echo "You can monitor this with 'tail -f DATA/LOG/yacy00.log' and 'fuser log/yacy00.log'"
+echo "You can monitor this with 'tail -f ${DATADIR}LOG/yacy00.log' and 'fuser ${DATADIR}LOG/yacy00.log'"
 
 # wait until the yacy.running file disappears which means that YaCy has terminated
 # If you don't want to wait, just run this concurrently
-while [ -f "DATA/yacy.running" ]
+while [ -f "${DATADIR}yacy.running" ]
 do
 sleep 1
 done
