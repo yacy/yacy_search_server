@@ -5,6 +5,11 @@ if exist DATA\yacy.noconsole del DATA\yacy.noconsole
 
 Rem Generating the proper classpath unsing loops and labels
 Set CLASSPATH=lib/yacycore.jar;htroot
+Rem Check core jar exists to avoid failing silently later
+if not exist lib/yacycore.jar (
+	Echo "Error : lib/yacycore.jar was not found! Please first build from sources using Apache Ant."
+	Exit /b 1
+)
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
