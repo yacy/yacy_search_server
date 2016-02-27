@@ -18,6 +18,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,7 +39,6 @@ import net.yacy.server.http.HTTPDProxyHandler;
 
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
-import org.eclipse.jetty.proxy.ProxyServlet;
 
 /**
  * Servlet to implement proxy via url parameter "/proxy.html?url=xyz_urltoproxy"
@@ -59,7 +59,7 @@ import org.eclipse.jetty.proxy.ProxyServlet;
  * @deprecated since 1.81 use {@link UrlProxyServlet} instead.
  */
 @Deprecated //use UrlProxyServlet instead
-public class YaCyProxyServlet extends ProxyServlet implements Servlet {
+public class YaCyProxyServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = 4900000000000001120L;
     
     @Override
