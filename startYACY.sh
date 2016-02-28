@@ -186,7 +186,7 @@ fi
 # generating the proper classpath
 CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
-CLASSPATH=".:htroot:$CLASSPATH"
+CLASSPATH=".:$CLASSPATH"
 
 cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
 if [ $GUI -eq 1 ] #gui
