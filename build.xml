@@ -660,7 +660,6 @@
     <java classname="net.yacy.yacy" fork="yes">
       <classpath>
         <pathelement location="${build}"/>
-        <pathelement location="${htroot}"/>
         <pathelement location="${lib}" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
@@ -680,7 +679,6 @@
       <classpath refid="run.classpath"/>
       <classpath>
         <pathelement location="${build}"/>
-        <pathelement location="${htroot}"/>
         <pathelement location="${lib}" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
@@ -716,7 +714,6 @@
     <java classname="net.yacy.yacy" fork="yes">
       <classpath>
         <pathelement location="${build}"/>
-        <pathelement location="${htroot}"/>
         <pathelement location="${lib}" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
