@@ -4,7 +4,7 @@ title YaCy
 if exist DATA\yacy.noconsole del DATA\yacy.noconsole
 
 Rem Generating the proper classpath unsing loops and labels
-Set CLASSPATH=lib/yacycore.jar;htroot
+Set CLASSPATH=lib/yacycore.jar
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
