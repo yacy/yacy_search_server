@@ -283,7 +283,7 @@ public class LegacyBalancer implements Balancer {
             final String hostname = entry.getKey();
             final HostHandles hosthandles = entry.getValue();
             int size = hosthandles.handleSet.size();
-            int delta = Latency.waitingRemainingGuessed(hostname, hosthandles.hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
+            int delta = Latency.waitingRemainingGuessed(hostname, 80, hosthandles.hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
             map.put(hostname, new Integer[]{size, delta});
         }
         return map;

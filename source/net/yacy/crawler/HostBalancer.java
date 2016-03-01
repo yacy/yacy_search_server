@@ -297,7 +297,7 @@ public class HostBalancer implements Balancer {
                             String s = i.next();
                             HostQueue hq = this.queues.get(s);
                             if (hq == null) {i.remove(); continue smallstacks;}
-                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
                             if (delta < 0) continue; // keep all non-waiting stacks; they are useful to speed up things
                             // to protect all small stacks which have a fast throughput, remove all with long waiting time
                             if (delta >= 1000) {i.remove(); continue smallstacks;}
@@ -332,7 +332,7 @@ public class HostBalancer implements Balancer {
                     mixedstrategy: for (String h: this.roundRobinHostHashes) {
                         HostQueue hq = this.queues.get(h);
                         if (hq != null) {
-                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), h, robots, ClientIdentification.yacyInternetCrawlerAgent) / 200;
+                            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), h, robots, ClientIdentification.yacyInternetCrawlerAgent) / 200;
                             if (delta < 0) delta = 0;
                             List<String> queueHashes = fastTree.get(delta);
                             if (queueHashes == null) {
@@ -427,7 +427,7 @@ public class HostBalancer implements Balancer {
                         String s = i.next();
                         HostQueue hq = this.queues.get(s);
                         if (hq == null) {i.remove(); continue protectcheck;}
-                        int delta = Latency.waitingRemainingGuessed(hq.getHost(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                        int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
                         if (delta >= 0) {i.remove();}
                     }
                 }
@@ -488,7 +488,7 @@ public class HostBalancer implements Balancer {
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
         Map<String, Integer[]> map = new TreeMap<String, Integer[]>(); // we use a tree map to get a stable ordering
         for (HostQueue hq: this.queues.values()) try {
-            int delta = Latency.waitingRemainingGuessed(hq.getHost(), DigestURL.hosthash(hq.getHost(), hq.getPort()), robots, ClientIdentification.yacyInternetCrawlerAgent);
+            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), DigestURL.hosthash(hq.getHost(), hq.getPort()), robots, ClientIdentification.yacyInternetCrawlerAgent);
             map.put(hq.getHost() + ":" + hq.getPort(), new Integer[]{hq.size(), delta});
         } catch (MalformedURLException e) {
             ConcurrentLog.logException(e);
