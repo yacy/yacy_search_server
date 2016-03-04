@@ -151,6 +151,8 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 }
             }
 
+            zipFile.close(); // close zipfile (so underlaying file (temp file) can be deleted later
+
             // make the languages set
             final Set<String> languages = new HashSet<String>(1);
             if (docLanguage != null && docLanguage.isEmpty())

@@ -165,6 +165,8 @@ public class odtParser extends AbstractParser implements Parser {
                 }
             }
 
+            zipFile.close(); // close zipfile (so underlaying file (temp file) can be deleted later
+
             // make the languages set
             final Set<String> languages = new HashSet<String>(1);
             if (docLanguage != null) languages.add(docLanguage);
@@ -197,7 +199,7 @@ public class odtParser extends AbstractParser implements Parser {
                     "",
                     null,
                     descriptions,
-                    0.0f, 0.0f,
+                    0.0d, 0.0d,
                     contentBytes,
                     null,
                     null,
