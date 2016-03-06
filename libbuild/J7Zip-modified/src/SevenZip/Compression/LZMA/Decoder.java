@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import SevenZip.Compression.LZ.OutWindow;
-import SevenZip.Compression.LZMA.Base;
 import SevenZip.Compression.RangeCoder.BitTreeDecoder;
 
 public class Decoder extends InputStream implements ICompressCoder, ICompressGetInStreamProcessedSize,
@@ -71,7 +70,7 @@ public class Decoder extends InputStream implements ICompressCoder, ICompressGet
 		// Set lc, lp, pb
 		if (lc > Base.kNumLitContextBitsMax || lp > 4 || pb > Base.kNumPosStatesBitsMax)
 			throw new IllegalArgumentException("lc > Base.kNumLitContextBitsMax || lp > 4 || pb > Base.kNumPosStatesBitsMax");
-		if (this.m_LiteralDecoder != null) throw new NullPointerException("LiteralDecoder != null, WTF?!");
+		// if (this.m_LiteralDecoder != null) throw new NullPointerException("LiteralDecoder != null, WTF?!"); // hint: skip use of not initialized static variable
 		this.m_LiteralDecoder = new LiteralDecoder(lp, lc);
 		int numPosStates = 1 << pb;
 		this.m_LenDecoder = new LenDecoder(numPosStates);
