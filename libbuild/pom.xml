@@ -19,6 +19,7 @@
     <modules>
         <module>GitRevMavenTask</module>
         <module>WebCat-swf</module>
+        <module>J7Zip-modified</module>
         <!-- hack to include YaCy as module
         <module>..</module>
         -->

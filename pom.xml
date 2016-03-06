@@ -236,31 +236,7 @@
                 </configuration>
             </plugin>
             -->
-            <plugin>
-                <!-- install jars not found in maven repository to local repository -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <executions>
 
-                    <execution>
-                        <id>install-J7Zip-jar</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <file>${basedir}/lib/J7Zip-modified.jar</file>
-                            <groupId>net.yacy.extlib</groupId>
-                            <artifactId>J7Zip-modified</artifactId>
-                            <version>1.02</version>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
