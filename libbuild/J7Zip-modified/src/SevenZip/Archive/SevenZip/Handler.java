@@ -48,7 +48,7 @@ public class Handler implements IInArchive {
         if (numItems == 0)
             return;
         
-        Vector extractFolderInfoVector = new Vector();
+        Vector<ExtractFolderInfo> extractFolderInfoVector = new Vector();
         for (int ii = 0; ii < numItems; ii++) {
             int ref2Index = allFilesMode ? ii : indices[ii];
             
@@ -61,15 +61,15 @@ public class Handler implements IInArchive {
                 continue;
             }
             if (extractFolderInfoVector.isEmpty() ||
-                    folderIndex != ((ExtractFolderInfo)extractFolderInfoVector.lastElement()).FolderIndex) {
+                    folderIndex != (extractFolderInfoVector.lastElement()).FolderIndex) {
                 extractFolderInfoVector.add(new ExtractFolderInfo(ArchiveDB.kNumNoIndex, folderIndex));
-                Folder folderInfo = (Folder)database.Folders.get(folderIndex);
+                Folder folderInfo = database.Folders.get(folderIndex);
                 long unPackSize = folderInfo.GetUnPackSize();
                 importantTotalUnPacked += unPackSize;
-                ((ExtractFolderInfo)extractFolderInfoVector.lastElement()).UnPackSize = unPackSize;
+                extractFolderInfoVector.lastElement().UnPackSize = unPackSize;
             }
             
-            ExtractFolderInfo efi = (ExtractFolderInfo)extractFolderInfoVector.lastElement();
+            ExtractFolderInfo efi = extractFolderInfoVector.lastElement();
             
             int startIndex = database.FolderStartFileIndex.get(folderIndex); // CNum
             for (int index = efi.ExtractStatuses.size(); index <= fileIndex - startIndex; index++)
@@ -84,7 +84,7 @@ public class Handler implements IInArchive {
         long totalFolderUnPacked;
         
         for (int i = 0; i < extractFolderInfoVector.size(); i++, currentImportantTotalUnPacked += totalFolderUnPacked) {
-            ExtractFolderInfo efi = (ExtractFolderInfo)extractFolderInfoVector.get(i);
+            ExtractFolderInfo efi = extractFolderInfoVector.get(i);
             totalFolderUnPacked = efi.UnPackSize;
             
             extractCallback.SetCompleted(currentImportantTotalUnPacked);
@@ -103,7 +103,7 @@ public class Handler implements IInArchive {
                 continue;
             
             int folderIndex = efi.FolderIndex; // CNum
-            Folder folderInfo = (Folder)this._database.Folders.get(folderIndex);
+            Folder folderInfo = this._database.Folders.get(folderIndex);
             
             LocalProgress localProgressSpec = new LocalProgress(extractCallback, false);
             
@@ -203,10 +203,10 @@ public class Handler implements IInArchive {
     private String getMethods(int index2) {
         int folderIndex = _database.FileIndexToFolderIndexMap.get(index2);
         if (folderIndex != ArchiveDB.kNumNoIndex) {
-            Folder folderInfo = (Folder)_database.Folders.get(folderIndex);
+            Folder folderInfo = _database.Folders.get(folderIndex);
             StringBuffer methodsString = new StringBuffer();
             for (int i = folderInfo.Coders.size() - 1; i >= 0; i--) {
-                CoderInfo coderInfo = (CoderInfo)folderInfo.Coders.get(i);
+                CoderInfo coderInfo = folderInfo.Coders.get(i);
                 if (methodsString.length() > 0)
                     methodsString.append(' ');
                 

@@ -1,6 +1,7 @@
 package SevenZip.Archive.SevenZip;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
@@ -10,7 +11,6 @@ import SevenZip.ICompressFilter;
 import SevenZip.ICompressProgressInfo;
 import SevenZip.IInStream;
 
-import SevenZip.Archive.Common.BindPair;
 import SevenZip.Archive.Common.CoderMixer2ST;
 import SevenZip.Archive.Common.FilterCoder;
 
@@ -94,7 +94,7 @@ public class Decoder {
 		}
 		
 		for (i=0; i<folderInfo.Coders.size(); i++) {
-			CoderInfo coderInfo = (CoderInfo)folderInfo.Coders.get(i);
+			CoderInfo coderInfo = folderInfo.Coders.get(i);
 			AltCoderInfo altCoderInfo = (AltCoderInfo)coderInfo.AltCoders.firstElement();
 			
 			if (coderInfo.IsSimpleCoder()) {
@@ -128,7 +128,7 @@ public class Decoder {
 	private void setCoderMixerCommonInfos(Folder folderInfo, LongVector packSizes) {
 		int packStreamIndex = 0, unPackStreamIndex = 0;
 		for (int i=0; i<folderInfo.Coders.size(); i++) {
-			CoderInfo coderInfo = (CoderInfo)folderInfo.Coders.get(i);
+			CoderInfo coderInfo = folderInfo.Coders.get(i);
 			int numInStreams = coderInfo.NumInStreams;
 			int numOutStreams = coderInfo.NumOutStreams;
 			LongVector packSizesPointers = new LongVector(); // CRecordVector<const UInt64 *>
@@ -145,7 +145,7 @@ public class Decoder {
 				final int bindPairIndex = folderInfo.FindBindPairForInStream(packStreamIndex);
 				final int index;
 				if (bindPairIndex >= 0) {
-					index = ((BindPair)folderInfo.BindPairs.get(bindPairIndex)).OutIndex;
+					index = (folderInfo.BindPairs.get(bindPairIndex)).OutIndex;
 					packSizesPointer = folderInfo.UnPackSizes.get(index);
 				} else {
 					index = folderInfo.FindPackStreamArrayIndex(packStreamIndex);
@@ -172,7 +172,7 @@ public class Decoder {
 			ICompressProgressInfo compressProgress
 	) throws IOException {
 		
-		final Vector inStreams = folderInfo.getInStreams(
+		final Vector<InputStream> inStreams = folderInfo.getInStreams(
 				inStream,
 				startPos,
 				packSizes,
@@ -203,10 +203,10 @@ public class Decoder {
 		
 		this._mixerCoderSTSpec.Code(
 				inStreams,
-				null,
+				//null,
 				inStreams.size(),
 				outStreams,
-				null,
+				//null,
 				1,
 				compressProgress);
 	}

@@ -15,8 +15,8 @@ import SevenZip.Archive.Common.CoderStreamsInfo;
 
 public class Folder {
 	
-    public Vector Coders = new Vector();
-    public Vector BindPairs = new Vector();
+    public Vector<CoderInfo> Coders = new Vector();
+    public Vector<BindPair> BindPairs = new Vector();
     public IntVector PackStreams = new IntVector();
     public LongVector UnPackSizes = new LongVector();
     int UnPackCRC;
@@ -37,14 +37,14 @@ public class Folder {
     
     public int FindBindPairForInStream(int inStreamIndex) {
         for(int i = 0; i < BindPairs.size(); i++)
-            if (((BindPair)BindPairs.get(i)).InIndex == inStreamIndex)
+            if ((BindPairs.get(i)).InIndex == inStreamIndex)
                 return i;
         return -1;
     }
     
     public int FindBindPairForOutStream(int outStreamIndex) {
         for(int i = 0; i < BindPairs.size(); i++)
-            if (((BindPair)BindPairs.get(i)).OutIndex == outStreamIndex)
+            if ((BindPairs.get(i)).OutIndex == outStreamIndex)
                 return i;
         return -1;
     }
@@ -59,7 +59,7 @@ public class Folder {
     public int GetNumOutStreams() {
         int result = 0;
         for (int i = 0; i < Coders.size(); i++)
-            result += ((CoderInfo)Coders.get(i)).NumOutStreams;
+            result += (Coders.get(i)).NumOutStreams;
         return result;
     }
     
@@ -82,14 +82,14 @@ public class Folder {
 		
 		for (int i = 0; i < this.BindPairs.size(); i++) {
 			BindPair bindPair = new BindPair();
-			bindPair.InIndex = ((BindPair)this.BindPairs.get(i)).InIndex;
-			bindPair.OutIndex = ((BindPair)this.BindPairs.get(i)).OutIndex;
+			bindPair.InIndex = (this.BindPairs.get(i)).InIndex;
+			bindPair.OutIndex = (this.BindPairs.get(i)).OutIndex;
 			bindInfo.BindPairs.add(bindPair);
 		}
 		int outStreamIndex = 0;
 		for (int i = 0; i < this.Coders.size(); i++) {
 			CoderStreamsInfo coderStreamsInfo = new CoderStreamsInfo();
-			CoderInfo coderInfo = (CoderInfo)this.Coders.get(i);
+			CoderInfo coderInfo = this.Coders.get(i);
 			coderStreamsInfo.NumInStreams = coderInfo.NumInStreams;
 			coderStreamsInfo.NumOutStreams = coderInfo.NumOutStreams;
 			bindInfo.Coders.add(coderStreamsInfo);

@@ -33,11 +33,11 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
     // }
     
     void CodeReal(
-            Vector inStreams,
-            Object useless1, // const UInt64 ** /* inSizes */,
+            Vector<InputStream> inStreams,
+            //Object useless1, // const UInt64 ** /* inSizes */,
             int numInStreams,
-            Vector outStreams,
-            Object useless2, // const UInt64 ** /* outSizes */,
+            Vector<OutputStream> outStreams,
+            //Object useless2, // const UInt64 ** /* outSizes */,
             int numOutStreams,
             ICompressProgressInfo progress) throws java.io.IOException {
         
@@ -50,11 +50,11 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
         _rangeDecoder.Create(1 << 20);
         _outStream.Create(1 << 16);
         
-        _mainInStream.SetStream((InputStream)inStreams.get(0));
-        _callStream.SetStream((InputStream)inStreams.get(1));
-        _jumpStream.SetStream((InputStream)inStreams.get(2));
-        _rangeDecoder.SetStream((InputStream)inStreams.get(3));
-        _outStream.SetStream((OutputStream)outStreams.get(0));
+        _mainInStream.SetStream(inStreams.get(0));
+        _callStream.SetStream(inStreams.get(1));
+        _jumpStream.SetStream(inStreams.get(2));
+        _rangeDecoder.SetStream(inStreams.get(3));
+        _outStream.SetStream(outStreams.get(0));
         
         _mainInStream.Init();
         _callStream.Init();
@@ -154,17 +154,17 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
     }
     
     public void Code(
-            Vector inStreams, // ISequentialInStream **inStreams,
-            Object useless_inSizes, // const UInt64 ** /* inSizes */,
+            Vector<InputStream> inStreams, // ISequentialInStream **inStreams,
+            //Object useless_inSizes, // const UInt64 ** /* inSizes */,
             int numInStreams,
-            Vector outStreams, // ISequentialOutStream **outStreams
-            Object useless_outSizes, // const UInt64 ** /* outSizes */,
+            Vector<OutputStream> outStreams, // ISequentialOutStream **outStreams
+            //Object useless_outSizes, // const UInt64 ** /* outSizes */,
             int numOutStreams,
             ICompressProgressInfo progress) throws java.io.IOException {
         
         try {
-            CodeReal(inStreams, useless_inSizes, numInStreams,
-                    outStreams, useless_outSizes,numOutStreams, progress);
+            CodeReal(inStreams, /*useless_inSizes,*/ numInStreams,
+                    outStreams, /*useless_outSizes,*/ numOutStreams, progress);
         } catch(java.io.IOException e) {
             throw e;
         } finally {

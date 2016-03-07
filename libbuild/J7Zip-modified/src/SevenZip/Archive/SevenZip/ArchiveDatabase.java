@@ -11,9 +11,9 @@ class ArchiveDatabase {
     public LongVector PackSizes = new LongVector();
     public BoolVector PackCRCsDefined = new BoolVector();
     public IntVector PackCRCs = new IntVector();
-    public Vector Folders = new Vector();
+    public Vector<Folder> Folders = new Vector();
     public IntVector NumUnPackStreamsVector = new IntVector();
-    public Vector Files = new Vector();
+    public Vector<FileItem> Files = new Vector();
     
     void Clear() {
         PackSizes.clear();

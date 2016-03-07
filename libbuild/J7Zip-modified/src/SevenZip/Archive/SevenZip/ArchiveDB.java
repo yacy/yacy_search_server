@@ -17,19 +17,19 @@ public class ArchiveDB {
 
 	public static final int kNumNoIndex = 0xFFFFFFFF;
 	
-    public final LongVector		PackSizes					= new LongVector();
-	public final BoolVector		PackCRCsDefined				= new BoolVector();
-	public final IntVector		PackCRCs					= new IntVector();
+    public final LongVector		PackSizes			= new LongVector();
+	public final BoolVector		PackCRCsDefined			= new BoolVector();
+	public final IntVector		PackCRCs			= new IntVector();
 	public final IntVector		NumUnPackStreamsVector		= new IntVector();
-	public final Vector			Files						= new Vector();
-	public 		 Vector			Folders						= new Vector();
+	public final Vector<FileItem>	Files				= new Vector();
+	public 	     Vector<Folder>	Folders				= new Vector();
 	
 	public final IntVector		FolderStartPackStreamIndex	= new IntVector();
 	public final IntVector		FolderStartFileIndex		= new IntVector();
 	public final IntVector		FileIndexToFolderIndexMap	= new IntVector();
 	
 	private final InStream		inStream;
-	private final InArchiveInfo	ArchiveInfo					= new InArchiveInfo();
+	private final InArchiveInfo	ArchiveInfo			= new InArchiveInfo();
 	private final LongVector	PackStreamStartPositions	= new LongVector();
     
     public ArchiveDB(InStream inStream) throws IOException {
@@ -254,7 +254,7 @@ public class ArchiveDB {
     }
     
     private void ReadSubStreamsInfo(
-            Vector folders,
+            Vector<Folder> folders,
             IntVector numUnPackStreamsInFolders,
             LongVector unPackSizes,
             BoolVector digestsDefined,
@@ -360,7 +360,7 @@ public class ArchiveDB {
         
         type = this.inStream.ReadID();
         assert (type == Header.NID.kUnPackInfo);
-        Vector folders = ReadUnPackInfo(null);
+        Vector<Folder> folders = ReadUnPackInfo(null);
         
         type = this.inStream.ReadID();
         assert (type == Header.NID.kEnd);
@@ -517,14 +517,14 @@ public class ArchiveDB {
         streamSwitch.close();
     }
     
-    private Vector ReadUnPackInfo(Vector dataVector) throws IOException {
+    private Vector<Folder> ReadUnPackInfo(Vector dataVector) throws IOException {
         this.inStream.skipToAttribute(Header.NID.kFolder);
         
         int numFolders = this.inStream.ReadNum();
         
         StreamSwitch streamSwitch = new StreamSwitch();
         streamSwitch.Set(this.inStream, dataVector);
-        Vector folders = new Vector(numFolders);
+        Vector<Folder> folders = new Vector(numFolders);
         for (int i=0; i<numFolders; i++)
             folders.add(GetNextFolderItem());
         streamSwitch.close();
@@ -532,7 +532,7 @@ public class ArchiveDB {
         this.inStream.skipToAttribute(Header.NID.kCodersUnPackSize);
         
         for (int i=0; i<numFolders; i++) {
-            Folder folder = (Folder)folders.get(i);
+            Folder folder = folders.get(i);
             int numOutStreams = folder.GetNumOutStreams();
             folder.UnPackSizes.Reserve(numOutStreams);
             for (int j=0; j<numOutStreams; j++) {
@@ -548,7 +548,7 @@ public class ArchiveDB {
                 IntVector crcs = new IntVector();
                 crcs = this.inStream.ReadHashDigests(numFolders, crcsDefined);
                 for (int i=0; i<numFolders; i++) {
-                    Folder folder = (Folder)folders.get(i);
+                    Folder folder = folders.get(i);
                     folder.UnPackCRCDefined = crcsDefined.get(i);
                     folder.UnPackCRC = crcs.get(i);
                 }
@@ -569,7 +569,7 @@ public class ArchiveDB {
         int numOutStreams = 0;
         for (int i=0; i<numCoders; i++) {
             folder.Coders.add(new CoderInfo());
-            CoderInfo coder = (CoderInfo)folder.Coders.lastElement();
+            CoderInfo coder = folder.Coders.lastElement();
             int mainByte;
             do {
                 AltCoderInfo altCoder = new AltCoderInfo();

@@ -6,8 +6,8 @@ import Common.IntVector;
 
 public class BindInfo {
 	
-    public Vector Coders = new Vector();
-    public Vector BindPairs = new Vector();
+    public Vector<CoderStreamsInfo> Coders = new Vector();
+    public Vector<BindPair> BindPairs = new Vector();
     public IntVector InStreams = new IntVector();
     public IntVector OutStreams = new IntVector();
     
