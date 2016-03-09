@@ -51,37 +51,31 @@ public class BindInfo {
 
     /**
      * @param streamIndex
-     * @return int[2], where the element at index 0 specifies the coder index number and
-     * the element at index 1 is the stream index corresponding to the found coder index.
-     * <p>Returns <code>null</code> if no InStream for <code>streamIndex</code> could be
-     * found.</p>
+     * @return the coder index number 
      */
-    public int[] FindInStream(int streamIndex) {
+    public int FindInStream(int streamIndex) {
         for (int i=0; i<Coders.size(); i++) {
             int curSize = ((CoderStreamsInfo)Coders.get(i)).NumInStreams;
             if (streamIndex < curSize) {
-                return new int[] { i, streamIndex };
+                return i;
             }
             streamIndex -= curSize;
         }
-        return null;
+        return -1; //throw new UnknownError("1");
     }
     
     /**
      * @param streamIndex
-     * @return int[2], where the element at index 0 specifies the coder index number and
-     * the element at index 1 is the stream index corresponding to the found coder index.
-     * <p>Returns <code>null</code> if no OutStream for <code>streamIndex</code> could be
-     * found.</p>
+     * @return  the coder index number 
      */
-    public int[] FindOutStream(int streamIndex) {
+    public int FindOutStream(int streamIndex) {
         for (int i=0; i<Coders.size(); i++) {
             int curSize = ((CoderStreamsInfo)Coders.get(i)).NumOutStreams;
             if (streamIndex < curSize)
-                return new int[] { i, streamIndex };
+                return i;
             streamIndex -= curSize;
         }
-        return null;
+        return -1; //throw new UnknownError("1");
     }
     
     public boolean equals(Object obj) {
