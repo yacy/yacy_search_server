@@ -103,9 +103,9 @@ public class PeerActions {
             ctimeUTC0 = nowUTC0Time;
             assert (seed.getLastSeenUTC() - ctimeUTC0 < 100);
         }
-        if (Math.abs(nowUTC0Time - ctimeUTC0) / 1000 / 60 > 60 * 6 ) {
+        if (Math.abs(nowUTC0Time - ctimeUTC0) / 1000 / 60 > 1440 ) {
             // the new connection is out-of-age, we reject the connection
-            if (Network.log.isFine()) Network.log.fine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getIPs() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
+            if (Network.log.isFine()) Network.log.info("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getIPs() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
             return false;
         }
 
@@ -139,6 +139,7 @@ public class PeerActions {
             // has been disconnected then we compare the dates:
             // if the new peer has a LastSeen date, and that date is before
             // the disconnection date, then we ignore the new peer
+            /*
             if (!direct) {
                 if (ctimeUTC0 < dtimeUTC0) {
                     // the disconnection was later, we reject the connection
@@ -146,6 +147,7 @@ public class PeerActions {
                     return false;
                 }
             }
+            */
 
             // this is a return of a lost peer
             if (Network.log.isFine()) Network.log.fine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getIPs());
@@ -158,10 +160,12 @@ public class PeerActions {
             try {
                 // if the old LastSeen date is later then the other
                 // info, then we reject the info
+                
                 if ((ctimeUTC0 < (connectedSeed.getLastSeenUTC())) && (!direct)) {
                     if (Network.log.isFine()) Network.log.fine("connect: rejecting old info about peer '" + seed.getName() + "'");
                     return false;
                 }
+                
 
                 /*if (connectedSeed.getName() != seed.getName()) {
                     // TODO: update seed name lookup cache
