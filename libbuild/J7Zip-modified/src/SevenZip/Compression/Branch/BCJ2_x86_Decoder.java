@@ -7,10 +7,10 @@ import java.io.OutputStream;
 import java.util.Vector;
 
 import SevenZip.Compression.LZ.OutWindow;
-
 import SevenZip.ICompressCoder2;
 import SevenZip.ICompressProgressInfo;
 import SevenZip.Common.InBuffer;
+import SevenZip.HRESULT;
 
 public class BCJ2_x86_Decoder implements ICompressCoder2 {
 
@@ -32,7 +32,7 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
     //     return ((b0 == 0x0F) && ((b1 & 0xF0) == 0x80));
     // }
     
-    void CodeReal(
+    int CodeReal(
             Vector<InputStream> inStreams,
             //Object useless1, // const UInt64 ** /* inSizes */,
             int numInStreams,
@@ -83,7 +83,7 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
             int b = _mainInStream.read();
             if (b == -1) {
                 Flush();
-                return;
+                return HRESULT.S_OK;
             }
             _outStream.WriteByte(b); // System.out.println("0:"+b);
             // if ((b != 0xE8) && (b != 0xE9) && (!IsJcc(prevByte, b))) {
@@ -116,7 +116,7 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
                     src |= ((int)b0) << 8;
                     
                     b0 = _callStream.read();
-                    if (b0 == -1) return; // TODO: HRESULT.S_FALSE;
+                    if (b0 == -1) return HRESULT.S_FALSE;
                     src |= ((int)b0);
                     
                 } else {
@@ -133,7 +133,7 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
                     src |= ((int)b0) << 8;
                     
                     b0 = _jumpStream.read();
-                    if(b0 == -1) return; // TODO: HRESULT.S_FALSE;
+                    if(b0 == -1) return HRESULT.S_FALSE;
                     src |= ((int)b0);
                     
                 }
@@ -153,7 +153,8 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
         _outStream.Flush();
     }
     
-    public void Code(
+    @Override
+    public int Code(
             Vector<InputStream> inStreams, // ISequentialInStream **inStreams,
             //Object useless_inSizes, // const UInt64 ** /* inSizes */,
             int numInStreams,
@@ -163,7 +164,7 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
             ICompressProgressInfo progress) throws java.io.IOException {
         
         try {
-            CodeReal(inStreams, /*useless_inSizes,*/ numInStreams,
+            return CodeReal(inStreams, /*useless_inSizes,*/ numInStreams,
                     outStreams, /*useless_outSizes,*/ numOutStreams, progress);
         } catch(java.io.IOException e) {
             throw e;
@@ -180,6 +181,7 @@ public class BCJ2_x86_Decoder implements ICompressCoder2 {
         _outStream.ReleaseStream();
     }
     
+    @Override
     public void close() throws java.io.IOException {
         ReleaseStreams();       
     }

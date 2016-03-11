@@ -7,7 +7,7 @@ import java.util.Vector;
 
 public interface ICompressCoder2 {
 	
-    public void Code(
+    public int Code(
             Vector<InputStream> inStreams,
             //Object useless1, // const UInt64 ** /* inSizes */,
             int numInStreams,
