@@ -58,18 +58,13 @@ network.unit.remotecrawl.speed = 300
 network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist1 = http://low.audioattack.de/yacy/seed.txt
 network.unit.bootstrap.seedlist2 = http://sixcooler.de/yacy/seed.txt
-network.unit.bootstrap.seedlist3 = http://fennec.cx/yacy/seed.txt
-network.unit.bootstrap.seedlist4 = http://buelte.com/share/seed.txt
-network.unit.bootstrap.seedlist5 = http://esbek.iv.net.pl/yacy/seed.txt
-network.unit.bootstrap.seedlist6 = http://freenode.homeunix.org/yacy/seed.txt
-network.unit.bootstrap.seedlist7 = http://yacy.tschability.ch/seed.txt
-network.unit.bootstrap.seedlist8 = http://xz1.nl/yacy/seed.txt
-network.unit.bootstrap.seedlist9 = http://massagefreun.de/yacy/seed.txt
-network.unit.bootstrap.seedlist10 = http://yacy-vs2.db0anf.de/bootstrap/vs2-seed.txt
-network.unit.bootstrap.seedlist11 = http://178.63.78.81:8090/www/seed.txt
-network.unit.bootstrap.seedlist12 = http://188.243.64.125:37852/yacy/seed.txt
-network.unit.bootstrap.seedlist13 = http://213.174.50.179/seed.txt
-network.unit.bootstrap.seedlist14 = http://87.106.29.77:59465/seed.txt
+network.unit.bootstrap.seedlist3 = http://yacyseed.underworld.fr/seed.txt
+network.unit.bootstrap.seedlist4 = http://yacycalou.net:8090/seed.txt
+network.unit.bootstrap.seedlist5 = http://yacyseed.fherb.de/seed.txt
+network.unit.bootstrap.seedlist6 = http://fennec.cx/yacy/seed.txt
+network.unit.bootstrap.seedlist7 = http://freenode.homeunix.org/yacy/seed.txt
+network.unit.bootstrap.seedlist8 = http://yacy.tschability.ch/seed.txt
+network.unit.bootstrap.seedlist9 = http://xz1.nl/yacy/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
