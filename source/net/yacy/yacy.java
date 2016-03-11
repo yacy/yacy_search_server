@@ -114,6 +114,10 @@ public final class yacy {
     public static final String hline = "-------------------------------------------------------------------------------";
     public static final Semaphore shutdownSemaphore = new Semaphore(0);
 
+    public static File htDocsPath = null;
+    public static File shareDefaultPath = null;
+    public static File shareDumpDefaultPath = null;
+    
     /**
      * a reference to the {@link Switchboard} created by the
      * {@link yacy#startup(String, long, long)} method.
@@ -244,7 +248,7 @@ public final class yacy {
             // create some directories
             final File htRootPath = new File(appHome, sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
             mkdirIfNeseccary(htRootPath);
-            final File htDocsPath = sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
+            htDocsPath = sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
@@ -287,8 +291,10 @@ public final class yacy {
                         System.out.println("Error creating htdocs readme: " + e.getMessage());
                     }
 
-            final File shareDefaultPath = new File(htDocsPath, "share");
+            shareDefaultPath = new File(htDocsPath, "share");
             mkdirIfNeseccary(shareDefaultPath);
+            shareDumpDefaultPath = new File(shareDefaultPath, "dump");
+            mkdirIfNeseccary(shareDumpDefaultPath);
 
             migration.migrate(sb, oldRev, newRev);
 

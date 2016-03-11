@@ -627,6 +627,7 @@ public final class Fulltext {
         public String getExt() {return this.ext;}
     }
     
+    public final static String yacy_dump_prefix = "yacy_dump_";
     public Export export(Fulltext.ExportFormat format, String filter, String query, final int maxseconds, File path, boolean dom, boolean text) throws IOException {
         
         // modify query according to maxseconds
@@ -662,11 +663,11 @@ public final class Fulltext {
         Object lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
         Date firstdate = (Date) firstdateobject;
         Date lastdate = (Date) lastdateobject;
-        String s = new File(path, "yacy_dump_" +
+        String s = new File(path, yacy_dump_prefix +
                 "f" + GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate) + "_" +
                 "l" + GenericFormatter.FORMAT_SHORT_MINUTE.format(lastdate) + "_" +
                 "n" + GenericFormatter.FORMAT_SHORT_MINUTE.format(new Date(now)) + "_" +
-                "c" + String.format("%1$012d", doccount)).getAbsolutePath();
+                "c" + String.format("%1$012d", doccount)).getAbsolutePath() + "_tc"; // the name ends with the transaction token ('c' = 'created')
         
         // create export file name
         if (s.indexOf('.',0) < 0) s += "." + format.getExt();
