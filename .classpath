@@ -64,8 +64,8 @@
 	<classpathentry kind="lib" path="lib/jetty-util-9.2.15.v20160210.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-webapp-9.2.15.v20160210.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-xml-9.2.15.v20160210.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.5.1.jar"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/solr-core-5.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/solr-solrj-5.4.1.jar"/>
