@@ -29,9 +29,9 @@
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.10.jar"/>
-	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.16.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.16.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.16.jar"/>
+	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.18.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.18.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.18.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.4.4.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/xmpcore-5.1.2.jar"/>
@@ -48,7 +48,7 @@
 	<classpathentry kind="lib" path="lib/poi-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.16.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.18.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-client-9.2.15.v20160210.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-continuation-9.2.15.v20160210.jar"/>
