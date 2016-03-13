@@ -560,6 +560,11 @@
             <version>${jetty.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.18</version>
+        </dependency>
+        <dependency>
             <groupId>pt.tumba</groupId>
             <artifactId>webcat-swf</artifactId>
             <version>0.1</version>
