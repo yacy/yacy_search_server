@@ -7,7 +7,7 @@
     <version>1.83</version>
     <packaging>jar</packaging>
     <description>YaCy - a Peer to Peer Web Search Engine</description>
-    <name>YaCy</name>
+    <name>YaCy Search Server</name>
     <url>http://www.yacy.net</url>
     <issueManagement>
         <system>YaCy Bugtracker</system>
