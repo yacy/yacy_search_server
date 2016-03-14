@@ -23,17 +23,16 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy;
+package net.yacy.simplesearchclient;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import net.yacy.cora.util.CommonPattern;
 
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
@@ -55,6 +54,7 @@ public class YaCySearchClient {
     private final String host, query;
     private final int port;
     private int offset;
+    private final static Pattern SPACE       = Pattern.compile(" ");
 
     public YaCySearchClient(final String host, final int port, final String query) {
         this.host = host;
@@ -80,7 +80,7 @@ public class YaCySearchClient {
                     .append("/yacysearch.rss?verify=false&startRecord=")
                     .append(YaCySearchClient.this.offset)
                     .append("&maximumRecords=10&resource=local&query=")
-                    .append(CommonPattern.SPACE.matcher(YaCySearchClient.this.query).replaceAll("+")).toString();
+                    .append(SPACE.matcher(YaCySearchClient.this.query).replaceAll("+")).toString();
             try { url = new URL(u); } catch (final MalformedURLException e) { throw new IOException (e); }
             try { doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream()); }
             catch (final ParserConfigurationException e) { throw new IOException (e); }
@@ -131,14 +131,22 @@ public class YaCySearchClient {
      * Use this method as stub for an integration in your own programs
      */
     public static void main(String[] args) {
-        for (String query: args) try {
-            long t = System.currentTimeMillis();
-            YaCySearchClient search = new YaCySearchClient("localhost", 8090, query);
-            System.out.println("Search result for '" + query + "':");
-            System.out.print(search.next().toString()); // get 10 results; you may repeat this for next 10
-            System.out.println("Search Time: " + (System.currentTimeMillis() - t) + " milliseconds\n");
-        } catch (final IOException e) {
-            e.printStackTrace();
+        if (args.length < 1) {
+            System.out.println("No query string as argument found.");
+            System.out.println("Call the main method with one argument, the query string,");
+            System.out.println("while YaCy is running on localhost.");
+        } else {
+            for (String query : args) {
+                try {
+                    long t = System.currentTimeMillis();
+                    YaCySearchClient search = new YaCySearchClient("localhost", 8090, query);
+                    System.out.println("Search result for '" + query + "':");
+                    System.out.print(search.next().toString()); // get 10 results; you may repeat this for next 10
+                    System.out.println("Search Time: " + (System.currentTimeMillis() - t) + " milliseconds\n");
+                } catch (final IOException e) {                    
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
