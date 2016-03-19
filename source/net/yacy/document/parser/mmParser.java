@@ -36,7 +36,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -73,7 +73,7 @@ public class mmParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -119,7 +119,7 @@ public class mmParser extends AbstractParser implements Parser {
             null,
             null,
             null,
-            0.0f, 0.0f,
+            0.0d, 0.0d,
             content,
             null,
             null,

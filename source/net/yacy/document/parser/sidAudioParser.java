@@ -31,7 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -59,7 +59,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -97,7 +97,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         header.get("publisher"),
                         null,
                         null,
-                        0.0f, 0.0f,
+                        0.0d, 0.0d,
                         null,
                         null,
                         null,

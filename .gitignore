@@ -17,3 +17,4 @@ lib/yacy-cora.jar
 /winDATA.bkp/
 /DATA.cloud/
 yacy.log
+/target/

@@ -23,38 +23,63 @@ package net.yacy.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import net.yacy.cora.util.ConcurrentLog;
 
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
-
+/**
+ * Class loader for servlet classes
+ * (findClass looking in default htroot directory)
+ */
 public final class serverClassLoader extends ClassLoader {
-    /**
-     * directory of class files
-     */
-    private final Map<File, Class<?>> classes;
 
     public serverClassLoader() {
         //super(ClassLoader.getSystemClassLoader());
     	super(Thread.currentThread().getContextClassLoader());
-        this.classes = new ConcurrentHashMap<File, Class<?>>(100);
+        if (!registerAsParallelCapable()) { // avoid blocking
+            ConcurrentLog.warn("ClassLoader", "registerAsParallelCapable failed");
+        }
     }
 
     public serverClassLoader(final ClassLoader parent) {
         super(parent);
-        this.classes = new ConcurrentHashMap<File, Class<?>>(100);
+        if (!registerAsParallelCapable()) {
+            ConcurrentLog.warn("ClassLoader", "registerAsParallelCapable failed");
+        }
     }
 
-    public Package[] packages() {
-        return super.getPackages();
+    /**
+     * Find servlet class in default htroot directory
+     * but use the internal loadClass(File) methode to load the class same way
+     * (e.g. caching) as direct call to loadClass(File)
+     * This methode is mainly to avoid classpath conflicts for servlet to servlet calls
+     * making inclusion of htroot in system classpath not crucial
+     *
+     * @param servletname (delivered by parent loader without ".class" file extension
+     * @return class in htroot
+     * @throws ClassNotFoundException
+     */
+    @Override
+    protected Class<?> findClass(String classname) throws ClassNotFoundException {
+        // construct path to htroot for a servletname
+        File cpath = new File (Switchboard.getSwitchboard().getDataPath(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT),classname+".class");
+        return loadClass(cpath);
     }
 
+    /**
+     * A special loadClass using file as argument to find and load a class
+     * This methode is directly called by the application and not part of the
+     * normal loadClass chain (= never called by JVM)
+     *
+     * @param classfile
+     * @return loaded an resolved class
+     * @throws ClassNotFoundException
+     */
     public Class<?> loadClass(final File classfile) throws ClassNotFoundException {
-        // take the class out of the cache, denoted by the class file
-        Class<?> c = this.classes.get(classfile);
-        if (c != null) return c;
 
+        Class<?> c;
         final int p = classfile.getName().indexOf('.',0);
         if (p < 0) throw new ClassNotFoundException("wrong class name: " + classfile.getName());
         final String classname = classfile.getName().substring(0, p);
@@ -67,7 +92,6 @@ public final class serverClassLoader extends ClassLoader {
             // make a class out of the stream
             c = this.defineClass(null, b, 0, b.length);
             resolveClass(c);
-            this.classes.put(classfile, c);
         } catch (final LinkageError ee) {
         	c = findLoadedClass(classname);
         	if (c != null) return c;

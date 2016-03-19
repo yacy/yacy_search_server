@@ -6,7 +6,7 @@ if not exist DATA md DATA
 echo . >DATA\yacy.noconsole
 
 Rem Setting the classpath
-Set CLASSPATH=lib\yacycore.jar;htroot
+Set CLASSPATH=lib\yacycore.jar
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=

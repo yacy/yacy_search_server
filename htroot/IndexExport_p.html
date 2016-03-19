@@ -18,14 +18,17 @@
     <form action="IndexExport_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Loaded URL Export</legend>
       <dl>
-        <dt class="TableCellDark">Export File</dt>
-        <dd><input type="text" name="exportfile" value="#[exportfile]#" size="80" maxlength="250" />
+        <dt class="TableCellDark">Export Path</dt>
+        <dd><input type="text" name="exportfilepath" value="#[exportfilepath]#" size="120" maxlength="250" />
         </dd>
         <dt class="TableCellDark">URL Filter</dt>
         <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" />
         </dd>
         <dt class="TableCellDark">query</dt>
         <dd><input type="text" name="exportquery" value="*:*" size="20" maxlength="250" />
+        </dd>
+        <dt class="TableCellDark">maximum age (seconds, -1 = unlimited)</dt>
+        <dd><input type="text" name="exportmaxseconds" value="-1" size="20" maxlength="250" />
         </dd>
         <dt class="TableCellDark">Export Format</dt>
         <dd>

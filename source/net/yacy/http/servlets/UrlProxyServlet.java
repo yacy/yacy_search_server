@@ -15,6 +15,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.document.encoding.UTF8;
@@ -32,7 +33,6 @@ import net.yacy.server.http.ChunkedInputStream;
 import net.yacy.server.http.HTTPDProxyHandler;
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
-import org.eclipse.jetty.proxy.ProxyServlet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -75,7 +75,7 @@ import org.jsoup.select.Elements;
  * 
  * This class is linked to YaCy within jetty using the defaults/web.xml configuration
  */
-public class UrlProxyServlet extends ProxyServlet implements Servlet {
+public class UrlProxyServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = 4900000000000001121L;
     private String _stopProxyText = null;
 
@@ -341,7 +341,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
                     return true;
                 }
             } catch (PatternSyntaxException ex) {
-                this._log.warn("wrong ip pattern in url proxy config", ex.getMessage() );
+                ConcurrentLog.warn("PROXY", "wrong ip pattern in url proxy config " + ex.getMessage() );
             }
         }
         return false;

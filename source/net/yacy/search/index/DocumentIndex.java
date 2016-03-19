@@ -204,22 +204,24 @@ public class DocumentIndex extends Segment {
             return;
         }
         final String[] s = start.list();
-        AnchorURL w;
-        for ( final String t : s ) {
-            try {
-                w = new AnchorURL(start, t);
-                if ( w.canRead() && !w.isHidden() ) {
-                    if ( w.isDirectory() ) {
-                        addConcurrent(w);
-                    } else {
-                        try {
-                            this.queue.put(w);
-                        } catch (final InterruptedException e ) {
+        if (s != null) {
+            AnchorURL w;
+            for ( final String t : s ) {
+                try {
+                    w = new AnchorURL(start, t);
+                    if ( w.canRead() && !w.isHidden() ) {
+                        if ( w.isDirectory() ) {
+                            addConcurrent(w);
+                        } else {
+                            try {
+                                this.queue.put(w);
+                            } catch (final InterruptedException e ) {
+                            }
                         }
                     }
+                } catch (final MalformedURLException e1 ) {
+                    ConcurrentLog.logException(e1);
                 }
-            } catch (final MalformedURLException e1 ) {
-                ConcurrentLog.logException(e1);
             }
         }
     }

@@ -327,9 +327,6 @@ search.BlackLists=url.default.black
 surftips.BlackLists=url.default.black
 news.BlackLists=url.default.black
 
-proxyCookieBlackList=cookie.default.black
-proxyCookieWhiteList=cookie.default.black
-
 # the blue-list; 
 # no search result is locally presented that has any word of the bluelist
 # in the search words, the URL or the URL's description

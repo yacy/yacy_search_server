@@ -40,6 +40,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -56,7 +57,7 @@ public class apkParser extends AbstractParser implements Parser  {
     
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -91,7 +92,7 @@ public class apkParser extends AbstractParser implements Parser  {
         return docs;
     }
     
-    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final JarFile jf) {
+    public Document[] parse(final DigestURL location, final String mimeType, final String charset, final JarFile jf) {
         StringBuilder sb = new StringBuilder();
         String title = location.getFileName();
         AndroidManifestParser manifest = null;
@@ -142,11 +143,11 @@ public class apkParser extends AbstractParser implements Parser  {
                 null,
                 null,
                 singleList(title),
-                "",
+                null,
                 manifest == null ? "" : manifest.packageName,
                 null,
                 null,
-                0.0f, 0.0f,
+                0.0d, 0.0d,
                 sb.toString(),
                 links,
                 null,

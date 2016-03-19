@@ -67,6 +67,7 @@ public class WorkTables extends Tables {
     public final static String TABLE_API_TYPE_CONFIGURATION = "configuration";
     public final static String TABLE_API_TYPE_CRAWLER = "crawler";
     public final static String TABLE_API_TYPE_DELETION = "deletion";
+    public final static String TABLE_API_TYPE_DUMP = "dump";
 
     public final static String TABLE_API_COL_TYPE = "type";
     public final static String TABLE_API_COL_COMMENT = "comment";

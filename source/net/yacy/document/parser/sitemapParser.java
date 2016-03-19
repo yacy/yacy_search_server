@@ -40,7 +40,6 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -52,7 +51,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
-import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.io.ByteCountInputStream;
 
 import org.w3c.dom.CharacterData;
@@ -71,7 +69,7 @@ public class sitemapParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -94,15 +92,15 @@ public class sitemapParser extends AbstractParser implements Parser {
                     null,
                     null,
                     singleList(""),
+                    null,
                     "",
-                    "",
-                    null,
-                    new ArrayList<String>(),
-                    0.0f, 0.0f,
                     null,
                     null,
+                    0.0d, 0.0d,
                     null,
-                    new LinkedHashMap<DigestURL, ImageEntry>(),
+                    null,
+                    null,
+                    null,
                     false,
                     new Date());
             docs.add(doc);

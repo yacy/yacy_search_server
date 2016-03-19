@@ -275,6 +275,7 @@ public class ConfigBasic {
         prop.put("lang_ru", "0");
         prop.put("lang_uk", "0");
         prop.put("lang_en", "0");
+        prop.put("lang_jp", "0");
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {

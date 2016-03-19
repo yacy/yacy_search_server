@@ -101,7 +101,7 @@
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Administration</h3></li>
       <li><a href="IndexControlURLs_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Index Administration</a></li>
-      <li><a href="Tables_p.html?table=robots&count=100" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">System Administration</a></li>
+      <li><a href="Settings_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">System Administration</a></li>
       <li><a href="Blacklist_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Filter &amp; Blacklists</a></li>
       <li><a href="Table_API_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Process Scheduler</a></li>
     </ul>

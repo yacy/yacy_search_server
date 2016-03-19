@@ -74,7 +74,7 @@ public class push_p {
                 String collection = post.get("collection-" + i, "");
                 String lastModified = post.get("lastModified-" + i, ""); // must be in RFC1123 format
                 String contentType = post.get("contentType-" + i, "");
-                String data64 = post.get("data-" + i, ""); // file uploads are base64encoded in YaCyDefaultServlet.parseMultipart
+                String data64 = post.get("data-" + i + "$file", ""); // multi-file uploads are all base64-encoded in YaCyDefaultServlet.parseMultipart
                 byte[] data = Base64Order.standardCoder.decode(data64);
                 if ((data == null || data.length == 0) && data64.length() > 0) data = UTF8.getBytes(data64); // for test cases
     
