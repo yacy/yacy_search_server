@@ -450,7 +450,7 @@ Peer Port:==Peer-Port:
 with SSL== mit SSL
 https enabled==https aktiviert
  on port == auf Port 
-Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
+Configure your router for YaCy using UPnP:==Ihren Router für YaCy konfigurieren, via UPnP:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern
 What you should do next:==Was Sie als Nächstes tun können:
