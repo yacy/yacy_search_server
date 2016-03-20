@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
@@ -47,26 +48,34 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 
 public class migration {
-    //SVN constants
-    public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
-    public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
-    public static final int NEW_OVERLAYS=4422;
-    public static final int IDX_HOST=7724; // api for index retrieval: host index
-   
-    public static void migrate(final Switchboard sb, final int fromRev, final int toRev){
-        if(fromRev < toRev){
-            if(fromRev < TAGDB_WITH_TAGHASH){
+    //SVN constants (version & revision format = v.vvv0rrrr)
+    public static final double TAGDB_WITH_TAGHASH=0.43101635; //tagDB keys are tagHashes instead of plain tagname.
+    public static final double NEW_OVERLAYS      =0.56504422;
+    public static final double IDX_HOST_VER      =0.99007724; // api for index retrieval: host index
+
+    /**
+     * Migrates older configuratin to current version
+     * @param sb
+     * @param fromVer the long version & revision (example 1.83009123)
+     * @param toRev to current version
+     */
+    public static void migrate(final Switchboard sb, final double fromVer, final double toVer){
+        if(fromVer < toVer){
+            if(fromVer < TAGDB_WITH_TAGHASH){
                 migrateBookmarkTagsDB(sb);
             }
-            if(fromRev < NEW_OVERLAYS){
+            if(fromVer < NEW_OVERLAYS){
                 migrateDefaultFiles(sb);
             }
-            ConcurrentLog.info("MIGRATION", "Migrating from "+ fromRev + " to " + toRev);
-            presetPasswords(sb);
-            migrateSwitchConfigSettings(sb);
-            migrateWorkFiles(sb);
+            // use String.format to cut-off small rounding errors
+            ConcurrentLog.info("MIGRATION", "Migrating from "+ String.format(Locale.US, "%.8f",fromVer) + " to " + String.format(Locale.US, "%.8f",toVer));
+            if (fromVer < 0.47d) {
+                presetPasswords(sb);
+                migrateSwitchConfigSettings(sb);
+                migrateWorkFiles(sb);
+            }
         }
-        installSkins(sb); // FIXME: yes, bad fix for quick release 0.47
+        if (fromVer < 0.431d) installSkins(sb);
 
         // ssl/https support currently on hardcoded default port 8443 (v1.67/9563)
         // make sure YaCy can start (disable ssl/https support if port is used)

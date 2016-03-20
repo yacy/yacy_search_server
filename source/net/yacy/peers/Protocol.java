@@ -1722,7 +1722,7 @@ public final class Protocol {
                 Base64Order.enhancedCoder,
                 6);
         // check if the host supports this protocol
-        if ( target.getRevision() < migration.IDX_HOST ) {
+        if ( target.getVersion()< migration.IDX_HOST_VER ) {
             // if the protocol is not supported then we just return an empty host reference container
             return index;
         }
