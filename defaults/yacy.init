@@ -1001,7 +1001,8 @@ httpc.nameCacheNoCachingPatterns = .*.ath.cx,.*.blogdns.*,.*.boldlygoingnowhere.
 #squid Redirector compatible
 externalRedirector=
 
-svnRevision=0
+# the Yacy Version this config was created with
+Version=0.0
 
 currentSkin=pdbootstrap
 
