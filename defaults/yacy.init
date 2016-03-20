@@ -1002,7 +1002,9 @@ httpc.nameCacheNoCachingPatterns = .*.ath.cx,.*.blogdns.*,.*.boldlygoingnowhere.
 externalRedirector=
 
 # the Yacy Version this config was created with
-Version=0.0
+Version=
+# old version value (keep to allow conversion of .conf, until next main releas > 1.83)
+svnRevision=0
 
 currentSkin=pdbootstrap
 
