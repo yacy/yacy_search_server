@@ -35,8 +35,8 @@
             <outputDirectory>htroot</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>langstats</directory>
-            <outputDirectory>langstats</outputDirectory>
+            <directory>langdetect</directory>
+            <outputDirectory>langdetect</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>locales</directory>
