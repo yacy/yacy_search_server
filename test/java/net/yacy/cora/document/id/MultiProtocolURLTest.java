@@ -235,6 +235,27 @@ public class MultiProtocolURLTest {
             assertEquals(testurls.get(s),result);
         }
     }
+
+     /**
+     * Test of toTokens method, of class MultiProtocolURL.
+     */
+    @Test
+    public void testToTokens() {
+        // test string pairs which should generate equal results
+        String[][] testString = new String[][]{
+            {"abc", "abc "},
+            {" cde", "cde"},
+            {"  efg", "efg "},
+            {"hij hij", " hij "},
+            {"klm          mno", "klm@mno"},
+            {"abc/cde?fff", "abc\\cde-fff "} };
+        String result1, result2;
+        for (String[] s : testString) {
+            result1 = MultiProtocolURL.toTokens(s[0]);
+            result2 = MultiProtocolURL.toTokens(s[1]);
+            assertEquals("input: "+s[0]+"="+s[1],result1, result2);
+        }
+    }
 }
 
 

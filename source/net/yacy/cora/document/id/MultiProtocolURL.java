@@ -980,8 +980,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     /**
      * create word tokens for parser. Find CamelCases and separate these words
-     * resulting words are not ordered by appearance, but all
-     * @return
+     * resulting words are not ordered by appearance, but all in sequence
+     * @return string with unique tokens
      */
     public static String toTokens(final String s) {
         // remove all non-character & non-number
@@ -992,14 +992,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if ((c >= '0' && c <='9') || (c >= 'a' && c <='z') || (c >= 'A' && c <='Z')) sb.append(c); else sb.append(' ');
         }
 
-        String t = sb.toString();
-
-        // remove all double-spaces
-        int p;
-        while ((p = t.indexOf("  ",0)) >= 0) t = t.substring(0, p) + t.substring(p + 1);
-
         // split the string into tokens and add all camel-case splitting
-        final String[] u = CommonPattern.SPACES.split(t);
+        final String[] u = CommonPattern.SPACES.split(sb);
         final Set<String> token = new LinkedHashSet<String>();
         for (final String r: u) token.add(r);
         for (final String r: u) token.addAll(parseCamelCase(r));
