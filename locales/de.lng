@@ -3061,6 +3061,7 @@ After a short while you should see the effect on the==Nach kurzer Zeit können S
 You can now go back to the==Sie können nun zurück zu den
 Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
 You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden:
+Your need to restart YaCy to activate the changes.==Um die Änderungen zu aktivieren müssen Sie YaCy neu starten.
 #-----------------------------
 
 #File: Settings_MessageForwarding.inc

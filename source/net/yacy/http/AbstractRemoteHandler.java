@@ -38,6 +38,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import org.eclipse.jetty.proxy.ConnectHandler;
 import org.eclipse.jetty.server.Handler;
@@ -125,7 +126,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         // from here we can assume it is a proxy request
         // should check proxy use permission        
  
-        if (!Switchboard.getSwitchboard().getConfigBool("isTransparentProxy", false)) {
+        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false)) {
             // transparent proxy not swiched on
             response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed (see System Administration -> Advanced Settings -> Proxy Access Settings -> Transparent Proxy; switched off).");
             baseRequest.setHandled(true);

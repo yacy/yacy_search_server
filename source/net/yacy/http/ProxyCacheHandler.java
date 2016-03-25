@@ -34,12 +34,12 @@ import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-
-import net.yacy.crawler.data.Cache;
-import net.yacy.crawler.retrieval.Response;
 
 /**
  * jetty http handler serves pages from cache if available and valid
@@ -65,7 +65,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
             ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
 
             if (cachedResponseHeader != null) {
-                RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
+                RequestHeader proxyHeaders = YaCyDefaultServlet.convertHeaderFromJetty(request);
                 // TODO: this convertion is only necessary
                 final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
                         null,

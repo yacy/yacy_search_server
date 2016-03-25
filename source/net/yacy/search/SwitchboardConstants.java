@@ -319,7 +319,8 @@ public final class SwitchboardConstants {
      * @see Switchboard#PROXY_CACHE_LAYOUT_HASH
      */
     public static final String PROXY_YACY_ONLY                 = "proxyYacyOnly";
-    
+    public static final String PROXY_TRANSPARENT_PROXY         = "isTransparentProxy";
+
     public static final String AUTOCRAWL                       = "autocrawl";
     public static final String AUTOCRAWL_INDEX_TEXT            = "autocrawl.index.text";
     public static final String AUTOCRAWL_INDEX_MEDIA           = "autocrawl.index.media";

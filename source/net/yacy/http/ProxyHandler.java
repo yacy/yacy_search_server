@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.Date;
-import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +46,7 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.TextParser;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.server.http.HTTPDProxyHandler;
 import net.yacy.server.http.MultiOutputStream;
 
@@ -69,20 +69,6 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         timeout = sb.getConfigInt("proxy.clientTimeout", 10000);
     }
 
-	public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
-		RequestHeader result = new RequestHeader();
-		Enumeration<String> headerNames = request.getHeaderNames();
-		while(headerNames.hasMoreElements()) {
-			String headerName = headerNames.nextElement();
-			Enumeration<String> headers = request.getHeaders(headerName);
-			while(headers.hasMoreElements()) {
-				String header = headers.nextElement();
-				result.add(headerName, header);
-			}
-		}
-		return result;
-	}
-	
 	private void convertHeaderToJetty(HttpResponse in, HttpServletResponse out) {
 		for(Header h: in.getAllHeaders()) {
 			out.addHeader(h.getName(), h.getValue());
@@ -143,7 +129,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		
 		sb.proxyLastAccess = System.currentTimeMillis();
         
-        RequestHeader proxyHeaders = convertHeaderFromJetty(request);
+        RequestHeader proxyHeaders = YaCyDefaultServlet.convertHeaderFromJetty(request);
         setProxyHeaderForClient(request, proxyHeaders);
 
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);

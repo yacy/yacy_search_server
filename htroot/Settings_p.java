@@ -31,6 +31,7 @@ import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -83,7 +84,7 @@ public final class Settings_p {
         prop.putHTML("peerLang", peerLang);
         
         // http networking settings
-        prop.put("isTransparentProxy", env.getConfigBool("isTransparentProxy", false) ? "1" : "0");
+        prop.put("isTransparentProxy", env.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "1" : "0");
         prop.put("proxyAlwaysFresh", env.getConfigBool("proxyAlwaysFresh", false) ? "1" : "0");
         prop.put("proxy.sendViaHeader", env.getConfigBool("proxy.sendViaHeader", false) ? "1" : "0");
         prop.put("proxy.sendXForwardedForHeader", env.getConfigBool("proxy.sendXForwardedForHeader", true) ? "1" : "0");

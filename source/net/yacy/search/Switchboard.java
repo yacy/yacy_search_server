@@ -3025,7 +3025,7 @@ public final class Switchboard extends serverSwitch {
                 searchEvent,
                 sourceName,
                 getConfigBool(SwitchboardConstants.DHT_ENABLED, false),
-                this.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null,
+                this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null,
                 this.getConfig("crawler.http.acceptLanguage", null));
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
