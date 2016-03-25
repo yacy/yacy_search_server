@@ -814,7 +814,7 @@ Network pages==der Netzwerkseiten
 Surftips==der Surftipps
 News pages==der News-Seiten
 Blog==des Blogs
-Wiki=des Wikis
+Wiki==des Wikis
 Public bookmarks==der öffentlichen Lesezeichen
 Home Page==der Home-Page
 File Share==des File-Shares
@@ -846,7 +846,7 @@ To change colors and styles use the ==Um die Farben und Stile zu ändern, verwen
  menu for different skins.== Menü für verschiedene Skins.
 Other portal settings can be adjusted in==Andere Einstellungen für das Portal können im
 >Generic Search Portal<==>Generisches Suchportal<
-menu.=Menü geändert werden.
+menu.==Menü geändert werden.
 >Page Template<==>Seiten Template<
 #>Administration<==>Administration<
 >Web Search<==>Websuche<
@@ -1697,8 +1697,8 @@ Retrieve by URL:<==Abfrage nach URL:<
 Retrieve by URL-Hash==Abfrage nach URL-Hash
 "Show Details for URL-Hash"=="Details für URL-Hash zeigen"
 #"Generate List"=="Liste erstellen"
-Cleanup=Aufräumen
-Index Deletion=Löschen des Index
+Cleanup==Aufräumen
+Index Deletion==Löschen des Index
 Delete local search index (embedded Solr and old Metadata)==Lösche den lokalen Suchindex (Embedded Solr und alte Metadaten)
 Delete remote solr index==Lösche entfernten Solr Index
 Delete RWI Index (DHT transmission words)==Lösche RWI Index (DHT übertragene Worte)
@@ -1713,7 +1713,7 @@ Show top==Zeige die
 domains from all URLs.==Top-Domains aus allen URLs.
 "Generate Statistics"=="Statistik erstellen"
 Dump and Restore of Solr Index==Dump und Wiederherstellen des Solr Index
-Dump File=Dump Datei
+Dump File==Dump Datei
 "Create Dump"=="Erstelle Dump"
 "Restore Dump"=="Stelle Dump wieder her"
 Optimize Solr==Optimiere Solr
@@ -1837,7 +1837,7 @@ this must be the path right in front of '/viewtopic.php?'==dies muss den komplet
 Type==Typ
 > of database<==> der Datenbank<
 use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
-Host=Hostname
+Host==Hostname
 > of the database<==> der Datenbank<
 of database service==des Datenbank Dienstes
 usually 3306 for mySQL==normalerweise 3306 für MySQL
@@ -3111,8 +3111,8 @@ A possible reason is that you are behind a firewall, NAT or Router.==Ein möglic
 But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
 global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
 "bad"=="schlecht"
-"idea"="Idee"
-"good"="gut"
+"idea"=="Idee"
+"good"=="gut"
 "Follow YaCy on Twitter"=="Folge YaCy auf Twitter"
 We encourage you to open your firewall for the port you configured (usually: 8090),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8090) in Ihrer Firewall zu öffnen,
 or to set up a 'virtual server' in your router settings (often called DMZ).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
@@ -3125,7 +3125,7 @@ Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Installiere YaCy
-You can download the latest releases here:=Hier kann die neueste Version heruntergeladen werden:
+You can download the latest releases here:==Hier kann die neueste Version heruntergeladen werden:
 You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
 which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
@@ -3796,7 +3796,7 @@ English, Englisch==German, Deutsch
 First Steps==Erste Schritte
 Use Case &amp; Account==Anwendungsfall &amp; Zugangsdaten
 Load Web Pages, Crawler==Webseiten laden mit Crawler
-RAM/Disk Usage &amp; Updates="RAM+Disk Belegung &amp; Updates
+RAM/Disk Usage &amp; Updates==RAM+Disk Belegung &amp; Updates
 You just started a YaCy peer!==Sie haben gerade begonnen YaCy zu nutzen!
 As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==Als Anfänger sehen Sie hier zunächst nur einfache Funktionen. Wählen Sie einen Anwendungsfall, benennen Sie Ihren Peer oder starten Sie einen Webcrawl, dann sehen Sie alle Optionen.
 You did not yet start a web crawl!==Sie haben bislang keinen Webcrawl gestartet!

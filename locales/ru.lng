@@ -3266,8 +3266,8 @@ A possible reason is that you are behind a firewall, NAT or Router.==Возмо�
 But you can <a href="index.html">search the internet</a> using the other peers'==Но вы можете <a href="index.html">выполнять поиск</a>, с помощью других узлов
 global index on your own search page.==на главной странице поиска.
 "bad"=="плохой"
-"idea"="идея"
-"good"="хороший"
+"idea"=="идея"
+"good"=="хороший"
 "Follow YaCy on Twitter"=="Следуй за YaCy на Twitter"
 We encourage you to open your firewall for the port you configured (usually: 8090),==Рекомендуется открыть доступ к используемому порту (обычно, 8090) на вашем брандмауэре,
 or to set up a 'virtual server' in your router settings (often called DMZ).==или настройте "виртуальный сервер" на вашем роутере (настройка обычно называется DMZ).
@@ -3280,7 +3280,7 @@ Latest public version is==Последняя доступная версия
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Вы можете загрузить самую последнюю версию программы. Нажмите здесь для установки этого обновления и перезапуска YaCy:
 #"Update YaCy"=="Обновить YaCy"
 Install YaCy==Установка YaCy
-You can download the latest releases here:=Вы можете загрузить последние версии программы здесь:
+You can download the latest releases here:==Вы можете загрузить последние версии программы здесь:
 You are running a server in senior mode and you support the global internet index,==Ваш узел является старшим и вы участвуете в создании глобального индекса интернета,
 which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Ваш узел является главным и вы можете публиковать свой сид-лист на публично-доступном сервере,

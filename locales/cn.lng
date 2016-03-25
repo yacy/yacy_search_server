@@ -712,7 +712,7 @@ Network pages==网络页面
 Surftips==建议
 News pages==新闻
 Blog==博客
-Wiki=维基
+Wiki==维基
 Public bookmarks==公共书签
 Home Page==首页
 File Share==共享文件
@@ -1445,7 +1445,7 @@ this must be the path right in front of '/viewtopic.php?'==必须在'/viewtopic.
 Type==数据库
 > of database<==> 类型<
 use either 'mysql' or 'pgsql'==使用'mysql'或者'pgsql'
-Host=数据库
+Host==数据库
 > of the database<==> 主机名<
 of database service==数据库服务
 usually 3306 for mySQL==MySQL中通常是3306
@@ -2660,8 +2660,8 @@ A possible reason is that you are behind a firewall, NAT or Router.==很可能�
 But you can <a href="index.html">search the internet</a> using the other peers'==但是您依然能进行<a href="index.html">搜索</a>
 global index on your own search page.==, 需要通过其他peer的全球索引.
 "bad"=="坏"
-"idea"="主意"
-"good"="好"
+"idea"=="主意"
+"good"=="好"
 "Follow YaCy on Twitter"=="在Twitter上关注YaCy"
 We encourage you to open your firewall for the port you configured (usually: 8090),==我们推荐您开发防火墙端口(通常是: 8090),
 or to set up a 'virtual server' in your router settings (often called DMZ).==或者在路由设置中(DMZ)建立一个"虚拟服务器".

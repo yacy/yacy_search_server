@@ -2845,8 +2845,8 @@ A possible reason is that you are behind a firewall, NAT or Router.==Одна з
 But you can <a href="index.html">search the internet</a> using the other peers'==Але ви можете <a href="index.html">здійснювати пошук</a> в глобальному індексі
 global index on your own search page.==інших вузлів зі своєї сторінки пошуку.
 "bad"=="погано"
-"idea"="думка"
-"good"="добре"
+"idea"=="думка"
+"good"=="добре"
 "Follow YaCy on Twitter"=="Слідувати за YaCy на Twitter'і"
 We encourage you to open your firewall for the port you configured (usually: 8090),==Ми рекомендуєм відкрити файрвол на виставленому порту YaCy (за замовчуванням: 8090)
 or to set up a 'virtual server' in your router settings (often called DMZ).==або виставити "віртуальний сервер" у вашому маршрутизаторі (часто називається DMZ).
