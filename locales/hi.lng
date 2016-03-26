@@ -491,8 +491,7 @@ YaCy P2P Web Search== पी 2 पी वेब खोज
 Size and position (width | height | position)==आकार और स्थिति  (चौड़ाई  | ऊंचाई  | स्थिति )
 Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==निर्दिष्ट करता है जहाँ संवाद प्रदर्शित किया जाना चाहिए. पद के लिए संभावित मान:  'केंद्र '  ​​'बाएँ ',  'ठीक '  ​​'शीर्ष '  ​​'नीचे ', या एक समन्वय जोड़ी  (पिक्सेल में शीर्ष बाएँ से ऑफसेट युक्त सरणी के व्यूपोर्ट ) या संभव स्ट्रिंग मूल्यों  (जैसे  [ 'ठीक '  ​​'शीर्ष ' ] ऊपरी दाएँ कोने के लिए )
 Animation effects (show | hide)==एनिमेशन प्रभाव  (शो | छिपाने )
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==
-रभाव इस्तेमाल किया जाएगा. संभावित मान:  'अंधा '  ​​'क्लिप '  ​​'ड्रॉप '  ​​'विस्फोट '  ​​'गुना '  ​​'कश '  ​​'स्लाइड '  ​​'पैमाने ' ,  'आकार '  ​​'धड़कना '
+The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==रभाव इस्तेमाल किया जाएगा. संभावित मान:  'अंधा '  ​​'क्लिप '  ​​'ड्रॉप '  ​​'विस्फोट '  ​​'गुना '  ​​'कश '  ​​'स्लाइड '  ​​'पैमाने ' ,  'आकार '  ​​'धड़कना '
 Interaction (modal | resizable)== 
 इंटरेक्शन  (मोडल  | बदलने योग्य )
 If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==मोडल सही पर सेट किया जाता है, तो संवाद मोडल व्यवहार होगा; पेज पर अन्य मदों (यानी  के साथ बातचीत नहीं कर सकते हैं)  निष्क्रिय किया जाएगा

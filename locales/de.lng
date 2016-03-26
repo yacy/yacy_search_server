@@ -473,8 +473,7 @@ You can also use your peer without opening it, but this is not recomended.==Sie 
 #---------------------------
 Heuristics Configuration==Heuristik Konfiguration
 A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik" target="_blank">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
-Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Wenn eine Such Heuristik verwendet wird, werden die gefunden Links nicht direkt als Suchergebnisse angezeigt aber dafür die geladenen Seiten indexiert und mit dem anderen Inhalt abgespeichert.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
 The success of heuristics are marked with an image==Der Erfolg der Heuristik wird mit einem Bild markiert
@@ -602,8 +601,7 @@ url<==URL<
 Size and position (width | height | position)==Größe und Position (Breite | Höhe | Position)
 Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
 Animation effects (show | hide)==Animationseffekte (show | hide)
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==
-Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
 Interaction (modal | resizable)==Interaktion (modal | resizable)
 If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
 Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
@@ -695,8 +693,7 @@ Content Parser Settings==Inhalt Parser Einstellungen
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Dateitypen basierend auf ihren MIME-Typen ermöglichen.
 For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
-If you want to test a specific parser you can do so using the==
-Wenn Sie einen bestimmten Parser testen wollen, verwenden Sie dafür den
+If you want to test a specific parser you can do so using the==Wenn Sie einen bestimmten Parser testen wollen, verwenden Sie dafür den
 >File Viewer<==>Datei Betrachter<
 > enable/disable<==> aktiv / inaktiv<
 >Extension<==>Erweiterung<
@@ -711,8 +708,7 @@ If you like to integrate YaCy as portal for your web pages, you may want to chan
 The search page may be customized.==Die Suchseite kann auf die eigenen Bedürfnisse zugeschnitten werden.
 You can change the 'corporate identity'-images, the greeting line==Sie können die 'Corporate Identity' Bilder, die Grußzeile
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==und einen Link auf die Homepage ändern, der aufgerufen wird wenn die 'Corporate Identity' Bilder angeklickt werden.
-To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==
-Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
+To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
 Greeting Line<==Grußzeile<
 URL of Home Page<==URL der Homepage<
 URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<

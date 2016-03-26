@@ -815,8 +815,7 @@ If you like to integrate YaCy as portal for your web pages, you may want to chan
 The search page may be customized.==Страница поиска может быть настроена.
 You can change the 'corporate identity'-images, the greeting line==Вы можете изменить картинку фирменного логотипа, строку приветствия
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==и ссылку на домашную страницу, которая будет доступна при нажатии на картинку фирменного логотипа.
-To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==
-Изменить цвета и стили, языки и скины можно на <a href="ConfigAppearance_p.html">этой</a> странице.
+To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==Изменить цвета и стили, языки и скины можно на <a href="ConfigAppearance_p.html">этой</a> странице.
 Greeting Line<==Строка приветствия<
 URL of Home Page<==Адрес домашней страницы<
 URL of a Small Corporate Image<==Адрес маленького логотипа<

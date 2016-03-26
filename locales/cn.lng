@@ -427,8 +427,7 @@ You can also use your peer without opening it, but this is not recomended.==不�
 #---------------------------
 Heuristics Configuration==启发式配置
 A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik">启发式</a> '是一个依赖于经验来解决问题, 学习与发现问题的过程.' (Wikipedia).
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
-您可以在这里开启启发式搜索, 通过猜测链接, 嵌套搜索和访问其他搜索引擎, 从而找到更多符合您期望的结果.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==您可以在这里开启启发式搜索, 通过猜测链接, 嵌套搜索和访问其他搜索引擎, 从而找到更多符合您期望的结果.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==开启启发式搜索时, 搜索结果给出的链接并不是直接搜索的链接, 而是已经缓存在其他服务器上的结果.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==这保证了黑名单的有效性, 并且搜索关键字是通过启发式搜索找到的.
 The success of heuristics are marked with an image==启发式搜索找到的结果会被特定图标标记
@@ -499,8 +498,7 @@ YaCy P2P Web Search==YaCy P2P 网页搜索
 Size and position (width | height | position)==尺寸和位置(宽度 | 高度 | 位置)
 Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==指定对话框位置. 对于位置: 'center', 'left', 'right', 'top', 'bottom' 的值, 或者一个包含对应位置值的数组 (以左上角为参考位置的像素数), 或者字符串值 (e.g. ['right','top'] 对应右上角)
 Animation effects (show | hide)==动画效果 (显示 | 隐藏)
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==
-可用特效: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==可用特效: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
 Interaction (modal | resizable)==对话框 (modal | 可变)
 If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==如果选中modal属性, 则对话框会有modal行为; 否则页面上就不具有此特性. (即不能进行交互操作).
 Modal dialogs create an overlay below the dialog but above other page elements.==Modal对话框会在页面元素下面而不是其上创建覆盖层.
@@ -630,8 +628,7 @@ If you like to integrate YaCy as portal for your web pages, you may want to chan
 The search page may be customized.==搜索页面可以自由定制.
 You can change the 'corporate identity'-images, the greeting line==您可以改变 'Corporate Identity' 图像, 问候语
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==和一个指向首页的 'Corporate Identity' 图像链接.
-To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==
-若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
+To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
 Greeting Line<==问候语<
 URL of Home Page<==首页链接<
 URL of a Small Corporate Image<==小图位置<
