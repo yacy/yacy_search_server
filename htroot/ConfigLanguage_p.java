@@ -29,11 +29,11 @@
 //javac -classpath .:../Classes Blacklist_p.java
 //if the shell's current path is HTROOT
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -109,7 +109,7 @@ public class ConfigLanguage_p {
                 }
                 try {
                     final File langFile = new File(langPath, url.substring(url.lastIndexOf('/'), url.length()));
-                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(langFile)));
+                    final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
 
                     while (it.hasNext()) {
                         bw.write(it.next() + "\n");
