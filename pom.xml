@@ -580,6 +580,11 @@
             <version>2.11.0</version>
         </dependency>
         <dependency>
+            <groupId>com.collaborne</groupId>
+            <artifactId>xliff-core-1.2</artifactId>
+            <version>1.1</version>
+        </dependency>        
+        <dependency>
             <groupId>com.adobe.xmp</groupId>
             <artifactId>xmpcore</artifactId>
             <version>5.1.2</version>
