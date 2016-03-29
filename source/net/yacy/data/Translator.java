@@ -138,10 +138,6 @@ public class Translator {
         return lists;
     }
 
-    public static boolean translateFile(final File sourceFile, final File destFile, final File translationFile){
-        return translateFile(sourceFile, destFile, loadTranslationsLists(translationFile).get(sourceFile.getName()));
-    }
-
     /**
      * Translate sourceFile to destFile using translationList.
      * @param sourceFile file to translate

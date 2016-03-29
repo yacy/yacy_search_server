@@ -1485,7 +1485,7 @@ Pictures==画像
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==地図上に "#[query]#" の検索結果を表示する
+show search results for "#[query]#" on map==地図上に "#[query]#" の検索結果を表示する
 #-----------------------------
 
 ### Subdirectory api ###

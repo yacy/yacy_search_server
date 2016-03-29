@@ -3438,7 +3438,7 @@ Pictures==Bilder
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==Показати результати пошуку для "#[query]#" на карті
+show search results for "#[query]#" on map==Показати результати пошуку для "#[query]#" на карті
 >Provider==>Домени
 >Name Space==>Простір імен
 >Author==>Автори

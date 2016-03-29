@@ -717,7 +717,6 @@ Enable Search for Everyone?==Suche für Jedermann aktivieren?
 Search is available for everyone==Suche steht für Jedermann zur Verfügung
 Only the administator is allowed to search==Nur der Administrator darf suchen
 Show additional interaction features in footer==Zeige zusätzliche Features zur Interaktion in der Fußzeile
-User-Logon==Benutzer-Logon
 Snippet Fetch Strategy &amp; Link Verification==Snippet Fetch Strategie &amp; Link Verifikation
 Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==Beschleunige die Suchergebnisse mit dieser Option! (Verwende CACHEONLY oder FALSE, um die Verifikation abzuschalten)
 NOCACHE: no use of web cache, load all snippets online==NOCACHE: Keine Verwendung des Webcache, alle Snippets online laden
@@ -1048,7 +1047,7 @@ Seg-<br/>ments==Seg-<br/>mente
 >solr search api<==>Solr Such-API<
 >Webgraph Edges<==>Webgraph Kanten<
 Citations<br/>(reverse link index)==Citations<br/>(Rückwärts Such Index)
-RWIs<br/>(P2P Chunks)==RWIs<br/>(P2P Anteile)<
+RWIs<br/>(P2P Chunks)==RWIs<br/>(P2P Anteile)
 Local Crawler==Lokaler Crawler
 Limit Crawler==Limitierter Crawler
 Remote Crawler==Entfernter Crawler
@@ -3741,7 +3740,7 @@ Pictures==Bilder
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
+show search results for "#[query]#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
 >Documents==>Text
 >Images==>Bilder
 >Protocol==>Netzdienste
@@ -4015,7 +4014,6 @@ Knowledge Loader==Wissensdatenbank-Lader
 >Augmented Content<==>Angereicherter Inhalt<
 Augmented Browsing==Angereichertes Browsing
 Filters and Modules==Filter und Module
-Augmented Parsing==Angereichertes Parsen
 #-----------------------------
 
 #File: env/templates/submenuTargetAnalysis.template
