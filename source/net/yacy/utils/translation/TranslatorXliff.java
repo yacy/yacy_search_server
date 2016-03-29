@@ -116,8 +116,6 @@ public class TranslatorXliff extends Translator {
                         if (target != null) {
                             List<Object> targetContentList = target.getContent();
                             String targetContent = targetContentList.get(0).toString();
-                            if (source.startsWith("find the line where the default search window"))
-                                System.out.println();
                             translationList.put(source, targetContent);
                         } else {
                             translationList.put(source, null);

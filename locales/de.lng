@@ -934,7 +934,7 @@ Last Deploy==Letztes Update
 #---------------------------
 Connection Tracking==Verbindungsstatus
 Incoming Connections==Eingehende Verbindungen
-Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
+Showing #[numActiveRunning]# active connections from a max. of #[numMax]# allowed incoming connections.==Es werden #[numActiveRunning]# Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
 Protocol</td>==Protokoll</td>
 Duration==Dauer
 Source IP[:Port]==Quell-IP[:Port]
@@ -2392,6 +2392,16 @@ this peer==Ihr Peer
 #Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
 #You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, drücken Sie diesen Knopf:
 #"go online"=="online gehen"
+
+Network History==Netzwerk Historie
+Count of Connected Senior Peers==Anzahl aktiver Senior Peers
+in the last two days, scale = 1h==in den letzten 2 Tagen, Teilung 1h
+Count of all Active Peers Per Day==Anzahl aktiver Peers pro Tag
+in the last week, scale = 1d==in der letzten Woche, Teilung 1 Tag
+Count of all Active Peers Per Week==Anzahl aktiver Peers pro Woche
+in the last 30d, scale = 7d==in den letzten 30 Tagen, Teilung 7 Tage
+Count of all Active Peers Per Month==Anzahl aktiver Peers pro Monat
+in the last 365d, scale = 30d==in den letzten 365 Tagen, Teilung 30 Tage
 #-----------------------------
 
 #File: News.html
