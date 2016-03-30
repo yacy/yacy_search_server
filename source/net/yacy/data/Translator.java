@@ -236,7 +236,7 @@ public class Translator {
             "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk," +
             "gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;," +
             "ru/&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;,uk/&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;," + 
-            "hi/&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;"
+            "hi/&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;,ja/&#26085;&#26412;&#35486;"
             );
         final Map<String, String> map = new HashMap<String, String>();
         for (final String element : ms) {

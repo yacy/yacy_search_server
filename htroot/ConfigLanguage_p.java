@@ -102,25 +102,23 @@ public class ConfigLanguage_p {
                 try {
                     final DigestURL u = new DigestURL(url);
                     it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, null, null));
+                    try {
+                        final File langFile = new File(langPath, url.substring(url.lastIndexOf('/'), url.length()));
+                        final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
+
+                        while (it.hasNext()) {
+                            bw.write(it.next() + "\n");
+                        }
+                        bw.close();
+                        if (post.containsKey("use_lang") && "on".equals(post.get("use_lang"))) {
+                            Translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
+                        }
+                    } catch (final IOException e) {
+                        prop.put("status", "2");//error saving the language file
+                    }
                 } catch(final IOException e) {
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);
-                    return prop;
-                }
-                try {
-                    final File langFile = new File(langPath, url.substring(url.lastIndexOf('/'), url.length()));
-                    final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
-
-                    while (it.hasNext()) {
-                        bw.write(it.next() + "\n");
-                    }
-                    bw.close();
-                } catch(final IOException e) {
-                    prop.put("status", "2");//error saving the language file
-                    return prop;
-                }
-                if (post.containsKey("use_lang") && "on".equals(post.get("use_lang"))) {
-                    Translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
         }

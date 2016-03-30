@@ -182,7 +182,7 @@ public class TranslatorXliff extends Translator {
                     output.write("    <trans-unit id=\"" + Integer.toHexString(source.hashCode()) + "\" xml:space=\"preserve\" approved=\"no\">\n");
                     output.write("       <source>" + toXmlStr(source) + "</source>\n");
                     if (target != null && !target.isEmpty()) { // omitt target text if not available
-                        output.write("       <target>" + toXmlStr(target) + "</target>\n");
+                        output.write("       <target" + (target.equals(source) ? "" : " state='translated'") + ">" + toXmlStr(target) + "</target>\n");
                     }
                     output.write("    </trans-unit>\n");
                 }
