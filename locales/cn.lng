@@ -3338,9 +3338,9 @@ Index Cleaner==索引整理
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==控制台
+#UNUSED HERE
+#Peer Administration Console==控制台
 #Status==状态
-Basic Configuration==基本设置
 >Accounts==>账户
 Network Configuration==网络设置
 >Heuristics<==>触发式<
@@ -3350,7 +3350,6 @@ System Update==系统升级
 Advanced Settings==高级设置
 Parser Configuration==解析配置
 Local robots.txt==本地robots.txt
-#Web Cache==Web Cache
 Advanced Properties==高级设置
 #-----------------------------
 
@@ -3454,6 +3453,14 @@ Publication==发布
 #Wiki==Wiki
 #Blog==Blog
 File Hosting==文件共享
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==基本设置
+>Accounts<==>账户<
+Network Configuration==网络设置
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template

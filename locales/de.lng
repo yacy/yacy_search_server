@@ -424,7 +424,7 @@ Error saving the skin.==Fehler beim Speichern des Skins.
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Zugangseinstellungen
-Basic Configuration==Eingangskonfiguration
+Basic Configuration==Grundkonfiguration
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen, um korrekt zu funktionieren
 Select a language for the interface==Wählen Sie eine Sprache für das Interface
 Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
@@ -3889,18 +3889,12 @@ Content Control==Inhaltskontrolle
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==Peer Administrations Konsole
-#Status==Status
-Basic Configuration==Eingangskonfiguration
->Accounts==>Konten
+System Administration==System Administration
 Network Configuration==Netzwerk Konfiguration
 Download System Update==Download System-Aktualisierung
 >Performance==>Leistung
 Advanced Settings==Erweiterte Einstellungen
-Local robots.txt==Lokale robots.txt
-#Web Cache==Web Cache
 Advanced Properties==Erweiterte Konfiguration
-#>Thread Dump<==>Thread Dump<
 #-----------------------------
 
 #File: env/templates/submenuContentIntegration.template
@@ -4034,6 +4028,14 @@ Mass Crawl Check==Massen Crawl-Überprüfung
 Regex Test==Regulärer Ausdruck Test
 #-----------------------------
 
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+Use Case &amp; Accounts==Anwendungsfall &amp; Zugangsdaten
+Basic Configuration==Grundkonfiguration
+>Accounts<==>Benutzerverwaltung<
+Network Configuration==Netzwerk Einstellungen
+#-----------------------------
+
 #File: env/templates/submenuViewLog.template
 #---------------------------
 Server Log Menu==Server Log Menü
@@ -4145,7 +4147,7 @@ Crawl Start==Crawl starten
 Monitoring==Überwachung
 YaCy Network==YaCy Netzwerk
 >Settings==>Einstellungen
-"Basic Settings"=="Eingangskonfiguration"
+"Basic Settings"=="Grundkonfiguration"
 	Basic==	Basis
 Accounts==Konten
 "Network"=="Netzwerk"

@@ -870,7 +870,6 @@ Edit Profile==प्रोफ़ाइल संपादित करें
 #---------------------------
 
 #File: CrawlResults.html
-#File: CrawlResults.html
 #---------------------------
 Crawl Results<==क्रॉल परिणाम<
 Overview</a>==ओवरव्यू</a>
@@ -943,8 +942,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==नवीनत
 "delete"=="हटाना"
 #-----------------------------
 
-
-CrawlStartExpert.html
+#File: CrawlStartExpert.html
 #---------------------------
 Expert Crawl Start==विशेषज्ञ क्रॉल प्रारंभ
 Start Crawling Job:==नौकरी रेंगने प्रारंभ:
@@ -1121,6 +1119,13 @@ Available server within the given IP range==दी आईपी सीमा क
 #-----------------------------
 
 #File: CrawlStartSite.html
+#---------------------------
+#-----------------------------
 
-
-
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==बेसिक कॉन्फ़िगरेशन
+#>Accounts<==>Accounts<
+Network Configuration==संजाल विन्यास
+#-----------------------------

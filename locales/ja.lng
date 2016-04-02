@@ -1624,10 +1624,10 @@ Content Control==コンテントの制御
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==ピア管理コンソール
+System Administration==システムの管理
+#UNUSED HERE
+#Peer Administration Console==ピア管理コンソール
 #Status==状態
-Basic Configuration==基本的な構成
->Accounts==>アカウント
 Network Configuration==ネットワークの構成
 Download System Update==システムの更新をダウンロードする
 >Performance==>パフォーマンス
@@ -1791,6 +1791,7 @@ Regex Test==正規表現のテスト
 Use Case &amp; Accounts==使用例 &amp; アカウント
 Basic Configuration==基本的な構成
 >Accounts<==>アカウント<
+Network Configuration==ネットワークの構成
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
@@ -1804,14 +1805,6 @@ Server Log Menu==サーヴァーのログのメニュー
 Web Visualization==ウェブの視覚化
 Web Structure==ウェブの構造
 Image Collage==画像のコラージュ
-#-----------------------------
-
-#File: env/templates/submenuUseCaseAccount.template
-#---------------------------
-Use Case &amp; Accounts==使用例 &amp; アカウント
-Basic Configuration==基本的な構成
->Accounts<==>アカウント<
-Network Configuration==ネットワークの構成
 #-----------------------------
 
 #File: htdocsdefault/dir.html

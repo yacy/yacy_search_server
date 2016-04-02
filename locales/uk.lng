@@ -3596,11 +3596,9 @@ Index Cleaner==Очищення індексу
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==Адмін. консоль
+#UNUSED HERE
+#Peer Administration Console==Адмін. консоль
 >Status==>Стан
-Basic Configuration==Початкове налаштування
->Accounts==>Облікові записи
-Network Configuration==Настройка мережі
 >Heuristics<==>Евристика<
 Dictionary Loader==Завантаження словника
 System Update==Оновлення системи
@@ -3728,6 +3726,14 @@ Publication==Публікація
 #Wiki==Wiki
 Blog==Блог
 File Hosting==Загальний доступ до файлів
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==Початкове налаштування
+>Accounts<==>Облікові записи<
+Network Configuration==Настройка мережі
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template

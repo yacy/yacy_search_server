@@ -4356,8 +4356,6 @@ Parser Configuration==Конфигурация парсера
 #---------------------------
 System Administration==Настройки системы
 >Status==>Состояние
-Basic Configuration==Основные настройки
->Accounts==>Учётные записи
 Network Configuration==Настройка сети
 Advanced Settings==Настройки системы
 Local robots.txt==Локальный robots.txt

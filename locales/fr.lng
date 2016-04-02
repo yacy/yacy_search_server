@@ -2229,10 +2229,10 @@ Local Peer Wiki==Wiki du noeud local
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==Console d'administration du noeud
+System Administration==Administration du syst&egrave;me
+#UNUSED HERE
+#Peer Administration Console==Console d'administration du noeud
 Status==Status
-Basic Configuration==Configuration de base
->Accounts==>Comptes
 Network Configuration==Configuration r&eacute;seau
 Download System Update==Mise &agrave; jour du syst&egrave;me
 >Performance==>Performance
@@ -2301,6 +2301,7 @@ Ranking and Heuristics==Classement et heuristique
 Use Case &amp; Accounts==Mode d'utilisation et comptes
 Basic Configuration==Configuration de base
 >Accounts<==>Comptes<
+Network Configuration==Configuration r&eacute;seau
 #-----------------------------
 
 #File: htdocsdefault/dir.html

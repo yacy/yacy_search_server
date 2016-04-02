@@ -2024,6 +2024,7 @@ Download YaCy==Stiahni YaCy
 #---------------------------
 Peer Configuration Menu==Konfigur&aacute;cia menu peera
 Basic Configuraton==Z&aacute;kladn&eacute; nastavenia
+Advanced Settings==Pokrocil&eacute; nastavenia
 >Language==>Jazyk
 Peer Profile==Profil
 Interface Skins==Nastavenie vzhladu
@@ -2068,6 +2069,14 @@ Performance Menu==Menu vykonu
 Queues Performance Settings==Cakacia listina nastaveny vykonu
 Memory Settings for Database Caches==Nastavenia pamate databazovej cache
 Timing Settings for Search Sequence==Nastavenia casu pre vyhladavaciu sekvenciu
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==Z&aacute;kladn&eacute; nastavenia
+#>Accounts<==>Accounts<
+#Network Configuration==Network Configuration
 #-----------------------------
 
 #File: htdocsdefault/dir.html
