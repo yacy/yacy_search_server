@@ -2850,8 +2850,11 @@ HTTP Networking==HTTP Netzwerk
 Transparent Proxy==Transparenter Proxy
 With this you can specify if YaCy can be used as transparent proxy.==Hiermit können Sie festlegen ob YaCy als transparenter Proxy genutzt werden kann.
 Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Hinweis: Unter Linux können Sie Ihre Firewall darauf einstellen, alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden.
-Connection Keep-Alive==Verbindung halten
-With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit können Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalität unterstützen soll.
+#Always Fresh:==Always Fresh:
+#If unchecked, the proxy will act using Cache Fresh / Cache Stale rules.==If unchecked, the proxy will act using Cache Fresh / Cache Stale rules.
+#If checked, the cache is always fresh which means==If checked, the cache is always fresh which means
+#that a page is never loaded again if it was already stored in the cache.==that a page is never loaded again if it was already stored in the cache.
+#However, if the page does not exist in the cache, it will be loaded in any case.==However, if the page does not exist in the cache, it will be loaded in any case.
 Send "Via" Header==Sende "Via" Header
 Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
 http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
@@ -3051,7 +3054,6 @@ Seed Upload Method:==Seed Upload Methode:
 Seed File URL:==Seed Datei URL:
 Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
 Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist:
-Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
 Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
 Message Forwarding Support is:==Nachrichten Weiterleitungs Unterstützung:
 Message Forwarding Command:==Nachrichten Weiterleitungskommando:

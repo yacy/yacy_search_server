@@ -1960,7 +1960,7 @@ you must also switch to online mode==najprv sa vsak musite prepnut do online mod
 (by using the proxy) to contribute to the global index.==(v ktorom pouzivate proxy) aby ste mohli prehladavat globalny index.
 The global search resulted in #[globalresults]# link contributions from other YaCy peers.==Globalne vyhladavanie obsahuje #[globalresults]# vysledkov, ktore boli vytvorene za prispenia ostatnych peerov.  
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
-with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
+#with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture (C) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
 #-----------------------------
 

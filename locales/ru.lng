@@ -2860,7 +2860,7 @@ Solr Ranking Configuration<==Конфигурация ранжирования S
 These are ranking attributes for Solr. This ranking applies for internal and remote (P2P or shard) Solr access.==Это аттрибуты ранжирования для Solr. Это ранжирование применяется для внутренного и удалённого (P2P или раздельного) доступа к Solr.
 Select a profile:==Выберите профиль:
 >Boost Function<==>Функция Boost<
-A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.==Eine Boost Funktion kann numerische Werte von Ergebnis-Dokumenten kombinieren, um eine Nummer zu erzeugen die mit den Scoring Werten der Suchergebnisse multipliziert wird.
+#A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.==Eine Boost Funktion kann numerische Werte von Ergebnis-Dokumenten kombinieren, um eine Nummer zu erzeugen die mit den Scoring Werten der Suchergebnisse multipliziert wird.
 To see all available fields, see the==Все доступные поля смотрите
 >YaCy Solr Schema<==>схему Solr<
 and look for numeric values (these are names with suffix '_i').==и ищите числовые значения (названия с суффиксом '_i').
@@ -2873,9 +2873,9 @@ Example: to order by date, use==Например: для сортировки п
 "Set Boost Function"=="Установить функцию Boost"
 "Re-Set to default"=="Восстановить значения по-умолчанию"
 >Boost Query<==>Запрос Boost<
-The Boost Query is attached to every query. Use this to statically boost specific content in the index.==Die Boost Abfrage wird an jede Abfrage angehängt. Verwenden sie diese Einstellung, um spezifischen Inhalt im Index zu boosten.
+#The Boost Query is attached to every query. Use this to statically boost specific content in the index.==Die Boost Abfrage wird an jede Abfrage angehängt. Verwenden sie diese Einstellung, um spezifischen Inhalt im Index zu boosten.
 Example: "fuzzy==Например: "fuzzy
- means that documents, identified as 'double' are ranked very bad and appended to the end of all results (because the unique are ranked high).== bedeutet dass Dokumente die als 'double' identifiziert werden sehr schlecht geranked werden und an das Ende der Suchergebnisliste angehängt werden (weil die eindeutigen hoch geranked werden).
+# means that documents, identified as 'double' are ranked very bad and appended to the end of all results (because the unique are ranked high).== bedeutet dass Dokumente die als 'double' identifiziert werden sehr schlecht geranked werden und an das Ende der Suchergebnisliste angehängt werden (weil die eindeutigen hoch geranked werden).
 To find appropriate fields for this query, see the ==Чтобы найти соответствующие поля запросов, смотрите 
 >YaCy Solr Schema<==>схему Solr<
  and look for boolean values (with suffix '_b') or tags inside string fields (with suffix '_s' or '_sxt').== и ищите логические значения (с суффиксом '_b') или тэги внутри строк (с суффиксом '_s' или '_sxt')
@@ -2884,7 +2884,7 @@ To find appropriate fields for this query, see the ==Чтобы найти со�
 "Set Boost Query"=="Установить запрос Boost"
 #"Re-Set to default"=="Восстановить значения по-умолчанию"
 #>Solr Boosts<==>Solr Boosts<
-This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
+#This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
 field not in local index (boost has no effect)==поля нет в локальном индексе (эффект Boost не применяется)
 "Set Field Boosts"=="Установить поле Boosts"
 #"Re-Set to default"=="Восстановить значения по-умолчанию"
@@ -4579,7 +4579,7 @@ YaCy: Default Page for Individual Peer Content==YaCy: Страница по-ум
 Individual&nbsp;Web&nbsp;Page==Личная вэб-страница
 Welcome to your own web page<br />in the <strong>YaCy Network==Добро пожаловать на вашу вэб-страницу<br />im <strong>в сети YaCy
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==Это демонстрационная страница для вашего личного вэб-сервера!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
+#PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
 &lt;YaCy-application-home&gt;<strong>#[wwwpath]#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
 #-----------------------------
 
@@ -4723,10 +4723,10 @@ title="help"==title="Помощь"
 #File: yacy/ui/yacyui-welcome.html
 #---------------------------
 >Overview==>Обзор
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
-I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
+#YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
+#YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
+#I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
+#For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
 #-----------------------------
 
 #File: api/citation.html

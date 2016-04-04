@@ -663,10 +663,10 @@ A third option is the interactive search. Use this code:== एक तीसर�
 #---------------------------
 Your Personal Profile==आपकी व्यक्तिगत प्रोफ़ाइल
 You can create a personal profile here, which can be seen by other YaCy-members==आप अन्य YaCy सदस्यों द्वारा देखा जा सकता है, यहां एक निजी प्रोफाइल बना सकते हैं
-or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
+#or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
 #Name==नाम
 #Nick Name==उपनाम 
-Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)==Homepage (erscheint auf der <a href="Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
+#Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)==Homepage (erscheint auf der <a href="Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
 #eMail==ईमेल
 #ICQ==आईसीक्यू
 #Jabber==गपशप
