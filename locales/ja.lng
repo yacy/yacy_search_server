@@ -231,7 +231,7 @@ Surftips==サーフティップス
 
 #File: Blog.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==コメント</a>
 >edit==>編集
 >delete==>削除
@@ -272,7 +272,7 @@ Please select the XML-file you want to import:==あなたが取り込みたいXM
 
 #File: BlogComments.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==コメント</a>
 Login==ログイン
 Blog-Home==ブログ-ホーム

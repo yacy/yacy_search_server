@@ -173,7 +173,7 @@ Surftips==建议
 
 #File: Blog.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==评论</a>
 >edit==>编辑
 >delete==>删除
@@ -214,7 +214,7 @@ Please select the XML-file you want to import:==请选择您想导入的XML文�
 
 #File: BlogComments.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==评论</a>
 Login==登录
 Blog-Home==博客主页
@@ -465,7 +465,6 @@ Delete robots.txt Cache==删除robots.txt 缓存
 Language selection==语言选择
 You can change the language of the YaCy-webinterface with translation files.==您可以使用翻译文件来改变YaCy操作界面的语言.
 Current language</label>==当前语言</label>
-#default(english)==Deutsch
 Author(s) (chronological)</label>==作者(按时间排序)</label>
 Send additions to maintainer</em>==向维护者提交补丁</em>
 Available Languages</label>==可用语言</label>
@@ -1551,7 +1550,7 @@ Profile==资料
 Depth==深度
 Modified Date==修改日期
 Anchor Name==祖先名
-URL==URL
+#URL==URL
 [Delete]==[删除]
 Delete Entries:==已删除条目:
 "Delete"=="删除"
@@ -1573,7 +1572,7 @@ Profile==资料
 Depth==深度
 Modified Date==修改日期
 Anchor Name==祖先名
-URL==URL
+#URL==URL
 Delete==删除
 #-----------------------------        
 

@@ -98,7 +98,7 @@ a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Patt
 Activate this list for==इस लिस्ट को सक्रिय करें
 Show entries:==एन्त्रिएस देखिये/दिखाएँ :
 Entries per page:==एन्तिरेस प्रति पेज :
-"Go"=="आगे बढे"
+#"Go"=="आगे बढे"
 Edit existing pattern(s):==मौजूदा पैटर्न (ओं) को एडिट करें  :
 "Save URL pattern(s)"=="यूआरएल पैटर्न (ओं) सेव करें "
 </body>==<script>window.onload = function () {$("label:contains('proxy')").text('प्रॉक्सी '); $("label:contains('crawler')").text('क्रेल्वेर '); $("label:contains('dht')").text('DHT'); $("label:contains('search')").text('खोज'); $("label:contains('surftips')").text('सर्फिंगटिप्स '); $("label:contains('news')").text('समाचार');}</script></body>
@@ -457,11 +457,11 @@ Delete robots.txt Cache==मिटाना robots.txt कैश
 #---------------------------
 Language selection==भाषा चयन
 You can change the language of the YaCy-webinterface with translation files.==आप अनुवाद फाइलों के साथ याची वेबिन्तेर्फास  की भाषा बदल सकते हैं
-Current language</label>==वर्तमान भाषा </ लेबल>
+Current language</label>==वर्तमान भाषा </label>
 #default(english)==# डिफ़ॉल्ट  (अंग्रेजी )
-Author(s) (chronological)</label>==लेखक  (एस )  (कालानुक्रमिक ) </ लेबल>
-Send additions to maintainer</em>==नुरक्षक </ em> के लिए फाईल भेजें
-Available Languages</label>==उपलब्ध भाषाएँ </ लेबल>
+Author(s) (chronological)</label>==लेखक  (एस )  (कालानुक्रमिक ) </label>
+Send additions to maintainer</em>==जोड़ भेजें मेंटेनर को</em>
+Available Languages</label>==उपलब्ध भाषाएँ </label>
 Install new language from URL==यूआरएल से नई भाषा को स्थापित करें
 Use this language==इस भाषा का प्रयोग करें
 "Use"=="प्रयोग"
@@ -582,7 +582,8 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 #-----------------------------
 
 #File: ConfigParser.html
-#---------------------------Parser Configuration==पार्सर कॉन्फ़िगरेशन
+#---------------------------
+Parser Configuration==पार्सर कॉन्फ़िगरेशन
 Content Parser Settings==कंटेन्ट पार्सर सेटिंग्स
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.== इस सेटिंग के साथ आप अपने एम.आई.एमई प्रकार के आधार पर अतिरिक्त सामग्री प्रकार के पार्स को सक्रिय या निष्क्रिय कर सकते हैं.
 For a detailed description of the various MIME-types take a look at== विभिन्न एमआईएमई प्रकार की एक विस्तृत विवरण पर एक नज़र रखना
@@ -961,7 +962,7 @@ Create Bookmark==बुकमार्क बनाएँ
 Title<==शीर्षक<
 Folder<==फोल्डर<
 This option lets you create a bookmark from your crawl start URL.==यह विकल्प आपको अपने क्रॉल शुरू यूआरएल से एक बुकमार्क बनाने की सुविधा देता है.
-Crawling Depth</label>==रेंगने की गहराई </ लेबल>
+Crawling Depth</label>==रेंगने की गहराई</label>
 This defines how often the Crawler will follow links (of links..) embedded in websites.==इस ट्रेक लिंक  पालन करेंगे कितनी बार परिभाषित करता है (लिंक का .. ) वेबसाइटों में एम्बेडेड
 0 means that only the page you enter under "Starting Point" will be added==0 आप  तहत प्रवेश केवल पृष्ठ "शुरुआती बिंदु " जोड़ दिया जाएगा मतलब है कि
 to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==सूचकांक के लिए. 2-4 सामान्य अनुक्रमण के लिए अच्छा है. 8 से अधिक मान उपयोगी नहीं हैं, एक गहराई -8 क्रॉल जाएगा के बाद से
@@ -1085,7 +1086,7 @@ Scan Range==रेंज स्कैन
 Scan sub-range with given host==दिया मेजबान के साथ उप रेंज स्कैन
 Full Intranet Scan:==पूर्ण इंट्रानेट स्कैन:
 Do not use intranet scan results, you are not in an intranet environment!==इंट्रानेट परिणाम स्कैन का उपयोग न करें, आप एक इंट्रानेट वातावरण में नहीं कर रहे हैं!
->Scan Cache<==>Scan Cache<
+#>Scan Cache<==>Scan Cache<
 accumulate scan results with access type "granted" into scan cache (do not delete old scan result)==पहुंच प्रकार  "दी " स्कैन कैश  (पुराने स्कैन परिणाम  नष्ट नहीं है) में से परिणाम स्कैन जमा
 >Service Type<==>सेवा के प्रकार<
 #>ftp==>एफटीपी

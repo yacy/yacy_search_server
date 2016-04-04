@@ -915,7 +915,7 @@ Network pages==Страницам сети
 Surftips==Подсказкам
 News pages==Страницам новостей
 Blog==Блогу
-Wiki==Wiki
+#Wiki==Wiki
 Public bookmarks==Публичным закладкам
 Home Page==Домашней странице
 File Share==Общим файлам
@@ -3611,7 +3611,7 @@ Add & Edit Bookmark==Добавить и редактировать заклад
 Public:==Публичная
 yes==да
 no==нет
-URL:==URL
+#URL:==URL
 Title:==Заголовок
 Description:==Описание
 Folder (/folder/subfolder):==Папка (папка/подпапка)
@@ -3744,7 +3744,7 @@ View URL Content==Показать сведения об URL-адресе
 "Show Metadata"=="Показать метаданные"
 "Browse Host"=="Просмотр хоста"
 >URL Metadata<==>Метаданные<
-URL==URL
+#URL==URL
 Search in Document:==Поиск в документе:
 "Show Snippet"=="Показать фрагмент"
 Hash==Хэш
@@ -3852,7 +3852,7 @@ from page title (splitted)==из заголовка страницы (разде
 from page author==из страницы автора
 "Create"=="Создать"
 Vocabulary Editor==Редактор словаря
-This produces the following triples in the==Das produziert die folgenden Tripel im
+#This produces the following triples in the==Das produziert die folgenden Tripel im
 #>triplestore<==>triplestore<
 if a term or synonym matches in a document:==если значение или синоним совпадают в документе
 more Triples for linking into objectspace==больше трех ссылок на объект

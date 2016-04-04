@@ -24,8 +24,8 @@
 
 #File: Blacklist_p.html
 #---------------------------
-Blacklist Manager==Blacklist Manager
-Blacklist==Blacklist
+#Blacklist Manager==Blacklist Manager
+#Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Questa funzione fornisce al proxy un filtro per le URL; le URL nella blacklist non vengono caricate
 from being loaded. You can define several blacklists and activate them separately.== Puoi definire diverse blacklist e acctivarle separatamente.
 You may also provide your blacklist to other peers by sharing them; in return you may==Puoi fornire la tua blacklist agli altri peers rendendola condivisa; in ritorno puoi
@@ -46,28 +46,28 @@ These are the domain name / path patterns in this blacklist:==Questi sono i domi
 You can select them here for deletion==Puoi selezionarli per la cancellazione
 Delete URL pattern==Cancella URL
 Enter new domain name / path pattern in the form:==Inserisci un nuovo dominio/path nella form
-path-regexpr==path-regexpr
+#path-regexpr==path-regexpr
 Add URL pattern==Aggiungi URL
 Import blacklist items from other YaCy peers:==Importa le blacklist dagli altri YacY peers:
-Host:==Host:
+#Host:==Host:
 "Load new blacklist items"=="Carica una nuova blacklist"
 Import blacklist items from URL:==Importa le entrate della blacklist dalla URL
-URL:==URL:
+#URL:==URL:
 "Load new blacklist items"=="Carica una nuova blacklist"
 Import blacklist items from file:==Importa le entrare delle blacklist dal file:
 "Load new blacklist items"=="Carica una nuova blacklist"
 was removed from blacklist==&egrave; stato rimosso dalla blacklist
 was added to the blacklist==&egrave; stato aggiunto alla blacklist
-File:==File:
+#File:==File:
 #-----------------------------
 
 #File: Bookmarks.html
 #---------------------------
-YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
-<h2>Bookmarks==<h2>Bookmarks
+#YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
+#<h2>Bookmarks==<h2>Bookmarks
 Add Bookmark==Aggiunti Bookmark
 Edit Bookmark==Modifica Bookmark
-Url:==URL:
+#URL:==URL:
 Title:==Titolo:
 Description:==Descrizione:
 Tags (comma separated):==Tags (separati da virgole):

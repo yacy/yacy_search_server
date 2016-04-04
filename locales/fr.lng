@@ -16,7 +16,7 @@
 # Only part 1.
 # Contributors are in chronological ordern, not how much they did absolutely.
 # Thank you for your help!
-<!-- lang -->default(english)==french
+<!-- lang -->default(english)==Français
 <!-- author -->==gDupont, Marsupoil, Mikay&eacute;
 <!-- maintainer -->==gDupont
 #-----------------------------
@@ -237,12 +237,11 @@ in 5 seconds.==dans 5 secondes
 #---------------------------
 Language selection==S&eacute;lection de la langue
 You can change the language of the YaCy-webinterface with translation files.==Vous pouvez changer de langue de l'interface web YaCy grace aux fichiers de traduction.
-Current language:==Langue actuelle:
-default(english)==Français
+Current language</label>==Langue actuelle</label>
 Languagefile Author(s) (chronological):==Auteur(s) des fichiers de langues (chronologique):
-Send additions to maintainer:==Envoyez les ajouts &agrave;:
-Available Languages:==Langues disponibles:
-Install new language from URL:==T&eacute;l&eacute;charcher une nouvelle langue:
+Send additions to maintainer</em>==Envoyez les ajouts &agrave;</em>
+Available Languages</label>==Langues disponibles</label>
+Install new language from URL==T&eacute;l&eacute;charcher une nouvelle langue
 Use this language==Utiliser cette langue:
 "Use"==Utiliser
 "Delete"==Supprimer
@@ -749,7 +748,7 @@ Profile==Profil
 Depth==Profondeur
 Modified Date==Date de modification
 Anchor Name==Nom d'ancre
-URL==URL
+#URL==URL
 [Delete]==[Supprimer]
 Delete Entries:==Entr&eacute;es supprim&eacute;es:
 "Delete"=="Supprimer"
@@ -2042,7 +2041,6 @@ This tag creates a horizontal line.==Ces tags cr&eacute;ent une ligne horizontal
 pagename==nom de page
 description==description
 This tag creates links to other pages of the wiki.==Ce tag tire un lien vers une autre page Wiki.
-url==URL
 This tag creates links to external websites.==Ce tag cr&eacute;e un lien vers une page internet externe.
 Image==Image
 alt==description
@@ -2186,8 +2184,6 @@ Ranking and Heuristics==Classement et heuristique
 
 #File: env/templates/simpleheader.template
 #---------------------------
-#File: env/templates/simpleheader.template
-#---------------------------
 Toggle navigation==Activer la navigation
 Search Interfaces==Interfaces de recherche
 Web Search==Recherche Web
@@ -2274,7 +2270,7 @@ Crawl Start==D&eacute;marrer le crawl
 >Loader==>Chargeur
 >Local==>Local
 #Global==Global
->Overhang==>Overhang
+#>Overhang==>Overhang
 >Images==>Images
 >Movies==>Films
 >Music==>Musique

@@ -546,7 +546,6 @@ Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier können Sie die Sprache ändern. Wählen Sie die gewünschte Sprache aus der Liste aus.
 Current language</label>==Aktuelle Sprache</label>
-#default(english)==Deutsch
 Author(s) (chronological)</label>==Autoren (chronologisch)</label>
 Send additions to maintainer</em>==Schicken Sie Ergänzungen bitte an</em>
 Available Languages</label>==Verfügbare Sprachen</label>
@@ -1352,7 +1351,7 @@ only the given host(s)==Nur den/die angegebenen Host(s)
 addresses)==Addressen)
 Subnet<==Subnetz<
 Time-Out<==Timeout<
->Scan Cache<==>Scan Cache<
+#>Scan Cache<==>Scan Cache<
 accumulate scan results with access type "granted" into scan cache (do not delete old scan result)==Sammle Scan Ergebnisse mit dem Zugriffstyp "granted" im Scan Cache (Lösche keine alten Scan Ergebnisse)
 >Service Type<==>Service Typ<
 #>ftp==>FTP

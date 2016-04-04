@@ -97,7 +97,7 @@ a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Patt
 Activate this list for==Активува цей список для
 Show entries:==Показати записи:
 Entries per page:==Записів на сторінку:
-"Go"=="Вперед"
+#"Go"=="Вперед"
 Edit existing pattern(s):==Редагувати поточні шаблони:
 "Save URL pattern(s)"=="Зберегти шаблон(и) URL"
 </body>==<script>window.onload = function () {$("label:contains('proxy')").text('проксі'); $("label:contains('crawler')").text('сканувача'); $("label:contains('dht')").text('DHT'); $("label:contains('search')").text('пошуку'); $("label:contains('surftips')").text('серфінгу'); $("label:contains('news')").text('новин');}</script></body>
@@ -1680,7 +1680,7 @@ Profile==Профіль
 Depth==Глибина
 Modified Date==Дата зміни
 Anchor Name==Ім’я якоря
-URL==URL
+#URL==URL
 [Delete]==[Видалити]
 Delete Entries:==Видалити записи:
 "Delete"=="Видалити"
@@ -1702,7 +1702,7 @@ Profile==Профіль
 Depth==Глибина
 Modified Date==Дата зміни
 Anchor Name==Ім’я якоря
-URL==URL
+#URL==URL
 Delete==Видалити
 #-----------------------------
 
@@ -4202,7 +4202,6 @@ Published&nbsp;News==Опубліковані
 #File: YaCySearchPluginFF.html
 #---------------------------
 Quick Crawl Link==Швидке сканування посилання
-/env/grafics/yacy.gif==/env/grafics/yacy.png
 Firefox Search Plugin==Пошукове доповнення Firefox
 Unable to install the firefox search plugin==Неможливо встановити пошукове розширення firefox
 #"General"=="Загалом"

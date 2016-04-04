@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -200,6 +201,34 @@ public class TranslatorXliff extends Translator {
     }
 
     /**
+     * Helper to write translation entries for one file
+     *
+     * @param filename relative path file name
+     * @param textlist the translation list for filename
+     * @param output output file
+     * @throws IOException
+     */
+    private void writeFileSection(final String filename, final Map<String, String> textlist, OutputStreamWriter output) throws IOException {
+        output.write("#File: " + filename + "\n"
+                + "#------------------------------\n"); // required in 1.2
+
+        for (String source : textlist.keySet()) {
+            String target = textlist.get(source);
+            // we use hashCode of source string to get same id in different xliff files for same translation text
+            if (target != null && !target.isEmpty()) { // omitt target text if not available
+                if (source.equals(target)) {
+                    output.write("#" + source + "==" + target + "\n"); // no translation needed (mark #)
+                } else {
+                    output.write(source + "==" + target + "\n");
+                }
+            } else {
+                output.write("#"+source + "==" + source + "\n"); // no translation available (mark #)
+            }
+        }
+        output.write("#------------------------------\n\n");
+    }
+
+    /**
      * Saves the internal translation map as XLIFF 1.2 file
      *
      * @param targetLanguage the target language code, if null target is omitted
@@ -210,7 +239,7 @@ public class TranslatorXliff extends Translator {
      *
      * @return true on success
      */
-    public boolean saveAsLngFile(final String targetLanguageCode, String lngFile, Map<String, Map<String, String>> lng) {
+    public boolean saveAsLngFile(final String targetLanguageCode, File lngFile, Map<String, Map<String, String>> lng) {
 
         OutputStreamWriter output;
 
@@ -223,22 +252,16 @@ public class TranslatorXliff extends Translator {
             output.write("# followed by the translations  OriginalText==TranslatedText\n");
             output.write("# Comment lines start with #\n\n");
 
+            // special handling of "ConfigLanguage_p.html" to list on top of all other
+            // because of some important identifier
+            Map<String, String> txtmap = lng.get("ConfigLanguage_p.html");
+            writeFileSection("ConfigLanguage_p.html", txtmap, output);
+
             for (String afilemap : lng.keySet()) {
-                output.write("#File: " + afilemap + "\n"
-                        + "#------------------------------\n"); // required in 1.2
-
-                Map<String, String> txtmap = lng.get(afilemap);
-                for (String source : txtmap.keySet()) {
-                    String target = txtmap.get(source);
-                    // we use hashCode of source string to get same id in different xliff files for same translation text
-                    if (target != null && !target.isEmpty()) { // omitt target text if not available
-                        output.write(source + "==" + target + "\n");
-                    } else {
-                        output.write(source + "==" + source + "\n");
-                    }
-
+                txtmap = lng.get(afilemap);
+                if (!"ConfigLanguage_p.html".equals(afilemap)) {
+                    writeFileSection(afilemap, txtmap, output);
                 }
-                output.write("#------------------------------\n\n");
             }
             output.write("# EOF");
             output.close();
