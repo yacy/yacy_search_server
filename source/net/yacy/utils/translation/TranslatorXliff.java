@@ -115,9 +115,13 @@ public class TranslatorXliff extends Translator {
                         String source = ((TransUnit) xlfTransunit).getSource().getContent().get(0).toString();
                         Target target = ((TransUnit) xlfTransunit).getTarget();
                         if (target != null) {
-                            List<Object> targetContentList = target.getContent();
-                            String targetContent = targetContentList.get(0).toString();
-                            translationList.put(source, targetContent);
+                           if ("translated".equals(target.getState())) {
+                                List<Object> targetContentList = target.getContent();
+                                String targetContent = targetContentList.get(0).toString();
+                                translationList.put(source, targetContent);
+                            } else {
+                                translationList.put(source, null);
+                            }
                         } else {
                             translationList.put(source, null);
                         }
