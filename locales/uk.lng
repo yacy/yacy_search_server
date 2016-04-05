@@ -165,8 +165,7 @@ Surftips==Поради для серфінгу
 
 #File: Blog.html
 #---------------------------
-by==
-#від
+by==від
 Comments</a>==Коментарі</a>
 >edit==>редагувати
 >delete==>видалити
@@ -210,8 +209,7 @@ Please select the XML-file you want to import:==Будь-ласка, вибер�
 
 #File: BlogComments.html
 #---------------------------
-by==
-#від
+by==від
 Comments</a>==Коментарі</a>
 Login==Einloggen
 Blog-Home==Початкова сторінка блогу
@@ -1573,13 +1571,11 @@ usually 3306 for mySQL==зазвичай 3306 для MySQL
 Name of the database==Ім’я БД
 on the host==на хості
 Table prefix string==Рядок префікса таблиці
-for table names==
-#для імен таблиць
+for table names==для імен таблиць
 User==Користувач
 that can access the database==з доступом до БД
 Password==Пароль
-for the account of that user given above==
-#для доступу вищезазначеним користувачем
+for the account of that user given above==для доступу вищезазначеним користувачем
 Posts per file==Повідомлень на файл
 in exported surrogates==в експортованому допоміжному файлі
 Check database connection==Перевірити підключення до бази даних
@@ -4031,7 +4027,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 #>Tag Manager==>Ключові слова
 >Tag Manager==>Ключі
 >Import<==>Імпорт<
-All tag actions are applied to the sub-set of bookmarks defined by this query.==
+#All tag actions are applied to the sub-set of bookmarks defined by this query.==
 >Query==>Запит
 >Query Type==>Тип запиту
 >Tags (comma seperated)==>Ключі (через кому)
@@ -4040,7 +4036,7 @@ All tag actions are applied to the sub-set of bookmarks defined by this query.==
 >Folders (regexp)==>Папки (рег.вираз)
 >Title (regexp)==>Заголовок (рег.вираз)
 >Description (regexp)==>Опис (рег.вираз)
-Enter tags to add (<i>replace with</i>)==
+#Enter tags to add (<i>replace with</i>)==
 >(comma separated tags)==>(ключі через кому)
 #>Bookmark Importer==>Імпортувач закладок
 >Bookmark Importer==>Імпорт закладок

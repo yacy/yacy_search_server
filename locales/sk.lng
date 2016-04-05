@@ -527,7 +527,7 @@ Accept remote crawling requests and perform crawl at maximum of==Akceptuj poziad
 #Pages Per Minute (minimum is 1, low system load usually at PPM <= 30)==stranok za minutu (minimum je 1, pomale systemy nahravaju normalne pod 30 stranok za minutu)
 Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)==Neakceptuj poziadavky na vzdialeny crawling (prosim aktivujte tuto volbu len ak nemozete crawlovat 1 stranku za minut - pozri vyzsie)
 
-Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==
+#Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==
 # NOT USED
 #ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter.==
 # NOT USED
@@ -552,7 +552,7 @@ or see the fill/process count of all queues on the==alebo sa pozrite na proces v
 
 # NOT USED
 #Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.</b>==
-The indexing results are presented on the==
+#The indexing results are presented on the==
 		
 Index Monitor</a>-page.==stranke Monitor indexu</a>.
 # NOT USED
@@ -576,8 +576,8 @@ Start URL==Startovacia URL
 #Auto Filter Hlbka==
 # NOT USED
 #MaxAge</b>==
-Auto Filter Content==
-Max Page Per Domain==
+#Auto Filter Content==
+#Max Page Per Domain==
 # NOT USED
 #Accept "?" URLs==
 

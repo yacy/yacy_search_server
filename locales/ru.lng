@@ -498,11 +498,10 @@ start your own crawl</a> and contribute to the global index, or create your own 
 set a personal peer profile</a> (optional settings)==установить персональный профиль узла</a>
 monitor at the network page</a> what the other peers are doing==страницу мониторинга сети </>
 Your Peer name is a default name; please set an individual peer name.==Ваше имя узла является именем по-умолчанию, пожалуйста, установите другое имя узла.
-What you should do next:==
+#What you should do next:==
 You did not set a user name and/or a password.==Вы не установили имя пользователя и/или пароль.
 Some pages are protected by passwords.==Некоторые страницы защищены паролем.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a href="ConfigAccounts_p.html">Учётные записи</a>, чтобы защитить узел 
-YaCy.</p>::
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a href="ConfigAccounts_p.html">Учётные записи</a>, чтобы защитить узел YaCy.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт на фаерволе или ваш роутер не перенаправляет запросы на порт сервера.
 This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в сети.
 You can also use your peer without opening it, but this is not recomended.==YaCy может работать и без открытия порта, но это нежелательно.
@@ -770,7 +769,7 @@ deny remote search==запретить удалённый поиск
 >Robinson Mode==>Режим Robinson
 If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Если ваши узлы работают в режиме Robinson, то вы можете запустить YaCy в качестве движка для собственного поискового портала, без обмена данными с другими узлами
 There is no index receive and no index distribution between your peer and any other peer==В случае выбора Robinson-кластеризации, приём и передача индекса между вашим и другими узлами будут отсутствовать
-In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==
+#In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==
 >Private Peer==>Частный узел
 Your search engine will not contact any other peer, and will reject every request==Ваш узел не будет контактировать с любыми другими узлами, и будет возвращать любой запрос
 #>Private Cluster==>Частный кластер
@@ -906,7 +905,7 @@ For explanation please look into defaults/yacy.init==Дополнительны�
 #---------------------------
 Exclude Web-Spiders==Доступ к вэб-интерфейсу
 Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==В файле robots.txt вы можете указать параметры ограничения доступа к вэб-интерфейсу вашего узла.
-is a volunteer agreement most search-engines (including YaCy) follow.==
+#is a volunteer agreement most search-engines (including YaCy) follow.==
 It disallows crawlers to access webpages or even entire domains.==Таким образом, вы закроете доступ индексаторам к вэб-странице вашего узла или даже целому домену.
 Deny access to==Закрыть доступ к
 Entire Peer==Узлу целиком
@@ -927,7 +926,7 @@ Impressum==Реквизитам
 #---------------------------
 Integration of a Search Box==Интеграция поиска
 We give information how to integrate a search box on any web page that==Предлагаем вам инструкцию по интеграции поиска YaCy на любую вэб-страницу.
-calls the normal YaCy search window.==
+#calls the normal YaCy search window.==
 Simply use the following code:==Просто используете следующий код:
   MySearch==  Мой поиск
 "Search"=="Поиск"
@@ -1014,7 +1013,7 @@ check for new releases, download if available and restart with downloaded releas
 Download of release #[downloadedRelease]# finished. Restart Initiated.== Загрузка версии #[downloadedRelease]# завершена. Начинается перезагрузка.
 No more recent release found.==Более нового обновления не обнаружено.
 Release will be installed. Please wait.==Идет установка нового обновления. Пожалуйста, подождите.
-You installed YaCy with a package manager.==
+#You installed YaCy with a package manager.==
 To update YaCy, use the package manager:==Для обновления YaCy используйте менеджер пакетов.
 Omitting update because this is a development environment.==Пропускаю обновление, потому что это версия для разработчиков.
 Omitting update because download of release #[downloadedRelease]# failed.==Пропускаю обновление, потому что загрузка версии #[downloadedRelease]# не была успешной.
@@ -1233,7 +1232,7 @@ such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HT
 and automatically excluded from indexing.==и автоматически исключаются из индексирования.
 <em>Use Case:</em> You must use YaCy as proxy to fill up this table.==Таблица будет наполняться при использовании вами YaCy в качестве прокси-сервера.
 Set the proxy settings of your browser to the same port as given==Задайте выбранный порт (по-умолчанию 8090) в настройках прокси в вашем браузере.
-on the 'Settings'-page in the 'Proxy and Administration Port' field.==
+#on the 'Settings'-page in the 'Proxy and Administration Port' field.==
 (5) Results for Local Crawling==(5) Результаты локального индексирования
 These web pages had been crawled by your own crawl task.==Эти вэб-страницы были проиндексированы вашим узлом по вашему указанию.
 <em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==Запустите индексацию, указав начальную точку на странице "Индексирование/Сканер сети"
@@ -1329,7 +1328,7 @@ This option is used by default for proxy prefetch, but is not needed for explici
 A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled.==Вопросительный знак обычно означает динамическую страницу. Ссылки, указывающие на динамический контент. обычно не индексируются.
 However, there are sometimes web pages with static content that== Однако, иногда встречаются вэб-страницы со статическим содержимым, которое
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==доступно по ссылкам, содержащим вопросительный знак. Если вы не уверены, то не включайте эту опцию, чтобы избежать замкнутого индексирования.
-Following frames is NOT done by Gxxg1e, but we do by default to have a richer content. 'nofollow' in robots metadata can be overridden; this does not affect obeying of the robots.txt which is never ignored.==
+#Following frames is NOT done by Gxxg1e, but we do by default to have a richer content. 'nofollow' in robots metadata can be overridden; this does not affect obeying of the robots.txt which is never ignored.==
 Accept URLs with query-part ('?'):==Принимать ссылки с ('?') в части запроса:
 Obey html-robots-noindex:==Учитывать html-robots-noindex:
 Policy for usage of Web Cache==Политика использования вэб-кэша
@@ -1915,12 +1914,12 @@ Status==Состояние
 #---------------------------
 Parser Errors==Отклонённые ссылки
 Rejected URLs==Отклонённые ссылки
-Rejected URL List:==
+#Rejected URL List:==
 There are #[num]# entries in the rejected-urls list.==Число записей в списке #[num]#.
 Showing latest #[num]# entries.==Показаны #[num]# последних записей.
 "show more"=="Показать больше"
 "clear list"=="Очистить список"
-There are #[num]# entries in the rejected-queue:==
+#There are #[num]# entries in the rejected-queue:==
 #Initiator==Инициатор
 #Executor==Исполнитель
 Time==Дата и время
@@ -1952,7 +1951,7 @@ Host==Хост
 #---------------------------
 Content Integration: Retrieval from phpBB3 Databases==Интеграция контента: Извлечение данных из баз phpBB3
 It is possible to extract texts directly from mySQL and postgreSQL databases.==Возможно извлечение текстовых данных напрямую из баз mySQL и postgreSQL.
-Each extraction is specific to the data that is hosted in the database.==
+#Each extraction is specific to the data that is hosted in the database.==
 This interface gives you access to the phpBB3 forums software content.==Здесь вы можете получить доступ к содержимому phpBB3-форумов.
 If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Если вы желаете использовать импортированную базу данных, то вам пригодятся некоторые подсказки для устранения проблем, которые могут возникнуть при импортировании дампов в phpMyAdmin:
 before importing large database dumps, set==перед импортированием большого дампа базы данных, установите
@@ -2194,7 +2193,7 @@ Import List==Импортировать список
 >Imported<br />Records<==>Импортировано<br />записей<
 >Speed<br />(records/second)==>Скорость<br />(записей в секунду)
 Complete at==Всего записей
-Records==
+#Records==
 #-----------------------------
 
 #File: IndexReIndexMonitor_p.html
@@ -2532,7 +2531,7 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==Таблица с недавно запущенным индексированием представлена на странице "Монитор индексирования".
 A change in the personal profile will create a news entry. You can see recently made changes of==Изменение персонального профиля также создаёт сообщение. Вы можете увидеть недавно сделанные изменения в
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==профиле на странице сети. Изменение профиля отмечено звёздочкой '*' рядом с 'P' (профиль) выбор.
-More news services will follow.==
+#More news services will follow.==
 Above you can see four menues:==Вы увидете четыре меню:
 <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>Входящие сообщения(#[insize]#)</strong>: Последние сообщения, полученные вашим узлом.
 Only these news will be used to display specific news services as explained above.==Только эти сообщения будут использоваться для отображения определённых служб сообщений.
@@ -2783,7 +2782,7 @@ this controls the proxy auto configuration script for browsers at http://localho
 whether the proxy should only be used for .yacy-Domains==Использование прокси-сервера только для доменов .yacy
 Proxy pre-fetch setting:==Настройка кэширующего прокси:
 this is an automated html page loading procedure that takes actual proxy-requested==Настройка индексации кэшируемых страниц через прокси-сервер
-URLs as crawling start points for crawling.==
+#URLs as crawling start points for crawling.==
 Prefetch Depth==Уровень предварительной выборки
 A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==0 - отключение предварительной выборки, 1 - включение предварительной выборки. 
 embedded URLs, but since embedded image links are loaded by the browser==Предварительная выборка   
@@ -2987,7 +2986,7 @@ Specifies if YaCy should forward ssl connections to the remote proxy.==Разр�
 Remote proxy host==Хост удалённого прокси
 The ip address or domain name of the remote proxy==IP-адрес или домен удалённого прокси
 Remote proxy port==Порт удалённого прокси
-the port of the remote proxy==
+#the port of the remote proxy==
 Remote proxy user==Пользователь удалённого прокси
 Remote proxy password==Пароль удалённого прокси
 No-proxy adresses==Не использовать для прокси адреса
@@ -4216,7 +4215,7 @@ Project Wiki<==Wiki‐сайт проекта<
 Git Repository==Git-репозиторий
 Bugtracker==Багтрэкер
 Peer Statistics==Статистика YaCy
-external==
+#external==
 >Search...<==>Поиск...<
 "Search..."=="Поиск..."
 ### FIRST STEPS ###
@@ -4259,7 +4258,7 @@ Community (Web Forums)==Форум
 Project Wiki==Wiki-сайт проекта
 Search Interface==Интерфейс поиска
 About This Page==Ваш профиль
-external==
+#external==
 Bugtracker==Багтрэкер
 Git Repository==Git-репозиторий
 Peer Statistics==Статистика YaCy

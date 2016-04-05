@@ -837,8 +837,7 @@ This is the list of web pages that this peer initiated to crawl,==C'est une list
 but had been crawled by <em>other</em> peers.==mais a &eacute;t&eacute; crawl&eacute; par d'<em>autre</em> noeuds.
 This is the 'mirror'-case of process (6).==C'est le processus oppos&eacute; du (6)
 <em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Cas d'utilisation:</em> Vous obtenez des entr&eacute;es ici, si vous d&eacute;marrez un crawl local sur la page 'Cr&eacute;ation d'index' et activez  
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==
-l'indexation &agrave; distance. Chaque page, qui sera index&eacute;e par un noeud distant &agrave; votre demande,  
+'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==l'indexation &agrave; distance. Chaque page, qui sera index&eacute;e par un noeud distant &agrave; votre demande,  
 is reported back and can be monitored here.==sera rapport&eacute;e et peut &ecirc;tre monitor&eacute;e ici.
 (2) Index Monitor for Result of Search Queries==(2) Moniteur d'index des r&eacute;sultats de requ&ecirc;tes de recherche.
 This index transfer was initiated by your peer by doing a search query.==Ce transfert d'index a &eacute;t&eacute; initi&eacute; par votre noeud en lançant une  requ&ecirc;te de recherche.
@@ -1130,12 +1129,11 @@ minimum Idle==min. inactif
 current Active==actif courrant
 current Idle==inactif courrant
 Enter new Threadpool Configuration==Entrer un nouvelle configuration du pool de thread
-Proxy Performance Settings:==Param&egrave;tres de performance du proxy
+Proxy Performance Settings:==Param&egrave;tres de performance du proxy:
 #Online Caution Delay==
 This is the time that the crawler idles when the proxy is accessed.==C'est le temps d'inactivit&eacute; du crawler lorsque le proxy est acc&eacute;d&eacute;.
 The delay is extended by this time==Le d&eacute;lai normal est prolong&eacute; de cette dur&eacute;e
-each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==
-chaque fois que le proxy est acc&eacute;d&eacute;. Cela am&eacute;liore les performances de d&eacute;bit du proxy.
+each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==chaque fois que le proxy est acc&eacute;d&eacute;. Cela am&eacute;liore les performances de d&eacute;bit du proxy.
 current delta is==Depuis le dernier acc&eacute;s au proxy
 since last proxy access.==sont pass&eacute;s
 Enter New Parameters==Entrer de nouveaux param&egrave;tres
