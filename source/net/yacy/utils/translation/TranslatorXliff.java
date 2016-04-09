@@ -253,8 +253,8 @@ public class TranslatorXliff extends Translator {
             output.write("# -----------------------\n");
             output.write("# This is a part of YaCy, a peer-to-peer based web search engine\n\n");
             output.write("# Each translation list starts with #File: relative/path/to/file\n");
-            output.write("# followed by the translations  OriginalText==TranslatedText\n");
-            output.write("# Comment lines start with #\n\n");
+            output.write("# followed by the translations  OriginalText==TranslatedText (in one line)\n");
+            output.write("# Comment lines or not translated lines start with #\n\n");
 
             // special handling of "ConfigLanguage_p.html" to list on top of all other
             // because of some important identifier

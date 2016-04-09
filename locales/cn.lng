@@ -590,7 +590,6 @@ Parser Configuration==解析配置
 Content Parser Settings==内容解析设置
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==此设置能开启/关闭依据文件类型(MIME)的内容解析.
 For a detailed description of the various MIME-types take a look at==关于MIME的详细描述请参考
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
 enable/disable Parser==Parser 开启 / 关闭
 # --- Parser Names are hard-coded BEGIN ---
 ##Mime-Type==MIME Typ

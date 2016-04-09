@@ -622,7 +622,6 @@ Parser Configuration==Настройка обробника
 Content Parser Settings==Налаштування обробника вмісту
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==З допомогою цих настройок можна вмикати і вимикати обробку додаткових типів даних на основі їхніх MIME-типів.
 For a detailed description of the various MIME-types take a look at==Для докладного опису різних типів MIME дивіться
-http://www.iana.org/assignments/media-types/</a>==https://www.iana.org/assignments/media-types/</a>
 If you want to test a specific parser you can do so using the <a href="ViewFile.html">File Viewer</a>==Якщо потрібно перевірити незвичайний аналізатор, це можна зробити з допомогою <a href="ViewFile.html">переглядача файлів</a>
 enable/disable Parser==Ввім./Вимк. обробник
 # --- Parser Names are hard-coded BEGIN ---

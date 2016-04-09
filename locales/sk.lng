@@ -1552,7 +1552,6 @@ Changes will take effect immediately.==Zmeny su okamzite ucinne.
 Content Parser Settings==Nastavenia parsera obsahu
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==S tymito nastavenia mozete zapnut alebo vypnut parsovanie dodatocnych suborov na zaklade ich mime-typov.
 For a detailed description of the various MIME-types take a look at==Detailny popis rozlicnych mime-typov najdete na
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
 Changes take effect immediately==Zmeny su okamzite ucinne
 #-----------------------------
 

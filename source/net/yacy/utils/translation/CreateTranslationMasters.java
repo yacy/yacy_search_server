@@ -81,12 +81,18 @@ public class CreateTranslationMasters extends TranslatorXliff {
 
     /**
      * Create a master translation list by reading all translation files
+     * If a masterOutputFile exists, content is preserved (loaded first)
      *
      * @param masterOutpuFile output file (xliff format)
      * @throws IOException
      */
-    public void createMasterTranslationLists(File masterOutpuFile) throws IOException {
-        Map<String, Map<String, String>> xliffTrans = new TreeMap();
+    public void createMasterTranslationLists(File masterOutputFile) throws IOException {
+        Map<String, Map<String, String>> xliffTrans;
+        if (masterOutputFile.exists()) // if file exists, conserve existing master content (may be updated by external tool)
+            xliffTrans = TranslatorXliff.loadTranslationsListsFromXliff(masterOutputFile);
+        else
+            xliffTrans = new TreeMap();
+
         List<String> lngFiles = Translator.langFiles(new File("locales"));
         for (String filename : lngFiles) {
             // load translation list
@@ -134,7 +140,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
             }
         }
         // save as xliff file w/o language code
-        saveAsXliff(null, masterOutpuFile, xliffTrans);
+        saveAsXliff(null, masterOutputFile, xliffTrans);
     }
 
     /**

@@ -633,7 +633,7 @@ YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie k
 To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
 this network definition must be equal to all members of the same YaCy network.==müssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
 Network Definition==Netzwerk Definition
-Network Nick==Netzwerk Nick
+Network Nick==Netzwerk Name
 Long Description==Lange Beschreibung
 Indexing Domain==Indexierungs Domain
 #DHT==DHT

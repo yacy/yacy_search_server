@@ -798,7 +798,6 @@ Parser Configuration==Конфигурация парсера
 Content Parser Settings==Настройки анализа контента
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==С помощью этих настроек вы можете включить или выключить анализ дополнительных типов контента.
 For a detailed description of the various MIME-types take a look at==Детальное описание различных типов файлов смотрите на
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>
 If you want to test a specific parser you can do so using the==Если вы желаете тестировать специальные парсеры, вы также можете использовать
 >File Viewer<==>просмотр файлов<
 > enable/disable<==> Включено / Выключено<
@@ -976,7 +975,7 @@ Other portal settings can be adjusted in==Другие настройки пор
 >Collection<==>Хранилище<
 >Title of Result<==>Заголовок результата<
 Description and text snippet of the search result==Описание и фрагмент текста результата поиска
-http://url-of-the-search-result.net==http://url-of-the-search-result.net
+#http://url-of-the-search-result.net==http://url-of-the-search-result.net
 42 kbyte<==42 КБайт<
 >Metadata<==>Метаданные<
 >Parser<==>Анализ<

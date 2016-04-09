@@ -646,7 +646,7 @@ Other portal settings can be adjusted in <a href="ConfigPortal.html">Generic Sea
 >Vocabulary<==>語彙<
 >Title of Result<==>結果の題名<
 Description and text snippet of the search result==検索結果の説明とテキストのスニペット
-http://url-of-the-search-result.net==http://url-of-the-search-result.net
+#http://url-of-the-search-result.net==http://url-of-the-search-result.net
 42 kbyte<==42 kB<
 >Metadata<==>メタデータ<
 #>Parser<==>構文解析器<

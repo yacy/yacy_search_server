@@ -1427,7 +1427,7 @@ Forwarding host password:==Weiterleitender Host mot de passe
 #By default, the access is not limited,==Standardmäßig ist der Zugang unbeschränkt,
 #because this function is needed to spawn the p2p index-sharing function.==da dies notwendig ist um den P2P-Indextausch zu ermöglichen.
 #If you block access to your server (setting anything else than '*'), then you will also be blocked==Wenn Sie den Zugang zu Ihrem Server blockieren (Einstellen von irgendetwas anderem als '*') dann werden Sie auch davon ausgeschlossen
-from using other peers' indexes for search service.==den Index anderer Noeuds zur Suche zu verwenden.
+#from using other peers' indexes for search service.==den Index anderer Noeuds zur Suche zu verwenden.
 #However, blocking access may be correct in enterprise environments where you only want to index your==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein,
 #company's own web pages.==wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
 #staticIP (optional):==statische IP (optional):
@@ -1676,12 +1676,12 @@ This peer's name==Name dieses Noeuds
 #This peer's statistics==Statistik dieses Noeuds
 #Unknown==unbekannt
 Uptime==En ligne depuis
-Connects (==Verbindungen (
+#Connects (==Verbindungen (
 #"connected Juniors"=="verbundene Juniors"
 #"connected Seniors"=="verbundene Seniors"
 #"connected Principals"=="verbundene Principals"
 #"disconnected peers"=="nichtverbundene Noeuds"
-peers/hour==Noeuds/Stunde
+peers/hour==Noeuds/heure
 #This peer's status==Status dieses Noeuds
 #Virgin - You have not published your peer seed yet. This happens automatically, just wait. While you have this status you are not allowed to search other peers.==Virgin - Ihr Noeud ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch. Während Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Noeuds zu durchsuchen.
 #Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.==Junior - Ihr Noeud kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Noeuds von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
