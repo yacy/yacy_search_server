@@ -29,6 +29,7 @@
 //javac -classpath .:../Classes Blacklist_p.java
 //if the shell's current path is HTROOT
 
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,6 +49,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
+import net.yacy.utils.translation.TranslatorXliff;
 
 
 public class ConfigLanguage_p {
@@ -103,15 +105,25 @@ public class ConfigLanguage_p {
                     final DigestURL u = new DigestURL(url);
                     it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, null, null));
                     try {
-                        final File langFile = new File(langPath, url.substring(url.lastIndexOf('/'), url.length()));
+                        File langFile = new File(langPath, u.getFileName());
                         final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
 
                         while (it.hasNext()) {
                             bw.write(it.next() + "\n");
                         }
                         bw.close();
+                        
+                        // convert downloaded xliff to internal lng file
+                        final String ext = Files.getFileExtension(langFile.getName());
+                        if (ext.equalsIgnoreCase("xlf") || ext.equalsIgnoreCase("xliff")) {
+                            TranslatorXliff tx = new TranslatorXliff();
+                            Map lng = TranslatorXliff.loadTranslationsListsFromXliff(langFile);
+                            langFile = new File(langPath, Files.getNameWithoutExtension(langFile.getName())+".lng");
+                            tx.saveAsLngFile(null, langFile, lng);
+                        }
+                        
                         if (post.containsKey("use_lang") && "on".equals(post.get("use_lang"))) {
-                            Translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
+                            Translator.changeLang(env, langPath, langFile.getName());
                         }
                     } catch (final IOException e) {
                         prop.put("status", "2");//error saving the language file

@@ -549,6 +549,7 @@ Current language</label>==Aktuelle Sprache</label>
 Author(s) (chronological)</label>==Autoren (chronologisch)</label>
 Send additions to maintainer</em>==Schicken Sie Ergänzungen bitte an</em>
 Available Languages</label>==Verfügbare Sprachen</label>
+Supported formats are the internal language file (extension .lng) or XLIFF (extension .xlf) format.==Unterstütztes Format ist das interne Sprachdatei (Dateiendung .lng) oder XLIFF (Dateiendung .xlf) Format.
 Install new language from URL==Neue Sprachdatei herunterladen
 Use this language==Diese Sprachdatei sofort benutzen
 "Use"=="Benutzen"
