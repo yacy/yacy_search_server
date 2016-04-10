@@ -4160,6 +4160,8 @@ Select tags to remove ...==Ключі для видалення ...
 
 #File: ServerScannerList.html
 #---------------------------
+Network Scanner Monitor==Результати сканування мережі
+The following servers can be searched:==По наступних серверах можна здійснювати пошук:
 The following servers had been detected:==Були виявлені наступні сервери:
 Available server within the given IP range==Доступні сервери в межах вказаної IP-області
 >Protocol<==>Протокол<
@@ -4174,8 +4176,6 @@ Available server within the given IP range==Доступні сервери в �
 >not in index<==>не в індексі<
 >indexed<==>проіндексовано<
 "Add Selected Servers to Crawler"=="Додати обрані сервери у сканування"
-The following servers can be searched:==По наступних серверах можна здійснювати пошук:
-Network Scanner Monitor==Результати сканування мережі
 #-----------------------------
 
 #File: env/templates/submenuComputation.template

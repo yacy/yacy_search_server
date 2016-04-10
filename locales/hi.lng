@@ -1102,11 +1102,21 @@ Look every==हर देखो
 again and add new sites automatically to indexer.==फिर और इंडेक्सर को स्वचालित रूप से नए स्थलों को जोड़ने.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==एक अनुसूचित स्कैन अवधि के दौरान दिखाई नहीं देते हैं कि साइट खोज परिणामों से बाहर रखा जाएगा.
 "Scan"=="स्कैन"
-The following servers had been detected:==निम्न सर्वर पाया गया था::
+#-----------------------------
+
+#File: CrawlStartSite.html
+#---------------------------
+#-----------------------------
+
+#File: ServerScannerList.html
+#------------------------------
+#Network Scanner Monitor==Network Scanner Monitor
+#The following servers had been detected:==निम्न सर्वर पाया गया था:
+#The following servers can be searched:==The following servers can be searched:
 Available server within the given IP range==दी आईपी सीमा के भीतर उपलब्ध सर्वर
 >Protocol<==>प्रोटोकॉल<
-#>IP<==>आईपी<
-#>URL<==>यूआरएल<
+>IP<==>आईपी<
+>URL<==>यूआरएल<
 >Access<==>पहुंच<
 >Process<==>प्रक्रिया<
 >unknown<==>अज्ञात<
@@ -1116,11 +1126,7 @@ Available server within the given IP range==दी आईपी सीमा क
 >not in index<==>नहीं सूचकांक में<
 >indexed<==>अनुक्रमित<
 "Add Selected Servers to Crawler"=="ट्रेक के लिए चयनित सर्वर जोड़ें"
-#-----------------------------
-
-#File: CrawlStartSite.html
-#---------------------------
-#-----------------------------
+#------------------------------
 
 #File: env/templates/submenuUseCaseAccount.template
 #---------------------------

@@ -1491,20 +1491,6 @@ Look every==Проверять каждые
 again and add new sites automatically to indexer.==и добавлять новые сайты в индексатор автоматически.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==Сайты, которые будут недоступны во время запланированного сканирования, будут удалены из результатов поиска.
 "Scan"=="Сканировать"
-#The following servers had been detected:==Die folgenden Server wurden entdeckt:
-#Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
-#>Protocol<==>Протокол<
-#>IP<==>IP-адрес<
-#>URL<==>URL-адрес<
-#>Access<==>Доступ<
-#>Process<==>Состояние<
-#>unknown<==>неизвестно<
-#>empty<==>пусто<
-#>granted<==>разрешено<
-#>denied<==>запрещено<
-#>not in index<==>нет в индексе<
-#>indexed<==>проиндексировано<
-#"Add Selected Servers to Crawler"=="Добавить выбранные серверы в индексатор"
 #-----------------------------
 
 #File: CrawlStartSite.html
@@ -2933,6 +2919,25 @@ URLs for<br/>Remote<br/>Crawl==Ссылки для <br/>удалённых <br/>
 #>RWIs<==>RWIs<
 >Age<==>Возраст<
 #-----------------------------
+
+#File: ServerScannerList.html
+#------------------------------
+#Network Scanner Monitor==Network Scanner Monitor
+#The following servers had been detected:==The following servers had been detected:
+#Available server within the given IP range==Available server within the given IP range
+>Protocol<==>Протокол<
+>IP<==>IP-адрес<
+>URL<==>URL-адрес<
+>Access<==>Доступ<
+>Process<==>Состояние<
+>unknown<==>неизвестно<
+>empty<==>пусто<
+>granted<==>разрешено<
+>denied<==>запрещено<
+>not in index<==>нет в индексе<
+>indexed<==>проиндексировано<
+"Add Selected Servers to Crawler"=="Добавить выбранные серверы в индексатор"
+#------------------------------
 
 #File: Settings_p.html
 #---------------------------

@@ -1094,20 +1094,6 @@ Look every==每隔
 again and add new sites automatically to indexer.==再次检视, 并自动添加新站点到索引器中.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==周期扫描中未上线的站点会被自动排除.
 "Scan"=="扫描"
-The following servers had been detected:==已检测到以下服务器:
-Available server within the given IP range==指定IP范围内的可用服务器
->Protocol<==>协议<
-#>IP<==>IP<
-#>URL<==>URL<
->Access<==>权限<
->Process<==>状态<
->unknown<==>未知<
->empty<==>空<
->granted<==>已授权<
->denied<==>拒绝<
->not in index<==>未在索引中<
->indexed<==>已被索引<
-"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
 #-----------------------------
 
 #File: CrawlStartSite.html
@@ -2344,6 +2330,26 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 #>RWIs<==>RWIs<
 >Age<==>寿命<
 #-----------------------------
+
+#File: ServerScannerList.html
+#------------------------------
+#Network Scanner Monitor==Network Scanner Monitor
+The following servers had been detected:==已检测到以下服务器:
+#The following servers can be searched:==The following servers can be searched:
+Available server within the given IP range==指定IP范围内的可用服务器
+>Protocol<==>协议<
+#>IP<==>IP<
+#>URL<==>URL<
+>Access<==>权限<
+>Process<==>状态<
+>unknown<==>未知<
+>empty<==>空<
+>granted<==>已授权<
+>denied<==>拒绝<
+>not in index<==>未在索引中<
+>indexed<==>已被索引<
+"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
+#------------------------------
 
 #File: Settings_p.html
 #---------------------------
