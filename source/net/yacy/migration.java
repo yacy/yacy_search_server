@@ -75,7 +75,7 @@ public class migration {
                 migrateWorkFiles(sb);
             }
         }
-        if (fromVer < 0.431d) installSkins(sb);
+        installSkins(sb); // FIXME: yes, bad fix for quick release 0.47
 
         // ssl/https support currently on hardcoded default port 8443 (v1.67/9563)
         // make sure YaCy can start (disable ssl/https support if port is used)
