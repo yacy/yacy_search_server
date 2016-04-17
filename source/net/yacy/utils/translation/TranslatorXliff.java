@@ -129,7 +129,7 @@ public class TranslatorXliff extends Translator {
                 }
             }
         } catch (JAXBException je) {
-            ConcurrentLog.warn("TRANSKATOR",je.getMessage());
+            ConcurrentLog.warn("TRANSLATOR", je.getMessage());
         } catch (FileNotFoundException ex) {
             ConcurrentLog.warn("TRANSLATOR", "File not found: " + xliffFile.getAbsolutePath());
         }

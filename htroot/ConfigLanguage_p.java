@@ -117,7 +117,7 @@ public class ConfigLanguage_p {
                         final String ext = Files.getFileExtension(langFile.getName());
                         if (ext.equalsIgnoreCase("xlf") || ext.equalsIgnoreCase("xliff")) {
                             TranslatorXliff tx = new TranslatorXliff();
-                            Map lng = TranslatorXliff.loadTranslationsListsFromXliff(langFile);
+                            Map<String,Map<String,String>> lng = TranslatorXliff.loadTranslationsListsFromXliff(langFile);
                             langFile = new File(langPath, Files.getNameWithoutExtension(langFile.getName())+".lng");
                             tx.saveAsLngFile(null, langFile, lng);
                         }
