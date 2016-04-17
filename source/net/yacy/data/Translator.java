@@ -51,6 +51,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.peers.Seed;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.translation.ExtensionsFileFilter;
@@ -268,7 +269,7 @@ public class Translator {
                 Formatter.setLocale(env.getConfig("locale.language", "en"));
                 try {
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                    bw.write(env.getConfig("svnRevision", "Error getting Version"));
+                    bw.write(env.getConfig(Seed.VERSION, "Error getting Version"));
                     bw.close();
                 } catch (final IOException e) {
                     // Error

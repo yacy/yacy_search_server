@@ -3773,6 +3773,7 @@ Table Viewer==Tabellen Betrachter
 
 #File: api/yacydoc.html
 #---------------------------
+>Title<==>Titel<
 >Author<==>Autor<
 >Description<==>Beschreibung<
 >Subject<==>Betreff<
