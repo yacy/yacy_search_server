@@ -52,6 +52,7 @@ public class migration {
     public static final double TAGDB_WITH_TAGHASH=0.43101635; //tagDB keys are tagHashes instead of plain tagname.
     public static final double NEW_OVERLAYS      =0.56504422;
     public static final double IDX_HOST_VER      =0.99007724; // api for index retrieval: host index
+    public static final double SSLPORT_CFG       =1.67009578; // https port in cfg
 
     /**
      * Migrates older configuratin to current version
@@ -80,9 +81,13 @@ public class migration {
         // ssl/https support currently on hardcoded default port 8443 (v1.67/9563)
         // make sure YaCy can start (disable ssl/https support if port is used)
         if (sb.getConfigBool("server.https", false)) {
-            if (TimeoutRequest.ping("127.0.0.1", 8443, 3000)) {
+            int sslport = 8443;
+            if (fromVer > SSLPORT_CFG) {
+                sslport = sb.getConfigInt("port.ssl", 8443);
+            }
+            if (TimeoutRequest.ping("127.0.0.1", sslport, 3000)) {
                 sb.setConfig("server.https", false);
-                ConcurrentLog.info("MIGRATION", "disabled https support (reason: default port 8443 already used)");
+                ConcurrentLog.config("MIGRATION", "disabled https support (reason: port already used)");
             }
         }
     }
