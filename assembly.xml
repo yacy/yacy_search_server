@@ -43,10 +43,6 @@
             <outputDirectory>locales</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>ranking</directory>
-            <outputDirectory>ranking</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>skins</directory>
             <outputDirectory>skins</outputDirectory>
         </fileSet>
