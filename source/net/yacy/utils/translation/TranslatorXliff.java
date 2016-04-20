@@ -214,7 +214,7 @@ public class TranslatorXliff extends Translator {
      */
     private void writeFileSection(final String filename, final Map<String, String> textlist, OutputStreamWriter output) throws IOException {
         output.write("#File: " + filename + "\n"
-                + "#------------------------------\n"); // required in 1.2
+                + "#---------------------------\n"); // required in 1.2
 
         for (String source : textlist.keySet()) {
             String target = textlist.get(source);
@@ -229,7 +229,7 @@ public class TranslatorXliff extends Translator {
                 output.write("#"+source + "==" + source + "\n"); // no translation available (mark #)
             }
         }
-        output.write("#------------------------------\n\n");
+        output.write("#-----------------------------\n\n");
     }
 
     /**

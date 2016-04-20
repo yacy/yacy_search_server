@@ -2866,7 +2866,7 @@ Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web
 System Status==Стан системи
 Process</dt>==Процес</dt>
 Unknown==невідомо
-Uptime==Час в мережі
+Uptime:==Час в мережі:
 System Resources==Системні ресурси
 Processors:==Процесори:
 Protection==Безпека

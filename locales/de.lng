@@ -546,6 +546,7 @@ Current language</label>==Aktuelle Sprache</label>
 Author(s) (chronological)</label>==Autoren (chronologisch)</label>
 Send additions to maintainer</em>==Schicken Sie Ergänzungen bitte an</em>
 Available Languages</label>==Verfügbare Sprachen</label>
+Download Language File==Sprachdatei herunterladen
 Supported formats are the internal language file (extension .lng) or XLIFF (extension .xlf) format.==Unterstütztes Format ist das interne Sprachdatei (Dateiendung .lng) oder XLIFF (Dateiendung .xlf) Format.
 Install new language from URL==Neue Sprachdatei herunterladen
 Use this language==Diese Sprachdatei sofort benutzen
@@ -575,8 +576,6 @@ Installing:==Installieren:
 download yacy-portalsearch.tar.gz from==Downloaden von yacy-portalsearch.tar.gz von
 unpack within your HTTP servers path==Entpacken in das HTTP Server Verzeichnis
 use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==Verwenden von ./yacy/portalsearch/yacy-portalsearch.html als Referenz für eine Integration mit Ihrem bestehenen Portal
-#Remote access through selected YaCy Peer==Remote Access durch ausgewähltes YaCy Peer
-#Advantages:==Vorteile:
 Always latest version of YaCy Search Widget==Immer die aktuellste Version des YaCy Suchwidgets
 No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Keine AJAX/JSON cross Domainanfragen, da Suchwidget und YaCy auf derselben Domäne gehostet werden.
 Under certain cirumstances slower than static hosting==Unter bestimmten Umständen langsamer als statisches Hosting
@@ -3148,8 +3147,12 @@ For community support, please visit our==Für Unterstützung aus der Community, 
 #---------------------------
 #System Status==System Status
 Unknown==unbekannt
-Uptime==Online seit
+YaCy version:==YaCy Version:
+Uptime:==Online seit:
+Java version:==Java Version:
 Processors:==Prozessoren:
+peak:==max:
+total:==Total:
 Protection==Sicherheit
 Password is missing==Kein Passwort
 password-protected==Passwort-geschützt

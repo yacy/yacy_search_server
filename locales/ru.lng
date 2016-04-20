@@ -3300,7 +3300,7 @@ System Status==Статус системы
 System==Система
 YaCy version==Версия YaCy
 Unknown==неизвестная
-Uptime==Время работы
+Uptime:==Время работы:
 Processors:==Процессоры:
 Load:==Загрузка процессора:
 Threads:==Потоки:

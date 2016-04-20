@@ -1170,7 +1170,7 @@ Welcome to YaCy!==YaCyへようこそ!
 Unknown==不明
 System==システム
 YaCy version==YaCyのヴァージョン
-Uptime==稼働時間
+Uptime:==稼働時間:
 Java version:==Javaのヴァージョン:
 Processors:==プロセッサー:
 Load:==負荷:
