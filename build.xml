@@ -228,7 +228,7 @@
     	<pathelement location="${lib}/lucene-suggest-5.5.0.jar" />
 	<pathelement location="${lib}/jsonic-1.2.0.jar" />
 	<pathelement location="${lib}/langdetect.jar" />
-    	<pathelement location="${lib}/metadata-extractor-2.8.1.jar" />
+    	<pathelement location="${lib}/metadata-extractor-2.9.1.jar" />
     	<pathelement location="${lib}/noggit-0.5.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
         <pathelement location="${lib}/pdfbox-1.8.11.jar" />
