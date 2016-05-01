@@ -1970,6 +1970,13 @@ Help / Wiki==Pomoc / Wiki
 Peer Owner Profile==Profi vlastn&iacute;ka peera
 #-----------------------------
 
+#File: env/templates/submenuAccessTracker.template
+#---------------------------
+Cookie Menu==Cookie Menu
+Incoming&nbsp;Cookies==Prichadzajuce cookies
+Outgoing&nbsp;Cookies==Odchadzajuce cookies
+#-----------------------------
+
 #File: env/templates/header.template
 #---------------------------
 # NOT USED
@@ -2026,13 +2033,6 @@ Advanced Settings==Pokrocil&eacute; nastavenia
 Peer Profile==Profil
 Interface Skins==Nastavenie vzhladu
 >Advanced==>Pokrocil&eacute; nastavenia
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Cookie Menu
-Incoming&nbsp;Cookies==Prichadzajuce cookies
-Outgoing&nbsp;Cookies==Odchadzajuce cookies
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template

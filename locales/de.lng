@@ -3860,6 +3860,9 @@ Local Search<==Lokale Suche<
 #Log==Log
 Host Tracker==Host-Tracker
 Remote Search<==Remote-Suche<
+Cookie Menu==Cookie Menü
+Incoming&nbsp;Cookies==Eingehende Cookies
+Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -3909,13 +3912,6 @@ External Content Integration==Integration von externen Inhalten
 Import phpBB3 forum==Importiere phpBB3 Forum
 Import Mediawiki dumps==Importiere Mediawiki Dumps
 Import OAI-PMH Sources==Importiere OAI-PMH Quellen
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Cookie Menü
-Incoming&nbsp;Cookies==Eingehende Cookies
-Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template

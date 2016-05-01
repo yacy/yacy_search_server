@@ -3575,8 +3575,10 @@ All Connections</a>==Всі з’єднання</a>
 Local Search==Місцевий пошук
 Log==Журнал
 Host Tracker==Спостереження за сервером
-#Remote&nbsp;Search==Віддалений&nbsp;пошук
-Remote Search==Віддалений пошук
+Remote Search<==Віддалений пошук<
+Cookie Menu==Меню печива
+Incoming&nbsp;Cookies==Вхідне печиво
+Outgoing&nbsp;Cookies==Вихідне печиво
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -3613,13 +3615,6 @@ External Content Integration==Включення зовнішнього вміс
 Import phpBB3 forum==Імпорт форуму phpBB3
 Import Mediawiki dumps==Імпорт Mediawiki Dumps
 Import OAI-PMH Sources==Імпорт джерел OAI-PMH
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Меню печива
-Incoming&nbsp;Cookies==Вхідне печиво
-Outgoing&nbsp;Cookies==Вихідне печиво
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template

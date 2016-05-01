@@ -1583,6 +1583,7 @@ Local Search<==ローカル検索<
 #Log==ログ
 Host Tracker==ホスト トラッカー
 Remote Search<==リモート検索<
+Cookie Menu==Cookie メニュー
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -1641,11 +1642,6 @@ Advanced Properties==高度な属性
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
 External Content Integration==外部コンテントの統合
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Cookie メニュー
 #-----------------------------
 
 #File: env/templates/submenuCrawler.template

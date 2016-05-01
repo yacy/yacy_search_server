@@ -2196,6 +2196,13 @@ Bugtracker==Suivi des bugs
 external==lien externe
 #-----------------------------
 
+#File: env/templates/submenuAccessTracker.template
+#---------------------------
+Cookie Menu==Menu Cookie
+Incoming Cookies==Cookies entrants
+Outgoing Cookies==Cookies sortants
+#-----------------------------
+
 #File: env/templates/submenuComputation.template
 #---------------------------
 Application Status==&Eacute;tat de l'application
@@ -2229,13 +2236,6 @@ Download System Update==Mise &agrave; jour du syst&egrave;me
 Advanced Settings==Param&egrave;tres avanc&eacute;s
 Local robots.txt==robots.txt local
 Advanced Properties==Configuration avanc&eacute;e
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Menu Cookie
-Incoming Cookies==Cookies entrants
-Outgoing Cookies==Cookies sortants
 #-----------------------------
 
 #File: env/templates/submenuCrawler.template
