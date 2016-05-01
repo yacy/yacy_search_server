@@ -91,7 +91,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
         if (masterOutputFile.exists()) // if file exists, conserve existing master content (may be updated by external tool)
             xliffTrans = TranslatorXliff.loadTranslationsListsFromXliff(masterOutputFile);
         else
-            xliffTrans = new TreeMap();
+            xliffTrans = new TreeMap<String, Map<String, String>>();
 
         List<String> lngFiles = Translator.langFiles(new File("locales"));
         for (String filename : lngFiles) {

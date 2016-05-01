@@ -184,9 +184,13 @@ public class TranslatorXliff extends Translator {
                 for (String source : txtmap.keySet()) {
                     String target = txtmap.get(source);
                     // we use hashCode of source string to get same id in different xliff files for same translation text
-                    output.write("    <trans-unit id=\"" + Integer.toHexString(source.hashCode()) + "\" xml:space=\"preserve\" approved=\"no\">\n");
-                    output.write("       <source>" + toXmlStr(source) + "</source>\n");
-                    if (target != null && !target.isEmpty()) { // omitt target text if not available
+                    output.write("    <trans-unit id=\"" + Integer.toHexString(source.hashCode()) + "\" xml:space=\"preserve\" approved=\"no\"");
+                    if (target == null || target.isEmpty()) { // omitt target text if not available
+                        output.write(" translate=\"yes\">\n");
+                        output.write("       <source>" + toXmlStr(source) + "</source>\n");
+                    } else {
+                        output.write(">\n");
+                        output.write("       <source>" + toXmlStr(source) + "</source>\n");
                         output.write("       <target" + (target.equals(source) ? "" : " state='translated'") + ">" + toXmlStr(target) + "</target>\n");
                     }
                     output.write("    </trans-unit>\n");
