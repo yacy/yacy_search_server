@@ -110,7 +110,7 @@ public class NetworkHistory {
         int scale=(int)Math.pow(10, order);
         minpeers=(minpeers/scale)*scale;
         maxpeers=((maxpeers/scale)+1)*scale;
-        if ((maxpeers-minpeers)/scale < 3) scale=scale/2;
+        if ((maxpeers-minpeers)/scale < 3) scale=Math.max(1,scale/2);
         final int leftborder = 30;
         final int rightborder = 10;
         final int width = post.getInt("width", 768 + leftborder + rightborder);
