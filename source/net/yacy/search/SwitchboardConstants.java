@@ -155,19 +155,6 @@ public final class SwitchboardConstants {
     public static final String SURROGATES_METHOD_START         = "surrogateProcess";
     public static final String SURROGATES_METHOD_JOBCOUNT      = "surrogateQueueSize";
     public static final String SURROGATES_METHOD_FREEMEM       = "surrogateFreeMem";
-    // 80_search_result_processing
-    /**
-     * <p><code>public static final String <strong>SEARCHRESULT</strong> = "80_searchresult"</code></p>
-     * <p>A thread that stores search results from other peers into the own index.</p>
-     */
-    public static final String SEARCHRESULT                      = "80_searchresult";
-    public static final String SEARCHRESULT_MEMPREREQ            = "80_searchresult_memprereq";
-    public static final String SEARCHRESULT_LOADPREREQ           = "80_searchresult_loadprereq";
-    public static final String SEARCHRESULT_IDLESLEEP            = "80_searchresult_idlesleep";
-    public static final String SEARCHRESULT_BUSYSLEEP            = "80_searchresult_busysleep";
-    public static final String SEARCHRESULT_METHOD_START         = "searchresultProcess";
-    public static final String SEARCHRESULT_METHOD_JOBCOUNT      = "searchresultQueueSize";
-    public static final String SEARCHRESULT_METHOD_FREEMEM       = "searchresultFreeMem";
     // 85_scheduler
     /**
      * <p><code>public static final String <strong>SCHEDULER</strong> = "85_scheduler"</code></p>

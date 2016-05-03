@@ -2167,10 +2167,6 @@ public final class Switchboard extends serverSwitch {
         }
         return false;
     }
-
-    public void searchresultFreeMem() {
-        // do nothing
-    }
     
     public static void clearCaches() {
         // flush caches in used libraries
