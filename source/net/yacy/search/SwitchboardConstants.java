@@ -178,56 +178,6 @@ public final class SwitchboardConstants {
     public static final String CLEANUP_IDLESLEEP            = "90_cleanup_idlesleep";
     public static final String CLEANUP_BUSYSLEEP            = "90_cleanup_busysleep";
     /**
-     * <p><code>public static final String <strong>RAM_CACHE_LURL</strong> = "ramCacheLURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Loaded URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_LURL_TIME      = "ramCacheLURL_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_NURL</strong> = "ramCacheNURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Noticed URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_NURL_TIME      = "ramCacheNURL_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_RWI</strong> = "ramCacheRWI"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the RWIs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_RWI_TIME       = "ramCacheRWI_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_HTTP</strong> = "ramCacheHTTP"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the HTTP Headers DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_HTTP_TIME      = "ramCacheHTTP_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_MESSAGE</strong> = "ramCacheMessage"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Message DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_MESSAGE_TIME   = "ramCacheMessage_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_ROBOTS</strong> = "ramCacheRobots"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the robots.txts DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_ROBOTS_TIME    = "ramCacheRobots_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_PROFILES</strong> = "ramCacheProfiles"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Crawl Profiles DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_PROFILES_TIME  = "ramCacheProfiles_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_PRE_NURL</strong> = "ramCachePreNURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Pre-Noticed URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_PRE_NURL_TIME  = "ramCachePreNURL_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_WIKI</strong> = "ramCacheWiki"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Wiki DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_WIKI_TIME      = "ramCacheWiki_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_BLOG</strong> = "ramCacheBlog"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Blog DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_BLOG_TIME      = "ramCacheBlog_time";
-    /**
      * <p><code>public static final String <strong>INDEX_DIST_CHUNK_SIZE_START</strong> = "indexDistribution.startChunkSize"</code></p>
      * <p>Name of the setting specifying how many words the very first chunk will contain when the DHT-thread starts</p>
      */
