@@ -825,11 +825,12 @@ load only files in a sub-path of given url==与えられたURLのサブ-パス�
 #---------------------------
 #YaCy: Help==YaCy: ヘルプ
 YaCy: Tutorial==YaCy: チュートリアル
+>Tutorial==>チュートリアル
 #-----------------------------
 
 #File: HostBrowser.html
 #---------------------------
-#Index Browser==索引ブラウザー
+Index Browser==索引ブラウザー
 #Administration Options==管理オプション
 #-----------------------------
 

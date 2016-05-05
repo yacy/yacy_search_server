@@ -243,9 +243,9 @@ Send additions to maintainer</em>==Envoyez les ajouts &agrave;</em>
 Available Languages</label>==Langues disponibles</label>
 Install new language from URL==T&eacute;l&eacute;charcher une nouvelle langue
 Use this language==Utiliser cette langue:
-"Use"==Utiliser
-"Delete"==Supprimer
-"Install"==Installer
+"Use"=="Utiliser"
+"Delete"=="Supprimer"
+"Install"=="Installer"
 Unable to get URL:==Impossible d'installer le fichier de cette URL:
 Error saving the language file.==Erreur en sauvegardant le fichier de langue.
 #-----------------------------
@@ -663,6 +663,11 @@ This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a
 >Scheduler Steering<==>Commande du planificateur<
 The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering==Le planificateur de balayage peut &ecirc;tre modifi&eacute; ou supprim&eacute; au moyen de la <a href="Table_API_p.html">commande de l'API
 #---------------------------
+
+#File: HostBrowser.html
+#---------------------------
+Index Browser==Explorateur d'index
+#-----------------------------
 
 #File: IndexCreateIndexingQueue_p.html
 #---------------------------
@@ -2154,6 +2159,7 @@ RAM/Disk Usage &amp; Updates==Utilisation RAM/disque et mises &agrave; jour
 Monitoring==Surveillance
 System Status==&Eacute;tat du syst&egrave;me
 Peer-to-Peer Network==R&eacute;seau pair &agrave; pair
+Index Browser==Explorateur d'index
 Network Access==Acc&egrave;s au r&eacute;seau
 Web Visualization==Visualisation du web
 Crawler Monitor==Surveillance du balayeur
@@ -2292,6 +2298,11 @@ Use Case &amp; Accounts==Mode d'utilisation et comptes
 Basic Configuration==Configuration de base
 >Accounts<==>Comptes<
 Network Configuration==Configuration r&eacute;seau
+#-----------------------------
+
+#File: env/templates/submenuWebStructure.template
+#---------------------------
+Index Browser==Explorateur d'index
 #-----------------------------
 
 #File: htdocsdefault/dir.html
