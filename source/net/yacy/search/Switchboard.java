@@ -2539,20 +2539,6 @@ public final class Switchboard extends serverSwitch {
                 boolean postprocessing = process_key_exist && reference_index_exist && minimum_ram_fullfilled && minimum_load_fullfilled;
                 if (!postprocessing) log.info("postprocessing deactivated: constraints violated");
 
-                // Hack to prevent Solr problem on partial update if target document contains multivalued date field
-                // regardless if this field is part of the update it causes a org.apache.solr.common.SolrException: Invalid Date String Exception.
-                // 2015-09-12 Solr v5.2.1 & v5.3
-                // this hack switches partial update off (if multivalued datefield _dts exists, like: dates_in_content_dts startDates_dts endDates_dts)
-                boolean partialUpdate = getConfigBool("postprocessing.partialUpdate", true);
-
-                /* Solr 5.4.0 bugfix see http://issues.apache.org/jira/browse/SOLR-8050 Partial update on document with multivalued date field fails
-                *
-                for (String sf : index.fulltext().getDefaultConfiguration().keySet()) {
-                    if (sf.endsWith("_dts")) {
-                        partialUpdate = false;
-                    }
-                }
-                */
                 if (allCrawlsFinished) {
                     // refresh the search cache
                     SearchEventCache.cleanupEvents(true);
@@ -2561,7 +2547,7 @@ public final class Switchboard extends serverSwitch {
                     if (postprocessing) {
                         // run postprocessing on all profiles
                         ReferenceReportCache rrCache = index.getReferenceReportCache();
-                        proccount += collection1Configuration.postprocessing(index, rrCache, null, partialUpdate);
+                        proccount += collection1Configuration.postprocessing(index, rrCache, null, getConfigBool("postprocessing.partialUpdate", true));
                         this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                     }
                     this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
@@ -2574,7 +2560,7 @@ public final class Switchboard extends serverSwitch {
                         if (postprocessing) {
                             // run postprocessing on these profiles
                             ReferenceReportCache rrCache = index.getReferenceReportCache();
-                            for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash, partialUpdate);
+                            for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash, getConfigBool("postprocessing.partialUpdate", true));
                             this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                         }
                         this.crawler.cleanProfiles(deletionCandidates);
