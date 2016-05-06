@@ -109,14 +109,7 @@ public class PeerActions {
             return false;
         }
 
-        // disconnection time
-        long dtimeUTC0;
         final Seed disconnectedSeed = this.seedDB.getDisconnected(seed.hash);
-        if (disconnectedSeed == null) {
-            dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
-        } else {
-            dtimeUTC0 = disconnectedSeed.getLong("dct", 0);
-        }
 
         if (direct) {
             // remember the moment
@@ -129,9 +122,6 @@ public class PeerActions {
             // set connection flag
             if (Math.abs(nowUTC0Time - ctimeUTC0) > 120000) seed.setFlagDirectConnect(false); // 2 minutes
         }
-
-        // update latest version number
-        if (seed.getVersion() > yacyVersion.latestRelease) yacyVersion.latestRelease = seed.getVersion();
 
         // prepare to update
         if (disconnectedSeed != null) {
