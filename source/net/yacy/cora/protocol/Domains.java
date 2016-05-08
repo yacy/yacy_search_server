@@ -100,12 +100,10 @@ public class Domains {
     private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<InetAddress> publicIPv6HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
-    private static Set<String> myHostNames = new HashSet<String>();
     private static Set<String> localHostNames = new HashSet<String>(); // subset of myHostNames
     private static Set<String> publicIPv4HostNames = new HashSet<String>(); // subset of myHostNames
     private static Set<String> publicIPv6HostNames = new HashSet<String>(); // subset of myHostNames
     static {
-        myHostNames.add(LOCALHOST);
         localHostNames.add(LOCALHOST);
         try {
             InetAddress localHostAddress = InetAddress.getLocalHost();
@@ -166,8 +164,6 @@ public class Domains {
                     }
                     hns.add(hostaddressP);
                     final String hostname = getHostName(a);
-                    if (hostname != null) myHostNames.add(hostname);
-                    myHostNames.addAll(hns);
                     for (String hostaddress: hns) {
                         if (hostaddress.contains("::0:") || hostaddress.contains(":0::")) continue; // not common (but possible); we skip that
                         // we write the local tests into variables to be able to debug these values
@@ -986,9 +982,7 @@ public class Domains {
 
                 // add also the isLocal host name caches
                 final boolean localp = ip.isAnyLocalAddress() || ip.isLinkLocalAddress() || ip.isSiteLocalAddress();
-                if (localp) {
-                    myHostNames.add(host);
-                } else {
+                if (!localp) {
                     if (globalHosts != null) try {
                         globalHosts.add(host);
                     } catch (final IOException e) {}

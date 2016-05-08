@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.ReverseMapIterator;
 
 public final class ResultURLs {
@@ -102,7 +103,7 @@ public final class ResultURLs {
                 resultStack.put(urlhash, new InitExecEntry(initiatorHash, executorHash));
             }
         } catch (final Exception ex) {
-            System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
+            ConcurrentLog.warn("CRAWLER", "INTERNAL ERROR in newEntry/2: " + ex.toString());
             return;
         }
         try {
@@ -111,7 +112,7 @@ public final class ResultURLs {
                 domains.inc(hostname);
             }
         } catch (final Exception ex) {
-            System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());
+            ConcurrentLog.warn("CRAWLER", "INTERNAL ERROR in newEntry/3: " + ex.toString());
             return;
         }
     }

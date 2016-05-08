@@ -93,10 +93,10 @@ public class ListNonTranslatedFiles extends TranslatorUtil {
 			
 			List<File> nonTranslatedFiles = new ArrayList<>();
 			for(File srcFile : srcFiles) {
-				Path relativeSrcFile = sourcePath.relativize(srcFile.toPath());
-				if(!translatedRelativePaths.contains(relativeSrcFile.toString())) {
-					nonTranslatedFiles.add(srcFile);
-				}
+                            Path relativeSrcFile = sourcePath.relativize(srcFile.toPath());
+                            if (!translatedRelativePaths.contains(relativeSrcFile.toString().replace('\\', '/'))) { // replace windows path separator for compare
+                                nonTranslatedFiles.add(srcFile);
+                            }
 			}
 			
 			printResults(nonTranslatedFiles);

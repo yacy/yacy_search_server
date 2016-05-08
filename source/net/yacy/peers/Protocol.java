@@ -905,7 +905,7 @@ public final class Protocol {
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
             parts.put("exclude", UTF8.StringBody(excludehashes));
-            parts.put("duetime", UTF8.StringBody("1000"));
+            // parts.put("duetime", UTF8.StringBody("1000")); // not used or red by receiver, max wait time given by praram "time" (2016-04-25 v1.83/9772)
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
             parts.put("filter", UTF8.StringBody(event.query.urlMaskString));
@@ -1722,7 +1722,7 @@ public final class Protocol {
                 Base64Order.enhancedCoder,
                 6);
         // check if the host supports this protocol
-        if ( target.getRevision() < migration.IDX_HOST ) {
+        if ( target.getVersion()< migration.IDX_HOST_VER ) {
             // if the protocol is not supported then we just return an empty host reference container
             return index;
         }

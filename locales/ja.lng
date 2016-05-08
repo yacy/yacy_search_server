@@ -231,7 +231,7 @@ Surftips==サーフティップス
 
 #File: Blog.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==コメント</a>
 >edit==>編集
 >delete==>削除
@@ -272,7 +272,7 @@ Please select the XML-file you want to import:==あなたが取り込みたいXM
 
 #File: BlogComments.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==コメント</a>
 Login==ログイン
 Blog-Home==ブログ-ホーム
@@ -646,7 +646,7 @@ Other portal settings can be adjusted in <a href="ConfigPortal.html">Generic Sea
 >Vocabulary<==>語彙<
 >Title of Result<==>結果の題名<
 Description and text snippet of the search result==検索結果の説明とテキストのスニペット
-http://url-of-the-search-result.net==http://url-of-the-search-result.net
+#http://url-of-the-search-result.net==http://url-of-the-search-result.net
 42 kbyte<==42 kB<
 >Metadata<==>メタデータ<
 #>Parser<==>構文解析器<
@@ -825,11 +825,12 @@ load only files in a sub-path of given url==与えられたURLのサブ-パス�
 #---------------------------
 #YaCy: Help==YaCy: ヘルプ
 YaCy: Tutorial==YaCy: チュートリアル
+>Tutorial==>チュートリアル
 #-----------------------------
 
 #File: HostBrowser.html
 #---------------------------
-#Index Browser==索引ブラウザー
+Index Browser==索引ブラウザー
 #Administration Options==管理オプション
 #-----------------------------
 
@@ -1170,7 +1171,7 @@ Welcome to YaCy!==YaCyへようこそ!
 Unknown==不明
 System==システム
 YaCy version==YaCyのヴァージョン
-Uptime==稼働時間
+Uptime:==稼働時間:
 Java version:==Javaのヴァージョン:
 Processors:==プロセッサー:
 Load:==負荷:
@@ -1485,7 +1486,7 @@ Pictures==画像
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==地図上に "#[query]#" の検索結果を表示する
+show search results for "#[query]#" on map==地図上に "#[query]#" の検索結果を表示する
 #-----------------------------
 
 ### Subdirectory api ###
@@ -1583,6 +1584,7 @@ Local Search<==ローカル検索<
 #Log==ログ
 Host Tracker==ホスト トラッカー
 Remote Search<==リモート検索<
+Cookie Menu==Cookie メニュー
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -1624,10 +1626,10 @@ Content Control==コンテントの制御
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==ピア管理コンソール
+System Administration==システムの管理
+#UNUSED HERE
+#Peer Administration Console==ピア管理コンソール
 #Status==状態
-Basic Configuration==基本的な構成
->Accounts==>アカウント
 Network Configuration==ネットワークの構成
 Download System Update==システムの更新をダウンロードする
 >Performance==>パフォーマンス
@@ -1641,11 +1643,6 @@ Advanced Properties==高度な属性
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
 External Content Integration==外部コンテントの統合
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Cookie メニュー
 #-----------------------------
 
 #File: env/templates/submenuCrawler.template
@@ -1791,6 +1788,7 @@ Regex Test==正規表現のテスト
 Use Case &amp; Accounts==使用例 &amp; アカウント
 Basic Configuration==基本的な構成
 >Accounts<==>アカウント<
+Network Configuration==ネットワークの構成
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
@@ -1804,14 +1802,6 @@ Server Log Menu==サーヴァーのログのメニュー
 Web Visualization==ウェブの視覚化
 Web Structure==ウェブの構造
 Image Collage==画像のコラージュ
-#-----------------------------
-
-#File: env/templates/submenuUseCaseAccount.template
-#---------------------------
-Use Case &amp; Accounts==使用例 &amp; アカウント
-Basic Configuration==基本的な構成
->Accounts<==>アカウント<
-Network Configuration==ネットワークの構成
 #-----------------------------
 
 #File: htdocsdefault/dir.html

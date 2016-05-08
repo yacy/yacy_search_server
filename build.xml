@@ -160,7 +160,6 @@
     <!-- when changing paths here, please also update the paths in /addon/YaCy.app/Contents/Info.plist -->
     <path id="project.class.path">
         <pathelement location="${build}" />
-        <pathelement location="${htroot}" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-1.46.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-1.46.jar" />
@@ -169,9 +168,9 @@
     	<pathelement location="${lib}/common-io-3.2.1.jar" />
     	<pathelement location="${lib}/common-lang-3.2.1.jar" />
     	<pathelement location="${lib}/commons-codec-1.10.jar" />
-    	<pathelement location="${lib}/commons-compress-1.10.jar" />
+    	<pathelement location="${lib}/commons-compress-1.11.jar" />
     	<pathelement location="${lib}/commons-fileupload-1.3.1.jar" />
-    	<pathelement location="${lib}/commons-io-2.4.jar" />
+    	<pathelement location="${lib}/commons-io-2.5.jar" />
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-lang-2.6.jar" />
     	<pathelement location="${lib}/commons-logging-1.2.jar" />
@@ -209,7 +208,7 @@
         <pathelement location="${lib}/jetty-xml-9.2.15.v20160210.jar" />
     	<pathelement location="${lib}/jsch-0.1.53.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
-    	<pathelement location="${lib}/jsoup-1.8.3.jar" />
+    	<pathelement location="${lib}/jsoup-1.9.1.jar" />
     	<pathelement location="${lib}/log4j-over-slf4j-1.7.18.jar" />
     	<pathelement location="${lib}/lucene-analyzers-common-5.5.0.jar" />
     	<pathelement location="${lib}/lucene-analyzers-phonetic-5.5.0.jar" />
@@ -229,7 +228,7 @@
     	<pathelement location="${lib}/lucene-suggest-5.5.0.jar" />
 	<pathelement location="${lib}/jsonic-1.2.0.jar" />
 	<pathelement location="${lib}/langdetect.jar" />
-    	<pathelement location="${lib}/metadata-extractor-2.8.1.jar" />
+    	<pathelement location="${lib}/metadata-extractor-2.9.1.jar" />
     	<pathelement location="${lib}/noggit-0.5.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
         <pathelement location="${lib}/pdfbox-1.8.11.jar" />
@@ -245,6 +244,7 @@
     	<pathelement location="${lib}/weupnp-0.1.4.jar" />
     	<pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
+        <pathelement location="${lib}/xliff-core-1.2-1.1.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
         <pathelement location="${lib}/xmpcore-5.1.2.jar" />
     	<pathelement location="${lib}/zookeeper-3.4.6.jar" />

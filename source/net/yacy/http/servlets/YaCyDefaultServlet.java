@@ -68,7 +68,6 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
-import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.Seed;
@@ -662,8 +661,27 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
 
+    /**
+     * Convert ServletRequest header to YaCy RequestHeader
+     * @param request ServletRequest
+     * @return RequestHeader created from ServletRequest
+     */
+    public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
+        RequestHeader result = new RequestHeader();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            Enumeration<String> headers = request.getHeaders(headerName);
+            while (headers.hasMoreElements()) {
+                String header = headers.nextElement();
+                result.add(headerName, header);
+            }
+        }
+        return result;
+    }
+
     protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
+        RequestHeader legacyRequestHeader = convertHeaderFromJetty(request);
 
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);

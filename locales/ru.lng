@@ -498,11 +498,10 @@ start your own crawl</a> and contribute to the global index, or create your own 
 set a personal peer profile</a> (optional settings)==установить персональный профиль узла</a>
 monitor at the network page</a> what the other peers are doing==страницу мониторинга сети </>
 Your Peer name is a default name; please set an individual peer name.==Ваше имя узла является именем по-умолчанию, пожалуйста, установите другое имя узла.
-What you should do next:==
+#What you should do next:==
 You did not set a user name and/or a password.==Вы не установили имя пользователя и/или пароль.
 Some pages are protected by passwords.==Некоторые страницы защищены паролем.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a href="ConfigAccounts_p.html">Учётные записи</a>, чтобы защитить узел 
-YaCy.</p>::
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a href="ConfigAccounts_p.html">Учётные записи</a>, чтобы защитить узел YaCy.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт на фаерволе или ваш роутер не перенаправляет запросы на порт сервера.
 This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в сети.
 You can also use your peer without opening it, but this is not recomended.==YaCy может работать и без открытия порта, но это нежелательно.
@@ -770,7 +769,7 @@ deny remote search==запретить удалённый поиск
 >Robinson Mode==>Режим Robinson
 If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Если ваши узлы работают в режиме Robinson, то вы можете запустить YaCy в качестве движка для собственного поискового портала, без обмена данными с другими узлами
 There is no index receive and no index distribution between your peer and any other peer==В случае выбора Robinson-кластеризации, приём и передача индекса между вашим и другими узлами будут отсутствовать
-In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==
+#In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==
 >Private Peer==>Частный узел
 Your search engine will not contact any other peer, and will reject every request==Ваш узел не будет контактировать с любыми другими узлами, и будет возвращать любой запрос
 #>Private Cluster==>Частный кластер
@@ -799,7 +798,6 @@ Parser Configuration==Конфигурация парсера
 Content Parser Settings==Настройки анализа контента
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==С помощью этих настроек вы можете включить или выключить анализ дополнительных типов контента.
 For a detailed description of the various MIME-types take a look at==Детальное описание различных типов файлов смотрите на
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>
 If you want to test a specific parser you can do so using the==Если вы желаете тестировать специальные парсеры, вы также можете использовать
 >File Viewer<==>просмотр файлов<
 > enable/disable<==> Включено / Выключено<
@@ -815,8 +813,7 @@ If you like to integrate YaCy as portal for your web pages, you may want to chan
 The search page may be customized.==Страница поиска может быть настроена.
 You can change the 'corporate identity'-images, the greeting line==Вы можете изменить картинку фирменного логотипа, строку приветствия
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==и ссылку на домашную страницу, которая будет доступна при нажатии на картинку фирменного логотипа.
-To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==
-Изменить цвета и стили, языки и скины можно на <a href="ConfigAppearance_p.html">этой</a> странице.
+To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==Изменить цвета и стили, языки и скины можно на <a href="ConfigAppearance_p.html">этой</a> странице.
 Greeting Line<==Строка приветствия<
 URL of Home Page<==Адрес домашней страницы<
 URL of a Small Corporate Image<==Адрес маленького логотипа<
@@ -907,7 +904,7 @@ For explanation please look into defaults/yacy.init==Дополнительны�
 #---------------------------
 Exclude Web-Spiders==Доступ к вэб-интерфейсу
 Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==В файле robots.txt вы можете указать параметры ограничения доступа к вэб-интерфейсу вашего узла.
-is a volunteer agreement most search-engines (including YaCy) follow.==
+#is a volunteer agreement most search-engines (including YaCy) follow.==
 It disallows crawlers to access webpages or even entire domains.==Таким образом, вы закроете доступ индексаторам к вэб-странице вашего узла или даже целому домену.
 Deny access to==Закрыть доступ к
 Entire Peer==Узлу целиком
@@ -916,7 +913,7 @@ Network pages==Страницам сети
 Surftips==Подсказкам
 News pages==Страницам новостей
 Blog==Блогу
-Wiki==Wiki
+#Wiki==Wiki
 Public bookmarks==Публичным закладкам
 Home Page==Домашней странице
 File Share==Общим файлам
@@ -928,7 +925,7 @@ Impressum==Реквизитам
 #---------------------------
 Integration of a Search Box==Интеграция поиска
 We give information how to integrate a search box on any web page that==Предлагаем вам инструкцию по интеграции поиска YaCy на любую вэб-страницу.
-calls the normal YaCy search window.==
+#calls the normal YaCy search window.==
 Simply use the following code:==Просто используете следующий код:
   MySearch==  Мой поиск
 "Search"=="Поиск"
@@ -978,7 +975,7 @@ Other portal settings can be adjusted in==Другие настройки пор
 >Collection<==>Хранилище<
 >Title of Result<==>Заголовок результата<
 Description and text snippet of the search result==Описание и фрагмент текста результата поиска
-http://url-of-the-search-result.net==http://url-of-the-search-result.net
+#http://url-of-the-search-result.net==http://url-of-the-search-result.net
 42 kbyte<==42 КБайт<
 >Metadata<==>Метаданные<
 >Parser<==>Анализ<
@@ -1015,7 +1012,7 @@ check for new releases, download if available and restart with downloaded releas
 Download of release #[downloadedRelease]# finished. Restart Initiated.== Загрузка версии #[downloadedRelease]# завершена. Начинается перезагрузка.
 No more recent release found.==Более нового обновления не обнаружено.
 Release will be installed. Please wait.==Идет установка нового обновления. Пожалуйста, подождите.
-You installed YaCy with a package manager.==
+#You installed YaCy with a package manager.==
 To update YaCy, use the package manager:==Для обновления YaCy используйте менеджер пакетов.
 Omitting update because this is a development environment.==Пропускаю обновление, потому что это версия для разработчиков.
 Omitting update because download of release #[downloadedRelease]# failed.==Пропускаю обновление, потому что загрузка версии #[downloadedRelease]# не была успешной.
@@ -1234,7 +1231,7 @@ such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HT
 and automatically excluded from indexing.==и автоматически исключаются из индексирования.
 <em>Use Case:</em> You must use YaCy as proxy to fill up this table.==Таблица будет наполняться при использовании вами YaCy в качестве прокси-сервера.
 Set the proxy settings of your browser to the same port as given==Задайте выбранный порт (по-умолчанию 8090) в настройках прокси в вашем браузере.
-on the 'Settings'-page in the 'Proxy and Administration Port' field.==
+#on the 'Settings'-page in the 'Proxy and Administration Port' field.==
 (5) Results for Local Crawling==(5) Результаты локального индексирования
 These web pages had been crawled by your own crawl task.==Эти вэб-страницы были проиндексированы вашим узлом по вашему указанию.
 <em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==Запустите индексацию, указав начальную точку на странице "Индексирование/Сканер сети"
@@ -1330,7 +1327,7 @@ This option is used by default for proxy prefetch, but is not needed for explici
 A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled.==Вопросительный знак обычно означает динамическую страницу. Ссылки, указывающие на динамический контент. обычно не индексируются.
 However, there are sometimes web pages with static content that== Однако, иногда встречаются вэб-страницы со статическим содержимым, которое
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==доступно по ссылкам, содержащим вопросительный знак. Если вы не уверены, то не включайте эту опцию, чтобы избежать замкнутого индексирования.
-Following frames is NOT done by Gxxg1e, but we do by default to have a richer content. 'nofollow' in robots metadata can be overridden; this does not affect obeying of the robots.txt which is never ignored.==
+#Following frames is NOT done by Gxxg1e, but we do by default to have a richer content. 'nofollow' in robots metadata can be overridden; this does not affect obeying of the robots.txt which is never ignored.==
 Accept URLs with query-part ('?'):==Принимать ссылки с ('?') в части запроса:
 Obey html-robots-noindex:==Учитывать html-robots-noindex:
 Policy for usage of Web Cache==Политика использования вэб-кэша
@@ -1494,20 +1491,6 @@ Look every==Проверять каждые
 again and add new sites automatically to indexer.==и добавлять новые сайты в индексатор автоматически.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==Сайты, которые будут недоступны во время запланированного сканирования, будут удалены из результатов поиска.
 "Scan"=="Сканировать"
-#The following servers had been detected:==Die folgenden Server wurden entdeckt:
-#Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
-#>Protocol<==>Протокол<
-#>IP<==>IP-адрес<
-#>URL<==>URL-адрес<
-#>Access<==>Доступ<
-#>Process<==>Состояние<
-#>unknown<==>неизвестно<
-#>empty<==>пусто<
-#>granted<==>разрешено<
-#>denied<==>запрещено<
-#>not in index<==>нет в индексе<
-#>indexed<==>проиндексировано<
-#"Add Selected Servers to Crawler"=="Добавить выбранные серверы в индексатор"
 #-----------------------------
 
 #File: CrawlStartSite.html
@@ -1677,7 +1660,7 @@ doublequotes==двойные кавычки
 prefer given language==предпочитать указанный язык
 an ISO639 2-letter code==двухбуквенный языковой код ISO639
 heuristics==эвристики
-add search results from blekko==добавить результаты из Blekko
+add search results from ==добавить результаты из 
 Search Navigation==Навигация по поиску
 keyboard shotcuts==Назначения клавиш
 tab or page-up==Tab или PgUp
@@ -1916,12 +1899,12 @@ Status==Состояние
 #---------------------------
 Parser Errors==Отклонённые ссылки
 Rejected URLs==Отклонённые ссылки
-Rejected URL List:==
+#Rejected URL List:==
 There are #[num]# entries in the rejected-urls list.==Число записей в списке #[num]#.
 Showing latest #[num]# entries.==Показаны #[num]# последних записей.
 "show more"=="Показать больше"
 "clear list"=="Очистить список"
-There are #[num]# entries in the rejected-queue:==
+#There are #[num]# entries in the rejected-queue:==
 #Initiator==Инициатор
 #Executor==Исполнитель
 Time==Дата и время
@@ -1953,7 +1936,7 @@ Host==Хост
 #---------------------------
 Content Integration: Retrieval from phpBB3 Databases==Интеграция контента: Извлечение данных из баз phpBB3
 It is possible to extract texts directly from mySQL and postgreSQL databases.==Возможно извлечение текстовых данных напрямую из баз mySQL и postgreSQL.
-Each extraction is specific to the data that is hosted in the database.==
+#Each extraction is specific to the data that is hosted in the database.==
 This interface gives you access to the phpBB3 forums software content.==Здесь вы можете получить доступ к содержимому phpBB3-форумов.
 If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Если вы желаете использовать импортированную базу данных, то вам пригодятся некоторые подсказки для устранения проблем, которые могут возникнуть при импортировании дампов в phpMyAdmin:
 before importing large database dumps, set==перед импортированием большого дампа базы данных, установите
@@ -2195,7 +2178,7 @@ Import List==Импортировать список
 >Imported<br />Records<==>Импортировано<br />записей<
 >Speed<br />(records/second)==>Скорость<br />(записей в секунду)
 Complete at==Всего записей
-Records==
+#Records==
 #-----------------------------
 
 #File: IndexReIndexMonitor_p.html
@@ -2533,7 +2516,7 @@ Other peers may use this information to prevent double-crawls from the same star
 A table with recently started crawls is presented on the Index Create - page==Таблица с недавно запущенным индексированием представлена на странице "Монитор индексирования".
 A change in the personal profile will create a news entry. You can see recently made changes of==Изменение персонального профиля также создаёт сообщение. Вы можете увидеть недавно сделанные изменения в
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==профиле на странице сети. Изменение профиля отмечено звёздочкой '*' рядом с 'P' (профиль) выбор.
-More news services will follow.==
+#More news services will follow.==
 Above you can see four menues:==Вы увидете четыре меню:
 <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>Входящие сообщения(#[insize]#)</strong>: Последние сообщения, полученные вашим узлом.
 Only these news will be used to display specific news services as explained above.==Только эти сообщения будут использоваться для отображения определённых служб сообщений.
@@ -2784,7 +2767,7 @@ this controls the proxy auto configuration script for browsers at http://localho
 whether the proxy should only be used for .yacy-Domains==Использование прокси-сервера только для доменов .yacy
 Proxy pre-fetch setting:==Настройка кэширующего прокси:
 this is an automated html page loading procedure that takes actual proxy-requested==Настройка индексации кэшируемых страниц через прокси-сервер
-URLs as crawling start points for crawling.==
+#URLs as crawling start points for crawling.==
 Prefetch Depth==Уровень предварительной выборки
 A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==0 - отключение предварительной выборки, 1 - включение предварительной выборки. 
 embedded URLs, but since embedded image links are loaded by the browser==Предварительная выборка   
@@ -2861,7 +2844,7 @@ Solr Ranking Configuration<==Конфигурация ранжирования S
 These are ranking attributes for Solr. This ranking applies for internal and remote (P2P or shard) Solr access.==Это аттрибуты ранжирования для Solr. Это ранжирование применяется для внутренного и удалённого (P2P или раздельного) доступа к Solr.
 Select a profile:==Выберите профиль:
 >Boost Function<==>Функция Boost<
-A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.==Eine Boost Funktion kann numerische Werte von Ergebnis-Dokumenten kombinieren, um eine Nummer zu erzeugen die mit den Scoring Werten der Suchergebnisse multipliziert wird.
+#A Boost Function can combine numeric values from the result document to produce a number which is multiplied with the score value from the query result.==Eine Boost Funktion kann numerische Werte von Ergebnis-Dokumenten kombinieren, um eine Nummer zu erzeugen die mit den Scoring Werten der Suchergebnisse multipliziert wird.
 To see all available fields, see the==Все доступные поля смотрите
 >YaCy Solr Schema<==>схему Solr<
 and look for numeric values (these are names with suffix '_i').==и ищите числовые значения (названия с суффиксом '_i').
@@ -2874,9 +2857,9 @@ Example: to order by date, use==Например: для сортировки п
 "Set Boost Function"=="Установить функцию Boost"
 "Re-Set to default"=="Восстановить значения по-умолчанию"
 >Boost Query<==>Запрос Boost<
-The Boost Query is attached to every query. Use this to statically boost specific content in the index.==Die Boost Abfrage wird an jede Abfrage angehängt. Verwenden sie diese Einstellung, um spezifischen Inhalt im Index zu boosten.
+#The Boost Query is attached to every query. Use this to statically boost specific content in the index.==Die Boost Abfrage wird an jede Abfrage angehängt. Verwenden sie diese Einstellung, um spezifischen Inhalt im Index zu boosten.
 Example: "fuzzy==Например: "fuzzy
- means that documents, identified as 'double' are ranked very bad and appended to the end of all results (because the unique are ranked high).== bedeutet dass Dokumente die als 'double' identifiziert werden sehr schlecht geranked werden und an das Ende der Suchergebnisliste angehängt werden (weil die eindeutigen hoch geranked werden).
+# means that documents, identified as 'double' are ranked very bad and appended to the end of all results (because the unique are ranked high).== bedeutet dass Dokumente die als 'double' identifiziert werden sehr schlecht geranked werden und an das Ende der Suchergebnisliste angehängt werden (weil die eindeutigen hoch geranked werden).
 To find appropriate fields for this query, see the ==Чтобы найти соответствующие поля запросов, смотрите 
 >YaCy Solr Schema<==>схему Solr<
  and look for boolean values (with suffix '_b') or tags inside string fields (with suffix '_s' or '_sxt').== и ищите логические значения (с суффиксом '_b') или тэги внутри строк (с суффиксом '_s' или '_sxt')
@@ -2885,7 +2868,7 @@ To find appropriate fields for this query, see the ==Чтобы найти со�
 "Set Boost Query"=="Установить запрос Boost"
 #"Re-Set to default"=="Восстановить значения по-умолчанию"
 #>Solr Boosts<==>Solr Boosts<
-This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
+#This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
 field not in local index (boost has no effect)==поля нет в локальном индексе (эффект Boost не применяется)
 "Set Field Boosts"=="Установить поле Boosts"
 #"Re-Set to default"=="Восстановить значения по-умолчанию"
@@ -2936,6 +2919,25 @@ URLs for<br/>Remote<br/>Crawl==Ссылки для <br/>удалённых <br/>
 #>RWIs<==>RWIs<
 >Age<==>Возраст<
 #-----------------------------
+
+#File: ServerScannerList.html
+#------------------------------
+#Network Scanner Monitor==Network Scanner Monitor
+#The following servers had been detected:==The following servers had been detected:
+#Available server within the given IP range==Available server within the given IP range
+>Protocol<==>Протокол<
+>IP<==>IP-адрес<
+>URL<==>URL-адрес<
+>Access<==>Доступ<
+>Process<==>Состояние<
+>unknown<==>неизвестно<
+>empty<==>пусто<
+>granted<==>разрешено<
+>denied<==>запрещено<
+>not in index<==>нет в индексе<
+>indexed<==>проиндексировано<
+"Add Selected Servers to Crawler"=="Добавить выбранные серверы в индексатор"
+#------------------------------
 
 #File: Settings_p.html
 #---------------------------
@@ -2988,7 +2990,7 @@ Specifies if YaCy should forward ssl connections to the remote proxy.==Разр�
 Remote proxy host==Хост удалённого прокси
 The ip address or domain name of the remote proxy==IP-адрес или домен удалённого прокси
 Remote proxy port==Порт удалённого прокси
-the port of the remote proxy==
+#the port of the remote proxy==
 Remote proxy user==Пользователь удалённого прокси
 Remote proxy password==Пароль удалённого прокси
 No-proxy adresses==Не использовать для прокси адреса
@@ -3266,8 +3268,8 @@ A possible reason is that you are behind a firewall, NAT or Router.==Возмо�
 But you can <a href="index.html">search the internet</a> using the other peers'==Но вы можете <a href="index.html">выполнять поиск</a>, с помощью других узлов
 global index on your own search page.==на главной странице поиска.
 "bad"=="плохой"
-"idea"="идея"
-"good"="хороший"
+"idea"=="идея"
+"good"=="хороший"
 "Follow YaCy on Twitter"=="Следуй за YaCy на Twitter"
 We encourage you to open your firewall for the port you configured (usually: 8090),==Рекомендуется открыть доступ к используемому порту (обычно, 8090) на вашем брандмауэре,
 or to set up a 'virtual server' in your router settings (often called DMZ).==или настройте "виртуальный сервер" на вашем роутере (настройка обычно называется DMZ).
@@ -3280,7 +3282,7 @@ Latest public version is==Последняя доступная версия
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Вы можете загрузить самую последнюю версию программы. Нажмите здесь для установки этого обновления и перезапуска YaCy:
 #"Update YaCy"=="Обновить YaCy"
 Install YaCy==Установка YaCy
-You can download the latest releases here:=Вы можете загрузить последние версии программы здесь:
+You can download the latest releases here:==Вы можете загрузить последние версии программы здесь:
 You are running a server in senior mode and you support the global internet index,==Ваш узел является старшим и вы участвуете в создании глобального индекса интернета,
 which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Ваш узел является главным и вы можете публиковать свой сид-лист на публично-доступном сервере,
@@ -3298,7 +3300,7 @@ System Status==Статус системы
 System==Система
 YaCy version==Версия YaCy
 Unknown==неизвестная
-Uptime==Время работы
+Uptime:==Время работы:
 Processors:==Процессоры:
 Load:==Загрузка процессора:
 Threads:==Потоки:
@@ -3612,7 +3614,7 @@ Add & Edit Bookmark==Добавить и редактировать заклад
 Public:==Публичная
 yes==да
 no==нет
-URL:==URL
+#URL:==URL
 Title:==Заголовок
 Description:==Описание
 Folder (/folder/subfolder):==Папка (папка/подпапка)
@@ -3745,7 +3747,7 @@ View URL Content==Показать сведения об URL-адресе
 "Show Metadata"=="Показать метаданные"
 "Browse Host"=="Просмотр хоста"
 >URL Metadata<==>Метаданные<
-URL==URL
+#URL==URL
 Search in Document:==Поиск в документе:
 "Show Snippet"=="Показать фрагмент"
 Hash==Хэш
@@ -3853,7 +3855,7 @@ from page title (splitted)==из заголовка страницы (разде
 from page author==из страницы автора
 "Create"=="Создать"
 Vocabulary Editor==Редактор словаря
-This produces the following triples in the==Das produziert die folgenden Tripel im
+#This produces the following triples in the==Das produziert die folgenden Tripel im
 #>triplestore<==>triplestore<
 if a term or synonym matches in a document:==если значение или синоним совпадают в документе
 more Triples for linking into objectspace==больше трех ссылок на объект
@@ -4114,7 +4116,7 @@ Pictures==Изображения
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==Показать результат поиска "#[query]#" на карте
+show search results for "#[query]#" on map==Показать результат поиска "#[query]#" на карте
 >Provider==>Домен
 >Name Space==>Имя
 >Author==>Автор
@@ -4217,7 +4219,7 @@ Project Wiki<==Wiki‐сайт проекта<
 Git Repository==Git-репозиторий
 Bugtracker==Багтрэкер
 Peer Statistics==Статистика YaCy
-external==
+#external==
 >Search...<==>Поиск...<
 "Search..."=="Поиск..."
 ### FIRST STEPS ###
@@ -4260,7 +4262,7 @@ Community (Web Forums)==Форум
 Project Wiki==Wiki-сайт проекта
 Search Interface==Интерфейс поиска
 About This Page==Ваш профиль
-external==
+#external==
 Bugtracker==Багтрэкер
 Git Repository==Git-репозиторий
 Peer Statistics==Статистика YaCy
@@ -4357,8 +4359,6 @@ Parser Configuration==Конфигурация парсера
 #---------------------------
 System Administration==Настройки системы
 >Status==>Состояние
-Basic Configuration==Основные настройки
->Accounts==>Учётные записи
 Network Configuration==Настройка сети
 Advanced Settings==Настройки системы
 Local robots.txt==Локальный robots.txt
@@ -4582,7 +4582,7 @@ YaCy: Default Page for Individual Peer Content==YaCy: Страница по-ум
 Individual&nbsp;Web&nbsp;Page==Личная вэб-страница
 Welcome to your own web page<br />in the <strong>YaCy Network==Добро пожаловать на вашу вэб-страницу<br />im <strong>в сети YaCy
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==Это демонстрационная страница для вашего личного вэб-сервера!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
+#PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
 &lt;YaCy-application-home&gt;<strong>#[wwwpath]#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
 #-----------------------------
 
@@ -4726,10 +4726,10 @@ title="help"==title="Помощь"
 #File: yacy/ui/yacyui-welcome.html
 #---------------------------
 >Overview==>Обзор
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
-I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
+#YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
+#YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
+#I am currently changing the backend to a more application friendly format and getting good results with it (I will check that in some time after the stable release 0.7).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
+#For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
 #-----------------------------
 
 #File: api/citation.html

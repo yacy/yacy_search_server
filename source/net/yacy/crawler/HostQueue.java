@@ -101,7 +101,11 @@ public class HostQueue implements Balancer {
         this.port = Integer.parseInt(filename.substring(p + 1)); // consider "host.com" contains dot but no required port -> will throw exception
         init();
     }
-    
+
+    /**
+     * Opens and initializes the host queue
+     * @throws MalformedURLException if directory for the host could not be created
+     */
     private final void init() throws MalformedURLException {
         try {
             if (this.hostName == null)

@@ -51,6 +51,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.peers.Seed;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.translation.ExtensionsFileFilter;
@@ -136,10 +137,6 @@ public class Translator {
         }
         lists.put(forFile, translationList);
         return lists;
-    }
-
-    public static boolean translateFile(final File sourceFile, final File destFile, final File translationFile){
-        return translateFile(sourceFile, destFile, loadTranslationsLists(translationFile).get(sourceFile.getName()));
     }
 
     /**
@@ -240,7 +237,7 @@ public class Translator {
             "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk," +
             "gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;," +
             "ru/&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;,uk/&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;," + 
-            "hi/&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;"
+            "hi/&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;,ja/&#26085;&#26412;&#35486;"
             );
         final Map<String, String> map = new HashMap<String, String>();
         for (final String element : ms) {
@@ -272,7 +269,7 @@ public class Translator {
                 Formatter.setLocale(env.getConfig("locale.language", "en"));
                 try {
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                    bw.write(env.getConfig("svnRevision", "Error getting Version"));
+                    bw.write(env.getConfig(Seed.VERSION, "Error getting Version"));
                     bw.close();
                 } catch (final IOException e) {
                     // Error

@@ -50,13 +50,13 @@ These are the domain name / path patterns in this blacklist:==Αυτά είνα�
 You can select them here for deletion==Μπορείτε να τα επιλέξετε εδώ για διαγραφή
 Delete URL pattern==Διαγραφή του URL pattern
 Enter new domain name / path pattern in the form:==Βάλτε στη φόρμα ένα νέο όνομα χώρου (domain name)/διαδρομή
-path-regexpr==path-regexpr
+#path-regexpr==path-regexpr
 Add URL pattern==Προσθήκη ενός URL pattern
 Import blacklist items from other YaCy peers:==Εισαγωγή καταχωρήσεων από Μαύρες Λίστες άλλων ομότιμων χρηστών του YacY:
-Host:==Host:
+#Host:==Host:
 "Load new blacklist items"=="Φορτώστε νέες καταχωρήσεις στη Μαύρη Λίστα"
 Import blacklist items from URL:==Εισαγωγή καταχωρήσεων της Μαύρης Λίστας από την URL
-URL:==URL:
+#URL:==URL:
 "Load new blacklist items"=="Φορτώστε νέες καταχωρήσεις στη Μαύρη Λίστα"
 Import blacklist items from file:==Εισαγωγή καταχωρήσεων που βρίσκονται σε Μαύρες Λίστες, από το αρχείο:
 "Load new blacklist items"=="Φορτώστε νέες καταχωρήσεις στη Μαύρη Λίστα"
@@ -71,7 +71,7 @@ YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
 <h2>Bookmarks==<h2>Bookmarks
 Add Bookmark==Προσθήκη Σελειδοδείκτη (Bookmark)
 Edit Bookmark==Τροποποίηση Σελειδοδείκτη (Bookmark)
-Url:==URL:
+#URL:==URL:
 Title:==Τίτλος:
 Description:==Περιγραφή:
 Tags (comma separated):==Tags (χωρισμένα με κόμματα):

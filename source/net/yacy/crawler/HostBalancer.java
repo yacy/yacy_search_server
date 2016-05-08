@@ -87,7 +87,7 @@ public class HostBalancer implements Balancer {
     }
 
     /**
-     * fills the queue with by scanning the hostsPath directory in a thread to
+     * fills the queue by scanning the hostsPath directory in a thread to
      * return immediately (as large unfinished crawls may take longer to load)
      */
     private void init() {
@@ -106,7 +106,9 @@ public class HostBalancer implements Balancer {
                             queues.put(DigestURL.hosthash(queue.getHost(), queue.getPort()), queue);
                         }
                     } catch (MalformedURLException | RuntimeException e) {
-                        log.warn("init error for " + hostsPath.getName() + " host=" + hoststr + " " + e.getLocalizedMessage());
+                        log.warn("delete queue due to init error for " + hostsPath.getName() + " host=" + hoststr + " " + e.getLocalizedMessage());
+                        // if exception thrown we can't init the queue, maybe due to name violation. That won't get better, delete it.
+                        FileUtils.deletedelete(new File(hostsPath, hoststr));
                     }
                 }
             }

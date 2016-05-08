@@ -661,10 +661,7 @@ collection=user
 730_ccfilter_busysleep=1000
 730_ccfilter_memprereq=1048576
 730_ccfilter_loadprereq=8.0
-80_searchresult_idlesleep=10000
-80_searchresult_busysleep=200
-80_searchresult_memprereq=0
-80_searchresult_loadprereq=2.0
+
 85_scheduler_idlesleep=60000
 85_scheduler_busysleep=60000
 85_scheduler_memprereq=1048576
@@ -1001,6 +998,9 @@ httpc.nameCacheNoCachingPatterns = .*.ath.cx,.*.blogdns.*,.*.boldlygoingnowhere.
 #squid Redirector compatible
 externalRedirector=
 
+# the Yacy Version this config was created with
+Version=
+# old version value (keep to allow conversion of .conf, until next main releas > 1.83)
 svnRevision=0
 
 currentSkin=pdbootstrap
