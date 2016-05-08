@@ -18,3 +18,4 @@ lib/yacy-cora.jar
 /DATA.cloud/
 yacy.log
 /target/
+.project

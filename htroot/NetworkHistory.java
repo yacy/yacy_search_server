@@ -97,7 +97,6 @@ public class NetworkHistory {
                 if (v != null && v.longValue() > 0) minpeers = Math.min(minpeers, (int) v.longValue());
             }
         }
-        ConcurrentLog.warn("NetworkHistory", "min:"+minpeers+" max:"+maxpeers);
         if (minpeers == Integer.MAX_VALUE) minpeers=0; // no values
         if (minpeers < 0) {
         	ConcurrentLog.warn("NetworkHistory", "Negative value in plot. columns:"+columns);
@@ -109,8 +108,7 @@ public class NetworkHistory {
         int scale=(int)Math.pow(10, order);
         minpeers=(minpeers/scale)*scale;
         maxpeers=((maxpeers/scale)+1)*scale;
-        if ((maxpeers-minpeers)/scale < 3) scale=Math.max(1,scale/2);
-        ConcurrentLog.warn("NetworkHistory", "min:"+minpeers+" max:"+maxpeers+" order:"+order+" scale:"+scale);
+        if ((maxpeers-minpeers)/scale < 3) scale=Math.max(5,scale/2);
         final int leftborder = 30;
         final int rightborder = 10;
         final int width = post.getInt("width", 768 + leftborder + rightborder);
