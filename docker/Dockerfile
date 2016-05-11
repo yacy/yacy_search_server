@@ -12,7 +12,7 @@ RUN apt-get clean
 	
 # copy context : should be a YaCy git repository (remote or locally cloned)
 # context can also be obtained from extracted sources archive, but version number will be default to 1.83/9000 when building
-COPY ./yacy_search_server /opt/yacy_search_server
+COPY . /opt/yacy_search_server
 
 # trace content of copied directory
 RUN ls /opt/yacy_search_server
