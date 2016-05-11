@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
@@ -99,7 +98,6 @@ public class Blacklist {
     }
 
     private File blacklistRootPath = null;
-    private Map<BlacklistType, String> blacklistFiles = new TreeMap<BlacklistType, String>();
     private final ConcurrentMap<BlacklistType, HandleSet> cachedUrlHashs;
     private final ConcurrentMap<BlacklistType, Map<String, Set<Pattern>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     private final ConcurrentMap<BlacklistType, Map<String, Set<Pattern>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
@@ -170,7 +168,6 @@ public class Blacklist {
         for (final HandleSet entry : this.cachedUrlHashs.values()) {
             entry.clear();
         }
-        blacklistFiles.clear();
     }
 
     public final int size() {
@@ -201,9 +198,6 @@ public class Blacklist {
      * @param sep
      */
     private void loadList(final BlacklistFile blFile, final String sep) {
-    	if (!blacklistFiles.containsKey(blFile.getType())) {
-    		blacklistFiles.put(blFile.getType(), blFile.getFileName());
-    	}
     	
         final Map<String, Set<Pattern>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
         final Map<String, Set<Pattern>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
