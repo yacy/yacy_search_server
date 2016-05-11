@@ -20,7 +20,7 @@ RUN ls -la /opt/yacy_search_server
 WORKDIR /opt/yacy_search_server
 	
 # Compile with ant
-RUN ant clean compile
+RUN ant compile
 
 # clean .git directory useless now
 RUN rm -rf .git
