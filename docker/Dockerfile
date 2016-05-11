@@ -12,10 +12,13 @@ RUN apt-get clean
 	
 # copy context : should be a YaCy git repository (remote or locally cloned)
 # context can also be obtained from extracted sources archive, but version number will be default to 1.83/9000 when building
-COPY . /opt/yacy_search_server-master
+COPY ./yacy_search_server /opt/yacy_search_server
+
+# trace content of copied directory
+RUN ls /opt/yacy_search_server
 
 # set current working dir to extracted sources directory
-WORKDIR /opt/yacy_search_server-master
+WORKDIR /opt/yacy_search_server
 	
 # Compile with ant
 RUN ant clean compile
@@ -27,7 +30,7 @@ RUN rm -rf .git
 EXPOSE 8090
 
 # Set data volume : can be used to persist yacy data and configuration
-VOLUME ["/opt/yacy_search_server-master/DATA"]
+VOLUME ["/opt/yacy_search_server/DATA"]
 
 # Start yacy ind debug mode (-d) to display console logs and to wait for yacy process
-CMD sh /opt/yacy_search_server-master/startYACY.sh -d
+CMD sh /opt/yacy_search_server/startYACY.sh -d
