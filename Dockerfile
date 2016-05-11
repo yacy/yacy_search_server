@@ -14,7 +14,7 @@ RUN apt-get clean
 COPY ./ /opt/yacy_search_server/
 
 # trace content of copied directory
-RUN ls /opt/yacy_search_server
+RUN ls -la /opt/yacy_search_server
 
 # set current working dir to extracted sources directory
 WORKDIR /opt/yacy_search_server
