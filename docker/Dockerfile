@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -yq \
 # set current working dir
 WORKDIR /opt
 
+# initial admin password can be set through environment variable
+ENV YACY_ADMIN_PASS docker
+
 # clone main YaCy git repository (we need to clone git repository to generate correct version when building from source)
 RUN git clone https://github.com/yacy/yacy_search_server.git
 
@@ -23,6 +26,9 @@ WORKDIR /opt/yacy_search_server
 	
 # Compile with ant
 RUN ant compile
+
+# Set admin password from env variable in yacy.init file
+RUN sed -i "/adminAccount=/c\adminAccount=admin:$YACY_ADMIN_PASS" /opt/yacy_search_server/defaults/yacy.init
 
 # make some cleaning to reduce image size
 RUN rm -rf .git && apt-get clean
