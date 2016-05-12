@@ -4,26 +4,26 @@ FROM debian:latest
 # Install needed packages
 RUN apt-get update && apt-get install -yq \
 	default-jdk \
-	ant
+	ant \
+	git
 	
-# Clean apt cache
-RUN apt-get clean
-	
-# copy context : should be a YaCy git repository (remote or locally cloned)
-# context can also be obtained from extracted sources archive, but version number will be default to 1.83/9000 when building
-COPY ./ /opt/yacy_search_server/
+# set current working dir
+WORKDIR /opt
 
-# trace content of copied directory
+# clone main YaCy git repository (we need to clone git repository to generate correct version when building from source)
+RUN git clone https://github.com/yacy/yacy_search_server.git
+
+# trace content of source directory
 RUN ls -la /opt/yacy_search_server
 
-# set current working dir to extracted sources directory
+# set current working dir
 WORKDIR /opt/yacy_search_server
 	
 # Compile with ant
 RUN ant compile
 
-# clean .git directory useless now
-RUN rm -rf .git
+# make some cleaning to reduce image size
+RUN rm -rf .git && apt-get clean
 
 # Expose port 8090
 EXPOSE 8090
