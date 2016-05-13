@@ -30,7 +30,7 @@ RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be
 
 # make some cleaning to reduce image size
 RUN rm -rf .git \
-	&& apt-get purge -yq \
+	&& apt-get purge -yq --auto-remove \
 		default-jdk \
 		ant \
 		git \ 
