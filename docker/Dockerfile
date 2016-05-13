@@ -6,6 +6,7 @@ FROM debian:latest
 # Install needed packages
 RUN apt-get update && apt-get install -yq \
 	default-jdk \
+	default-jre-headless \
 	ant \
 	git
 	
@@ -28,7 +29,12 @@ RUN ant compile
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
 
 # make some cleaning to reduce image size
-RUN rm -rf .git && apt-get clean
+RUN rm -rf .git \
+	&& apt-get purge -yq \
+		default-jdk \
+		ant \
+		git \ 
+	&& apt-get clean
 
 # Expose port 8090
 EXPOSE 8090
