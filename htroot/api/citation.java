@@ -116,13 +116,15 @@ public class citation {
 
         ArrayList<String> sentences = new ArrayList<String>();
         if (title != null) for (String s: title) if (s.length() > 0) sentences.add(s);
-        SentenceReader sr = new SentenceReader(text);
-        StringBuilder line;
-        while (sr.hasNext()) {
-            line = sr.next();
-            if (line.length() > 0) sentences.add(line.toString());
+        if (text != null && !text.isEmpty()) {
+            SentenceReader sr = new SentenceReader(text);
+            StringBuilder line;
+            while (sr.hasNext()) {
+                line = sr.next();
+                if (line.length() > 0) sentences.add(line.toString());
+            }
         }
-        
+
         // for each line make a statistic about the number of occurrences somewhere else
         OrderedScoreMap<String> scores = new OrderedScoreMap<String>(null); // accumulates scores for citating urls
         LinkedHashMap<String, Set<DigestURL>> sentenceOcc = new LinkedHashMap<String, Set<DigestURL>>();
