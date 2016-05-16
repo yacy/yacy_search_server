@@ -7,9 +7,17 @@ import java.util.List;
 import net.yacy.utils.translation.ExtensionsFileFilter;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 
 public class Html2ImageTest {
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        // make sure DATA exists
+        File f = new File("test/DATA");
+        if (!f.exists()) f.mkdir();
+    }
 
     /**
      * Test of pdf2image method, of class Html2Image.
@@ -22,6 +30,7 @@ public class Html2ImageTest {
         extensions.add("pdf");
         FilenameFilter fileFilter = new ExtensionsFileFilter(extensions);
         String[] pdffiles = pd.list(fileFilter);
+        assertTrue("no pdf files in test/parsertest directory", pdffiles.length > 0);
 
         for (String pdffilename : pdffiles) {
             File pdffile = new File(pd, pdffilename);

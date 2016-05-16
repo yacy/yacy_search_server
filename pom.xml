@@ -36,7 +36,7 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>5.5.0</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.15.v20160210</jetty.version>
+        <jetty.version>9.2.16.v20160414</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -67,7 +67,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.5.1</version>
                 <configuration>
                     <excludes>
                         <!-- special exclude for compatibility with ant build script
@@ -160,9 +160,9 @@
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                     <windowtitle>YaCy API: javadoc documentation</windowtitle>
-                    <excludes>
-                        htroot/*.java
-                    </excludes>
+                    <includes>
+                        ${project.build.directory}/*.java
+                    </includes>
                     <failOnError>false</failOnError>
                 </configuration>
             </plugin>
@@ -309,11 +309,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.james</groupId>
-            <artifactId>apache-mime4j</artifactId>
-            <version>0.6.1</version>
-        </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15</artifactId>
