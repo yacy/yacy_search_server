@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.pdfbox.exceptions.CryptographyException;
+import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -65,7 +66,6 @@ import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
-import org.apache.pdfbox.pdfparser.PDFParser;
 
 
 public class pdfParser extends AbstractParser implements Parser {
@@ -204,7 +204,7 @@ public class pdfParser extends AbstractParser implements Parser {
                             docPublisher,
                             null,
                             null,
-                            0.0f, 0.0f,
+                            0.0d, 0.0d,
                             pages == null || page > pages.length ? new byte[0] : UTF8.getBytes(pages[page]),
                             pdflinks == null || page >= pdflinks.length ? null : pdflinks[page],
                             null,
