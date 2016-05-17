@@ -1,19 +1,19 @@
 # Yacy Docker image from latest sources
 
-# Getting built image from Docker Hub
+## Getting built image from Docker Hub
 
 	docker pull luccioman/yacy
 	
 Repository URL : (https://hub.docker.com/r/luccioman/yacy/)
 
-# Building image yourself
+## Building image yourself
 
 Using yacy_search_server/docker/Dockerfile :
 
 	cd yacy_search_server/docker
 	docker build .
 	
-# Default admin account
+## Default admin account
 
 login : admin
 
@@ -21,18 +21,18 @@ password : docker
 
 You should modify this default password with page /ConfigAccounts_p.html when exposing publicly your YaCy container.
 
-# Usage
+## Usage
 
-## First start
+### First start
 
-### Most basic
+#### Most basic
 
 	docker run luccioman/yacy
 
 YaCy web interface is then exposed at http://[container_ip]:8090.	
 You can retrieve the container IP address with `docker inspect`.
 
-### Easier to handle
+#### Easier to handle
 
 	docker run --name yacy -p 8090:8090 luccioman/yacy
 	
@@ -40,26 +40,26 @@ You can retrieve the container IP address with `docker inspect`.
 
 -p option map host port and container port, allowing web interface access through the usual http://localhost:8090.
 
-### With persistent data volume
+#### With persistent data volume
 
 	docker run -v [your_host/data/directory]:/opt/yacy_search_server/DATA luccioman/yacy
 		
 This allow your container to reuse a data directory form the host.
 
-### As background process
+#### As background process
 
 	docker run -d luccioman/yacy
 
-## Next starts
+### Next starts
 
-### As attached process
+#### As attached process
 
 	docker start -a yacy
 	
-### As background process
+###" As background process
 
 	docker start yacy
 
-## Shutdown
+### Shutdown
 
 * Use "Shutdown" button in administration web interface
