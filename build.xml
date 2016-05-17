@@ -160,7 +160,6 @@
     <!-- when changing paths here, please also update the paths in /addon/YaCy.app/Contents/Info.plist -->
     <path id="project.class.path">
         <pathelement location="${build}" />
-        <pathelement location="${lib}/apache-mime4j-0.6.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-1.46.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-1.46.jar" />
     	<pathelement location="${lib}/chardet.jar" />
@@ -192,20 +191,20 @@
     	<pathelement location="${lib}/jcifs-1.3.17.jar" />
     	<pathelement location="${lib}/jcl-over-slf4j-1.7.18.jar" />
     	<pathelement location="${lib}/jempbox-1.8.11.jar" />
-        <pathelement location="${lib}/jetty-client-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-continuation-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-deploy-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-http-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-io-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-jmx-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-proxy-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-security-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-server-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-servlet-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-servlets-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-util-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-webapp-9.2.15.v20160210.jar" />
-        <pathelement location="${lib}/jetty-xml-9.2.15.v20160210.jar" />
+        <pathelement location="${lib}/jetty-client-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-continuation-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-deploy-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-http-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-io-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-jmx-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-proxy-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-security-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-server-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-servlet-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-servlets-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-util-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-webapp-9.2.16.v20160414.jar" />
+        <pathelement location="${lib}/jetty-xml-9.2.16.v20160414.jar" />
     	<pathelement location="${lib}/jsch-0.1.53.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
     	<pathelement location="${lib}/jsoup-1.9.1.jar" />
@@ -291,21 +290,6 @@
     </jar>
 
   </target>
-  
-  <target name="compile-cora" depends="init" description="compile YaCy cora component">
-    <!-- compile the cora sources -->
-    <javac srcdir="${src}/net/yacy/cora/" destdir="${build}/"
-           debug="true" debuglevel="lines,vars,source"
-           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
-      <classpath refid="project.class.path" />
-      <compilerarg value="-Xlint"/>
-    </javac>
-  	
-  	<!-- make yacy-cora.jar -->
-    <jar destfile="${lib}/yacy-cora.jar" includes="**/net/yacy/cora/**" basedir="${build}/"></jar>
-
-  </target>
-
   
   <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets">
     <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
@@ -528,7 +512,6 @@
     <delete file="${build}/net/yacy/peers/operation/yacyBuildProperties.java" failonerror="false"/>
     <delete file="${build}/log4j.properties" failonerror="false"/>
     <delete file="${lib}/yacycore.jar" failonerror="false"/>
-    <delete file="${lib}/yacy-cora.jar" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false"/>    

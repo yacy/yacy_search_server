@@ -60,7 +60,7 @@ public class MessageSend_p {
         final serverObjects prop = new serverObjects();
 
         if ((post == null) || (post.get("hash","").isEmpty())) {
-            prop.put("mode", "2");
+            prop.put("mode", "3");
             return prop;
         }
 
@@ -78,52 +78,58 @@ public class MessageSend_p {
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
             Seed seed = sb.peers.getConnected(ASCII.getBytes(hash));
-            for(String ip: seed.getIPs()) {
-                final Map<String, String> result = Protocol.permissionMessage(seed.getPublicAddress(ip), hash);
-                //System.out.println("DEBUG: permission request result = " + result.toString());
-                String peerName;
-                Seed targetPeer = null;
-                if (hash.equals(sb.peers.mySeed().hash)) {
-                    peerName = sb.peers.mySeed().get(Seed.NAME,"nameless");
-                } else {
-                    targetPeer = sb.peers.getConnected(hash);
-                    if (targetPeer == null)
-                        peerName = "nameless";
-                    else
-                        peerName = targetPeer.get(Seed.NAME,"nameless");
-                }
-    
-                prop.putXML("mode_permission_peerName", peerName);
-                final String response = (result == null) ? null : result.get("response");
-                if (response == null || result == null) {
-                    // we don't have permission or other peer does not exist
-                    prop.put("mode_permission", "0");
-                    if (targetPeer != null) {
-                        sb.peers.peerActions.interfaceDeparture(targetPeer, ip);
-                    }
-                } else {
-                    prop.put("mode_permission", "1");
-    
-                    // write input form
-                    try {
-                        final int messagesize = Integer.parseInt(result.get("messagesize"));
-                        final int attachmentsize = Integer.parseInt(result.get("attachmentsize"));
-    
-                        prop.putXML("mode_permission_response", response);
-                        prop.put("mode_permission_messagesize", messagesize);
-                        prop.put("mode_permission_attachmentsize", attachmentsize);
-                        prop.putXML("mode_permission_subject", subject);
-                        prop.putXML("mode_permission_message", message);
-                        prop.putHTML("mode_permission_hash", hash);
-                        if (post.containsKey("preview")) {
-                            prop.putWiki(sb.peers.mySeed().getPublicAddress(ip), "mode_permission_previewmessage", message);
+            if (seed != null) {
+                for (String ip : seed.getIPs()) {
+                    final Map<String, String> result = Protocol.permissionMessage(seed.getPublicAddress(ip), hash);
+                    //System.out.println("DEBUG: permission request result = " + result.toString());
+                    String peerName;
+                    Seed targetPeer = null;
+                    if (hash.equals(sb.peers.mySeed().hash)) {
+                        peerName = sb.peers.mySeed().get(Seed.NAME, "nameless");
+                    } else {
+                        targetPeer = sb.peers.getConnected(hash);
+                        if (targetPeer == null) {
+                            peerName = "nameless";
+                        } else {
+                            peerName = targetPeer.get(Seed.NAME, "nameless");
                         }
-    
-                    } catch (final NumberFormatException e) {
-                        // "unresolved pattern", the remote peer is alive but had an exception
-                        prop.put("mode_permission", "2");
+                    }
+
+                    prop.putXML("mode_permission_peerName", peerName);
+                    final String response = (result == null) ? null : result.get("response");
+                    if (response == null || result == null) {
+                        // we don't have permission or other peer does not exist
+                        prop.put("mode_permission", "0");
+                        if (targetPeer != null) {
+                            sb.peers.peerActions.interfaceDeparture(targetPeer, ip);
+                        }
+                    } else {
+                        prop.put("mode_permission", "1");
+
+                        // write input form
+                        try {
+                            final int messagesize = Integer.parseInt(result.get("messagesize"));
+                            final int attachmentsize = Integer.parseInt(result.get("attachmentsize"));
+
+                            prop.putXML("mode_permission_response", response);
+                            prop.put("mode_permission_messagesize", messagesize);
+                            prop.put("mode_permission_attachmentsize", attachmentsize);
+                            prop.putXML("mode_permission_subject", subject);
+                            prop.putXML("mode_permission_message", message);
+                            prop.putHTML("mode_permission_hash", hash);
+                            if (post.containsKey("preview")) {
+                                prop.putWiki(sb.peers.mySeed().getPublicAddress(ip), "mode_permission_previewmessage", message);
+                            }
+
+                        } catch (final NumberFormatException e) {
+                            // "unresolved pattern", the remote peer is alive but had an exception
+                            prop.put("mode_permission", "2");
+                        }
                     }
                 }
+            } else { // seed == null
+                prop.put("mode_permission", "0");
+                prop.putXML("mode_permission_peerName", "a passive peer");
             }
         } else {
             prop.put("mode", "2");
@@ -140,7 +146,7 @@ public class MessageSend_p {
                 SeedDB seedDB = sb.peers;
                 // prepare request
                 final String salt = crypt.randomSalt();
-                
+
                 // send request
                 final Map<String, ContentBody> parts = Protocol.basicRequestParts(Switchboard.getSwitchboard(), hash, salt);
                 parts.put("process", UTF8.StringBody("post"));
