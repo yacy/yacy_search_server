@@ -279,7 +279,7 @@ public final class Switchboard extends serverSwitch {
     public List<Pattern> networkWhitelist, networkBlacklist;
     public FilterEngine domainList;
     private Dispatcher dhtDispatcher;
-    public LinkedBlockingQueue<String> trail;
+    public LinkedBlockingQueue<String> trail; // connect infos from cytag servlet
     public SeedDB peers;
     public WorkTables tables;
     public Tray tray;
