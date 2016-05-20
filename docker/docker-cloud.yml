@@ -3,5 +3,4 @@ yacy:
   ports:
     - '8090:8090'
   restart: on-failure
-  volumes:
-    - /opt/yacy_search_server
+  autoredeploy: true
