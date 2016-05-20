@@ -40,19 +40,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.pdfbox.exceptions.CryptographyException;
-import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
-import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
-import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.apache.pdfbox.pdmodel.interactive.action.type.PDAction;
-import org.apache.pdfbox.pdmodel.interactive.action.type.PDActionURI;
+import org.apache.pdfbox.pdmodel.interactive.action.PDAction;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionURI;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
@@ -105,11 +102,8 @@ public class pdfParser extends AbstractParser implements Parser {
         PDDocument pdfDoc;
         try {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY); // the pdfparser is a big pain
-            //pdfDoc = PDDocument.load(source);
-            final PDFParser pdfParser = new PDFParser(source);
-            pdfParser.setTempDirectory(new File(System.getProperty("java.io.tmpdir")));
-            pdfParser.parse();
-            pdfDoc = pdfParser.getPDDocument();
+            MemoryUsageSetting mus = MemoryUsageSetting.setupMixed(200*1024*1024);
+            pdfDoc = PDDocument.load(source, mus);
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         } finally {
@@ -117,18 +111,6 @@ public class pdfParser extends AbstractParser implements Parser {
         }
 
         if (pdfDoc.isEncrypted()) {
-            try {
-                pdfDoc.openProtection(new StandardDecryptionMaterial(""));
-            } catch (final BadSecurityHandlerException e) {
-                try {pdfDoc.close();} catch (final IOException ee) {}
-                throw new Parser.Failure("Document is encrypted (1): " + e.getMessage(), location);
-            } catch (final IOException e) {
-                try {pdfDoc.close();} catch (final IOException ee) {}
-                throw new Parser.Failure("Document is encrypted (2): " + e.getMessage(), location);
-            } catch (final CryptographyException e) {
-                try {pdfDoc.close();} catch (final IOException ee) {}
-                throw new Parser.Failure("Document is encrypted (3): " + e.getMessage(), location);
-            }
             final AccessPermission perm = pdfDoc.getCurrentAccessPermission();
             if (perm == null || !perm.canExtractContent()) {
                 try {pdfDoc.close();} catch (final IOException ee) {}
@@ -147,7 +129,7 @@ public class pdfParser extends AbstractParser implements Parser {
             docPublisher = info.getProducer();
             if (docPublisher == null || docPublisher.isEmpty()) docPublisher = info.getCreator();
             docKeywordStr = info.getKeywords();
-            try {if (info.getModificationDate() != null) docDate = info.getModificationDate().getTime();} catch (IOException e) {}
+            if (info.getModificationDate() != null) docDate = info.getModificationDate().getTime();
             // unused:
             // info.getTrapped());
         }
@@ -171,7 +153,7 @@ public class pdfParser extends AbstractParser implements Parser {
             pdflinks = extractPdfLinks(pdfDoc);
             
             // get the fulltext (either per document or for each page)
-            final PDFTextStripper stripper = new PDFTextStripper(StandardCharsets.UTF_8.name());
+            final PDFTextStripper stripper = new PDFTextStripper(/*StandardCharsets.UTF_8.name()*/);
 
             if (individualPages) {
                 // this is a hack which stores individual pages of the source pdf into individual index documents
@@ -291,12 +273,9 @@ public class pdfParser extends AbstractParser implements Parser {
      * @return all detected links
      */
     private Collection<AnchorURL>[] extractPdfLinks(final PDDocument pdf) {
-        @SuppressWarnings("unchecked")
-        List<PDPage> allPages = pdf.getDocumentCatalog().getAllPages();
-        @SuppressWarnings("unchecked")
-        Collection<AnchorURL>[] linkCollections = (Collection<AnchorURL>[]) new Collection<?>[allPages.size()];
+        Collection<AnchorURL>[] linkCollections = (Collection<AnchorURL>[]) new Collection<?>[pdf.getNumberOfPages()];
         int pagecount = 0;
-        for (PDPage page : allPages) {
+        for (PDPage page : pdf.getPages()) {
             final Collection<AnchorURL> pdflinks = new ArrayList<AnchorURL>();
             try {
                 List<PDAnnotation> annotations = page.getAnnotations();
