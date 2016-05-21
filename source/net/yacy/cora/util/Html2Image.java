@@ -48,6 +48,8 @@ import net.yacy.kelondro.util.OS;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
 
 /**
  * Convert html to an copy on disk-image in a other file format
@@ -156,8 +158,7 @@ public class Html2Image {
         if (OS.isWindows || !convert.exists()) {
             try {
                 PDDocument pdoc = PDDocument.load(pdf);
-                PDPage page = (PDPage) pdoc.getDocumentCatalog().getAllPages().get(0);
-                BufferedImage bi = page.convertToImage(BufferedImage.TYPE_INT_RGB, density);
+                BufferedImage bi = new PDFRenderer(pdoc).renderImageWithDPI(0, density, ImageType.RGB);
 
                 return ImageIO.write(bi, "jpg", image);
 

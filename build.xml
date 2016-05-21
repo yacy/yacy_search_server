@@ -173,7 +173,7 @@
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-lang-2.6.jar" />
     	<pathelement location="${lib}/commons-logging-1.2.jar" />
-    	<pathelement location="${lib}/fontbox-1.8.11.jar" />
+    	<pathelement location="${lib}/fontbox-2.0.1.jar" />
         <pathelement location="${lib}/guava-18.0.jar" />
         <pathelement location="${lib}/htmllexer.jar" />
         <pathelement location="${lib}/httpclient-4.5.2.jar" />
@@ -190,7 +190,6 @@
         <pathelement location="${lib}/javax.servlet-api-3.1.0.jar" />
     	<pathelement location="${lib}/jcifs-1.3.17.jar" />
     	<pathelement location="${lib}/jcl-over-slf4j-1.7.18.jar" />
-    	<pathelement location="${lib}/jempbox-1.8.11.jar" />
         <pathelement location="${lib}/jetty-client-9.2.16.v20160414.jar" />
         <pathelement location="${lib}/jetty-continuation-9.2.16.v20160414.jar" />
         <pathelement location="${lib}/jetty-deploy-9.2.16.v20160414.jar" />
@@ -230,7 +229,7 @@
     	<pathelement location="${lib}/metadata-extractor-2.9.1.jar" />
     	<pathelement location="${lib}/noggit-0.5.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
-        <pathelement location="${lib}/pdfbox-1.8.11.jar" />
+        <pathelement location="${lib}/pdfbox-2.0.1.jar" />
     	<pathelement location="${lib}/poi-3.14-20160307.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.14-20160307.jar" />
         <pathelement location="${lib}/slf4j-api-1.7.18.jar" />
