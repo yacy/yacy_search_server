@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -83,7 +84,7 @@ public class Vocabulary_p {
                     final boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
                     final boolean discoverFromCSV = post.get("discovermethod", "").equals("csv");
                     final String discoverFromCSVPath = post.get("discoverpath", "").replaceAll("%20", " ");
-                    final String discoverFromCSVCharset = post.get("charset", StandardCharsets.UTF_8.name());
+                    String discoverFromCSVCharset = post.get("charset", StandardCharsets.UTF_8.name());
                     final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
                     final int discovercolumnsynonyms = post.getInt("discovercolumnsynonyms", -1);
                     final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
@@ -95,7 +96,11 @@ public class Vocabulary_p {
                     if (!discoverNot) {
                         if (discoverFromCSV && discoverFromCSVFile != null && discoverFromCSVFile.exists()) {
                             // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
-                            FileUtils.checkCharset(discoverFromCSVFile, discoverFromCSVCharset, true);
+                            if (discoverFromCSVCharset.equals("autodetect")) {
+                                List<String> charsets = FileUtils.detectCharset(discoverFromCSVFile);
+                                discoverFromCSVCharset = charsets.get(0);
+                                ConcurrentLog.info("FileUtils", "detected charset: " + discoverFromCSVCharset + " used to read " + discoverFromCSVFile.toString());
+                            }
                             // read file
                             BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset));
                             String line = null;
@@ -304,10 +309,12 @@ public class Vocabulary_p {
         }
 
         // make charset list for import method selector
-        int c = 0;
+        prop.putHTML("create_charset_" + 0 + "_name", "autodetect");
+        prop.put("create_charset_" + 0 + "_selected", 1);
+        int c = 1;
         for (String cs: Charset.availableCharsets().keySet()) {
             prop.putHTML("create_charset_" + c + "_name", cs);
-            prop.put("create_charset_" + c + "_selected", cs.equals("windows-1252") ? 1 : 0);
+            prop.put("create_charset_" + c + "_selected", 0);
             c++;
         }
         prop.put("create_charset", c);

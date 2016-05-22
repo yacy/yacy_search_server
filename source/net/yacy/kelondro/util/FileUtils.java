@@ -53,7 +53,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -935,10 +934,10 @@ public final class FileUtils {
      * used code from http://jchardet.sourceforge.net/;
      * see also: http://www-archive.mozilla.org/projects/intl/chardet.html
      * @param file
-     * @return a set of probable charsets
+     * @return a list of probable charsets
      * @throws IOException
      */
-    public static Set<String> detectCharset(File file) throws IOException {
+    public static List<String> detectCharset(File file) throws IOException {
         // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
         nsDetector det = new nsDetector(nsPSMDetector.ALL);
         BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file));
@@ -953,11 +952,11 @@ public final class FileUtils {
             if (!isAscii && !done) done = det.DoIt(buf,len, false);
         }
         det.DataEnd();
-        Set<String> result = new HashSet<>();
+        List<String> result = new ArrayList<>();
         if (isAscii) {
-            result.add("ASCII");
+            result.add(StandardCharsets.US_ASCII.name());
         } else {
-            for (String c: det.getProbableCharsets()) result.add(c);
+            for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
         }
 
         return result;
@@ -976,7 +975,7 @@ public final class FileUtils {
             @Override
             public void run() {
                 try {
-                    Set<String> charsets = FileUtils.detectCharset(file);
+                    List<String> charsets = FileUtils.detectCharset(file);
                     if (charsets.contains(givenCharset)) {
                         ConcurrentLog.info("checkCharset", "appropriate charset '" + givenCharset + "' for import of " + file + ", is part one detected " + charsets);
                     } else {
