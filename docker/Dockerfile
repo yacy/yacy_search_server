@@ -25,7 +25,7 @@ WORKDIR /opt/yacy_search_server
 # Compile with ant
 RUN ant compile
 
-# Set initial admin password : "docker"
+# Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
 
 # make some cleaning to reduce image size
