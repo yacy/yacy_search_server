@@ -101,45 +101,46 @@ public class Vocabulary_p {
                                 discoverFromCSVCharset = charsets.get(0);
                                 ConcurrentLog.info("FileUtils", "detected charset: " + discoverFromCSVCharset + " used to read " + discoverFromCSVFile.toString());
                             }
-                            // read file
-                            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset));
-                            String line = null;
-                            Pattern semicolon = Pattern.compile(";");
-                            Map<String, String> synonym2literal = new HashMap<>(); // helper map to check if there are double synonyms
-                            while ((line = r.readLine()) != null) {
-                                if (line.length() == 0) continue;
-                                String[] l = semicolon.split(line);
-                                if (l.length == 0) l = new String[]{line};
-                                String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
-                                if (literal == null) continue;
-                                literal = normalizeLiteral(literal);
-                                String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink].trim();
-                                if (literal.length() > 0) {
-                                    String synonyms = "";
-                                    if (discoverenrichsynonyms) {
-                                        Set<String> sy = SynonymLibrary.getSynonyms(literal);
-                                        if (sy != null) {
-                                            for (String s: sy) synonyms += "," + s;
+                            // read file (try-with-resource to close inputstream automatically)
+                            try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset))) {
+                                String line = null;
+                                Pattern semicolon = Pattern.compile(";");
+                                Map<String, String> synonym2literal = new HashMap<>(); // helper map to check if there are double synonyms
+                                while ((line = r.readLine()) != null) {
+                                    if (line.length() == 0) continue;
+                                    String[] l = semicolon.split(line);
+                                    if (l.length == 0) l = new String[]{line};
+                                    String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
+                                    if (literal == null) continue;
+                                    literal = normalizeLiteral(literal);
+                                    String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink].trim();
+                                    if (literal.length() > 0) {
+                                        String synonyms = "";
+                                        if (discoverenrichsynonyms) {
+                                            Set<String> sy = SynonymLibrary.getSynonyms(literal);
+                                            if (sy != null) {
+                                                for (String s: sy) synonyms += "," + s;
+                                            }
+                                        } else if (discoverreadcolumn) {
+                                            synonyms = discovercolumnsynonyms < 0 || l.length <= discovercolumnsynonyms ? null : l[discovercolumnsynonyms].trim();
+                                            synonyms = normalizeLiteral(synonyms);
+                                        } else {
+                                            synonyms = Tagging.normalizeTerm(literal);
                                         }
-                                    } else if (discoverreadcolumn) {
-                                        synonyms = discovercolumnsynonyms < 0 || l.length <= discovercolumnsynonyms ? null : l[discovercolumnsynonyms].trim();
-                                        synonyms = normalizeLiteral(synonyms);
-                                    } else {
-                                        synonyms = Tagging.normalizeTerm(literal);
-                                    }
-                                    // check double synonyms
-                                    if (synonyms.length() > 0) {
-                                        String oldliteral = synonym2literal.get(synonyms);
-                                        if (oldliteral != null && !literal.equals(oldliteral)) {
-                                            // replace old entry with combined new
-                                            table.remove(oldliteral);
-                                            String newliteral = oldliteral + "," + literal;
-                                            literal = newliteral;
+                                        // check double synonyms
+                                        if (synonyms.length() > 0) {
+                                            String oldliteral = synonym2literal.get(synonyms);
+                                            if (oldliteral != null && !literal.equals(oldliteral)) {
+                                                // replace old entry with combined new
+                                                table.remove(oldliteral);
+                                                String newliteral = oldliteral + "," + literal;
+                                                literal = newliteral;
+                                            }
+                                            synonym2literal.put(synonyms, literal);
                                         }
-                                        synonym2literal.put(synonyms, literal);
+                                        // store term
+                                        table.put(literal, new Tagging.SOTuple(synonyms, objectlink == null ? "" : objectlink));
                                     }
-                                    // store term
-                                    table.put(literal, new Tagging.SOTuple(synonyms, objectlink == null ? "" : objectlink));
                                 }
                             }
                         } else {

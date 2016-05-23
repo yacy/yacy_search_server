@@ -933,26 +933,24 @@ public final class FileUtils {
      */
     public static List<String> detectCharset(File file) throws IOException {
         // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
-        nsDetector det = new nsDetector(nsPSMDetector.ALL);
-        BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file));
-
-        byte[] buf = new byte[1024] ;
-        int len;
-        boolean done = false ;
-        boolean isAscii = true ;
-
-        while ((len = imp.read(buf,0,buf.length)) != -1) {
-            if (isAscii) isAscii = det.isAscii(buf,len);
-            if (!isAscii && !done) done = det.DoIt(buf,len, false);
+        List<String> result;
+        try (BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file))) { // try-with-resource to close inputstream
+            nsDetector det = new nsDetector(nsPSMDetector.ALL);
+            byte[] buf = new byte[1024] ;
+            int len;
+            boolean done = false ;
+            boolean isAscii = true ;
+            while ((len = imp.read(buf,0,buf.length)) != -1) {
+                if (isAscii) isAscii = det.isAscii(buf,len);
+                if (!isAscii && !done) done = det.DoIt(buf,len, false);
+            }   det.DataEnd();
+            result = new ArrayList<>();
+            if (isAscii) {
+                result.add(StandardCharsets.US_ASCII.name());
+            } else {
+                for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
+            }
         }
-        det.DataEnd();
-        List<String> result = new ArrayList<>();
-        if (isAscii) {
-            result.add(StandardCharsets.US_ASCII.name());
-        } else {
-            for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
-        }
-
         return result;
     }
     
