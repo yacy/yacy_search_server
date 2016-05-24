@@ -186,6 +186,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     /** the public IP of this peer (old field, will be used to carry the IPv4) */
     public static final String IP = "IP";
     
+    /** the jre version */
+    public static final String JRE = "JRE";
+    
     /** more public IPs of this peer, containing only IPv6 addresses. This list of of IPv6 addresses is separated with a vertical bar/pipe '|'.
      *  This list may have zero entries if the host does not have a IPv6 address. It may have more than one IPv6 address if the
      *  Host detects more than one public IPv6 locally but did not get a feedback from other peers if any of these addresses are
@@ -283,6 +286,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         this.dna.put(Seed.UTC, GenericFormatter.UTCDiffString());
         this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // virgin/junior/senior/principal
 
+        String jre = System.getProperty("java.version");
+        this.dna.put(Seed.JRE, jre);
         this.birthdate = System.currentTimeMillis();
     }
 
