@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 
 Package: yacy
 Architecture: all
-Depends: openjdk-7-jre-headless | openjdk-8-jre-headless, sudo, debconf
+Depends: java7-runtime-headless | java8-runtime-headless, sudo, debconf
 Suggests: curl | wget
 Description: Peer-to-Peer Web Search Engine
  YaCy is a Java-based peer-to-peer search engine.
