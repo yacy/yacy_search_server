@@ -344,7 +344,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     /**
      * try to get the public IP<br>
      *
-     * @return the IP or localhost IP (127.0.0.1)
+     * @return the public IP or null
      */
     @Deprecated
     public final String getIP() {
