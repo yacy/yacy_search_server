@@ -85,8 +85,7 @@ public class TranslatorXliff extends Translator {
          * </xliff>
          */
         Xliff xliffTranslation;
-        try {
-            FileInputStream fis = new FileInputStream(xliffFile);
+        try (FileInputStream fis = new FileInputStream(xliffFile)){ // try-with-resource to close inputstream
             JAXBContext ctx = JAXBContext.newInstance(org.oasis.xliff.core_12.Xliff.class);
             Unmarshaller un = ctx.createUnmarshaller();
             Object obj = un.unmarshal(fis);
@@ -132,6 +131,8 @@ public class TranslatorXliff extends Translator {
             ConcurrentLog.warn("TRANSLATOR", je.getMessage());
         } catch (FileNotFoundException ex) {
             ConcurrentLog.warn("TRANSLATOR", "File not found: " + xliffFile.getAbsolutePath());
+        } catch (IOException ex) {
+            ConcurrentLog.warn("TRANSLATOR", ex.getMessage());
         }
         return lngLists;
     }
