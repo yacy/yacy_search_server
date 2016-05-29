@@ -3313,7 +3313,7 @@ Peer Statistics::YaCy Statistics==peer统计数据::YaCy数据
 #Administration<==Administration<
 >Web Search<==>网页搜索<
 >Search Network<==>搜索网络<
-Peer Owner Profile==peer所有者资料
+#Peer Owner Profile==peer所有者资料
 Help / YaCy Wiki==帮助 / YaCy Wiki
 #-----------------------------
 

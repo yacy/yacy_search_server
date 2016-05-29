@@ -1967,7 +1967,7 @@ Architecture (C) by Michael Peter Christen==Architektur (C) von Michael Peter Ch
 #---------------------------
 Project Home==Domovsk&aacute; str&aacute;nka
 Help / Wiki==Pomoc / Wiki
-Peer Owner Profile==Profi vlastn&iacute;ka peera
+#Peer Owner Profile==Profi vlastn&iacute;ka peera
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template

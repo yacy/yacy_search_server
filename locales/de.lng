@@ -842,7 +842,6 @@ menu.==Menü geändert werden.
 #>Administration<==>Administration<
 >Web Search<==>Websuche<
 >File Search<==>Dateisuche<
->About Us<==>Über Uns<
 >Help / YaCy Wiki<==>Hilfe / YaCy Wiki<
 "Search"=="Suche"
 #>Text<==>Text<
@@ -3844,7 +3843,7 @@ Ranking and Heuristics==Ranking und Heuristiken
 >File Search<==>Datei-Suche<
 >Compare Search<==>Vergleichssuche<
 >Index Browser<==>Index Browser<
->About Us<==>Impressum dieses Peers<
+About This Page==Impressum dieses Peers
 Help / YaCy Wiki==Hilfe / YaCy Wiki
 #-----------------------------
 
