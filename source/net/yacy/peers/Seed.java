@@ -133,8 +133,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public static final String PEERTYPE = "PeerType";
 
-    /** static/dynamic (if the IP changes often for any reason) */
-    private static final String IPTYPE = "IPType";
     private static final String FLAGS = "Flags";
     public static final String FLAGSZERO = "    ";
     
@@ -262,7 +260,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         // settings that is created during the 'hello' phase - in first contact
         this.dna.put(Seed.IP, ""); // 123.234.345.456
         this.dna.put(Seed.PORT, "&empty;");
-        this.dna.put(Seed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
         this.dna.put(Seed.USPEED, Seed.ZERO); // the computated uplink speed of the peer
@@ -758,7 +755,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @return an address string which can be used as host:port part of an url (if no port avail returns just host)
      */
     public final String getPublicAddress(final String ip) {
-        if (ip == null) throw new RuntimeException("ip == NULL"); // that should not happen
+        if (ip == null) throw new RuntimeException("ip == NULL"); // that should not happen in Peer-to-Peer mode (but can in Intranet mode)
         final String port = this.dna.get(Seed.PORT); // we do not use getPort() here to avoid String->Integer->toString() conversion
         final StringBuilder sb = new StringBuilder(ip.length() + 8); // / = surplus for port
         if (ip.indexOf(':') >= 0) {
