@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -yq \
 	default-jdk \
 	default-jre-headless \
 	ant \
-	git
+	git \
+	curl
 	
 # set current working dir
 WORKDIR /opt

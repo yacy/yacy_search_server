@@ -46,7 +46,7 @@ You can retrieve the container IP address with `docker inspect`.
 
 	docker run -v [your_host/data/directory]:/opt/yacy_search_server/DATA luccioman/yacy
 		
-This allow your container to reuse a data directory form the host.
+This allow your container to reuse a data directory from the host.
 
 #### As background process
 
@@ -65,3 +65,6 @@ This allow your container to reuse a data directory form the host.
 ### Shutdown
 
 * Use "Shutdown" button in administration web interface
+* OR run :
+
+	docker exec [your_container_name] /opt/yacy_search_server/stopYACY.sh	
