@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -yq \
 	default-jre-headless \
 	ant \
 	git \
-	curl
+	curl \
+	sudo
 	
 # set current working dir
 WORKDIR /opt
@@ -29,6 +30,12 @@ RUN ant compile
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
 
+# Create user and group yacy : this user will be used to run YaCy main process
+RUN adduser --system --group --no-create-home --disabled-password yacy
+
+# Set ownership of yacy install directory to yacy user/group
+RUN chown yacy:yacy -R /opt/yacy_search_server
+
 # make some cleaning to reduce image size
 RUN rm -rf .git \
 	&& apt-get purge -yq --auto-remove \
@@ -40,8 +47,8 @@ RUN rm -rf .git \
 # Expose port 8090
 EXPOSE 8090
 
-# Set data volume : can be used to persist yacy data and configuration
+# Set data volume : yacy data and configuration will persist aven after container stop or destruction
 VOLUME ["/opt/yacy_search_server/DATA"]
 
-# Start yacy ind debug mode (-d) to display console logs and to wait for yacy process
-CMD sh /opt/yacy_search_server/startYACY.sh -d
+# Start yacy as non-root process in debug mode (-d) to display console logs and to wait for yacy process
+CMD sudo -u yacy sh /opt/yacy_search_server/startYACY.sh -d
