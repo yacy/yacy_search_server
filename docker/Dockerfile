@@ -1,16 +1,17 @@
 # Build a docker image from latest YaCy sources
 
-# Base image : latest stable Debian 
-FROM debian:latest
+# Base image : latest stable official jdk container from Docker (Debian based) 
+FROM java:latest
 
 # Install needed packages
 RUN apt-get update && apt-get install -yq \
-	default-jdk \
-	default-jre-headless \
 	ant \
 	git \
 	curl \
 	sudo
+	
+# trace java version
+RUN java -version
 	
 # set current working dir
 WORKDIR /opt
@@ -39,7 +40,6 @@ RUN chown yacy:yacy -R /opt/yacy_search_server
 # make some cleaning to reduce image size
 RUN rm -rf .git \
 	&& apt-get purge -yq --auto-remove \
-		default-jdk \
 		ant \
 		git \ 
 	&& apt-get clean
