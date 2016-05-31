@@ -7,8 +7,7 @@ FROM java:latest
 RUN apt-get update && apt-get install -yq \
 	ant \
 	git \
-	curl \
-	sudo
+	curl
 	
 # trace java version
 RUN java -version
@@ -50,5 +49,8 @@ EXPOSE 8090
 # Set data volume : yacy data and configuration will persist aven after container stop or destruction
 VOLUME ["/opt/yacy_search_server/DATA"]
 
-# Start yacy as non-root process in debug mode (-d) to display console logs and to wait for yacy process
-CMD sudo -u yacy sh /opt/yacy_search_server/startYACY.sh -d
+# Next commands run as yacy as non-root user for improved security
+USER yacy
+
+# Start yacy in debug mode (-d) to display console logs and to wait for yacy process
+CMD sh /opt/yacy_search_server/startYACY.sh -d
