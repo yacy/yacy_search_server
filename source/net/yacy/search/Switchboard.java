@@ -3292,6 +3292,8 @@ public final class Switchboard extends serverSwitch {
     /**
      * load the content of a URL, parse the content and add the content to the index This process is started
      * concurrently. The method returns immediately after the call.
+     * Loaded/indexed pages are added to the given SearchEvent. If this is not required prefer addToCrawler
+     * to spare concurrent processes, bandwidth and intransparent crawl/load activity
      *
      * @param url the url that shall be indexed
      * @param searchEvent (optional) a search event that shall get results from the indexed pages directly
@@ -3328,7 +3330,7 @@ public final class Switchboard extends serverSwitch {
                 continue;
             }
             requests.add(request);
-        }
+            }
         
         new Thread() {
             @Override
