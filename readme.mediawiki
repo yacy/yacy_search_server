@@ -99,6 +99,13 @@ http://<remote-server-address>:8090/ConfigAccounts_p.html
 
 and set an administration account.
 
+== CAN I RUN YACY IN A VIRTUAL MACHINE OR A CONTAINER ==
+YaCy runs fine in virtual machines managed by software such as VirtualBox or VMware. 
+
+Container technology may be more flexible and lightweight and also works fine with YaCy.
+
+More details for YaCy with Docker [here](docker/Readme.md).
+
 
 == PORT 8090 IS BAD, PEOPLE ARE NOT ALLOWED TO ACCESS THAT PORT ==
 You can forward port 80 to 8090 with iptables:
