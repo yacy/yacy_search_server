@@ -42,11 +42,21 @@ You can retrieve the container IP address with `docker inspect`.
 
 -p option map host port and container port, allowing web interface access through the usual http://localhost:8090.
 
-#### With persistent data volume
+#### Handle persistent data volume
 
-	docker run -v [your_host/data/directory]:/opt/yacy_search_server/DATA luccioman/yacy
-		
-This allow your container to reuse a data directory from the host.
+As configured in the Dockerfile, by default yacy data (in /opt/yacy_search_server/DATA) will persist after container stop or deletion, in a volume with an automatically generated id.
+
+Bu you may map a host directory to hold yacy data in container :
+
+	docker run -v [/your_host/data/directory]:/opt/yacy_search_server/DATA luccioman/yacy
+	
+Or just use a volume label to help identify it later
+
+	docker run -v yacy_volume:/opt/yacy_search_server/DATA luccioman/yacy
+
+Note that you can list all docker volumes with :
+
+	docker volume ls
 
 #### As background process
 
