@@ -104,7 +104,7 @@ YaCy runs fine in virtual machines managed by software such as VirtualBox or VMw
 
 Container technology may be more flexible and lightweight and also works fine with YaCy.
 
-More details for YaCy with Docker [here](docker/Readme.md).
+More details for YaCy with Docker [[docker/Readme.md|here]].
 
 
 == PORT 8090 IS BAD, PEOPLE ARE NOT ALLOWED TO ACCESS THAT PORT ==
