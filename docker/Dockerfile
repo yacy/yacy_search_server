@@ -1,9 +1,9 @@
 # Build a docker image from latest YaCy sources
 
-# Base image : latest stable official jdk container from Docker (Debian based) 
+# Base image : latest stable official jdk image from Docker (Debian based) 
 FROM java:latest
 
-# Install needed packages
+# Install needed packages not in base image
 RUN apt-get update && apt-get install -yq \
 	ant \
 	git \
