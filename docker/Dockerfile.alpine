@@ -45,22 +45,19 @@ ENV PATH ${PATH}:/opt/ant/bin
 # set current working dir
 WORKDIR /opt
 
-
-# clone main YaCy git repository (we need to clone git repository to generate correct version when building from source)
-# add and delete git package within this same step to avoid image size growth
+# All in one step to reduce image size growth :
+# - add git package
+# - clone main YaCy git repository (we need to clone git repository to generate correct version when building from source)
+# - compile with apache ant
+# - remove unnecessary and size consuming .git directory
+# - delete git package and ant binary install
 RUN apk update && \
-	apk add --no-cache git && \
-	git clone https://github.com/yacy/yacy_search_server.git && \
-	apk del git
-
-# trace content of source directory
-RUN ls -la /opt/yacy_search_server
-
-# set current working dir
-WORKDIR /opt/yacy_search_server
-	
-# Compile with ant
-RUN ant compile
+        apk add --no-cache git && \
+        git clone https://github.com/yacy/yacy_search_server.git && \
+        ant compile -f /opt/yacy_search_server/build.xml && \
+        rm -rf "/opt/yacy_search_server/.git" && \
+        rm -rf /opt/ant && \
+        apk del git
 
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
@@ -70,10 +67,6 @@ RUN addgroup yacy && adduser -S -G yacy -H -D yacy
 
 # Set ownership of yacy install directory to yacy user/group
 RUN chown yacy:yacy -R /opt/yacy_search_server
-
-# make some cleaning to reduce image size
-RUN rm -rf .git && \
-	rm -rf /opt/ant
 
 # Expose port 8090
 EXPOSE 8090
