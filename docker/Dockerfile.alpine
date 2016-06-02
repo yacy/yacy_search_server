@@ -26,9 +26,9 @@ ENV ANT_VERSION 1.9.7
 # - remove archive and gnupg package
 RUN apk update && \
 	apk add --no-cache gnupg && \
-	curl http://www.eu.apache.org/dist//ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz > apache-ant-${ANT_VERSION}-bin.tar.gz && \
-	curl https://www.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz.asc > apache-ant-${ANT_VERSION}-bin.tar.gz.asc && \
-	curl https://www.apache.org/dist/ant/KEYS | gpg --import && \
+	curl -fSL http://www.eu.apache.org/dist//ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz -o apache-ant-${ANT_VERSION}-bin.tar.gz && \
+	curl -fSL https://www.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz.asc -o apache-ant-${ANT_VERSION}-bin.tar.gz.asc && \
+	curl -fSL https://www.apache.org/dist/ant/KEYS | gpg --import && \
 	gpg --verify apache-ant-${ANT_VERSION}-bin.tar.gz.asc && \
 	tar xzf apache-ant-${ANT_VERSION}-bin.tar.gz && \
 	mkdir /opt && \
