@@ -168,7 +168,7 @@
     	<pathelement location="${lib}/common-lang-3.2.1.jar" />
     	<pathelement location="${lib}/commons-codec-1.10.jar" />
     	<pathelement location="${lib}/commons-compress-1.11.jar" />
-    	<pathelement location="${lib}/commons-fileupload-1.3.1.jar" />
+    	<pathelement location="${lib}/commons-fileupload-1.3.2.jar" />
     	<pathelement location="${lib}/commons-io-2.5.jar" />
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-lang-2.6.jar" />
