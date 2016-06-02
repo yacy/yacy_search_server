@@ -44,6 +44,7 @@ import javax.xml.bind.Unmarshaller;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
+import net.yacy.search.Switchboard;
 
 import org.oasis.xliff.core_12.Body;
 import org.oasis.xliff.core_12.Target;
@@ -66,7 +67,7 @@ public class TranslatorXliff extends Translator {
      * @return a HashMap, which contains for each File a HashMap with
      * translations.
      */
-    public static Map<String, Map<String, String>> loadTranslationsListsFromXliff(final File xliffFile) {
+    public Map<String, Map<String, String>> loadTranslationsListsFromXliff(final File xliffFile) {
 
         final Map<String, Map<String, String>> lngLists = new TreeMap<String, Map<String, String>>(); //list of translationLists for different files.
         /**
@@ -144,11 +145,13 @@ public class TranslatorXliff extends Translator {
      * @param xliffFile
      * @return translatio map
      */
-    public static Map<String, Map<String, String>> loadTranslationsLists(final File xliffFile) {
+    @Override
+    public Map<String, Map<String, String>> loadTranslationsLists(final File xliffFile) {
+        File locallng = getScratchFile(xliffFile);
         if (xliffFile.getName().toLowerCase().endsWith(".xlf") || xliffFile.getName().toLowerCase().endsWith(".xliff")) {
-            return loadTranslationsListsFromXliff(xliffFile);
+            return locallng.exists() ? loadTranslationsListsFromXliff(locallng) : loadTranslationsListsFromXliff(xliffFile);
         } else {
-            return Translator.loadTranslationsLists(xliffFile);
+            return locallng.exists() ? super.loadTranslationsLists(locallng) : super.loadTranslationsLists(xliffFile);
         }
     }
 
@@ -316,5 +319,22 @@ public class TranslatorXliff extends Translator {
             control = s.indexOf(">", control);
         }
         return s;
+    }
+
+    /**
+     * Get the path to a work/scratch file in the DATA/LOCALE directory with the
+     * same name as given in the langPath
+     *
+     * @param langFile the path with filename to the language file
+     * @return a path to DATA/LOCALE/langFile.filename()
+     */
+    public File getScratchFile(final File langFile) {
+        if (Switchboard.getSwitchboard() != null) { // for debug and testing were switchboard is null
+            File f = Switchboard.getSwitchboard().getDataPath("locale.translated_html", "DATA/LOCALE");
+            f = new File(f.getParentFile(), langFile.getName());
+            return f;
+        } else {
+            return langFile;
+        }
     }
 }

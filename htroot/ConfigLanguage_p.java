@@ -82,7 +82,7 @@ public class ConfigLanguage_p {
                  * directory traversal attacks!
                  */
                 if (langFiles.contains(selectedLanguage) || selectedLanguage.startsWith("default")) {
-                    Translator.changeLang(env, langPath, selectedLanguage);
+                    new TranslatorXliff().changeLang(env, langPath, selectedLanguage);
                 }
 
                 //delete language file
@@ -105,7 +105,8 @@ public class ConfigLanguage_p {
                     final DigestURL u = new DigestURL(url);
                     it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, null, null));
                     try {
-                        File langFile = new File(langPath, u.getFileName());
+                        TranslatorXliff tx = new TranslatorXliff();
+                        File langFile = tx.getScratchFile(new File(langPath, u.getFileName()));
                         final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
 
                         while (it.hasNext()) {
@@ -116,14 +117,13 @@ public class ConfigLanguage_p {
                         // convert downloaded xliff to internal lng file
                         final String ext = Files.getFileExtension(langFile.getName());
                         if (ext.equalsIgnoreCase("xlf") || ext.equalsIgnoreCase("xliff")) {
-                            TranslatorXliff tx = new TranslatorXliff();
-                            Map<String,Map<String,String>> lng = TranslatorXliff.loadTranslationsListsFromXliff(langFile);
+                            Map<String,Map<String,String>> lng = tx.loadTranslationsListsFromXliff(langFile);
                             langFile = new File(langPath, Files.getNameWithoutExtension(langFile.getName())+".lng");
                             tx.saveAsLngFile(null, langFile, lng);
                         }
                         
                         if (post.containsKey("use_lang") && "on".equals(post.get("use_lang"))) {
-                            Translator.changeLang(env, langPath, langFile.getName());
+                            tx.changeLang(env, langPath, langFile.getName());
                         }
                     } catch (final IOException e) {
                         prop.put("status", "2");//error saving the language file

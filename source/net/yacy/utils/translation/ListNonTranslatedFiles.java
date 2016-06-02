@@ -87,7 +87,7 @@ public class ListNonTranslatedFiles extends TranslatorUtil {
 				+ translationFile);
 
 		try {
-			Set<String> translatedRelativePaths = Translator.loadTranslationsLists(translationFile).keySet();
+			Set<String> translatedRelativePaths = new Translator().loadTranslationsLists(translationFile).keySet();
 
 			List<File> srcFiles = FileUtils.getFilesRecursive(sourceDir, excludedDir, fileFilter);
 			
