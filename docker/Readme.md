@@ -2,6 +2,11 @@
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/luccioman/yacy_search_server/tree/docker/docker)
 
+## Supported tags and respective Dockerfile links
+
+* latest (Dockerfile)
+* lastet-alpine (Dockerfile.alpine)
+
 ## Getting built image from Docker Hub
 
 	docker pull luccioman/yacy
@@ -14,6 +19,16 @@ Using yacy_search_server/docker/Dockerfile :
 
 	cd yacy_search_server/docker
 	docker build .
+	
+## Image variants
+
+`luccioman/yacy:latest`
+
+This image is based on latest stable official [java](https://hub.docker.com/_/java/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
+
+`luccioman/yacy:latest-alpine`
+
+This image is based on latest stable official Alpine Linux [java](https://hub.docker.com/_/java/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
 	
 ## Default admin account
 
@@ -78,3 +93,7 @@ Note that you can list all docker volumes with :
 * OR run :
 
 	docker exec [your_container_name] /opt/yacy_search_server/stopYACY.sh	
+
+## License
+
+View [license](../COPYRIGHT) information for the software contained in this image.
