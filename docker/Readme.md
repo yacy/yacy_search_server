@@ -2,7 +2,7 @@
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/luccioman/yacy_search_server/tree/docker/docker)
 
-## Supported tags and respective Dockerfile links
+## Supported tags and respective Dockerfiles
 
 * latest (Dockerfile)
 * lastet-alpine (Dockerfile.alpine)
@@ -24,7 +24,7 @@ Using yacy_search_server/docker/Dockerfile :
 
 `luccioman/yacy:latest`
 
-This image is based on latest stable official [java](https://hub.docker.com/_/java/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
+This image is based on latest stable official Debian [java](https://hub.docker.com/_/java/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
 
 `luccioman/yacy:latest-alpine`
 
@@ -96,4 +96,4 @@ Note that you can list all docker volumes with :
 
 ## License
 
-View [license](../COPYRIGHT) information for the software contained in this image.
+View [license](https://github.com/yacy/yacy_search_server/blob/master/COPYRIGHT) information for the software contained in this image.
