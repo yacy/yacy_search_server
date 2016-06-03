@@ -95,6 +95,7 @@ public class ConfigLanguage_p {
                 if (langFiles.contains(selectedLanguage)) {
                     final File langfile= new File(langPath, selectedLanguage);
                     FileUtils.deletedelete(langfile);
+                    new TranslatorXliff().getScratchFile(langfile).delete();
                 }
 
                 //load language file from URL
