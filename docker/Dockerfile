@@ -4,10 +4,7 @@
 FROM java:latest
 
 # Install needed packages not in base image
-RUN apt-get update && apt-get install -yq \
-	ant \
-	git \
-	curl
+RUN apt-get update && apt-get install -yq curl
 	
 # trace java version
 RUN java -version
@@ -15,17 +12,20 @@ RUN java -version
 # set current working dir
 WORKDIR /opt
 
-# clone main YaCy git repository (we need to clone git repository to generate correct version when building from source)
-RUN git clone https://github.com/yacy/yacy_search_server.git
+# All in one step to reduce image size growth :
+# - install ant and git packages
+# - clone main YaCy git repository (we need to clone git repository to generate correct version when building from source)
+# - Compile with ant
+# - remove unnecessary and size consuming .git directory
+# - remove ant and git packages
+RUN apt-get update && \
+	apt-get install -yq ant git && \
+	git clone https://github.com/yacy/yacy_search_server.git && \
+	ant compile -f /opt/yacy_search_server/build.xml && \
+	rm -rf /opt/yacy_search_server/.git && \
+	apt-get purge -yq --auto-remove ant git && \ 
+	apt-get clean
 
-# trace content of source directory
-RUN ls -la /opt/yacy_search_server
-
-# set current working dir
-WORKDIR /opt/yacy_search_server
-	
-# Compile with ant
-RUN ant compile
 
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
@@ -35,13 +35,6 @@ RUN adduser --system --group --no-create-home --disabled-password yacy
 
 # Set ownership of yacy install directory to yacy user/group
 RUN chown yacy:yacy -R /opt/yacy_search_server
-
-# make some cleaning to reduce image size
-RUN rm -rf .git \
-	&& apt-get purge -yq --auto-remove \
-		ant \
-		git \ 
-	&& apt-get clean
 
 # Expose port 8090
 EXPOSE 8090
