@@ -100,7 +100,7 @@ public class Translator_p {
                             if (sourcetext.endsWith("<") && !t.endsWith("<")) t=t+"<";
                         }
                         targettxt = t;
-                        origTextList.replace(sourcetext, targettxt);
+                        origTextList.put(sourcetext, targettxt);
                         changed = true;
                     }
                     prop.putHTML("textlist_" + i + "_sourcetxt", sourcetext);
