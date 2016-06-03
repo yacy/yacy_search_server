@@ -521,8 +521,8 @@ public final class CrawlSwitchboard {
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE),
                 -1,
                 true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
-                false,
-                false,
+                false, // indexText
+                false, // indexMedia
                 true,
                 false,
                 -1, false, true, CrawlProfile.MATCH_NEVER_STRING,

@@ -107,7 +107,7 @@ public class Translator {
      * @param translationFile the File, which contains the Lists
      * @return a HashMap, which contains for each File a HashMap with translations.
      */
-    public static Map<String, Map<String, String>> loadTranslationsLists(final File translationFile) {
+    public Map<String, Map<String, String>> loadTranslationsLists(final File translationFile) {
         final Map<String, Map<String, String>> lists = new HashMap<String, Map<String, String>>(); //list of translationLists for different files.
         Map<String, String> translationList = new LinkedHashMap<String, String>(); //current Translation Table (maintaining input order)
 
@@ -186,7 +186,7 @@ public class Translator {
 	return true;
     }
 
-    public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final File translationFile, final String extensions){
+    public boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final File translationFile, final String extensions){
         return translateFiles(sourceDir, destDir, baseDir, loadTranslationsLists(translationFile), extensions);
     }
 
@@ -219,7 +219,7 @@ public class Translator {
         return true;
     }
 
-    public static boolean translateFilesRecursive(final File sourceDir, final File destDir, final File translationFile, final String extensions, final String notdir){
+    public boolean translateFilesRecursive(final File sourceDir, final File destDir, final File translationFile, final String extensions, final String notdir){
         final List<File> dirList=FileUtils.getDirsRecursive(sourceDir, notdir);
         dirList.add(sourceDir);
         for (final File file : dirList) {
@@ -248,7 +248,7 @@ public class Translator {
         return map;
     }
 
-    public static boolean changeLang(final serverSwitch env, final File langPath, final String lang) {
+    public boolean changeLang(final serverSwitch env, final File langPath, final String lang) {
         boolean ret = false;
 
         if ("default".equals(lang) || "default.lng".equals(lang)) {
@@ -257,14 +257,10 @@ public class Translator {
         } else {
             final String htRootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
             final File sourceDir = new File(env.getAppPath(), htRootPath);
-            final File destDir = new File(env.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
-            // .lng
-            //File destDir = new File(env.getRootPath(), htRootPath + "/locale/" + lang.substring(0, lang.length() - 4));// cut
-            // .lng
+            final File destDir = new File(env.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut .lng
             final File translationFile = new File(langPath, lang);
 
-            //if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
-            if (Translator.translateFilesRecursive(sourceDir, destDir, translationFile, "html,template,inc", "locale")) {
+            if (translateFilesRecursive(sourceDir, destDir, translationFile, "html,template,inc", "locale")) {
                 env.setConfig("locale.language", lang.substring(0, lang.length() - 4));
                 Formatter.setLocale(env.getConfig("locale.language", "en"));
                 try {

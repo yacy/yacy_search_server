@@ -86,7 +86,7 @@ public class TranslateAll extends TranslatorUtil {
 					File localeDestDir = new File(destDir, localeCode);
 					localeDestDir.mkdirs();
 
-					Translator.translateFilesRecursive(sourceDir, localeDestDir,
+					new Translator().translateFilesRecursive(sourceDir, localeDestDir,
 							translationFile, extensions, "locale");
 				}
 			}

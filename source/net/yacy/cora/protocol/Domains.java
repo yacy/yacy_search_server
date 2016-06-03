@@ -101,8 +101,6 @@ public class Domains {
     private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<InetAddress> publicIPv6HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<String> localHostNames = new HashSet<String>(); // subset of myHostNames
-    private static Set<String> publicIPv4HostNames = new HashSet<String>(); // subset of myHostNames
-    private static Set<String> publicIPv6HostNames = new HashSet<String>(); // subset of myHostNames
     static {
         localHostNames.add(LOCALHOST);
         try {
@@ -179,10 +177,8 @@ public class Domains {
                             ConcurrentLog.info("Domain Init", "local host address: " + hostaddress + " (public)");
                             if (a instanceof Inet4Address) {
                                 publicIPv4HostAddresses.add(a);
-                                if (hostname != null) {publicIPv4HostNames.add(hostname); publicIPv4HostNames.add(hostaddress);}
                             } else {
                                 publicIPv6HostAddresses.add(a);
-                                if (hostname != null) {publicIPv6HostNames.add(hostname); publicIPv6HostNames.add(hostaddress);}
                             }
                         }
                     }
