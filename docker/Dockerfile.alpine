@@ -52,12 +52,12 @@ WORKDIR /opt
 # - remove unnecessary and size consuming .git directory
 # - delete git package and ant binary install
 RUN apk update && \
-        apk add --no-cache git && \
-        git clone https://github.com/yacy/yacy_search_server.git && \
-        ant compile -f /opt/yacy_search_server/build.xml && \
-        rm -rf "/opt/yacy_search_server/.git" && \
-        rm -rf /opt/ant && \
-        apk del git
+	apk add --no-cache git && \
+	git clone https://github.com/yacy/yacy_search_server.git && \
+	ant compile -f /opt/yacy_search_server/build.xml && \
+	rm -rf /opt/yacy_search_server/.git && \
+	rm -rf /opt/ant && \
+	apk del git
 
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
