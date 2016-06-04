@@ -37,7 +37,7 @@
                 <label for="targettxt#[tokenid]#"  >#[sourcetxt]#</label>
               </td>
               <td style="border-bottom: solid gray;  border-bottom-width: 1px;" valign="top" nowrap>
-                <input type="text" name="targettxt#[tokenid]#" id="targettxt#[tokenid]#" size="80" value="#[targettxt]#"/>#(filteruntranslated)#::<button name="approve" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-ok-sign" style="color: green"/></button>#(/filteruntranslated)#
+                <input type="text" name="targettxt#[tokenid]#" id="targettxt#[tokenid]#" size="80" value="#[targettxt]#" #(filteruntranslated)#disabled::#(/filteruntranslated)#/>#(filteruntranslated)#::<button name="approve" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-ok-sign" style="color: green"/></button>#(/filteruntranslated)#
               </td>
             </tr>
             #{/textlist}#

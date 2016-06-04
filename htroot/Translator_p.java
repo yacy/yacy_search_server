@@ -107,7 +107,6 @@ public class Translator_p {
                     prop.putHTML("textlist_" + i + "_targettxt", targettxt);
                     prop.put("textlist_" + i + "_tokenid", Integer.toString(i));
                     prop.put("textlist_" + i + "_filteruntranslated_tokenid", Integer.toString(i));
-                    //prop.put("textlist_" + i +"_filteruntranslated", filteruntranslated);
                     i++;
                 }
                 if (post != null && post.containsKey("savetranslationlist")) {
