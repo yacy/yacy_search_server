@@ -2508,7 +2508,7 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 >Name<==>Ім’я<
 >Remote<br/>Crawl<==>Remote<br/>Crawl<
 >Release/<br/>SVN<==>Випуск/SVN<
->PPM<==>==>Сторінок За Хвилину (PPM)<
+>PPM<==>Сторінок За Хвилину (PPM)<
 >QPH<==>Запитів За Годину (QPH)<
 >Last<br/>Seen<==>Востаннє<br/>бачено<
 <strong>UTC</strong><br/>Offset==Зсув<br/><strong>UTC</strong>
@@ -2830,7 +2830,7 @@ value="add"==value="додати"
 Console Status==Консоль стану
 Log-in as administrator to see full status==Увійдіть як адміністратор для перегляду повного стану
 Welcome to YaCy!==Вітаємо в YaCy!
-Your settings are _not_ protected!</strong>==Ваші налаштування _не_ захищені паролем!</strong>
+Your settings are _not_ protected!==Ваші налаштування _не_ захищені паролем!
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Будь-ласка, <strong>негайно</strong> відкрийте <a href="ConfigAccounts_p.html">настройки облікових записів</a>
 and set an administration password.==і виставте пароль адміністратора.
 You have not published your peer seed yet. This happens automatically, just wait.==Ваш вузол не відомий мережі. Зачекайте, це робиться автоматично.
