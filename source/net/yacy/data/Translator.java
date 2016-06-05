@@ -67,11 +67,11 @@ public class Translator {
 
     /**
      * Translate source using entries in translationTable
-     * @param source text to translate. Mus be non null.
+     * @param source text to translate. Must be non null.
      * @param translationTable translation entries : text to translate -> translation
      * @return source translated
      */
-	public static String translate(final String source,
+	public String translate(final StringBuilder source,
 			final Map<String, String> translationTable) {
 		final Set<Map.Entry<String, String>> entries = translationTable.entrySet();
 		StringBuilder builder = new StringBuilder(source);
@@ -146,7 +146,7 @@ public class Translator {
      * @param translationList map of translations
      * @return true when destFile was sucessfully written, false otherwise
      */
-    public static boolean translateFile(final File sourceFile, final File destFile, final Map<String, String> translationList){
+    public boolean translateFile(final File sourceFile, final File destFile, final Map<String, String> translationList){
 
         StringBuilder content = new StringBuilder();
         BufferedReader br = null;
@@ -167,7 +167,7 @@ public class Translator {
             }
         }
 
-        String processedContent = translate(content.toString(), translationList);
+        String processedContent = translate(content, translationList);
         BufferedWriter bw = null;
         try{
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile), StandardCharsets.UTF_8));
@@ -186,11 +186,17 @@ public class Translator {
 	return true;
     }
 
-    public boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final File translationFile, final String extensions){
-        return translateFiles(sourceDir, destDir, baseDir, loadTranslationsLists(translationFile), extensions);
-    }
-
-    public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Map<String, Map<String, String>> translationLists, final String extensions){
+    /**
+     * Translate files in sourceDir (relative path of baseDir) write result to destDir
+     *
+     * @param sourceDir relative path
+     * @param destDir destination
+     * @param baseDir base dir of source
+     * @param translationLists translation to use
+     * @param extensions file extension to include in translation
+     * @return
+     */
+    public boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Map<String, Map<String, String>> translationLists, final String extensions){
         destDir.mkdirs();
         final List<String> exts = ListManager.string2vector(extensions);
         final File[] sourceFiles = sourceDir.listFiles(new ExtensionsFileFilter(exts));
@@ -200,7 +206,7 @@ public class Translator {
                 relativePath=sourceFile.getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
                 relativePath = relativePath.replace(File.separatorChar, '/');
             } catch (final IndexOutOfBoundsException e) {
-                 ConcurrentLog.severe("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
+                ConcurrentLog.severe("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
                 relativePath = "wrong path"; //not in translationLists
             }
             if (translationLists.containsKey(relativePath)) {
@@ -219,17 +225,29 @@ public class Translator {
         return true;
     }
 
-    public boolean translateFilesRecursive(final File sourceDir, final File destDir, final File translationFile, final String extensions, final String notdir){
-        final List<File> dirList=FileUtils.getDirsRecursive(sourceDir, notdir);
+    /**
+     * Translate files starting with sourceDir and all subdirectories.
+     *
+     * @param sourceDir
+     * @param destDir
+     * @param translationFile translation language file
+     * @param extensions extension of files to include in translation
+     * @param notdir directory to exclude
+     * @return true if all files translated (or none)
+     */
+    public boolean translateFilesRecursive(final File sourceDir, final File destDir, final File translationFile, final String extensions, final String notdir) {
+        final List<File> dirList = FileUtils.getDirsRecursive(sourceDir, notdir);
         dirList.add(sourceDir);
+        final Map<String, Map<String, String>> translationLists = loadTranslationsLists(translationFile);
+        boolean erg = true;
         for (final File file : dirList) {
-            if(file.isDirectory() && !file.getName().equals(notdir)) {
+            if (file.isDirectory() && !file.getName().equals(notdir)) {
                 //cuts the sourcePath and prepends the destPath
                 File file2 = new File(destDir, file.getPath().substring(sourceDir.getPath().length()));
-                translateFiles(file, file2, sourceDir, translationFile, extensions);
+                erg &= translateFiles(file, file2, sourceDir, translationLists, extensions);
             }
         }
-        return true;
+        return erg;
     }
 
     public static Map<String, String> langMap(@SuppressWarnings("unused") final serverSwitch env) {
