@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ * first published 07.04.2005 on http://yacy.net
+ * Licensed under the GNU GPL-v2 license
+ */
+
 function linkstructure(hostname, element, width, height, maxtime, maxnodes) {
 	var nodes = {};
 	var links = [];

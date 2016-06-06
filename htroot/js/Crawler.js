@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ * first published 07.04.2005 on http://yacy.net
+ * Licensed under the GNU GPL-v2 license
+ */
+
 DELETE_STRING="delete";
 BAR_IMG1="/env/grafics/green-block.png";
 BAR_IMG2="/env/grafics/red-block.png";

@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ * first published 07.04.2005 on http://yacy.net
+ * Licensed under the GNU GPL-v2 license
+ */
+
 function addHover() {
   if (document.all&&document.getElementById) {
     var divs = document.getElementsByTagName("div");

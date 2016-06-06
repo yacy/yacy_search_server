@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ * first published 07.04.2005 on http://yacy.net
+ * Licensed under the GNU GPL-v2 license
+ */
+
 /* Initialize Bookmark Actions */
 function bm_action(com,grid) {
 	if (com=='Delete') {
