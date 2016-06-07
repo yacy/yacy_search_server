@@ -3449,6 +3449,21 @@ Threaddump<==Thread Dump<
 #"create Threaddump"=="Threaddump erstellen"
 #-----------------------------
 
+#File: Translator_p.html
+#---------------------------
+Translation Editor==Übersetzungseditor
+Translate untranslated text of the user interface (current language).==Ergänze fehlende Übersetzungen der Benutzeroberfläche (aktuell aktive Sprache).
+The modified translation file is stored in DATA/LOCALE directory.==Geänderte Übersetzungen werden im Verzeichnis DATA/LOCALE gespeichert.
+UI Translation==Übersetzung Benutzeroberfläche
+Target Language:==Zielsprache
+Source File==Quelldatei
+view it==Datei anzeigen
+filter untranslated==filter unübersetztes
+Source Text==Quelltext
+Translated Text==Übersetzung
+Save translation==Änderungen speichern
+#-----------------------------
+
 #File: User.html
 #---------------------------
 User Page==Benutzer Seite

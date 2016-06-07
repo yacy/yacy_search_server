@@ -11,14 +11,13 @@
     #%env/templates/submenuDesign.template%#
     <h2>Translation Editor</h2>
 
-    <p>Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory</p>
-
-    <fieldset>
-      <legend>
-        <label>UI Translation</label>
-      </legend>
-      <p>Target Language: <b>#[targetlang]#</b></p><p class="error">#[errmsg]#</p>
-      <form id="Translation" method="post" action="Translator_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <p>Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.</p>
+    <form id="Translation" method="post" action="Translator_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>
+          <label>UI Translation</label>
+        </legend>
+        <p>Target Language: <b>#[targetlang]#</b></p><p class="error">#[errmsg]#</p>
         <label for="sourcefile">Source File</label>
         <select name="sourcefile" onchange="submit();">
           #{filelist}#
@@ -45,8 +44,8 @@
         
           <input type="submit" name="savetranslationlist" value="Save translation" class="btn btn-primary"/>
      
-      </form>
-    </fieldset>
+      </fieldset>
+    </form>
 
     #%env/templates/footer.template%#
   </body>
