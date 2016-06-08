@@ -14,7 +14,8 @@
         @licstart  The following is the entire license notice for the 
         JavaScript code in this page.
 
-        Copyright (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+        Copyright (C) 2005-2016 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany 
+        and other YaCy developers (see http://yacy.net/en/Join.html)
         first published 07.04.2005 on http://yacy.net
 
         The JavaScript code in this page is free software: you can redistribute it and/or
@@ -29,8 +30,7 @@
 
         You should have received a copy of the GNU General Public License
         along with this program; if not, write to the Free Software
-        Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
-
+        Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         @licend  The above is the entire license notice
         for the JavaScript code in this page.
