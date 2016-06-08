@@ -1,4 +1,7 @@
-/*    
+/*
+* @licstart  The following is the entire license notice for the 
+* JavaScript code in this file.
+* 
 * Copyright (C) 2006 - 2014 Alexander Schier, Martin Thelian, Michael Peter Christen,
 * Florian Richter, Stefan Förster, David Wieditz
 * 
@@ -17,6 +20,9 @@
 * 
 * You should have received a copy of the GNU General Public License
 * along with YaCy.  If not, see <http://www.gnu.org/licenses/>.
+* 
+* @licend  The above is the entire license notice
+* for the JavaScript code in this file.
 */
 
 var AJAX_OFF="/env/grafics/empty.gif";
