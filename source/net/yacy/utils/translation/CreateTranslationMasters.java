@@ -58,7 +58,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
      * @param targetLngTxt the translated text
      * @return true = if map was modified, otherwise false
      */
-    protected boolean addTranslation(Map<String, Map<String, String>> translation, final String relFileName, final String sourceLngTxt, final String targetLngTxt) {
+    public boolean addTranslation(Map<String, Map<String, String>> translation, final String relFileName, final String sourceLngTxt, final String targetLngTxt) {
         boolean modified = false;
 
         Map<String, String> transFile;
@@ -156,7 +156,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
         final String filename = lngfile.getName();
         Map<String, Map<String, String>> xliffTrans = loadTranslationsListsFromXliff(xlifmaster);
         // load translation list
-        System.out.println("join into master translation file " + filename);
+        ConcurrentLog.info("TRANSLATOR", "join into master translation file " + filename);
         Map<String, Map<String, String>> origTrans = loadTranslationsLists(lngfile);
 
         for (String transfilename : origTrans.keySet()) { // get translation filename

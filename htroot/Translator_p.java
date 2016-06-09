@@ -52,6 +52,8 @@ public class Translator_p {
             File masterxlf = new File("locales", "master.lng.xlf");
             if (!masterxlf.exists()) ctm.createMasterTranslationLists(masterxlf);
             Map<String, Map<String, String>> origTrans = ctm.joinMasterTranslationLists(masterxlf, lngfile);
+            final File locallngfile = ctm.getScratchFile(lngfile);
+            Map<String, Map<String, String>> localTrans = ctm.loadTranslationsLists(locallngfile); // TODO: this will read file twice
             int i = 0;
             if (origTrans.size() > 0) {
                 String filename = origTrans.keySet().iterator().next();
@@ -87,7 +89,8 @@ public class Translator_p {
                 boolean changed = false;
                 for (String sourcetext : origTextList.keySet()) {
                     String targettxt = origTextList.get(sourcetext);
-                    if (targettxt == null || targettxt.isEmpty()) {
+                    boolean existinlocalTrans = localTrans.containsKey(filename) && localTrans.get(filename).containsKey(sourcetext);
+                    if (targettxt == null || targettxt.isEmpty() || existinlocalTrans) {
                         prop.put("textlist_" + i + "_filteruntranslated", true);
                     } else if (filteruntranslated) {
                         continue;
@@ -100,21 +103,21 @@ public class Translator_p {
                             if (sourcetext.endsWith("<") && !t.endsWith("<")) t=t+"<";
                         }
                         targettxt = t;
-                        origTextList.replace(sourcetext, targettxt);
-                        changed = true;
+                        // add changes to original (for display) and local (for save)
+                        origTextList.put(sourcetext, targettxt);
+                        changed = ctm.addTranslation (localTrans, filename, sourcetext, targettxt);
                     }
                     prop.putHTML("textlist_" + i + "_sourcetxt", sourcetext);
                     prop.putHTML("textlist_" + i + "_targettxt", targettxt);
                     prop.put("textlist_" + i + "_tokenid", Integer.toString(i));
                     prop.put("textlist_" + i + "_filteruntranslated_tokenid", Integer.toString(i));
-                    //prop.put("textlist_" + i +"_filteruntranslated", filteruntranslated);
                     i++;
                 }
                 if (post != null && post.containsKey("savetranslationlist")) {
                     changed = true;
                 }
                 if (changed) {
-                    ctm.saveAsLngFile(langcfg, ctm.getScratchFile(lngfile), origTrans);
+                    ctm.saveAsLngFile(langcfg, locallngfile, localTrans);
                 }
             }
             prop.put("textlist", i);
