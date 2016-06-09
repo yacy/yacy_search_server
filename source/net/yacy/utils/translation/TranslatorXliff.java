@@ -55,8 +55,11 @@ import org.oasis.xliff.core_12.Xliff;
  * Wordlist based translator
  *
  * Translator which can read and write translation lists from a
- * <a href="http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html">XLIFF
- * 1.2</a> file with phrases or single words to translate a string or a file
+ * <a href="http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html">XLIFF 1.2</a>
+ * file with phrases or single words to translate a string or a file.
+ *
+ * On loading of translation files loaded data is merged with local (modified or downloaded)
+ * translation data in DATA/LOCALE/
  */
 public class TranslatorXliff extends Translator {
 
@@ -140,21 +143,56 @@ public class TranslatorXliff extends Translator {
 
     /**
      * Maps (overrides) Translator.loadTranslationsLists to read from xliff file
-     * if file extension is .xlf or .xliff (otherwise load xx.lng file)
+     * if file extension is .xlf or .xliff (otherwise load xx.lng file).
+     * Additionally if localy modified translation exists in DATA/LOCALE content
+     * is merged into given translation.
      *
      * @param xliffFile
-     * @return translatio map
+     * @return translation map
      */
     @Override
     public Map<String, Map<String, String>> loadTranslationsLists(final File xliffFile) {
         File locallng = getScratchFile(xliffFile);
         if (xliffFile.getName().toLowerCase().endsWith(".xlf") || xliffFile.getName().toLowerCase().endsWith(".xliff")) {
-            return locallng.exists() ? loadTranslationsListsFromXliff(locallng) : loadTranslationsListsFromXliff(xliffFile);
+            if (locallng.exists()) {
+                Map<String, Map<String, String>> mergedList = loadTranslationsListsFromXliff(xliffFile);
+                Map<String, Map<String, String>> tmplist = loadTranslationsListsFromXliff(locallng);
+                return mergeTranslationLists(mergedList, tmplist);
+            } else {
+                return loadTranslationsListsFromXliff(xliffFile);
+            }
+        } else if (locallng.exists()) {
+            Map<String, Map<String, String>> mergedList = super.loadTranslationsLists(xliffFile);
+            Map<String, Map<String, String>> tmplist = super.loadTranslationsLists(locallng);
+            return mergeTranslationLists(mergedList, tmplist);
         } else {
-            return locallng.exists() ? super.loadTranslationsLists(locallng) : super.loadTranslationsLists(xliffFile);
+            return super.loadTranslationsLists(xliffFile);
         }
     }
 
+    /**
+     * Merges translations, values from localTrans overwrite entries in masterTrans.
+     *
+     * @param masterTrans master translation
+     * @param localTrans translation to be merged to master
+     * @return resulting map with all entries from master and localTrans
+     */
+    protected Map<String, Map<String, String>> mergeTranslationLists(Map<String, Map<String, String>> masterTrans, Map<String, Map<String, String>> localTrans) {
+        if (localTrans != null && !localTrans.isEmpty()) {
+            for (String transfilename : localTrans.keySet()) { // get translation filename
+
+                Map<String, String> origList = localTrans.get(transfilename);
+                if (masterTrans.containsKey(transfilename)) {
+                    Map<String, String> xliffList = masterTrans.get(transfilename);
+                    xliffList.putAll(origList);
+                } else {
+                    masterTrans.put(transfilename, origList);
+                }
+            }
+        }
+        return masterTrans;
+    }
+    
     /**
      * Saves the internal translation map as XLIFF 1.2 file
      *
@@ -221,23 +259,24 @@ public class TranslatorXliff extends Translator {
      * @throws IOException
      */
     private void writeFileSection(final String filename, final Map<String, String> textlist, OutputStreamWriter output) throws IOException {
-        output.write("#File: " + filename + "\n"
-                + "#---------------------------\n"); // required in 1.2
+        if (!filename.isEmpty()) {
+            output.write("#File: " + filename + "\n"
+                    + "#---------------------------\n");
 
-        for (String source : textlist.keySet()) {
-            String target = textlist.get(source);
-            // we use hashCode of source string to get same id in different xliff files for same translation text
-            if (target != null && !target.isEmpty()) { // omitt target text if not available
-                if (source.equals(target)) {
-                    output.write("#" + source + "==" + target + "\n"); // no translation needed (mark #)
+            for (String source : textlist.keySet()) {
+                String target = textlist.get(source);
+                if (target != null && !target.isEmpty()) { // omitt target text if not available
+                    if (source.equals(target)) {
+                        output.write("#" + source + "==" + target + "\n"); // no translation needed (mark #)
+                    } else {
+                        output.write(source + "==" + target + "\n");
+                    }
                 } else {
-                    output.write(source + "==" + target + "\n");
+                    output.write("#" + source + "==" + source + "\n"); // no translation available (mark #)
                 }
-            } else {
-                output.write("#"+source + "==" + source + "\n"); // no translation available (mark #)
             }
+            output.write("#-----------------------------\n\n");
         }
-        output.write("#-----------------------------\n\n");
     }
 
     /**
@@ -267,7 +306,7 @@ public class TranslatorXliff extends Translator {
             // special handling of "ConfigLanguage_p.html" to list on top of all other
             // because of some important identifier
             Map<String, String> txtmap = lng.get("ConfigLanguage_p.html");
-            writeFileSection("ConfigLanguage_p.html", txtmap, output);
+            if (txtmap != null) writeFileSection("ConfigLanguage_p.html", txtmap, output);
 
             for (String afilemap : lng.keySet()) {
                 txtmap = lng.get(afilemap);

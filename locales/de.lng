@@ -2779,7 +2779,7 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 #>Name<==>Name<
 #>Remote<br/>Crawl<==>Remote<br/>Crawl<
 #>Release/<br/>SVN<==>Version/<br/>SVN<
->PPM<==>==>Seiten pro Minute (PPM)<
+>PPM<==>Seiten pro Minute (PPM)<
 >QPH<==>Anfragen pro Stunde (QPH)<
 >Last<br/>Seen<==>Zuletzt<br/>Gesehen<
 >UTC</strong><br/>Offset<==>UTC</strong><br/>Abweichung<
@@ -3106,7 +3106,7 @@ value="add"==value="hinzufügen"
 Console Status==Konsolen Status
 Log-in as administrator to see full status==Als Administrator einloggen, für kompletten Status
 Welcome to YaCy!==Willkommen bei YaCy!
-Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!</strong>
+Your settings are _not_ protected!==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Bitte öffnen Sie die <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> <strong>sofort</strong>
 and set an administration password.==und geben Sie ein Administrator Passwort ein.
 You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
@@ -3449,6 +3449,21 @@ Threaddump<==Thread Dump<
 #"create Threaddump"=="Threaddump erstellen"
 #-----------------------------
 
+#File: Translator_p.html
+#---------------------------
+Translation Editor==Übersetzungseditor
+Translate untranslated text of the user interface (current language).==Ergänze fehlende Übersetzungen der Benutzeroberfläche (aktuell aktive Sprache).
+The modified translation file is stored in DATA/LOCALE directory.==Geänderte Übersetzungen werden im Verzeichnis DATA/LOCALE gespeichert.
+UI Translation==Übersetzung Benutzeroberfläche
+Target Language:==Zielsprache
+Source File==Quelldatei
+view it==Datei anzeigen
+filter untranslated==filter unübersetztes
+Source Text==Quelltext
+Translated Text==Übersetzung
+Save translation==Änderungen speichern
+#-----------------------------
+
 #File: User.html
 #---------------------------
 User Page==Benutzer Seite
@@ -3582,13 +3597,13 @@ delete vocabulary<==Lösche Vokabelliste<
 
 #File: WatchWebStructure_p.html
 #---------------------------
-Web Structure<==Webstruktur<
+Web Structure==Webstruktur
 The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
 To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
-API wiki page==API Seite im WikiWeb Structure==Netz Struktur
+API wiki page==API Seite im Wiki
 >Host List<==>Host Liste<
 >#[count]# outlinks==>#[count]# ausgehende Links
 host<==Host<
