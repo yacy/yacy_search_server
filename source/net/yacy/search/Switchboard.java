@@ -225,8 +225,6 @@ public final class Switchboard extends serverSwitch {
     public final static String SOLR_COLLECTION_CONFIGURATION_NAME = "solr.collection.schema";
     public final static String SOLR_WEBGRAPH_CONFIGURATION_NAME = "solr.webgraph.schema";
     
-    // load slots
-    public static int xstackCrawlSlots = 2000;
     public static long lastPPMUpdate = System.currentTimeMillis() - 30000;
     private static final int dhtMaxContainerCount = 500;
     private int dhtMaxReferenceCount = 1000;
@@ -235,8 +233,6 @@ public final class Switchboard extends serverSwitch {
     public static SortedSet<String> badwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> stopwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> blueList = null;
-//    public static HandleSet badwordHashes = null; // not used 2013-06-06
-//    public static HandleSet blueListHashes = null; // not used 2013-06-06
     public static SortedSet<byte[]> stopwordHashes = null;
     public static Blacklist urlBlacklist = null;
 
@@ -271,7 +267,6 @@ public final class Switchboard extends serverSwitch {
     public BookmarksDB bookmarksDB;
     public WebStructureGraph webStructure;
     public ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
-    public long indexedPages = 0;
     public int searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
     public int searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
     public float searchQueriesGlobal = 0f; // partial counter of remote queries (1/number-of-requested-peers)
@@ -655,7 +650,6 @@ public final class Switchboard extends serverSwitch {
             } else {
                 blueList = new TreeSet<String>();
             }
- //         blueListHashes = Word.words2hashesHandles(blueList);
             this.log.config("loaded blue-list from file "
                 + plasmaBlueListFile.getName()
                 + ", "
@@ -680,7 +674,6 @@ public final class Switchboard extends serverSwitch {
                 badwordsFile = new File(appPath, "defaults/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             }
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
-//          badwordHashes = Word.words2hashesHandles(badwords);
             this.log.config("loaded badwords from file "
                 + badwordsFile.getName()
                 + ", "
@@ -3043,9 +3036,6 @@ public final class Switchboard extends serverSwitch {
             UTF8.getBytes(this.peers.mySeed().hash), // executor peer hash
             processCase // process case
             );
-
-        // increment number of indexed urls
-        this.indexedPages++;
 
         // update profiling info
         if ( System.currentTimeMillis() - lastPPMUpdate > 20000 ) {
