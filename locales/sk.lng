@@ -1231,7 +1231,7 @@ This cache is very important for a fast search process.==Tato cache je velmi dol
 Increasing the cache size will result in more search results and less IO during DHT transfer.==Dosledok zvacsenie tejto cache je viac vysledkov vyhladavania a menej vstupno/vystupnej zataze pocas DHT prenosu.
 'noticed' URLs=='zname' URL adresy
 A noticed URL is one that was discovered during crawling but was not loaded yet.==Znama URL adresa je taka ktora bola objavena pocas crawlingu avsak nebola este nahrata.
-Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Erh&ouml;hen der Cachegr&ouml;&szlig;e resultiert in schnellerer R&uuml;ck&uuml;berpr&uuml;fung beim Durchf&uuml;hren von Crawls.
+#Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Erh&ouml;hen der Cachegr&ouml;&szlig;e resultiert in schnellerer R&uuml;ck&uuml;berpr&uuml;fung beim Durchf&uuml;hren von Crawls.
 'error' URLs=='chybne' URL adresy
 URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.==URL adresy ktore nemozu byt nahrante su ulozene v tejto databaze. Takisto sa pouziva pri dvojnasobnej kontrole pocas crawlingu. 
 Increasing the cache size will most probably speed up crawling slightly, but not significantly.==Zvacsenie tejto cache pravdepodobne jemne zvysi rychlost crawlingu, nie vsak o vela. 
@@ -1343,7 +1343,6 @@ Page.==stranke.
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-YaCy '#[clientname]#': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Rychly Crawl Link
 Quick Crawl Link==Rychly Crawl Link
 Quickly adding Bookmarks:==Rychly Crawl - Zalozky:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Kliknite na tahajte (drag and drop) odkaz nizsie do toolbar/linkbaru Vaseho browsera. 
@@ -1418,7 +1417,7 @@ Server Access Restrictions==Obmedzenia pristupu k serveru
 You can restrict the access to this proxy/server using a two-stage security barrier:==Pristup k tomuto proxy resp. HTTP serveru mozete obmedzit pouzitym 2-stupnovej bezpecnostnej bariery:
 define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards==zadajte <i>priestor sietovych domen</i> so zoznamom IP adries povolenych klientov alebo pomocou wildcard znakov 
 define an <i>user account</i> with an user:password - pair==vytvorte <i>uzivatelsky ucet</i> pomocou paru 'uzivatel:heslo'
-This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
+#This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
 You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Pravdepodobne nechcete na internete zielat Vase proxy, takze by ste mali zvolit IP adresovy priestor tak aby zodpovedal adresam Vaseho intranetu.
 The default setting should be right in most cases.==Predvolene nastavenia by mali byt vo vacsine pripadov spravne. 
 If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Ak chcete mozete tiez vytvorit proxy ucet, takze kazdy uzivatel proxy sa musi najprv prihlasit, co je vsak neobvykle riesenie.
@@ -1697,6 +1696,7 @@ from 'late' peers to enrich this search result.==z pomalych peerov na zlepsenie 
 #---------------------------
 System-, Index- and Peer-Status==Stav systemu, indexu a peera
 Welcome to YaCy!==Vitajte v YaCy!
+Your settings are _not_ protected!==Vase nastavenia _nie_su_ chranene heslom!
 "Restart"=="Restartuj"
 "Shutdown"=="Vypni"
 Public System Properties==Vseobecne systemove vlastnosti
@@ -1776,7 +1776,7 @@ Private System Properties==Sukromne systemove vlastnosti
 System Resources==Systemove zdroje
 Processors:==Procesory:
 Protection==Ochrana
-<b>Your settings are _not_ protected!</b> Please go to the==<b>Vase nastavenia _nie_su_ chranene heslom</b> Chodte prosim na 
+#<b>Your settings are _not_ protected!</b> Please go to the==<b>Vase nastavenia _nie_su_ chranene heslom</b> Chodte prosim na 
 settings</a> page <b>immediately</b> and set an administration password.==stranku nastaveni</a> a <b>ihned</b> si zvolte heslo.
 Your settings are protected by a password.==Vase nastavenia su chranene heslom.
 Peer host==Peer Host
