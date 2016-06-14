@@ -25,6 +25,7 @@ import java.util.Map;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -118,6 +119,15 @@ public class Translator_p {
                 }
                 if (changed) {
                     ctm.saveAsLngFile(langcfg, locallngfile, localTrans);
+                    // adhoc translate this file
+                    // 1. get/calc the path
+                    final String htRootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+                    final File sourceDir = new File(env.getAppPath(), htRootPath);
+                    final File destDir = new File(env.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), locallngfile.getName().substring(0, locallngfile.getName().length() - 4));// cut .lng
+                    // get absolute file by adding relative filename from translationlist
+                    final File sourceFile = new File(sourceDir, filename);
+                    final File destFile = new File(destDir, filename);
+                    ctm.translateFile(sourceFile, destFile, origTextList); // do the translation
                 }
             }
             prop.put("textlist", i);
