@@ -49,6 +49,7 @@ import java.util.Set;
 
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.SentenceReader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Seed;
@@ -71,34 +72,55 @@ public class Translator {
      * @param translationTable translation entries : text to translate -> translation
      * @return source translated
      */
-	public String translate(final StringBuilder source,
-			final Map<String, String> translationTable) {
-		final Set<Map.Entry<String, String>> entries = translationTable.entrySet();
-		StringBuilder builder = new StringBuilder(source);
-		for (final Entry<String, String> entry: entries) {
-			String key = entry.getKey();
-			/* We have to check key is not empty or indexOf would always return a positive value */
-			if (key != null && !key.isEmpty()) {
-				String translation = entry.getValue();
-				int index = builder.indexOf(key);
-				if (index < 0) {
-					// Filename not available, but it will be printed in Log
-					// after all untranslated Strings as "Translated file: "
-					if (ConcurrentLog.isFine("TRANSLATOR"))
-						ConcurrentLog.fine("TRANSLATOR", "Unused String: "
-								+ key);
-				} else {
-					while (index >= 0) {
-						builder.replace(index, index + key.length(),
-								translation);
-						index = builder.indexOf(key,
-								index + translation.length());
-					}
-				}
-			}
-		}
-		return builder.toString();
-	}
+    public String translate(final StringBuilder source,
+            final Map<String, String> translationTable) {
+        final Set<Map.Entry<String, String>> entries = translationTable.entrySet();
+        StringBuilder builder = new StringBuilder(source);
+        for (final Entry<String, String> entry : entries) {
+            String key = entry.getKey();
+            /* We have to check key is not empty or indexOf would always return a positive value */
+            if (key != null && !key.isEmpty()) {
+                String translation = entry.getValue();
+                int index = builder.indexOf(key);
+                if (index < 0) {
+                    // Filename not available, but it will be printed in Log
+                    // after all untranslated Strings as "Translated file: "
+                    if (ConcurrentLog.isFine("TRANSLATOR"))
+                        ConcurrentLog.fine("TRANSLATOR", "Unused String: " + key);
+                } else {
+                    while (index >= 0) {
+
+                        // check for word boundary before and after translation key
+                        // to avoid translation just on char sequence  e.g. as in  key="bug" source="mybugfix"
+                        boolean boundary = index + key.length() >= builder.length(); // eof text = end-bondary
+
+                        if (!boundary) {
+                            char c = builder.charAt(index + key.length() - 1);
+                            char lc = builder.charAt(index + key.length());
+                            boundary |= (SentenceReader.punctuation(c) || SentenceReader.invisible(c)); // special case, basically last char of key
+                            boundary |= (SentenceReader.punctuation(lc) || SentenceReader.invisible(lc)); // char after key = end-boundary
+                        }
+
+                        // if end-boundary ok check begin-boundary
+                        if (boundary && index > 0) {
+                            char c = builder.charAt(index - 1); // char before key = begin-boundary
+                            boundary = (SentenceReader.punctuation(c) || SentenceReader.invisible(c));
+                            char fc = builder.charAt(index); // special case for key >name< , currently to allow  <label>name</label (basically fist char of key)
+                            boundary |= (SentenceReader.punctuation(fc) || SentenceReader.invisible(fc));
+                        }
+
+                        if (boundary) { // boundary check ok -> translate
+                            builder.replace(index, index + key.length(), translation);
+                            index = builder.indexOf(key, index + translation.length());
+                        } else { // otherwise just skip to next occurence
+                            index = builder.indexOf(key, index + key.length());
+                        }
+                    }
+                }
+            }
+        }
+        return builder.toString();
+    }
 
     /**
      * Load multiple translationLists from one File. Each List starts with #File: relative/path/to/file
