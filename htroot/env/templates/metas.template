@@ -5,6 +5,9 @@
   <meta name="description" content="Software HTTP Freeware Home Page" />
   <meta name="copyright" content="Michael Christen et al." />
   
+  <!-- Ensure proper rendering and touch zooming on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
   <!-- Bootstrap core CSS -->
   <link href="/env/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="/env/bootstrap/css/bootstrap-switch.min.css" rel="stylesheet">
