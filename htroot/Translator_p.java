@@ -25,6 +25,7 @@ import java.util.Map;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -76,36 +77,46 @@ public class Translator_p {
 
                 i = 0;
                 boolean filteruntranslated = false;
+                boolean editapproved = false; // to switch already approved translation in edit mode
                 int textlistid = -1;
                 if (post != null) {
                     filteruntranslated = post.getBoolean("filteruntranslated");
-                    if (filteruntranslated) {
-                        prop.put("filter.checked", 1);
-                    } else {
-                        prop.put("filter.checked", 0);
-                    }
+                    prop.put("filter.checked", filteruntranslated); // remember filter setting
                     textlistid = post.getInt("approve", -1);
+                    if (post.containsKey("editapproved")) {
+                        textlistid = post.getInt("editapproved", -1);
+                        editapproved = true;
+                    }
                 }
                 boolean changed = false;
                 for (String sourcetext : origTextList.keySet()) {
                     String targettxt = origTextList.get(sourcetext);
                     boolean existinlocalTrans = localTrans.containsKey(filename) && localTrans.get(filename).containsKey(sourcetext);
+                    
+                    if (editapproved) existinlocalTrans |= (i == textlistid); // if edit of approved requested handle as/like existing in local to allow edit
+                    
                     if (targettxt == null || targettxt.isEmpty() || existinlocalTrans) {
                         prop.put("textlist_" + i + "_filteruntranslated", true);
                     } else if (filteruntranslated) {
                         continue;
                     }
+                    // handle (modified) input text
                     if (i == textlistid && post != null) {
-                        String t = post.get("targettxt" + Integer.toString(textlistid));
-                        // correct common partial html markup (part of text identification for words also used as html parameter)
-                        if (!t.isEmpty()) {
-                            if (sourcetext.startsWith(">") && !t.startsWith(">")) t=">"+t;
-                            if (sourcetext.endsWith("<") && !t.endsWith("<")) t=t+"<";
+                        if (editapproved) { // switch already translated in edit mode by copying to local translation
+                            // not saved here as not yet modified/approved
+                            ctm.addTranslation(localTrans, filename, sourcetext, targettxt);
+                        } else {
+                            String t = post.get("targettxt" + Integer.toString(textlistid));
+                            // correct common partial html markup (part of text identification for words also used as html parameter)
+                            if (!t.isEmpty()) {
+                                if (sourcetext.startsWith(">") && !t.startsWith(">")) t=">"+t;
+                                if (sourcetext.endsWith("<") && !t.endsWith("<")) t=t+"<";
+                            }
+                            targettxt = t;
+                            // add changes to original (for display) and local (for save)
+                            origTextList.put(sourcetext, targettxt);
+                            changed = ctm.addTranslation(localTrans, filename, sourcetext, targettxt);
                         }
-                        targettxt = t;
-                        // add changes to original (for display) and local (for save)
-                        origTextList.put(sourcetext, targettxt);
-                        changed = ctm.addTranslation (localTrans, filename, sourcetext, targettxt);
                     }
                     prop.putHTML("textlist_" + i + "_sourcetxt", sourcetext);
                     prop.putHTML("textlist_" + i + "_targettxt", targettxt);
@@ -118,6 +129,15 @@ public class Translator_p {
                 }
                 if (changed) {
                     ctm.saveAsLngFile(langcfg, locallngfile, localTrans);
+                    // adhoc translate this file
+                    // 1. get/calc the path
+                    final String htRootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+                    final File sourceDir = new File(env.getAppPath(), htRootPath);
+                    final File destDir = new File(env.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), locallngfile.getName().substring(0, locallngfile.getName().length() - 4));// cut .lng
+                    // get absolute file by adding relative filename from translationlist
+                    final File sourceFile = new File(sourceDir, filename);
+                    final File destFile = new File(destDir, filename);
+                    ctm.translateFile(sourceFile, destFile, origTextList); // do the translation
                 }
             }
             prop.put("textlist", i);

@@ -82,7 +82,7 @@ public class Translator {
             if (key != null && !key.isEmpty()) {
                 String translation = entry.getValue();
                 int index = builder.indexOf(key);
-                if (index < 0) {
+                if (index < 0 || translation == null ) {
                     // Filename not available, but it will be printed in Log
                     // after all untranslated Strings as "Translated file: "
                     if (ConcurrentLog.isFine("TRANSLATOR"))
