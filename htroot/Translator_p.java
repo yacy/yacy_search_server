@@ -62,10 +62,22 @@ public class Translator_p {
                     filename = post.get("sourcefile", filename);
                 }
 
+                // prepare filename list for drop-down list
                 Iterator<String> filenameit = origTrans.keySet().iterator();
-
+                final boolean filteruntranslated = post == null ? false : post.getBoolean("filteruntranslated");
                 while (filenameit.hasNext()) {
                     String tmp = filenameit.next();
+                    if (filteruntranslated) { // filter filenames with untranslated entries
+                        Map<String, String> tmptrans = origTrans.get(tmp);
+                        boolean hasuntrans = false;
+                        for (String x : tmptrans.values()) {
+                            if (x == null || x.isEmpty()) {
+                                hasuntrans = true;
+                                break;
+                            }
+                        }
+                        if (!hasuntrans) continue;
+                    }
                     prop.put("filelist_" + i + "_filename", tmp);
                     prop.put("filelist_" + i + "_selected", tmp.equals(filename));
                     i++;
@@ -76,11 +88,9 @@ public class Translator_p {
                 Map<String, String> origTextList = origTrans.get(filename);
 
                 i = 0;
-                boolean filteruntranslated = false;
                 boolean editapproved = false; // to switch already approved translation in edit mode
                 int textlistid = -1;
                 if (post != null) {
-                    filteruntranslated = post.getBoolean("filteruntranslated");
                     prop.put("filter.checked", filteruntranslated); // remember filter setting
                     textlistid = post.getInt("approve", -1);
                     if (post.containsKey("editapproved")) {
