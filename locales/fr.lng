@@ -37,7 +37,7 @@ not shared::shared==non partag&eacute;::partag&eacute;
 New list:==Nouvelle liste:
 "create"=="cr&eacute;er"
 Settings for this list==Param&egrave;tres de cette liste
-Save==Sauvegarder
+"Save"=="Sauvegarder"
 Share/don't share this list==Partager/ne pas partager cette liste
 Delete this list==Supprimer cette liste
 Edit this list==&eacute;diter cette liste
@@ -208,7 +208,7 @@ Your peer can be reached by other peers==Votre noeud est joignable par les autre
 Peer Port:==Port logiciel du noeud:
 with SSL==avec SSL
 (https enabled#==(https activ&eacute;#
-: on port <==: sur le port <
+on port==sur le port
 Configure your router for YaCy using UPnP:==Configurer votre routeur pour YaCy en utilisant UPnP:
 Configuration was not successful. This may take a moment.== &Eacute;chec de la configuration. Cela peut prendre un moment.
 Set Configuration==Sauver la configuration
@@ -230,7 +230,7 @@ You did not open a port in your firewall or your router does not forward the ser
 This is needed if you want to fully participate in the YaCy network.==Cela est n&eacute;cessaire pour participer pleinement au r&eacute;seau YaCy.
 You can also use your peer without opening it, but this is not recomended.==Vous pouvez aussi utiliser votre pair sans l'ouvrir, mais cela n'est pas recommand&eacute;.
 The peer port was changed successfully. Your browser will be redirected to the new ==Le port logiciel du noeud a &eacute;t&eacute; correctement modifi&eacute;. Votre navigateur sera redirig&eacute; vers la nouvelle 
-in 5 seconds.==dans 5 secondes
+in 5 seconds.==dans 5 secondes.
 #-----------------------------
 
 #File: ConfigLanguage_p.html
@@ -264,7 +264,7 @@ eMail==courriel
 #Yahoo!==Yahoo!
 #MSN==MSN
 Comment==Commentaire
-"Save"==Sauvegarder
+"Save"=="Sauvegarder"
 You can use==Vous pouvez utiliser
 here.==ici.
 #-----------------------------
@@ -291,8 +291,8 @@ Error saving the skin.==Erreur en sauvegardant le th&egrave;me.
 Release will be installed. Please wait.==La version va &ecirc;tre install&eacute;e. Veuillez patienter.
 This servlet can only be used on operation systems that are currently supported for deploy functions.==Cette servlet ne peut &ecirc;tre utilis&eacute;e que sur les syst&egrave;mes d'exploitation actuellement support&eacute;s pour les fonctions de d&eacute;ploiement.
 If you see this message this means that your operation system is not supported.==Si vous voyez ce message, &ccedil;a signifie que votre syst&egrave;me d'exploitation n'est pas support&eacute;.
->Manual System Update==>Mise &agrave; jour manuelle du syst&egrave;me
->Current installed Release==>Version actuellement install&eacute;e
+Manual System Update==Mise &agrave; jour manuelle du syst&egrave;me
+Current installed Release==Version actuellement install&eacute;e
 >Available Releases==>Versions disponibles
 >changelog<==>journal des changements<
 > and <==> et <
@@ -1083,6 +1083,11 @@ Attributes==Attributs
 "#(page)#::Process All News::Delete All News::Abort Publication of All News::Delete All News#(/page)#"==#(page)#::Traiter toutes les nouvelles::Supprimer toutes les nouvelles::Annuler la publication de toutes les nouvelles::Supprimer toutes les nouvelles#(/page)#
 #-----------------------------
 
+#File: Performance_p.html
+#---------------------------
+Performance Settings==Param&egrave;tres de performance
+#-----------------------------
+
 #File: PerformanceQueues_p.html
 #---------------------------
 Performance Settings of Queues and Processes==Param&egrave;tres de performance des files et des processus
@@ -1303,7 +1308,6 @@ Page.==page.
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-YaCy '#[clientname]#': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell-Crawl-Link
 Quick Crawl Link==Lien d'exploration rapide
 Quickly adding Bookmarks:==Ajouter rapidement aux favoris:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Il suffit de glisser le lien ci-dessous vers votre barre d'outils/barre de liens.
@@ -2249,6 +2253,12 @@ Advanced Properties==Configuration avanc&eacute;e
 Load Web Pages, Crawler==Charger des pages web, balayeur
 Site Crawling==Balayage de sites
 Parser Configuration==Configuration de l'analyseur syntaxique
+#-----------------------------
+
+#File: env/templates/submenuDesign.template
+#-----------------------------
+>Appearance==>Apparence
+>Language==>Langue
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
