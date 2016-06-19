@@ -177,7 +177,7 @@
         <pathelement location="${lib}/guava-18.0.jar" />
         <pathelement location="${lib}/htmllexer.jar" />
         <pathelement location="${lib}/httpclient-4.5.2.jar" />
-        <pathelement location="${lib}/httpcore-4.4.4.jar" />
+        <pathelement location="${lib}/httpcore-4.4.5.jar" />
         <pathelement location="${lib}/httpmime-4.5.2.jar" />
         <pathelement location="${lib}/icu4j-57_1.jar" />
     	<pathelement location="${lib}/imageio-bmp-3.2.1.jar" />
