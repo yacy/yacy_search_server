@@ -409,7 +409,8 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.18</version>
+            <version>1.7.21</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -434,7 +435,8 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.18</version>
+            <version>1.7.21</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
@@ -550,7 +552,8 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.18</version>
+            <version>1.7.21</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>pt.tumba</groupId>
