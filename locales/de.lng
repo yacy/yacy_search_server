@@ -131,7 +131,7 @@ Delete selected pattern(s)==Lösche gewählten Eintrag
 Move selected pattern(s) to==Verschiebe gewählten Eintrag zu
 #You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
 Add new pattern:==Neuen Eintrag hinzufügen:
-"Add URL pattern"=="URL hinzufügen"
+Add URL pattern==URL hinzufügen
 The right '*', after the '/', can be replaced by a==Der rechte Asterisk '*', nach dem '/', kann ersetzt werden durch einen
 >regular expression<==>regulären Ausdruck<
 domain.net/fullpath<==domain.de/vollerpfad<
@@ -447,7 +447,7 @@ Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreich
 Peer Port:==Peer-Port:
 with SSL== mit SSL
 https enabled==https aktiviert
- on port == auf Port 
+on port==auf Port
 Configure your router for YaCy using UPnP:==Ihren Router für YaCy konfigurieren, via UPnP:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern
@@ -557,6 +557,8 @@ Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu ins
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
 might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+Simple Editor==Einfacher Editor
+to add untranslated text==zum bearbeiten unübersetzter Texte
 #-----------------------------
 
 #File: ConfigLiveSearch.html
@@ -1059,7 +1061,7 @@ Load<==Auslastung<
 
 #File: CrawlProfileEditor_p.html
 #---------------------------
->Crawl Profile Editor<==>Crawl Profil Editor<
+Crawl Profile Editor==Crawl Profil Editor
 >Crawler Steering<==>Crawler Steuerung<
 >Crawl Scheduler<==>Crawl Planer<
 >Scheduled Crawls can be modified in this table<==>Geplante Crawls können in dieser Tabelle geändert werden<
@@ -1184,7 +1186,7 @@ Other already visited URLs are sorted out as "double", if they are not allowed u
 
 
 >From Link-List of URL<==>Von Linkliste der URL<
-From Sitemap<==Von Sitemap<
+From Sitemap==Von Sitemap
 From File (enter a path<br/>within your local file system)==Von Datei (Verwende Pfad einer Datei<br/>auf dem lokalen Dateisystem)
 
 A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl führt eine Dubletten Prüfung anhand einer internen Datenbank gegen alle im Internet gefunden Links durch. Wenn dieselbe URL wieder gefunden wird,
@@ -2828,6 +2830,7 @@ Message Forwarding (optional)==Nachrichten Weiterleitung (optional)
 
 #File: Settings_Crawler.inc
 #---------------------------
+>Crawler Settings<==>Crawler Einstellungen<
 Generic Crawler Settings==Allgemeine Crawler Einstellungen
 Connection timeout in ms==Verbindungs-Timeout in ms
 means unlimited==schaltet die Begrenzung ab
@@ -3938,7 +3941,7 @@ DHT Transfer==DHT-Verteilung
 Proxy Use==Proxy Benutzung
 Local Crawling</a>==Lokales Crawlen</a>
 Global Crawling</a>==Globales Crawlen</a>
-Surrogate Import</a>==Surrogat Import</a>
+Surrogate Import==Surrogat Import
 Processing Monitor==Prozess Monitor
 Loader<==Lade Puffer<
 Rejected URLs==Abgelehnte URLs
@@ -3962,7 +3965,7 @@ Parser Configuration==Parser Konfiguration
 #-----------------------------
 >Appearance==>Erscheinungsbild
 >Language==>Sprache
->Search Page Layout==>Suchseitenlayout
+Search Page Layout==Suchseitenlayout
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
