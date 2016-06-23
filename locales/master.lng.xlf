@@ -1587,9 +1587,6 @@
     <trans-unit id="bfcc5088" xml:space="preserve" approved="no" translate="yes">
        <source>"Submit"</source>
     </trans-unit>
-    <trans-unit id="fda7badd" xml:space="preserve" approved="no" translate="yes">
-       <source>http://www.iana.org/assignments/media-types/&lt;/a&gt;</source>
-    </trans-unit>
   </body>
 </file>
 
@@ -2117,6 +2114,9 @@
     <trans-unit id="5d032a67" xml:space="preserve" approved="no" translate="yes">
        <source>Release will be installed. Please wait.</source>
     </trans-unit>
+    <trans-unit id="3c7a4df9" xml:space="preserve" approved="no" translate="yes">
+       <source>You installed YaCy with a package manager.</source>
+    </trans-unit>    
     <trans-unit id="20240fb3" xml:space="preserve" approved="no" translate="yes">
        <source>To update YaCy, use the package manager:</source>
     </trans-unit>
@@ -2191,9 +2191,6 @@
     </trans-unit>
     <trans-unit id="8713e5b1" xml:space="preserve" approved="no" translate="yes">
        <source>Last Deploy</source>
-    </trans-unit>
-    <trans-unit id="3c7a4df9" xml:space="preserve" approved="no" translate="yes">
-       <source>You installed YaCy with a package manager.</source>
     </trans-unit>
   </body>
 </file>
@@ -6752,10 +6749,19 @@
     </trans-unit>
     <trans-unit id="c6803af7" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Boost Query"</source>
-    </trans-unit>
+    </trans-unit>    
     <trans-unit id="c50afe39" xml:space="preserve" approved="no" translate="yes">
        <source>field not in local index (boost has no effect)</source>
     </trans-unit>
+    <trans-unit id="ebe8bd4e" xml:space="preserve" approved="no" translate="yes">
+       <source>You can boost with vocabularies, use the field</source>
+    </trans-unit>
+    <trans-unit id="369809bc" xml:space="preserve" approved="no" translate="yes">
+       <source>with values</source>
+    </trans-unit>    
+    <trans-unit id="abdacdba" xml:space="preserve" approved="no" translate="yes">
+       <source>You can also boost on logarithmic occurrence counters of the fields</source>
+    </trans-unit>    
     <trans-unit id="af04244c" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Field Boosts"</source>
     </trans-unit>
@@ -8657,9 +8663,6 @@
   <body>
     <trans-unit id="a444325e" xml:space="preserve" approved="no" translate="yes">
        <source>See the page info about the url.</source>
-    </trans-unit>
-    <trans-unit id="700fabc1" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy '#[clientname]#': View URL Content</source>
     </trans-unit>
     <trans-unit id="df784dad" xml:space="preserve" approved="no" translate="yes">
        <source>View URL Content</source>
