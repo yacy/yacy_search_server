@@ -42,7 +42,7 @@ public class WikiCodeTest {
             "== Header ==", "==Header=="};
 
         String[] nohdrTeststr = new String[]{ // wrong test header
-            "Text of = Header =", "One=Two"};
+            "Text of = Header, false = wrong", "One=Two"};
 
         WikiCode wc = new WikiCode();
 
