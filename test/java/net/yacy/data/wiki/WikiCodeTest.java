@@ -1,5 +1,6 @@
 package net.yacy.data.wiki;
 
+import java.io.BufferedReader;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -32,4 +33,26 @@ public class WikiCodeTest {
         }
     }
 
+    /**
+     * test header wiki markup
+     */
+    @Test
+    public void testProcessLineOfWikiCode() {
+        String[] hdrTeststr = new String[]{ // ok test header
+            "== Header ==", "==Header=="};
+
+        String[] nohdrTeststr = new String[]{ // wrong test header
+            "Text of = Header =", "One=Two"};
+
+        WikiCode wc = new WikiCode();
+
+        for (String s : hdrTeststr) { // test ok header
+            String erg = wc.transform("8090", s);
+            assertTrue("<h2> tag expected:"+erg, erg.contains("<h2>"));
+        }
+        for (String s : nohdrTeststr) { // test wrong header
+            String erg = wc.transform("8090", s);
+            assertFalse("no header tag expected:"+erg, erg.contains("<h1>"));
+        }
+    }
 }
