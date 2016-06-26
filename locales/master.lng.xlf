@@ -5515,12 +5515,9 @@
 
 <file original="Network.html"  source-language="en"  datatype="html">
   <body>
-    <trans-unit id="3e587bc4" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy '#[clientname]#': YaCy Search Network</source>
-    </trans-unit>
-    <trans-unit id="3024b1ff" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy Search Network '#[networkName]#'</source>
-    </trans-unit>
+    <trans-unit id="ff8b8258" xml:space="preserve" approved="no" translate="yes">
+       <source>YaCy Search Network</source>
+    </trans-unit>      
     <trans-unit id="1f205c10" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy Network&lt;</source>
     </trans-unit>
@@ -5811,9 +5808,6 @@
     </trans-unit>
     <trans-unit id="b5434abc" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;DHT-in&lt;</source>
-    </trans-unit>
-    <trans-unit id="ff8b8258" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy Search Network</source>
     </trans-unit>
     <trans-unit id="31955db0" xml:space="preserve" approved="no" translate="yes">
        <source>Count of Connected Senior Peers</source>
