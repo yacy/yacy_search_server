@@ -517,6 +517,7 @@ public final class FileUtils {
 
     /**
      * Read lines of a file into an ArrayList.
+     * Empty lines in the file are ignored.
      *
      * @param listFile the file
      * @return the resulting array as an ArrayList
@@ -529,7 +530,7 @@ public final class FileUtils {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile), StandardCharsets.UTF_8));
 
             while ( (line = br.readLine()) != null ) {
-                list.add(line);
+                if (!line.isEmpty()) list.add(line);
             }
             br.close();
         } catch (final IOException e ) {
@@ -576,6 +577,7 @@ public final class FileUtils {
 
     /**
      * Read lines of a text file into a String, optionally ignoring comments.
+     * Empty lines are always ignored.
      *
      * @param listFile the File to read from.
      * @param withcomments If <code>false</code> ignore lines starting with '#'.
