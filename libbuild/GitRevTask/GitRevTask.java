@@ -79,7 +79,7 @@ public class GitRevTask extends org.apache.tools.ant.Task {
 						break;
 					}
 				}
-				if (lastTag != null || distance++ > 999) break;
+				if (lastTag != null || distance++ > 90999) break;
 			}
 			walk.dispose();
 			if (lastTag == null) {
