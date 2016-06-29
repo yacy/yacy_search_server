@@ -1069,7 +1069,7 @@ Network Scanner==网络扫描器
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy可扫描http, ftp 和smb服务器.
 You must first select a IP range and then, after this range is scanned,==须先指定IP范围, 再进行扫描,
 it is possible to select servers that had been found for a full-site crawl.==才有可能选择主机并将其作为全站crawl的服务器.
-No servers had been detected in the given IP range #[iprange]#. 
+#No servers had been detected in the given IP range== 
 Please enter a different IP range for another scan.==未检测到可用服务器, 请重新指定IP范围.
 Please wait...==请稍候...
 >Scan the network<==>扫描网络<
@@ -2952,7 +2952,6 @@ New Password is empty.==新密码为空.
 
 #File: ViewFile.html
 #---------------------------
-YaCy '#[clientname]#': View URL Content==YaCy '#[clientname]#': 查看文件内容
 View URL Content==查看链接内容
 >Get URL Viewer<==>获取链接浏览器<
 >URL Metadata<==>链接元数据<

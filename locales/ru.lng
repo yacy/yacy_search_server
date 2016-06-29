@@ -1460,7 +1460,7 @@ Network Scanner==Сканер сети
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy может сканировать такие сегменты сети как http-, ftp- и smb-серверы .
 You must first select a IP range and then, after this range is scanned,==Сначала вы должны выбрать диапазон IP-адресов, а затем диапазон сканирования.
 it is possible to select servers that had been found for a full-site crawl.==После этого можно выбрать серверы для полного индексирования сайта.
-No servers had been detected in the given IP range #[iprange]#.==Серверы не обнаружены в заданном диапазоне IP-адресов. 
+No servers had been detected in the given IP range==Серверы не обнаружены в заданном диапазоне IP-адресов 
 Please enter a different IP range for another scan.==Пожалуйста, введите другой диапазон IP-адресов, для повторного сканирования.
 Please wait...==Пожалуйста, подождите...
 >Scan the network<==>Сканирование сети<

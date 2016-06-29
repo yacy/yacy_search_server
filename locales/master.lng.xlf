@@ -3294,8 +3294,8 @@
     <trans-unit id="e82c07f9" xml:space="preserve" approved="no" translate="yes">
        <source>it is possible to select servers that had been found for a full-site crawl.</source>
     </trans-unit>
-    <trans-unit id="ede81ac7" xml:space="preserve" approved="no" translate="yes">
-       <source>No servers had been detected in the given IP range #[iprange]#.</source>
+    <trans-unit id="9ad86623" xml:space="preserve" approved="no" translate="yes">
+       <source>No servers had been detected in the given IP range</source>
     </trans-unit>
     <trans-unit id="c8005605" xml:space="preserve" approved="no" translate="yes">
        <source>Please enter a different IP range for another scan.</source>
