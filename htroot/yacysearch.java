@@ -60,9 +60,7 @@ import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
-import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.Parser;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
@@ -73,7 +71,6 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -195,6 +192,7 @@ public class yacysearch {
             prop.put("geoinfo", "0");
             prop.put("rss_queryenc", "");
             prop.put("meanCount", 5);
+            prop.put("eventID",""); // mandatory parameter for yacysearchtrailer/yacysearchitem includes
             return prop;
         }
 
