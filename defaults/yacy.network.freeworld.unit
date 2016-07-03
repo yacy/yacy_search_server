@@ -65,6 +65,7 @@ network.unit.bootstrap.seedlist6 = http://fennec.cx/yacy/seed.txt
 network.unit.bootstrap.seedlist7 = http://freenode.homeunix.org/yacy/seed.txt
 network.unit.bootstrap.seedlist8 = http://yacy.tschability.ch/seed.txt
 network.unit.bootstrap.seedlist9 = http://xz1.nl/yacy/seed.txt
+network.unit.bootstrap.seedlist10 = http://gw.knyshov.net/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
