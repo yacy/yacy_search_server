@@ -327,9 +327,6 @@ search.BlackLists=url.default.black
 surftips.BlackLists=url.default.black
 news.BlackLists=url.default.black
 
-proxyCookieBlackList=cookie.default.black
-proxyCookieWhiteList=cookie.default.black
-
 # the blue-list; 
 # no search result is locally presented that has any word of the bluelist
 # in the search words, the URL or the URL's description
@@ -664,10 +661,7 @@ collection=user
 730_ccfilter_busysleep=1000
 730_ccfilter_memprereq=1048576
 730_ccfilter_loadprereq=8.0
-80_searchresult_idlesleep=10000
-80_searchresult_busysleep=200
-80_searchresult_memprereq=0
-80_searchresult_loadprereq=2.0
+
 85_scheduler_idlesleep=60000
 85_scheduler_busysleep=60000
 85_scheduler_memprereq=1048576
@@ -1004,6 +998,9 @@ httpc.nameCacheNoCachingPatterns = .*.ath.cx,.*.blogdns.*,.*.boldlygoingnowhere.
 #squid Redirector compatible
 externalRedirector=
 
+# the Yacy Version this config was created with
+Version=
+# old version value (keep to allow conversion of .conf, until next main releas > 1.83)
 svnRevision=0
 
 currentSkin=pdbootstrap
@@ -1039,7 +1036,7 @@ search.ranking.rwi.profile =
 search.ranking.solr.collection.boostname.tmpa.0=Default Profile
 search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,keywords^2.0,description_txt^1.5,author^1.0
 search.ranking.solr.collection.filterquery.tmpa.0=
-search.ranking.solr.collection.boostquery.tmpa.0=crawldepth_i:0^0.8 crawldepth_i:1^0.4
+search.ranking.solr.collection.boostquery.tmpa.0=crawldepth_i:0^0.8\ncrawldepth_i:1^0.4
 search.ranking.solr.collection.boostfunction.tmpb.0=
 search.ranking.solr.collection.boostname.tmpa.1=Date Profile: sort by date in descending order for a '/date' usage
 search.ranking.solr.collection.boostfields.tmpa.1=url_paths_sxt^0.1,title^0.1,text_t^0.1
@@ -1054,7 +1051,7 @@ search.ranking.solr.collection.boostfunction.tmpb.2=
 search.ranking.solr.collection.boostname.tmpa.3=_unused3
 search.ranking.solr.collection.boostfields.tmpa.3=text_t^1.0
 search.ranking.solr.collection.filterquery.tmpa.3=
-search.ranking.solr.collection.boostquery.tmpa.3=crawldepth_i:0^0.8 crawldepth_i:1^0.4
+search.ranking.solr.collection.boostquery.tmpa.3=crawldepth_i:0^0.8\ncrawldepth_i:1^0.4
 search.ranking.solr.collection.boostfunction.tmpb.3=
 
 # the following values are used to identify duplicate content

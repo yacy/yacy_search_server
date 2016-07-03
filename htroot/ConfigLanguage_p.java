@@ -29,11 +29,12 @@
 //javac -classpath .:../Classes Blacklist_p.java
 //if the shell's current path is HTROOT
 
-import java.io.BufferedWriter;
+import com.google.common.io.Files;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +49,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
+import net.yacy.utils.translation.TranslatorXliff;
 
 
 public class ConfigLanguage_p {
@@ -80,7 +82,7 @@ public class ConfigLanguage_p {
                  * directory traversal attacks!
                  */
                 if (langFiles.contains(selectedLanguage) || selectedLanguage.startsWith("default")) {
-                    Translator.changeLang(env, langPath, selectedLanguage);
+                    new TranslatorXliff().changeLang(env, langPath, selectedLanguage);
                 }
 
                 //delete language file
@@ -93,6 +95,7 @@ public class ConfigLanguage_p {
                 if (langFiles.contains(selectedLanguage)) {
                     final File langfile= new File(langPath, selectedLanguage);
                     FileUtils.deletedelete(langfile);
+                    new TranslatorXliff().getScratchFile(langfile).delete();
                 }
 
                 //load language file from URL
@@ -102,25 +105,33 @@ public class ConfigLanguage_p {
                 try {
                     final DigestURL u = new DigestURL(url);
                     it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, null, null));
+                    try {
+                        TranslatorXliff tx = new TranslatorXliff();
+                        File langFile = tx.getScratchFile(new File(langPath, u.getFileName()));
+                        final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
+
+                        while (it.hasNext()) {
+                            bw.write(it.next() + "\n");
+                        }
+                        bw.close();
+                        
+                        // convert downloaded xliff to internal lng file
+                        final String ext = Files.getFileExtension(langFile.getName());
+                        if (ext.equalsIgnoreCase("xlf") || ext.equalsIgnoreCase("xliff")) {
+                            Map<String,Map<String,String>> lng = tx.loadTranslationsListsFromXliff(langFile);
+                            langFile = new File(langPath, Files.getNameWithoutExtension(langFile.getName())+".lng");
+                            tx.saveAsLngFile(null, langFile, lng);
+                        }
+                        
+                        if (post.containsKey("use_lang") && "on".equals(post.get("use_lang"))) {
+                            tx.changeLang(env, langPath, langFile.getName());
+                        }
+                    } catch (final IOException e) {
+                        prop.put("status", "2");//error saving the language file
+                    }
                 } catch(final IOException e) {
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);
-                    return prop;
-                }
-                try {
-                    final File langFile = new File(langPath, url.substring(url.lastIndexOf('/'), url.length()));
-                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(langFile)));
-
-                    while (it.hasNext()) {
-                        bw.write(it.next() + "\n");
-                    }
-                    bw.close();
-                } catch(final IOException e) {
-                    prop.put("status", "2");//error saving the language file
-                    return prop;
-                }
-                if (post.containsKey("use_lang") && "on".equals(post.get("use_lang"))) {
-                    Translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
         }

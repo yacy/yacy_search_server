@@ -39,7 +39,6 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -88,7 +87,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String documentCharset,
             final VocabularyScraper vocscraper,
@@ -382,9 +381,9 @@ public class htmlParser extends AbstractParser implements Parser {
 
     public static void main(final String[] args) {
         // test parsing of a url
-        AnchorURL url;
+        DigestURL url;
         try {
-            url = new AnchorURL(args[0]);
+            url = new DigestURL(args[0]);
             final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent, null, null);
             final Document[] document = new htmlParser().parse(url, "text/html", StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();

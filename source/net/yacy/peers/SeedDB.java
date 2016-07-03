@@ -212,6 +212,9 @@ public final class SeedDB implements AlternativeDomainNames {
         }
         this.mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
         this.mySeed.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // markup startup condition
+
+        String jre = System.getProperty("java.version");
+        this.mySeed.put(Seed.JRE, jre);
     }
 
     public int redundancy() {
@@ -552,10 +555,18 @@ public final class SeedDB implements AlternativeDomainNames {
         }
         return new Seed(hash, entry);
     }
-    
+
+    /**
+     * Get seed denoted by hash from the given database.
+     * If hash equals own peers hash, the own seed is returned
+     * !(regardless if included in given database)
+     * @param hash
+     * @param database
+     * @return seed with hash or null
+     */
     private Seed get(final byte[] hash, final MapDataMining database) {
         if (hash == null || hash.length == 0) return null;
-        if ((this.mySeed != null) && (hash.equals(this.mySeed.hash))) return this.mySeed;
+        if ((this.mySeed != null) && (ASCII.String(hash).equals(this.mySeed.hash))) return this.mySeed;
         final ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
         try {
             final Map<String, String> map = database.get(hash);

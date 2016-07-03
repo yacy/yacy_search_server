@@ -69,7 +69,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.InvalidURLLicenceException;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
-import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.Seed;
@@ -89,7 +88,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
@@ -149,7 +147,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
     // settings for multipart/form-data
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
-    protected static final int SIZE_FILE_THRESHOLD = 100 * 1024 * 1024; // 100 MB is a lot but appropriate for multi-document pushed using the push_p.json servlet
+    protected static final int SIZE_FILE_THRESHOLD = 1024 * 1024 * 1024; // 1GB is a lot but appropriate for multi-document pushed using the push_p.json servlet
     protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
     private final static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool());
     /* ------------------------------------------------------------ */
@@ -664,8 +662,27 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
 
+    /**
+     * Convert ServletRequest header to YaCy RequestHeader
+     * @param request ServletRequest
+     * @return RequestHeader created from ServletRequest
+     */
+    public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
+        RequestHeader result = new RequestHeader();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            Enumeration<String> headers = request.getHeaders(headerName);
+            while (headers.hasMoreElements()) {
+                String header = headers.nextElement();
+                result.add(headerName, header);
+            }
+        }
+        return result;
+    }
+
     protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
+        RequestHeader legacyRequestHeader = convertHeaderFromJetty(request);
 
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
@@ -1128,8 +1145,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
             }
             if (files.size() <= 1) { // TODO: should include additonal checks to limit parameter.size below rel. large SIZE_FILE_THRESHOLD
-                for (Map.Entry<String, byte[]> fe: files) { // add the file content to parameter fieldname$file
-                    args.put(fe.getKey()+"$file", (fe.getValue()));
+                for (Map.Entry<String, byte[]> job: files) { // add the file content to parameter fieldname$file
+                    String n = job.getKey();
+                    byte[] v = job.getValue();
+                    String filename = args.get(n);
+                    if (filename != null && filename.endsWith(".gz")) {
+                        // transform this value into base64
+                        String b64 = Base64Order.standardCoder.encode(v);
+                        args.put(n + "$file", b64);
+                        args.remove(n);
+                        args.put(n, filename + ".base64");
+                    } else {
+                        args.put(n + "$file", v); // the byte[] is transformed into UTF8. You cannot push binaries here
+                    }
                 }
             } else {
                 // do this concurrently (this would all be superfluous if serverObjects could store byte[] instead only String)
@@ -1143,8 +1171,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         public void run() {
                             Map.Entry<String, byte[]> job;
                             try {while ((job = files.take()) != POISON) {
-                                String b64 = Base64Order.standardCoder.encode(job.getValue());
-                                synchronized (args) {args.put(job.getKey(), b64);}
+                                String n = job.getKey();
+                                byte[] v = job.getValue();
+                                String filename = args.get(n);
+                                String b64 = Base64Order.standardCoder.encode(v);
+                                synchronized (args) {
+                                    args.put(n + "$file", b64);
+                                    args.remove(n);
+                                    args.put(n, filename + ".base64");
+                                }
                             }} catch (InterruptedException e) {}
                         }
                     };

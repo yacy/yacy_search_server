@@ -46,7 +46,6 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.http.Jetty9HttpServerImpl;
@@ -65,7 +64,9 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.peers.Seed;
 import net.yacy.server.serverSwitch;
+import net.yacy.utils.translation.TranslatorXliff;
 
 
 /**
@@ -114,6 +115,10 @@ public final class yacy {
     public static final String hline = "-------------------------------------------------------------------------------";
     public static final Semaphore shutdownSemaphore = new Semaphore(0);
 
+    public static File htDocsPath = null;
+    public static File shareDefaultPath = null;
+    public static File shareDumpDefaultPath = null;
+    
     /**
      * a reference to the {@link Switchboard} created by the
      * {@link yacy#startup(String, long, long)} method.
@@ -230,21 +235,32 @@ public final class yacy {
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
 
-            int oldRev;
+            double oldVer;
     	    try {
-                oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
+                String tmpversion = sb.getConfig(Seed.VERSION, "");
+                if (tmpversion.isEmpty()) { // before 1.83009737 only the svnRevision nr was in config (like 9737)
+                    tmpversion = yacyBuildProperties.getVersion();
+                    int oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
+                    if (oldRev > 1) {                       
+                        oldVer = Double.parseDouble(tmpversion) + oldRev / 100000000.0;
+                    } else {
+                        oldVer = Double.parseDouble(yacyBuildProperties.getLongVersion()); // failsafe (assume current version = no migration)
+                    }
+                } else {
+                    oldVer = Double.parseDouble(tmpversion);
+                }
             } catch (final NumberFormatException e) {
-                oldRev = 0;
+                oldVer = 0.0d;
     	    }
-            final int newRev = Integer.parseInt(yacyBuildProperties.getSVNRevision());
-            sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
+            final double newRev = Double.parseDouble(yacyBuildProperties.getLongVersion());
+            sb.setConfig(Seed.VERSION, yacyBuildProperties.getLongVersion());
             sb.setConfig("applicationRoot", appHome.toString());
             sb.setConfig("dataRoot", dataHome.toString());
 
             // create some directories
             final File htRootPath = new File(appHome, sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
             mkdirIfNeseccary(htRootPath);
-            final File htDocsPath = sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
+            htDocsPath = sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
@@ -287,10 +303,12 @@ public final class yacy {
                         System.out.println("Error creating htdocs readme: " + e.getMessage());
                     }
 
-            final File shareDefaultPath = new File(htDocsPath, "share");
+            shareDefaultPath = new File(htDocsPath, "share");
             mkdirIfNeseccary(shareDefaultPath);
+            shareDumpDefaultPath = new File(shareDefaultPath, "dump");
+            mkdirIfNeseccary(shareDumpDefaultPath);
 
-            migration.migrate(sb, oldRev, newRev);
+            migration.migrate(sb, oldVer, newRev);
 
             // delete old release files
             final int deleteOldDownloadsAfterDays = (int) sb.getConfigLong("update.deleteOld", 30);
@@ -332,22 +350,22 @@ public final class yacy {
                 final File locale_source = sb.getAppPath("locale.source", "locales");
                 final String lang = sb.getConfig("locale.language", "");
                 if (!lang.equals("") && !lang.equals("default")) { //locale is used
-                    String currentRev = "";
+                    String currentRev = null;
                     try{
                         final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
-                        currentRev = br.readLine();
+                        currentRev = br.readLine(); // may return null
                         br.close();
                     }catch(final IOException e){
                         //Error
                     }
 
-                    if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
+                    if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) try { //is this another version?!
                         final File sourceDir = new File(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                         final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
-                        if (Translator.translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
+                        if (new TranslatorXliff().translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
                             //write the new Versionnumber
                             final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                            bw.write(sb.getConfig("svnRevision", "Error getting Version"));
+                            bw.write(sb.getConfig(Seed.VERSION, "Error getting Version"));
                             bw.close();
                         }
                     } catch (final IOException e) {}

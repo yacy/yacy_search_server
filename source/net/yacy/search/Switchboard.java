@@ -225,8 +225,6 @@ public final class Switchboard extends serverSwitch {
     public final static String SOLR_COLLECTION_CONFIGURATION_NAME = "solr.collection.schema";
     public final static String SOLR_WEBGRAPH_CONFIGURATION_NAME = "solr.webgraph.schema";
     
-    // load slots
-    public static int xstackCrawlSlots = 2000;
     public static long lastPPMUpdate = System.currentTimeMillis() - 30000;
     private static final int dhtMaxContainerCount = 500;
     private int dhtMaxReferenceCount = 1000;
@@ -235,8 +233,6 @@ public final class Switchboard extends serverSwitch {
     public static SortedSet<String> badwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> stopwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> blueList = null;
-//    public static HandleSet badwordHashes = null; // not used 2013-06-06
-//    public static HandleSet blueListHashes = null; // not used 2013-06-06
     public static SortedSet<byte[]> stopwordHashes = null;
     public static Blacklist urlBlacklist = null;
 
@@ -271,7 +267,6 @@ public final class Switchboard extends serverSwitch {
     public BookmarksDB bookmarksDB;
     public WebStructureGraph webStructure;
     public ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
-    public long indexedPages = 0;
     public int searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
     public int searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
     public float searchQueriesGlobal = 0f; // partial counter of remote queries (1/number-of-requested-peers)
@@ -279,7 +274,7 @@ public final class Switchboard extends serverSwitch {
     public List<Pattern> networkWhitelist, networkBlacklist;
     public FilterEngine domainList;
     private Dispatcher dhtDispatcher;
-    public LinkedBlockingQueue<String> trail;
+    public LinkedBlockingQueue<String> trail; // connect infos from cytag servlet
     public SeedDB peers;
     public WorkTables tables;
     public Tray tray;
@@ -537,6 +532,7 @@ public final class Switchboard extends serverSwitch {
                 bf.equals("scale(cr_host_norm_i,1,20)")) bf = "";
             if (bf.equals("recip(rord(last_modified),1,1000,1000))")) bf = "recip(ms(NOW,last_modified),3.16e-11,1,1)"; // that was an outdated date boost that did not work well
             if (i == 0 && bq.equals("fuzzy_signature_unique_b:true^100000.0")) bq = "crawldepth_i:0^0.8 crawldepth_i:1^0.4";
+            if (bq.equals("crawldepth_i:0^0.8 crawldepth_i:1^0.4")) bq = "crawldepth_i:0^0.8\ncrawldepth_i:1^0.4"; // Fix issue with multiple Boost Queries
             if (boosts.equals("url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0")) boosts = "url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^2.0";
             r.setName(name);
             r.updateBoosts(boosts);
@@ -611,7 +607,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // create a crawler
-        this.crawler = new CrawlSwitchboard(networkName, this);
+        this.crawler = new CrawlSwitchboard(this);
 
         // start yacy core
         this.log.config("Starting YaCy Protocol Core");
@@ -654,7 +650,6 @@ public final class Switchboard extends serverSwitch {
             } else {
                 blueList = new TreeSet<String>();
             }
- //         blueListHashes = Word.words2hashesHandles(blueList);
             this.log.config("loaded blue-list from file "
                 + plasmaBlueListFile.getName()
                 + ", "
@@ -679,7 +674,6 @@ public final class Switchboard extends serverSwitch {
                 badwordsFile = new File(appPath, "defaults/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             }
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
-//          badwordHashes = Word.words2hashesHandles(badwords);
             this.log.config("loaded badwords from file "
                 + badwordsFile.getName()
                 + ", "
@@ -1404,7 +1398,7 @@ public final class Switchboard extends serverSwitch {
 
             // create a crawler
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
-            this.crawler = new CrawlSwitchboard(networkName, this);
+            this.crawler = new CrawlSwitchboard(this);
 
             // init a DHT transmission dispatcher
             this.dhtDispatcher =
@@ -1675,9 +1669,8 @@ public final class Switchboard extends serverSwitch {
         // we need to take care that search requests and remote indexing requests go only
         // to the peers in the same cluster, if we run a robinson cluster.
         return (this.peers != null && this.peers.sizeConnected() == 0)
-            || (!getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, false) && !getConfigBool(
-                SwitchboardConstants.INDEX_RECEIVE_ALLOW,
-                false));
+            || (!getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, false) &&
+                !getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
     }
 
     public boolean isPublicRobinson() {
@@ -2168,10 +2161,6 @@ public final class Switchboard extends serverSwitch {
         }
         return false;
     }
-
-    public void searchresultFreeMem() {
-        // do nothing
-    }
     
     public static void clearCaches() {
         // flush caches in used libraries
@@ -2544,20 +2533,6 @@ public final class Switchboard extends serverSwitch {
                 boolean postprocessing = process_key_exist && reference_index_exist && minimum_ram_fullfilled && minimum_load_fullfilled;
                 if (!postprocessing) log.info("postprocessing deactivated: constraints violated");
 
-                // Hack to prevent Solr problem on partial update if target document contains multivalued date field
-                // regardless if this field is part of the update it causes a org.apache.solr.common.SolrException: Invalid Date String Exception.
-                // 2015-09-12 Solr v5.2.1 & v5.3
-                // this hack switches partial update off (if multivalued datefield _dts exists, like: dates_in_content_dts startDates_dts endDates_dts)
-                boolean partialUpdate = getConfigBool("postprocessing.partialUpdate", true);
-
-                /* Solr 5.4.0 bugfix see http://issues.apache.org/jira/browse/SOLR-8050 Partial update on document with multivalued date field fails
-                *
-                for (String sf : index.fulltext().getDefaultConfiguration().keySet()) {
-                    if (sf.endsWith("_dts")) {
-                        partialUpdate = false;
-                    }
-                }
-                */
                 if (allCrawlsFinished) {
                     // refresh the search cache
                     SearchEventCache.cleanupEvents(true);
@@ -2566,7 +2541,7 @@ public final class Switchboard extends serverSwitch {
                     if (postprocessing) {
                         // run postprocessing on all profiles
                         ReferenceReportCache rrCache = index.getReferenceReportCache();
-                        proccount += collection1Configuration.postprocessing(index, rrCache, null, partialUpdate);
+                        proccount += collection1Configuration.postprocessing(index, rrCache, null, getConfigBool("postprocessing.partialUpdate", true));
                         this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                     }
                     this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
@@ -2579,7 +2554,7 @@ public final class Switchboard extends serverSwitch {
                         if (postprocessing) {
                             // run postprocessing on these profiles
                             ReferenceReportCache rrCache = index.getReferenceReportCache();
-                            for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash, partialUpdate);
+                            for (String profileHash: deletionCandidates) proccount += collection1Configuration.postprocessing(index, rrCache, profileHash, getConfigBool("postprocessing.partialUpdate", true));
                             this.index.fulltext().commit(true); // without a commit the success is not visible in the monitoring
                         }
                         this.crawler.cleanProfiles(deletionCandidates);
@@ -3026,7 +3001,7 @@ public final class Switchboard extends serverSwitch {
                 searchEvent,
                 sourceName,
                 getConfigBool(SwitchboardConstants.DHT_ENABLED, false),
-                this.getConfigBool("isTransparentProxy", false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null,
+                this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null,
                 this.getConfig("crawler.http.acceptLanguage", null));
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
@@ -3061,9 +3036,6 @@ public final class Switchboard extends serverSwitch {
             UTF8.getBytes(this.peers.mySeed().hash), // executor peer hash
             processCase // process case
             );
-
-        // increment number of indexed urls
-        this.indexedPages++;
 
         // update profiling info
         if ( System.currentTimeMillis() - lastPPMUpdate > 20000 ) {
@@ -3310,6 +3282,8 @@ public final class Switchboard extends serverSwitch {
     /**
      * load the content of a URL, parse the content and add the content to the index This process is started
      * concurrently. The method returns immediately after the call.
+     * Loaded/indexed pages are added to the given SearchEvent. If this is not required prefer addToCrawler
+     * to spare concurrent processes, bandwidth and intransparent crawl/load activity
      *
      * @param url the url that shall be indexed
      * @param searchEvent (optional) a search event that shall get results from the indexed pages directly
@@ -3346,7 +3320,7 @@ public final class Switchboard extends serverSwitch {
                 continue;
             }
             requests.add(request);
-        }
+            }
         
         new Thread() {
             @Override
@@ -3755,42 +3729,57 @@ public final class Switchboard extends serverSwitch {
         }.start();
     }
 
-    public final void heuristicSearchResults(final String url) {
+    /**
+     * Get the outbound links of the result and add each unique link to crawler queue
+     * Is input resulturl a full index document with outboundlinks these will be used
+     * otherwise url is loaded and links are extracted/parsed
+     *
+     * @param resulturl the result doc which outbound links to add to crawler
+     */
+    public final void heuristicSearchResults(final URIMetadataNode resulturl) {
         new Thread() {
 
             @Override
             public void run() {
 
                 // get the links for a specific site
-                final AnchorURL startUrl;
-                try {
-                    startUrl = new AnchorURL(url);
-                } catch (final MalformedURLException e) {
-                    ConcurrentLog.logException(e);
-                    return;
-                }
+                final DigestURL startUrl = resulturl.url();
 
-                final Map<AnchorURL, String> links;
-                DigestURL url;
-                try {
-                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent, 0);
-                    if (links != null) {
-                        if (links.size() < 1000) { // limit to 1000 to skip large index pages
-                            final Iterator<AnchorURL> i = links.keySet().iterator();
-                            final boolean globalcrawljob = Switchboard.this.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL,false);
-                            Collection<DigestURL> urls = new ArrayList<DigestURL>();
-                            while (i.hasNext()) {
-                                url = i.next();
-                                boolean islocal = (url.getHost() == null && startUrl.getHost() == null) || (url.getHost() != null && startUrl.getHost() != null && url.getHost().contentEquals(startUrl.getHost()));
-                                // add all external links or links to different page to crawler
-                                if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
-                                    urls.add(url);
+                // result might be rich metadata, try to get outbout links directly from result
+                Set<DigestURL> urls;
+                Iterator<String> outlinkit = URIMetadataNode.getLinks(resulturl, false);
+                if (outlinkit.hasNext()) {
+                    urls = new HashSet<DigestURL>();
+                    while (outlinkit.hasNext()) {
+                        try {
+                            urls.add(new DigestURL(outlinkit.next()));
+                        } catch (MalformedURLException ex) { }
+                    }
+                } else { // otherwise get links from loader
+                    urls = null;
+
+                    try {
+                        final Map<AnchorURL, String> links;
+                        links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent, 0);
+                        if (links != null) {
+                            if (links.size() < 1000) { // limit to 1000 to skip large index pages
+                                final Iterator<AnchorURL> i = links.keySet().iterator();
+                                if (urls == null) urls = new HashSet<DigestURL>();
+                                while (i.hasNext()) {
+                                    DigestURL url = i.next();
+                                    boolean islocal = (url.getHost() == null && startUrl.getHost() == null) || (url.getHost() != null && startUrl.getHost() != null && url.getHost().contentEquals(startUrl.getHost()));
+                                    // add all external links or links to different page to crawler
+                                    if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
+                                        urls.add(url);
+                                    }
                                 }
                             }
-                            addToCrawler(urls, globalcrawljob);
                         }
-                    }
-                } catch (final Throwable e) {
+                    } catch (final Throwable e) { }
+                }
+                if (urls != null && urls.size() > 0) {
+                    final boolean globalcrawljob = Switchboard.this.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL,false);
+                    addToCrawler(urls, globalcrawljob);
                 }
             }
         }.start();
@@ -3992,7 +3981,7 @@ public final class Switchboard extends serverSwitch {
                             if ( (ys != null)
                                 && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
                                 final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
-                                if ( lastseen < 60 ) {
+                                if ( lastseen < 1440 || lc < 10 ) {
                                     if ( peers.peerActions.connectPeer(ys, false) ) {
                                         lc++;
                                     }

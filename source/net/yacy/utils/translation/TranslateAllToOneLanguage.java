@@ -66,7 +66,7 @@ public class TranslateAllToOneLanguage extends TranslatorUtil {
 				+ translationFile);
 
 		try {
-			Translator.translateFilesRecursive(sourceDir, destDir,
+			new Translator().translateFilesRecursive(sourceDir, destDir,
 					translationFile, extensions, "locale");
 		} finally {
 			ConcurrentLog.shutdown();

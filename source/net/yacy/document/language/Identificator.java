@@ -38,7 +38,6 @@ import net.yacy.cora.util.ConcurrentLog;
  */
 public final class Identificator {
 
-    private StringBuilder text;
     private Detector detector;
     private Language language;
 
@@ -46,7 +45,6 @@ public final class Identificator {
         try {
             if(DetectorFactory.getLangList().isEmpty()) DetectorFactory.loadProfile(new File("langdetect").toString());
             this.detector = DetectorFactory.create();
-            this.text = new StringBuilder();
         } catch (LangDetectException e) {
             ConcurrentLog.logException(e);
         }
@@ -54,11 +52,16 @@ public final class Identificator {
 
     public void add(final String word) {
         if (word == null) return;
-        this.text.append(" " + word);
+        this.detector.append(" " + word); // detector internally caches text up to maxtextlen = default = 10000 chars
     }
 
+    /**
+     * Get the detected language with highest probability
+     * if detection probability is above 0.3 (30%)
+     * Underlaying detector differentiates zh-cn and zh-tw, these are returned as zh here.
+     * @return 2 char language code (ISO 639-1)
+     */
     public String getLanguage() {
-        this.detector.append(this.text.toString());
         try {
             ArrayList<Language> probabilities = this.detector.getProbabilities();
             if(probabilities.isEmpty()) return null;
@@ -70,11 +73,25 @@ public final class Identificator {
         }
         // Return language only if probability is higher than 30% to account for missing language profiles
         if (this.language.prob > 0.3) {
-            return this.language.lang;
+            if (this.language.lang.length() == 2)
+                return this.language.lang;
+            else
+                return this.language.lang.substring(0,2);
         }
 
         return null;
 
+    }
+
+    /**
+     * Get the probability of the detected language (returned by {@link #getLanguage()})
+     * @return 0.0 to 1.0
+     */
+    public double getProbability() {
+        if (language != null) {
+            return language.prob;
+        } else
+            return 0.0;
     }
 
 }

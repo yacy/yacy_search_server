@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -70,7 +69,7 @@ public class xlsParser extends AbstractParser implements Parser {
      */
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -129,11 +128,11 @@ public class xlsParser extends AbstractParser implements Parser {
                         null,
                         null,
                         singleList(location.getFile()),
-                        "", // TODO: AUTHOR
+                        null, // TODO: AUTHOR
                         "", // TODO: publisher
                         null,
                         null,
-                        0.0f, 0.0f,
+                        0.0d, 0.0d,
                         contents,
                         null,
                         null,

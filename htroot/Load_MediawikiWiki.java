@@ -41,16 +41,12 @@ public class Load_MediawikiWiki {
 
         // define visible variables
         String a;
-        Set<String> ips = sb.peers.mySeed().getIPs();
-        /* There may eventually have no registered ip in mySeed, for example in Robinson mode : this shouldn't prevent crawling a MediaWiki */
-        if(ips != null && !ips.isEmpty()) {
-        	a = sb.peers.mySeed().getPublicAddress(ips.iterator().next());
+        if (sb.peers.myIPs().isEmpty()) {
+            a = "localhost:" + sb.getLocalPort();
         } else {
-        	a = "localhost:" + sb.getLocalPort();
+            a = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         }
-       	final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
-       	final String repository = "http://" + a + "/repository/";
-        prop.put("starturl", (intranet) ? repository : "http://");
+        prop.put("starturl", "http://");
         prop.put("address", a);
 
         // return rewrite properties

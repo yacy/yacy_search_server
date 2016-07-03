@@ -29,12 +29,11 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -55,7 +54,7 @@ public class rtfParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -83,17 +82,17 @@ public class rtfParser extends AbstractParser implements Parser {
                         replaceAll("\n"," ").
                         replaceAll("\r"," ").
                         replaceAll("\t"," ")),
-                    "", // TODO: AUTHOR
+                    null, // TODO: AUTHOR
                     "", // TODO: publisher
                     null,
                     null,
-                    0.0f, 0.0f,
+                    0.0d, 0.0d,
                     bodyText,
                     null,
                     null,
                     null,
                     false,
-                    new Date())};
+                    null)};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;

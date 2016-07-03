@@ -84,7 +84,7 @@ public class genericImageParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -213,7 +213,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     private ImageInfo parseJavaImage(
-                            final AnchorURL location,
+                            final DigestURL location,
                             final InputStream sourceStream) throws Parser.Failure {
         BufferedImage image = null;
         try {
@@ -228,7 +228,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     private ImageInfo parseJavaImage(
-                            final AnchorURL location,
+                            final DigestURL location,
                             final BufferedImage image) {
         final ImageInfo ii = new ImageInfo(location);
         ii.image = image;
@@ -265,12 +265,12 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     private class ImageInfo {
-        public AnchorURL location;
+        public DigestURL location;
         public BufferedImage image;
         public StringBuilder info;
         public int height;
         public int width;
-        public ImageInfo(final AnchorURL location) {
+        public ImageInfo(final DigestURL location) {
             this.location = location;
             this.image = null;
             this.info = new StringBuilder();

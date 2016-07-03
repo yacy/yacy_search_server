@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.workflow.InstantBusyThread;
@@ -46,6 +45,7 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
+import net.yacy.utils.translation.TranslatorXliff;
 import net.yacy.utils.upnp.UPnPMappingType;
 import net.yacy.utils.upnp.UPnP;
 
@@ -85,7 +85,7 @@ public class ConfigBasic {
 
         // language settings
         if (post != null && post.containsKey("language")  && !lang.equals(post.get("language", "default")) &&
-                (Translator.changeLang(env, langPath, post.get("language", "default") + ".lng"))) {
+                (new TranslatorXliff().changeLang(env, langPath, post.get("language", "default") + ".lng"))) {
             prop.put("changedLanguage", "1");
         }
 
@@ -275,6 +275,7 @@ public class ConfigBasic {
         prop.put("lang_ru", "0");
         prop.put("lang_uk", "0");
         prop.put("lang_en", "0");
+        prop.put("lang_jp", "0");
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {

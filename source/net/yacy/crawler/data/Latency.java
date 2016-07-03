@@ -146,7 +146,7 @@ public class Latency {
      * @return the remaining waiting time in milliseconds. The return value may be negative
      *         which expresses how long the time is over the minimum waiting time.
      */
-    public static int waitingRemainingGuessed(final String hostname, final String hosthash, final RobotsTxt robots, final ClientIdentification.Agent agent) {
+    public static int waitingRemainingGuessed(final String hostname, final int port, final String hosthash, final RobotsTxt robots, final ClientIdentification.Agent agent) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = map.get(hosthash);
@@ -171,7 +171,7 @@ public class Latency {
         
         // find the delay as given by robots.txt on target site
         if (robots != null) {
-            int robotsDelay = waitingRobots(hostname + ":80", robots, agent, false);
+            int robotsDelay = waitingRobots(hostname + ":" + port, robots, agent, false);
             if (robotsDelay < 0) return -timeSinceLastAccess; // no limits if granted exclusively for this peer
             waiting = Math.max(waiting, robotsDelay);
         }

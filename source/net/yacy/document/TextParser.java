@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.parser.apkParser;
@@ -161,7 +161,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper,
@@ -194,7 +194,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final AnchorURL location,
+            final DigestURL location,
             String mimeType,
             final String charset,
             final VocabularyScraper scraper,
@@ -220,7 +220,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final AnchorURL location,
+            final DigestURL location,
             String mimeType,
             final String charset,
             final VocabularyScraper scraper,
@@ -262,7 +262,7 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final Parser parser,
             final String charset,
@@ -285,7 +285,7 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final Set<Parser> parsers,
             final String charset,

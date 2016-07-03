@@ -25,7 +25,7 @@
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Manager==Spravca blacklistu
-Blacklist==Blacklist
+#Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Tato funkcia poskytuje URL filter pre proxy: URL adresa z blacklistu je blokovana 
 from being loaded. You can define several blacklists and activate them separately.==a nebude nahravana. Mozete definovat a nezavisle aktivovat niekolko blacklistov.
 You may also provide your blacklist to other peers by sharing them; in return you may==Vas blacklist mozete takisto poskytnut inemu peerovy na stiahnutie a naopak 
@@ -60,7 +60,7 @@ Add URL pattern==Pridaj URL masku
 "Load new blacklist items"=="Nahraj novy blacklist"
 # NOT USED
 #Import blacklist items from URL:==Importuj blacklist z URL adresy:
-URL:==URL:
+#URL:==URL:
 # NOT USED
 #Import blacklist items from file:==Importuj blacklist zo suboru: 
 was removed from blacklist==bol z blacklistu vymazany
@@ -192,13 +192,11 @@ location</a> in 10 seconds.==adresu</a> za 10 sekund.
 #---------------------------
 Language selection==V&yacute;ber jazyka
 You can change the language of the YaCy-webinterface with translation files.==Jazyk YaCy web rozhrania m&ocirc;zete zmenit pomocou prekladov&yacute;ch s&uacute;borov. Vyberte zvolen&yacute; jazyk zo zoznamu.
-Current language:==Aktu&aacute;lny jazyk
-# NOT USED
-#default(english)==Slovensky
+Current language</label>==Aktu&aacute;lny jazyk</label>
 Languagefile Author(s) (chronological):==Autor(y) jazykov&yacute;ch s&uacute;borov (chronologicky):
-Send additions to maintainer:==Pros&iacute;m po&scaron;lite zmeny maintainerovy na:
-Available Languages:==Podporovan&eacute; jazyky:
-Install new language from URL:==Nain&scaron;taluj nov&yacute; jazyk z URL adresy:
+Send additions to maintainer</em>==Pros&iacute;m po&scaron;lite zmeny maintainerovy na</em>
+Available Languages</label>==Podporovan&eacute; jazyky</label>
+Install new language from URL==Nain&scaron;taluj nov&yacute; jazyk z URL adresy
 Use this language==Tento jazyk ihned pouzit
 "Use"=="Pouzi"
 "Delete"=="Zmaz"
@@ -217,10 +215,10 @@ Name==Meno
 #Nick Name==Prez&yacute;vka
 Homepage==Domovsk&aacute; str&aacute;nka
 eMail==email
-ICQ==ICQ
-Jabber==Jabber
-Yahoo!==Yahoo!
-MSN==MSN
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN==MSN
 Comment==Koment&aacute;r
 "Save"=="Uloz profil"
 #-----------------------------
@@ -529,7 +527,7 @@ Accept remote crawling requests and perform crawl at maximum of==Akceptuj poziad
 #Pages Per Minute (minimum is 1, low system load usually at PPM <= 30)==stranok za minutu (minimum je 1, pomale systemy nahravaju normalne pod 30 stranok za minutu)
 Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)==Neakceptuj poziadavky na vzdialeny crawling (prosim aktivujte tuto volbu len ak nemozete crawlovat 1 stranku za minut - pozri vyzsie)
 
-Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==
+#Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==
 # NOT USED
 #ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter.==
 # NOT USED
@@ -554,7 +552,7 @@ or see the fill/process count of all queues on the==alebo sa pozrite na proces v
 
 # NOT USED
 #Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.</b>==
-The indexing results are presented on the==
+#The indexing results are presented on the==
 		
 Index Monitor</a>-page.==stranke Monitor indexu</a>.
 # NOT USED
@@ -578,8 +576,8 @@ Start URL==Startovacia URL
 #Auto Filter Hlbka==
 # NOT USED
 #MaxAge</b>==
-Auto Filter Content==
-Max Page Per Domain==
+#Auto Filter Content==
+#Max Page Per Domain==
 # NOT USED
 #Accept "?" URLs==
 
@@ -1233,7 +1231,7 @@ This cache is very important for a fast search process.==Tato cache je velmi dol
 Increasing the cache size will result in more search results and less IO during DHT transfer.==Dosledok zvacsenie tejto cache je viac vysledkov vyhladavania a menej vstupno/vystupnej zataze pocas DHT prenosu.
 'noticed' URLs=='zname' URL adresy
 A noticed URL is one that was discovered during crawling but was not loaded yet.==Znama URL adresa je taka ktora bola objavena pocas crawlingu avsak nebola este nahrata.
-Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Erh&ouml;hen der Cachegr&ouml;&szlig;e resultiert in schnellerer R&uuml;ck&uuml;berpr&uuml;fung beim Durchf&uuml;hren von Crawls.
+#Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Erh&ouml;hen der Cachegr&ouml;&szlig;e resultiert in schnellerer R&uuml;ck&uuml;berpr&uuml;fung beim Durchf&uuml;hren von Crawls.
 'error' URLs=='chybne' URL adresy
 URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.==URL adresy ktore nemozu byt nahrante su ulozene v tejto databaze. Takisto sa pouziva pri dvojnasobnej kontrole pocas crawlingu. 
 Increasing the cache size will most probably speed up crawling slightly, but not significantly.==Zvacsenie tejto cache pravdepodobne jemne zvysi rychlost crawlingu, nie vsak o vela. 
@@ -1345,7 +1343,6 @@ Page.==stranke.
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-YaCy '#[clientname]#': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Rychly Crawl Link
 Quick Crawl Link==Rychly Crawl Link
 Quickly adding Bookmarks:==Rychly Crawl - Zalozky:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Kliknite na tahajte (drag and drop) odkaz nizsie do toolbar/linkbaru Vaseho browsera. 
@@ -1420,7 +1417,7 @@ Server Access Restrictions==Obmedzenia pristupu k serveru
 You can restrict the access to this proxy/server using a two-stage security barrier:==Pristup k tomuto proxy resp. HTTP serveru mozete obmedzit pouzitym 2-stupnovej bezpecnostnej bariery:
 define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards==zadajte <i>priestor sietovych domen</i> so zoznamom IP adries povolenych klientov alebo pomocou wildcard znakov 
 define an <i>user account</i> with an user:password - pair==vytvorte <i>uzivatelsky ucet</i> pomocou paru 'uzivatel:heslo'
-This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
+#This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
 You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Pravdepodobne nechcete na internete zielat Vase proxy, takze by ste mali zvolit IP adresovy priestor tak aby zodpovedal adresam Vaseho intranetu.
 The default setting should be right in most cases.==Predvolene nastavenia by mali byt vo vacsine pripadov spravne. 
 If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Ak chcete mozete tiez vytvorit proxy ucet, takze kazdy uzivatel proxy sa musi najprv prihlasit, co je vsak neobvykle riesenie.
@@ -1554,7 +1551,6 @@ Changes will take effect immediately.==Zmeny su okamzite ucinne.
 Content Parser Settings==Nastavenia parsera obsahu
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==S tymito nastavenia mozete zapnut alebo vypnut parsovanie dodatocnych suborov na zaklade ich mime-typov.
 For a detailed description of the various MIME-types take a look at==Detailny popis rozlicnych mime-typov najdete na
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
 Changes take effect immediately==Zmeny su okamzite ucinne
 #-----------------------------
 
@@ -1700,6 +1696,7 @@ from 'late' peers to enrich this search result.==z pomalych peerov na zlepsenie 
 #---------------------------
 System-, Index- and Peer-Status==Stav systemu, indexu a peera
 Welcome to YaCy!==Vitajte v YaCy!
+Your settings are _not_ protected!==Vase nastavenia _nie_su_ chranene heslom!
 "Restart"=="Restartuj"
 "Shutdown"=="Vypni"
 Public System Properties==Vseobecne systemove vlastnosti
@@ -1779,7 +1776,7 @@ Private System Properties==Sukromne systemove vlastnosti
 System Resources==Systemove zdroje
 Processors:==Procesory:
 Protection==Ochrana
-<b>Your settings are _not_ protected!</b> Please go to the==<b>Vase nastavenia _nie_su_ chranene heslom</b> Chodte prosim na 
+#<b>Your settings are _not_ protected!</b> Please go to the==<b>Vase nastavenia _nie_su_ chranene heslom</b> Chodte prosim na 
 settings</a> page <b>immediately</b> and set an administration password.==stranku nastaveni</a> a <b>ihned</b> si zvolte heslo.
 Your settings are protected by a password.==Vase nastavenia su chranene heslom.
 Peer host==Peer Host
@@ -1901,10 +1898,10 @@ Name==Meno
 #Nick Name==Prezyvka
 Homepage==Domovska stranka
 eMail==eMail
-ICQ==ICQ
-Jabber==Jabber
-Yahoo!==Yahoo!
-MSN==MSN
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN==MSN
 Comment==Komentar
 #-----------------------------
 
@@ -1962,7 +1959,7 @@ you must also switch to online mode==najprv sa vsak musite prepnut do online mod
 (by using the proxy) to contribute to the global index.==(v ktorom pouzivate proxy) aby ste mohli prehladavat globalny index.
 The global search resulted in #[globalresults]# link contributions from other YaCy peers.==Globalne vyhladavanie obsahuje #[globalresults]# vysledkov, ktore boli vytvorene za prispenia ostatnych peerov.  
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
-with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
+#with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture (C) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
 #-----------------------------
 
@@ -1970,7 +1967,14 @@ Architecture (C) by Michael Peter Christen==Architektur (C) von Michael Peter Ch
 #---------------------------
 Project Home==Domovsk&aacute; str&aacute;nka
 Help / Wiki==Pomoc / Wiki
-Peer Owner Profile==Profi vlastn&iacute;ka peera
+#Peer Owner Profile==Profi vlastn&iacute;ka peera
+#-----------------------------
+
+#File: env/templates/submenuAccessTracker.template
+#---------------------------
+Cookie Menu==Cookie Menu
+Incoming&nbsp;Cookies==Prichadzajuce cookies
+Outgoing&nbsp;Cookies==Odchadzajuce cookies
 #-----------------------------
 
 #File: env/templates/header.template
@@ -2024,17 +2028,11 @@ Download YaCy==Stiahni YaCy
 #---------------------------
 Peer Configuration Menu==Konfigur&aacute;cia menu peera
 Basic Configuraton==Z&aacute;kladn&eacute; nastavenia
+Advanced Settings==Pokrocil&eacute; nastavenia
 >Language==>Jazyk
 Peer Profile==Profil
 Interface Skins==Nastavenie vzhladu
 >Advanced==>Pokrocil&eacute; nastavenia
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Cookie Menu
-Incoming&nbsp;Cookies==Prichadzajuce cookies
-Outgoing&nbsp;Cookies==Odchadzajuce cookies
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
@@ -2056,7 +2054,7 @@ Media Crawl Queues==Cakacia listina Media crawlu
 >Loader==>Nahravac
 >Local==>Lokal
 #Global==Global
->Overhang==>Overhang
+#>Overhang==>Overhang
 >Images==>Obrazky
 >Movies==>Filmy
 >Music==>Hudba
@@ -2068,6 +2066,14 @@ Performance Menu==Menu vykonu
 Queues Performance Settings==Cakacia listina nastaveny vykonu
 Memory Settings for Database Caches==Nastavenia pamate databazovej cache
 Timing Settings for Search Sequence==Nastavenia casu pre vyhladavaciu sekvenciu
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==Z&aacute;kladn&eacute; nastavenia
+#>Accounts<==>Accounts<
+#Network Configuration==Network Configuration
 #-----------------------------
 
 #File: htdocsdefault/dir.html

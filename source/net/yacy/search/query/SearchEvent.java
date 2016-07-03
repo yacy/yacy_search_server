@@ -1099,7 +1099,7 @@ public final class SearchEvent {
                 }
                 o = m.peek();
                 if (o == null) continue doubleloop;
-                if (o.getWeight() < bestEntry.getWeight()) bestEntry = o;
+                if (o.getWeight() > bestEntry.getWeight()) bestEntry = o;
             }
             if (bestEntry == null) {
                 //Log.logWarning("SearchEvent", "bestEntry == null (1)");

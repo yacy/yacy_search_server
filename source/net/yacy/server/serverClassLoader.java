@@ -23,8 +23,6 @@ package net.yacy.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.util.ConcurrentLog;
 
 import net.yacy.kelondro.util.FileUtils;
@@ -36,10 +34,6 @@ import net.yacy.search.SwitchboardConstants;
  * (findClass looking in default htroot directory)
  */
 public final class serverClassLoader extends ClassLoader {
-    /**
-     * directory of class files
-     */
-    private final Map<File, Class<?>> classes;
 
     public serverClassLoader() {
         //super(ClassLoader.getSystemClassLoader());
@@ -47,7 +41,6 @@ public final class serverClassLoader extends ClassLoader {
         if (!registerAsParallelCapable()) { // avoid blocking
             ConcurrentLog.warn("ClassLoader", "registerAsParallelCapable failed");
         }
-        this.classes = new ConcurrentHashMap<File, Class<?>>(100);
     }
 
     public serverClassLoader(final ClassLoader parent) {
@@ -55,7 +48,6 @@ public final class serverClassLoader extends ClassLoader {
         if (!registerAsParallelCapable()) {
             ConcurrentLog.warn("ClassLoader", "registerAsParallelCapable failed");
         }
-        this.classes = new ConcurrentHashMap<File, Class<?>>(100);
     }
 
     /**
@@ -86,10 +78,8 @@ public final class serverClassLoader extends ClassLoader {
      * @throws ClassNotFoundException
      */
     public Class<?> loadClass(final File classfile) throws ClassNotFoundException {
-        // take the class out of the cache, denoted by the class file
-        Class<?> c = this.classes.get(classfile);
-        if (c != null) return c;
 
+        Class<?> c;
         final int p = classfile.getName().indexOf('.',0);
         if (p < 0) throw new ClassNotFoundException("wrong class name: " + classfile.getName());
         final String classname = classfile.getName().substring(0, p);
@@ -102,7 +92,6 @@ public final class serverClassLoader extends ClassLoader {
             // make a class out of the stream
             c = this.defineClass(null, b, 0, b.length);
             resolveClass(c);
-            this.classes.put(classfile, c);
         } catch (final LinkageError ee) {
         	c = findLoadedClass(classname);
         	if (c != null) return c;

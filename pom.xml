@@ -7,7 +7,7 @@
     <version>1.83</version>
     <packaging>jar</packaging>
     <description>YaCy - a Peer to Peer Web Search Engine</description>
-    <name>YaCy</name>
+    <name>YaCy Search Server</name>
     <url>http://www.yacy.net</url>
     <issueManagement>
         <system>YaCy Bugtracker</system>
@@ -34,9 +34,9 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>5.4.0</solr.version> 
+        <solr.version>5.5.1</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.14.v20151106</jetty.version>
+        <jetty.version>9.2.17.v20160517</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -67,7 +67,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.5.1</version>
                 <configuration>
                     <excludes>
                         <!-- special exclude for compatibility with ant build script
@@ -151,7 +151,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>2.10.4</version>
                 <configuration>
                     <reportOutputDirectory>javadoc</reportOutputDirectory>
                     <author>true</author>
@@ -160,9 +160,9 @@
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                     <windowtitle>YaCy API: javadoc documentation</windowtitle>
-                    <excludes>
-                        htroot/*.java
-                    </excludes>
+                    <includes>
+                        ${project.build.directory}/*.java
+                    </includes>
                     <failOnError>false</failOnError>
                 </configuration>
             </plugin>
@@ -236,31 +236,7 @@
                 </configuration>
             </plugin>
             -->
-            <plugin>
-                <!-- install jars not found in maven repository to local repository -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <executions>
 
-                    <execution>
-                        <id>install-J7Zip-jar</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <file>${basedir}/lib/J7Zip-modified.jar</file>
-                            <groupId>net.yacy.extlib</groupId>
-                            <artifactId>J7Zip-modified</artifactId>
-                            <version>1.02</version>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -272,7 +248,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.5.3</version>
+                        <version>2.6</version>
                         <configuration>
                             <descriptors>
                                 <descriptor>assembly.xml</descriptor>
@@ -289,6 +265,16 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.0.0</version>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <version>2.8.2</version>
                     </plugin>
                 </plugins>
             </build>
@@ -334,11 +320,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.james</groupId>
-            <artifactId>apache-mime4j</artifactId>
-            <version>0.6.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15</artifactId>
             <version>1.46</version>
@@ -356,17 +337,18 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.10</version>
+            <version>1.11</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.3.1</version>
+            <version>1.3.2</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <version>2.5</version>
         </dependency>        
         <dependency>
             <groupId>commons-jxpath</groupId>
@@ -384,16 +366,6 @@
             <version>1.2</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>fontbox</artifactId>
-            <version>1.8.11</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.htmlparser</groupId>
             <artifactId>htmllexer</artifactId>
             <version>2.1</version>
@@ -401,22 +373,23 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.1</version>
+            <version>4.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.4</version>
+            <version>4.4.5</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.5.1</version>
+            <version>4.5.2</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
-            <version>56.1</version>
+            <version>57.1</version>
         </dependency>
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
@@ -446,12 +419,8 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>jempbox</artifactId>
-            <version>1.8.11</version>
+            <version>1.7.21</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -466,7 +435,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.8.3</version>
+            <version>1.9.2</version>
         </dependency>
         <dependency>
             <groupId>com.youcruit.com.cybozu.labs</groupId>
@@ -476,7 +445,8 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.13</version>
+            <version>1.7.21</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
@@ -486,7 +456,7 @@
         <dependency>
             <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
-            <version>2.8.1</version>
+            <version>2.9.1</version>
         </dependency>
         <dependency>
             <groupId>oro</groupId>
@@ -496,33 +466,24 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>1.8.11</version>
+            <version>2.0.2</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>3.13</version>
+            <version>3.14</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>3.13</version>
+            <version>3.14</version>
         </dependency>
         <dependency>
             <groupId>sax</groupId>
             <artifactId>sax</artifactId>
             <version>2.0.1</version>
         </dependency>        
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.13</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
@@ -599,6 +560,12 @@
             <version>${jetty.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.21</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>pt.tumba</groupId>
             <artifactId>webcat-swf</artifactId>
             <version>0.1</version>
@@ -606,13 +573,18 @@
         <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
-            <version>0.1.3</version>
+            <version>0.1.4</version>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.11.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.collaborne</groupId>
+            <artifactId>xliff-core-1.2</artifactId>
+            <version>1.1</version>
+        </dependency>        
         <dependency>
             <groupId>com.adobe.xmp</groupId>
             <artifactId>xmpcore</artifactId>

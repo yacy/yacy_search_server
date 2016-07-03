@@ -905,7 +905,7 @@ public final class Protocol {
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
             parts.put("exclude", UTF8.StringBody(excludehashes));
-            parts.put("duetime", UTF8.StringBody("1000"));
+            // parts.put("duetime", UTF8.StringBody("1000")); // not used or red by receiver, max wait time given by praram "time" (2016-04-25 v1.83/9772)
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
             parts.put("filter", UTF8.StringBody(event.query.urlMaskString));
@@ -1147,25 +1147,25 @@ public final class Protocol {
             return 0;
         }
         
-        List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
+        List<URIMetadataNode> resultContainer = new ArrayList<URIMetadataNode>();
         Network.log.info("SEARCH (solr), returned " + docList[0].size() + " out of " + docList[0].getNumFound() + " documents and " + facets.size() + " facets " + facets.keySet().toString() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
         Collection<SolrInputDocument> docs;
         if (event.addResultsToLocalIndex) { // only needed to store remote results
             docs = new ArrayList<SolrInputDocument>(docList[0].size());
         } else docs = null;
-        for (final SolrDocument doc: docList[0]) {
+        for (final SolrDocument tmpdoc: docList[0]) {
             //System.out.println("***DEBUG*** " + ((String) doc.getFieldValue("sku")));
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
             }
             // get one single search result
-            if ( doc == null ) {
+            if ( tmpdoc == null ) {
                 continue;
             }
             URIMetadataNode urlEntry;
             try {
-                urlEntry = new URIMetadataNode(doc);
+                urlEntry = new URIMetadataNode(tmpdoc);
             } catch (MalformedURLException ex) {
                 continue;
             }
@@ -1198,73 +1198,61 @@ public final class Protocol {
                 
                 // put the remote documents to the local index. We must convert the solr document to a solr input document:
                 if (event.addResultsToLocalIndex) {
-                	/* Check document size, only if a limit is set on remote documents size allowed to be stored to local index */
-                	if(checkDocumentSize(doc, event.getRemoteDocStoredMaxSize() * 1024)) {
-                		final SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+                    /* Check document size, only if a limit is set on remote documents size allowed to be stored to local index */
+                    if (checkDocumentSize(tmpdoc, event.getRemoteDocStoredMaxSize() * 1024)) {
+                        final SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(tmpdoc);
 
-                		// the input document stays untouched because it contains top-level cloned objects
-                		docs.add(sid);
-                		// will be stored to index, and is a full solr document, can be added to firstseen
-                		event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
-                	} else {
-                		Network.log.info("Document size greater than " + event.getRemoteDocStoredMaxSize() + " kbytes, excludes it from being stored to local index. Url : " + urlEntry.urlstring());
-                	}
+                        // the input document stays untouched because it contains top-level cloned objects
+                        docs.add(sid);
+                        // will be stored to index, and is a full solr document, can be added to firstseen
+                        event.query.getSegment().setFirstSeenTime(urlEntry.hash(), Math.min(urlEntry.moddate().getTime(), System.currentTimeMillis()));
+                    } else {
+                        Network.log.info("Document size greater than " + event.getRemoteDocStoredMaxSize() + " kbytes, excludes it from being stored to local index. Url : " + urlEntry.urlstring());
+                    }
                 }
 
                 // after this conversion we can remove the largest and not used field text_t and synonyms_sxt from the document
                 // because that goes into a search cache and would take a lot of memory in the search cache
                 //doc.removeFields(CollectionSchema.text_t.getSolrFieldName());
-                doc.removeFields(CollectionSchema.synonyms_sxt.getSolrFieldName());
-                
+                tmpdoc.removeFields(CollectionSchema.synonyms_sxt.getSolrFieldName());
+
                 ResultURLs.stack(
-                    ASCII.String(urlEntry.url().hash()),
-                    urlEntry.url().getHost(),
-                    event.peers.mySeed().hash.getBytes(),
-                    UTF8.getBytes(target.hash),
-                    EventOrigin.QUERIES);
+                        ASCII.String(urlEntry.url().hash()),
+                        urlEntry.url().getHost(),
+                        event.peers.mySeed().hash.getBytes(),
+                        UTF8.getBytes(target.hash),
+                        EventOrigin.QUERIES);
             }
 
-            // add the url entry to the word indexes
-            container.add(urlEntry);
+            // add the url entry to the checked results
+            resultContainer.add(urlEntry);
         }
-        final int dls = docList[0].size();
         final int numFound = (int) docList[0].getNumFound();
         docList[0].clear();
         docList[0] = null;
         if (localsearch) {
-            event.addNodes(container, facets, snippets, true, "localpeer", numFound);
+            event.addNodes(resultContainer, facets, snippets, true, "localpeer", numFound);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
-            Network.log.info("local search (solr): localpeer sent " + container.size() + "/" + numFound + " references");
+            Network.log.info("local search (solr): localpeer sent " + resultContainer.size() + "/" + numFound + " references");
         } else {
             if (event.addResultsToLocalIndex) {
-				/*
-				 * Current thread might be interrupted by SearchEvent.cleanup()
-				 */
-				if (Thread.interrupted()) {
-					throw new InterruptedException("solrQuery interrupted");
-				}
-				WriteToLocalIndexThread writeToLocalIndexThread = new WriteToLocalIndexThread(event.query.getSegment(),
-						docs);
-				writeToLocalIndexThread.start();
-				try {
-					writeToLocalIndexThread.join();
-				} catch (InterruptedException e) {
-					/*
-					 * Current thread interruption might happen while waiting
-					 * for writeToLocalIndexThread.
-					 */
-					writeToLocalIndexThread.stopWriting();
-					throw new InterruptedException("solrQuery interrupted");
-				}
-				docs.clear();
+                /*
+		 * Current thread might be interrupted by SearchEvent.cleanup()
+                 */
+                if (Thread.interrupted()) {
+                    throw new InterruptedException("solrQuery interrupted");
+                }
+                WriteToLocalIndexThread writeToLocalIndexThread = new WriteToLocalIndexThread(event.query.getSegment(),
+                        docs); // will clear docs on return
+                writeToLocalIndexThread.start();
             }
-            event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, numFound);
+            event.addNodes(resultContainer, facets, snippets, false, target.getName() + "/" + target.hash, numFound);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
-            Network.log.info("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.size()) + "/" + numFound + " references");
+            Network.log.info("remote search (solr): peer " + target.getName() + " sent " + (resultContainer.size()) + "/" + numFound + " references");
         }
-        return dls;
+        return resultContainer.size();
     }
     
     /**
@@ -1285,6 +1273,7 @@ public final class Protocol {
     	
     	/**
     	 * Parameters must be not null.
+         * After writing the collection is cleared
     	 * @param segment solr segment to write
     	 * @param docs solr documents collection to put to segment
     	 */
@@ -1300,17 +1289,19 @@ public final class Protocol {
     		this.stop.set(true);
     	}
 		
-		@Override
-		public void run() {
-            for (SolrInputDocument doc: docs) {
-            	if(stop.get()) {
-            		Network.log.info("Writing documents collection to Solr segment was stopped.");
-            		return;
-            	}
-            	segment.putDocument(doc);
+        @Override
+        public void run() {
+            for (SolrInputDocument doc : docs) {
+                if (stop.get()) {
+                    docs.clear();
+                    Network.log.info("Writing documents collection to Solr segment was stopped.");
+                    return;
+                }
+                segment.putDocument(doc);
             }
-		}
-	}
+            docs.clear();
+        }
+    }
     
 	/**
 	 * Only when maxSize is greater than zero, check that doc size is lower. To
@@ -1722,7 +1713,7 @@ public final class Protocol {
                 Base64Order.enhancedCoder,
                 6);
         // check if the host supports this protocol
-        if ( target.getRevision() < migration.IDX_HOST ) {
+        if ( target.getVersion()< migration.IDX_HOST_VER ) {
             // if the protocol is not supported then we just return an empty host reference container
             return index;
         }

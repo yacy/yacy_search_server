@@ -28,7 +28,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
@@ -80,7 +79,7 @@ public class svgParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper,
@@ -128,7 +127,7 @@ public class svgParser extends AbstractParser implements Parser {
                 "",
                 null,
                 null,
-                0.0f, 0.0f,
+                0.0d, 0.0d,
                 docDescription, // text - for this image description is best text we have
                 null,
                 null,

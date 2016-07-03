@@ -49,6 +49,7 @@ import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.SnapshotImagesReponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
@@ -58,6 +59,7 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -121,7 +123,8 @@ public class SolrSelectServlet extends HttpServlet {
             MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString());
 
             Switchboard sb = Switchboard.getSwitchboard();
-            boolean authenticated = true;
+            // TODO: isUserInRole needs a login to jetty container (not done automatically on admin from localhost)
+            boolean authenticated = hrequest.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString());;
             
             // count remote searches if this was part of a p2p search
             if (mmsp.getMap().containsKey("partitions")) {
@@ -166,7 +169,7 @@ public class SolrSelectServlet extends HttpServlet {
                 String bq = ranking.getBoostQuery();
                 String bf = ranking.getBoostFunction();
                 if (fq.length() > 0) mmsp.getMap().put(CommonParams.FQ, new String[]{fq});
-                if (bq.length() > 0) mmsp.getMap().put(DisMaxParams.BQ, new String[]{bq});
+                if (bq.length() > 0) mmsp.getMap().put(DisMaxParams.BQ, StringUtils.split(bq,"\t\n\r\f")); // bq split into multiple query params, allowing space in single query
                 if (bf.length() > 0) mmsp.getMap().put("boost", new String[]{bf}); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
             }
             

@@ -859,7 +859,7 @@ public class Response {
         final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.getContentType());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(new AnchorURL(url()), this.responseHeader == null ? null : this.responseHeader.getContentType(), this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(), new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
+            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.getContentType(), this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(), new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
         } catch (final Exception e) {
             return null;
         }

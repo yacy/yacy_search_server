@@ -60,9 +60,7 @@ import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
-import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.Parser;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
@@ -73,7 +71,6 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -195,6 +192,7 @@ public class yacysearch {
             prop.put("geoinfo", "0");
             prop.put("rss_queryenc", "");
             prop.put("meanCount", 5);
+            prop.put("eventID",""); // mandatory parameter for yacysearchtrailer/yacysearchitem includes
             return prop;
         }
 
@@ -556,31 +554,18 @@ public class yacysearch {
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
                 final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(recommendHash));
-                if ( urlentry != null ) {
-                    Document[] documents = null;
-                    try {
-                        documents =
-                            sb.loader.loadDocuments(
-                                sb.loader.request(urlentry.url(), true, false),
-                                CacheStrategy.IFEXIST,
-                                Integer.MAX_VALUE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
-                    } catch (final IOException e ) {
-                    } catch (final Parser.Failure e ) {
-                    }
-                    if ( documents != null ) {
-                        // create a news message
-                        final Map<String, String> map = new HashMap<String, String>();
-                        map.put("url", urlentry.url().toNormalform(true).replace(',', '|'));
-                        map.put("title", urlentry.dc_title().replace(',', ' '));
-                        map.put("description", documents[0].dc_title().replace(',', ' '));
-                        map.put("author", documents[0].dc_creator());
-                        map.put("tags", documents[0].dc_subject(' '));
-                        sb.peers.newsPool.publishMyNews(
+                if (urlentry != null) {
+                    // create a news message
+                    final Map<String, String> map = new HashMap<String, String>();
+                    map.put("url", urlentry.url().toNormalform(true).replace(',', '|'));
+                    map.put("title", urlentry.dc_title().replace(',', ' '));
+                    map.put("description", urlentry.getDescription().isEmpty() ? urlentry.dc_title().replace(',', ' ') : urlentry.getDescription().get(0).replace(',', ' '));
+                    map.put("author", urlentry.dc_creator());
+                    map.put("tags", urlentry.dc_subject().replace(',', ' '));
+                    sb.peers.newsPool.publishMyNews(
                             sb.peers.mySeed(),
                             NewsPool.CATEGORY_SURFTIPP_ADD,
                             map);
-                        documents[0].close();
-                    }
                 }
             }
 

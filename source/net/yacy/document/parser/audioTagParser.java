@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -71,7 +71,7 @@ public class audioTagParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -172,7 +172,7 @@ public class audioTagParser extends AbstractParser implements Parser {
                     location.getHost(), // publisher
                     null, // sections
                     descriptions, // abstrct
-                    0.0f, 0.0f, // lon, lat
+                    0.0d, 0.0d, // lon, lat
                     text.toString(), // text
                     null,
                     null,
@@ -191,11 +191,11 @@ public class audioTagParser extends AbstractParser implements Parser {
 	                null,
 	                null,
 	                singleList(filename), // title
-	                "", // author
+	                null, // author
 	                location.getHost(),
 	                null,
 	                null,
-	                0.0f, 0.0f,
+	                0.0d, 0.0d,
 	                location.toTokens(),
 	                null,
 	                null,

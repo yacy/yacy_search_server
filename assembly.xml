@@ -35,16 +35,12 @@
             <outputDirectory>htroot</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>langstats</directory>
-            <outputDirectory>langstats</outputDirectory>
+            <directory>langdetect</directory>
+            <outputDirectory>langdetect</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>locales</directory>
             <outputDirectory>locales</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>ranking</directory>
-            <outputDirectory>ranking</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>skins</directory>

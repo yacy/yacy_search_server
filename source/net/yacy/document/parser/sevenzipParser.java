@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.Date;
 
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -58,7 +59,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
     }
 
     public Document parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final int timezoneOffset,
@@ -110,7 +111,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
     }
 
     public Document parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final int timezoneOffset,
@@ -120,7 +121,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 

@@ -40,14 +40,8 @@ public class Load_PHPBB3 {
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        String a;
-        Set<String> ips = sb.peers.mySeed().getIPs();
-        /* There may eventually have no registered ip in mySeed, for example in Robinson mode : this shouldn't prevent crawling a MediaWiki */
-        if(ips != null && !ips.isEmpty()) {
-        	a = sb.peers.mySeed().getPublicAddress(ips.iterator().next());
-        } else {
-        	a = "localhost:" + sb.getLocalPort();
-        }
+        String a = sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
+        if (a == null) a = "localhost:" + sb.getLocalPort();
         final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
         final String repository = "http://" + a + "/repository/";
         prop.put("starturl", (intranet) ? repository : "http://");

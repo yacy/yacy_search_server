@@ -101,7 +101,11 @@ public class HostQueue implements Balancer {
         this.port = Integer.parseInt(filename.substring(p + 1)); // consider "host.com" contains dot but no required port -> will throw exception
         init();
     }
-    
+
+    /**
+     * Opens and initializes the host queue
+     * @throws MalformedURLException if directory for the host could not be created
+     */
     private final void init() throws MalformedURLException {
         try {
             if (this.hostName == null)
@@ -518,7 +522,7 @@ public class HostQueue implements Balancer {
     @Override
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
         Map<String, Integer[]> map = new TreeMap<String, Integer[]>();
-        int delta = Latency.waitingRemainingGuessed(this.hostName, this.hostHash, robots, ClientIdentification.yacyInternetCrawlerAgent);
+        int delta = Latency.waitingRemainingGuessed(this.hostName, this.port, this.hostHash, robots, ClientIdentification.yacyInternetCrawlerAgent);
         map.put(this.hostName, new Integer[]{this.size(), delta});
         return map;
     }

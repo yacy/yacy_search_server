@@ -117,7 +117,11 @@ public class WebStructurePicture_p {
             for (int i = 0; i < hostlist.length; i++) {
                 String host = hostlist[i];
                 String hash = null;
-                try {hash = ASCII.String((new DigestURL("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {ConcurrentLog.logException(e);}
+                try {
+                    hash = ASCII.String((new DigestURL("http://" + host)).hash(), 6, 6);
+                } catch (final MalformedURLException e) {
+                    continue;
+                }
                 Map.Entry<String, String> centernode = new AbstractMap.SimpleEntry<String, String>(hash, host);
                 double angle = 2.0d * i * Math.PI / hostlist.length;
                 if (hostlist.length == 3) angle -= Math.PI / 2;

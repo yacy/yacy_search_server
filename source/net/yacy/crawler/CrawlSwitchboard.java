@@ -59,8 +59,8 @@ import net.yacy.search.SwitchboardConstants;
 
 public final class CrawlSwitchboard {
 	
-	public static final String CRAWL_PROFILE_AUTOCRAWL_DEEP = "autocrawlDeep";
-	public static final String CRAWL_PROFILE_AUTOCRAWL_SHALLOW = "autocrawlShallow";
+    public static final String CRAWL_PROFILE_AUTOCRAWL_DEEP = "autocrawlDeep";
+    public static final String CRAWL_PROFILE_AUTOCRAWL_SHALLOW = "autocrawlShallow";
     public static final String CRAWL_PROFILE_PROXY = "proxy";
     public static final String CRAWL_PROFILE_REMOTE = "remote";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT = "snippetLocalText";
@@ -107,18 +107,12 @@ public final class CrawlSwitchboard {
     private final File queuesRoot;
     private Switchboard switchboard;
 
-    public CrawlSwitchboard(final String networkName, Switchboard switchboard) {
+    public CrawlSwitchboard(Switchboard switchboard) {
 
         this.switchboard = switchboard;
         this.log = this.switchboard.log;
         this.queuesRoot = this.switchboard.queuesRoot;
         this.defaultPushProfiles = new ConcurrentHashMap<>();
-        this.log.info("Initializing Word Index for the network '" + networkName + "'.");
-
-        if ( networkName == null || networkName.isEmpty() ) {
-            log.severe("no network name given - shutting down");
-            System.exit(0);
-        }
         this.profilesActiveCrawlsCache = Collections.synchronizedMap(new TreeMap<byte[], CrawlProfile>(Base64Order.enhancedCoder));
         this.profilesActiveCrawlsCounter = new ConcurrentHashMap<String, RowHandleSet>();
 
@@ -521,8 +515,8 @@ public final class CrawlSwitchboard {
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE),
                 -1,
                 true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
-                false,
-                false,
+                false, // indexText
+                false, // indexMedia
                 true,
                 false,
                 -1, false, true, CrawlProfile.MATCH_NEVER_STRING,

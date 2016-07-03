@@ -14,11 +14,6 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     public static final double YACY_POVIDES_REMOTECRAWL_LISTS = (float) 0.550;
     private static yacyVersion thisVersion = null;
 
-    /**
-     * information about latest release, retrieved by other peers release version,
-     * this value is overwritten when a peer with later version appears*/
-    public static double latestRelease = 0.1; //
-
     private double releaseNr;
     private final String dateStamp;
     private int svn;

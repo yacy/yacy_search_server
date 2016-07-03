@@ -26,7 +26,7 @@ package net.yacy.document;
 import java.io.InputStream;
 import java.util.Set;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 
 public interface Parser {
@@ -55,7 +55,7 @@ public interface Parser {
      * @throws InterruptedException
      */
     public Document[] parse(
-            AnchorURL url,
+            DigestURL url,
             String mimeType,
             String charset,
             VocabularyScraper scraper,

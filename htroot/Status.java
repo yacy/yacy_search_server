@@ -173,6 +173,10 @@ public class Status
             prop.put("hintCrawlMonitor", "1");
         }
 
+        if (!System.getProperty("java.version").startsWith("1.8")) {
+            prop.put("hintJREVersion", "1");
+        }
+
         if (adminaccess && "intranet|webportal|allip".indexOf(env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified")) >= 0) {
             prop.put("hintSupport", "1");
         }
@@ -207,7 +211,7 @@ public class Status
         } else {
             prop.put("remoteProxy", "0"); // not used
         }
-        prop.put("info_isTransparentProxy", sb.getConfigBool("isTransparentProxy", false) ? "0" : "1");
+        prop.put("info_isTransparentProxy", sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "0" : "1");
         prop.put("info_proxyURL", sb.getConfigBool("proxyURL", false) ? "0" : "1");
         
         // peer information
@@ -221,14 +225,6 @@ public class Status
             final long uptime = 60000 * sb.peers.mySeed().getLong(Seed.UPTIME, 0L);
             prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", PeerActions.formatInterval(uptime));
-            prop.putNum("peerStatistics_pagesperminute", sb.peers.mySeed().getPPM());
-            prop.putNum(
-                "peerStatistics_queriesperhour",
-                Math.round(6000d * sb.peers.mySeed().getQPM()) / 100d);
-            prop.putNum("peerStatistics_links", sb.peers.mySeed().getLinkCount());
-            prop.put("peerStatistics_words", Formatter.number(sb.peers.mySeed().getWordCount()));
-            prop.putNum("peerStatistics_disconnects", sb.peers.peerActions.disconnects);
-            prop.put("peerStatistics_connects", Formatter.number(sb.peers.mySeed().get(Seed.CCOUNT, "0")));
             thisHash = sb.peers.mySeed().hash;
             if ( sb.peers.mySeed().getIPs().size() == 0 ) {
                 prop.put("peerAddress", "0"); // not assigned + instructions

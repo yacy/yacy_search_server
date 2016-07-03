@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -85,7 +85,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -167,7 +167,7 @@ public class metadataImageParser extends AbstractParser implements Parser {
             new HashSet<String>(0), // languages
             keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords
             singleList(title), // title
-            author == null ? "" : author, // author
+            author == null ? null : author, // author
             location.getHost(), // Publisher
             null, // sections
             descriptions, // description
