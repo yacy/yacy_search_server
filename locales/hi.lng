@@ -1077,7 +1077,7 @@ Network Scanner==नेटवर्क स्कैनर
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy उपलब्ध HTTP, FTP और किसी सर्वर के लिए एक नेटवर्क खंड स्कैन कर सकते हैं.
 You must first select a IP range and then, after this range is scanned,==इस श्रृंखला स्कैन के बाद आप पहली बार, तो एक आईपी श्रेणी का चयन करना चाहिए
 it is possible to select servers that had been found for a full-site crawl.==यह एक पूरी साइट क्रॉल के लिए पाया गया था कि सर्वर का चयन करने के लिए संभव है.
-No servers had been detected in the given IP range #[iprange]#. 
+#No servers had been detected in the given IP range==
 Please enter a different IP range for another scan.==एक और स्कैन के लिए एक अलग आईपी रेंज दर्ज करें.
 Please wait...==कृपया प्रतीक्षा करें ...
 >Scan the network<==>नेटवर्क स्कैन<

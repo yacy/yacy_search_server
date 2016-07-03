@@ -87,7 +87,7 @@ public class GitRevMavenTask extends AbstractMojo {
                         break;
                     }
                 }
-                if (lastTag != null || distance++ > 999) {
+                if (lastTag != null || distance++ > 90999) {
                     break;
                 }
             }

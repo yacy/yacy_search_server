@@ -1587,9 +1587,6 @@
     <trans-unit id="bfcc5088" xml:space="preserve" approved="no" translate="yes">
        <source>"Submit"</source>
     </trans-unit>
-    <trans-unit id="fda7badd" xml:space="preserve" approved="no" translate="yes">
-       <source>http://www.iana.org/assignments/media-types/&lt;/a&gt;</source>
-    </trans-unit>
   </body>
 </file>
 
@@ -2117,6 +2114,9 @@
     <trans-unit id="5d032a67" xml:space="preserve" approved="no" translate="yes">
        <source>Release will be installed. Please wait.</source>
     </trans-unit>
+    <trans-unit id="3c7a4df9" xml:space="preserve" approved="no" translate="yes">
+       <source>You installed YaCy with a package manager.</source>
+    </trans-unit>    
     <trans-unit id="20240fb3" xml:space="preserve" approved="no" translate="yes">
        <source>To update YaCy, use the package manager:</source>
     </trans-unit>
@@ -2191,9 +2191,6 @@
     </trans-unit>
     <trans-unit id="8713e5b1" xml:space="preserve" approved="no" translate="yes">
        <source>Last Deploy</source>
-    </trans-unit>
-    <trans-unit id="3c7a4df9" xml:space="preserve" approved="no" translate="yes">
-       <source>You installed YaCy with a package manager.</source>
     </trans-unit>
   </body>
 </file>
@@ -3297,8 +3294,8 @@
     <trans-unit id="e82c07f9" xml:space="preserve" approved="no" translate="yes">
        <source>it is possible to select servers that had been found for a full-site crawl.</source>
     </trans-unit>
-    <trans-unit id="ede81ac7" xml:space="preserve" approved="no" translate="yes">
-       <source>No servers had been detected in the given IP range #[iprange]#.</source>
+    <trans-unit id="9ad86623" xml:space="preserve" approved="no" translate="yes">
+       <source>No servers had been detected in the given IP range</source>
     </trans-unit>
     <trans-unit id="c8005605" xml:space="preserve" approved="no" translate="yes">
        <source>Please enter a different IP range for another scan.</source>
@@ -5518,12 +5515,9 @@
 
 <file original="Network.html"  source-language="en"  datatype="html">
   <body>
-    <trans-unit id="3e587bc4" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy '#[clientname]#': YaCy Search Network</source>
-    </trans-unit>
-    <trans-unit id="3024b1ff" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy Search Network '#[networkName]#'</source>
-    </trans-unit>
+    <trans-unit id="ff8b8258" xml:space="preserve" approved="no" translate="yes">
+       <source>YaCy Search Network</source>
+    </trans-unit>      
     <trans-unit id="1f205c10" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy Network&lt;</source>
     </trans-unit>
@@ -5814,9 +5808,6 @@
     </trans-unit>
     <trans-unit id="b5434abc" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;DHT-in&lt;</source>
-    </trans-unit>
-    <trans-unit id="ff8b8258" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy Search Network</source>
     </trans-unit>
     <trans-unit id="31955db0" xml:space="preserve" approved="no" translate="yes">
        <source>Count of Connected Senior Peers</source>
@@ -6752,10 +6743,19 @@
     </trans-unit>
     <trans-unit id="c6803af7" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Boost Query"</source>
-    </trans-unit>
+    </trans-unit>    
     <trans-unit id="c50afe39" xml:space="preserve" approved="no" translate="yes">
        <source>field not in local index (boost has no effect)</source>
     </trans-unit>
+    <trans-unit id="ebe8bd4e" xml:space="preserve" approved="no" translate="yes">
+       <source>You can boost with vocabularies, use the field</source>
+    </trans-unit>
+    <trans-unit id="369809bc" xml:space="preserve" approved="no" translate="yes">
+       <source>with values</source>
+    </trans-unit>    
+    <trans-unit id="abdacdba" xml:space="preserve" approved="no" translate="yes">
+       <source>You can also boost on logarithmic occurrence counters of the fields</source>
+    </trans-unit>    
     <trans-unit id="af04244c" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Field Boosts"</source>
     </trans-unit>
@@ -8657,9 +8657,6 @@
   <body>
     <trans-unit id="a444325e" xml:space="preserve" approved="no" translate="yes">
        <source>See the page info about the url.</source>
-    </trans-unit>
-    <trans-unit id="700fabc1" xml:space="preserve" approved="no" translate="yes">
-       <source>YaCy '#[clientname]#': View URL Content</source>
     </trans-unit>
     <trans-unit id="df784dad" xml:space="preserve" approved="no" translate="yes">
        <source>View URL Content</source>

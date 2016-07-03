@@ -1334,7 +1334,7 @@ Network Scanner==Netzwerk Scanner
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy kann ein Netzwerksegment auf verfügbare HTTP, FTP und SMB Server hin absuchen.
 You must first select a IP range and then, after this range is scanned,==Sie müssen zuerst einen IP Bereich festlegen  und dann, nachdem dieser Bereich gescannt wurde,
 it is possible to select servers that had been found for a full-site crawl.==ist es möglich einen gefunden Server für eine volle Seiten Suche crawlen zu lassen.
-No servers had been detected in the given IP range #[iprange]#. 
+No servers had been detected in the given IP range==Es wurde kein Server im angegebenen IP Bereich gefunden
 Please enter a different IP range for another scan.==Bitte geben Sie einen anderen IP Bereich ein für einen weiteren Scan.
 Please wait...==Bitte warten...
 >Scan the network<==>Das Netzwerk Scannen<
@@ -3147,7 +3147,7 @@ For community support, please visit our==Für Unterstützung aus der Community, 
 
 #File: Status_p.inc
 #---------------------------
-#System Status==System Status
+System Status==Systemstatus
 Unknown==unbekannt
 YaCy version:==YaCy Version:
 Uptime:==Online seit:
@@ -3493,7 +3493,6 @@ New Password is empty.==Das neue Passwort ist leer.
 
 #File: ViewFile.html
 #---------------------------
-YaCy '#[clientname]#': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
 View URL Content==Zeige URL Inhalte
 >Get URL Viewer<==>URL Betrachter<
 "Show Metadata"=="Metadaten anzeigen"
