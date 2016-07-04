@@ -4,7 +4,7 @@
 
     <groupId>net.yacy</groupId>
     <artifactId>yacycore</artifactId>
-    <version>1.83</version>
+    <version>1.91</version>
     <packaging>jar</packaging>
     <description>YaCy - a Peer to Peer Web Search Engine</description>
     <name>YaCy Search Server</name>
@@ -34,7 +34,7 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>5.5.1</solr.version> 
+        <solr.version>5.5.2</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
         <jetty.version>9.2.17.v20160517</jetty.version>
                 
