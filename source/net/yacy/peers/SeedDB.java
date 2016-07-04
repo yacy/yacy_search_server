@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -49,6 +50,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
@@ -1093,4 +1095,65 @@ public final class SeedDB implements AlternativeDomainNames {
 
     }
 
+    public void loadSeedListConcurrently(final String seedListFileURL, final AtomicInteger scc, final int timeout, final boolean checkAge) {
+        // uses the superseed to initialize the database with known seeds
+
+        Thread seedLoader = new Thread() {
+            @Override
+            public void run() {
+                // load the seed list
+                try {
+                    DigestURL url = new DigestURL(seedListFileURL);
+                    //final long start = System.currentTimeMillis();
+                    final RequestHeader reqHeader = new RequestHeader();
+                    reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
+                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
+                    final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
+                    client.setHeader(reqHeader.entrySet());
+
+                    client.HEADResponse(url.toNormalform(false), false);
+                    int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+                    ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
+                    if (checkAge) {
+                        if (header.lastModified() == null) {
+                            Network.log.warn("BOOTSTRAP: seed-list URL " + seedListFileURL + " not usable, last-modified is missing");
+                            return;
+                        } else if ((header.age() > 86400000) && (scc.get() > 0)) {
+                            Network.log.info("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
+                            return;
+                        }
+                    }
+                    scc.incrementAndGet();
+                    final byte[] content = client.GETbytes(url, null, null, false);
+                    Iterator<String> enu = FileUtils.strings(content);
+                    int lc = 0;
+                    int uptodatec = 0, outdatedc = 0;
+                    while (enu.hasNext()) {
+                        try {
+                            Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
+                            if ((ys != null) && (!mySeedIsDefined() || !mySeed().hash.equals(ys.hash))) {
+                                final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
+                                if (lastseen < 240) uptodatec++; else outdatedc++;
+                                if ( lastseen < 240 || lc < 10 ) {
+                                    if (peerActions.connectPeer(ys, false) ) lc++;
+                                }
+                            }
+                        } catch (final Throwable e ) {
+                            Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
+                        }
+                    }
+                    Network.log.info("BOOTSTRAP: " + lc + " seeds from seed-list URL " + seedListFileURL + ", AGE=" + (header.age() / 3600000) + "h" + ", uptodatec = " + uptodatec + ", outdatedc = " + outdatedc);
+
+                } catch (final IOException e ) {
+                    // this is when wget fails, commonly because of timeout
+                    Network.log.info("BOOTSTRAP: failed (1) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
+                } catch (final Exception e ) {
+                    // this is when wget fails; may be because of missing internet connection
+                    Network.log.severe("BOOTSTRAP: failed (2) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);
+                }
+            }
+        };
+        seedLoader.start();
+    }
+    
 }

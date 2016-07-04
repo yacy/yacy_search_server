@@ -3932,85 +3932,9 @@ public final class Switchboard extends serverSwitch {
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
-                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
+                this.peers.loadSeedListConcurrently(seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
             }
         }
-    }
-
-    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout, final boolean checkAge) {
-        // uses the superseed to initialize the database with known seeds
-
-        Thread seedLoader = new Thread() {
-            @Override
-            public void run() {
-                // load the seed list
-                try {
-                    DigestURL url = new DigestURL(seedListFileURL);
-                    //final long start = System.currentTimeMillis();
-                    final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
-                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
-                    final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-                    client.setHeader(reqHeader.entrySet());
-
-                    client.HEADResponse(url.toNormalform(false), false);
-                    int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-                    ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-                    if (checkAge) {
-                        if ( header.lastModified() == null ) {
-                            Network.log.warn("BOOTSTRAP: seed-list URL "
-                                + seedListFileURL
-                                + " not usable, last-modified is missing");
-                            return;
-                        } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
-                            Network.log.info("BOOTSTRAP: seed-list URL "
-                                + seedListFileURL
-                                + " too old ("
-                                + (header.age() / 86400000)
-                                + " days)");
-                            return;
-                        }
-                    }
-                    scc.incrementAndGet();
-                    final byte[] content = client.GETbytes(url, null, null, false);
-                    Iterator<String> enu = FileUtils.strings(content);
-                    int lc = 0;
-                    while ( enu.hasNext() ) {
-                        try {
-                            Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
-                            if ( (ys != null)
-                                && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
-                                final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
-                                if ( lastseen < 1440 || lc < 10 ) {
-                                    if ( peers.peerActions.connectPeer(ys, false) ) {
-                                        lc++;
-                                    }
-                                }
-                            }
-                        } catch (final Throwable e ) {
-                            Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
-                        }
-                    }
-                    Network.log.info("BOOTSTRAP: "
-                        + lc
-                        + " seeds from seed-list URL "
-                        + seedListFileURL
-                        + ", AGE="
-                        + (header.age() / 3600000)
-                        + "h");
-
-                } catch (final IOException e ) {
-                    // this is when wget fails, commonly because of timeout
-                    Network.log.info("BOOTSTRAP: failed (1) to load seeds from seed-list URL "
-                        + seedListFileURL + ": " + e.getMessage());
-                } catch (final Exception e ) {
-                    // this is when wget fails; may be because of missing internet connection
-                    Network.log.severe("BOOTSTRAP: failed (2) to load seeds from seed-list URL "
-                        + seedListFileURL + ": " + e.getMessage(), e);
-                }
-            }
-        };
-        seedLoader.start();
     }
 
     public void initRemoteProxy() {
