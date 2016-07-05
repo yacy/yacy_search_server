@@ -9,7 +9,6 @@ classes/
 RELEASE/
 /yacy.pid
 .DS_Store
-lib/yacy-cora.jar
 /DATA.bkp
 /DATA.1
 /gen
