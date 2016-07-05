@@ -99,6 +99,8 @@ public class GitRevMavenTask extends AbstractMojo {
             }
         } catch (final IOException e) {
             e.printStackTrace();
+        } catch(IllegalArgumentException e) {
+        	e.printStackTrace();
         }
         if (project != null) {
             project.getProperties().put(this.branchPropertyName, branch);
