@@ -1,0 +1,1 @@
+web: java $JAVA_OPTS -classpath target/classes:lib/* net.yacy.yacy
