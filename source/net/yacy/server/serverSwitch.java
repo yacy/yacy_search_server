@@ -229,6 +229,15 @@ public class serverSwitch {
 	 */
 	public int getLocalPort() {
 
+		/* A system property "http.port" may override configuration 
+		 * This is useful when running YaCy inside a container manager such as Heroku which decide which http port to use */
+		String systemDefinedPort = System.getProperty("http.port");
+		if(systemDefinedPort != null) {
+			try {
+				return Integer.parseInt(systemDefinedPort);
+			} catch(NumberFormatException e) {
+			}
+		}
 		return getConfigInt("port", 8090);
 	}
 

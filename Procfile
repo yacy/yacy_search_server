@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -classpath target/classes:lib/* net.yacy.yacy
+web: java $JAVA_OPTS -Dhttp.port=$PORT -classpath target/classes:lib/* net.yacy.yacy
