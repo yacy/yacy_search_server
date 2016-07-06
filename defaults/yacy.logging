@@ -1,6 +1,6 @@
 # Set the logging level for the root of the namespace.
 # This becomes the default logging level for all Loggers.
-.level=INFO
+.level=FINE
 
 # setting logging levels vor individual classes
 # possible values are:
