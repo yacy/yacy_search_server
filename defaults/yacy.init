@@ -8,7 +8,7 @@
 
 # ----------------------------------------------------------------------------
 # port number where the server should bind to
-port = 8090
+port = 80
 
 # optinal ssl port (https port) the server should bind to
 port.ssl = 8443
