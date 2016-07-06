@@ -102,9 +102,9 @@ filesize.max.other = 8589934591
 # The property here can also be a url where the definition can be loaded.
 # In case of privately managed networks, this configuration must be changed BEFORE it is released
 # to the members of the separated network peers.
-#network.unit.definition = defaults/yacy.network.freeworld.unit
+network.unit.definition = defaults/yacy.network.freeworld.unit
 #network.unit.definition = defaults/yacy.network.webportal.unit
-network.unit.definition = defaults/yacy.network.intranet.unit
+#network.unit.definition = defaults/yacy.network.intranet.unit
 
 # distinguish intranet/internet IPs:
 # if this setting is set to true, then only URL-Hashes with 'intranet'-Flag is created, even if the
@@ -497,11 +497,11 @@ tray.menu.enabled=true
 # index sharing attributes: by default, sharing is on.
 # If you want to use YaCy only for local indexing (robinson mode),
 # you may switch this off
-allowDistributeIndex=false
+allowDistributeIndex=true
 allowDistributeIndexWhileCrawling=false
 allowDistributeIndexWhileIndexing=true
-allowReceiveIndex=false
-allowReceiveIndex.search=false
+allowReceiveIndex=true
+allowReceiveIndex.search=true
 indexReceiveBlockBlacklist=true
 
 # the frequency is the number of links per minute, that the peer allowes
@@ -868,7 +868,7 @@ search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,lang
 #            consider content nevertheless as available and show result without snippet
 # false:     no link verification and not snippet generation:
 #            all search results are valid without verification
-search.verify = cacheonly
+search.verify = ifexist
 
 search.excludehosts=
 search.excludehosth=
@@ -876,7 +876,7 @@ search.excludehosth=
 # in case that a link verification fails then the corresponding index reference can be
 # deleted to clean up the index. If this property is set then failed index verification in
 # the cases of nocache, iffresh and ifexist causes an index deletion
-search.verify.delete = false
+search.verify.delete = true
 
 # remote search details
 remotesearch.maxcount = 10
@@ -1223,7 +1223,7 @@ federated.service.solr.indexing.writeEnabled = true
 # The citation service is used for ranking; this is a reverse linking index. It should be on before and after the migration.
 # It can be switched off if only a remote solr index is used.
 core.service.fulltext = true
-core.service.rwi.tmp = false
+core.service.rwi.tmp = true
 core.service.citation.tmp = true
 core.service.webgraph.tmp = false
 
