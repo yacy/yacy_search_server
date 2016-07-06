@@ -28,14 +28,13 @@ public class HostQueueTest {
     public void testClear() throws MalformedURLException, IOException, SpaceExceededException {
         File stackDirFile = new File(stackDir);
         String hostDir = "a.com";
-        int hostPort = 80;
-
-        // open queue
-        HostQueue testhq = new HostQueue(stackDirFile, hostDir, hostPort, true, true);
-
-        // add a url
         String urlstr = "http://" + hostDir + "/test.html";
         DigestURL url = new DigestURL(urlstr);
+        
+        // open queue
+        HostQueue testhq = new HostQueue(stackDirFile, url, true, true);
+
+        // add a url
         Request req = new Request(url, null);
         testhq.push(req, null, null);
 
