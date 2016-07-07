@@ -1,0 +1,20 @@
+{
+	"name": "YaCy",
+	"description": "Decentralized Web Search",
+	"keywords": [
+		"yacy",
+		"search",
+		"p2p",
+		"decentralized",
+		"java"
+	],
+	"website": "http://yacy.net",
+	"repository": "https://github.com/yacy/yacy_search_server",
+	"logo": "http://yacy.net/material/YaCyLogo2011.svg",
+	"env": {
+		"MAVEN_CUSTOM_OPTS": {
+			"description": "Custom options required for maven build (to run YaCy in senior mode, please set -Dyacy.staticIP=your_app_name.herokuapp.com)",
+			"value": "-f libbuild/pom.xml -DskipTests=true -Dyacy.port=80 -Dyacy.admin.passwd=MD5:1029a0355adffb6378ceed9936ca9be4"
+		}
+	}
+}
