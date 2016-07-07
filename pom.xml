@@ -36,8 +36,8 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>5.5.2</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.17.v20160517</jetty.version>
-                
+        <jetty.version>9.2.17.v20160517</jetty.version>    
+             
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
         <REPL_RELEASE>yacy_v${project.version}_${DSTAMP}_${releaseNr}.tar.gz</REPL_RELEASE>
@@ -64,64 +64,6 @@
                 </configuration>
             </plugin>
             
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<id>init.staticIP</id>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target if="yacy.staticIP"
-								description="Set staticIP in yacy.init only if provided as a property">
-								<replaceregexp file="${project.basedir}/defaults/yacy.init"
-               						match="staticIP=(.*)"
-               						replace="staticIP=${yacy.staticIP}"
-               						byline="true"
-								/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>init.port</id>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target if="yacy.port"
-								description="Set port in yacy.init only if provided as a property">
-								<replaceregexp file="${project.basedir}/defaults/yacy.init"
-               						match="port = (.*)"
-               						replace="port = ${yacy.port}"
-               						byline="true"
-								/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>init.admin</id>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target if="yacy.admin.passwd"
-								description="Set encoded admin password in yacy.init only if provided as a property">
-								<replaceregexp file="${project.basedir}/defaults/yacy.init"
-               						match="adminAccountBase64MD5=(.*)"
-               						replace="adminAccountBase64MD5=${yacy.admin.passwd}"
-               						byline="true"
-								/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -179,11 +121,11 @@
                 </configuration>
             </plugin>
 
-           <!-- compile htroot -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <executions>
+                    <!-- compile htroot -->
                     <execution>
                         <id>compile-htroot</id>
                         <phase>compile</phase>
@@ -203,6 +145,57 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
+					<execution>
+						<id>init.staticIP</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target if="yacy.staticIP"
+								description="Set staticIP in yacy.init only if provided as a property">
+								<replaceregexp file="${project.basedir}/defaults/yacy.init"
+               						match="staticIP=(.*)"
+               						replace="staticIP=${yacy.staticIP}"
+               						byline="true"
+								/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>init.port</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target if="yacy.port"
+								description="Set port in yacy.init only if provided as a property">
+								<replaceregexp file="${project.basedir}/defaults/yacy.init"
+               						match="port = (.*)"
+               						replace="port = ${yacy.port}"
+               						byline="true"
+								/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>init.admin</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target if="yacy.admin.passwd"
+								description="Set encoded admin password in yacy.init only if provided as a property">
+								<replaceregexp file="${project.basedir}/defaults/yacy.init"
+               						match="adminAccountBase64MD5=(.*)"
+               						replace="adminAccountBase64MD5=${yacy.admin.passwd}"
+               						byline="true"
+								/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
                 </executions>
             </plugin>
 
@@ -225,29 +218,6 @@
                 </configuration>
             </plugin>
             
-            <!-- custom plugin to add YaCy release number from local Git clone 
-            sets property <releaseNr>9nnn</releasNr> <DSTAMP>yyyyMMdd</DSTAMP> 
-            ! run sub project in libbuild to install the plugin ! -->
-            <plugin>
-                <groupId>net.yacy</groupId>
-                <artifactId>maven-plugin-gitrevisionnumber</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                        <!-- optional parameter to set/change the propertyName 
-                        <configuration> 
-                            <branchPropertyName>branch</branchPropertyName>
-                            <buildNumberPropertyName>releasNr</buildNumberPropertyName> 
-                            <commitDatePropertyName>DSTAMP</commitDatePropertyName> 
-                        </configuration> 
-                        -->
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>templating-maven-plugin</artifactId>
@@ -299,6 +269,55 @@
     </build>
 
     <profiles>
+		<profile>
+			<!-- Active when .git directory is missing -->
+			<id>no-git</id>
+			<activation>
+				<file>
+					<missing>.git</missing>
+				</file>
+			</activation>
+			<properties>
+			    <!-- fallback value consistent with ant build -->
+				<releaseNr>9000</releaseNr>
+			</properties>
+		</profile>
+    	<profile>
+    		<id>git-rev-number</id>
+    		<!-- Active profile when .git folder exists -->
+			<activation>
+				<file>
+					<exists>.git</exists>
+				</file>
+			</activation>
+    		<build>
+    			<plugins>
+            		<!-- custom plugin to add YaCy release number from local Git clone 
+            		sets property <releaseNr>9nnn</releasNr> <DSTAMP>yyyyMMdd</DSTAMP> 
+            		! run sub project in libbuild to install the plugin ! -->
+            		<plugin>
+                		<groupId>net.yacy</groupId>
+                		<artifactId>maven-plugin-gitrevisionnumber</artifactId>
+                		<version>1.0</version>
+                		<executions>
+                    		<execution>
+                        		<phase>initialize</phase>
+                        		<goals>
+                            		<goal>create</goal>
+                        		</goals>
+                        		<!-- optional parameter to set/change the propertyName 
+                        		<configuration> 
+                            		<branchPropertyName>branch</branchPropertyName>
+                            		<buildNumberPropertyName>releasNr</buildNumberPropertyName> 
+                            		<commitDatePropertyName>DSTAMP</commitDatePropertyName> 
+                        		</configuration> 
+                        		-->
+                    		</execution>
+                		</executions>
+            		</plugin>
+    			</plugins>
+    		</build>
+    	</profile>
         <profile>
             <!-- profile to create a release archive -->
             <id>release-profile</id>

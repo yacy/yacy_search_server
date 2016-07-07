@@ -42,9 +42,6 @@ public class GitRevMavenTask extends AbstractMojo {
     private String buildNumberPropertyName = "releaseNr";
     @Parameter
     private String commitDatePropertyName = "DSTAMP";
-    
-    /** Default revision number when no commit can be found */
-    private static final String DEFAULT_REV_NUMBER = "0000";
 
     Log log = this.getLog();
 
@@ -96,26 +93,20 @@ public class GitRevMavenTask extends AbstractMojo {
             }
             walk.dispose();
             if (lastTag == null) {
-                revision = DEFAULT_REV_NUMBER;
+                revision = "0000";
             } else {
                 revision = Integer.toString(distance + 9000);
             }
         } catch (final IOException e) {
-        	revision = DEFAULT_REV_NUMBER;
-        } catch(IllegalArgumentException e) {
-        	revision = DEFAULT_REV_NUMBER;
+            e.printStackTrace();
         }
         if (project != null) {
-        	if(branch != null) {
-        		project.getProperties().put(this.branchPropertyName, branch);
-        		log.info("GitrevMavenTask: set property " + this.branchPropertyName + "='" + branch + "'");
-        	}
+            project.getProperties().put(this.branchPropertyName, branch);
+            log.info("GitrevMavenTask: set property " + this.branchPropertyName + "='" + branch + "'");            
             project.getProperties().put(this.buildNumberPropertyName, revision);
             log.info("GitrevMavenTask: set property " + this.buildNumberPropertyName + "=" + revision);
-            if(commitDate != null) {
-            	project.getProperties().put(this.commitDatePropertyName, commitDate);
-            	log.info("GitrevMavenTask: set property " + this.commitDatePropertyName + "=" + commitDate);
-            }
+            project.getProperties().put(this.commitDatePropertyName, commitDate);
+            log.info("GitrevMavenTask: set property " + this.commitDatePropertyName + "=" + commitDate);
         } else {
             log.error("GitrevMavenTask: no Maven project");
             System.out.println(this.branchPropertyName + "=" + branch);
