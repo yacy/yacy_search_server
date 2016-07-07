@@ -63,6 +63,64 @@
                     <warSourceDirectory>htroot</warSourceDirectory>
                 </configuration>
             </plugin>
+            
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>init.staticIP</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target if="yacy.staticIP"
+								description="Set staticIP in yacy.init only if provided as a property">
+								<replaceregexp file="${project.basedir}/defaults/yacy.init"
+               						match="staticIP=(.*)"
+               						replace="staticIP=${yacy.staticIP}"
+               						byline="true"
+								/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>init.port</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target if="yacy.port"
+								description="Set port in yacy.init only if provided as a property">
+								<replaceregexp file="${project.basedir}/defaults/yacy.init"
+               						match="port = (.*)"
+               						replace="port = ${yacy.port}"
+               						byline="true"
+								/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>init.admin</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target if="yacy.admin.passwd"
+								description="Set encoded admin password in yacy.init only if provided as a property">
+								<replaceregexp file="${project.basedir}/defaults/yacy.init"
+               						match="adminAccountBase64MD5=(.*)"
+               						replace="adminAccountBase64MD5=${yacy.admin.passwd}"
+               						byline="true"
+								/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
