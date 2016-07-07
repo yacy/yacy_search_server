@@ -131,7 +131,7 @@ public class ConfigBasic {
 
         // check port and ssl connection
         final boolean reconnect;
-        if (!(env.getConfigLong("port", port) == port) || env.getConfigBool("server.https", false) != ssl) {
+        if (!(env.getLocalPort() == port) || env.getConfigBool("server.https", false) != ssl) {
             // validate port
             final YaCyHttpServer theServerCore =  env.getHttpServer();
             env.setConfig("port", port);
