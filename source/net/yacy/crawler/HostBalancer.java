@@ -489,12 +489,10 @@ public class HostBalancer implements Balancer {
     @Override
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
         Map<String, Integer[]> map = new TreeMap<String, Integer[]>(); // we use a tree map to get a stable ordering
-        for (HostQueue hq: this.queues.values()) try {
-            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), DigestURL.hosthash(hq.getHost(), hq.getPort()), robots, ClientIdentification.yacyInternetCrawlerAgent);
+        for (HostQueue hq: this.queues.values()) {
+            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hq.getHostHash(), robots, ClientIdentification.yacyInternetCrawlerAgent);
             map.put(hq.getHost() + ":" + hq.getPort(), new Integer[]{hq.size(), delta});
-        } catch (MalformedURLException e) {
-            ConcurrentLog.logException(e);
-        } 
+        }
         return map;
     }
 
