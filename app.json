@@ -13,7 +13,7 @@
 	"logo": "http://yacy.net/material/YaCyLogo2011.svg",
 	"env": {
 		"MAVEN_CUSTOM_OPTS": {
-			"description": "Custom options required for maven build (to run YaCy in senior mode, please set -Dyacy.staticIP=your_app_name.herokuapp.com)",
+			"description": "Custom options required for maven build on Heroku. To run YaCy in senior mode, you MUST set -Dyacy.staticIP=your_app_name.herokuapp.com. Default admin password is 'heroku', passed encoded to -Dyacy.admin.passwd. You should replace it with your own custom password.",
 			"value": "-f libbuild/pom.xml -DskipTests=true -Dyacy.port=80 -Dyacy.admin.passwd=MD5:1029a0355adffb6378ceed9936ca9be4"
 		}
 	}
