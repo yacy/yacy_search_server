@@ -1,7 +1,5 @@
 # Yacy Docker image from latest sources
 
-[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/luccioman/yacy_search_server/tree/docker/docker)
-
 ## Supported tags and respective Dockerfiles
 
 * latest (Dockerfile)
