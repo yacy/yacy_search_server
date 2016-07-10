@@ -29,6 +29,7 @@
 
 import java.util.Iterator;
 import java.util.Map;
+import net.yacy.cora.protocol.RequestHeader;
 
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
@@ -38,7 +39,7 @@ import net.yacy.server.servletProperties;
 
 public class CookieTest_p {
 
-    public static serverObjects respond(final ResponseHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
 
         // case if no values are requested
