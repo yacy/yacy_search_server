@@ -266,6 +266,8 @@ public class ConfigBasic {
 
         // set default values
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
+        prop.put("hasSystemDefinedPort", env.getLocalPortSystemProperty() != null ? 1 : 0);
+        prop.put("hasSystemDefinedPort_systemProperty", serverSwitch.LOCAL_PORT_SYSTEM_PROPERTY);
         prop.put("defaultPort", env.getLocalPort());
         prop.put("withsslenabled", env.getConfigBool("server.https", false) ? 1 : 0);
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed

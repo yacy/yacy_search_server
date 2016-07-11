@@ -90,7 +90,7 @@
             <dl>
               <dt><label for="port">Peer Port: </label></dt>
               <dd>
-                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" />&nbsp;&nbsp;&nbsp;
+				<input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" #(hasSystemDefinedPort)#::disabled="disabled"#(/hasSystemDefinedPort)#/> #(hasSystemDefinedPort)#::(Set by system property '#[systemProperty]#')#(/hasSystemDefinedPort)#&nbsp;&nbsp;&nbsp;
                 <input type="checkbox" name="withssl" id="withssl" #(withsslenabled)#::checked="checked"#(/withsslenabled)#>with SSL (https enabled#(withsslenabled)#:: on port <a href="Settings_p.html?page=ProxyAccess">#[sslport]#</a>#(/withsslenabled)#)
               </dd>
               #(upnp)#::<dt>
