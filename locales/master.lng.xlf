@@ -1055,6 +1055,15 @@
     <trans-unit id="811f79a2" xml:space="preserve" approved="no" translate="yes">
        <source>please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port</source>
     </trans-unit>
+    <trans-unit id="d068b09" xml:space="preserve" approved="no" translate="yes">
+       <source>Opening a router port is &lt;i&gt;not&lt;/i&gt; a YaCy-specific task;</source>
+    </trans-unit>
+    <trans-unit id="42abd098" xml:space="preserve" approved="no" translate="yes">
+       <source>you can see instruction videos everywhere in the internet, just search for &lt;a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router"&gt;Open Ports on a &amp;lt;our-router-type&amp;gt; Router&lt;/a&gt; and add your router type as search term.</source>
+    </trans-unit>
+    <trans-unit id="b40e882c" xml:space="preserve" approved="no" translate="yes">
+       <source>However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.</source>
+    </trans-unit>    
     <trans-unit id="36323d62" xml:space="preserve" approved="no" translate="yes">
        <source>Your peer can be reached by other peers</source>
     </trans-unit>

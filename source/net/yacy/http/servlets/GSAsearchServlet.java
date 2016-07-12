@@ -96,7 +96,7 @@ public class GSAsearchServlet extends HttpServlet {
     public static void respond(final HttpServletRequest header, final Switchboard sb, final OutputStream out) {
 
         // remember the peer contact for peer statistics
-        String clientip = header.getHeader(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        String clientip = header.getRemoteAddr();
         if (clientip == null) clientip = "<unknown>"; // read an artificial header addendum
         String userAgent = header.getHeader(HeaderFramework.USER_AGENT);
         if (userAgent == null) userAgent = "<unknown>";
