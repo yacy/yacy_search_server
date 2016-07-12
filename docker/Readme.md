@@ -109,7 +109,7 @@ OR
 	
 Create new container based on pulled image, using volume data from old container :
 	
-	docker create --name [tmp-container_name] -p 8090:8090 --volumes-from=[container_name] luccioman/yacy:latest
+	docker create --name [tmp-container_name] -p 8090:8090 --volumes-from=[container_name] --log-opt max-size=100m --log-opt max-file=2 luccioman/yacy:latest
 	
 Stop old container :
 
