@@ -117,9 +117,19 @@ YaCy runs fine in virtual machines managed by software such as VirtualBox or VMw
 
 Container technology may be more flexible and lightweight and also works fine with YaCy.
 
-More details for YaCy with Docker [[docker/Readme.md|here]].
+These technologies can either be deployed locally, on remote machines you own, or in the 'cloud'. Decide what fits the most your privacy requirements.
 
-You can deploy on [[Heroku|https://www.heroku.com/]] platform using the deploy button at the top of this page.
+### Docker
+
+Deploy easily YaCy on a Docker cloud provider of your choice (can be a machine you own) with the deploy button at the top of this page.
+
+More details for YaCy with Docker in [[docker/Readme.md]].
+
+### Heroku
+
+Deploy easily on [Heroku](https://www.heroku.com/) PaaS (Platform as a service) provider using the deploy button at the top.
+
+More details for YaCy on Heroku in [[Heroku.md]].
 
 
 ## Port 8090 is bad, people are not allowed to access that port
