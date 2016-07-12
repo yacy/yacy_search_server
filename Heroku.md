@@ -16,9 +16,9 @@ YaCy main git history is too large to be pushed on Heroku (more than 300MB Herok
 
 ## Deploy with the button
 
-- Click on the 'Deploy to Heroku' button on the main YaCy [[README.md]].
+- Click on the 'Deploy to Heroku' button on the main YaCy [README.md](README.md).
 - Log in with your Heroku account or create one.
-- A preconfigured deploy page is proposed (configuration comes from the [[app.json]] file).
+- A preconfigured deploy page is proposed (configuration comes from the [app.json](app.json) file).
 - Enter the name of your application (don't let Heroku choose a default one).
 - Edit the environment variable `MAVEN_CUSTOM_OPTS` : insert ` -Dyacy.staticIP=your_app_name.herokuapp.com`, with `your_app_name` replaced with the name you choosed.
 If you ignore the two previous steps, YaCy will run, but in junior mode : it will not be able to be reached by other peers and will not contribute to the global indexing.
@@ -69,15 +69,15 @@ Here are some brief instructions to deploy YaCy on Heroku from command line. Mor
 
 ### Heroku specific configuration files :
 
-- [[app.json]] : used when deploying with the button
-- [[.env]] : set up environment variables for local heroku run
-- [[Procfile]] : contain main process description used to launch YaCy
+- [app.json](app.json) : used when deploying with the button
+- [.env](.env) : set up environment variables for local heroku run
+- [Procfile](Procfile) : contain main process description used to launch YaCy
 
 ### Custom maven options
 
 With any of the deployment methods described, setting the option `-f libbuild/pom.xml -DskipTests=true` in the `MAVEN_CUSTOM_OPTS` environment variable is the minimum required for a successfull build and deploy. If not set, build will fail because missing dependent submodules from libbuild directory.
 
-What'smore, the only way for other YaCy peers to reach a peer running on Heroku is to use the "dyno" public URL (in the form of your_app_name.herokuapp.com). This is why `-Dyacy.port=80` and `-Dyacy.staticIP=your_app_name.herokuapp.com` options have to be set in the `MAVEN_CUSTOM_OPTS` variable, or else your YaCy peer will run in "junior" mode. These options are used to customise `port` and `staticIP` initial properties in the [[defaults/yacy.init]] file at build.
+What'smore, the only way for other YaCy peers to reach a peer running on Heroku is to use the "dyno" public URL (in the form of your_app_name.herokuapp.com). This is why `-Dyacy.port=80` and `-Dyacy.staticIP=your_app_name.herokuapp.com` options have to be set in the `MAVEN_CUSTOM_OPTS` variable, or else your YaCy peer will run in "junior" mode. These options are used to customise `port` and `staticIP` initial properties in the [yacy.init](defaults/yacy.init) file at build.
 
 ### HTTP local port
 

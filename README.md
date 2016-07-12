@@ -123,13 +123,13 @@ These technologies can either be deployed locally, on remote machines you own, o
 
 Deploy easily YaCy on a Docker cloud provider of your choice (can be a machine you own) with the deploy button at the top of this page.
 
-More details for YaCy with Docker in [[docker/Readme.md]].
+More details for YaCy with Docker in [docker/Readme.md](docker/Readme.md).
 
 ### Heroku
 
 Deploy easily on [Heroku](https://www.heroku.com/) PaaS (Platform as a service) provider using the deploy button at the top.
 
-More details for YaCy on Heroku in [[Heroku.md]].
+More details for YaCy on Heroku in [Heroku.md](Heroku.md).
 
 
 ## Port 8090 is bad, people are not allowed to access that port
