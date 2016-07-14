@@ -104,6 +104,11 @@ Augmented Browsing:==Angereichertes Browsing:
 Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==Schaltet angereichertes Browsing an oder ab. Wenn aktiviert werden alle Webseite während des Ladens modifiziert.
 #-----------------------------
 
+#File: Autocrawl_p.html
+#---------------------------
+"Save"=="Speichern"
+#-----------------------------
+
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Administration==Blacklist Verwaltung
