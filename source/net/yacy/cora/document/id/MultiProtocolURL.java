@@ -832,7 +832,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     /**
-     * Get extension out of a filename
+     * Get extension out of a filename in lowercase
      * cuts off query part
      * @param fileName
      * @return extension or ""
@@ -1064,8 +1064,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return toNormalform(excludeAnchor, false);
     }
 
+    /**
+     * Generates a normal form of the URL.
+     * For file: url it normalizes also path delimiter to be '/' (replace possible Windows '\'
+     * @param excludeAnchor
+     * @param removeSessionID
+     * @return
+     */
     public String toNormalform(final boolean excludeAnchor, final boolean removeSessionID) {
-        // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
             return this.protocol + ":" + this.userInfo + "@" + this.host;
@@ -1095,6 +1101,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (!defaultPort) {
             u.append(":");
             u.append(this.port);
+        }
+        if (isFile() && urlPath.indexOf('\\') >= 0) { // normalize windows backslash (important for hash computation)
+            urlPath = urlPath.replace('\\', '/');
         }
         u.append(urlPath);
         String result = u.toString();
