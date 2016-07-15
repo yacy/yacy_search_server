@@ -616,6 +616,9 @@
     <trans-unit id="824e78ee" xml:space="preserve" approved="no" translate="yes">
        <source>Please select the XML-file you want to import:</source>
     </trans-unit>
+    <trans-unit id="4cf708d" xml:space="preserve" approved="no" translate="yes">
+       <source>Text:</source>
+    </trans-unit>
   </body>
 </file>
 
