@@ -287,15 +287,6 @@ Time used==Temps utilis&eacute;
 Save User==Sauvegarder l'utilisateur
 #-----------------------------
 
-#File: ConfigAdvanced_p.html
-#---------------------------
-Advanced Config==Configuration avanc&eacute;e
-Here are all configuration options from YaCy.==Toutes les options de configuration de YaCy sont ici.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options n&eacute;cessitent un red&eacute;marrage et certaines autres peuvent provoquer l'arr&ecirc;t de YaCy si elles sont mal choisies.
-For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init ».
-"Save"=="Sauvegarder"
-#-----------------------------
-
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Configuration de l'acc&egrave;s
@@ -399,6 +390,15 @@ Comment==Commentaire
 "Save"=="Sauvegarder"
 You can use==Vous pouvez utiliser
 here.==ici.
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+Advanced Config==Configuration avanc&eacute;e
+Here are all configuration options from YaCy.==Toutes les options de configuration de YaCy sont ici.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options n&eacute;cessitent un red&eacute;marrage et certaines autres peuvent provoquer l'arr&ecirc;t de YaCy si elles sont mal choisies.
+For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init ».
+"Save"=="Sauvegarder"
 #-----------------------------
 
 #File: ConfigSkins_p.html
