@@ -2431,8 +2431,8 @@ Timing Settings for Search Sequence==Param&egrave;tres temporels la recherche
 Ranking and Heuristics==Classement et heuristique
 #Solr Ranking Config==Solr Ranking Config
 #RWI Ranking Config==RWI Ranking Config
->Heuristics<==>==Heuristiques<
-#---------------------------
+>Heuristics<==>Heuristiques<
+#-----------------------------
 
 #File: env/templates/submenuUseCaseAccount.template
 #---------------------------
