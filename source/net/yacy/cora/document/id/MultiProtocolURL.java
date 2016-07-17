@@ -219,8 +219,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if (q < 0) { // check for www.test.com?searchpart
                 q = url.indexOf("?", p + 3);
             } else { // check that '/' was not in searchpart (example http://test.com?data=1/2/3)
-                if (url.lastIndexOf("?",q) >= 0) {
-                    q = url.lastIndexOf("?",q);
+                if (url.lastIndexOf("?", q) >= 0) {
+                    q = url.indexOf("?", p + 3);
                 }
             }
             int r;
