@@ -244,11 +244,12 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         // find rootpath
         int rootpathStart = 0;
         int rootpathEnd = this.path.length() - 1;
-        if (!this.path.isEmpty() && this.path.charAt(0) == '/')
+        if (!this.path.isEmpty() && (this.path.charAt(0) == '/' || this.path.charAt(0) == '\\'))
             rootpathStart = 1;
         if (this.path.endsWith("/"))
             rootpathEnd = this.path.length() - 2;
         p = this.path.indexOf('/', rootpathStart);
+        if (this.isFile() && p < 0) p = this.path.indexOf('\\', rootpathStart); // double-check for windows path (if it's a file url)
         String rootpath = "";
         if (p > 0 && p < rootpathEnd) {
             rootpath = this.path.substring(rootpathStart, p);
@@ -264,7 +265,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         final StringBuilder hashs = new StringBuilder(12);
         assert hashs.length() == 0;
         // form the 'local' part of the hash
-        final String normalform = toNormalform(true, true);
+        final String normalform = toNormalform(true, true); // normalizes also Windows backslash in path to '/' for file url
         final String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
         if (b64l.length() < 5) return null;
         hashs.append(b64l.substring(0, 5)); // 5 chars

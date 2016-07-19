@@ -9,7 +9,7 @@
 # This file is maintained by gDupont
 # This file is written by gDupont, Marsupoil, Mikayé, Moubai
 
-# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer. 
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
 #File: ConfigLanguage_p.html
 #---------------------------
@@ -21,53 +21,157 @@
 <!-- maintainer -->==gDupont
 #-----------------------------
 
+#File: AccessGrid_p.html
+#---------------------------
+YaCy Network Access==Accès réseau
+Server Access Grid==Grille d'accès au serveur
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Cette image montre les connexions entrant vers votre instance YaCy et les connexions sortant de votre instance vers les autres pairs et serveurs web
+#-----------------------------
+
 #File: Blacklist_p.html
 #---------------------------
-Blacklist Manager==Gestionnaire des listes noire
-Used Blacklist engine:==Moteur de liste noire utilis&eacute;:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournit un filtre d'URL sur le serveur Proxy;. Toute URL provenant de la liste noire ne pourra &ecirc;tre charg&eacute;.
-You can define several blacklists and activate them separately.==Vous pouvez d&eacute;finir de nombreuses listes noires et les activer s&eacute;par&eacute;ment.
-You may also provide your blacklist to other peers by sharing them; in return you may==Vous pouvez aussi partager vos listes noires avec d'autres noeuds du r&eacute;seau; en retour vous pourrez
-collect blacklist entries from other peers.==collecter celles des autres.
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Cette fonction permet d'ajouter un filtrage d'URL au proxy; toute URL présente dans la liste noire est bloquée.
+Blacklist Administration==Administration de liste noire
+from being loaded. You can define several blacklists and activate them separately.==Vous pouvez définir plusieurs listes noires et les activer séparément.
+Select list to edit:==Sélectionnez la liste à éditer :
+Create new list:==Créer une nouvelle liste :
+Edit list==Modifier la liste
+These are the domain name/path patterns in==Motifs de noms de domaine/adresses dans
+Blacklist Pattern==Entrées
+Edit selected pattern(s)==Editer l(es) entrée(s) sélectionnée(s)
+Delete selected pattern(s)==Supprimer l(es) entrée(s) sélectionnée(s)
+Move selected pattern(s) to==Déplacer l(es) entrée(s) sélectionnée(s) vers
+Add new pattern:==Ajouter une nouvelle entrée :
+The right '*', after the '/', can be replaced by a==Le caractère '*' à droite, après le '/', peut être remplacé par une
+>regular expression<==>expression régulière<
+a complete <==une <
+(slow)==(lent)
+Show entries:==Afficher les entrées :
+Entries per page:==Entrées par page :
+"set"=="Appliquer"
+Edit existing pattern(s):==Modifier l(es) entrée(s) existante(s)
+"Save URL pattern(s)"=="Enregistrer"
+Settings for this list==Param&egrave;tres de la liste
+"create"=="Cr&eacute;er"
+Add URL pattern==Ajouter
+You may also provide your blacklist to other peers by sharing them; in return you may==Vous pouvez aussi partager vos listes noires avec les autres noeuds du r&eacute;seau; en retour vous pourrez
+collect blacklist entries from other peers.==importer celles des autres.
+Share/don't share this list==Partager/Ne pas partager
+Delete this list==Supprimer
+"Save"=="Appliquer"
 Active list:==Liste active:
 No blacklist selected==Aucune liste noire s&eacute;lectionn&eacute;e
-Select list:==S&eacute;lectionner une liste:
 not shared::shared==non partag&eacute;::partag&eacute;
-"select"=="s&eacute;lectionner"
-New list:==Nouvelle liste:
-"create"=="cr&eacute;er"
-Settings for this list==Param&egrave;tres de cette liste
-"Save"=="Sauvegarder"
-Share/don't share this list==Partager/ne pas partager cette liste
-Delete this list==Supprimer cette liste
-Edit this list==&eacute;diter cette liste
-These are the domain name / path patterns in this blacklist:==Les noms de domaines/ mod&egrave;le de chemin dans la liste noire:
-You can select them here for deletion==Vous pouvez les s&eacute;lectionner pour la suppression
-Delete URL pattern==Supprimer le mod&egrave;le d'URL
-Add URL pattern==Ajouter un mod&egrave;le d'URL
-Import blacklist items from...==Importer les donn&eacute;es d'une liste noire depuis...
-other YaCy peers:==Autre noeud Yacy:
-file:==fichiers:
-"Load new blacklist items"=="Charger les nouvelles donn&eacute;es de la liste noire"
-#URL:==URL:
-was removed from blacklist==a(ont) &eacute;t&eacute; supprim&eacute;(s) de la liste noire
-was added to the blacklist==a(ont) &eacute;t&eacute; ajout&eacute;(s) &agrave; la liste noire
 Activate this list for==Activer cette liste pour
+#-----------------------------
+
+#File: AccessTracker_p.html
+#---------------------------
+Access Tracker==Suivi des connexions
+Server Access Overview==Vue d'ensemble des accès serveur
+This is a list of #[num]# requests to the local http server within the last hour.==Liste des #[num]# requêtes vers le serveur http local pendant l'heure précédente.
+Showing #[num]# requests.==Affichage de #[num]# requêtes.
+>Host<==>Hôte<
+>Path<==>Chemin<
+Access Count During==Nombre d'accès par période prédécente
+last Second==Seconde
+last Minute==Minute
+last 10 Minutes==10 Minutes
+last Hour==Heure
+The following hosts are registered as source for brute-force requests to protected pages==Les hôtes suivants sont enregistrés comme sources pour des requêtes de force brute vers des pages protégées
+Access Times==Temps d'Accès
+Server Access Details==Détails des Accès Serveur
+Local Search Log==Recherche dans le journal local
+Local Search Host Tracker==Suivi des recherches locales
+Remote Search Log==Journal des recherches distantes
+Success:==Succès:
+Remote Search Host Tracker==Suivi des recherches distantes
+This is a list of searches that had been requested from this' peer search interface==Liste des requêtes lancées depuis l'interface de recherche de cette instance
+Showing #[num]# entries from a total of #[total]# requests.==Affichage de #[num]# entrées sur un total de #[tota]# requêtes.
+Requesting Host==Hôte appelant
+Expected Results==Résultats attendus
+Returned Results==Résultats renvoyés
+Used Time (ms)==Temps utilisé (ms)
+URL fetch (ms)==Récupération d'URL (ms)
+Snippet comp (ms)==Traitement de 'Snippet' (ms)
+Query==Requête
+Search Word Hashes==Hash des mots recherchés
+Count</td>==Décompte</td>
+Queries Per Last Hour==Requêtes sur l'heure précédente
+Access Dates==Dates d'accès
+This is a list of searches that had been requested from remote peer search interface==Liste des recherches effectuées depuis l'interface de recherche de pairs distants
+This is a list of requests (max. 1000) to the local http server within the last hour.==Liste des requêtes (max. 1000) vers le serveur http local pendant l'heure précédente.
+#-----------------------------
+
+#File: BlacklistImpExp_p.html
+#---------------------------
+Blacklist Import==Import de liste noire
+Used Blacklist engine:==Gestionnaire de liste noire utilisé :
+Import blacklist items from...==Imorter des entrées de liste noire depuis...
+other YaCy peers:==D'autres pairs YaCy :
+"Load new blacklist items"=="Importer"
+plain text file:<==Un fichier texte brut :<
+XML file:==Un fichier XML :
+Upload a regular text file which contains one blacklist entry per line.==Importer un fichier texte brut contenant une entrée de liste noire par ligne.
+Upload an XML file which contains one or more blacklists.==Importer un fichier XML contenant une ou plusieurs listes noires.
+Export blacklist items to...==Exporter les éléments de liste noire vers...
+Here you can export a blacklist as an XML file. This file will contain additional==Vous pouvez exporter ici une liste noire vers un fichier XML. Ce fichier contient des informations supplémentaires
+information about which cases a blacklist is activated for.==décrivant les cas pour lesquels cette liste noire est activée.
+"Export list as XML"=="Export XML"
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==Vous pouvez exporter ici une liste noire vers un fichier texte brut contenant une entrée de liste noire par ligne.
+This file will not contain any additional information==Ce fichier ne contiendra aucune information supplémentaire
+"Export list as text"=="Export texte"
+URL:==Une URL :
+#-----------------------------
+
+#File: AugmentedBrowsing_p.html
+#---------------------------
+Augmented Browsing<==Navigation augmentée<
+URL Proxy Settings<==Configuration du Proxy<
+With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==Avec cette configuration, vous pouvez activer ou désactiver le proxy utilisé pour la navigation augmentée.
+Service call: ==Appel du service :
+, where parameter is the url of an external web page.==, où parameter est l'url d'une page web externe.
+>URL proxy:<==>Proxy:<
+>Enabled<==>Activé<
+Globally enables or disables URL proxy via ==Active ou désactive globalement le proxy via 
+Show search results via URL proxy:==Afficher les résultats de recherche via le proxy :
+Enables or disables URL proxy for all search results. If enabled, all search results will be tunneled through URL proxy.==Active ou désactive le proxy pour tous les résultats de recherche. Lorsqu'activé, tous les résultats de recherche seront encapsulés par le proxy.
+Alternatively you may add this javascript to your browser favorites/short-cuts, which will reload the current browser address==Alternativement vous pouvez ajouter ce JavaScript aux favoris/marques-pages de votre navigateur, qui rechargera l'adresse courante
+via the YaCy proxy servlet.==via la servlet proxy de YaCy.
+or right-click this link and add to favorites:==ou bien faites un clic droit sur ce lien et créez un marque-page :
+Restrict URL proxy use:==Restriction d'utilisation du proxy
+Define client filter. Default: ==Définit un filtre client. Par défaut :
+URL substitution:==Substitution d'URL :
+Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==Définit les règles de substitution d'URL qui permettent de naviguer avec le proxy. Valeurs possibles : all, domainlist. Par défaut: domainlist.
+"Submit"=="Enregistrer"
 #-----------------------------
 
 #File: Blog.html
 #---------------------------
+Comments</a>==Commentaires</a>
+Edit<==Modifier<
+previous entries==Entrées précédentes
+next entries==Entrées suivantes
+new entry==Nouvelle entr&eacute;e
+import XML-File==Importer des donn&eacute;es XML
+export as XML==Exporter en XML
+Comments:==Commentaires :
+deactivated==désactivés
+>activated==>activés
+moderated==modérés
+Are you sure==Etes-vous sûr
+that you want to delete==de vouloir supprimer
+Confirm deletion==Confirmation
+Yes, delete it.==Oui, supprimer.
+No, leave it.==Non, conserver.
 by==par
 >edit==>&eacute;diter
 >delete==>supprimer
-show more entries==montrer plus d'entr&eacute;es
-new entry==nouvelle entr&eacute;e
-import XML-File==importer des donn&eacute;es XML
-export as XML==exporter en XML
 Blog-Home==Accueil du blog
 Author:==Auteur:
 Subject:==Titre:
 Text:==Texte:
+>edit==>&eacute;diter
 You can use==Vous pouvez utiliser
 Yacy-Wiki Code==le code YaCy-Wiki
 here.==ici.
@@ -78,13 +182,41 @@ here.==ici.
 No changes have been submitted so far!==Aucun changement n'a &eacute;t&eacute; soumis !
 Access denied==Acc&egrave;s refus&eacute;
 To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Pour &eacute;diter ou cr&eacute;er des entr&eacute;es dans ce blog, vous devez &ecirc;tre enregistr&eacute; en tant qu'administrateur ou en tant qu'utilisateur avec des droits d'acc&egrave;s au blog.
-Are you sure==&ecirc;tes vous sûr
-that you want to delete <strong>#[subject]#</strong> by #[author]#?==ce que vous souhaitez supprimer <strong>#[subject]#</strong> de #[author]# ?
-Yes, delete it.==Oui, le supprimer.
-No, leave it.==Non, le laisser.
 Import was successful!==L'importation a r&eacute;ussi !
 Import failed, maybe the supplied file was no valid blog-backup?==L'importation a &eacute;chou&eacute;, peut-&ecirc;tre que le fichier import&eacute; n'&eacute;tait pas une archive de blog valide?
 Please select the XML-file you want to import:==S&eacute;lectionnez le fichier XML que vous souhaitez importer :
+#-----------------------------
+
+#File: BlacklistCleaner_p.html
+#---------------------------
+Blacklist Cleaner==Nettoyage de Liste Noire
+Here you can remove or edit illegal or double blacklist-entries.==Vous pouvez nettoyer ici les entrées de liste noire incorrectes ou en double.
+"Check"=="Vérifier"
+Allow regular expressions in host part of blacklist entries.==Autoriser les expressions régulières dans la partie hôte des entrées de liste noire.
+The blacklist-cleaner only works for the following blacklist-engines up to now:==Le nettoyeur de blacklist fonctionne seulement pour les gestionnaires de liste noire suivants jusqu'à maintenant :
+Illegal Entries in #[blList]# for==Entrées incorrectes dans #[blList]# pour
+Deleted #[delCount]# entries==#[delCount]# entrées supprimées
+Altered #[alterCount]# entries!==#[alterCount]# entrées modifiées!
+Two wildcards in host-part==Deux caractères génériques dans la partie hôte
+Either subdomain <u>or</u> wildcard==Soit un sous-domaine <u>soit</u> un caractère générique
+Path is invalid Regex==Le chemin est une expression régulière non valide
+Wildcard not on begin or end==Pas de caractère générique au début ou à la fin
+Host contains illegal chars==L'hôte contient des caractères incorrects
+Double==Doublon
+"Change Selected"=="Modifier Sélectionné"
+"Delete Selected"=="Supprimer Sélectionné"
+No Blacklist selected==Pas de blacklist sélectionnée
+#-----------------------------
+
+#File: BlacklistTest_p.html
+#---------------------------
+Blacklist Test==Test de liste noire
+Used Blacklist engine:==Gestionnaire de liste noire :
+Test list:==Test de liste :
+The tested URL was==URL testée :
+It is blocked for the following cases:==Blocage dans les cas suivants :
+Search==Recherche
+Surftips==Recommendations
 #-----------------------------
 
 #File: Bookmarks.html
@@ -153,15 +285,6 @@ Rights==Droits
 Timelimit==Limite de temps
 Time used==Temps utilis&eacute;
 Save User==Sauvegarder l'utilisateur
-#-----------------------------
-
-#File: ConfigAdvanced_p.html
-#---------------------------
-Advanced Config==Configuration avanc&eacute;e
-Here are all configuration options from YaCy.==Toutes les options de configuration de YaCy sont ici.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options n&eacute;cessitent un red&eacute;marrage et certaines autres peuvent provoquer l'arr&ecirc;t de YaCy si elles sont mal choisies.
-For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init ».
-"Save"=="Sauvegarder"
 #-----------------------------
 
 #File: ConfigBasic.html
@@ -268,6 +391,15 @@ Comment==Commentaire
 "Save"=="Sauvegarder"
 You can use==Vous pouvez utiliser
 here.==ici.
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+Advanced Config==Configuration avanc&eacute;e
+Here are all configuration options from YaCy.==Toutes les options de configuration de YaCy sont ici.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options n&eacute;cessitent un red&eacute;marrage et certaines autres peuvent provoquer l'arr&ecirc;t de YaCy si elles sont mal choisies.
+For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init ».
+"Save"=="Sauvegarder"
 #-----------------------------
 
 #File: ConfigSkins_p.html
@@ -2300,8 +2432,8 @@ Timing Settings for Search Sequence==Param&egrave;tres temporels la recherche
 Ranking and Heuristics==Classement et heuristique
 #Solr Ranking Config==Solr Ranking Config
 #RWI Ranking Config==RWI Ranking Config
->Heuristics<==>==Heuristiques<
-#---------------------------
+>Heuristics<==>Heuristiques<
+#-----------------------------
 
 #File: env/templates/submenuUseCaseAccount.template
 #---------------------------

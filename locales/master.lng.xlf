@@ -190,6 +190,62 @@
   </body>
 </file>
 
+<file original="Autocrawl_p.html"  source-language="en" datatype="html">
+  <body>
+    <trans-unit id="263005b5" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Autocrawler&lt;</source>
+    </trans-unit>
+    <trans-unit id="7015ea9" xml:space="preserve" approved="no" translate="yes">
+       <source>Autocrawler automatically selects and adds tasks to the local crawl queue.</source>
+    </trans-unit>
+    <trans-unit id="173d9787" xml:space="preserve" approved="no" translate="yes">
+       <source>This will work best when there are already quite a few domains in the index.</source>
+    </trans-unit>
+    <trans-unit id="ef85f111" xml:space="preserve" approved="no" translate="yes">
+       <source>Autocralwer Configuration</source>
+    </trans-unit>    
+    <trans-unit id="45fd99f0" xml:space="preserve" approved="no" translate="yes">
+       <source>You need to restart for some settings to be applied</source>
+    </trans-unit>
+    <trans-unit id="7b631d2" xml:space="preserve" approved="no" translate="yes">
+       <source>Enable Autocrawler:</source>
+    </trans-unit>
+    <trans-unit id="66a1bd2c" xml:space="preserve" approved="no" translate="yes">
+       <source>Deep crawl every:</source>
+    </trans-unit>
+    <trans-unit id="2291c65d" xml:space="preserve" approved="no" translate="yes">
+       <source>Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.</source>
+    </trans-unit>
+    <trans-unit id="46c18c30" xml:space="preserve" approved="no" translate="yes">
+       <source>Rows to fetch at once:</source>
+    </trans-unit>
+    <trans-unit id="6b6b7b1b" xml:space="preserve" approved="no" translate="yes">
+       <source>Recrawl only older than # days:</source>
+    </trans-unit>
+    <trans-unit id="1472a55c" xml:space="preserve" approved="no" translate="yes">
+       <source>Get hosts by query:</source>
+    </trans-unit>
+    <trans-unit id="6dd8103f" xml:space="preserve" approved="no" translate="yes">
+       <source>Can be any valid Solr query.</source>
+    </trans-unit>
+    <trans-unit id="bc75d794" xml:space="preserve" approved="no" translate="yes">
+       <source>Shallow crawl depth (0 to 2):</source>
+    </trans-unit>
+    <trans-unit id="6c1bc4ce" xml:space="preserve" approved="no" translate="yes">
+       <source>Deep crawl depth (1 to 5):</source>
+    </trans-unit>
+    <trans-unit id="5c70dfbf" xml:space="preserve" approved="no" translate="yes">
+       <source>Index text:</source>
+    </trans-unit>
+    <trans-unit id="25aff004" xml:space="preserve" approved="no" translate="yes">
+       <source>Index media:</source>
+    </trans-unit>
+    <trans-unit id="3ec44343" xml:space="preserve" approved="no" translate="yes">
+       <source>"Save"</source>
+    </trans-unit>    
+  </body>
+</file>
+
 <file original="BlacklistCleaner_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="da2f8473" xml:space="preserve" approved="no" translate="yes">
@@ -559,6 +615,9 @@
     </trans-unit>
     <trans-unit id="824e78ee" xml:space="preserve" approved="no" translate="yes">
        <source>Please select the XML-file you want to import:</source>
+    </trans-unit>
+    <trans-unit id="4cf708d" xml:space="preserve" approved="no" translate="yes">
+       <source>Text:</source>
     </trans-unit>
   </body>
 </file>

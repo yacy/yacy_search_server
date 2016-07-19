@@ -638,10 +638,13 @@ dc_rights
         return v;
     }
 
+    /**
+     * We find all links that are part of a reference inside a url
+     *
+     * @param links links is either a Set of AnchorURL, Strings (with urls) or htmlFilterImageEntries
+     * @return map with contained urls as key and "ref" as value
+     */
     private static Map<AnchorURL, String> allReflinks(final Collection<?> links) {
-        // links is either a Set of Strings (with urls) or
-        // htmlFilterImageEntries
-        // we find all links that are part of a reference inside a url
         final Map<AnchorURL, String> v = new HashMap<AnchorURL, String>();
         final Iterator<?> i = links.iterator();
         Object o;
@@ -663,7 +666,9 @@ dc_rights
                     continue loop;
                 }
                 u = url.toNormalform(true);
-                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
+
+                // find start of a referenced http url
+                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
@@ -673,14 +678,28 @@ dc_rights
                         v.put(url, "ref");
                     continue loop;
                 }
-                if ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0) {
+
+                // find start of a referenced https url
+                if ((pos = u.toLowerCase().indexOf("https://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
-                    u = "http:/" + u.substring(pos);
-                    while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
-                        u = "http:/" + u.substring(pos);
+                    u = u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("https://", 7)) > 0)
+                        u = u.substring(pos);
                     url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
+                    continue loop;
+                }
+                
+                if ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0) { // 11 = skip protocol part + www of source url "http://www."
+                    i.remove();
+                    u = url.getProtocol()+":/" + u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0)
+                        u = url.getProtocol()+":/" + u.substring(pos);
+
+                    AnchorURL addurl = new AnchorURL(u);
+                    if (!(v.containsKey(addurl)))
+                        v.put(addurl, "ref");
                     continue loop;
                 }
             } catch (final MalformedURLException e) {

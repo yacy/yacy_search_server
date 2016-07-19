@@ -216,7 +216,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
             int q = url.indexOf('/', p + 3);
-            if (q < 0) q = url.indexOf("?", p + 3); // check for www.test.com?searchpart
+            if (q < 0) { // check for www.test.com?searchpart
+                q = url.indexOf("?", p + 3);
+            } else { // check that '/' was not in searchpart (example http://test.com?data=1/2/3)
+                if (url.lastIndexOf("?", q) >= 0) {
+                    q = url.indexOf("?", p + 3);
+                }
+            }
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
@@ -832,7 +838,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     /**
-     * Get extension out of a filename
+     * Get extension out of a filename in lowercase
      * cuts off query part
      * @param fileName
      * @return extension or ""
@@ -1064,8 +1070,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return toNormalform(excludeAnchor, false);
     }
 
+    /**
+     * Generates a normal form of the URL.
+     * For file: url it normalizes also path delimiter to be '/' (replace possible Windows '\'
+     * @param excludeAnchor
+     * @param removeSessionID
+     * @return
+     */
     public String toNormalform(final boolean excludeAnchor, final boolean removeSessionID) {
-        // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
             return this.protocol + ":" + this.userInfo + "@" + this.host;
@@ -1095,6 +1107,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (!defaultPort) {
             u.append(":");
             u.append(this.port);
+        }
+        if (isFile() && urlPath.indexOf('\\') >= 0) { // normalize windows backslash (important for hash computation)
+            urlPath = urlPath.replace('\\', '/');
         }
         u.append(urlPath);
         String result = u.toString();

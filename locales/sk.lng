@@ -137,15 +137,6 @@ Show==Zobraz
 Bookmarks per page.==z&aacute;loziek na str&aacute;nku.
 #-----------------------------
 
-#File: ConfigAdvanced_p.html
-#---------------------------
-Advanced Config==Pokrocile nastavenia
-Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
-For explanation please look into defaults/yacy.init==Vysvetlenie najdete v subore defaults/yacy.init
-"Save"=="Uloz"
-#-----------------------------
-
 #File: ConfigBasic.html
 #---------------------------
 Select a language for the interface==Zvolte jazyk web rozhrania
@@ -221,6 +212,15 @@ eMail==email
 #MSN==MSN
 Comment==Koment&aacute;r
 "Save"=="Uloz profil"
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+Advanced Config==Pokrocile nastavenia
+Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
+For explanation please look into defaults/yacy.init==Vysvetlenie najdete v subore defaults/yacy.init
+"Save"=="Uloz"
 #-----------------------------
 
 #File: ConfigSkins_p.html
@@ -1852,7 +1852,6 @@ user</a> page.==stranky pouzivatelov</a>.
 
 #File: ViewFile.html
 #---------------------------
-YaCy '#[clientname]#': View URL Content==YaCy '#[clientname]#': Zobraz obsah URL adresy
 View URL Content==Zobraz obsah URL adresy
 #URL==URL
 #Hash==Hash
