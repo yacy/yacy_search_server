@@ -145,12 +145,15 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
+                    
+                    <!-- Eventually customize yacy.init file -->
+                    
 					<execution>
 						<id>init.staticIP</id>
 						<phase>prepare-package</phase>
 						<configuration>
-							<target if="yacy.staticIP"
-								description="Set staticIP in yacy.init only if provided as a property">
+							<target if="yacy.staticIP" description="Set staticIP in yacy.init only if provided as a property">
+                            	<echo message="Set 'staticIP' property in defaults/yacy.init : ${yacy.staticIP}"/>
 								<replaceregexp file="${project.basedir}/defaults/yacy.init"
                						match="staticIP=(.*)"
                						replace="staticIP=${yacy.staticIP}"
@@ -168,6 +171,7 @@
 						<configuration>
 							<target if="yacy.port"
 								description="Set port in yacy.init only if provided as a property">
+								<echo message="Set 'port' property in defaults/yacy.init : ${yacy.port}"/>
 								<replaceregexp file="${project.basedir}/defaults/yacy.init"
                						match="port = (.*)"
                						replace="port = ${yacy.port}"
@@ -185,6 +189,7 @@
 						<configuration>
 							<target if="yacy.admin.passwd"
 								description="Set encoded admin password in yacy.init only if provided as a property">
+								<echo message="Set 'adminAccountBase64MD5' property in defaults/yacy.init : ${yacy.admin.passwd}"/>
 								<replaceregexp file="${project.basedir}/defaults/yacy.init"
                						match="adminAccountBase64MD5=(.*)"
                						replace="adminAccountBase64MD5=${yacy.admin.passwd}"
