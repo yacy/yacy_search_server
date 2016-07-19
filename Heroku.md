@@ -39,12 +39,12 @@ Here are some brief instructions to deploy YaCy on Heroku from command line. Mor
    - check everything works fine at http://localhost:8090
    - stop the local YaCy
 - Log in on heroku : `heroku login`
-- Create an app on heroku : `heroku create`
-- Set the `MAVEN_CUSTOM_OPTS` config var :
- - run : `heroku config:set MAVEN_CUSTOM_OPTS="-f libbuild/pom.xml -DskipTests=true -Dyacy.port=80 -Dyacy.admin.passwd=MD5:1029a0355adffb6378ceed9936ca9be4 -Dyacy.staticIP=your_app_name.herokuapp.com"` (fill `yacy.staticIP` and `yacy.admin.passwd` properties as described in the previous paragraph)
- - OR only set minimum required : `heroku config:set MAVEN_CUSTOM_OPTS="-f libbuild/pom.xml -DskipTests=true` and modify locally the defaults/yacy.init file (properties `port`, `staticIP` and `adminAccountBase64MD5`)
+- Create an app on heroku : `heroku create [your_app_name]`
 - Initialize a git repository : `git init`
 - Add remote heroku git repository for this deployment : `heroku git:remote -a your_app_name`
+- Set the `MAVEN_CUSTOM_OPTS` config var :
+ - run : `heroku config:set MAVEN_CUSTOM_OPTS="-f libbuild/pom.xml -DskipTests=true -Dyacy.port=80 -Dyacy.admin.passwd=MD5:1029a0355adffb6378ceed9936ca9be4 -Dyacy.staticIP=your_app_name.herokuapp.com"` (fill `yacy.staticIP` and `yacy.admin.passwd` properties as described in the previous paragraph)
+ - OR only set minimum required : `heroku config:set MAVEN_CUSTOM_OPTS="-f libbuild/pom.xml -DskipTests=true"` and modify locally the defaults/yacy.init file (properties `port`, `staticIP` and `adminAccountBase64MD5`)
 - Add files to git index : `git add .`
 - Commit : `git commit`
 - Push to heroku : `git push heroku master`
