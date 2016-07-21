@@ -356,8 +356,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return this.contentDomain;
     }
 
+    /**
+     * @deprecated not used (2016-07-20), doesn't handle all protocol cases. Use MultiprotocolURL(MultiProtocolURL, String) instead
+     */
+    @Deprecated // not used 2016-07-20
     public static MultiProtocolURL newURL(final String baseURL, String relPath) throws MalformedURLException {
-        if (relPath.startsWith("//")) {
+       if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             relPath = "http:" + relPath;
         }
@@ -373,6 +377,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return new MultiProtocolURL(new MultiProtocolURL(baseURL), relPath);
     }
 
+    /**
+     * @deprecated not used (2016-07-20), doesn't handle all protocol cases. Use MultiprotocolURL(MultiProtocolURL, String) instead
+     */
+    @Deprecated // not used 2016-07-20
     public static MultiProtocolURL newURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
@@ -831,11 +839,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public String getFileName() {
         // this is a method not defined in any sun api
         // it returns the last portion of a path without any reference
-        final int p = this.path.lastIndexOf('/');
-        if (p < 0) return this.path;
-        if (p == this.path.length() - 1) return ""; // no file name, this is a path to a directory
-        return this.path.substring(p + 1); // the 'real' file name
-    }
+            final int p = this.path.lastIndexOf('/');
+            if (p < 0) return this.path;
+            if (p == this.path.length() - 1) return ""; // no file name, this is a path to a directory
+            return this.path.substring(p + 1); // the 'real' file name
+        }
 
     /**
      * Get extension out of a filename in lowercase
@@ -2438,10 +2446,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
                 System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
             }
-            
+
             if (aURL != null && jURL != null && jURL.toString().equals(aURL.toNormalform(false))) {
                 System.out.println("jURL == aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
-            }
+}
 
             // check stability: the normalform of the normalform must be equal to the normalform
             if (aURL != null) try {
