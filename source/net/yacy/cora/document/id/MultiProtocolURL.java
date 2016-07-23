@@ -137,12 +137,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
      */
-    public MultiProtocolURL()  {
+    protected MultiProtocolURL()  {
         this.protocol = null;
         this.host = null;
         this.hostAddress = null;
         this.userInfo = null;
-        this.path = ""; // path is used often without check against null (this init is only used as poison url, but safe is safe, so init to empty string)
+        this.path = null;
         this.searchpart = null;
         this.anchor = null;
         this.contentDomain = null;
