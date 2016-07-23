@@ -142,7 +142,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         this.host = null;
         this.hostAddress = null;
         this.userInfo = null;
-        this.path = null;
+        this.path = ""; // path is used often without check against null (this init is only used as poison url, but safe is safe, so init to empty string)
         this.searchpart = null;
         this.anchor = null;
         this.contentDomain = null;
@@ -866,12 +866,22 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return fileName.substring(p + 1, q).toLowerCase();
     }
 
+    /**
+     * Get the path (including filename)
+     * Path is never null
+     * returns may range from empty string, just "/" to a full path
+     * @return
+     */
     public String getPath() {
         return this.path;
     }
 
+    /**
+     * Get path elements (directories) as array
+     * @return array with directory names or empty array
+     */
     public String[] getPaths() {
-        String s = this.path == null ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
+        String s = (this.path == null || this.path.length() < 1) ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
         int p = s.lastIndexOf('/');
         if (p < 0) return new String[0];
         s = s.substring(0, p); // the paths do not contain the last part, which is considered as the getFileName() part.
