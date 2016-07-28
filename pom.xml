@@ -36,8 +36,8 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>5.5.2</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.17.v20160517</jetty.version>    
-             
+        <jetty.version>9.2.17.v20160517</jetty.version>
+                
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
         <REPL_RELEASE>yacy_v${project.version}_${DSTAMP}_${releaseNr}.tar.gz</REPL_RELEASE>
@@ -63,7 +63,7 @@
                     <warSourceDirectory>htroot</warSourceDirectory>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -121,11 +121,11 @@
                 </configuration>
             </plugin>
 
+           <!-- compile htroot -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
                 <executions>
-                    <!-- compile htroot -->
                     <execution>
                         <id>compile-htroot</id>
                         <phase>compile</phase>
@@ -145,62 +145,6 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    
-                    <!-- Eventually customize yacy.init file -->
-                    
-					<execution>
-						<id>init.staticIP</id>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target if="yacy.staticIP" description="Set staticIP in yacy.init only if provided as a property">
-                            	<echo message="Set 'staticIP' property in defaults/yacy.init : ${yacy.staticIP}"/>
-								<replaceregexp file="${project.basedir}/defaults/yacy.init"
-               						match="staticIP=(.*)"
-               						replace="staticIP=${yacy.staticIP}"
-               						byline="true"
-								/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>init.port</id>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target if="yacy.port"
-								description="Set port in yacy.init only if provided as a property">
-								<echo message="Set 'port' property in defaults/yacy.init : ${yacy.port}"/>
-								<replaceregexp file="${project.basedir}/defaults/yacy.init"
-               						match="port = (.*)"
-               						replace="port = ${yacy.port}"
-               						byline="true"
-								/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>init.admin</id>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target if="yacy.admin.passwd"
-								description="Set encoded admin password in yacy.init only if provided as a property">
-								<echo message="Set 'adminAccountBase64MD5' property in defaults/yacy.init : ${yacy.admin.passwd}"/>
-								<replaceregexp file="${project.basedir}/defaults/yacy.init"
-               						match="adminAccountBase64MD5=(.*)"
-               						replace="adminAccountBase64MD5=${yacy.admin.passwd}"
-               						byline="true"
-								/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
                 </executions>
             </plugin>
 

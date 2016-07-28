@@ -20,9 +20,9 @@ YaCy main git history is too large to be pushed on Heroku (more than 300MB Herok
 - Log in with your Heroku account or create one.
 - A preconfigured deploy page is proposed (configuration comes from the [app.json](app.json) file).
 - Enter the name of your application (don't let Heroku choose a default one).
-- Edit the environment variable `MAVEN_CUSTOM_OPTS` : insert ` -Dyacy.staticIP=your_app_name.herokuapp.com`, with `your_app_name` replaced with the name you choosed.
-If you ignore the two previous steps, YaCy will run, but in junior mode : it will not be able to be reached by other peers and will not contribute to the global indexing.
-- Edit the environment variable `MAVEN_CUSTOM_OPTS` : replace `-Dyacy.admin.passwd=MD5:1029a0355adffb6378ceed9936ca9be4`, with a custom admin password encoded with YaCy (you can get this encoded value by running a local YaCy peer, setting your custom admin password in /ConfigAccounts_p.html, and retrieving it in DATA/SETTINGS/yacy.conf at key `adminAccountBase64MD5`).
+- Edit the configuration variable `YACY_PUBLIC_URL` : fill it with an URL like `your_app_name.herokuapp.com`, with `your_app_name` replaced with the name you choosed.
+If you ignore this step, YaCy will run, but in junior mode : it will not be able to be reached by other peers and will not contribute to the global indexing.
+- Edit the configuration variable `YACY_INIT_ADMIN_PASSWORD` : fill it with your custom admin password encoded with YaCy (you can get this encoded value by running a local YaCy peer, setting your custom admin password in /ConfigAccounts_p.html, and retrieving it in DATA/SETTINGS/yacy.conf at key `adminAccountBase64MD5`).
 - Click on the deploy button.
 - Heroku now build YaCy from sources.
 - If everything went fine, you can open YaCy search page with the `View` button
@@ -42,9 +42,9 @@ Here are some brief instructions to deploy YaCy on Heroku from command line. Mor
 - Create an app on heroku : `heroku create [your_app_name]`
 - Initialize a git repository : `git init`
 - Add remote heroku git repository for this deployment : `heroku git:remote -a your_app_name`
-- Set the `MAVEN_CUSTOM_OPTS` config var :
- - run : `heroku config:set MAVEN_CUSTOM_OPTS="-f libbuild/pom.xml -DskipTests=true -Dyacy.port=80 -Dyacy.admin.passwd=MD5:1029a0355adffb6378ceed9936ca9be4 -Dyacy.staticIP=your_app_name.herokuapp.com"` (fill `yacy.staticIP` and `yacy.admin.passwd` properties as described in the previous paragraph)
- - OR only set minimum required : `heroku config:set MAVEN_CUSTOM_OPTS="-f libbuild/pom.xml -DskipTests=true"` and modify locally the defaults/yacy.init file (properties `port`, `staticIP` and `adminAccountBase64MD5`)
+- Set the `MAVEN_CUSTOM_OPTS` config var : `heroku config:set MAVEN_CUSTOM_OPTS="-f libbuild/pom.xml -DskipTests=true"`
+- Set the `YACY_INIT_ADMIN_PASSWORD` config var : `heroku config:set YACY_INIT_ADMIN_PASSWORD="MD5:[your_encoded_password]"`
+- Set the `YACY_PUBLIC_URL` config var : `heroku config:set YACY_PUBLIC_URL="[your_app_name].herokuapp.com"`
 - Add files to git index : `git add .`
 - Commit : `git commit`
 - Push to heroku : `git push heroku master`
@@ -56,7 +56,7 @@ Here are some brief instructions to deploy YaCy on Heroku from command line. Mor
 - Click the 'New > Create new app' button
 - Eventually choose your app name and your region, then click 'Create App'
 - Go to the 'Settings' tab
-- Click the 'Reveal Config Vars' button, and add a var with KEY `MAVEN_CUSTOM_OPTS` and value filled as described in the previous paragraph
+- Click the 'Reveal Config Vars' button, and add vars `MAVEN_CUSTOM_OPTS`, `YACY_INIT_ADMIN_PASSWORD`, `YACY_PUBLIC_URL` with values filled as described in the previous paragraph
 - Go to the 'Deploy' tab
 - Choose 'GitHub' deployment method
 - Enter your GitHub account information
@@ -77,8 +77,15 @@ Here are some brief instructions to deploy YaCy on Heroku from command line. Mor
 
 With any of the deployment methods described, setting the option `-f libbuild/pom.xml -DskipTests=true` in the `MAVEN_CUSTOM_OPTS` environment variable is the minimum required for a successfull build and deploy. If not set, build will fail because missing dependent submodules from libbuild directory.
 
-What'smore, the only way for other YaCy peers to reach a peer running on Heroku is to use the "dyno" public URL (in the form of your_app_name.herokuapp.com). This is why `-Dyacy.port=80` and `-Dyacy.staticIP=your_app_name.herokuapp.com` options have to be set in the `MAVEN_CUSTOM_OPTS` variable, or else your YaCy peer will run in "junior" mode. These options are used to customise `port` and `staticIP` initial properties in the [yacy.init](defaults/yacy.init) file at build.
+What'smore, the only way for other YaCy peers to reach a peer running on Heroku is to use the "dyno" public URL (in the form of your_app_name.herokuapp.com). This is why the configuration variable `YACY_PUBLIC_URL` as to be set, or else your YaCy peer will run in "junior" mode. This variable is used in the Procfile to customize the `staticIP` initial property in the [yacy.init](defaults/yacy.init) file at launch.
 
 ### HTTP local port
 
 On heroku platform, you can not choose your application binding port. It is set by Heroku in the `PORT` environment variable, and at startup, the application has to bind to this port within 90 seconds. So YaCy has to bind to this port each time the "dyno" is started, and thus can not rely on its normal configuration file. This is done with the JVM system property `net.yacy.server.localPort` set in Procfile.
+
+### Administrator password
+
+If you wish to use YaCy administration features, you have to set an admin password, and authenticate with it. To generate the encoded password hash set in the config var `YACY_INIT_ADMIN_PASSWORD`, you can proceed as follow :
+ - either run a local YaCy peer, set your custom admin password in /ConfigAccounts_p.html, and retrieve it in DATA/SETTINGS/yacy.conf at key `adminAccountBase64MD5`
+ - OR run this command in YaCy source directory :
+  - `java -classpath target/classes:lib/* net.yacy.cora.order.Digest -strfhex "admin:The YaCy access is limited to administrators. If you don't know the password, you can change it using <yacy-home>/bin/passwd.sh <new-password>:[your_password]"`
