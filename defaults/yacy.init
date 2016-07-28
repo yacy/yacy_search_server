@@ -1130,10 +1130,6 @@ memory.disabledDHT = false
 # wether using standard memory strategy - or try generation memory strategy
 memory.standardStrategy = true
 
-# setting if execution of CGI files is allowed or not
-cgi.allow = false
-cgi.suffixes = cgi,pl
-
 # content integration settings
 content.phpbb3.urlstub = http://<mydomain>/
 content.phpbb3.dbtype = mysql
