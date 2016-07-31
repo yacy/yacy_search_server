@@ -36,8 +36,8 @@ RUN adduser --system --group --no-create-home --disabled-password yacy
 # Set ownership of yacy install directory to yacy user/group
 RUN chown yacy:yacy -R /opt/yacy_search_server
 
-# Expose port 8090
-EXPOSE 8090
+# Expose HTTP and HTTPS default ports
+EXPOSE 8090 8443
 
 # Set data volume : yacy data and configuration will persist aven after container stop or destruction
 VOLUME ["/opt/yacy_search_server/DATA"]
