@@ -297,9 +297,9 @@ public class Blacklist {
     }
     
     /**
-     * 
+     * Adds entry to a given blacklist internal data and updates the source file
      * @param blacklistType
-     * @param blacklistToUse
+     * @param blacklistToUse source file
      * @param host
      * @param path
      * @throws PunycodeException
@@ -362,7 +362,7 @@ public class Blacklist {
     }
 
     /**
-     * appends aN entry to the backlist source file.
+     * appends aN entry to the backlist source file and updates internal blacklist maps.
      * 
      * @param blacklistSourcefile name of the blacklist file (LISTS/*.black)
      * @param host host or host pattern
@@ -387,8 +387,21 @@ public class Blacklist {
         
         if (!p.isEmpty() && p.charAt(0) == '*') {
             p = "." + p;
-        }
+        }        
         Pattern pattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE); 
+        
+        // update (put) pattern to internal blacklist maps (for which source is active)
+        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+            if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistSourcefile)) {
+                final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(supportedBlacklistType, isMatchable(host));
+                Set<Pattern> hostList;
+                if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
+                    blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
+                }
+                hostList.add(pattern);
+            }
+        }
+
         // Append the line to the file.
         PrintWriter pw = null;
         try {
