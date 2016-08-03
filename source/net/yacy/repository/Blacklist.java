@@ -466,6 +466,14 @@ public class Blacklist {
         return s != null && s.has(urlHash);
     }
 
+    /**
+     * Check blacklist to contain given host & path pattern.
+     * To check if a url matches a blacklist pattern, use isListed()
+     * @param blacklistType
+     * @param host
+     * @param path
+     * @return
+     */
     public final boolean contains(final BlacklistType blacklistType, final String host, final String path) {
         boolean ret = false;
 
@@ -477,7 +485,13 @@ public class Blacklist {
 
             final Set<Pattern> hostList = blacklistMap.get(h);
             if (hostList != null) {
-                ret = hostList.contains(path);
+                for (Pattern hp : hostList) {
+                    String hpxs = hp.pattern();
+                    if (hpxs.equals(path)) {
+                        ret = true;
+                        break;
+                    }
+                }
             }
         }
         return ret;
