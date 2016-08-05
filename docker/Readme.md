@@ -83,17 +83,17 @@ Note that you can list all docker volumes with :
 
 	docker volume ls
 
-#### As background process
+#### Start as background process
 
 	docker run -d luccioman/yacy
 	
 ### HTTPS support
 
-This images are default configured with HTTPS enabled, and use a default certificate stored in defaults/freeworldKeystore. You should use your own certificated. In order to do it, you can proceed as follow.
+This images are default configured with HTTPS enabled, and use a default certificate stored in defaults/freeworldKeystore. You should use your own certificate. In order to do it, you can proceed as follow.
 
 #### Self-signed certificate
 
-A self-signed certificate will provide encrypted communications with your YaCy server, but browsers will still complain about an invalid security certificate with the error "SEC_ERROR_UNKNOWN_ISSUER". If it is sufficient for you, you can add permanently add exception to your browser. 
+A self-signed certificate will provide encrypted communications with your YaCy server, but browsers will still complain about an invalid security certificate with the error "SEC_ERROR_UNKNOWN_ISSUER". If it is sufficient for you, you can permanently add and exception to your browser.
 
 This kind of certificate can be generated and added to your YaCy Docker container with the following :
 
@@ -110,7 +110,7 @@ And configure the keyStoreXXXX properties accordingly :
 	
 #### Import an existing certificate:
 
-Importing a certificated validated by a certification authority (CA) will ensure you full HTTPS support with no security errors when accessing your YaCy peer. You can import an existing certificate in pkcs12 format.
+Importing a certificate validated by a certification authority (CA) will ensure you have full HTTPS support with no security errors when accessing your YaCy peer. You can import an existing certificate in pkcs12 format.
 
 First copy it to the YaCy Docker container volume :
 
