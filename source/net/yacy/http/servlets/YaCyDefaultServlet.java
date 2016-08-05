@@ -290,7 +290,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
-                resource = Resource.newResource(new File(HTTPDFileHandler.htDocsPath, pathInContext));
+                resource = Resource.newResource(new File(_htDocsPath, pathInContext));
             }
             
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -1033,8 +1033,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
 			}
 		}
 	}
-    
-    private static String appendPath(String proplist, String path) {
+
+    /**
+     * Append a path string to comma separated string of pathes if not already
+     * contained in the proplist string
+     * @param proplist comma separated string of pathes
+     * @param path path to be appended
+     * @return comma separated string of pathes including param path
+     */
+    private String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;
         if (proplist.contains(path)) return proplist;
         return proplist + "," + path;
