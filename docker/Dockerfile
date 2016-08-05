@@ -18,6 +18,10 @@ WORKDIR /opt
 # - Compile with ant
 # - remove unnecessary and size consuming .git directory
 # - remove ant and git packages
+
+# Possible alternative : copy directly your current sources an remove git clone command from the following RUN
+# COPY . /opt/yacy_search_server/
+
 RUN apt-get update && \
 	apt-get install -yq ant git && \
 	git clone https://github.com/yacy/yacy_search_server.git && \
@@ -29,6 +33,9 @@ RUN apt-get update && \
 
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
+
+# Intially enable HTTPS : this is the most secure option for remote administrator authentication
+RUN sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
 
 # Create user and group yacy : this user will be used to run YaCy main process
 RUN adduser --system --group --no-create-home --disabled-password yacy
