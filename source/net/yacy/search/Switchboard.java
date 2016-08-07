@@ -2204,17 +2204,24 @@ public final class Switchboard extends serverSwitch {
                 if (row == null) continue;
                 
                 // select api calls according to scheduler settings
-                final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
-                if (date_next_exec != null && now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
-                
+                final int stime = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+                if (stime > 0) { // has scheduled repeat
+                    final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
+                    if (date_next_exec != null) { // has been executed befor
+                        if (now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
+                    } else { // was never executed before
+                        pks.add(UTF8.String(row.getPK()));
+                    }
+                }
                 // select api calls according to event settings
                 final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
                 if (!"off".equals(kind)) {
                     String action = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
+                    Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null);
                     if ("startup".equals(action)) {
                         if (startupAction) {
                             pks.add(UTF8.String(row.getPK()));
-                            if ("once".equals(kind)) {
+                            if ("once".equals(kind) && date_last_exec != null) {
                                 row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
                                 sb.tables.update(WorkTables.TABLE_API_NAME, row);
                             }
@@ -2225,7 +2232,7 @@ public final class Switchboard extends serverSwitch {
                         long cycle = getThread(SwitchboardConstants.CLEANUP).getBusySleep();
                         if (d < System.currentTimeMillis() && System.currentTimeMillis() - d < cycle) {
                             pks.add(UTF8.String(row.getPK()));
-                            if ("once".equals(kind)) {
+                            if ("once".equals(kind) && date_last_exec != null) {
                                 row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
                                 row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
                                 sb.tables.update(WorkTables.TABLE_API_NAME, row);
@@ -2236,16 +2243,6 @@ public final class Switchboard extends serverSwitch {
             }
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        }
-        for (final String pk : pks) {
-            try {
-                row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-                WorkTables.calculateAPIScheduler(row, true); // calculate next update time
-                this.tables.update(WorkTables.TABLE_API_NAME, row);
-            } catch (final Throwable e ) {
-                ConcurrentLog.logException(e);
-                continue;
-            }
         }
         startupAction = false;
         

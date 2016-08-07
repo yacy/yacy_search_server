@@ -160,7 +160,9 @@ public class WorkTables extends Tables {
 
     /**
      * store a API call and set attributes to schedule a re-call of that API call according to a given frequence
-     * This is the same as the previous method but it also computes a re-call time and stores that additionally
+     * This is the same as the previous method but it also sets a re-call time and stores that additionally
+     * The method does't assume that the APICall was made and initializes the last_exec_date with null, this
+     * is set on actual APICall execution.
      * @param post the post arguments of the api call
      * @param servletName the name of the servlet
      * @param type name of the servlet category
@@ -191,14 +193,14 @@ public class WorkTables extends Tables {
             data.put(TABLE_API_COL_COMMENT, UTF8.getBytes(comment));
             byte[] date = ASCII.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
             data.put(TABLE_API_COL_DATE_RECORDING, date);
-            data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
+            data.put(TABLE_API_COL_DATE_LAST_EXEC, (Date)null);
             data.put(TABLE_API_COL_URL, UTF8.getBytes(apiurl));
 
             // insert APICALL attributes
-            data.put(TABLE_API_COL_APICALL_COUNT, UTF8.getBytes("1"));
+            data.put(TABLE_API_COL_APICALL_COUNT, UTF8.getBytes("0"));
             data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, ASCII.getBytes(Integer.toString(time)));
             data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, UTF8.getBytes(unit));
-            calculateAPIScheduler(data, false); // set next execution time
+            // calculateAPIScheduler(data, false); // set next execution time
             pk = super.insert(TABLE_API_NAME, data);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
@@ -234,6 +236,14 @@ public class WorkTables extends Tables {
             }
             if (row == null) continue;
             String theapicall = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)) + "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
+            try { // set exec time before the actual call to prevent repeat during client timeout (on short schedule duration)
+                final Date now = new Date();
+                row.put(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, now); // record exec time
+                WorkTables.calculateAPIScheduler(row, false); // calculate next update time
+                Switchboard.getSwitchboard().tables.update(WorkTables.TABLE_API_NAME, row);
+            } catch (IOException ex) {
+                ConcurrentLog.warn("APICALL", "error updating exec time for " + theapicall);
+            }
             try {
                 MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
                 // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
