@@ -59,6 +59,7 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -168,7 +169,7 @@ public class SolrSelectServlet extends HttpServlet {
                 String bq = ranking.getBoostQuery();
                 String bf = ranking.getBoostFunction();
                 if (fq.length() > 0) mmsp.getMap().put(CommonParams.FQ, new String[]{fq});
-                if (bq.length() > 0) mmsp.getMap().put(DisMaxParams.BQ, new String[]{bq});
+                if (bq.length() > 0) mmsp.getMap().put(DisMaxParams.BQ, StringUtils.split(bq,"\t\n\r\f")); // bq split into multiple query params, allowing space in single query
                 if (bf.length() > 0) mmsp.getMap().put("boost", new String[]{bf}); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
             }
             

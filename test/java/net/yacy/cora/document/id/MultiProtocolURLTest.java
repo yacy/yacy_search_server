@@ -127,6 +127,9 @@ public class MultiProtocolURLTest {
             new String[]{"http://www.yacy.net?query=test", "www.yacy.net"},
             new String[]{"http://www.yacy.net:?query=test", "www.yacy.net"},
             new String[]{"//www.yacy.net:?query=test", "www.yacy.net"},
+            
+            new String[]{"http://www.yacy.net?data=1/2/3", "www.yacy.net"},
+            new String[]{"http://www.yacy.net?url=http://test.com", "www.yacy.net"}
         };
 
         for (int i = 0; i < testStrings.length; i++) {

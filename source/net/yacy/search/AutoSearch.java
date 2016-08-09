@@ -289,7 +289,7 @@ public class AutoSearch extends AbstractBusyThread {
                     urls.add(new DigestURL(entry, (byte[]) null));
                     this.gotresults++;
                 }
-                sb.addToIndex(urls, null, "AutoSearch", null, true);
+                sb.addToCrawler(urls, false);
                 ConcurrentLog.info(AutoSearch.class.getName(), "added " + urls.size() + " results from " + seed.getName() + " to index for query=" + currentQuery);
             } catch (IOException ex) {
                 ConcurrentLog.info(AutoSearch.class.getName(), "no answer from " + seed.getName());

@@ -20,6 +20,18 @@
 
 package net.yacy.cora.util;
 
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import javax.imageio.ImageIO;
 import javax.swing.JEditorPane;
 import javax.swing.text.Document;
@@ -34,18 +46,15 @@ import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
 
+/**
+ * Convert html to an copy on disk-image in a other file format
+ * currently (pdf and/or jpg)
+ */
 public class Html2Image {
     
     // Mac
@@ -132,18 +141,31 @@ public class Html2Image {
     }
     
     /**
-     * convert a pdf to an image. proper values are i.e. width = 1024, height = 1024, density = 300, quality = 75
-     * @param pdf
-     * @param image
+     * convert a pdf (first page) to an image. proper values are i.e. width = 1024, height = 1024, density = 300, quality = 75
+     * using internal pdf library or external command line tool on linux or mac
+     * @param pdf input pdf file
+     * @param image output jpg file
      * @param width
      * @param height
-     * @param density
+     * @param density (dpi)
      * @param quality
      * @return
      */
     public static boolean pdf2image(File pdf, File image, int width, int height, int density, int quality) {
         final File convert = convertMac1.exists() ? convertMac1 : convertMac2.exists() ? convertMac2 : convertDebian;
-        
+
+        // convert pdf to jpg using internal pdfbox capability
+        if (OS.isWindows || !convert.exists()) {
+            try {
+                PDDocument pdoc = PDDocument.load(pdf);
+                BufferedImage bi = new PDFRenderer(pdoc).renderImageWithDPI(0, density, ImageType.RGB);
+
+                return ImageIO.write(bi, "jpg", image);
+
+            } catch (IOException ex) { }
+        }
+
+        // convert on mac or linux using external command line utility
         try {
             // i.e. convert -density 300 -trim yacy.pdf[0] -trim -resize 1024x -crop x1024+0+0 -quality 75% yacy-convert-300.jpg
             // note: both -trim are necessary, otherwise it is trimmed only on one side. The [0] selects the first page of the pdf

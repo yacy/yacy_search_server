@@ -594,6 +594,9 @@ public class Crawler_p {
                                 m.remove("generalFilter");
                                 m.remove("specificFilter");
                                 m.put("intention", post.get("intention", "").replace(',', '/'));
+                                if (successurls.size() > 0) { // just include at least one of the startURL's in case of multiple for the news service
+                                    m.put("startURL", successurls.iterator().next().toNormalform(true));
+                                }
                                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_CRAWL_START, m);
                             }
                         } else {

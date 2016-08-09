@@ -46,7 +46,6 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.http.Jetty9HttpServerImpl;
@@ -67,6 +66,7 @@ import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.peers.Seed;
 import net.yacy.server.serverSwitch;
+import net.yacy.utils.translation.TranslatorXliff;
 
 
 /**
@@ -362,7 +362,7 @@ public final class yacy {
                     if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) try { //is this another version?!
                         final File sourceDir = new File(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                         final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
-                        if (Translator.translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
+                        if (new TranslatorXliff().translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
                             //write the new Versionnumber
                             final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                             bw.write(sb.getConfig(Seed.VERSION, "Error getting Version"));

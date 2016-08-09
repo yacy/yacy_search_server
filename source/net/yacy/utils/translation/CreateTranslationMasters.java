@@ -58,7 +58,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
      * @param targetLngTxt the translated text
      * @return true = if map was modified, otherwise false
      */
-    protected boolean addTranslation(Map<String, Map<String, String>> translation, final String relFileName, final String sourceLngTxt, final String targetLngTxt) {
+    public boolean addTranslation(Map<String, Map<String, String>> translation, final String relFileName, final String sourceLngTxt, final String targetLngTxt) {
         boolean modified = false;
 
         Map<String, String> transFile;
@@ -89,7 +89,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
     public void createMasterTranslationLists(File masterOutputFile) throws IOException {
         Map<String, Map<String, String>> xliffTrans;
         if (masterOutputFile.exists()) // if file exists, conserve existing master content (may be updated by external tool)
-            xliffTrans = TranslatorXliff.loadTranslationsListsFromXliff(masterOutputFile);
+            xliffTrans = loadTranslationsListsFromXliff(masterOutputFile);
         else
             xliffTrans = new TreeMap<String, Map<String, String>>();
 
@@ -97,7 +97,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
         for (String filename : lngFiles) {
             // load translation list
             ConcurrentLog.info("TRANSLATOR", "include translation file " + filename);
-            Map<String, Map<String, String>> origTrans = Translator.loadTranslationsLists(new File("locales", filename));
+            Map<String, Map<String, String>> origTrans = loadTranslationsLists(new File("locales", filename));
 
             for (String transfilename : origTrans.keySet()) { // get translation filename
                 File checkfile = new File("htroot", transfilename);
@@ -154,10 +154,10 @@ public class CreateTranslationMasters extends TranslatorXliff {
     public Map<String, Map<String, String>> joinMasterTranslationLists(File xlifmaster, File lngfile) throws IOException {
 
         final String filename = lngfile.getName();
-        Map<String, Map<String, String>> xliffTrans = TranslatorXliff.loadTranslationsListsFromXliff(xlifmaster);
+        Map<String, Map<String, String>> xliffTrans = loadTranslationsListsFromXliff(xlifmaster);
         // load translation list
-        System.out.println("join into master translation file " + filename);
-        Map<String, Map<String, String>> origTrans = Translator.loadTranslationsLists(lngfile);
+        ConcurrentLog.info("TRANSLATOR", "join into master translation file " + filename);
+        Map<String, Map<String, String>> origTrans = loadTranslationsLists(lngfile);
 
         for (String transfilename : origTrans.keySet()) { // get translation filename
             // compare translation list

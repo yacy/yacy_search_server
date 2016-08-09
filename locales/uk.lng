@@ -427,7 +427,7 @@ You can also use your peer without opening it, but this is not recomended.==Ви
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==Настройки евристики
-A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="https://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
+#A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="https://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Пошукова евристика може бути використовувати методи, які допомагають виявити можливі результати пошуку з використанням запитів по посиланнях, вбудованого сканування та запитів до інших пошукових систем.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==При використанні пошукової евристики знайдені посилання не відображаються як пошукові результати, а індексуються та зберігаються разом з іншим вмістом.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Це гарантує, що чорні списки можуть бути використані, і що пошукові терміни з’являються дійсно на сторінках, які були знайдені за допомогою евристики.
@@ -1993,8 +1993,7 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 
 #File: Network.html
 #---------------------------
-YaCy '#[clientname]#': YaCy Search Network==YaCy "#[clientname]#": Пошукова мережа YaCy
-YaCy Search Network '#[networkName]#'==Пошукова мережа YaCy "#[networkName]#"
+YaCy Search Network==Пошукова мережа YaCy
 YaCy Network<==Мережа YaCy<
 The information that is presented on this page can also be retrieved as XML.==Інформацію на цій сторінці також можна отримати в форматі XML.
 Click the API icon to see the XML.==Натисніть значок API для відображення XML.
@@ -2448,18 +2447,18 @@ You have to <a href="Settings_p.html?page=ProxyAccess">setup the proxy</a> befor
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-Quick Crawl Link==Schnell Crawl Link
-Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
-Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
-If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
-Crawl with YaCy==Mit YaCy crawlen
-Title:==Titel:
-Link:==link:
-Status:==Status:
-URL successfully added to Crawler Queue==Die Url wurde erfolgreich zum Crawler-Puffer hinzugefügt.
-Malformed URL==Fehler in der URL
-Unable to create new crawling profile for URL:==Es ist nicht möglich für diese URL ein Crawling Profil zu erstellen:
-Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
+Quick Crawl Link==Швидке сканування посилання
+#Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
+#Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
+#If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
+#Crawl with YaCy==Mit YaCy crawlen
+#Title:==Titel:
+#Link:==link:
+#Status:==Status:
+#URL successfully added to Crawler Queue==Die Url wurde erfolgreich zum Crawler-Puffer hinzugefügt.
+#Malformed URL==Fehler in der URL
+#Unable to create new crawling profile for URL:==Es ist nicht möglich für diese URL ein Crawling Profil zu erstellen:
+#Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
 #-----------------------------
 
 #File: Ranking_p.html
@@ -2508,7 +2507,7 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 >Name<==>Ім’я<
 >Remote<br/>Crawl<==>Remote<br/>Crawl<
 >Release/<br/>SVN<==>Випуск/SVN<
->PPM<==>==>Сторінок За Хвилину (PPM)<
+>PPM<==>Сторінок За Хвилину (PPM)<
 >QPH<==>Запитів За Годину (QPH)<
 >Last<br/>Seen<==>Востаннє<br/>бачено<
 <strong>UTC</strong><br/>Offset==Зсув<br/><strong>UTC</strong>
@@ -2830,7 +2829,7 @@ value="add"==value="додати"
 Console Status==Консоль стану
 Log-in as administrator to see full status==Увійдіть як адміністратор для перегляду повного стану
 Welcome to YaCy!==Вітаємо в YaCy!
-Your settings are _not_ protected!</strong>==Ваші налаштування _не_ захищені паролем!</strong>
+Your settings are _not_ protected!==Ваші налаштування _не_ захищені паролем!
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Будь-ласка, <strong>негайно</strong> відкрийте <a href="ConfigAccounts_p.html">настройки облікових записів</a>
 and set an administration password.==і виставте пароль адміністратора.
 You have not published your peer seed yet. This happens automatically, just wait.==Ваш вузол не відомий мережі. Зачекайте, це робиться автоматично.
@@ -2941,7 +2940,7 @@ Go back to the <a href="Settings_p.html">Settings</a> page==Назад до ст
 Your system is not protected by a password==Ваша система не захищена паролем
 Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Будь-ласка, перейдіть на сторінку <a href="ConfigAccounts_p.html">керування користувачами</a> і виставте основний пароль.
 You don't have the correct access right to perform this task.==У вас немає дозволу на запуск цього додатка.
-Please log in.==Bitte melden Sie sich an.
+#Please log in.==Bitte melden Sie sich an.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Якщо хочете зробити інші зміни, можна перейти назад на сторінку <a href="Settings_p.html">налаштувань</a>.
 See you soon!==До зустрічі!
 Just a moment, please!==Зачекайте трохи, будь ласка!
@@ -3557,7 +3556,7 @@ Crawler / Harvester==Сканер / Збирач
 Administration<==Адміністрування<
 >Web Search<==>Веб-Пошук<
 >Search Network<==>Пошукова мережа<
-Peer Owner Profile==Профіль власника вузла
+#Peer Owner Profile==Профіль власника вузла
 Help / YaCy Wiki==Допомога / YaCy Wiki
 #-----------------------------
 

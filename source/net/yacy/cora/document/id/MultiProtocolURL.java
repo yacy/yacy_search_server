@@ -137,7 +137,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
      */
-    public MultiProtocolURL()  {
+    protected MultiProtocolURL()  {
         this.protocol = null;
         this.host = null;
         this.hostAddress = null;
@@ -216,7 +216,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
             int q = url.indexOf('/', p + 3);
-            if (q < 0) q = url.indexOf("?", p + 3); // check for www.test.com?searchpart
+            if (q < 0) { // check for www.test.com?searchpart
+                q = url.indexOf("?", p + 3);
+            } else { // check that '/' was not in searchpart (example http://test.com?data=1/2/3)
+                if (url.lastIndexOf("?", q) >= 0) {
+                    q = url.indexOf("?", p + 3);
+                }
+            }
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
@@ -350,8 +356,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return this.contentDomain;
     }
 
+    /**
+     * @deprecated not used (2016-07-20), doesn't handle all protocol cases. Use MultiprotocolURL(MultiProtocolURL, String) instead
+     */
+    @Deprecated // not used 2016-07-20
     public static MultiProtocolURL newURL(final String baseURL, String relPath) throws MalformedURLException {
-        if (relPath.startsWith("//")) {
+       if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             relPath = "http:" + relPath;
         }
@@ -367,6 +377,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return new MultiProtocolURL(new MultiProtocolURL(baseURL), relPath);
     }
 
+    /**
+     * @deprecated not used (2016-07-20), doesn't handle all protocol cases. Use MultiprotocolURL(MultiProtocolURL, String) instead
+     */
+    @Deprecated // not used 2016-07-20
     public static MultiProtocolURL newURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
@@ -825,14 +839,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public String getFileName() {
         // this is a method not defined in any sun api
         // it returns the last portion of a path without any reference
-        final int p = this.path.lastIndexOf('/');
-        if (p < 0) return this.path;
-        if (p == this.path.length() - 1) return ""; // no file name, this is a path to a directory
-        return this.path.substring(p + 1); // the 'real' file name
-    }
+            final int p = this.path.lastIndexOf('/');
+            if (p < 0) return this.path;
+            if (p == this.path.length() - 1) return ""; // no file name, this is a path to a directory
+            return this.path.substring(p + 1); // the 'real' file name
+        }
 
     /**
-     * Get extension out of a filename
+     * Get extension out of a filename in lowercase
      * cuts off query part
      * @param fileName
      * @return extension or ""
@@ -852,12 +866,22 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return fileName.substring(p + 1, q).toLowerCase();
     }
 
+    /**
+     * Get the path (including filename)
+     * Path is never null
+     * returns may range from empty string, just "/" to a full path
+     * @return
+     */
     public String getPath() {
         return this.path;
     }
 
+    /**
+     * Get path elements (directories) as array
+     * @return array with directory names or empty array
+     */
     public String[] getPaths() {
-        String s = this.path == null ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
+        String s = (this.path == null || this.path.length() < 1) ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
         int p = s.lastIndexOf('/');
         if (p < 0) return new String[0];
         s = s.substring(0, p); // the paths do not contain the last part, which is considered as the getFileName() part.
@@ -1064,8 +1088,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return toNormalform(excludeAnchor, false);
     }
 
+    /**
+     * Generates a normal form of the URL.
+     * For file: url it normalizes also path delimiter to be '/' (replace possible Windows '\'
+     * @param excludeAnchor
+     * @param removeSessionID
+     * @return
+     */
     public String toNormalform(final boolean excludeAnchor, final boolean removeSessionID) {
-        // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
             return this.protocol + ":" + this.userInfo + "@" + this.host;
@@ -1095,6 +1125,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (!defaultPort) {
             u.append(":");
             u.append(this.port);
+        }
+        if (isFile() && urlPath.indexOf('\\') >= 0) { // normalize windows backslash (important for hash computation)
+            urlPath = urlPath.replace('\\', '/');
         }
         u.append(urlPath);
         String result = u.toString();
@@ -2423,10 +2456,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
                 System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
             }
-            
+
             if (aURL != null && jURL != null && jURL.toString().equals(aURL.toNormalform(false))) {
                 System.out.println("jURL == aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
-            }
+}
 
             // check stability: the normalform of the normalform must be equal to the normalform
             if (aURL != null) try {

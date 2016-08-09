@@ -38,7 +38,7 @@ public class Load_PHPBB3 {
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        String a = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
+        String a = sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (a == null) a = "localhost:" + sb.getLocalPort();
         final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
         final String repository = "http://" + a + "/repository/";

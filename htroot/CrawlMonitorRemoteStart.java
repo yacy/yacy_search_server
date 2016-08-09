@@ -61,8 +61,8 @@ public class CrawlMonitorRemoteStart {
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", dark ? "1" : "0");
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created().toString());
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", peername);
-                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
-                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL"));
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention"));
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_crawlingQ", ("true".equals(record.attributes().get("crawlingQ"))) ? "1" : "0");
                 showedCrawl++;
@@ -88,8 +88,8 @@ public class CrawlMonitorRemoteStart {
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", dark ? "1" : "0");
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created().toString());
                 prop.putHTML("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
-                prop.putHTML("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
-                prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
+                prop.putHTML("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL"));
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention"));
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", ("true".equals(record.attributes().get("crawlingQ"))) ? "1" : "0");
                 showedCrawl++;

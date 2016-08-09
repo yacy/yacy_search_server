@@ -26,7 +26,6 @@
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -38,11 +37,13 @@ public class Load_MediawikiWiki {
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        String a = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
-        if (a == null) a = "localhost:" + sb.getLocalPort();
-        final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
-        final String repository = "http://" + a + "/repository/";
-        prop.put("starturl", (intranet) ? repository : "http://");
+        String a;
+        if (sb.peers.myIPs().isEmpty()) {
+            a = "localhost:" + sb.getLocalPort();
+        } else {
+            a = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
+        }
+        prop.put("starturl", "http://");
         prop.put("address", a);
 
         // return rewrite properties

@@ -386,7 +386,7 @@ public final class QueryParams {
         if (!qf.isEmpty()) params.setParam(DisMaxParams.QF, qf);
         if (this.queryGoal.getIncludeSize() > 1) {
             // add boost on combined words
-            if (bq.length() > 0) bq += " ";
+            if (bq.length() > 0) bq += "\n";
             bq += CollectionSchema.text_t.getSolrFieldName() + ":\"" + this.queryGoal.getIncludeString() + "\"^10";
         }
         if (fq.length() > 0) {
@@ -396,7 +396,7 @@ public final class QueryParams {
             newfq.add(fq);
             params.setFilterQueries(newfq.toArray(new String[newfq.size()]));
         }
-        if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq);
+        if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq.split("[\\r\\n]+")); // split on any sequence consisting of CR and/or LF
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         
         // prepare result

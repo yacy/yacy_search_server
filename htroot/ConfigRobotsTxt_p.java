@@ -43,8 +43,9 @@ public class ConfigRobotsTxt_p {
         final Switchboard sb = (Switchboard) env;
         final servletProperties prop = new servletProperties();
 
-        final RobotsTxtConfig rbc = ((Switchboard)env).robotstxtConfig;
-        prop.put("clientname", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
+        final RobotsTxtConfig rbc = sb.robotstxtConfig;
+        // globaly overwitten by template engine (removed to avoid risk of NPE in intranet mode)
+        // prop.put("clientname", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP())); 
 
         if (post != null) {
             if (post.containsKey("save")) {

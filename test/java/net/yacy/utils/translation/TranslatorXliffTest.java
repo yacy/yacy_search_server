@@ -31,7 +31,7 @@ public class TranslatorXliffTest {
         for (String filename : lngFiles) {
             // load translation list
             System.out.println("Test translation file " + filename);
-            Map<String, Map<String, String>> origTrans =  Translator.loadTranslationsLists(new File("locales", filename));
+            Map<String, Map<String, String>> origTrans =  new Translator().loadTranslationsLists(new File("locales", filename));
             TranslatorXliff txlif = new TranslatorXliff();
 
             // save as xliff file

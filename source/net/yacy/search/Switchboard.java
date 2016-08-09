@@ -112,9 +112,7 @@ import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -225,8 +223,6 @@ public final class Switchboard extends serverSwitch {
     public final static String SOLR_COLLECTION_CONFIGURATION_NAME = "solr.collection.schema";
     public final static String SOLR_WEBGRAPH_CONFIGURATION_NAME = "solr.webgraph.schema";
     
-    // load slots
-    public static int xstackCrawlSlots = 2000;
     public static long lastPPMUpdate = System.currentTimeMillis() - 30000;
     private static final int dhtMaxContainerCount = 500;
     private int dhtMaxReferenceCount = 1000;
@@ -235,8 +231,6 @@ public final class Switchboard extends serverSwitch {
     public static SortedSet<String> badwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> stopwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> blueList = null;
-//    public static HandleSet badwordHashes = null; // not used 2013-06-06
-//    public static HandleSet blueListHashes = null; // not used 2013-06-06
     public static SortedSet<byte[]> stopwordHashes = null;
     public static Blacklist urlBlacklist = null;
 
@@ -271,7 +265,6 @@ public final class Switchboard extends serverSwitch {
     public BookmarksDB bookmarksDB;
     public WebStructureGraph webStructure;
     public ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
-    public long indexedPages = 0;
     public int searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
     public int searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
     public float searchQueriesGlobal = 0f; // partial counter of remote queries (1/number-of-requested-peers)
@@ -279,7 +272,7 @@ public final class Switchboard extends serverSwitch {
     public List<Pattern> networkWhitelist, networkBlacklist;
     public FilterEngine domainList;
     private Dispatcher dhtDispatcher;
-    public LinkedBlockingQueue<String> trail;
+    public LinkedBlockingQueue<String> trail; // connect infos from cytag servlet
     public SeedDB peers;
     public WorkTables tables;
     public Tray tray;
@@ -537,6 +530,7 @@ public final class Switchboard extends serverSwitch {
                 bf.equals("scale(cr_host_norm_i,1,20)")) bf = "";
             if (bf.equals("recip(rord(last_modified),1,1000,1000))")) bf = "recip(ms(NOW,last_modified),3.16e-11,1,1)"; // that was an outdated date boost that did not work well
             if (i == 0 && bq.equals("fuzzy_signature_unique_b:true^100000.0")) bq = "crawldepth_i:0^0.8 crawldepth_i:1^0.4";
+            if (bq.equals("crawldepth_i:0^0.8 crawldepth_i:1^0.4")) bq = "crawldepth_i:0^0.8\ncrawldepth_i:1^0.4"; // Fix issue with multiple Boost Queries
             if (boosts.equals("url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0")) boosts = "url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^2.0";
             r.setName(name);
             r.updateBoosts(boosts);
@@ -611,7 +605,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // create a crawler
-        this.crawler = new CrawlSwitchboard(networkName, this);
+        this.crawler = new CrawlSwitchboard(this);
 
         // start yacy core
         this.log.config("Starting YaCy Protocol Core");
@@ -654,7 +648,6 @@ public final class Switchboard extends serverSwitch {
             } else {
                 blueList = new TreeSet<String>();
             }
- //         blueListHashes = Word.words2hashesHandles(blueList);
             this.log.config("loaded blue-list from file "
                 + plasmaBlueListFile.getName()
                 + ", "
@@ -679,7 +672,6 @@ public final class Switchboard extends serverSwitch {
                 badwordsFile = new File(appPath, "defaults/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             }
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
-//          badwordHashes = Word.words2hashesHandles(badwords);
             this.log.config("loaded badwords from file "
                 + badwordsFile.getName()
                 + ", "
@@ -1404,7 +1396,7 @@ public final class Switchboard extends serverSwitch {
 
             // create a crawler
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
-            this.crawler = new CrawlSwitchboard(networkName, this);
+            this.crawler = new CrawlSwitchboard(this);
 
             // init a DHT transmission dispatcher
             this.dhtDispatcher =
@@ -2198,6 +2190,10 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    /**
+     * Check scheduled api calls scheduled execution time and execute all jobs due
+     * @return true if calls have been executed
+     */
     public boolean schedulerJob() {
 
         // execute scheduled API actions
@@ -2206,15 +2202,22 @@ public final class Switchboard extends serverSwitch {
         final Date now = new Date();
         try {
             final Iterator<Tables.Row> plainIterator = this.tables.iterator(WorkTables.TABLE_API_NAME);
-            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
+            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_LAST_EXEC).iterator();
             while (mapIterator.hasNext()) {
                 row = mapIterator.next();
                 if (row == null) continue;
                 
                 // select api calls according to scheduler settings
-                final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
-                if (date_next_exec != null && now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
-                
+                final int stime = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+                if (stime > 0) { // has scheduled repeat
+                    final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
+                    if (date_next_exec != null) { // has been executed before
+                        if (now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
+                    } else { // was never executed before
+                        pks.add(UTF8.String(row.getPK()));
+                    }
+                }
+
                 // select api calls according to event settings
                 final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
                 if (!"off".equals(kind)) {
@@ -2244,16 +2247,6 @@ public final class Switchboard extends serverSwitch {
             }
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        }
-        for (final String pk : pks) {
-            try {
-                row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-                WorkTables.calculateAPIScheduler(row, true); // calculate next update time
-                this.tables.update(WorkTables.TABLE_API_NAME, row);
-            } catch (final Throwable e ) {
-                ConcurrentLog.logException(e);
-                continue;
-            }
         }
         startupAction = false;
         
@@ -3043,9 +3036,6 @@ public final class Switchboard extends serverSwitch {
             processCase // process case
             );
 
-        // increment number of indexed urls
-        this.indexedPages++;
-
         // update profiling info
         if ( System.currentTimeMillis() - lastPPMUpdate > 20000 ) {
             // we don't want to do this too often
@@ -3291,6 +3281,8 @@ public final class Switchboard extends serverSwitch {
     /**
      * load the content of a URL, parse the content and add the content to the index This process is started
      * concurrently. The method returns immediately after the call.
+     * Loaded/indexed pages are added to the given SearchEvent. If this is not required prefer addToCrawler
+     * to spare concurrent processes, bandwidth and intransparent crawl/load activity
      *
      * @param url the url that shall be indexed
      * @param searchEvent (optional) a search event that shall get results from the indexed pages directly
@@ -3327,7 +3319,7 @@ public final class Switchboard extends serverSwitch {
                 continue;
             }
             requests.add(request);
-        }
+            }
         
         new Thread() {
             @Override
@@ -3908,7 +3900,7 @@ public final class Switchboard extends serverSwitch {
         mySeed.setLastSeenUTC();
         mySeed.put(Seed.UTC, GenericFormatter.UTCDiffString());
         mySeed.setFlagAcceptRemoteCrawl(getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
-        mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
+        mySeed.setFlagAcceptRemoteIndex(getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
         if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort("port.ssl", 8443)));
 
@@ -3939,85 +3931,9 @@ public final class Switchboard extends serverSwitch {
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
-                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
+                this.peers.loadSeedListConcurrently(seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
             }
         }
-    }
-
-    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout, final boolean checkAge) {
-        // uses the superseed to initialize the database with known seeds
-
-        Thread seedLoader = new Thread() {
-            @Override
-            public void run() {
-                // load the seed list
-                try {
-                    DigestURL url = new DigestURL(seedListFileURL);
-                    //final long start = System.currentTimeMillis();
-                    final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
-                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
-                    final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-                    client.setHeader(reqHeader.entrySet());
-
-                    client.HEADResponse(url.toNormalform(false), false);
-                    int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-                    ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-                    if (checkAge) {
-                        if ( header.lastModified() == null ) {
-                            Network.log.warn("BOOTSTRAP: seed-list URL "
-                                + seedListFileURL
-                                + " not usable, last-modified is missing");
-                            return;
-                        } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
-                            Network.log.info("BOOTSTRAP: seed-list URL "
-                                + seedListFileURL
-                                + " too old ("
-                                + (header.age() / 86400000)
-                                + " days)");
-                            return;
-                        }
-                    }
-                    scc.incrementAndGet();
-                    final byte[] content = client.GETbytes(url, null, null, false);
-                    Iterator<String> enu = FileUtils.strings(content);
-                    int lc = 0;
-                    while ( enu.hasNext() ) {
-                        try {
-                            Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
-                            if ( (ys != null)
-                                && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
-                                final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
-                                if ( lastseen < 1440 || lc < 10 ) {
-                                    if ( peers.peerActions.connectPeer(ys, false) ) {
-                                        lc++;
-                                    }
-                                }
-                            }
-                        } catch (final Throwable e ) {
-                            Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
-                        }
-                    }
-                    Network.log.info("BOOTSTRAP: "
-                        + lc
-                        + " seeds from seed-list URL "
-                        + seedListFileURL
-                        + ", AGE="
-                        + (header.age() / 3600000)
-                        + "h");
-
-                } catch (final IOException e ) {
-                    // this is when wget fails, commonly because of timeout
-                    Network.log.info("BOOTSTRAP: failed (1) to load seeds from seed-list URL "
-                        + seedListFileURL + ": " + e.getMessage());
-                } catch (final Exception e ) {
-                    // this is when wget fails; may be because of missing internet connection
-                    Network.log.severe("BOOTSTRAP: failed (2) to load seeds from seed-list URL "
-                        + seedListFileURL + ": " + e.getMessage(), e);
-                }
-            }
-        };
-        seedLoader.start();
     }
 
     public void initRemoteProxy() {

@@ -937,7 +937,17 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
             //extra treatment for headlines
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
-                processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
+                // require line starts with headline markup (hdr e.g.  "   == Title == " but not  "Seven = six plus one" )
+                int i = 0;
+                boolean beginsWith = true;
+                while (i < firstPosition) {
+                    if (stringBuilder.charAt(i) > ' ') {
+                        beginsWith = false;
+                        break;
+                    }
+                    i++;
+                }
+                if (beginsWith) processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
             } else {
                 final int oldLength = stringBuilder.length();
                 stringBuilder.replace(firstPosition, firstPosition + tags.openWikiLength, tags.openHTML);

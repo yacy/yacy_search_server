@@ -104,6 +104,11 @@ Augmented Browsing:==Angereichertes Browsing:
 Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==Schaltet angereichertes Browsing an oder ab. Wenn aktiviert werden alle Webseite während des Ladens modifiziert.
 #-----------------------------
 
+#File: Autocrawl_p.html
+#---------------------------
+"Save"=="Speichern"
+#-----------------------------
+
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Administration==Blacklist Verwaltung
@@ -131,7 +136,7 @@ Delete selected pattern(s)==Lösche gewählten Eintrag
 Move selected pattern(s) to==Verschiebe gewählten Eintrag zu
 #You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
 Add new pattern:==Neuen Eintrag hinzufügen:
-"Add URL pattern"=="URL hinzufügen"
+Add URL pattern==URL hinzufügen
 The right '*', after the '/', can be replaced by a==Der rechte Asterisk '*', nach dem '/', kann ersetzt werden durch einen
 >regular expression<==>regulären Ausdruck<
 domain.net/fullpath<==domain.de/vollerpfad<
@@ -447,7 +452,7 @@ Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreich
 Peer Port:==Peer-Port:
 with SSL== mit SSL
 https enabled==https aktiviert
- on port == auf Port 
+on port==auf Port
 Configure your router for YaCy using UPnP:==Ihren Router für YaCy konfigurieren, via UPnP:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern
@@ -557,6 +562,8 @@ Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu ins
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
 might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+Simple Editor==Einfacher Editor
+to add untranslated text==zum bearbeiten unübersetzter Texte
 #-----------------------------
 
 #File: ConfigLiveSearch.html
@@ -842,7 +849,6 @@ menu.==Menü geändert werden.
 #>Administration<==>Administration<
 >Web Search<==>Websuche<
 >File Search<==>Dateisuche<
->About Us<==>Über Uns<
 >Help / YaCy Wiki<==>Hilfe / YaCy Wiki<
 "Search"=="Suche"
 #>Text<==>Text<
@@ -1060,7 +1066,7 @@ Load<==Auslastung<
 
 #File: CrawlProfileEditor_p.html
 #---------------------------
->Crawl Profile Editor<==>Crawl Profil Editor<
+Crawl Profile Editor==Crawl Profil Editor
 >Crawler Steering<==>Crawler Steuerung<
 >Crawl Scheduler<==>Crawl Planer<
 >Scheduled Crawls can be modified in this table<==>Geplante Crawls können in dieser Tabelle geändert werden<
@@ -1185,7 +1191,7 @@ Other already visited URLs are sorted out as "double", if they are not allowed u
 
 
 >From Link-List of URL<==>Von Linkliste der URL<
-From Sitemap<==Von Sitemap<
+From Sitemap==Von Sitemap
 From File (enter a path<br/>within your local file system)==Von Datei (Verwende Pfad einer Datei<br/>auf dem lokalen Dateisystem)
 
 A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl führt eine Dubletten Prüfung anhand einer internen Datenbank gegen alle im Internet gefunden Links durch. Wenn dieselbe URL wieder gefunden wird,
@@ -1333,7 +1339,7 @@ Network Scanner==Netzwerk Scanner
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy kann ein Netzwerksegment auf verfügbare HTTP, FTP und SMB Server hin absuchen.
 You must first select a IP range and then, after this range is scanned,==Sie müssen zuerst einen IP Bereich festlegen  und dann, nachdem dieser Bereich gescannt wurde,
 it is possible to select servers that had been found for a full-site crawl.==ist es möglich einen gefunden Server für eine volle Seiten Suche crawlen zu lassen.
-No servers had been detected in the given IP range #[iprange]#. 
+No servers had been detected in the given IP range==Es wurde kein Server im angegebenen IP Bereich gefunden
 Please enter a different IP range for another scan.==Bitte geben Sie einen anderen IP Bereich ein für einen weiteren Scan.
 Please wait...==Bitte warten...
 >Scan the network<==>Das Netzwerk Scannen<
@@ -2780,7 +2786,7 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 #>Name<==>Name<
 #>Remote<br/>Crawl<==>Remote<br/>Crawl<
 #>Release/<br/>SVN<==>Version/<br/>SVN<
->PPM<==>==>Seiten pro Minute (PPM)<
+>PPM<==>Seiten pro Minute (PPM)<
 >QPH<==>Anfragen pro Stunde (QPH)<
 >Last<br/>Seen<==>Zuletzt<br/>Gesehen<
 >UTC</strong><br/>Offset<==>UTC</strong><br/>Abweichung<
@@ -2829,6 +2835,7 @@ Message Forwarding (optional)==Nachrichten Weiterleitung (optional)
 
 #File: Settings_Crawler.inc
 #---------------------------
+>Crawler Settings<==>Crawler Einstellungen<
 Generic Crawler Settings==Allgemeine Crawler Einstellungen
 Connection timeout in ms==Verbindungs-Timeout in ms
 means unlimited==schaltet die Begrenzung ab
@@ -3107,7 +3114,7 @@ value="add"==value="hinzufügen"
 Console Status==Konsolen Status
 Log-in as administrator to see full status==Als Administrator einloggen, für kompletten Status
 Welcome to YaCy!==Willkommen bei YaCy!
-Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!</strong>
+Your settings are _not_ protected!==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Bitte öffnen Sie die <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> <strong>sofort</strong>
 and set an administration password.==und geben Sie ein Administrator Passwort ein.
 You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
@@ -3145,7 +3152,7 @@ For community support, please visit our==Für Unterstützung aus der Community, 
 
 #File: Status_p.inc
 #---------------------------
-#System Status==System Status
+System Status==Systemstatus
 Unknown==unbekannt
 YaCy version:==YaCy Version:
 Uptime:==Online seit:
@@ -3450,6 +3457,21 @@ Threaddump<==Thread Dump<
 #"create Threaddump"=="Threaddump erstellen"
 #-----------------------------
 
+#File: Translator_p.html
+#---------------------------
+Translation Editor==Übersetzungseditor
+Translate untranslated text of the user interface (current language).==Ergänze fehlende Übersetzungen der Benutzeroberfläche (aktuell aktive Sprache).
+The modified translation file is stored in DATA/LOCALE directory.==Geänderte Übersetzungen werden im Verzeichnis DATA/LOCALE gespeichert.
+UI Translation==Übersetzung Benutzeroberfläche
+Target Language:==Zielsprache
+Source File==Quelldatei
+view it==Datei anzeigen
+filter untranslated==filter unübersetztes
+Source Text==Quelltext
+Translated Text==Übersetzung
+Save translation==Änderungen speichern
+#-----------------------------
+
 #File: User.html
 #---------------------------
 User Page==Benutzer Seite
@@ -3476,7 +3498,6 @@ New Password is empty.==Das neue Passwort ist leer.
 
 #File: ViewFile.html
 #---------------------------
-YaCy '#[clientname]#': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
 View URL Content==Zeige URL Inhalte
 >Get URL Viewer<==>URL Betrachter<
 "Show Metadata"=="Metadaten anzeigen"
@@ -3583,13 +3604,13 @@ delete vocabulary<==Lösche Vokabelliste<
 
 #File: WatchWebStructure_p.html
 #---------------------------
-Web Structure<==Webstruktur<
+Web Structure==Webstruktur
 The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
 To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
-API wiki page==API Seite im WikiWeb Structure==Netz Struktur
+API wiki page==API Seite im Wiki
 >Host List<==>Host Liste<
 >#[count]# outlinks==>#[count]# ausgehende Links
 host<==Host<
@@ -3844,7 +3865,7 @@ Ranking and Heuristics==Ranking und Heuristiken
 >File Search<==>Datei-Suche<
 >Compare Search<==>Vergleichssuche<
 >Index Browser<==>Index Browser<
->About Us<==>Impressum dieses Peers<
+About This Page==Impressum dieses Peers
 Help / YaCy Wiki==Hilfe / YaCy Wiki
 #-----------------------------
 
@@ -3924,7 +3945,7 @@ DHT Transfer==DHT-Verteilung
 Proxy Use==Proxy Benutzung
 Local Crawling</a>==Lokales Crawlen</a>
 Global Crawling</a>==Globales Crawlen</a>
-Surrogate Import</a>==Surrogat Import</a>
+Surrogate Import==Surrogat Import
 Processing Monitor==Prozess Monitor
 Loader<==Lade Puffer<
 Rejected URLs==Abgelehnte URLs
@@ -3948,7 +3969,7 @@ Parser Configuration==Parser Konfiguration
 #-----------------------------
 >Appearance==>Erscheinungsbild
 >Language==>Sprache
->Search Page Layout==>Suchseitenlayout
+Search Page Layout==Suchseitenlayout
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template

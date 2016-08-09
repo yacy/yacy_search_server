@@ -39,9 +39,16 @@ public class opensearchdescription {
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
 
-        String thisaddress = header.get("Host", Domains.LOCALHOST);
-        if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + env.getLocalPort();
-        String thisprotocol = env.getConfigBool("server.https", false) ? "https" : "http";
+        String thisaddress = header.get("Host"); // returns host:port (if not defalt http/https ports)
+        String thisprotocol = "http";
+        if (thisaddress == null) {
+            thisaddress = Domains.LOCALHOST + ":" + sb.getConfig("port", "8090");
+        } else {
+            final String sslport = ":" + sb.getConfig("port.ssl", "8443");
+            if (thisaddress.endsWith(sslport)) { // connection on ssl port, use https protocol
+                thisprotocol = "https";
+            }
+        }
         
         final serverObjects prop = new serverObjects();
         prop.put("compareyacy", post != null && post.getBoolean("compare_yacy") ? 1 : 0);

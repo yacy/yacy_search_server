@@ -68,7 +68,7 @@ public final class transferURL {
         final String youare   = post.get("youare", "");   // seed hash of the target peer, needed for network stability
 //      final String key      = post.get("key", "");      // transmission key
         final int urlc        = post.getInt("urlc", 0);    // number of transported urls
-        final boolean granted = sb.getConfigBool("allowReceiveIndex", false);
+        final boolean granted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
         final boolean blockBlacklist = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_BLACKLIST, false);
 
         // response values

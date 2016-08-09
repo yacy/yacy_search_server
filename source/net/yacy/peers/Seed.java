@@ -133,8 +133,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public static final String PEERTYPE = "PeerType";
 
-    /** static/dynamic (if the IP changes often for any reason) */
-    private static final String IPTYPE = "IPType";
     private static final String FLAGS = "Flags";
     public static final String FLAGSZERO = "    ";
     
@@ -185,6 +183,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /** the public IP of this peer (old field, will be used to carry the IPv4) */
     public static final String IP = "IP";
+    
+    /** the jre version */
+    public static final String JRE = "JRE";
     
     /** more public IPs of this peer, containing only IPv6 addresses. This list of of IPv6 addresses is separated with a vertical bar/pipe '|'.
      *  This list may have zero entries if the host does not have a IPv6 address. It may have more than one IPv6 address if the
@@ -259,7 +260,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         // settings that is created during the 'hello' phase - in first contact
         this.dna.put(Seed.IP, ""); // 123.234.345.456
         this.dna.put(Seed.PORT, "&empty;");
-        this.dna.put(Seed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
         this.dna.put(Seed.USPEED, Seed.ZERO); // the computated uplink speed of the peer
@@ -283,6 +283,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         this.dna.put(Seed.UTC, GenericFormatter.UTCDiffString());
         this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // virgin/junior/senior/principal
 
+        String jre = System.getProperty("java.version");
+        this.dna.put(Seed.JRE, jre);
         this.birthdate = System.currentTimeMillis();
     }
 
@@ -339,7 +341,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     /**
      * try to get the public IP<br>
      *
-     * @return the IP or localhost IP (127.0.0.1)
+     * @return the public IP or null
      */
     @Deprecated
     public final String getIP() {
@@ -753,7 +755,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @return an address string which can be used as host:port part of an url (if no port avail returns just host)
      */
     public final String getPublicAddress(final String ip) {
-        if (ip == null) throw new RuntimeException("ip == NULL"); // that should not happen
+        if (ip == null) throw new RuntimeException("ip == NULL"); // that should not happen in Peer-to-Peer mode (but can in Intranet mode)
         final String port = this.dna.get(Seed.PORT); // we do not use getPort() here to avoid String->Integer->toString() conversion
         final StringBuilder sb = new StringBuilder(ip.length() + 8); // / = surplus for port
         if (ip.indexOf(':') >= 0) {

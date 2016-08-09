@@ -13,6 +13,33 @@
   Thanks to many, many people for contributions and suggestions.
   Licenced as X11: http://www.kryogenix.org/code/browser/licence.html
   This basically means: do what you want with it.
+
+  @licstart  The following is the entire license notice for the 
+  JavaScript code in this file.
+ 
+  Copyright (c) 1997-2007 Stuart Langridge
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+  @licend  The above is the entire license notice
+  for the JavaScript code in this file.
 */
 
  
@@ -169,7 +196,7 @@ sorttable = {
     for (var i=0; i<table.tBodies[0].rows.length; i++) {
       text = sorttable.getInnerText(table.tBodies[0].rows[i].cells[column]);
       if (text != '') {
-        if (text.match(/^-?[£$¤]?[\d,.]+%?$/)) {
+        if (text.match(/^-?[ï¿½$ï¿½]?[\d,.]+%?$/)) {
           return sorttable.sort_numeric;
         }
         // check for a date: dd/mm/yyyy or dd/mm/yy 
