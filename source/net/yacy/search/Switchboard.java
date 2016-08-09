@@ -2190,6 +2190,10 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    /**
+     * Check scheduled api calls scheduled execution time and execute all jobs due
+     * @return true if calls have been executed
+     */
     public boolean schedulerJob() {
 
         // execute scheduled API actions
@@ -2243,16 +2247,6 @@ public final class Switchboard extends serverSwitch {
             }
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        }
-        for (final String pk : pks) {
-            try {
-                row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-                WorkTables.calculateAPIScheduler(row, true); // calculate next update time
-                this.tables.update(WorkTables.TABLE_API_NAME, row);
-            } catch (final Throwable e ) {
-                ConcurrentLog.logException(e);
-                continue;
-            }
         }
         startupAction = false;
         
