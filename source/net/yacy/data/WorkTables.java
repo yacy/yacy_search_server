@@ -80,7 +80,7 @@ public class WorkTables extends Tables {
     public final static String TABLE_API_COL_APICALL_COUNT = "apicall_count"; // counts how often the API was called (starts with 1)
     public final static String TABLE_API_COL_APICALL_SCHEDULE_TIME = "apicall_schedule_time"; // factor for SCHEULE_UNIT time units
     public final static String TABLE_API_COL_APICALL_SCHEDULE_UNIT = "apicall_schedule_unit"; // may be 'minutes', 'hours', 'days'
-    public final static String TABLE_API_COL_APICALL_EVENT_KIND = "apicall_event_kind"; // 
+    public final static String TABLE_API_COL_APICALL_EVENT_KIND = "apicall_event_kind"; //
     public final static String TABLE_API_COL_APICALL_EVENT_ACTION = "apicall_event_action"; // 
 
     public final static String TABLE_ROBOTS_NAME = "robots";
@@ -146,6 +146,7 @@ public class WorkTables extends Tables {
 
                 // insert APICALL attributes
                 row.put(TABLE_API_COL_APICALL_COUNT, row.get(TABLE_API_COL_APICALL_COUNT, 1) + 1);
+                calculateAPIScheduler(row, false); // set next execution time (as this might be a forward existing entry with schedule data)
                 super.update(TABLE_API_NAME, row);
                 assert pk != null;
             }
@@ -311,20 +312,24 @@ public class WorkTables extends Tables {
         Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, (Date) null) : null;
         date = update ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, date) : row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
         if (date == null) return;
-        long d = date.getTime();
+        long d = 0;
         
         final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
         if ("off".equals(kind)) {
-            int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
-            if (time <= 0) {
+            int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, -1);
+            if (time <= 0) { // no schedule time
                 row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
                 return;
             }
             String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
-            if (unit.equals("minutes")) d += 60000L * Math.max(10, time);
-            if (unit.equals("hours"))   d += 60000L * 60L * time;
-            if (unit.equals("days"))    d += 60000L * 60L * 24L * time;
-            if (d < System.currentTimeMillis()) d = System.currentTimeMillis() + 600000L;
+            if (unit.equals("minutes")) d = 60000L * Math.max(10, time);
+            if (unit.equals("hours"))   d = hour * time;
+            if (unit.equals("days"))    d = day * time;
+            if ((d + date.getTime()) < System.currentTimeMillis()) { // missed schedule
+                d += System.currentTimeMillis(); // advance next exec from now
+            } else {
+                d += date.getTime(); // advance next exec from last execution
+            }
             d -= d % 60000; // remove seconds
         } else {
             String action = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");

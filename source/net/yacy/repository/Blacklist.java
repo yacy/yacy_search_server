@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -256,17 +257,27 @@ public class Blacklist {
         loadList(blFile, sep);
     }
 
-    public final void removeAll(final BlacklistType blacklistType, final String host) {
-        getBlacklistMap(blacklistType, true).remove(host);
-        getBlacklistMap(blacklistType, false).remove(host);
-    }
-
+    /**
+     * remove the host/path from internal blacklist maps for given blacklistType
+     * !! and removes the entry from source blacklist file !!
+     * @param blacklistType
+     * @param blacklistToUse
+     * @param host
+     * @param path
+     */
     public final void remove(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) {
 
         final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, true);
         Set<Pattern> hostList = blacklistMap.get(host);
         if (hostList != null) {
-            hostList.remove(path);
+            // remove pattern from list (by comparing patternstring with path, remove(path) will not match path)
+            for (Pattern hp : hostList) {
+                String hpxs = hp.pattern();
+                if (hpxs.equals(path)) {
+                    hostList.remove(hp);
+                    break;
+                }
+            }
             if (hostList.isEmpty()) {
                 blacklistMap.remove(host);
             }
@@ -275,12 +286,21 @@ public class Blacklist {
         final Map<String, Set<Pattern>> blacklistMapNotMatch = getBlacklistMap(blacklistType, false);
         hostList = blacklistMapNotMatch.get(host);
         if (hostList != null) {
-            hostList.remove(path);
+            // remove pattern from list
+            for (Pattern hp : hostList) {
+                String hpxs = hp.pattern();
+                if (hpxs.equals(path)) {
+                    hostList.remove(hp);
+                    break;
+                }
+            }
             if (hostList.isEmpty()) {
                 blacklistMapNotMatch.remove(host);
             }
         }
 
+        //TODO: check if delete from blacklist is desired, on reload entry will not be available in any blacklist
+        //      even if remove (above) from internal maps (at runtime) is only done for given blacklistType
         // load blacklist data from file
         final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
         
@@ -297,9 +317,9 @@ public class Blacklist {
     }
     
     /**
-     * 
+     * Adds entry to a given blacklist internal data and updates the source file
      * @param blacklistType
-     * @param blacklistToUse
+     * @param blacklistToUse source file
      * @param host
      * @param path
      * @throws PunycodeException
@@ -362,7 +382,7 @@ public class Blacklist {
     }
 
     /**
-     * appends aN entry to the backlist source file.
+     * appends aN entry to the backlist source file and updates internal blacklist maps.
      * 
      * @param blacklistSourcefile name of the blacklist file (LISTS/*.black)
      * @param host host or host pattern
@@ -387,8 +407,21 @@ public class Blacklist {
         
         if (!p.isEmpty() && p.charAt(0) == '*') {
             p = "." + p;
-        }
+        }        
         Pattern pattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE); 
+        
+        // update (put) pattern to internal blacklist maps (for which source is active)
+        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+            if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistSourcefile)) {
+                final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(supportedBlacklistType, isMatchable(host));
+                Set<Pattern> hostList;
+                if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
+                    blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
+                }
+                hostList.add(pattern);
+            }
+        }
+
         // Append the line to the file.
         PrintWriter pw = null;
         try {
@@ -433,6 +466,14 @@ public class Blacklist {
         return s != null && s.has(urlHash);
     }
 
+    /**
+     * Check blacklist to contain given host & path pattern.
+     * To check if a url matches a blacklist pattern, use isListed()
+     * @param blacklistType
+     * @param host
+     * @param path
+     * @return
+     */
     public final boolean contains(final BlacklistType blacklistType, final String host, final String path) {
         boolean ret = false;
 
@@ -444,7 +485,13 @@ public class Blacklist {
 
             final Set<Pattern> hostList = blacklistMap.get(h);
             if (hostList != null) {
-                ret = hostList.contains(path);
+                for (Pattern hp : hostList) {
+                    String hpxs = hp.pattern();
+                    if (hpxs.equals(path)) {
+                        ret = true;
+                        break;
+                    }
+                }
             }
         }
         return ret;

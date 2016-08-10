@@ -201,10 +201,9 @@ public class BEncodedHeap implements MapStore {
         final Map<String, BDecoder.BObject> map = bobj.getMap();
         final Map<String, byte[]> m = new HashMap<String, byte[]>();
         for ( final Map.Entry<String, BDecoder.BObject> entry : map.entrySet() ) {
-            if ( entry.getValue().getType() != BDecoder.BType.string ) {
-                continue;
-            }
-            m.put(entry.getKey(), entry.getValue().getString());
+            BObject ev = entry.getValue();
+            if ( ev == null || ev.getType() != BDecoder.BType.string ) continue;
+            m.put(entry.getKey(), ev.getString());
         }
         return m;
     }
@@ -688,11 +687,8 @@ public class BEncodedHeap implements MapStore {
                 m.put("k", "222".getBytes());
                 map.insert("789".getBytes(), m);
                 // iterate over keys
-                Map.Entry<byte[], Map<String, byte[]>> entry;
-                final Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
-                while ( i.hasNext() ) {
-                    entry = i.next();
-                    System.out.println(ASCII.String(entry.getKey()) + ": " + entry.getValue());
+                for (Map.Entry<byte[], Map<String, byte[]>> entry : map) {
+                    System.out.println(ASCII.String(entry.getKey()) + ": " + ASCII.String(entry.getValue().values().iterator().next()));
                 }
                 // clean up
                 map.close();
