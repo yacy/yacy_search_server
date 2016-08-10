@@ -17,7 +17,7 @@
 			"required": false
 		},
 		"YACY_PUBLIC_URL": {
-			"description": "External URL used by other peers to reach yours, required to run in 'Senior' mode. You chouls set it with [your_app_name].herokuapp.com`.",
+			"description": "External URL used by other peers to reach yours, required to run in 'Senior' mode. You chould set it with [your_app_name].herokuapp.com.",
 			"required": false
 		},
 		"MAVEN_CUSTOM_OPTS": {
