@@ -113,6 +113,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
     public static final String X_YACY_MEDIA_TITLE = "X-YaCy-Media-Title"; // can be attached to media files which do not have metadata; this will be used as title
     public static final String X_YACY_MEDIA_KEYWORDS = "X-YaCy-Media-Keywords"; // can be attached to media files which do not have metadata; this will be used as keywords (space-separared list of words)
+    /** Added when generating legacy request header to allow template servlets to know the original request scheme : "http" or "https" */
+    public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme";
 
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";
