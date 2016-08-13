@@ -686,6 +686,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
+        /* Add request scheme (http or https) to allow templates to know wether original request is http or https 
+         * (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
+        legacyRequestHeader.put(HeaderFramework.X_YACY_REQUEST_SCHEME, request.getScheme());
         Switchboard sb = Switchboard.getSwitchboard();
         if (legacyRequestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(request.getAuthType())) {
