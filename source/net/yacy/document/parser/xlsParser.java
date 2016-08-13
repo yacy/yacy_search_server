@@ -27,23 +27,22 @@
 
 package net.yacy.document.parser;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
 
-import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
-import org.apache.poi.hssf.eventusermodel.HSSFListener;
-import org.apache.poi.hssf.eventusermodel.HSSFRequest;
-import org.apache.poi.hssf.record.NumberRecord;
-import org.apache.poi.hssf.record.Record;
-import org.apache.poi.hssf.record.SSTRecord;
+import org.apache.poi.hpsf.SummaryInformation;
+import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 
@@ -76,113 +75,52 @@ public class xlsParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream source) throws Parser.Failure,
             InterruptedException {
-        return new XLSHSSFListener().parse(location, mimeType, charset, source);
-    }
 
-    public class XLSHSSFListener implements HSSFListener {
+        try {
+            //create a new org.apache.poi.poifs.filesystem.Filesystem
+            final POIFSFileSystem poifs = new POIFSFileSystem(source);
+            ExcelExtractor exceldoc = new ExcelExtractor(poifs);
+            exceldoc.setIncludeSheetNames(false); // exclude sheet names from getText() as also empty sheet names are returned
 
-        //StringBuilder for parsed text
-        private final StringBuilder sbFoundStrings;
+            SummaryInformation sumInfo = exceldoc.getSummaryInformation();
+            String title = sumInfo.getTitle();
+            if (title == null || title.isEmpty()) title = MultiProtocolURL.unescape(location.getFileName());
 
+            final String subject = sumInfo.getSubject();
+            List<String> descriptions = new ArrayList<String>();
+            if (subject != null && !subject.isEmpty()) descriptions.add(subject);
 
-        public XLSHSSFListener() {
-            this.sbFoundStrings = new StringBuilder(100);
-        }
+            // get keywords (for yacy as array)
+            final String keywords = sumInfo.getKeywords();
+            final String[] keywlist;
+            if (keywords != null && !keywords.isEmpty()) {
+               keywlist = CommonPattern.COMMA.split(keywords);
+            } else keywlist = null;
 
-        /*
-         * parses the source documents and returns a Document containing
-         * all extracted information about the parsed document
-         */
-        public Document[] parse(final DigestURL location, final String mimeType,
-                @SuppressWarnings("unused") final String charset, final InputStream source) throws Parser.Failure,
-                InterruptedException {
-            try {
+            Document[] retdocs = new Document[]{new Document(
+                location,
+                mimeType,
+                StandardCharsets.UTF_8.name(),
+                this,
+                null,
+                keywlist,
+                singleList(title),
+                sumInfo.getAuthor(),
+                exceldoc.getDocSummaryInformation().getCompany(),
+                null,
+                descriptions,
+                0.0d, 0.0d,
+                exceldoc.getText(),
+                null,
+                null,
+                null,
+                false,
+                sumInfo.getLastSaveDateTime())};
 
-                //create a new org.apache.poi.poifs.filesystem.Filesystem
-                final POIFSFileSystem poifs = new POIFSFileSystem(source);
-                //get the Workbook (excel part) stream in a InputStream
-                final InputStream din = poifs.createDocumentInputStream("Workbook");
-                //construct out HSSFRequest object
-                final HSSFRequest req = new HSSFRequest();
-                //lazy listen for ALL records with the listener shown above
-                req.addListenerForAllRecords(this);
-                //create our event factory
-                final HSSFEventFactory factory = new HSSFEventFactory();
-                //process our events based on the document input stream
-                factory.processEvents(req, din);
-                //close our document input stream (don't want to leak these!)
-                din.close();
+            return retdocs;
 
-                //now the parsed strings are in the StringBuilder, now convert them to a String
-                final String contents = this.sbFoundStrings.toString().trim();
-
-                /*
-                 * create the plasmaParserDocument for the database
-                 * and set shortText and bodyText properly
-                 */
-                return new Document[]{new Document(
-                        location,
-                        mimeType,
-                        StandardCharsets.UTF_8.name(),
-                        this,
-                        null,
-                        null,
-                        singleList(location.getFile()),
-                        null, // TODO: AUTHOR
-                        "", // TODO: publisher
-                        null,
-                        null,
-                        0.0d, 0.0d,
-                        contents,
-                        null,
-                        null,
-                        null,
-                        false,
-                        new Date())};
-            } catch (final Exception e) {
-                if (e instanceof InterruptedException) throw (InterruptedException) e;
-
-                /*
-                 * an unexpected error occurred, log it and throw a Parser.Failure
-                 */
-                ConcurrentLog.logException(e);
-                final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
-                throw new Parser.Failure(errorMsg, location);
-            }
-        }
-
-        @Override
-        public void processRecord(final Record record) {
-            SSTRecord sstrec = null;
-            switch (record.getSid()){
-                case NumberRecord.sid: {
-                    final NumberRecord numrec = (NumberRecord) record;
-                    this.sbFoundStrings.append(numrec.getValue());
-                    break;
-                }
-                //unique string records
-                case SSTRecord.sid: {
-                    sstrec = (SSTRecord) record;
-                    for (int k = 0; k < sstrec.getNumUniqueStrings(); k++){
-                        this.sbFoundStrings.append( sstrec.getString(k) );
-
-                        //add line seperator
-                        this.sbFoundStrings.append( "\n" );
-                    }
-                    break;
-                }
-                /*
-                case LabelSSTRecord.sid: {
-                    final LabelSSTRecord lsrec = (LabelSSTRecord)record;
-                    sbFoundStrings.append( sstrec.getString(lsrec.getSSTIndex()) );
-                    break;
-                }
-                */
-            }
-
-            //add line seperator
-            this.sbFoundStrings.append( "\n" );
+        } catch (IOException ex1) {
+            throw new Parser.Failure(ex1.getMessage(), location);
         }
     }
-
 }
