@@ -92,13 +92,13 @@ public class Document {
     private final Set<String> languages;
     private boolean indexingDenied;
     private final double lon, lat;
-    private final Object parserObject; // the source object that was used to create the Document
+    private final Parser parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date lastModified;
     private int crawldepth;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
-                    final Object parserObject,
+                    final Parser parserObject,
                     final Set<String> languages,
                     final String[] keywords,
                     final List<String> titles,
@@ -160,11 +160,29 @@ public class Document {
         if (contentDomain != ContentDomain.ALL) return contentDomain;
         return this.dc_source().getContentDomainFromExt();
     }
-    
-    public Object getParserObject() {
+
+    /**
+     * The parser used to generate the document
+     * @return Parser
+     */
+    public Parser getParserObject() {
         return this.parserObject;
     }
 
+    /**
+     * Confinient call to get the source/scraper object of the underlaying parser
+     * if the parser uses a scraper, like htmlParser
+     * @return scraper object typically of type ContentScraper but may also of type DCEntry
+     */
+    public Object getScraperObject() {
+        if (this.parserObject instanceof AbstractParser) {
+            if (((AbstractParser) this.parserObject).scraperObject != null) {
+                return ((AbstractParser) this.parserObject).scraperObject;
+            }
+        }
+        return null;
+    }
+    
     public Set<String> getContentLanguages() {
         return this.languages;
     }
@@ -931,9 +949,9 @@ dc_rights
 
         // clean up parser data
         for (final Document doc: docs) {
-            Object parserObject = doc.getParserObject();
-            if (parserObject instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parserObject;
+            Object scraper = doc.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 html.close();
             }
         }
@@ -979,9 +997,9 @@ dc_rights
                     if (!entry.getKey().attachedNofollow()) result.put(entry.getKey(), entry.getValue());
                 }
             }
-            final Object parser = d.getParserObject();
-            if (parser instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parser;
+            final Object scraper = d.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) try {result.put(new AnchorURL(refresh), "refresh");} catch (final MalformedURLException e) {}
                 AnchorURL canonical = html.getCanonical();

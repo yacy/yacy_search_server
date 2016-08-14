@@ -39,7 +39,8 @@ public abstract class AbstractParser implements Parser {
     protected final Set<String> SUPPORTED_MIME_TYPES = new LinkedHashSet<String>(); 
     protected final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     private   final String name;
-
+    protected Object scraperObject; // used scraper or source object if any, otherwise null
+    
     /**
      * initialize a parser with a name
      * @param name
