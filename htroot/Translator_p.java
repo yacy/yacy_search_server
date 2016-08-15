@@ -38,7 +38,7 @@ public class Translator_p {
             final servletProperties prop = new servletProperties();
             final Switchboard sb = (Switchboard) env;
 
-            String langcfg = env.getConfig("locale.language", "default");
+            String langcfg = sb.getConfig("locale.language", "default");
             prop.put("targetlang", langcfg);
             if ("default".equals(langcfg)) {
                 prop.put("errmsg", "activate a different language");
@@ -47,10 +47,10 @@ public class Translator_p {
                 prop.put("errmsg", "");
             }
 
-            File lngfile = new File("locales", langcfg + ".lng");
+            File lngfile = new File(sb.getAppPath("locale.source", "locales"), langcfg + ".lng");
             CreateTranslationMasters ctm = new CreateTranslationMasters(/*new File ("locales","master.lng.xlf")*/);
 
-            File masterxlf = new File("locales", "master.lng.xlf");
+            File masterxlf = new File(sb.getAppPath("locale.source", "locales"), "master.lng.xlf");
             if (!masterxlf.exists()) ctm.createMasterTranslationLists(masterxlf);
             Map<String, Map<String, String>> origTrans = ctm.joinMasterTranslationLists(masterxlf, lngfile);
             final File locallngfile = ctm.getScratchFile(lngfile);
