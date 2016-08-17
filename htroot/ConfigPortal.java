@@ -33,6 +33,8 @@ import java.net.MalformedURLException;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
@@ -224,19 +226,30 @@ public class ConfigPortal {
         prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
-        /* Addresse used in code template */
+        /* Address used in code template */
         String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getLocalPort();
         }
         prop.put("myaddress", myaddress);
         
-        /* Adress used to display iframe preview : no need to use public adress when coming from local */
-        String myPreviewAddress = myaddress;
-        if(header.accessFromLocalhost()) {
-        	myPreviewAddress = "localhost:" + sb.getLocalPort();
+        /* Address used to generate the preview frames : let's use the adress and port as requested. (Same behavior as opensearchdescription.java) */
+        String myPreviewAddress = header.get(HeaderFramework.HOST); // returns host:port (if not default http/https ports)
+        String myPreviewProtocol = "http";
+        if (myPreviewAddress == null) {
+        	myPreviewAddress = Domains.LOCALHOST + ":" + sb.getConfig("port", "8090");
+        } else {
+            final String sslport = ":" + sb.getConfig("port.ssl", "8443");
+            if (myPreviewAddress.endsWith(sslport)) { // connection on ssl port, use https protocol
+                myPreviewProtocol = "https";
+            }
         }
+        /* YaCyDefaultServelt should have filled this custom header, making sure we know here wether original request is http or https
+         *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
+        myPreviewProtocol = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, myPreviewProtocol);
+        
         prop.put("myPreviewAddress", myPreviewAddress);
+        prop.put("myPreviewProtocol", myPreviewProtocol);
         return prop;
     }
 
