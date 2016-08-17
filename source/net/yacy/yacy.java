@@ -39,13 +39,22 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
+
+import com.google.common.io.Files;
+
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.document.Document;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.http.Jetty9HttpServerImpl;
@@ -54,17 +63,11 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
+import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import com.google.common.io.Files;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.order.Digest;
-import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.crawler.retrieval.Response;
-import net.yacy.peers.Seed;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.translation.TranslatorXliff;
 
@@ -265,22 +268,7 @@ public final class yacy {
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // copy the donate iframe (better to copy this once here instead of doing this in an actual iframe in the search result)
-            final File wwwEnvPath = new File(htDocsPath, "env");
-            mkdirIfNeseccary(wwwEnvPath);
-            final String iframesource = sb.getConfig("donation.iframesource", "");
-            final String iframetarget = sb.getConfig("donation.iframetarget", "");
-            final File iframefile = new File(htDocsPath, iframetarget);
-            if (!iframefile.exists()) new Thread() {
-                @Override
-                public void run() {
-                    final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
-                    Response response;
-                    try {
-                        response = sb.loader == null ? null : sb.loader.load(sb.loader.request(new DigestURL(iframesource), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
-                        if (response != null) FileUtils.copy(response.getContent(), iframefile);
-                    } catch (Throwable e) {}
-                }
-            }.start();
+            importDonationIFrame(sb, htDocsPath);
             
             // create default notifier picture
             File notifierFile = new File(htDocsPath, "notifier.gif");
@@ -420,6 +408,53 @@ public final class yacy {
             System.exit(0);
         } catch (final Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
+
+    /**
+     * Concurrently import the donation iframe content to serve it directly from this peer.
+     * @param switchBoard the SwitchBoard instance
+     */
+	private static void importDonationIFrame(final Switchboard switchBoard, final File htDocsDirectory) {
+		final File wwwEnvPath = new File(htDocsDirectory, "env");
+		mkdirIfNeseccary(wwwEnvPath);
+		final String iframesource = switchBoard.getConfig("donation.iframesource", "");
+		final String iframetarget = switchBoard.getConfig("donation.iframetarget", "");
+		final File iframefile = new File(htDocsDirectory, iframetarget);
+		if (!iframefile.exists()) new Thread() {
+		    @Override
+		    public void run() {
+		        final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
+		        Response documentResponse;
+		        try {
+		        	/* Load the donation html frame content */
+		        	documentResponse = sb.loader == null ? null : sb.loader.load(sb.loader.request(new DigestURL(iframesource), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
+		            if (documentResponse != null) {
+		            	Document[] documents = documentResponse.parse();
+		            	if(documents != null && documents.length > 0 && documents[0] != null) {
+		            		Document donateDocument = documents[0];
+		            		String donateDocContent = new String(documentResponse.getContent(), donateDocument.getCharset());
+		            		/* Load image resources contained in the page */
+		            		if(donateDocument.getImages() != null) {
+		            			for(DigestURL imgURL : donateDocument.getImages().keySet()) {
+		            				Response response = sb.loader.load(sb.loader.request(imgURL, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
+		            				if (response != null) {
+		            					String imgFileName = imgURL.getFileName();
+		            					/* Store each image to this peer custom directory */
+		            					FileUtils.copy(response.getContent(), new File(iframefile.getParentFile(), imgFileName));
+		                        	
+		            					/* Transform the original image URL to a relative one */
+		            					donateDocContent = donateDocContent.replace(imgURL.getURL().toString(), imgFileName);
+		            				}
+		            			}
+		            		}
+			            	FileUtils.copy(donateDocContent.getBytes(donateDocument.getCharset()), iframefile);
+		            	}
+		            }
+		        } catch (Exception e) {
+		        	ConcurrentLog.warn("STARTUP", "Could not retrieve donation frame content.", e);
+		        }
+		    }
+		}.start();
+	}
 
 	/**
 	 * @param f
