@@ -48,20 +48,20 @@
 	<classpathentry kind="lib" path="lib/commons-io-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.21.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-client-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-continuation-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-deploy-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-http-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-io-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-jmx-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-proxy-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-security-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-server-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlet-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlets-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-util-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-webapp-9.2.17.v20160517.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-xml-9.2.17.v20160517.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-client-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-deploy-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-jmx-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-proxy-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-webapp-9.2.18.v20160721.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-xml-9.2.18.v20160721.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.6.jar"/>

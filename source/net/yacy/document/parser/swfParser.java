@@ -68,10 +68,9 @@ public class swfParser extends AbstractParser implements Parser {
         try {
             final SWF2HTML swf2html = new SWF2HTML();
             String contents = "";
-            ContentScraper htmlscraper=null;
             try {
-            	contents = swf2html.convertSWFToHTML(source);
-                htmlscraper =  htmlParser.parseToScraper(location, charset, scraper, timezoneOffset, contents, 100);
+                contents = swf2html.convertSWFToHTML(source);
+                scraperObject = htmlParser.parseToScraper(location, charset, scraper, timezoneOffset, contents, 100);
             } catch (final NegativeArraySizeException e) {
                 throw new Parser.Failure(e.getMessage(), location);
             } catch (final IOException e) {
@@ -79,29 +78,9 @@ public class swfParser extends AbstractParser implements Parser {
             } catch (final Exception e) {
                 throw new Parser.Failure(e.getMessage(), location);
             }
-            /*
-            String url = null;
-            String urlnr = null;
-            final String linebreak = System.getProperty("line.separator");
-            final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
-            int urls = 0;
-            int urlStart = -1;
-            int urlEnd = 0;
-            int p0 = 0;
 
-            //extracting urls
-            while ((urlStart = contents.indexOf("http://",urlEnd)) >= 0){
-                urlEnd = contents.indexOf(linebreak,urlStart);
-                url = contents.substring(urlStart,urlEnd);
-                urlnr = Integer.toString(++urls);
-                AnchorURL u = new AnchorURL(url);
-                u.setNameProperty(urlnr);
-                anchors.add(u);
-                contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
-            }
-            */
-
-           // As the result of parsing this function must return a plasmaParserDocument object
+            // As the result of parsing this function must return a plasmaParserDocument object
+            ContentScraper htmlscraper = (ContentScraper) this.scraperObject; // shortcut to access ContentScraper methodes
             return new Document[]{new Document(
                 location, // url of the source document
                 mimeType, // the documents mime type

@@ -43,19 +43,19 @@ public class compare_yacy {
         searchengines.put("YaCy (local)", "yacysearch.html?display=2&resource=local&query=");
         //searchengines.put("google.com", "https://www.google.com/#q=");
         searchengines.put("startpage.com", "https://startpage.com/do/search?cat=web&query=");
-        searchengines.put("bing.com", "http://www.bing.com/search?q=");
-        searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
-        searchengines.put("metager2.de (web)", "http://www.metager2.de/search.php?ses=web&q=");
-        searchengines.put("metager2.de (international)", "http://www.metager2.de/search.php?ses=international&q=");
-        searchengines.put("yahoo.com", "http://search.yahoo.com/search?p=");
-        //searchengines.put("romso.de", "http://romso.de/?q="); // no serach service 2016-01-02
-        searchengines.put("Wikipedia English", "http://en.wikipedia.org/wiki/");
-        searchengines.put("Wikipedia Deutsch", "http://de.wikipedia.org/wiki/");
-        searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?verify=true&resource=global&nav=all&display=2&meanCount=5&query=");
+        searchengines.put("bing.com", "https://www.bing.com/search?q=");
+        searchengines.put("metager.de", "https://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
+        searchengines.put("metager2.de (web)", "https://www.metager2.de/search.php?ses=web&q=");
+        searchengines.put("metager2.de (international)", "https://www.metager2.de/search.php?ses=international&q=");
+        //searchengines.put("yahoo.com", "https://search.yahoo.com/search?p="); // no search service in iframe 2016-08-17 : "Load denied by X-Frame-Options: does not permit cross-origin framing."
+        //searchengines.put("romso.de", "http://romso.de/?q="); // no search service 2016-01-02
+        searchengines.put("Wikipedia English", "https://en.wikipedia.org/wiki/");
+        searchengines.put("Wikipedia Deutsch", "https://de.wikipedia.org/wiki/");
+        //searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?verify=true&resource=global&nav=all&display=2&meanCount=5&query="); // no search service 2016-08-17
         //searchengines.put("dbpedia", "http://dbpedia.neofonie.de/browse/~:"); // no search service 2016-01-02
-        searchengines.put("wolfram alpha", "http://www.wolframalpha.com/input/?i=");
-        searchengines.put("OAIster@OCLC", "http://oaister.worldcat.org/search?q=");
-        searchengines.put("oai.yacy.net", "http://oai.yacy.net/yacysearch.html?verify=true&resource=local&nav=all&display=2&meanCount=5&query=");
+        searchengines.put("wolfram alpha", "https://www.wolframalpha.com/input/?i=");
+        searchengines.put("OAIster@OCLC", "https://oaister.worldcat.org/search?q=");
+        //searchengines.put("oai.yacy.net", "http://oai.yacy.net/yacysearch.html?verify=true&resource=local&nav=all&display=2&meanCount=5&query="); // no search service 2016-08-17
     }
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
