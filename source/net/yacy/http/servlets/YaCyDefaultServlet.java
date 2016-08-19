@@ -188,8 +188,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
         templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
     }
-
-
+    
     /* ------------------------------------------------------------ */
     protected boolean getInitBoolean(String name, boolean dft) {
         String value = getInitParameter(name);
@@ -237,7 +236,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
     
-    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -514,8 +513,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
             out = new WriterOutputStream(response.getWriter());
         }
 
-        response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 600000); // expires ten minutes in the future
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, resource.lastModified());
+        // remove the last-modified field since caching otherwise does not work
+        /*
+           https://www.ietf.org/rfc/rfc2616.txt
+           "if the response does have a Last-Modified time, the heuristic
+           expiration value SHOULD be no more than some fraction of the interval
+           since that time. A typical setting of this fraction might be 10%."
+        */
+        if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+            response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+        }
+
+        // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+        response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
         
         if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
             //  if there were no ranges, send entire entity
@@ -637,12 +647,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setContentType(extensionmime);
             }
         }
-
+        /*
+         * DO NOT enable this again, removal of the LAST_MODIFIED field enables caching
         long lml = resource.lastModified();
         if (lml >= 0) {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
         }
-
+        */
+        
         if (count != -1) {
             if (count < Integer.MAX_VALUE) {
                 response.setContentLength((int) count);
@@ -805,12 +817,17 @@ public class YaCyDefaultServlet extends HttpServlet  {
         String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
         long now = System.currentTimeMillis();
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
         if (target.endsWith(".css")) {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour (which is still often, others use 1 week, month or year)
         } else if (target.endsWith(".png")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 60000); // expires in 1 minute (reduce heavy image creation load)
+            // expires in 1 minute (reduce heavy image creation load)
+            if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                response.getHeaders(HeaderFramework.LAST_MODIFIED).clear();
+            }
+            response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(60));
         } else {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
         }
         
