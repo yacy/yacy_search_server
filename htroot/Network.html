@@ -9,6 +9,39 @@
     }
     </style>
 
+  <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body id="Network">
+
+    #(menu)#
+    #%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#    
+    <div class="SubMenu">
+      <h3>YaCy Network</h3>
+      <ul class="SubMenu">
+        <li><a href="Network.html" class="MenuItemLink">Network Overview</a></li>
+        <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Junior&nbsp;(fragment)&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=5" class="MenuItemLink">Network History</a></li>
+      </ul>
+    </div>
+    #(/menu)#
+    
+<div id="api"><a href="Network.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML.
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+<script type="text/javascript">
+document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.location.search.substring(1));
+</script>
+
+    #(page)#
+    <h2>YaCy Search Network '#[networkName]#'</h2>
   <script type="text/javascript">
   <!--
     imagestub = "NetworkPicture.png?width=1024&height=720&bgcolor=FFFFFF&ct=15000&coronaangle=";
@@ -45,39 +78,6 @@
     }
   -->
   </script>
-  <script type="text/javascript" src="js/sorttable.js"></script>
-  </head>
-  <body id="Network">
-
-    #(menu)#
-    #%env/templates/embeddedheader.template%#
-    ::
-    #%env/templates/simpleheader.template%#
-    ::
-    #%env/templates/header.template%#    
-    <div class="SubMenu">
-      <h3>YaCy Network</h3>
-      <ul class="SubMenu">
-        <li><a href="Network.html" class="MenuItemLink">Network Overview</a></li>
-        <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Senior&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Junior&nbsp;(fragment)&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=5" class="MenuItemLink">Network History</a></li>
-      </ul>
-    </div>
-    #(/menu)#
-    
-<div id="api"><a href="Network.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
-<span>The information that is presented on this page can also be retrieved as XML.
-Click the API icon to see the XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
-</div>
-<script type="text/javascript">
-document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.location.search.substring(1));
-</script>
-
-    #(page)#
-    <h2>YaCy Search Network '#[networkName]#'</h2>
     ::
     <h2>Active Principal and Senior Peers in '#[networkName]#' Network</h2>
     ::
