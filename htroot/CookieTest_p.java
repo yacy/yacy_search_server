@@ -84,8 +84,14 @@ public class CookieTest_p {
             //header.
        }
 
-        prop.put("cookiesout", "1");
-        prop.putHTML("cookiesout_0_string", header.getHeaderCookies().replaceAll(";",";<br />"));
+        //prop.put("cookiesout", "1");
+        String[] cookielst = header.getHeaderCookies().split(";");
+        int i = 0;
+        for (String singleco : cookielst) {
+            prop.putHTML("cookiesout_" + i + "_string", singleco + ";"); // output with ";" for compatiblity with cookiesin
+            i++;
+        }
+        prop.put("cookiesout", i);
         return prop;
     }
 }

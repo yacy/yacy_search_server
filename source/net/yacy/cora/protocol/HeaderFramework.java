@@ -750,6 +750,12 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     {
         setCookie( name,  value,  null,  null,  null, false);
     }
+
+    /**
+     * Gets the header entry "Cookie"
+     * 
+     * @return String with cookies separated by ';'
+     */
     public String getHeaderCookies(){
         final Iterator<Map.Entry<String, String>> it = entrySet().iterator();
         while(it.hasNext())
