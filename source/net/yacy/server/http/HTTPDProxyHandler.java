@@ -66,6 +66,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -170,7 +171,7 @@ public final class HTTPDProxyHandler {
             yellowList = FileUtils.loadList(new File(f));
             log.config("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
         } else {
-            yellowList = new HashSet<String>();
+            yellowList = null;
         }
 
         final String redirectorPath = sb.getConfig("externalRedirector", "");
@@ -255,6 +256,8 @@ public final class HTTPDProxyHandler {
     }
 
     /**
+     * Get a page from the remote server as proxy request for the client
+     *
      * @param conProp a collection of properties about the connection, like URL
      * @param requestHeader The header lines of the connection from the request
      * @param respond the OutputStream to the client
@@ -404,6 +407,16 @@ public final class HTTPDProxyHandler {
         }
     }
 
+    /**
+     * Get requested proxied page from the web
+     *
+     * @param conProp
+     * @param url
+     * @param requestHeader
+     * @param cachedResponseHeader
+     * @param respond
+     * @param agent
+     */
     private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURL url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond, final ClientIdentification.Agent agent) {
         try {
             final int reqID = requestHeader.hashCode();
@@ -412,7 +425,14 @@ public final class HTTPDProxyHandler {
             final String path = url.getPath(); // conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
             final String args = url.getSearchpart(); // conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
             final String ip =      (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
-            final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the ip from the connecting peer
+            final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the http version for the request
+            final String clienthttpVer; // the http version of the client connection
+            final HttpServletRequest clientservletrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+            if (clientservletrequest != null) {
+                clienthttpVer = clientservletrequest.getProtocol();
+            } else {
+                clienthttpVer = null;
+            }
             final int port = url.getPort();
 
             // resolve yacy and yacyh domains
@@ -440,7 +460,6 @@ public final class HTTPDProxyHandler {
             try {
             	client.GET(getUrl, false);
                 if (log.isFinest()) log.finest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
-                conProp.put(HeaderFramework.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 
                 int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                 final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
@@ -490,7 +509,7 @@ public final class HTTPDProxyHandler {
                 HTTPDemon.sendRespondHeader(
                         conProp,
                         respond,
-                        httpVer,
+                        clienthttpVer,
                         statusCode,
                         client.getHttpResponse().getStatusLine().toString(), // status text
                         responseHeader);
@@ -634,7 +653,13 @@ public final class HTTPDProxyHandler {
     ) throws IOException {
 
         final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-
+        final String clienthttpVer; // the http version of the client connection
+        final HttpServletRequest clientservletrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+        if (clientservletrequest != null) {
+            clienthttpVer = clientservletrequest.getProtocol();
+        } else {
+            clienthttpVer = null;
+        }
         // we respond on the request by using the cache, the cache is fresh
         try {
             prepareResponseHeader(cachedResponseHeader, httpVer);
@@ -653,7 +678,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(0));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,httpVer,304,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,304,cachedResponseHeader);
                 //respondHeader(respond, "304 OK", cachedResponseHeader); // respond with 'not modified'
             } else {
                 // unconditional request: send content of cache
@@ -664,7 +689,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(cacheEntry.length));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
 
                 // send also the complete body now from the cache
@@ -795,7 +820,7 @@ public final class HTTPDProxyHandler {
                 if (httpVer.equals(HeaderFramework.HTTP_VERSION_0_9) || httpVer.equals(HeaderFramework.HTTP_VERSION_1_0)) {
                     forceConnectionClose(conProp);
                 } else {
-                    chunkedOut = new ChunkedOutputStream(respond);
+                chunkedOut = new ChunkedOutputStream(respond);
                 }
                 responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
             }

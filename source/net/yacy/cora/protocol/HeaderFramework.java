@@ -196,6 +196,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     }
 
     /* PROPERTIES: General properties */
+    // Properties are used to internally store or remember header values and additional connection information
+    // One of the usages is in proxy operation to prepare header values to be set as header values upon connection
+    //  * use of properties as header values is discouraged (e.g. as proxy transmits it as arbitrary headers) [2016-8-21]
     public static final String CONNECTION_PROP_HTTP_VER = "HTTP";
     public static final String CONNECTION_PROP_PROTOCOL = "PROTOCOL";
     public static final String CONNECTION_PROP_HOST = "HOST";
@@ -207,16 +210,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_ARGS = "ARGS";
     public static final String CONNECTION_PROP_CLIENTIP = "CLIENTIP";
     public static final String CONNECTION_PROP_PERSISTENT = "PERSISTENT";
-    //public static final String CONNECTION_PROP_KEEP_ALIVE_COUNT = "KEEP-ALIVE_COUNT";
-    //public static final String CONNECTION_PROP_REQUESTLINE = "REQUESTLINE";
-    //public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
     public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
-    //public static final String CONNECTION_PROP_INPUTSTREAM = "INPUTSTREAM";
-    //public static final String CONNECTION_PROP_OUTPUTSTREAM = "OUTPUTSTREAM";
 
     /* PROPERTIES: Client -> Proxy */
-    public static final String CONNECTION_PROP_CLIENT_REQUEST_HEADER = "CLIENT_REQUEST_HEADER";
+    public static final String CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST = "CLIENT_HTTPSERVLETREQUEST";
 
     /* PROPERTIES: Proxy -> Client */
     public static final String CONNECTION_PROP_PROXY_RESPOND_CODE = "PROXY_RESPOND_CODE";
@@ -546,7 +544,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if (theHeader == null) throw new IllegalArgumentException();
 
         // setting the http version if it was not already set
-        if (httpVersion == null) httpVersion = "HTTP/1.0";
+        if (httpVersion == null) httpVersion = HTTP_VERSION_1_0;
 
         // setting the status text if it was not already set
         if ((httpStatusText == null)||(httpStatusText.length()==0)) {

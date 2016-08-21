@@ -128,7 +128,8 @@ public final class HTTPDemon {
         ByteArrayOutputStream o = null;
         try {
             // setting the proper http status message
-            String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = "HTTP/1.1";
+            String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+            if (httpVersion == null) httpVersion = HeaderFramework.HTTP_VERSION_1_1;
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
                 //http1_1 includes http1_0 messages
                 if (HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
