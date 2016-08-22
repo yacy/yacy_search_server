@@ -116,14 +116,29 @@ public final class HTTPDFileHandler {
     }
 
     /** Returns a path to the localized or default file according to the locale.language (from he switchboard)
-     * @param path relative from htroot */
-    public static File getLocalizedFile(final String path){
-        String localeSelection = switchboard.getConfig("locale.language","default");
+     * @param path relative from htroot
+     * @param clientLang preferred client language (browser setting), applied if config locale.language=browser
+     */
+    public static File getLocalizedFile(final String path, final String clientLang){
+        String localeSelection = switchboard.getConfig("locale.language", "browser");
         if (!(localeSelection.equals("default"))) {
-            final File localePath = new File(htLocalePath, localeSelection + '/' + path);
-            if (localePath.exists()) return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
+
+            if (localeSelection.equals("browser")) { // handle preferred language of client browser
+                if (clientLang != null && !clientLang.isEmpty()) {
+                    final File localePath = new File(htLocalePath, clientLang + '/' + path);
+                    if (localePath.exists()) { // on success return otherwise continue with default htDocsPath
+                        return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
+                    }
+                }
+            } else { // use language from switchboard config
+
+                final File localePath = new File(htLocalePath, localeSelection + '/' + path);
+                if (localePath.exists()) {
+                    return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
+                }
+            }
         }
-        
+
         final File docsPath  = new File(htDocsPath, path);
         if (docsPath.exists()) return docsPath;
         return new File(htDefaultPath, path);
@@ -131,7 +146,7 @@ public final class HTTPDFileHandler {
 
     public static final File getOverlayedFile(final String path) {
         File targetFile;
-        targetFile = getLocalizedFile(path);
+        targetFile = getLocalizedFile(path, null);
         if (!targetFile.exists()) {
             targetFile = new File(htDocsPath, path);
         }
