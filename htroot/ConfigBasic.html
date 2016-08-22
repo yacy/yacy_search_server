@@ -33,14 +33,15 @@
         <li>
           <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
           <fieldset>
-            <input type="radio" name="language" value="default" id="lang_en" onchange="this.form.submit()" #(lang_en)#::checked="checked"#(/lang_en)# /><label for="lang_en">English</label>            
-            <input type="radio" name="language" value="de" id="lang_de" onchange="this.form.submit()" #(lang_de)#::checked="checked"#(/lang_de)# /><label for="lang_de">Deutsch</label>&nbsp;
-            <input type="radio" name="language" value="fr" id="lang_fr" onchange="this.form.submit()" #(lang_fr)#::checked="checked"#(/lang_fr)# /><label for="lang_fr">Fran&ccedil;ais</label>&nbsp;
-            <input type="radio" name="language" value="cn" id="lang_cn" onchange="this.form.submit()" #(lang_cn)#::checked="checked"#(/lang_cn)# /><label for="lang_cn">&#27721;&#35821;/&#28450;&#35486</label>
-            <input type="radio" name="language" value="ru" id="lang_ru" onchange="this.form.submit()" #(lang_ru)#::checked="checked"#(/lang_ru)# /><label for="lang_ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</label>
-            <input type="radio" name="language" value="uk" id="lang_uk" onchange="this.form.submit()" #(lang_uk)#::checked="checked"#(/lang_uk)# /><label for="lang_uk">&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</label>
-            <input type="radio" name="language" value="hi" id="lang_hi" onchange="this.form.submit()" #(lang_hi)#::checked="checked"#(/lang_hi)# /><label for="lang_hi">&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</label>
-            <input type="radio" name="language" value="ja" id="lang_ja" onchange="this.form.submit()" #(lang_ja)#::checked="checked"#(/lang_ja)# /><label for="lang_ja">&#26085;&#26412;&#35486;</label>            
+            <input type="radio" name="language" value="browser" id="lang_browser" onchange="this.form.submit()" #(lang_browser)#::checked="checked"#(/lang_browser)# /><label for="lang_browser">Browser</label>&nbsp;
+            <input type="radio" name="language" value="default" id="lang_en" onchange="this.form.submit()" #(lang_en)#::checked="checked"#(/lang_en)# /><label for="lang_en" class="#[active_en]#">English</label>&nbsp;    
+            <input type="radio" name="language" value="de" id="lang_de" onchange="this.form.submit()" #(lang_de)#::checked="checked"#(/lang_de)# /><label class="#[active_de]#" for="lang_de">Deutsch</label>&nbsp;
+            <input type="radio" name="language" value="fr" id="lang_fr" onchange="this.form.submit()" #(lang_fr)#::checked="checked"#(/lang_fr)# /><label class="#[active_fr]#" for="lang_fr">Fran&ccedil;ais</label>&nbsp;
+            <input type="radio" name="language" value="cn" id="lang_cn" onchange="this.form.submit()" #(lang_cn)#::checked="checked"#(/lang_cn)# /><label class="#[active_cn]#" for="lang_cn">&#27721;&#35821;/&#28450;&#35486</label>
+            <input type="radio" name="language" value="ru" id="lang_ru" onchange="this.form.submit()" #(lang_ru)#::checked="checked"#(/lang_ru)# /><label class="#[active_ru]#" for="lang_ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</label>
+            <input type="radio" name="language" value="uk" id="lang_uk" onchange="this.form.submit()" #(lang_uk)#::checked="checked"#(/lang_uk)# /><label class="#[active_uk]#" for="lang_uk">&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</label>
+            <input type="radio" name="language" value="hi" id="lang_hi" onchange="this.form.submit()" #(lang_hi)#::checked="checked"#(/lang_hi)# /><label class="#[active_hi]#" for="lang_hi">&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</label>
+            <input type="radio" name="language" value="ja" id="lang_ja" onchange="this.form.submit()" #(lang_ja)#::checked="checked"#(/lang_ja)# /><label class="#[active_ja]#" for="lang_ja">&#26085;&#26412;&#35486;</label>            
           </fieldset>
         </li>
         <!-- take care that no other items are changed, but also change the former if no js is enabled -->

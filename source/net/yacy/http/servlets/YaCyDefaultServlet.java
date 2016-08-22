@@ -811,7 +811,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected void handleTemplate(String target,  HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
-        String localeSelection = sb.getConfig("locale.language", "default");
+        String localeSelection = sb.getConfig("locale.language", "browser");
+        if (localeSelection.endsWith("browser")) {
+            String lng = request.getLocale().getLanguage();
+            if (lng.equalsIgnoreCase("en")) { // because en is handled as "default" in localizer
+                localeSelection = "default";
+            } else {
+                localeSelection = lng;
+            }
+        }
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(_resourceBase.addPath(target).getFile());
         String targetExt = target.substring(target.lastIndexOf('.') + 1);
@@ -994,6 +1002,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                templatePatterns.put("clientlanguage", localeSelection);
                 
                 String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 

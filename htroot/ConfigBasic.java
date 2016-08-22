@@ -31,11 +31,13 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.workflow.InstantBusyThread;
@@ -63,7 +65,7 @@ public class ConfigBasic {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final File langPath = new File(sb.getAppPath("locale.source", "locales").getAbsolutePath());
-        String lang = env.getConfig("locale.language", "default");
+        String lang = env.getConfig("locale.language", "browser");
 
         final int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
@@ -269,6 +271,7 @@ public class ConfigBasic {
         prop.put("defaultPort", env.getLocalPort());
         prop.put("withsslenabled", env.getConfigBool("server.https", false) ? 1 : 0);
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
+        prop.put("lang_browser", "0"); // for client browser language dependent
         prop.put("lang_de", "0");
         prop.put("lang_fr", "0");
         prop.put("lang_cn", "0");
@@ -280,6 +283,28 @@ public class ConfigBasic {
             prop.put("lang_en", "1");
         } else {
             prop.put("lang_" + lang, "1");
+        }
+        // set label class (green background) for active translation
+        if (lang.equals("browser")) {
+            List<String> l = Translator.activeTranslations();
+            prop.put("active_cn", l.contains("cn") ? "label-success" : "");
+            prop.put("active_de", l.contains("de") ? "label-success" : "");
+            prop.put("active_fr", l.contains("fr") ? "label-success" : "");
+            prop.put("active_hi", l.contains("hi") ? "label-success" : "");
+            prop.put("active_jp", l.contains("jp") ? "label-success" : "");
+            prop.put("active_ru", l.contains("ru") ? "label-success" : "");
+            prop.put("active_uk", l.contains("uk") ? "label-success" : "");
+            prop.put("active_en", "label-success");
+            
+        } else {
+            prop.put("active_de", "");
+            prop.put("active_fr", "");
+            prop.put("active_hi", "");
+            prop.put("active_cn", "");
+            prop.put("active_ru", "");
+            prop.put("active_uk", "");
+            prop.put("active_en", "");
+            prop.put("active_jp", "");
         }
         return prop;
     }

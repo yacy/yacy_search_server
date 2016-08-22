@@ -37,6 +37,8 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
 
@@ -54,6 +56,7 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.data.Translator;
 import net.yacy.document.Document;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
@@ -337,29 +340,43 @@ public final class yacy {
                 //regenerate Locales from Translationlist, if needed
                 final File locale_source = sb.getAppPath("locale.source", "locales");
                 final String lang = sb.getConfig("locale.language", "");
-                if (!lang.equals("") && !lang.equals("default")) { //locale is used
-                    String currentRev = null;
-                    try{
-                        final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
-                        currentRev = br.readLine(); // may return null
-                        br.close();
-                    }catch(final IOException e){
-                        //Error
-                    }
-
-                    if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) try { //is this another version?!
-                        final File sourceDir = new File(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
-                        final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
-                        if (new TranslatorXliff().translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
-                            //write the new Versionnumber
-                            final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                            bw.write(sb.getConfig(Seed.VERSION, "Error getting Version"));
-                            bw.close();
+                // on lang=browser all active translation should be checked (because any could be requested by client)
+                List<String> langlist;
+                if (lang.endsWith("browser"))
+                    langlist = Translator.activeTranslations(); // get all translated languages
+                else {
+                    langlist = new ArrayList<String>();
+                    langlist.add(lang);
+                }
+                for (String tmplang : langlist) {
+                    if (!tmplang.equals("") && !tmplang.equals("default") && !tmplang.equals("browser")) { //locale is used
+                        String currentRev = null;
+                        try {
+                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), tmplang + "/version"))));
+                            currentRev = br.readLine(); // may return null
+                            br.close();
+                        } catch (final IOException e) {
+                            //Error
                         }
-                    } catch (final IOException e) {}
+
+                        if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) {
+                            try { //is this another version?!
+                                final File sourceDir = new File(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
+                                final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), tmplang);
+                                if (new TranslatorXliff().translateFilesRecursive(sourceDir, destDir, new File(locale_source, tmplang + ".lng"), "html,template,inc", "locale")) { //translate it
+                                    //write the new Versionnumber
+                                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                                    bw.write(sb.getConfig(Seed.VERSION, "Error getting Version"));
+                                    bw.close();
+                                }
+                            } catch (final IOException e) {
+                            }
+                        }
+                    }
                 }
                 // initialize number formatter with this locale
-                Formatter.setLocale(lang);
+                if (!lang.equals("browser")) // "default" is handled by .setLocale()
+                    Formatter.setLocale(lang);
 
                 // registering shutdown hook
                 ConcurrentLog.config("STARTUP", "Registering Shutdown Hook");
