@@ -40,7 +40,7 @@ public class Translator_p {
 
             String langcfg = sb.getConfig("locale.language", "default");
             prop.put("targetlang", langcfg);
-            if ("default".equals(langcfg)) {
+            if ("default".equals(langcfg) || "browser".equals(langcfg)) {
                 prop.put("errmsg", "activate a different language");
                 return prop;
             } else {
