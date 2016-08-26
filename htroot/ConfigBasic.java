@@ -133,7 +133,7 @@ public class ConfigBasic {
 
         // check port and ssl connection
         final boolean reconnect;
-        if (!(env.getConfigLong("port", port) == port) || env.getConfigBool("server.https", false) != ssl) {
+        if (!(env.getLocalPort() == port) || env.getConfigBool("server.https", false) != ssl) {
             // validate port
             final YaCyHttpServer theServerCore =  env.getHttpServer();
             env.setConfig("port", port);
@@ -268,6 +268,8 @@ public class ConfigBasic {
 
         // set default values
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
+        prop.put("hasSystemDefinedPort", env.getLocalPortSystemProperty() != null ? 1 : 0);
+        prop.put("hasSystemDefinedPort_systemProperty", serverSwitch.LOCAL_PORT_SYSTEM_PROPERTY);
         prop.put("defaultPort", env.getLocalPort());
         prop.put("withsslenabled", env.getConfigBool("server.https", false) ? 1 : 0);
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed

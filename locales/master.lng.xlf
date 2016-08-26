@@ -1129,6 +1129,9 @@
     <trans-unit id="9b86d79b" xml:space="preserve" approved="no" translate="yes">
        <source>Peer Port:</source>
     </trans-unit>
+    <trans-unit id="a24f437b" xml:space="preserve" approved="no" translate="yes">
+       <source>Set by system property</source>
+    </trans-unit>
     <trans-unit id="c7d5ab92" xml:space="preserve" approved="no" translate="yes">
        <source>with SSL</source>
     </trans-unit>

@@ -167,29 +167,6 @@
                 </configuration>
             </plugin>
             
-            <!-- custom plugin to add YaCy release number from local Git clone 
-            sets property <releaseNr>9nnn</releasNr> <DSTAMP>yyyyMMdd</DSTAMP> 
-            ! run sub project in libbuild to install the plugin ! -->
-            <plugin>
-                <groupId>net.yacy</groupId>
-                <artifactId>maven-plugin-gitrevisionnumber</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                        <!-- optional parameter to set/change the propertyName 
-                        <configuration> 
-                            <branchPropertyName>branch</branchPropertyName>
-                            <buildNumberPropertyName>releasNr</buildNumberPropertyName> 
-                            <commitDatePropertyName>DSTAMP</commitDatePropertyName> 
-                        </configuration> 
-                        -->
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>templating-maven-plugin</artifactId>
@@ -241,6 +218,55 @@
     </build>
 
     <profiles>
+		<profile>
+			<!-- Active when .git directory is missing -->
+			<id>no-git</id>
+			<activation>
+				<file>
+					<missing>.git</missing>
+				</file>
+			</activation>
+			<properties>
+			    <!-- fallback value consistent with ant build -->
+				<releaseNr>9000</releaseNr>
+			</properties>
+		</profile>
+    	<profile>
+    		<id>git-rev-number</id>
+    		<!-- Active profile when .git folder exists -->
+			<activation>
+				<file>
+					<exists>.git</exists>
+				</file>
+			</activation>
+    		<build>
+    			<plugins>
+            		<!-- custom plugin to add YaCy release number from local Git clone 
+            		sets property <releaseNr>9nnn</releasNr> <DSTAMP>yyyyMMdd</DSTAMP> 
+            		! run sub project in libbuild to install the plugin ! -->
+            		<plugin>
+                		<groupId>net.yacy</groupId>
+                		<artifactId>maven-plugin-gitrevisionnumber</artifactId>
+                		<version>1.0</version>
+                		<executions>
+                    		<execution>
+                        		<phase>initialize</phase>
+                        		<goals>
+                            		<goal>create</goal>
+                        		</goals>
+                        		<!-- optional parameter to set/change the propertyName 
+                        		<configuration> 
+                            		<branchPropertyName>branch</branchPropertyName>
+                            		<buildNumberPropertyName>releasNr</buildNumberPropertyName> 
+                            		<commitDatePropertyName>DSTAMP</commitDatePropertyName> 
+                        		</configuration> 
+                        		-->
+                    		</execution>
+                		</executions>
+            		</plugin>
+    			</plugins>
+    		</build>
+    	</profile>
         <profile>
             <!-- profile to create a release archive -->
             <id>release-profile</id>
