@@ -916,6 +916,16 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
+                boolean staticImage = target.equals("/ViewImage.png");
+               
+                if (staticImage) {
+                    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+                    }
+
+                    // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+                    response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+                }
                 final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
