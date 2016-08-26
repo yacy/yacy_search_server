@@ -32,7 +32,7 @@
     <td>Specifies if the proxy should send the X-Forwarded-For http header.</td>
   </tr> 
   <tr valign="top">
-    <td colspan="3"><input type="submit" class="btn btn-primary btn-sm" name="httpNetworking" value="Submit" /> <em>Changes will take effect immediately.</em></td>
+    <td colspan="3"><input type="submit" class="btn btn-primary btn-sm" name="httpNetworking" value="Submit" /></td>
   </tr>  
 </table>
 </fieldset>

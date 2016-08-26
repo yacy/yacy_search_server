@@ -1,0 +1,47 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<h1>File Share</h1>
+		#(mode)#
+		<!-- mode = 0 - display an upload form -->
+		<p>This form can be used to share a (index) file</p>
+		<form id="push" action="share.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+			<dl>
+				<dt>Files to process:<dt>
+				<dt>&nbsp;<dt><dd>&nbsp;</dd>
+				<dd>
+					<dl>						
+						<dt>data=</dt>
+						<dd><input name="data" type="file"></dd>
+					</dl>
+				</dd>
+			</dl>
+			<input type="submit" value="Submit">
+		</form>
+		::
+		<!-- mode 1 - display the push results -->
+		Result for the recently submitted file(s). You can also submit the same form using the servlet share.json to get push confirmations in json format.
+		<dl>
+			<dt>successall</dt><dd>#(successall)#false::true#(/successall)#</dd>
+			<dt>countsuccess</dt><dd>#[countsuccess]#</dd>
+			<dt>countfail</dt><dd>#[countfail]#</dd>
+		</dl>
+		<table border="1">
+		<tr><th>Item</th><th>URL</th><th>Success</th><th>Message</th></tr>
+		<tr>
+		<td>#[item]#</td>
+		<td>#(success)#::<a href="#[url]#">#[url]#</a>#(/success)#</td>
+		<td>#(success)#fail::ok#(/success)#</td>
+		<td>#(success)##[message]#::<a href="#[message]#" target="_blank">#[message]#</a>#(/success)#</td>
+		</tr>
+		</table>
+		<p>
+		If you want to push again files, use this form to pre-define a number of upload forms:
+		<form id="push" action="share.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+		<input name="c" type="text" value="1" size="4" maxlength="8"><input type="submit" value="Submit">
+		</form>
+		</p>
+		#(/mode)#
+	</body>
+</html>

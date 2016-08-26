@@ -640,16 +640,16 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 }
 
                 line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK);
-            }            
+            }
             // this is the part of the code that is responsible for Youtube video links supporting only the video ID as parameter
             else if (kl.startsWith(WIKI_VIDEO_YOUTUBE)) {
             	kl = kl.substring(LEN_WIKI_VIDEO_YOUTUBE);
-            	line = line.substring(0, positionOfOpeningTag) + "" + "<object width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/" + kl + "\"></param><param name=\"wmode\" value=\"transparent\"></param><embed src=\"http://www.youtube.com/v/" + kl + "\" type=\"application/x-shockwave-flash\" wmode=\"transparent\" width=\"425\" height=\"350\"></embed></object>";            			
+            	line = line.substring(0, positionOfOpeningTag) + "" + "<object width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/" + kl + "\"></param><param name=\"wmode\" value=\"transparent\"></param><embed src=\"http://www.youtube.com/v/" + kl + "\" type=\"application/x-shockwave-flash\" wmode=\"transparent\" width=\"425\" height=\"350\"></embed></object>";
             }
             // this is the part of the code that is responsible for Vimeo video links supporting only the video ID as parameter
             else if (kl.startsWith(WIKI_VIDEO_VIMEO)) {
             	kl = kl.substring(LEN_WIKI_VIDEO_VIMEO);
-            	line = line.substring(0, positionOfOpeningTag) + "" + "<iframe src=\"http://player.vimeo.com/video/" + kl + "\" width=\"425\" height=\"350\" frameborder=\"0\" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>";            			
+            	line = line.substring(0, positionOfOpeningTag) + "" + "<iframe src=\"http://player.vimeo.com/video/" + kl + "\" width=\"425\" height=\"350\" frameborder=\"0\" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>";
             }
             // if it's no image, it might be an internal link
             else {
@@ -937,7 +937,17 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
             //extra treatment for headlines
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
-                processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
+                // require line starts with headline markup (hdr e.g.  "   == Title == " but not  "Seven = six plus one" )
+                int i = 0;
+                boolean beginsWith = true;
+                while (i < firstPosition) {
+                    if (stringBuilder.charAt(i) > ' ') {
+                        beginsWith = false;
+                        break;
+                    }
+                    i++;
+                }
+                if (beginsWith) processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
             } else {
                 final int oldLength = stringBuilder.length();
                 stringBuilder.replace(firstPosition, firstPosition + tags.openWikiLength, tags.openHTML);
@@ -1046,28 +1056,39 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 // {{Coordinate |NS 45/37/43.0/N |EW. 07/58/41.0/E |type=landmark |region=IT-BI}} ## means: degree/minute/second
                 // {{Coordinate |NS 51.48994 |EW. 7.33249 |type=landmark |region=DE-NW}}
                 final String b[] = a.split("\\|");
-                float lon = Float.NaN, lat = Float.NaN;
-                float lonm = 0.0f, latm = 0.0f;
+                float lon = Float.NaN, lat = Float.NaN; // degree
+                float lonm = 0.0f, latm = 0.0f; // minutes (including sec as fraction)
                 String lono = "E", lato = "N";
                 String name = "";
-                for (final String c: b) {
-                    if (c.toLowerCase().startsWith("name=")) {
-                        name = c.substring(5);
+                try {
+                    for (final String c : b) {
+                        if (c.toLowerCase().startsWith("name=")) {
+                            name = c.substring(5);
+                        }
+                        if (c.toUpperCase().startsWith("NS=")) {
+                            final String d[] = c.substring(3).split("/");
+                            if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lato = "S"; l = -l;} lat = (float) Math.floor(l); latm = 60.0f * (l - lat);}
+                            else if (d.length > 1) { //format: NS deg/min/sec/N
+                                lat = Float.parseFloat(d[0]); // degree
+                                if (!d[1].isEmpty()) latm = Float.parseFloat(d[1]); // minutes
+                                if (d.length >= 3 && !d[2].isEmpty()) {latm += (Float.parseFloat(d[2]) / 60.0f);} // sec (check empty because format found "45/10//N" )
+                                if (d[d.length - 1].toUpperCase().equals("S")) lato = "S";
+                            }
+                        }
+                        if (c.toUpperCase().startsWith("EW=")) {
+                            final String d[] = c.substring(3).split("/");
+                            if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
+                            else if (d.length > 1) {
+                                lon = Float.parseFloat(d[0]);
+                                if (!d[1].isEmpty()) lonm = Float.parseFloat(d[1]);
+                                if (d.length >= 3 && !d[2].isEmpty()) {lonm += (Float.parseFloat(d[2]) / 60.0f);}
+                                if (d[d.length-1].toUpperCase().equals("W")) {lono = "W";}
+                            }
+                        }
                     }
-                    if (c.toUpperCase().startsWith("NS=")) {
-                        final String d[] = c.substring(3).split("/");
-                        if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lato = "S"; l = -l;} lat = (float) Math.floor(l); latm = 60.0f * (l - lat);}
-                        else if (d.length == 2) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]);}
-                        else if (d.length >= 3) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
-                        if (d[d.length-1].toUpperCase().equals("S")) {lato = "S";}
-                    }
-                    if (c.toUpperCase().startsWith("EW=")) {
-                        final String d[] = c.substring(3).split("/");
-                        if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
-                        else if (d.length == 2) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]);}
-                        else if (d.length >= 3) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
-                        if (d[d.length-1].toUpperCase().equals("W")) {lato = "W";}
-                    }
+                } catch (NumberFormatException nsExcept) {
+                    // catch parseFloat exception (may still happen if wiki code contains expressions)
+                    continue;
                 }
                 if (!Float.isNaN(lon) && !Float.isNaN(lat)) {
                     // replace this with a format that the html parser can understand

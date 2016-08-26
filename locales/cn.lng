@@ -108,7 +108,6 @@ a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Patt
 Activate this list for==为以下条目激活此名单
 Show entries:==显示条目:
 Entries per page:==页面条目:
-"Go"=="Go"
 Edit existing pattern(s):==编辑现有规则:
 "Save URL pattern(s)"=="保存URL规则"
 #-----------------------------
@@ -174,7 +173,7 @@ Surftips==建议
 
 #File: Blog.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==评论</a>
 >edit==>编辑
 >delete==>删除
@@ -215,7 +214,7 @@ Please select the XML-file you want to import:==请选择您想导入的XML文�
 
 #File: BlogComments.html
 #---------------------------
-by==by
+#by==by
 Comments</a>==评论</a>
 Login==登录
 Blog-Home==博客主页
@@ -428,8 +427,7 @@ You can also use your peer without opening it, but this is not recomended.==不�
 #---------------------------
 Heuristics Configuration==启发式配置
 A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik">启发式</a> '是一个依赖于经验来解决问题, 学习与发现问题的过程.' (Wikipedia).
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
-您可以在这里开启启发式搜索, 通过猜测链接, 嵌套搜索和访问其他搜索引擎, 从而找到更多符合您期望的结果.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==您可以在这里开启启发式搜索, 通过猜测链接, 嵌套搜索和访问其他搜索引擎, 从而找到更多符合您期望的结果.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==开启启发式搜索时, 搜索结果给出的链接并不是直接搜索的链接, 而是已经缓存在其他服务器上的结果.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==这保证了黑名单的有效性, 并且搜索关键字是通过启发式搜索找到的.
 The success of heuristics are marked with an image==启发式搜索找到的结果会被特定图标标记
@@ -467,7 +465,6 @@ Delete robots.txt Cache==删除robots.txt 缓存
 Language selection==语言选择
 You can change the language of the YaCy-webinterface with translation files.==您可以使用翻译文件来改变YaCy操作界面的语言.
 Current language</label>==当前语言</label>
-#default(english)==Deutsch
 Author(s) (chronological)</label>==作者(按时间排序)</label>
 Send additions to maintainer</em>==向维护者提交补丁</em>
 Available Languages</label>==可用语言</label>
@@ -500,8 +497,7 @@ YaCy P2P Web Search==YaCy P2P 网页搜索
 Size and position (width | height | position)==尺寸和位置(宽度 | 高度 | 位置)
 Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==指定对话框位置. 对于位置: 'center', 'left', 'right', 'top', 'bottom' 的值, 或者一个包含对应位置值的数组 (以左上角为参考位置的像素数), 或者字符串值 (e.g. ['right','top'] 对应右上角)
 Animation effects (show | hide)==动画效果 (显示 | 隐藏)
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==
-可用特效: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==可用特效: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
 Interaction (modal | resizable)==对话框 (modal | 可变)
 If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==如果选中modal属性, 则对话框会有modal行为; 否则页面上就不具有此特性. (即不能进行交互操作).
 Modal dialogs create an overlay below the dialog but above other page elements.==Modal对话框会在页面元素下面而不是其上创建覆盖层.
@@ -594,7 +590,6 @@ Parser Configuration==解析配置
 Content Parser Settings==内容解析设置
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==此设置能开启/关闭依据文件类型(MIME)的内容解析.
 For a detailed description of the various MIME-types take a look at==关于MIME的详细描述请参考
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
 enable/disable Parser==Parser 开启 / 关闭
 # --- Parser Names are hard-coded BEGIN ---
 ##Mime-Type==MIME Typ
@@ -631,8 +626,7 @@ If you like to integrate YaCy as portal for your web pages, you may want to chan
 The search page may be customized.==搜索页面可以自由定制.
 You can change the 'corporate identity'-images, the greeting line==您可以改变 'Corporate Identity' 图像, 问候语
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==和一个指向首页的 'Corporate Identity' 图像链接.
-To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==
-若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
+To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
 Greeting Line<==问候语<
 URL of Home Page<==首页链接<
 URL of a Small Corporate Image<==小图位置<
@@ -713,7 +707,7 @@ Network pages==网络页面
 Surftips==建议
 News pages==新闻
 Blog==博客
-Wiki=维基
+Wiki==维基
 Public bookmarks==公共书签
 Home Page==首页
 File Share==共享文件
@@ -1075,7 +1069,7 @@ Network Scanner==网络扫描器
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy可扫描http, ftp 和smb服务器.
 You must first select a IP range and then, after this range is scanned,==须先指定IP范围, 再进行扫描,
 it is possible to select servers that had been found for a full-site crawl.==才有可能选择主机并将其作为全站crawl的服务器.
-No servers had been detected in the given IP range #[iprange]#. 
+#No servers had been detected in the given IP range== 
 Please enter a different IP range for another scan.==未检测到可用服务器, 请重新指定IP范围.
 Please wait...==请稍候...
 >Scan the network<==>扫描网络<
@@ -1100,20 +1094,6 @@ Look every==每隔
 again and add new sites automatically to indexer.==再次检视, 并自动添加新站点到索引器中.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==周期扫描中未上线的站点会被自动排除.
 "Scan"=="扫描"
-The following servers had been detected:==已检测到以下服务器:
-Available server within the given IP range==指定IP范围内的可用服务器
->Protocol<==>协议<
-#>IP<==>IP<
-#>URL<==>URL<
->Access<==>权限<
->Process<==>状态<
->unknown<==>未知<
->empty<==>空<
->granted<==>已授权<
->denied<==>拒绝<
->not in index<==>未在索引中<
->indexed<==>已被索引<
-"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
 #-----------------------------
 
 #File: CrawlStartSite.html
@@ -1446,7 +1426,7 @@ this must be the path right in front of '/viewtopic.php?'==必须在'/viewtopic.
 Type==数据库
 > of database<==> 类型<
 use either 'mysql' or 'pgsql'==使用'mysql'或者'pgsql'
-Host=数据库
+Host==数据库
 > of the database<==> 主机名<
 of database service==数据库服务
 usually 3306 for mySQL==MySQL中通常是3306
@@ -1508,6 +1488,21 @@ With this file it is possible to find cities with a population > 1000 all over t
 >With this file it is possible to find locations in Germany using the location (city) name, a zip code, a car sign or a telephone pre-dial number.<==>使用此插件, 则能通过查询城市名, 邮编, 车牌号或者电话区号得到德国任何地点的位置信息.<
 #-----------------------------
 
+#File: IndexCreateQueues_p.html
+#---------------------------
+#Crawl Queue<==Crawl Queue<
+#Click on this API button to see an XML with information about the crawler latency and other statistics.==Click on this API button to see an XML with information about the crawler latency and other statistics.
+#This crawler queue is empty==This crawler queue is empty
+Delete Entries:==已删除条目:
+"Delete"=="删除"
+#>Count<==>Count<
+>Initiator<==>发起者<
+>Profile<==>资料<
+>Depth<==>深度<
+Modified Date==修改日期
+Anchor Name==祖先名
+#-----------------------------
+
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 Global Crawl Queue==全球crawl队列
@@ -1540,7 +1535,7 @@ Profile==资料
 Depth==深度
 Modified Date==修改日期
 Anchor Name==祖先名
-URL==URL
+#URL==URL
 [Delete]==[删除]
 Delete Entries:==已删除条目:
 "Delete"=="删除"
@@ -1562,7 +1557,7 @@ Profile==资料
 Depth==深度
 Modified Date==修改日期
 Anchor Name==祖先名
-URL==URL
+#URL==URL
 Delete==删除
 #-----------------------------        
 
@@ -1959,7 +1954,6 @@ this peer==本机peer
 >DHT-out<==>DHT输出<
 >green lines<==>绿线<
 >DHT-in<==>DHT输入<
-#DHT-out==DHT-out
 #You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
 #Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
 #You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, drücken Sie diesen Knopf:
@@ -2337,6 +2331,26 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 >Age<==>寿命<
 #-----------------------------
 
+#File: ServerScannerList.html
+#------------------------------
+#Network Scanner Monitor==Network Scanner Monitor
+The following servers had been detected:==已检测到以下服务器:
+#The following servers can be searched:==The following servers can be searched:
+Available server within the given IP range==指定IP范围内的可用服务器
+>Protocol<==>协议<
+#>IP<==>IP<
+#>URL<==>URL<
+>Access<==>权限<
+>Process<==>状态<
+>unknown<==>未知<
+>empty<==>空<
+>granted<==>已授权<
+>denied<==>拒绝<
+>not in index<==>未在索引中<
+>indexed<==>已被索引<
+"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
+#------------------------------
+
 #File: Settings_p.html
 #---------------------------
 Advanced Settings==高级设置
@@ -2380,7 +2394,7 @@ Submit==提交
 Changes will take effect immediately==改变立即生效
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==HTTP网络
 Transparent Proxy==透明代理
@@ -2647,15 +2661,15 @@ A possible reason is that you are behind a firewall, NAT or Router.==很可能�
 But you can <a href="index.html">search the internet</a> using the other peers'==但是您依然能进行<a href="index.html">搜索</a>
 global index on your own search page.==, 需要通过其他peer的全球索引.
 "bad"=="坏"
-"idea"="主意"
-"good"="好"
+"idea"=="主意"
+"good"=="好"
 "Follow YaCy on Twitter"=="在Twitter上关注YaCy"
 We encourage you to open your firewall for the port you configured (usually: 8090),==我们推荐您开发防火墙端口(通常是: 8090),
 or to set up a 'virtual server' in your router settings (often called DMZ).==或者在路由设置中(DMZ)建立一个"虚拟服务器".
 Please be fair, contribute your own index to the global index.==请公平地贡献您的索引给全球索引.
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==空闲磁盘空间低于 #[minSpace]#. crawl已被关闭,
 it as soon as possible and restart YaCy.==请尽快修复并重启YaCy.
-Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT已被关闭,
+Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT-in已被关闭,
 Latest public version is==最新版本为
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==您可以下载最新版本YaCy, 点此进行升级并重启:
 #"Update YaCy"=="Update YaCy"
@@ -2938,7 +2952,6 @@ New Password is empty.==新密码为空.
 
 #File: ViewFile.html
 #---------------------------
-YaCy '#[clientname]#': View URL Content==YaCy '#[clientname]#': 查看文件内容
 View URL Content==查看链接内容
 >Get URL Viewer<==>获取链接浏览器<
 >URL Metadata<==>链接元数据<
@@ -3021,7 +3034,7 @@ Error with file input==文件输入错误
 started.==已开始.
 Please wait some seconds,==请稍等,
 it may take some seconds until the first result appears there.==在出现第一个搜索结果前需要几秒钟时间.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==如果您crawl了不需要的页面, 您可以 <a href="IndexCreateWWWLocalQueue_p.html">点这</a> 删除它们.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==如果您crawl了不需要的页面, 您可以 <a href="IndexCreateQueues_p.html?stack=LOCAL">点这</a> 删除它们.
 Crawl Queue:==crawl队列:
 Queue</th>==队列</th>
 Profile</th>==资料</th>
@@ -3203,7 +3216,7 @@ Pictures==图像
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==显示 "#[query]#" 的搜索结果
+show search results for "#[query]#" on map==显示 "#[query]#" 的搜索结果
 #>Provider==>Anbieter
 >Name Space==>命名空间导航
 >Author==>作者导航
@@ -3299,7 +3312,7 @@ Peer Statistics::YaCy Statistics==peer统计数据::YaCy数据
 #Administration<==Administration<
 >Web Search<==>网页搜索<
 >Search Network<==>搜索网络<
-Peer Owner Profile==peer所有者资料
+#Peer Owner Profile==peer所有者资料
 Help / YaCy Wiki==帮助 / YaCy Wiki
 #-----------------------------
 
@@ -3328,9 +3341,9 @@ Index Cleaner==索引整理
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==控制台
+#UNUSED HERE
+#Peer Administration Console==控制台
 #Status==状态
-Basic Configuration==基本设置
 >Accounts==>账户
 Network Configuration==网络设置
 >Heuristics<==>触发式<
@@ -3340,7 +3353,6 @@ System Update==系统升级
 Advanced Settings==高级设置
 Parser Configuration==解析配置
 Local robots.txt==本地robots.txt
-#Web Cache==Web Cache
 Advanced Properties==高级设置
 #-----------------------------
 
@@ -3444,6 +3456,14 @@ Publication==发布
 #Wiki==Wiki
 #Blog==Blog
 File Hosting==文件共享
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==基本设置
+>Accounts<==>账户<
+Network Configuration==网络设置
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template

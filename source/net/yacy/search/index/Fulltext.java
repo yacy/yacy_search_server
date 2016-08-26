@@ -77,15 +77,17 @@ import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrInfoMBean;
+import org.apache.solr.util.DateFormatUtil;
 import org.apache.lucene.util.Version;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_5_2"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10"};
+    private static final String SOLR_PATH = "solr_5_5"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2"};
     
     // class objects
     private final File                    segmentPath;
@@ -617,9 +619,62 @@ public final class Fulltext {
             }
         }
     }
-    
+
     public static enum ExportFormat {
-        text, html, rss, solr;
+        text("txt"), html("html"), rss("rss"), solr("xml");
+        private final String ext;
+        private ExportFormat(String ext) {this.ext = ext;}
+        public String getExt() {return this.ext;}
+    }
+    
+    public final static String yacy_dump_prefix = "yacy_dump_";
+    public Export export(Fulltext.ExportFormat format, String filter, String query, final int maxseconds, File path, boolean dom, boolean text) throws IOException {
+        
+        // modify query according to maxseconds
+        long now = System.currentTimeMillis();
+        if (maxseconds > 0) {
+            long from = now - maxseconds * 1000L;
+            String nowstr = DateFormatUtil.formatExternal(new Date(now));
+            String fromstr = DateFormatUtil.formatExternal(new Date(from));
+            String dateq = CollectionSchema.load_date_dt.getSolrFieldName() + ":[" + fromstr + " TO " + nowstr + "]";
+            query = query == null || AbstractSolrConnector.CATCHALL_QUERY.equals(query) ? dateq : query + " AND " + dateq; 
+        } else {
+            query = query == null? AbstractSolrConnector.CATCHALL_QUERY : query;
+        }
+        
+        // check the oldest and latest entry in the index for this query
+        SolrDocumentList firstdoclist, lastdoclist;
+        firstdoclist = this.getDefaultConnector().getDocumentListByQuery(
+               query, CollectionSchema.load_date_dt.getSolrFieldName() + " asc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
+        lastdoclist = this.getDefaultConnector().getDocumentListByQuery(
+               query, CollectionSchema.load_date_dt.getSolrFieldName() + " desc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
+
+        if (firstdoclist.size() == 0 || lastdoclist.size() == 0) {
+            assert firstdoclist.size() == 0 && lastdoclist.size() == 0;
+            throw new IOException("number of exported documents == 0");
+        }
+        assert firstdoclist.size() == 1 && lastdoclist.size() == 1;
+        long doccount = firstdoclist.getNumFound();
+        
+        // create the export name
+        SolrDocument firstdoc = firstdoclist.get(0);
+        SolrDocument lastdoc = lastdoclist.get(0);
+        Object firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+        Object lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+        Date firstdate = (Date) firstdateobject;
+        Date lastdate = (Date) lastdateobject;
+        String s = new File(path, yacy_dump_prefix +
+                "f" + GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate) + "_" +
+                "l" + GenericFormatter.FORMAT_SHORT_MINUTE.format(lastdate) + "_" +
+                "n" + GenericFormatter.FORMAT_SHORT_MINUTE.format(new Date(now)) + "_" +
+                "c" + String.format("%1$012d", doccount)).getAbsolutePath() + "_tc"; // the name ends with the transaction token ('c' = 'created')
+        
+        // create export file name
+        if (s.indexOf('.',0) < 0) s += "." + format.getExt();
+        final File f = new File(s);
+        f.getParentFile().mkdirs();
+        
+        return export(f, filter, query, format, dom, text);
     }
     
     // export methods

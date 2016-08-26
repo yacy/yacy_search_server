@@ -159,18 +159,19 @@ public class BlogBoard {
     }
 
     public boolean importXML(final String input) {
-    	final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    	try {
-            final DocumentBuilder builder = factory.newDocumentBuilder();
-            return parseXMLimport(builder.parse(new ByteArrayInputStream(UTF8.getBytes(input))));
-        } catch (final ParserConfigurationException ex) {
-            ConcurrentLog.logException(ex);
-        } catch (final SAXException ex) {
-            ConcurrentLog.logException(ex);
-        } catch (final IOException ex) {
-            ConcurrentLog.logException(ex);
+        if (input != null && !input.isEmpty()) {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            try {
+                final DocumentBuilder builder = factory.newDocumentBuilder();
+                return parseXMLimport(builder.parse(new ByteArrayInputStream(UTF8.getBytes(input))));
+            } catch (final ParserConfigurationException ex) {
+                ConcurrentLog.logException(ex);
+            } catch (final SAXException ex) {
+                ConcurrentLog.logException(ex);
+            } catch (final IOException ex) {
+                ConcurrentLog.logException(ex);
+            }
         }
-
     	return false;
     }
 

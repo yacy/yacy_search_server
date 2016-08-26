@@ -60,9 +60,7 @@ import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
-import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.Parser;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
@@ -73,7 +71,6 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -195,6 +192,7 @@ public class yacysearch {
             prop.put("geoinfo", "0");
             prop.put("rss_queryenc", "");
             prop.put("meanCount", 5);
+            prop.put("eventID",""); // mandatory parameter for yacysearchtrailer/yacysearchitem includes
             return prop;
         }
 
@@ -220,14 +218,15 @@ public class yacysearch {
         
         // collect search attributes
 
-        int itemsPerPage =
-            Math.min(
-                (authenticated)
-                    ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()
-                        ? 100
-                        : 5000) : (snippetFetchStrategy != null
-                        && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000),
-                post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10))))); // SRU syntax with old property as alternative
+        // check an determine items per page (max of [100 or configured default]}
+        final int defaultItemsPerPage = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);
+        int itemsPerPage = post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", defaultItemsPerPage))); // requested or default // SRU syntax with old property as alternative
+        // whatever admin has set as default, that's always ok
+        if (itemsPerPage > defaultItemsPerPage && itemsPerPage > 100) { // if above hardcoded 100 limit restrict request (except default allows more)
+            // search option (index.html) offers up to 100 (that defines the lower limit available to request)
+            itemsPerPage = Math.max((snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000), defaultItemsPerPage);
+        }
+
         int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
 
         final boolean indexof = (post != null && post.get("indexof", "").equals("on"));
@@ -266,13 +265,6 @@ public class yacysearch {
 
         // find search domain
         final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
-
-        // patch until better search profiles are available
-        if (contentdom == ContentDomain.IMAGE && (itemsPerPage == 10 || itemsPerPage == 100)) {
-            itemsPerPage = 64;
-        } else if ( contentdom != ContentDomain.IMAGE && itemsPerPage > 50 && itemsPerPage < 100 ) {
-            itemsPerPage = 10;
-        }
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
@@ -476,8 +468,8 @@ public class yacysearch {
                 }
             }
 
-            final int heuristicBlekko = querystring.indexOf("/heuristic", 0);
-            if ( heuristicBlekko >= 0 ) {
+            final int heuristicOS = querystring.indexOf("/heuristic", 0);
+            if ( heuristicOS >= 0 ) {
                 querystring = querystring.replace("/heuristic", "");
                 modifier.add("/heuristic");
             }
@@ -562,31 +554,18 @@ public class yacysearch {
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
                 final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(recommendHash));
-                if ( urlentry != null ) {
-                    Document[] documents = null;
-                    try {
-                        documents =
-                            sb.loader.loadDocuments(
-                                sb.loader.request(urlentry.url(), true, false),
-                                CacheStrategy.IFEXIST,
-                                Integer.MAX_VALUE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
-                    } catch (final IOException e ) {
-                    } catch (final Parser.Failure e ) {
-                    }
-                    if ( documents != null ) {
-                        // create a news message
-                        final Map<String, String> map = new HashMap<String, String>();
-                        map.put("url", urlentry.url().toNormalform(true).replace(',', '|'));
-                        map.put("title", urlentry.dc_title().replace(',', ' '));
-                        map.put("description", documents[0].dc_title().replace(',', ' '));
-                        map.put("author", documents[0].dc_creator());
-                        map.put("tags", documents[0].dc_subject(' '));
-                        sb.peers.newsPool.publishMyNews(
+                if (urlentry != null) {
+                    // create a news message
+                    final Map<String, String> map = new HashMap<String, String>();
+                    map.put("url", urlentry.url().toNormalform(true).replace(',', '|'));
+                    map.put("title", urlentry.dc_title().replace(',', ' '));
+                    map.put("description", urlentry.getDescription().isEmpty() ? urlentry.dc_title().replace(',', ' ') : urlentry.getDescription().get(0).replace(',', ' '));
+                    map.put("author", urlentry.dc_creator());
+                    map.put("tags", urlentry.dc_subject().replace(',', ' '));
+                    sb.peers.newsPool.publishMyNews(
                             sb.peers.mySeed(),
                             NewsPool.CATEGORY_SURFTIPP_ADD,
                             map);
-                        documents[0].close();
-                    }
                 }
             }
 
@@ -669,10 +648,6 @@ public class yacysearch {
                     indexSegment,
                     ranking,
                     header.get(HeaderFramework.USER_AGENT, ""),
-                    sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, false)
-                        && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
-                        && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
-                    false,
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
             EventTracker.delete(EventTracker.EClass.SEARCH);
@@ -725,14 +700,11 @@ public class yacysearch {
                         SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
                         sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)));
 
-            if ( startRecord == 0 ) {
-                if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) && authenticated && !stealthmode) {
+            if ( startRecord == 0 && authenticated && !stealthmode ) {
+                if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) ) {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
-                if ( heuristicBlekko >= 0  && authenticated && !stealthmode ) {
-                    FederateSearchManager.getManager().search(theSearch);
-                }
-                if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && authenticated && !stealthmode) {
+                if ( heuristicOS >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) ) {
                     FederateSearchManager.getManager().search(theSearch);
                 }
             }

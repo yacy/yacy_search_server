@@ -48,10 +48,10 @@ Showing #[num]# requests.==Gezeigt werden #[num]# Anfragen.
 >Path<==>Pfad<
 Date<==Datum<
 Access Count During==Erfasster Zugriff während der
-last Second==letzten Sekunde
-last Minute==letzten Minute
+last Second==letzte Sekunde
+last Minute==letzte Minute
 last 10 Minutes==letzten 10 Minuten
-last Hour==letzten Stunde
+last Hour==letzte Stunde
 The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf geschützte Seiten erkannt
 #>Host==>Host
 Access Times==Zugriffszeiten
@@ -102,38 +102,11 @@ With this settings you can activate or deactivate augmented browsing which happe
 Augmented Browsing:==Angereichertes Browsing:
 #>Enabled<==>Aktiviert<
 Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==Schaltet angereichertes Browsing an oder ab. Wenn aktiviert werden alle Webseite während des Ladens modifiziert.
-#"Submit"=="Absenden"
 #-----------------------------
 
-#File: AugmentedBrowsingFilters_p.html
+#File: Autocrawl_p.html
 #---------------------------
-Augmented Browsing - Filters and Modules==Angereichertes Browsen - Filter und Module
-Augmented Browsing Filters<==Filter für angereichertes Browsen<
-Select the desired functionality.==Wählen Sie die gewünschte Funktionalität.
-External REFLECT:<==Externed REFLECT:<
->Enabled<==>Aktiviert<
-Send webpages to REFLECT (==Sende Webseiten zu (
-Select the desired inbuilt functionality==Wählen Sie die gewünschte eingebaute Funktionalität.
-Add DOCTYPE:==Füge DOCTYPE hinzu:
-Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.==Füge DOCTYPE Informatione hinzu wenn nicht angegeben. Das ist notwendig für den IE damit position:absolute korrekt angezeigt wird.
-Reparse webpage:==Parse Webseite erneut:
-Put webpage back into schema (htmlparser document) to allow node by node manipulation.==Setze Webseite zurück ins Schema (htmlpaser Dokuement), um Knoten bei Knoten Manipulation zu ermöglichen.
-Show overlay interaction buttons:==Zeige Overlay Schaltflächen zur Interaktion:
-Show overlay interaction buttons.==Zeige Overlay Schaltflächen zur Interaktion.
-"Submit"=="Absenden"
-#-----------------------------
-
-#File: AugmentedParsing_p.html
-#---------------------------
-Augmented Parsing<==Angereichertes Parsen<
-Global Status==Globaler Status
-With this settings you can activate or deactivate augmented parsing which combines the documents with information from external sources (tags etc.).==Mit dieser Einstellung können Sie angereichertes Parsen an- oder abschalten das Dokumente mit Informationen von externen Webseiten kombiniert (z.B. Tags, etc.).
-Augmented Parser:==Angereicherter Parser:
->Enabled<==>Aktiviert<
-Globally enables or disables the augmented parser. This setting requires a restart.==Schaltet den angereicherten Parser global an oder ab. Diese Einstellung erfordert einen Neustart.
-Augmented Parser - RDFa:==Angereicherter Parser - RDFa:
-Globally enables or disables the RDFa parser. This setting requires a restart.==Schaltet den RDFs Parser global ein oder aus. Diese Einstellung erfordert einen Neustart.
-"Submit"=="Absenden"
+"Save"=="Speichern"
 #-----------------------------
 
 #File: Blacklist_p.html
@@ -163,7 +136,7 @@ Delete selected pattern(s)==Lösche gewählten Eintrag
 Move selected pattern(s) to==Verschiebe gewählten Eintrag zu
 #You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
 Add new pattern:==Neuen Eintrag hinzufügen:
-"Add URL pattern"=="URL hinzufügen"
+Add URL pattern==URL hinzufügen
 The right '*', after the '/', can be replaced by a==Der rechte Asterisk '*', nach dem '/', kann ersetzt werden durch einen
 >regular expression<==>regulären Ausdruck<
 domain.net/fullpath<==domain.de/vollerpfad<
@@ -255,7 +228,6 @@ next entries==nächste  Einträge
 new entry==Neuer Eintrag
 import XML-File==XML-Datei importieren
 export as XML==als XML exportieren
-Comments</a>==Kommentare</a>
 Blog-Home==Blog-Startseite
 Author:==Autor:
 Subject:==Titel:
@@ -415,7 +387,6 @@ Save User==Benutzer speichern
 #---------------------------
 Appearance and Integration==Erscheinungsbild und Integration
 You can change the appearance of the YaCy interface with skins.==Sie können hier das Aussehen der YaCy Oberfläche mit Skins verändern,
-#You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
 The selected skin and language also affects the appearance of the search page.==das ausgewählte Design und die gewählte Sprache wirken sich auch auf das Erscheinungsbild der Suchseite aus.
 If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
 change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
@@ -436,8 +407,8 @@ The generic skin 'generic_pd' can be configured here with custom colors:==Der al
 >Table&nbsp;Item&nbsp;2<==>Tabellen&nbsp;Zelle&nbsp;2<
 >Table&nbsp;Bottom<==>Tabellen&nbsp;Unterseite<
 >Border&nbsp;Line<==>Rand&nbsp;Linie<
->Sign&nbsp;'bad'<==>Zeichen&nbsp;'gut'<
->Sign&nbsp;'good'<==>Zeichen&nbsp;'schlecht'<
+>Sign&nbsp;'bad'<==>Zeichen&nbsp;'schlecht'<
+>Sign&nbsp;'good'<==>Zeichen&nbsp;'gut'<
 >Sign&nbsp;'other'<==>Zeichen&nbsp;'andere'<
 >Search&nbsp;Headline<==>Suche&nbsp;Kopfzeile<
 >Search&nbsp;URL==>Suche&nbsp;URL
@@ -456,7 +427,7 @@ Error saving the skin.==Fehler beim Speichern des Skins.
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Zugangseinstellungen
-Basic Configuration==Eingangskonfiguration
+Basic Configuration==Grundkonfiguration
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen, um korrekt zu funktionieren
 Select a language for the interface==Wählen Sie eine Sprache für das Interface
 Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
@@ -481,8 +452,8 @@ Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreich
 Peer Port:==Peer-Port:
 with SSL== mit SSL
 https enabled==https aktiviert
- on port == auf Port 
-Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
+on port==auf Port
+Configure your router for YaCy using UPnP:==Ihren Router für YaCy konfigurieren, via UPnP:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern
 What you should do next:==Was Sie als Nächstes tun können:
@@ -505,8 +476,7 @@ You can also use your peer without opening it, but this is not recomended.==Sie 
 #---------------------------
 Heuristics Configuration==Heuristik Konfiguration
 A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik" target="_blank">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
-Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Wenn eine Such Heuristik verwendet wird, werden die gefunden Links nicht direkt als Suchergebnisse angezeigt aber dafür die geladenen Seiten indexiert und mit dem anderen Inhalt abgespeichert.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
 The success of heuristics are marked with an image==Der Erfolg der Heuristik wird mit einem Bild markiert
@@ -531,7 +501,6 @@ opensearch load external search result list from active systems below==Lade exte
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==Wenn diese Heuristik genutzt wird, dann wird jede neue Suchanfragezeile für einen Aufruf der aufgelisteten OpenSearch Systeme verwendet.
 20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 Resultate werden vom remote System genommen und simultan geladen, geparsed und sofort indexiert.
 To find out more about OpenSearch see==Um mehr über OpenSearch zu erfahren besuche
-#>OpenSearch.org<==>OpenSearch.org<
 Available/Active Opensearch System==Verfügbare/Aktive OpenSearch Systeme
 >Active<==>Aktiv<
 >Title<==>Titel<
@@ -579,10 +548,11 @@ Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier können Sie die Sprache ändern. Wählen Sie die gewünschte Sprache aus der Liste aus.
 Current language</label>==Aktuelle Sprache</label>
-#default(english)==Deutsch
 Author(s) (chronological)</label>==Autoren (chronologisch)</label>
 Send additions to maintainer</em>==Schicken Sie Ergänzungen bitte an</em>
 Available Languages</label>==Verfügbare Sprachen</label>
+Download Language File==Sprachdatei herunterladen
+Supported formats are the internal language file (extension .lng) or XLIFF (extension .xlf) format.==Unterstütztes Format ist das interne Sprachdatei (Dateiendung .lng) oder XLIFF (Dateiendung .xlf) Format.
 Install new language from URL==Neue Sprachdatei herunterladen
 Use this language==Diese Sprachdatei sofort benutzen
 "Use"=="Benutzen"
@@ -592,6 +562,8 @@ Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu ins
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
 might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+Simple Editor==Einfacher Editor
+to add untranslated text==zum bearbeiten unübersetzter Texte
 #-----------------------------
 
 #File: ConfigLiveSearch.html
@@ -611,8 +583,6 @@ Installing:==Installieren:
 download yacy-portalsearch.tar.gz from==Downloaden von yacy-portalsearch.tar.gz von
 unpack within your HTTP servers path==Entpacken in das HTTP Server Verzeichnis
 use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page==Verwenden von ./yacy/portalsearch/yacy-portalsearch.html als Referenz für eine Integration mit Ihrem bestehenen Portal
-#Remote access through selected YaCy Peer==Remote Access durch ausgewähltes YaCy Peer
-#Advantages:==Vorteile:
 Always latest version of YaCy Search Widget==Immer die aktuellste Version des YaCy Suchwidgets
 No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.==Keine AJAX/JSON cross Domainanfragen, da Suchwidget und YaCy auf derselben Domäne gehostet werden.
 Under certain cirumstances slower than static hosting==Unter bestimmten Umständen langsamer als statisches Hosting
@@ -634,8 +604,7 @@ url<==URL<
 Size and position (width | height | position)==Größe und Position (Breite | Höhe | Position)
 Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
 Animation effects (show | hide)==Animationseffekte (show | hide)
-The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==
-Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.==Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
 Interaction (modal | resizable)==Interaktion (modal | resizable)
 If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
 Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
@@ -668,7 +637,7 @@ YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie k
 To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
 this network definition must be equal to all members of the same YaCy network.==müssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
 Network Definition==Netzwerk Definition
-Network Nick==Netzwerk Nick
+Network Nick==Netzwerk Name
 Long Description==Lange Beschreibung
 Indexing Domain==Indexierungs Domain
 #DHT==DHT
@@ -727,8 +696,7 @@ Content Parser Settings==Inhalt Parser Einstellungen
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Dateitypen basierend auf ihren MIME-Typen ermöglichen.
 For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
-If you want to test a specific parser you can do so using the==
-Wenn Sie einen bestimmten Parser testen wollen, verwenden Sie dafür den
+If you want to test a specific parser you can do so using the==Wenn Sie einen bestimmten Parser testen wollen, verwenden Sie dafür den
 >File Viewer<==>Datei Betrachter<
 > enable/disable<==> aktiv / inaktiv<
 >Extension<==>Erweiterung<
@@ -743,8 +711,7 @@ If you like to integrate YaCy as portal for your web pages, you may want to chan
 The search page may be customized.==Die Suchseite kann auf die eigenen Bedürfnisse zugeschnitten werden.
 You can change the 'corporate identity'-images, the greeting line==Sie können die 'Corporate Identity' Bilder, die Grußzeile
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==und einen Link auf die Homepage ändern, der aufgerufen wird wenn die 'Corporate Identity' Bilder angeklickt werden.
-To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==
-Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
+To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
 Greeting Line<==Grußzeile<
 URL of Home Page<==URL der Homepage<
 URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<
@@ -753,7 +720,6 @@ Enable Search for Everyone?==Suche für Jedermann aktivieren?
 Search is available for everyone==Suche steht für Jedermann zur Verfügung
 Only the administator is allowed to search==Nur der Administrator darf suchen
 Show additional interaction features in footer==Zeige zusätzliche Features zur Interaktion in der Fußzeile
-User-Logon==Benutzer-Logon
 Snippet Fetch Strategy &amp; Link Verification==Snippet Fetch Strategie &amp; Link Verifikation
 Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==Beschleunige die Suchergebnisse mit dieser Option! (Verwende CACHEONLY oder FALSE, um die Verifikation abzuschalten)
 NOCACHE: no use of web cache, load all snippets online==NOCACHE: Keine Verwendung des Webcache, alle Snippets online laden
@@ -846,7 +812,7 @@ Network pages==der Netzwerkseiten
 Surftips==der Surftipps
 News pages==der News-Seiten
 Blog==des Blogs
-Wiki=des Wikis
+Wiki==des Wikis
 Public bookmarks==der öffentlichen Lesezeichen
 Home Page==der Home-Page
 File Share==des File-Shares
@@ -878,13 +844,11 @@ To change colors and styles use the ==Um die Farben und Stile zu ändern, verwen
  menu for different skins.== Menü für verschiedene Skins.
 Other portal settings can be adjusted in==Andere Einstellungen für das Portal können im
 >Generic Search Portal<==>Generisches Suchportal<
-menu.=Menü geändert werden.
+menu.==Menü geändert werden.
 >Page Template<==>Seiten Template<
 #>Administration<==>Administration<
 >Web Search<==>Websuche<
 >File Search<==>Dateisuche<
->IndexBrowser<==>Index Browser<
->About Us<==>Über Uns<
 >Help / YaCy Wiki<==>Hilfe / YaCy Wiki<
 "Search"=="Suche"
 #>Text<==>Text<
@@ -972,7 +936,7 @@ Last Deploy==Letztes Update
 #---------------------------
 Connection Tracking==Verbindungsstatus
 Incoming Connections==Eingehende Verbindungen
-Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
+Showing #[numActiveRunning]# active connections from a max. of #[numMax]# allowed incoming connections.==Es werden #[numActiveRunning]# Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
 Protocol</td>==Protokoll</td>
 Duration==Dauer
 Source IP[:Port]==Quell-IP[:Port]
@@ -1085,7 +1049,7 @@ Seg-<br/>ments==Seg-<br/>mente
 >solr search api<==>Solr Such-API<
 >Webgraph Edges<==>Webgraph Kanten<
 Citations<br/>(reverse link index)==Citations<br/>(Rückwärts Such Index)
-RWIs<br/>(P2P Chunks)==RWIs<br/>(P2P Anteile)<
+RWIs<br/>(P2P Chunks)==RWIs<br/>(P2P Anteile)
 Local Crawler==Lokaler Crawler
 Limit Crawler==Limitierter Crawler
 Remote Crawler==Entfernter Crawler
@@ -1102,15 +1066,13 @@ Load<==Auslastung<
 
 #File: CrawlProfileEditor_p.html
 #---------------------------
->Crawl Profile Editor<==>Crawl Profil Editor<
+Crawl Profile Editor==Crawl Profil Editor
 >Crawler Steering<==>Crawler Steuerung<
 >Crawl Scheduler<==>Crawl Planer<
 >Scheduled Crawls can be modified in this table<==>Geplante Crawls können in dieser Tabelle geändert werden<
 Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl Profile beinhalten Informationen über einen Crawl Prozess der gerade ausgeführt wird.
 
-#Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
 #The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
-#cannot be altered here as they are hard-coded.==können nicht verändert werden, weil sie "hard-coded" sind.
 Crawl Profile List==Crawl Profil Liste
 Crawl Thread==Crawl Art
 #Status==Status
@@ -1229,7 +1191,7 @@ Other already visited URLs are sorted out as "double", if they are not allowed u
 
 
 >From Link-List of URL<==>Von Linkliste der URL<
-From Sitemap<==Von Sitemap<
+From Sitemap==Von Sitemap
 From File (enter a path<br/>within your local file system)==Von Datei (Verwende Pfad einer Datei<br/>auf dem lokalen Dateisystem)
 
 A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl führt eine Dubletten Prüfung anhand einer internen Datenbank gegen alle im Internet gefunden Links durch. Wenn dieselbe URL wieder gefunden wird,
@@ -1371,31 +1333,13 @@ To use this option, the 'collection_sxt'-field must be switched on in the==Um di
 "Start New Crawl Job"=="Neuen Crawl Job starten"
 #-----------------------------
 
-#File: CrawlStartIntranet_p.html
-#---------------------------
-#Intranet Crawl Start==Intranet Crawl Start
-When an index domain is configured to contain intranet links,==Wenn eine Index Domain konfiguriert wurde die Intranet Links enthält,
-the intranet may be scanned for available servers.==kann dieses Intranet auf verfügbare Server gescannt werden.
-Please select below the servers in your intranet that you want to fetch into the search index.==Bitte in der folgenden Server Liste aus Ihrem Intranet auswählen, welche Sie in den Suchindex aufnehmen wollen.
-This network definition does not allow intranet links.==Diese Netzwerk Konfiguration erlaubt keine Intranet Links.
-A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Eine Liste mit Servern aus dem Intranet ist nur verfügbar, wenn Sie YaCy auch konfiguriert haben Intranetseiten zu indexieren.
-To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.==Um diese Einstellung vorzunehmen, bitte im Servlet <a href="ConfigBasic.html">Basis Konfiguration</a> den Anwendungsfall 'Intranet Indexierung' auswählen.
-Available Intranet Server==Verfügbare Intranet Server
-#>IP<==>IP<
-#>URL<==>URL<
->Process<==>Status<
->not in index<==>Nicht im Index<
->indexed<==>Indexiert<
-"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawler hinzu"
-#-----------------------------
-
 #File: CrawlStartScanner_p.html
 #---------------------------
 Network Scanner==Netzwerk Scanner
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy kann ein Netzwerksegment auf verfügbare HTTP, FTP und SMB Server hin absuchen.
 You must first select a IP range and then, after this range is scanned,==Sie müssen zuerst einen IP Bereich festlegen  und dann, nachdem dieser Bereich gescannt wurde,
 it is possible to select servers that had been found for a full-site crawl.==ist es möglich einen gefunden Server für eine volle Seiten Suche crawlen zu lassen.
-No servers had been detected in the given IP range #[iprange]#. 
+No servers had been detected in the given IP range==Es wurde kein Server im angegebenen IP Bereich gefunden
 Please enter a different IP range for another scan.==Bitte geben Sie einen anderen IP Bereich ein für einen weiteren Scan.
 Please wait...==Bitte warten...
 >Scan the network<==>Das Netzwerk Scannen<
@@ -1408,7 +1352,7 @@ only the given host(s)==Nur den/die angegebenen Host(s)
 addresses)==Addressen)
 Subnet<==Subnetz<
 Time-Out<==Timeout<
->Scan Cache<==>Scan Cache<
+#>Scan Cache<==>Scan Cache<
 accumulate scan results with access type "granted" into scan cache (do not delete old scan result)==Sammle Scan Ergebnisse mit dem Zugriffstyp "granted" im Scan Cache (Lösche keine alten Scan Ergebnisse)
 >Service Type<==>Service Typ<
 #>ftp==>FTP
@@ -1425,20 +1369,6 @@ Look every==Überprüfe alle
 again and add new sites automatically to indexer.==wieder und füge neue Seiten automatisch zum Indexer hinzu.
 Sites that do not appear during a scheduled scan period will be excluded from search results.==Seiten die nicht im Laufe eines geplanten Scans auftauchen werden von den Suchergebnissen ausgeschlossen.
 "Scan"=="Scannen"
-#The following servers had been detected:==Die folgenden Server wurden entdeckt:
-#Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
-#>Protocol<==>Protokoll<
-#>IP<==>IP<
-#>URL<==>URL<
-#>Access<==>Zugriff<
-#>Process<==>Prozess<
-#>unknown<==>unbekannt<
-#>empty<==>leer<
-#>granted<==>erlaubt<
-#>denied<==>verweigert<
-#>not in index<==>nicht im Index<
-#>indexed<==>indexiert<
-#"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawlen hinzu"
 #-----------------------------
 
 #File: CrawlStartSite.html
@@ -1603,7 +1533,7 @@ doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
 an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
 heuristics==Heuristiken
-add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
+add search results from external opensearch systems==Benutze zusätzliche Ergebnisse von externen Opensearchsystemen
 Search Navigation==Such-Navigation
 keyboard shotcuts==Tastatur-Kürzel
 tab or page-up==Tab oder Bild hoch
@@ -1748,8 +1678,8 @@ Retrieve by URL:<==Abfrage nach URL:<
 Retrieve by URL-Hash==Abfrage nach URL-Hash
 "Show Details for URL-Hash"=="Details für URL-Hash zeigen"
 #"Generate List"=="Liste erstellen"
-Cleanup=Aufräumen
-Index Deletion=Löschen des Index
+Cleanup==Aufräumen
+Index Deletion==Löschen des Index
 Delete local search index (embedded Solr and old Metadata)==Lösche den lokalen Suchindex (Embedded Solr und alte Metadaten)
 Delete remote solr index==Lösche entfernten Solr Index
 Delete RWI Index (DHT transmission words)==Lösche RWI Index (DHT übertragene Worte)
@@ -1764,7 +1694,7 @@ Show top==Zeige die
 domains from all URLs.==Top-Domains aus allen URLs.
 "Generate Statistics"=="Statistik erstellen"
 Dump and Restore of Solr Index==Dump und Wiederherstellen des Solr Index
-Dump File=Dump Datei
+Dump File==Dump Datei
 "Create Dump"=="Erstelle Dump"
 "Restore Dump"=="Stelle Dump wieder her"
 Optimize Solr==Optimiere Solr
@@ -1837,6 +1767,39 @@ There are #[num]# entries in the rejected-queue:==Es befinden sich #[num]# Eintr
 Fail-Reason==Fehlermeldung
 #-----------------------------
 
+#File: IndexExport_p.html
+#---------------------------
+#URL Database Administration==URL Database Administration
+#Index Export
+The local index currently contains #[ucount]# documents.==Der lokale Index enthält im Moment #[ucount]# Dokumente.
+Loaded URL Export==Export geladener URLs
+Export File==Export-Datei
+#URL Filter
+#>query<
+#Export Format
+Full Data Records:==Komplette Datensätze
+(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)==(vollständige Solr Daten, ein Dokument pro Zeile in einer grossen xml Datei, kann mit Kommandozeilentools bearbeitet werden, kann aus DATA/SURROGATE/in/ importiert werden)
+#> XML (RSS)<
+Full URL List:==Liste mit vollständiger URL:
+Plain Text List (URLs only)==Einfache Text Liste (nur URLs)
+HTML (URLs with title)==HTML (URLs mit Titel)
+Only Domain:==Liste mit nur Domainnamen:
+Plain Text List (domains only)==Einfache Text Liste (nur Domains)
+HTML (domains as URLs, no title)==HTML (Domains als URLs, kein Titel)
+>Only Text:==>Nur Text:
+Fulltext of Search Index Text==Voller Text der Indexdokumente
+#"Export"
+Export to file #[exportfile]# is running ..  #[urlcount]# Documents so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# Dokumente bisher
+Finished export of #[urlcount]# Documents to file==Export beendet und #[urlcount]# Dokumente gespeichert in Datei
+Import this file by moving it to DATA/SURROGATES/in==Verschiebe diese Datei nach DATA/SURROGATES/in um sie zu importieren
+Export to file #[exportfile]# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
+Dump and Restore of Solr Index==Dump und Wiederherstellen des Solr Index
+"Create Dump"=="Erstelle Dump"
+Dump File==Dump Datei
+"Restore Dump"=="Stelle Dump wieder her"
+Stored a solr dump to file==Solr Dump gespeichert in Datei
+#-----------------------------
+
 #File: ContentIntegrationPHPBB3_p.html
 #---------------------------
 Content Integration: Retrieval from phpBB3 Databases==Integration von Inhalt: Import aus phpBB3 Datenbanken
@@ -1855,7 +1818,7 @@ this must be the path right in front of '/viewtopic.php?'==dies muss den komplet
 Type==Typ
 > of database<==> der Datenbank<
 use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
-Host=Hostname
+Host==Hostname
 > of the database<==> der Datenbank<
 of database service==des Datenbank Dienstes
 usually 3306 for mySQL==normalerweise 3306 für MySQL
@@ -1924,62 +1887,19 @@ Suggestion dictionaries will help YaCy to provide better suggestions during the 
 This file provides 100000 most common german words for suggestions==Diese Datei stell die 100000 häufigsten deutschen Wörter für Suchvorschläge bereit
 #-----------------------------
 
-#File: IndexCreateWWWGlobalQueue_p.html
+#File: IndexCreateQueues_p.html
 #---------------------------
-Global Crawl Queue==Globaler Crawl-Puffer
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Dieser Puffer enthält URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuführen.
-If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
-The global crawler queue is empty==Der globale Crawler-Puffer ist leer.
-"clear global crawl queue"=="Lösche globalen Crawler-Puffer"
-There are <strong>#[num]#</strong> entries in the global crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Einträge in dem globalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
-Show last==Zeige die letzten
-</a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
-Anchor Name==Anker Name
-#URL==URL
-#-----------------------------
-
-#File: IndexCreateWWWLocalQueue_p.html
-#---------------------------
-Local Crawl Queue==Lokaler Crawl-Puffer
-This queue stores the urls that shall be crawled localy by this peer.==Dieser Puffer enthält URLs, die von diesem Peer lokal gecrawlt werden sollen.
-It may also contain urls that are computed by the proxy-prefetch.==Sie enthält auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
-The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
-There are <strong>#[num]#</strong> entries in the local crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Einträge in dem lokalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
-Show last==Zeige die letzten
-</a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
-Anchor Name==Anker Name
-URL==URL
-[Delete]==[Löschen]
+Crawl Queue<==Crawl-Puffer<
+Click on this API button to see an XML with information about the crawler latency and other statistics.==Klick auf API Icon für statistische Kennwerte des Crawlers als XML.
+This crawler queue is empty==Dieser Crawl-Puffer ist leer
 Delete Entries:==Lösche Einträge:
 "Delete"=="Löschen"
-This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
-#-----------------------------
-
-#File: IndexCreateWWWRemoteQueue_p.html
-#---------------------------
-Remote Crawl Queue==Remote Crawl Puffer
-This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.==Dieser Puffer enthält die URLS, die Ihnen andere Peers zugeschickt haben, um für diese einen Remote Crawl durchzuführen.
-The remote crawler queue is empty==Der Remote Crawler-Puffer ist leer
-"clear remote crawl queue"=="leere Remote Crawl Puffer"
-There are <strong>#[num]#</strong> entries in the remote crawler queue.==Es befinden sich <strong>#[num]#</strong> Einträge in dem Remote Crawler-Puffer.
-Showing <strong>#[show-num]#</strong> most recent entries.==Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
-Show last==Zeige die letzten
-</a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
+>Count<==>Anzahl<
+>Initiator<==>Initiator<
+>Profile<==>Profil<
+>Depth<==>Tiefe<
 Modified Date==Änderungsdatum
 Anchor Name==Anker Name
-URL==URL
-Delete==Löschen
 #-----------------------------
 
 #File: IndexDeletion_p.html
@@ -2454,11 +2374,20 @@ this peer==Ihr Peer
 >DHT-out<==>DHT ausgehend<
 >green lines<==>grüne Linien<
 >DHT-in<==>DHT eingehend<
-#DHT-out==DHT-out
 #You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
 #Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
 #You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, drücken Sie diesen Knopf:
 #"go online"=="online gehen"
+
+Network History==Netzwerk Historie
+Count of Connected Senior Peers==Anzahl aktiver Senior Peers
+in the last two days, scale = 1h==in den letzten 2 Tagen, Teilung 1h
+Count of all Active Peers Per Day==Anzahl aktiver Peers pro Tag
+in the last week, scale = 1d==in der letzten Woche, Teilung 1 Tag
+Count of all Active Peers Per Week==Anzahl aktiver Peers pro Woche
+in the last 30d, scale = 7d==in den letzten 30 Tagen, Teilung 7 Tage
+Count of all Active Peers Per Month==Anzahl aktiver Peers pro Monat
+in the last 365d, scale = 30d==in den letzten 365 Tagen, Teilung 30 Tage
 #-----------------------------
 
 #File: News.html
@@ -2771,35 +2700,6 @@ Unable to create new crawling profile for URL:==Es ist nicht möglich für diese
 Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
 #-----------------------------
 
-#File: Ranking_p.html
-#---------------------------
-Ranking Configuration==Ranking Einstellungen
-The document ranking influences the order of the search result entities.==Das Dokument Ranking beeinflusst die Reihenfolge der Suchergebnis Datensätze.
-A ranking is computed using a number of attributes from the documents that match with the search word.==Ein Ranking wird berechnet mit einer Anzahl von Attributen aus den Dokumenten die das gesuchte Wort enthalten.
-The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.==Die Attribute werden zuerst über alle Suchergebnisse normalisiert und dann wird das normalisierte Attribut multpliziert mit dem Ranking Koeffizienten der aus dieser Liste errechnet wird.
-The ranking coefficient grows exponentially with the ranking levels given in the following table.==Der Ranking Koeffizient wächst exponential mit den Ranking Werten die in der folgenden Tabelle festgelegt werden.
-If you increase a single value by one, then the strength of the parameter doubles.==Wenn Sie einen einzelnen Wert um eins erhöhen wird die Stärke des Parameters verdoppelt.
-Pre-Ranking==Vor-Ranking
-
-# Aktuell sind die Werte und Hover over Information in der Ranking_p.java hartcodiert und können nicht übersetzt werden
-#
-#Date==Datum
-#a higher ranking level prefers younger documents.==Ein höherer Ranking Level bevorzugt jüngere Dokumente
-#The age of a document is measured using the date submitted by the remote server as document date==Das Alter eines Dokuments wird gemessen anhand des Dokument Datums das der Remote Server übermittelt
-
-There are two ranking stages:==Es gibt zwei Phasen beim Ranking.
-first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==Zuerst werden alle Resultate nach dem Vor-Ranking geranked und aus der resultierenden Liste werden die Dokumente erneut im Nach-Ranking sortiert.
-The two stages are separated because they need statistical information from the result of the pre-ranking.==Die zwei Phasen sind getrennt weil statistische Informationen aus dem Ergebnis des Vor-Rankings benötigt werden.
-
-Post-Ranking==Nach-Ranking
-
-#Application Of Prefer Pattern==Anwendung eines bevorzugten Musters
-#a higher ranking level prefers documents where the url matches the prefer pattern given in a search request.==Ein höherer Ranking Level bevorzugt Dokumente deren URL auf das bevorzugte Muster einer Suchanfrage passt.
-
-"Set as Default Ranking"=="Als Standard Ranking speichern"
-"Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
-#-----------------------------
-
 #File: RankingRWI_p.html
 #---------------------------
 RWI Ranking Configuration<==RWI Ranking Konfiguration<
@@ -2844,7 +2744,9 @@ To find appropriate fields for this query, see the ==Um passende Felder für die
 "Set Boost Query"=="Setze Boost Abfrage"
 #"Re-Set to default"=="Reset auf Standardwerte"
 #>Solr Boosts<==>Solr Boosts<
-This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.==Das ist das Set der suchbaren Felder. Einträge ohne Boost Werte werden nicht durchsucht. Boost Werte erhöhen die Wichtigkeit der Treffer im passenden Feld.
+This is the set of searchable fields (see==Dies ist der Satz der durchsuchbaren Felder (siehe
+Entries without a boost value are not searched.==Einträge ohne Boost Werte werden nicht durchsucht.
+Boost values make hits inside the corresponding field more important.==Boost Werte erhöhen die Wichtigkeit der Treffer im entsprechdem Feld.
 field not in local index (boost has no effect)==Feld ist nicht im lokalen Index (Boost hat keinen Effekt)
 "Set Field Boosts"=="Setze Feld Boosts"
 #"Re-Set to default"=="Reset auf Standardwerte"
@@ -2884,7 +2786,7 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 #>Name<==>Name<
 #>Remote<br/>Crawl<==>Remote<br/>Crawl<
 #>Release/<br/>SVN<==>Version/<br/>SVN<
->PPM<==>==>Seiten pro Minute (PPM)<
+>PPM<==>Seiten pro Minute (PPM)<
 >QPH<==>Anfragen pro Stunde (QPH)<
 >Last<br/>Seen<==>Zuletzt<br/>Gesehen<
 >UTC</strong><br/>Offset<==>UTC</strong><br/>Abweichung<
@@ -2893,6 +2795,25 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 #>RWIs<==>RWIs<
 >Age<==>Alter<
 #-----------------------------
+
+#File: ServerScannerList.html
+#------------------------------
+#Network Scanner Monitor==Network Scanner Monitor
+The following servers can be searched:==Die folgenden Server können durchsucht werden:
+Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
+>Protocol<==>Protokoll<
+#IP=IP
+#URL==URL
+>Access<==>Zugriff<
+>Process<==>Prozess<
+>inaccessible<==>unbekannt<
+>empty<==>leer<
+>granted<==>erlaubt<
+>denied<==>verweigert<
+>not in index<==>nicht im Index<
+>indexed<==>indexiert<
+"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawlen hinzu"
+#------------------------------
 
 #File: Settings_p.html
 #---------------------------
@@ -2914,6 +2835,7 @@ Message Forwarding (optional)==Nachrichten Weiterleitung (optional)
 
 #File: Settings_Crawler.inc
 #---------------------------
+>Crawler Settings<==>Crawler Einstellungen<
 Generic Crawler Settings==Allgemeine Crawler Einstellungen
 Connection timeout in ms==Verbindungs-Timeout in ms
 means unlimited==schaltet die Begrenzung ab
@@ -2929,14 +2851,17 @@ Submit==Speichern
 Changes will take effect immediately==Änderungen sind sofort aktiv
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==HTTP Netzwerk
 Transparent Proxy==Transparenter Proxy
 With this you can specify if YaCy can be used as transparent proxy.==Hiermit können Sie festlegen ob YaCy als transparenter Proxy genutzt werden kann.
 Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Hinweis: Unter Linux können Sie Ihre Firewall darauf einstellen, alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden.
-Connection Keep-Alive==Verbindung halten
-With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit können Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalität unterstützen soll.
+#Always Fresh:==Always Fresh:
+#If unchecked, the proxy will act using Cache Fresh / Cache Stale rules.==If unchecked, the proxy will act using Cache Fresh / Cache Stale rules.
+#If checked, the cache is always fresh which means==If checked, the cache is always fresh which means
+#that a page is never loaded again if it was already stored in the cache.==that a page is never loaded again if it was already stored in the cache.
+#However, if the page does not exist in the cache, it will be loaded in any case.==However, if the page does not exist in the cache, it will be loaded in any case.
 Send "Via" Header==Sende "Via" Header
 Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45" target="_blank">Via-HTTP-Header</a>
 http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
@@ -3136,7 +3061,6 @@ Seed Upload Method:==Seed Upload Methode:
 Seed File URL:==Seed Datei URL:
 Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
 Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist:
-Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
 Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
 Message Forwarding Support is:==Nachrichten Weiterleitungs Unterstützung:
 Message Forwarding Command:==Nachrichten Weiterleitungskommando:
@@ -3150,6 +3074,7 @@ After a short while you should see the effect on the==Nach kurzer Zeit können S
 You can now go back to the==Sie können nun zurück zu den
 Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
 You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden:
+Your need to restart YaCy to activate the changes.==Um die Änderungen zu aktivieren müssen Sie YaCy neu starten.
 #-----------------------------
 
 #File: Settings_MessageForwarding.inc
@@ -3189,7 +3114,7 @@ value="add"==value="hinzufügen"
 Console Status==Konsolen Status
 Log-in as administrator to see full status==Als Administrator einloggen, für kompletten Status
 Welcome to YaCy!==Willkommen bei YaCy!
-Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!</strong>
+Your settings are _not_ protected!==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Bitte öffnen Sie die <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> <strong>sofort</strong>
 and set an administration password.==und geben Sie ein Administrator Passwort ein.
 You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
@@ -3199,21 +3124,21 @@ A possible reason is that you are behind a firewall, NAT or Router.==Ein möglic
 But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
 global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
 "bad"=="schlecht"
-"idea"="Idee"
-"good"="gut"
+"idea"=="Idee"
+"good"=="gut"
 "Follow YaCy on Twitter"=="Folge YaCy auf Twitter"
 We encourage you to open your firewall for the port you configured (usually: 8090),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8090) in Ihrer Firewall zu öffnen,
 or to set up a 'virtual server' in your router settings (often called DMZ).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
 Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
 it as soon as possible and restart YaCy.==dieses Problem so schnell wie möglich und starten Sie YaCy neu.
-Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT wurde deaktiviert. Bitte beheben Sie 
+Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT Empfang wurde deaktiviert. Bitte beheben Sie 
 Crawling is paused! If the crawling was paused automatically, please check your disk space.==Crawling wurde pausiert! Wenn das Crawling automatisch pausiert wurde, prüfen Sie bitte Ihrer Festplattenspeicher.
 Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Installiere YaCy
-You can download the latest releases here:=Hier kann die neueste Version heruntergeladen werden:
+You can download the latest releases here:==Hier kann die neueste Version heruntergeladen werden:
 You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
 which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
@@ -3227,10 +3152,14 @@ For community support, please visit our==Für Unterstützung aus der Community, 
 
 #File: Status_p.inc
 #---------------------------
-#System Status==System Status
+System Status==Systemstatus
 Unknown==unbekannt
-Uptime==Online seit
+YaCy version:==YaCy Version:
+Uptime:==Online seit:
+Java version:==Java Version:
 Processors:==Prozessoren:
+peak:==max:
+total:==Total:
 Protection==Sicherheit
 Password is missing==Kein Passwort
 password-protected==Passwort-geschützt
@@ -3304,7 +3233,7 @@ Just a moment, please!==Einen Moment bitte!
 Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
 Please send us feed-back!==Bitte senden Sie uns Feedback!
 We don't track YaCy users, YaCy does not send 'home-pings', we do not even know how many people use YaCy as their private search engine.==Wir tracken YaCy Benutzer nicht. YaCy sendet keine 'Pings nach Hause'. Wir wissen noch nicht einmal wie viele Menschen YaCy als ihre private Suchmaschine verwenden.
-Therefore we like to ask you: do you like YaCy? Will you use it again... if not, why? Is is possible that we change a bit to suit your needs?==Darum wollen wir Sie fragen: Mögen Sie YaCy? Werden sie es wieder verwenden ... wenn nicht ... Warum? Ist es möglich dass wir uns verändern, um uns Ihren Anforderungen anzupassen?
+Therefore we like to ask you: do you like YaCy? Will you use it again... if not, why? Is it possible that we change a bit to suit your needs?==Darum wollen wir Sie fragen: Mögen Sie YaCy? Werden sie es wieder verwenden ... wenn nicht ... Warum? Ist es möglich dass wir uns verändern, um uns Ihren Anforderungen anzupassen?
 Please send us feed-back about your experience with an==Bitte senden Sie uns Ihr Feedback mit einer
 >anonymous message<==>anonymen Nachricht<
 or a<==oder einem<
@@ -3528,6 +3457,21 @@ Threaddump<==Thread Dump<
 #"create Threaddump"=="Threaddump erstellen"
 #-----------------------------
 
+#File: Translator_p.html
+#---------------------------
+Translation Editor==Übersetzungseditor
+Translate untranslated text of the user interface (current language).==Ergänze fehlende Übersetzungen der Benutzeroberfläche (aktuell aktive Sprache).
+The modified translation file is stored in DATA/LOCALE directory.==Geänderte Übersetzungen werden im Verzeichnis DATA/LOCALE gespeichert.
+UI Translation==Übersetzung Benutzeroberfläche
+Target Language:==Zielsprache
+Source File==Quelldatei
+view it==Datei anzeigen
+filter untranslated==filter unübersetztes
+Source Text==Quelltext
+Translated Text==Übersetzung
+Save translation==Änderungen speichern
+#-----------------------------
+
 #File: User.html
 #---------------------------
 User Page==Benutzer Seite
@@ -3554,7 +3498,6 @@ New Password is empty.==Das neue Passwort ist leer.
 
 #File: ViewFile.html
 #---------------------------
-YaCy '#[clientname]#': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
 View URL Content==Zeige URL Inhalte
 >Get URL Viewer<==>URL Betrachter<
 "Show Metadata"=="Metadaten anzeigen"
@@ -3661,13 +3604,13 @@ delete vocabulary<==Lösche Vokabelliste<
 
 #File: WatchWebStructure_p.html
 #---------------------------
-Web Structure<==Webstruktur<
+Web Structure==Webstruktur
 The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
 To see a list of all APIs, please visit the==Um eine Liste aller APIs zu sehen, besuchen Sie die
-API wiki page==API Seite im WikiWeb Structure==Netz Struktur
+API wiki page==API Seite im Wiki
 >Host List<==>Host Liste<
 >#[count]# outlinks==>#[count]# ausgehende Links
 host<==Host<
@@ -3833,7 +3776,9 @@ Pictures==Bilder
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
+show search results for "#[query]#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
+>Documents==>Text
+>Images==>Bilder
 >Protocol==>Netzdienste
 >Provider==>Anbieter
 >Filetype==>Dateityp
@@ -3852,6 +3797,7 @@ Table Viewer==Tabellen Betrachter
 
 #File: api/yacydoc.html
 #---------------------------
+>Title<==>Titel<
 >Author<==>Autor<
 >Description<==>Beschreibung<
 >Subject<==>Betreff<
@@ -3882,7 +3828,7 @@ English, Englisch==German, Deutsch
 First Steps==Erste Schritte
 Use Case &amp; Account==Anwendungsfall &amp; Zugangsdaten
 Load Web Pages, Crawler==Webseiten laden mit Crawler
-RAM/Disk Usage &amp; Updates="RAM+Disk Belegung &amp; Updates
+RAM/Disk Usage &amp; Updates==RAM+Disk Belegung &amp; Updates
 You just started a YaCy peer!==Sie haben gerade begonnen YaCy zu nutzen!
 As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==Als Anfänger sehen Sie hier zunächst nur einfache Funktionen. Wählen Sie einen Anwendungsfall, benennen Sie Ihren Peer oder starten Sie einen Webcrawl, dann sehen Sie alle Optionen.
 You did not yet start a web crawl!==Sie haben bislang keinen Webcrawl gestartet!
@@ -3919,7 +3865,7 @@ Ranking and Heuristics==Ranking und Heuristiken
 >File Search<==>Datei-Suche<
 >Compare Search<==>Vergleichssuche<
 >Index Browser<==>Index Browser<
->About Us<==>Impressum dieses Peers<
+About This Page==Impressum dieses Peers
 Help / YaCy Wiki==Hilfe / YaCy Wiki
 #-----------------------------
 
@@ -3935,6 +3881,9 @@ Local Search<==Lokale Suche<
 #Log==Log
 Host Tracker==Host-Tracker
 Remote Search<==Remote-Suche<
+Cookie Menu==Cookie Menü
+Incoming&nbsp;Cookies==Eingehende Cookies
+Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -3965,23 +3914,18 @@ Content Control==Inhaltskontrolle
 >Published&nbsp;News<==>Veröffentlichte&nbsp;Nachrichten<
 ## Community Data Submenu
 >Community Data<==>Gemeinschaftsdaten<
+>Surftips<==>Surftipps<
 >Local Peer Wiki<==>Lokales Peer Wiki<
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==Peer Administrations Konsole
-#Status==Status
-Basic Configuration==Eingangskonfiguration
->Accounts==>Konten
+System Administration==System Administration
 Network Configuration==Netzwerk Konfiguration
 Download System Update==Download System-Aktualisierung
 >Performance==>Leistung
 Advanced Settings==Erweiterte Einstellungen
-Local robots.txt==Lokale robots.txt
-#Web Cache==Web Cache
 Advanced Properties==Erweiterte Konfiguration
-#>Thread Dump<==>Thread Dump<
 #-----------------------------
 
 #File: env/templates/submenuContentIntegration.template
@@ -3990,13 +3934,6 @@ External Content Integration==Integration von externen Inhalten
 Import phpBB3 forum==Importiere phpBB3 Forum
 Import Mediawiki dumps==Importiere Mediawiki Dumps
 Import OAI-PMH Sources==Importiere OAI-PMH Quellen
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Cookie Menü
-Incoming&nbsp;Cookies==Eingehende Cookies
-Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -4008,7 +3945,7 @@ DHT Transfer==DHT-Verteilung
 Proxy Use==Proxy Benutzung
 Local Crawling</a>==Lokales Crawlen</a>
 Global Crawling</a>==Globales Crawlen</a>
-Surrogate Import</a>==Surrogat Import</a>
+Surrogate Import==Surrogat Import
 Processing Monitor==Prozess Monitor
 Loader<==Lade Puffer<
 Rejected URLs==Abgelehnte URLs
@@ -4021,11 +3958,18 @@ Scheduler and Profile Editor<==Scheduler und Profil Editor<
 #robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Load Web Pages==Webseiten laden
+Site Crawling==Webseiten Crawlen
+Parser Configuration==Parser Konfiguration
+#-----------------------------
+
 #File: env/templates/submenuDesign.template
 #-----------------------------
 >Appearance==>Erscheinungsbild
 >Language==>Sprache
->Search Page Layout==>Suchseitenlayout
+Search Page Layout==Suchseitenlayout
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
@@ -4045,42 +3989,15 @@ Parser Configuration==Parser Konfiguration
 
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
-#Web Crawler Control==Web Crawler Steuerung
-#Start a Web Crawl==Starte einen Web Crawl
-#Crawl Start==Crawl starten
-#Crawl Profile Editor==Crawl Profil Editor
-#Crawler Queues==Crawler Puffer
-#Indexing<==Indexierung<
-#Loader<==Lader<
-#URLs to be processed==zu verarbeitende URLs
-#Processing Queues==Warteschlangen
-#Local<==Lokal<
-#Global<==Global<
-#Remote<==Remote<
-#Overhang<==Überhang<
-#Media Crawl Queues==Medien Crawl-Puffer
-#>Images==>Bilder
-#>Movies==>Filme
-#>Music==>Musik
-#--- New menu items ---
-Index Creation==Indexerzeugung
-#Crawler/Spider<==Crawler/Spider<
-Full Site Crawl==Vollständiger Seiten Crawl
-Sitemap Loader==Sitemap Lader
-Crawl Start<br/>(Expert)==Crawl Start<br/>(Experte)
-Network<br/>Scanner==Netzwerk<br/>Scanner
-#>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
-Crawling of==Crawlen von
-#MediaWikis==MediaWikis
->phpBB3 Forums<==>phpBB3 Foren<
-Index Export/Import<==Content Importer<
+Advanced Crawler==Experten Crawler
+Crawl Start (Expert)==Crawl Start (Experte)
+Crawling of MediaWikis==Crawlen von MediaWikis
+Crawling of phpBB3 Forums==Crawlen von phpBB3 Foren
 Network Harvesting<==Netzwerk Harvesting<
-#Remote<br/>Crawling==Remote<br/>Crawling
-#Scraping<br/>Proxy==Scraping<br/>Proxy
-Database Reader<==Datenbank Leser<
-for phpBB3 Forums==für phpBB3 Foren
-Dump Reader for==Dump Leser für
-#MediaWiki dumps==MediaWiki dumps
+Network Scanner==Netzwerk Scanner
+Remote Crawling==Remote Crawling
+Scraping Proxy==Scraping Proxy
+#Autocrawl==Autocrawler
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template
@@ -4099,18 +4016,13 @@ Publication==Veröffentlichung
 File Hosting==Datei Freigabe
 #-----------------------------
 
-#File: env/templates/submenuSearchConfiguration.template
+#File: env/templates/submenuRanking.template
 #---------------------------
-Integrated Search Configuration==Integrierte Suchkonfiguration
-Generic Search Portal==Generisches Suchportal
-Search Page Layout==Suchseite Layout
->Appearance<==>Darstellung<
->Language<==>Sprache<
-User Profile==Benutzerprofil
->Heuristics<==>Heuristik<
+Ranking and Heuristics==Ranking und Heuristiken
 Solr Ranking Config==Solr Ranking Konfiguration
 RWI Ranking Config==RWI Ranking Konfiguration
-#-----------------------------
+>Heuristics<==>Heuristiken<
+#---------------------------
 
 #File: env/templates/submenuSearchIntegration.template
 #---------------------------
@@ -4130,7 +4042,6 @@ Knowledge Loader==Wissensdatenbank-Lader
 >Augmented Content<==>Angereicherter Inhalt<
 Augmented Browsing==Angereichertes Browsing
 Filters and Modules==Filter und Module
-Augmented Parsing==Angereichertes Parsen
 #-----------------------------
 
 #File: env/templates/submenuTargetAnalysis.template
@@ -4139,6 +4050,14 @@ Target Analysis==Zielanalyse
 Robots.txt Database==Robots.txt Datenbank
 Mass Crawl Check==Massen Crawl-Überprüfung
 Regex Test==Regulärer Ausdruck Test
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+Use Case &amp; Accounts==Anwendungsfall &amp; Zugangsdaten
+Basic Configuration==Grundkonfiguration
+>Accounts<==>Benutzerverwaltung<
+Network Configuration==Netzwerk Einstellungen
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
@@ -4252,7 +4171,7 @@ Crawl Start==Crawl starten
 Monitoring==Überwachung
 YaCy Network==YaCy Netzwerk
 >Settings==>Einstellungen
-"Basic Settings"=="Eingangskonfiguration"
+"Basic Settings"=="Grundkonfiguration"
 	Basic==	Basis
 Accounts==Konten
 "Network"=="Netzwerk"

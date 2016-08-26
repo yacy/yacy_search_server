@@ -97,7 +97,7 @@ a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Patt
 Activate this list for==Активува цей список для
 Show entries:==Показати записи:
 Entries per page:==Записів на сторінку:
-"Go"=="Вперед"
+#"Go"=="Вперед"
 Edit existing pattern(s):==Редагувати поточні шаблони:
 "Save URL pattern(s)"=="Зберегти шаблон(и) URL"
 </body>==<script>window.onload = function () {$("label:contains('proxy')").text('проксі'); $("label:contains('crawler')").text('сканувача'); $("label:contains('dht')").text('DHT'); $("label:contains('search')").text('пошуку'); $("label:contains('surftips')").text('серфінгу'); $("label:contains('news')").text('новин');}</script></body>
@@ -165,8 +165,7 @@ Surftips==Поради для серфінгу
 
 #File: Blog.html
 #---------------------------
-by==
-#від
+by==від
 Comments</a>==Коментарі</a>
 >edit==>редагувати
 >delete==>видалити
@@ -210,8 +209,7 @@ Please select the XML-file you want to import:==Будь-ласка, вибер�
 
 #File: BlogComments.html
 #---------------------------
-by==
-#від
+by==від
 Comments</a>==Коментарі</a>
 Login==Einloggen
 Blog-Home==Початкова сторінка блогу
@@ -429,7 +427,7 @@ You can also use your peer without opening it, but this is not recomended.==Ви
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==Настройки евристики
-A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="https://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
+#A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="https://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Пошукова евристика може бути використовувати методи, які допомагають виявити можливі результати пошуку з використанням запитів по посиланнях, вбудованого сканування та запитів до інших пошукових систем.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==При використанні пошукової евристики знайдені посилання не відображаються як пошукові результати, а індексуються та зберігаються разом з іншим вмістом.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Це гарантує, що чорні списки можуть бути використані, і що пошукові терміни з’являються дійсно на сторінках, які були знайдені за допомогою евристики.
@@ -624,7 +622,6 @@ Parser Configuration==Настройка обробника
 Content Parser Settings==Налаштування обробника вмісту
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==З допомогою цих настройок можна вмикати і вимикати обробку додаткових типів даних на основі їхніх MIME-типів.
 For a detailed description of the various MIME-types take a look at==Для докладного опису різних типів MIME дивіться
-http://www.iana.org/assignments/media-types/</a>==https://www.iana.org/assignments/media-types/</a>
 If you want to test a specific parser you can do so using the <a href="ViewFile.html">File Viewer</a>==Якщо потрібно перевірити незвичайний аналізатор, це можна зробити з допомогою <a href="ViewFile.html">переглядача файлів</a>
 enable/disable Parser==Ввім./Вимк. обробник
 # --- Parser Names are hard-coded BEGIN ---
@@ -1337,7 +1334,7 @@ doublequotes==лапки
 prefer given language==Віддавати перевагу вказаній мові
 an ISO639 2-letter code==2-буквенний код ISO639
 heuristics==евристика
-add search results from blekko==додати пошукові результати з blekko
+add search results from ==додати пошукові результати з 
 Search Navigation==Пошукова навігація
 keyboard shotcuts==швидкий доступ
 tab or page-up==tab чи page-up
@@ -1573,13 +1570,11 @@ usually 3306 for mySQL==зазвичай 3306 для MySQL
 Name of the database==Ім’я БД
 on the host==на хості
 Table prefix string==Рядок префікса таблиці
-for table names==
-#для імен таблиць
+for table names==для імен таблиць
 User==Користувач
 that can access the database==з доступом до БД
 Password==Пароль
-for the account of that user given above==
-#для доступу вищезазначеним користувачем
+for the account of that user given above==для доступу вищезазначеним користувачем
 Posts per file==Повідомлень на файл
 in exported surrogates==в експортованому допоміжному файлі
 Check database connection==Перевірити підключення до бази даних
@@ -1633,6 +1628,21 @@ Suggestion dictionaries will help YaCy to provide better suggestions during the 
 This file provides 100000 most common german words for suggestions==Цей файл надає 100000 найбільш вживаних німецьких слів для підказок.
 #-----------------------------
 
+#File: IndexCreateQueues_p.html
+#---------------------------
+#Crawl Queue<==Crawl Queue<
+#Click on this API button to see an XML with information about the crawler latency and other statistics.==Click on this API button to see an XML with information about the crawler latency and other statistics.
+#This crawler queue is empty==This crawler queue is empty
+Delete Entries:==Видалити записи:
+"Delete"=="Видалити"
+#>Count<==>Count<
+>Initiator<==>Зачинщик<
+>Profile<==>Профіль<
+>Depth<==>Глибина<
+Modified Date==Дата зміни
+Anchor Name==Ім’я якоря
+#-----------------------------
+
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 Global Crawl Queue==Загальна черга сканування
@@ -1665,7 +1675,7 @@ Profile==Профіль
 Depth==Глибина
 Modified Date==Дата зміни
 Anchor Name==Ім’я якоря
-URL==URL
+#URL==URL
 [Delete]==[Видалити]
 Delete Entries:==Видалити записи:
 "Delete"=="Видалити"
@@ -1687,7 +1697,7 @@ Profile==Профіль
 Depth==Глибина
 Modified Date==Дата зміни
 Anchor Name==Ім’я якоря
-URL==URL
+#URL==URL
 Delete==Видалити
 #-----------------------------
 
@@ -1983,8 +1993,7 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 
 #File: Network.html
 #---------------------------
-YaCy '#[clientname]#': YaCy Search Network==YaCy "#[clientname]#": Пошукова мережа YaCy
-YaCy Search Network '#[networkName]#'==Пошукова мережа YaCy "#[networkName]#"
+YaCy Search Network==Пошукова мережа YaCy
 YaCy Network<==Мережа YaCy<
 The information that is presented on this page can also be retrieved as XML.==Інформацію на цій сторінці також можна отримати в форматі XML.
 Click the API icon to see the XML.==Натисніть значок API для відображення XML.
@@ -2438,18 +2447,18 @@ You have to <a href="Settings_p.html?page=ProxyAccess">setup the proxy</a> befor
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-Quick Crawl Link==Schnell Crawl Link
-Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
-Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
-If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
-Crawl with YaCy==Mit YaCy crawlen
-Title:==Titel:
-Link:==link:
-Status:==Status:
-URL successfully added to Crawler Queue==Die Url wurde erfolgreich zum Crawler-Puffer hinzugefügt.
-Malformed URL==Fehler in der URL
-Unable to create new crawling profile for URL:==Es ist nicht möglich für diese URL ein Crawling Profil zu erstellen:
-Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
+Quick Crawl Link==Швидке сканування посилання
+#Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
+#Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
+#If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, während Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugefügt, um indexiert zu werden.
+#Crawl with YaCy==Mit YaCy crawlen
+#Title:==Titel:
+#Link:==link:
+#Status:==Status:
+#URL successfully added to Crawler Queue==Die Url wurde erfolgreich zum Crawler-Puffer hinzugefügt.
+#Malformed URL==Fehler in der URL
+#Unable to create new crawling profile for URL:==Es ist nicht möglich für diese URL ein Crawling Profil zu erstellen:
+#Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-Puffer hinzuzufügen:
 #-----------------------------
 
 #File: Ranking_p.html
@@ -2498,7 +2507,7 @@ If the remote crawl option is switched on, then this peer will load URLs from th
 >Name<==>Ім’я<
 >Remote<br/>Crawl<==>Remote<br/>Crawl<
 >Release/<br/>SVN<==>Випуск/SVN<
->PPM<==>==>Сторінок За Хвилину (PPM)<
+>PPM<==>Сторінок За Хвилину (PPM)<
 >QPH<==>Запитів За Годину (QPH)<
 >Last<br/>Seen<==>Востаннє<br/>бачено<
 <strong>UTC</strong><br/>Offset==Зсув<br/><strong>UTC</strong>
@@ -2554,7 +2563,7 @@ Submit==Зберегти
 Changes will take effect immediately==Зміни набирають чинності негайно
 #-----------------------------
 
-#File: Settings_Http.inc
+#File: Settings_ProxyAccess.inc
 #---------------------------
 HTTP Networking==Мережа HTTP
 Transparent Proxy==Прозорий проксі
@@ -2820,7 +2829,7 @@ value="add"==value="додати"
 Console Status==Консоль стану
 Log-in as administrator to see full status==Увійдіть як адміністратор для перегляду повного стану
 Welcome to YaCy!==Вітаємо в YaCy!
-Your settings are _not_ protected!</strong>==Ваші налаштування _не_ захищені паролем!</strong>
+Your settings are _not_ protected!==Ваші налаштування _не_ захищені паролем!
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Будь-ласка, <strong>негайно</strong> відкрийте <a href="ConfigAccounts_p.html">настройки облікових записів</a>
 and set an administration password.==і виставте пароль адміністратора.
 You have not published your peer seed yet. This happens automatically, just wait.==Ваш вузол не відомий мережі. Зачекайте, це робиться автоматично.
@@ -2830,15 +2839,15 @@ A possible reason is that you are behind a firewall, NAT or Router.==Одна з
 But you can <a href="index.html">search the internet</a> using the other peers'==Але ви можете <a href="index.html">здійснювати пошук</a> в глобальному індексі
 global index on your own search page.==інших вузлів зі своєї сторінки пошуку.
 "bad"=="погано"
-"idea"="думка"
-"good"="добре"
+"idea"=="думка"
+"good"=="добре"
 "Follow YaCy on Twitter"=="Слідувати за YaCy на Twitter'і"
 We encourage you to open your firewall for the port you configured (usually: 8090),==Ми рекомендуєм відкрити файрвол на виставленому порту YaCy (за замовчуванням: 8090)
 or to set up a 'virtual server' in your router settings (often called DMZ).==або виставити "віртуальний сервер" у вашому маршрутизаторі (часто називається DMZ).
 Please be fair, contribute your own index to the global index.==Будь-ласка, будьте справедливими і зробіть свій внесок у загальний індекс!
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==Вільного простору на жорсткому диску менше #[minSpace]#. Сканування було вимкнене. Будь ласка, виправте
 it as soon as possible and restart YaCy.==цю проблему якомога швидше і перезапустіть YaCy.
-Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix==Залишилось менше, ніж #[minSpace]# пам’яті. DHT вимкнений. Будь ласка, виправте
+Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==Залишилось менше, ніж #[minSpace]# пам’яті. DHT-in вимкнений. Будь ласка, виправте
 Latest public version is==Остання стабільна версія
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Ви можете завантажити нову версію YaCy. Натисніть тут, щоб встановити це оновлення і перезапустити YaCy:
 "Update YaCy"=="Оновити YaCy"
@@ -2856,7 +2865,7 @@ Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web
 System Status==Стан системи
 Process</dt>==Процес</dt>
 Unknown==невідомо
-Uptime==Час в мережі
+Uptime:==Час в мережі:
 System Resources==Системні ресурси
 Processors:==Процесори:
 Protection==Безпека
@@ -2931,7 +2940,7 @@ Go back to the <a href="Settings_p.html">Settings</a> page==Назад до ст
 Your system is not protected by a password==Ваша система не захищена паролем
 Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Будь-ласка, перейдіть на сторінку <a href="ConfigAccounts_p.html">керування користувачами</a> і виставте основний пароль.
 You don't have the correct access right to perform this task.==У вас немає дозволу на запуск цього додатка.
-Please log in.==Bitte melden Sie sich an.
+#Please log in.==Bitte melden Sie sich an.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Якщо хочете зробити інші зміни, можна перейти назад на сторінку <a href="Settings_p.html">налаштувань</a>.
 See you soon!==До зустрічі!
 Just a moment, please!==Зачекайте трохи, будь ласка!
@@ -3226,7 +3235,7 @@ Error with file input==Помилка з файлом
 started.==запущене.
 Please wait some seconds,==Будь ласка, зачекайте кілька секунд,
 it may take some seconds until the first result appears there.==незабаром будуть перші результати.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Якщо ви просканували якусь небажану сторінку, її можна видалити <a href="IndexCreateWWWLocalQueue_p.html"> тут</a>.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==Якщо ви просканували якусь небажану сторінку, її можна видалити <a href="IndexCreateQueues_p.html?stack=LOCAL"> тут</a>.
 Crawl Queue:==Черга сканера:
 Queue</th>==Черга</th>
 Profile</th>==Профіль</th>
@@ -3423,7 +3432,7 @@ Pictures==Bilder
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "#[query]#" on map==Показати результати пошуку для "#[query]#" на карті
+show search results for "#[query]#" on map==Показати результати пошуку для "#[query]#" на карті
 >Provider==>Домени
 >Name Space==>Простір імен
 >Author==>Автори
@@ -3547,7 +3556,7 @@ Crawler / Harvester==Сканер / Збирач
 Administration<==Адміністрування<
 >Web Search<==>Веб-Пошук<
 >Search Network<==>Пошукова мережа<
-Peer Owner Profile==Профіль власника вузла
+#Peer Owner Profile==Профіль власника вузла
 Help / YaCy Wiki==Допомога / YaCy Wiki
 #-----------------------------
 
@@ -3565,8 +3574,10 @@ All Connections</a>==Всі з’єднання</a>
 Local Search==Місцевий пошук
 Log==Журнал
 Host Tracker==Спостереження за сервером
-#Remote&nbsp;Search==Віддалений&nbsp;пошук
-Remote Search==Віддалений пошук
+Remote Search<==Віддалений пошук<
+Cookie Menu==Меню печива
+Incoming&nbsp;Cookies==Вхідне печиво
+Outgoing&nbsp;Cookies==Вихідне печиво
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -3581,11 +3592,9 @@ Index Cleaner==Очищення індексу
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Administration Console==Адмін. консоль
+#UNUSED HERE
+#Peer Administration Console==Адмін. консоль
 >Status==>Стан
-Basic Configuration==Початкове налаштування
->Accounts==>Облікові записи
-Network Configuration==Настройка мережі
 >Heuristics<==>Евристика<
 Dictionary Loader==Завантаження словника
 System Update==Оновлення системи
@@ -3605,13 +3614,6 @@ External Content Integration==Включення зовнішнього вміс
 Import phpBB3 forum==Імпорт форуму phpBB3
 Import Mediawiki dumps==Імпорт Mediawiki Dumps
 Import OAI-PMH Sources==Імпорт джерел OAI-PMH
-#-----------------------------
-
-#File: env/templates/submenuCookie.template
-#---------------------------
-Cookie Menu==Меню печива
-Incoming&nbsp;Cookies==Вхідне печиво
-Outgoing&nbsp;Cookies==Вихідне печиво
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
@@ -3713,6 +3715,14 @@ Publication==Публікація
 #Wiki==Wiki
 Blog==Блог
 File Hosting==Загальний доступ до файлів
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+#Use Case &amp; Accounts==Use Case &amp; Accounts
+Basic Configuration==Початкове налаштування
+>Accounts<==>Облікові записи<
+Network Configuration==Настройка мережі
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
@@ -4010,7 +4020,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 #>Tag Manager==>Ключові слова
 >Tag Manager==>Ключі
 >Import<==>Імпорт<
-All tag actions are applied to the sub-set of bookmarks defined by this query.==
+#All tag actions are applied to the sub-set of bookmarks defined by this query.==
 >Query==>Запит
 >Query Type==>Тип запиту
 >Tags (comma seperated)==>Ключі (через кому)
@@ -4019,7 +4029,7 @@ All tag actions are applied to the sub-set of bookmarks defined by this query.==
 >Folders (regexp)==>Папки (рег.вираз)
 >Title (regexp)==>Заголовок (рег.вираз)
 >Description (regexp)==>Опис (рег.вираз)
-Enter tags to add (<i>replace with</i>)==
+#Enter tags to add (<i>replace with</i>)==
 >(comma separated tags)==>(ключі через кому)
 #>Bookmark Importer==>Імпортувач закладок
 >Bookmark Importer==>Імпорт закладок
@@ -4144,6 +4154,8 @@ Select tags to remove ...==Ключі для видалення ...
 
 #File: ServerScannerList.html
 #---------------------------
+Network Scanner Monitor==Результати сканування мережі
+The following servers can be searched:==По наступних серверах можна здійснювати пошук:
 The following servers had been detected:==Були виявлені наступні сервери:
 Available server within the given IP range==Доступні сервери в межах вказаної IP-області
 >Protocol<==>Протокол<
@@ -4158,8 +4170,6 @@ Available server within the given IP range==Доступні сервери в �
 >not in index<==>не в індексі<
 >indexed<==>проіндексовано<
 "Add Selected Servers to Crawler"=="Додати обрані сервери у сканування"
-The following servers can be searched:==По наступних серверах можна здійснювати пошук:
-Network Scanner Monitor==Результати сканування мережі
 #-----------------------------
 
 #File: env/templates/submenuComputation.template
@@ -4181,7 +4191,6 @@ Published&nbsp;News==Опубліковані
 #File: YaCySearchPluginFF.html
 #---------------------------
 Quick Crawl Link==Швидке сканування посилання
-/env/grafics/yacy.gif==/env/grafics/yacy.png
 Firefox Search Plugin==Пошукове доповнення Firefox
 Unable to install the firefox search plugin==Неможливо встановити пошукове розширення firefox
 #"General"=="Загалом"

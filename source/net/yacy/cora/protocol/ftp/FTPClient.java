@@ -49,6 +49,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1967,7 +1968,7 @@ public class FTPClient {
 
     private void send(final String buf) throws IOException {
         if (this.clientOutput == null) return;
-        byte[] b = buf.getBytes("UTF-8");
+        byte[] b = buf.getBytes(StandardCharsets.UTF_8);
         this.clientOutput.write(b, 0, b.length);
         this.clientOutput.write('\r');
         this.clientOutput.write('\n');

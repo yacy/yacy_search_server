@@ -32,7 +32,7 @@
           <dt><b>URL of the RSS feed</b></dt>
           <dd><input type="text" name="url" value="#[url]#" size="60" maxlength="256"/></dd>
           <dt>Preview</dt>
-          <dd><input type="submit" name="showrss" value="Show RSS Items" /></dd>
+          <dd><input type="submit" name="showrss" class="btn btn-default" value="Show RSS Items" /></dd>
           <dt>Indexing</dt>
           <dd>#(showload)#<input type="hidden" name="collection" id="collection" value="#[collection]#" />Available after successful loading of rss feed in preview::
           <dl>
@@ -57,7 +57,7 @@
             <dt>collection</dt>
             <dd><input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# /></dd>
           </dl>
-          <input type="submit" name="indexAllItemContent" value="Add All Items to Index (full content of url)" />
+          <input type="submit" name="indexAllItemContent" class="btn btn-primary" value="Add All Items to Index (full content of url)" />
           #(/showload)#</dd>
           #(showerrmsg)#::<dd class="error">#[msgtxt]#</dd>#(/showerrmsg)#   
         </dl>
@@ -95,8 +95,8 @@
       </table>
       <p>
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="submit" name="removeSelectedFeedsScheduler" value="Remove Selected Feeds from Scheduler" />
-      <input type="submit" name="removeAllFeedsScheduler" value="Remove All Feeds from Scheduler" />
+      <input type="submit" name="removeSelectedFeedsScheduler" class="btn btn-danger" value="Remove Selected Feeds from Scheduler" />
+      <input type="submit" name="removeAllFeedsScheduler" class="btn btn-danger" value="Remove All Feeds from Scheduler" />
       </p>
     </fieldset></form>
 	#(/showscheduledfeeds)#
@@ -122,9 +122,9 @@
       </table>
       <p>
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="submit" name="removeSelectedFeedsNewList" value="Remove Selected Feeds from Feed List" />
-      <input type="submit" name="removeAllFeedsNewList" value="Remove All Feeds from Feed List" />
-      <input type="submit" name="addSelectedFeedScheduler" value="Add Selected Feeds to Scheduler" />
+      <input type="submit" name="removeSelectedFeedsNewList" class="btn btn-danger" value="Remove Selected Feeds from Feed List" />
+      <input type="submit" name="removeAllFeedsNewList" class="btn btn-danger" value="Remove All Feeds from Feed List" />
+      <input type="submit" name="addSelectedFeedScheduler" class="btn btn-primary" value="Add Selected Feeds to Scheduler" />
       </p>
     </fieldset></form>
 	#(/shownewfeeds)#
@@ -168,7 +168,7 @@
       <p>
       <input type="hidden" name="num" value="#[num]#" />
       <input type="hidden" name="url" value="#[rss]#" />
-      <input type="submit" name="indexSelectedItemContent" value="Add Selected Items to Index (full content of url)" />
+      <input type="submit" name="indexSelectedItemContent" class="btn btn-primary" value="Add Selected Items to Index (full content of url)" />
       </p>
     </fieldset></form>
 	#(/showitems)#

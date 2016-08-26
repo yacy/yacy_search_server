@@ -29,6 +29,7 @@ package net.yacy.document.parser;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -43,7 +44,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -92,7 +93,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
     	return parser;
     }
 
-    private Document[] parse(final AnchorURL location, final String mimeType, @SuppressWarnings("unused") final String charset, final File dest) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final DigestURL location, final String mimeType, @SuppressWarnings("unused") final String charset, final File dest) throws Parser.Failure, InterruptedException {
 
         CharBuffer writer = null;
         try {
@@ -150,6 +151,8 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 }
             }
 
+            zipFile.close(); // close zipfile (so underlaying file (temp file) can be deleted later
+
             // make the languages set
             final Set<String> languages = new HashSet<String>(1);
             if (docLanguage != null && docLanguage.isEmpty())
@@ -172,16 +175,16 @@ public class ooxmlParser extends AbstractParser implements Parser {
             docs = new Document[]{new Document(
                     location,
                     mimeType,
-                    "UTF-8",
+                    StandardCharsets.UTF_8.name(),
                     this,
                     languages,
                     docKeywords,
                     singleList(docLongTitle),
                     docAuthor,
-                    "",
+                    null,
                     null,
                     descriptions,
-                    0.0f, 0.0f,
+                    0.0d, 0.0d,
                     contentBytes,
                     null,
                     null,
@@ -205,7 +208,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 

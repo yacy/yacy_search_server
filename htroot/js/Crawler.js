@@ -1,3 +1,23 @@
+/*    
+* Copyright (C) 2005 - 2014 Alexander Schier, Michael Peter Christen, 
+* and other YaCy developers (see http://yacy.net/en/Join.html)
+*         
+* This file is part of YaCy.
+* 
+* YaCy is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+* 
+* YaCy is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with YaCy.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 DELETE_STRING="delete";
 BAR_IMG1="/env/grafics/green-block.png";
 BAR_IMG2="/env/grafics/red-block.png";

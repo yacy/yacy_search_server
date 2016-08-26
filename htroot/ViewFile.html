@@ -2,6 +2,7 @@
 <!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    #%env/templates/metas.template%#
   <script type="text/javascript">
 //<![CDATA[
 function xmlhttpPost() {
@@ -53,7 +54,6 @@ function updatepage(str) {
 //]]>
 </script>
     <title>YaCy '#[clientname]#': View URL Content</title>
-    #%env/templates/metas.template%#
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
   </head>
   <body>
@@ -82,15 +82,15 @@ function updatepage(str) {
           <dt>URL:</dt>
           <dd>
             <input type="text" size="60" name="url" id="url" value="#[url]#" />
-            <input type="submit" name="show" value="Show Metadata" />
-            #(moar)#::<input type="button" value="Browse Host" onClick="location.href='/HostBrowser.html?path=' + document.getElementById('url').value" />#(/moar)#
+            <input type="submit" name="show" class="btn btn-primary" value="Show Metadata" />
+            #(moar)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='/HostBrowser.html?path=' + document.getElementById('url').value" />#(/moar)#
             <div id="searchresults"></div>
           </dd>
           #(moar)#::
           <dt>Search in Document:</dt>
           <dd>
             <input type="text" size="60" name="search" id="search" value="#[search]#" />
-            <input type="submit" name="show" value="Show Snippet" />
+            <input type="submit" name="show" class="btn btn-primary" value="Show Snippet" />
           </dd>
           #(/moar)#
         </dl>
@@ -124,7 +124,7 @@ function updatepage(str) {
               <option value="links"#(vMode-links)#:: selected="selected"#(/vMode-links)#>Link List</option>
               <option value="iframeCitations"#(vMode-iframeCitations)#:: selected="selected"#(/vMode-iframeCitations)#>Citation Report</option>
             </select>
-            <noscript><input type="submit" name="show" value="Show" /></noscript>
+            <noscript><input type="submit" name="show" class="btn btn-primary" value="Show" /></noscript>
           </dd>
         </dl>
         <input type="hidden" name="words" value="#[words]#" />

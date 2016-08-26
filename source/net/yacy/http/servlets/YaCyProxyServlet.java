@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -17,6 +18,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,7 +31,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
@@ -37,7 +38,6 @@ import net.yacy.server.http.HTTPDProxyHandler;
 
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
-import org.eclipse.jetty.proxy.ProxyServlet;
 
 /**
  * Servlet to implement proxy via url parameter "/proxy.html?url=xyz_urltoproxy"
@@ -58,7 +58,7 @@ import org.eclipse.jetty.proxy.ProxyServlet;
  * @deprecated since 1.81 use {@link UrlProxyServlet} instead.
  */
 @Deprecated //use UrlProxyServlet instead
-public class YaCyProxyServlet extends ProxyServlet implements Servlet {
+public class YaCyProxyServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = 4900000000000001120L;
     
     @Override
@@ -103,7 +103,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
             try {
                 proxyurl = new URL(strUrl);
             } catch (final MalformedURLException e) {
-                proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
+                proxyurl = new URL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
 
             }
         }
@@ -116,7 +116,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         if (proxyurl.getPort() != -1) {
             hostwithport += ":" + proxyurl.getPort();
         }
-        RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
+        RequestHeader yacyRequestHeader = YaCyDefaultServlet.convertHeaderFromJetty(request);
         yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
         yacyRequestHeader.remove(HeaderFramework.CONTENT_LENGTH);
         
@@ -126,6 +126,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
         prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
+        prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 
         yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
         yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());
@@ -172,13 +173,13 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         response.setContentType(mimeType);
         response.setStatus(httpStatus);
         
-        if ((mimeType != null) && (mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
+        if ((mimeType != null) && (mimeType.startsWith("text"))) {
             final StringWriter buffer = new StringWriter();
 
             if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
-                FileUtils.copy(new ChunkedInputStream(proxyout), buffer, UTF8.charset);
+                FileUtils.copy(new ChunkedInputStream(proxyout), buffer, StandardCharsets.UTF_8);
             } else {
-                FileUtils.copy(proxyout, buffer, UTF8.charset);
+                FileUtils.copy(proxyout, buffer, StandardCharsets.UTF_8);
             }
             final String sbuffer = buffer.toString();
 
@@ -299,7 +300,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
         if (b == -1) {
             return null;
         }
-        return buf.toString("UTF-8");
+        return buf.toString(StandardCharsets.UTF_8.name());
     }
 
     /**

@@ -137,14 +137,18 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
      * @throws ParseException 
      */
     public Calendar parse(final String timeString, final String UTCOffset) throws ParseException {
-        // FIXME: This method returns an incorrect date, check callers!
-        // ex: de.anomic.server.serverDate.parseShortSecond("20070101120000", "+0200").toGMTString()
-        // => 1 Jan 2007 13:00:00 GMT
         if (timeString == null || timeString.isEmpty()) { return Calendar.getInstance(UTCtimeZone); }
         if (UTCOffset == null || UTCOffset.isEmpty()) { return Calendar.getInstance(UTCtimeZone); }
-        return parse(timeString, UTCDiff(UTCOffset));
+        return parse(timeString, UTCDiff(UTCOffset)); // offset expected in min
     }
 
+    /**
+     * Calculates the time offset in minutes given as timezoneoffsetstring (diffString)
+     * e.g. "+0300"  returns 180
+     *
+     * @param diffString with fixed timezone format
+     * @return parsed timezone string in minutes
+     */
     private static int UTCDiff(final String diffString) {
         if (diffString.length() != 5) throw new IllegalArgumentException("UTC String malformed (wrong size):" + diffString);
         boolean ahead = true;
@@ -153,7 +157,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
         final int oh = NumberTools.parseIntDecSubstring(diffString, 1, 3);
         final int om = NumberTools.parseIntDecSubstring(diffString, 3);
-        return (int) ((ahead) ? 1 : -1 * (oh * AbstractFormatter.hourMillis + om * AbstractFormatter.minuteMillis));
+        return (int) ( ((ahead) ? 1 : -1) * (oh * 60 + om));
     }
     
     /**

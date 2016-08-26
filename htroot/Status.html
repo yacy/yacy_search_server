@@ -109,7 +109,7 @@
     
     #(warningMemoryLow)#::
     <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
-    <dd class="hint">Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix
+    <dd class="hint">Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix
     it as soon as possible and restart YaCy.
     </dd>
     #(/warningMemoryLow)#
@@ -127,11 +127,7 @@
     <dd class="hint">Latest public version is v#[latestVersion]#.
       You can download a more recent version of YaCy. Click here to install this update and restart YaCy: 
       <form action="Status.html" method="get" class="PeerControl" accept-charset="UTF-8">
-
-<!-- Is this line here on purpose or by accident?
-      <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist">
--->
-        <button type="submit" name="aquirerelease" value="Update YaCy">
+        <button type="submit" name="aquirerelease" class="btn btn-primary" value="Update YaCy">
           <img src="env/grafics/lock.gif" alt="lock icon"/>
           Install YaCy v#[latestVersion]#
         </button>
@@ -173,6 +169,15 @@
 	<dd class="hint">Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.
     </dd>
     #(/hintCrawlMonitor)#
+    
+    #(hintJREVersion)#::
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+	<dd class="hint">
+	Your Java version is old. YaCy currently needs Java 1.7 but we want to migrate to Java 1.8 in the future.
+	Migration to 1.8 won't happen until end of 2016, but we want to join code with YaCy's sister project <a href="http://loklak.org">loklak.org</a>
+	and with a possible re-construction of YaCy in the <a href="http://kaskelix.de">kaskelix</a> architecture which will be using Java 1.8
+    </dd>
+    #(/hintJREVersion)#
     
     #(hintSupport)#::
     <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>

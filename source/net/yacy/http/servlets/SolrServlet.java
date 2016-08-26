@@ -23,19 +23,13 @@ package net.yacy.http.servlets;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-
-import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.Switchboard;
-import net.yacy.search.schema.CollectionSchema;
-import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.util.ContentStreamBase;
@@ -48,10 +42,15 @@ import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.Method;
 import org.apache.solr.util.FastWriter;
 
+import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
+
 public class SolrServlet extends HttpServlet {
     
     private static final long serialVersionUID = 1L;
-    private static final Charset UTF8 = Charset.forName("UTF-8");
     
     @Override
     public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
@@ -89,8 +88,8 @@ public class SolrServlet extends HttpServlet {
                 binWriter.write(response.getOutputStream(), solrReq, solrRsp);
               } else {
                 String charset = ContentStreamBase.getCharsetFromContentType(ct);
-                Writer out = (charset == null || charset.equalsIgnoreCase("UTF-8"))
-                  ? new OutputStreamWriter(response.getOutputStream(), UTF8)
+                Writer out = (charset == null || charset.equalsIgnoreCase(StandardCharsets.UTF_8.name()))
+                  ? new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)
                   : new OutputStreamWriter(response.getOutputStream(), charset);
                 out = new FastWriter(out);
                 responseWriter.write(out, solrReq, solrRsp);

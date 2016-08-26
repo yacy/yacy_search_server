@@ -21,7 +21,7 @@
             <input type="checkbox" name="allowRegex" #(checked)#:: checked="checked"#(/checked)# />
                    Allow regular expressions in host part of blacklist entries.
             <br /><br />
-          <input type="submit" name="list" value="Check" />
+          <input type="submit" name="list" class="btn btn-primary" value="Check" />
         </div>::
         <p class="error">The blacklist-cleaner only works for the following blacklist-engines up to now:</p>
         <ul>#{engines}# 
@@ -58,7 +58,7 @@
           <dd><input type="text" name="entry#[entry]#" value="#[entry]#" size="50" /></dd>#{/entries}# 
           <dt>&nbsp;</dt>
           <dd>
-            <input type="submit" name="alter" value="Change Selected" /> <input type="submit" name="delete" value="Delete Selected" />
+            <input type="submit" name="alter" class="btn btn-primary" value="Change Selected" /> <input type="submit" name="delete" class="btn btn-danger" value="Delete Selected" />
           </dd>
         </dl>::#(/disabled)#
       </fieldset>

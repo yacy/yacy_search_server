@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -159,7 +160,7 @@ public class Tagging {
 			}
         } else {
             //
-            BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(propFile), UTF8.charset.name()));
+            BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(propFile), StandardCharsets.UTF_8.name()));
 	        if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
 	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
 	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();

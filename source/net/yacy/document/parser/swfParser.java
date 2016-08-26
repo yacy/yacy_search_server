@@ -29,15 +29,14 @@ package net.yacy.document.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.ContentScraper;
 import pt.tumba.parser.swf.SWF2HTML;
 
 public class swfParser extends AbstractParser implements Parser {
@@ -57,7 +56,7 @@ public class swfParser extends AbstractParser implements Parser {
      */
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -70,7 +69,8 @@ public class swfParser extends AbstractParser implements Parser {
             final SWF2HTML swf2html = new SWF2HTML();
             String contents = "";
             try {
-            	contents = swf2html.convertSWFToHTML(source);
+                contents = swf2html.convertSWFToHTML(source);
+                scraperObject = htmlParser.parseToScraper(location, charset, scraper, timezoneOffset, contents, 100);
             } catch (final NegativeArraySizeException e) {
                 throw new Parser.Failure(e.getMessage(), location);
             } catch (final IOException e) {
@@ -78,58 +78,28 @@ public class swfParser extends AbstractParser implements Parser {
             } catch (final Exception e) {
                 throw new Parser.Failure(e.getMessage(), location);
             }
-            String url = null;
-            String urlnr = null;
-            final String linebreak = System.getProperty("line.separator");
-            final List<String> abstrct = new ArrayList<String>();
-            //TreeSet images = null;
-            final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
-            int urls = 0;
-            int urlStart = -1;
-            int urlEnd = 0;
-            int p0 = 0;
 
-            //getting rid of HTML-Tags
-            p0 = contents.indexOf("<html><body>",0);
-            contents = contents.substring(p0+12);
-            p0 = contents.indexOf("</body></html>",0);
-            contents = contents.substring(0,p0);
-
-            //extracting urls
-            while ((urlStart = contents.indexOf("http://",urlEnd)) >= 0){
-                urlEnd = contents.indexOf(linebreak,urlStart);
-                url = contents.substring(urlStart,urlEnd);
-                urlnr = Integer.toString(++urls);
-                AnchorURL u = new AnchorURL(url);
-                u.setNameProperty(urlnr);
-                anchors.add(u);
-                contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
-            }
-
-           // As the result of parsing this function must return a plasmaParserDocument object
+            // As the result of parsing this function must return a plasmaParserDocument object
+            ContentScraper htmlscraper = (ContentScraper) this.scraperObject; // shortcut to access ContentScraper methodes
             return new Document[]{new Document(
-                    location,     // url of the source document
-                    mimeType,     // the documents mime type
-                    "UTF-8",      // charset of the document text
-                    this,
-                    null,
-                    null,          //keywords
-                    singleList(((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
-                          replaceAll("\r\n"," ").
-                          replaceAll("\n"," ").
-                          replaceAll("\r"," ").
-                          replaceAll("\t"," ")), // title
-                    "", // TODO: AUTHOR
-                    "",
-                    null,        // an array of section headlines
-                    abstrct,     // an abstract
-                    0.0f, 0.0f,
-                    contents,     // the parsed document text
-                    anchors,      // a map of extracted anchors
-                    null,
-                    null,
-                    false,
-                    new Date())};      // a treeset of image URLs
+                location, // url of the source document
+                mimeType, // the documents mime type
+                StandardCharsets.UTF_8.name(), // charset of the document text
+                this,
+                htmlscraper.getContentLanguages(),
+                htmlscraper.getKeywords(),
+                htmlscraper.getTitles(),
+                htmlscraper.getAuthor(),
+                htmlscraper.getPublisher(),
+                null, // sections
+                htmlscraper.getDescriptions(),
+                htmlscraper.getLon(), htmlscraper.getLat(),
+                htmlscraper.getText(),
+                htmlscraper.getAnchors(),
+                htmlscraper.getRSS(),
+                null, // images
+                false,
+                htmlscraper.getDate())};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 

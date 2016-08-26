@@ -71,8 +71,8 @@ public final class message {
         if (!Protocol.authentifyRequest(post, env)) return prop;
 
         final String process = post.get("process", "permission");
-        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
-        final InetAddress ias = Domains.dnsResolve(clientip);
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // read an artificial header addendum
+        final InetAddress ias = clientip != null ? Domains.dnsResolve(clientip) : null;
 
         final int messagesize = 10240;
         final int attachmentsize = 0;
@@ -116,7 +116,7 @@ public final class message {
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
             Seed otherSeed;
             try {
-                otherSeed = Seed.genRemoteSeed(otherSeedString, false, ias.getHostAddress());
+                otherSeed = Seed.genRemoteSeed(otherSeedString, false, ias == null ? null : ias.getHostAddress());
             } catch (final IOException e) {
                 prop.put("response", "-1"); // don't accept messages for bad seeds
                 return prop;

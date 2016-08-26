@@ -197,20 +197,9 @@ public class Network
     {
         private Map<String, String> result;
         private final Seed seed;
-        private final Semaphore sync;
-        private final List<Thread> syncList;
 
-        public publishThread(
-            final ThreadGroup tg,
-            final Seed seed,
-            final Semaphore sync,
-            final List<Thread> syncList) throws InterruptedException {
+        public publishThread(final ThreadGroup tg, final Seed seed) {
             super(tg, "PublishSeed_" + seed.getName());
-
-            this.sync = sync;
-            this.sync.acquire();
-            this.syncList = syncList;
-
             this.seed = seed;
             this.result = null;
         }
@@ -266,9 +255,6 @@ public class Network
                 log.severe(
                     "publishThread: error with target seed " + this.seed.toString() + ": " + e.getMessage(),
                     e);
-            } finally {
-                this.syncList.add(this);
-                this.sync.release();
             }
         }
     }
@@ -300,7 +286,7 @@ public class Network
             if ( this.sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN).equals(Seed.PEERTYPE_VIRGIN) ) {
                 if (attempts > PING_INITIAL) attempts = PING_INITIAL;
                 final Set<byte[]> ch = Switchboard.getSwitchboard().clusterhashes;
-                seeds = DHTSelection.seedsByAge(this.sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
+                seeds = DHTSelection.seedsByAge(this.sb.peers, true, Math.max(1, attempts - ((ch == null) ? 0 : ch.size()))); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if ( ch != null ) {
                     String hash;
@@ -351,16 +337,13 @@ public class Network
             this.sb.peers.mySeed().setUnusedFlags();
             //if (seeds.length > 1) {
             // holding a reference to all started threads
-            int contactedSeedCount = 0;
-            final List<Thread> syncList = Collections.synchronizedList(new LinkedList<Thread>()); // memory for threads
-            final Semaphore sync = new Semaphore(attempts);
-
+            final List<publishThread> syncList = Collections.synchronizedList(new LinkedList<publishThread>()); // memory for threads
+            
             // go through the peer list and starting a new publisher thread for each peer
             int i = 0;
             while ( si.hasNext() ) {
                 seed = si.next();
                 if ( seed == null || seed.hash.equals(this.sb.peers.mySeed().hash)) {
-                    sync.acquire();
                     continue;
                 }
                 i++;
@@ -372,29 +355,18 @@ public class Network
                 if ( (address == null) || (seederror != null) ) {
                     // we don't like that address, delete it
                     this.sb.peers.peerActions.interfaceDeparture(seed, ip);
-                    sync.acquire();
                 } else {
                     // starting a new publisher thread
-                    contactedSeedCount++;
-                    (new publishThread(Network.publishThreadGroup, seed, sync, syncList)).start();
+                    publishThread t = new publishThread(Network.publishThreadGroup, seed);
+                    t.start();
+                    syncList.add(t);
                 }
             }
 
             // receiving the result of all started publisher threads
-            for ( int j = 0; j < contactedSeedCount; j++ ) {
-
+            for (publishThread t: syncList) {
                 // waiting for the next thread to finish
-                sync.acquire();
-
-                // if this is true something is wrong ...
-                if ( syncList.isEmpty() ) {
-                    log.warn("PeerPing: syncList.isEmpty()==true");
-                    continue;
-                    //return 0;
-                }
-
-                // getting a reference to the finished thread
-                final publishThread t = (publishThread) syncList.remove(0);
+                t.join();
             }
 
             int accessible = 0;

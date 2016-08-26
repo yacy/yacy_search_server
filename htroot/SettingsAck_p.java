@@ -57,7 +57,8 @@ public class SettingsAck_p {
 
         // get referer for backlink
         final MultiProtocolURL referer = header.referer();
-        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true));
+        prop.put("needsRestart_referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true));
+        prop.put("needsRestart", false);
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
 
         if (post == null) {
@@ -152,8 +153,9 @@ public class SettingsAck_p {
 
             // set transparent proxy flag
             boolean isTransparentProxy = post.containsKey("isTransparentProxy");
-            env.setConfig("isTransparentProxy", isTransparentProxy);
+            env.setConfig(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, isTransparentProxy);
             prop.put("info_isTransparentProxy", isTransparentProxy ? "on" : "off");
+            if (isTransparentProxy) prop.put("needsRestart", isTransparentProxy);
             
             // set proxyAlwaysFresh flag
             boolean proxyAlwaysFresh = post.containsKey("proxyAlwaysFresh");

@@ -4,7 +4,7 @@
   <dl>
 
     <dt>System</dt>
-    <dd>YaCy version #[versionpp]#
+    <dd>YaCy version: #[versionpp]#
     #(peerStatistics)#
       Unknown
       ::

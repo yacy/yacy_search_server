@@ -377,7 +377,7 @@ public class Crawler_p {
                         try {
                             scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, agent);
                             // get links and generate filter
-                            for (DigestURL u: scraper.getAnchors()) {
+                            for (DigestURL u: scraper.getHyperlinks().keySet()) {
                                 newRootURLs.add(u);
                             }
                         } catch (final IOException e) {
@@ -594,6 +594,9 @@ public class Crawler_p {
                                 m.remove("generalFilter");
                                 m.remove("specificFilter");
                                 m.put("intention", post.get("intention", "").replace(',', '/'));
+                                if (successurls.size() > 0) { // just include at least one of the startURL's in case of multiple for the news service
+                                    m.put("startURL", successurls.iterator().next().toNormalform(true));
+                                }
                                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_CRAWL_START, m);
                             }
                         } else {

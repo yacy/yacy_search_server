@@ -26,8 +26,10 @@
 
 package net.yacy.repository;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
@@ -209,54 +211,9 @@ public final class LoaderDispatcher {
         }
         
         // check if we have the page in the cache
-        if (cacheStrategy != CacheStrategy.NOCACHE && crawlProfile != null) {
-            // we have passed a first test if caching is allowed
-            // now see if there is a cache entry
-
-            final ResponseHeader cachedResponse = (url.isLocal()) ? null : Cache.getResponseHeader(url.hash());
-            if (cachedResponse != null && Cache.hasContent(url.hash())) {
-                // yes we have the content
-
-                // create request header values and a response object because we need that
-                // in case that we want to return the cached content in the next step
-                final RequestHeader requestHeader = new RequestHeader();
-                requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
-                DigestURL refererURL = null;
-                if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
-                if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
-                final Response response = new Response(
-                        request,
-                        requestHeader,
-                        cachedResponse,
-                        crawlProfile,
-                        true,
-                        null);
-
-                // check which caching strategy shall be used
-                if (cacheStrategy == CacheStrategy.IFEXIST || cacheStrategy == CacheStrategy.CACHEONLY) {
-                    // well, just take the cache and don't care about freshness of the content
-                    final byte[] content = Cache.getContent(url.hash());
-                    if (content != null) {
-                        LoaderDispatcher.log.info("cache hit/useall for: " + url.toNormalform(true));
-                        response.setContent(content);
-                        return response;
-                    }
-                }
-
-                // now the cacheStrategy must be CACHE_STRATEGY_IFFRESH, that means we should do a proxy freshness test
-                //assert cacheStrategy == CacheStrategy.IFFRESH : "cacheStrategy = " + cacheStrategy;
-                if (response.isFreshForProxy()) {
-                    final byte[] content = Cache.getContent(url.hash());
-                    if (content != null) {
-                        LoaderDispatcher.log.info("cache hit/fresh for: " + url.toNormalform(true));
-                        response.setContent(content);
-                        return response;
-                    }
-                }
-                LoaderDispatcher.log.info("cache hit/stale for: " + url.toNormalform(true));
-            } else if (cachedResponse != null) {
-                LoaderDispatcher.log.warn("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
-            }
+        Response response = loadFromCache(request, cacheStrategy, agent, url, crawlProfile);
+        if(response != null) {
+        	return response;
         }
 
         // check case where we want results from the cache exclusively, and never from the Internet (offline mode)
@@ -269,21 +226,7 @@ public final class LoaderDispatcher {
 
         // check access time: this is a double-check (we checked possibly already in the balancer)
         // to make sure that we don't DoS the target by mistake
-        if (!url.isLocal()) {
-            final Long lastAccess = accessTime.get(host);
-            long wait = 0;
-            if (lastAccess != null) wait = Math.max(0, agent.minimumDelta + lastAccess.longValue() - System.currentTimeMillis());
-            if (wait > 0) {
-                // force a sleep here. Instead just sleep we clean up the accessTime map
-                final long untilTime = System.currentTimeMillis() + wait;
-                cleanupAccessTimeTable(untilTime);
-                if (System.currentTimeMillis() < untilTime) {
-                    long frcdslp = untilTime - System.currentTimeMillis();
-                    LoaderDispatcher.log.info("Forcing sleep of " + frcdslp + " ms for host " + host);
-                    try {Thread.sleep(frcdslp);} catch (final InterruptedException ee) {}
-                }
-            }
-        }
+        checkAccessTime(agent, url);
 
         // now it's for sure that we will access the target. Remember the access time
         if (host != null) {
@@ -292,7 +235,6 @@ public final class LoaderDispatcher {
         }
 
         // load resource from the internet
-        Response response = null;
         if (protocol.equals("http") || protocol.equals("https")) {
             response = this.httpLoader.load(request, crawlProfile, maxFileSize, blacklistType, agent);
         } else if (protocol.equals("ftp")) {
@@ -331,6 +273,167 @@ public final class LoaderDispatcher {
         return response;
     }
 
+    /**
+     * Try loading requested resource from cache according to cache strategy
+     * @param request request to resource
+     * @param cacheStrategy cache strategy to use
+     * @param agent agent identifier
+     * @param url resource url
+     * @param crawlProfile crawl profile
+     * @return a Response instance when resource could be loaded from cache, or null.
+     * @throws IOException when an error occured
+     */
+	private Response loadFromCache(final Request request, CacheStrategy cacheStrategy, ClientIdentification.Agent agent,
+			final DigestURL url, final CrawlProfile crawlProfile) throws IOException {
+		Response response = null;
+		if (cacheStrategy != CacheStrategy.NOCACHE && crawlProfile != null) {
+            // we have passed a first test if caching is allowed
+            // now see if there is a cache entry
+
+            final ResponseHeader cachedResponse = (url.isLocal()) ? null : Cache.getResponseHeader(url.hash());
+            if (cachedResponse != null && Cache.hasContent(url.hash())) {
+                // yes we have the content
+
+                // create request header values and a response object because we need that
+                // in case that we want to return the cached content in the next step
+                final RequestHeader requestHeader = new RequestHeader();
+                requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
+                DigestURL refererURL = null;
+                if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
+                if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
+                response = new Response(
+                        request,
+                        requestHeader,
+                        cachedResponse,
+                        crawlProfile,
+                        true,
+                        null);
+
+                // check which caching strategy shall be used
+                if (cacheStrategy == CacheStrategy.IFEXIST || cacheStrategy == CacheStrategy.CACHEONLY) {
+                    // well, just take the cache and don't care about freshness of the content
+                    final byte[] content = Cache.getContent(url.hash());
+                    if (content != null) {
+                        LoaderDispatcher.log.info("cache hit/useall for: " + url.toNormalform(true));
+                        response.setContent(content);
+                        return response;
+                    }
+                }
+
+                // now the cacheStrategy must be CACHE_STRATEGY_IFFRESH, that means we should do a proxy freshness test
+                //assert cacheStrategy == CacheStrategy.IFFRESH : "cacheStrategy = " + cacheStrategy;
+                if (response.isFreshForProxy()) {
+                    final byte[] content = Cache.getContent(url.hash());
+                    if (content != null) {
+                        LoaderDispatcher.log.info("cache hit/fresh for: " + url.toNormalform(true));
+                        response.setContent(content);
+                        return response;
+                    }
+                }
+                LoaderDispatcher.log.info("cache hit/stale for: " + url.toNormalform(true));
+            } else if (cachedResponse != null) {
+                LoaderDispatcher.log.warn("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
+            }
+        }
+		return response;
+	}
+    
+    /**
+     * Open an InputStream on a resource from the web, from ftp, from smb or a file
+     * @param request the request essentials
+     * @param cacheStratgy strategy according to NOCACHE, IFFRESH, IFEXIST, CACHEONLY
+     * @return an open ImageInputStream. Don't forget to close it once used!
+     * @throws IOException when url is malformed, blacklisted, or CacheStrategy is CACHEONLY and content is unavailable
+     */
+    private InputStream openInputStreamInternal(final Request request, CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
+        // get the protocol of the next URL
+        final DigestURL url = request.url();
+		if (url.isFile() || url.isSMB()) {
+			cacheStrategy = CacheStrategy.NOCACHE; // load just from the file
+													// system
+		}
+        final String protocol = url.getProtocol();
+        final String host = url.getHost();
+        final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
+        
+        // check if url is in blacklist
+        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
+            this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
+        }
+        
+        // check if we have the page in the cache
+        Response cachedResponse = loadFromCache(request, cacheStrategy, agent, url, crawlProfile);
+        if(cachedResponse != null) {
+        	return new ByteArrayInputStream(cachedResponse.getContent());
+        }
+
+        // check case where we want results from the cache exclusively, and never from the Internet (offline mode)
+        if (cacheStrategy == CacheStrategy.CACHEONLY) {
+            // we had a chance to get the content from the cache .. its over. We don't have it.
+            throw new IOException("cache only strategy");
+        }
+
+        // now forget about the cache, nothing there. Try to load the content from the Internet
+
+        // check access time: this is a double-check (we checked possibly already in the balancer)
+        // to make sure that we don't DoS the target by mistake
+		checkAccessTime(agent, url);
+
+        // now it's for sure that we will access the target. Remember the access time
+        if (host != null) {
+            if (accessTime.size() > accessTimeMaxsize) accessTime.clear(); // prevent a memory leak here
+            accessTime.put(host, System.currentTimeMillis());
+        }
+
+        // load resource from the internet
+        InputStream inStream = null;
+        if (protocol.equals("http") || protocol.equals("https")) {
+        	inStream = this.httpLoader.openInputStream(request, crawlProfile, 1, maxFileSize, blacklistType, agent);
+        } else if (protocol.equals("ftp") || protocol.equals("smb") || protocol.equals("file")) {
+        	// may also open directly stream with ftp loader
+        	inStream = url.getInputStream(agent, null, null);
+        } else {
+            throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
+        }
+        if (inStream == null) {
+            throw new IOException("Unable to open content stream");
+        }
+
+        return inStream;
+    }
+    
+
+    /**
+     * Check access time: this is a double-check (we checked possibly already in the balancer)
+     * to make sure that we don't DoS the target by mistake
+     * @param agent agent identifier
+     * @param url target url
+     */
+	private void checkAccessTime(ClientIdentification.Agent agent, final DigestURL url) {
+		if (!url.isLocal()) {
+			String host = url.getHost();
+			final Long lastAccess = accessTime.get(host);
+			long wait = 0;
+			if (lastAccess != null)
+				wait = Math.max(0, agent.minimumDelta + lastAccess.longValue() - System.currentTimeMillis());
+			if (wait > 0) {
+				// force a sleep here. Instead just sleep we clean up the
+				// accessTime map
+				final long untilTime = System.currentTimeMillis() + wait;
+				cleanupAccessTimeTable(untilTime);
+				if (System.currentTimeMillis() < untilTime) {
+					long frcdslp = untilTime - System.currentTimeMillis();
+					LoaderDispatcher.log.info("Forcing sleep of " + frcdslp + " ms for host " + host);
+					try {
+						Thread.sleep(frcdslp);
+					} catch (final InterruptedException ee) {
+					}
+				}
+			}
+		}
+	}
+
     private int protocolMaxFileSize(final DigestURL url) {
     	if (url.isHTTP() || url.isHTTPS())
     		return this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
@@ -357,6 +460,53 @@ public final class LoaderDispatcher {
         // read resource body (if it is there)
         return entry.getContent();
     }
+    
+    /**
+     * Open url as InputStream from the web or the cache
+     * @param request must be not null
+     * @param cacheStrategy cache strategy to use
+     * @param blacklistType black list
+     * @param agent agent identification for HTTP requests
+     * @return an open InputStream on content. Don't forget to close it once used.
+     * @throws IOException when url is malformed or blacklisted
+     */
+	public InputStream openInputStream(final Request request, final CacheStrategy cacheStrategy,
+			BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+		final int maxFileSize = protocolMaxFileSize(request.url());
+		InputStream stream = null;
+
+		Semaphore check = this.loaderSteering.get(request.url());
+		if (check != null && cacheStrategy != CacheStrategy.NOCACHE) {
+			// a loading process is going on for that url
+			long t = System.currentTimeMillis();
+			try {
+				check.tryAcquire(5, TimeUnit.SECONDS);
+			} catch (final InterruptedException e) {
+			}
+			ConcurrentLog.info("LoaderDispatcher",
+					"waited " + (System.currentTimeMillis() - t) + " ms for " + request.url().toNormalform(true));
+			// now the process may have terminated and we run a normal loading
+			// which may be successful faster because of a cache hit
+		}
+
+		this.loaderSteering.put(request.url(), new Semaphore(0));
+		try {
+			stream = openInputStreamInternal(request, cacheStrategy, maxFileSize, blacklistType, agent);
+		} catch(IOException ioe) {
+			/* Do not re encapsulate eventual IOException in an IOException */
+			throw ioe;
+		} catch (final Throwable e) {
+			throw new IOException(e);
+		} finally {
+			// release the semaphore anyway
+			check = this.loaderSteering.remove(request.url());
+			if (check != null) {
+				check.release(1000); // don't block any other
+			}
+		}
+
+		return stream;
+	}
 
     public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException, Parser.Failure {
 
@@ -410,7 +560,7 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<AnchorURL, String> loadLinks(final AnchorURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent, final int timezoneOffset) throws IOException {
+    public final Map<AnchorURL, String> loadLinks(final DigestURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent, final int timezoneOffset) throws IOException {
         final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, agent);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
@@ -418,10 +568,10 @@ public final class LoaderDispatcher {
         if (responseHeader == null) throw new IOException("responseHeader == null");
 
         Document[] documents = null;
-        final String supportError = TextParser.supports(url, responseHeader.mime());
+        final String supportError = TextParser.supports(url, responseHeader.getContentType());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
+            documents = TextParser.parseSource(url, responseHeader.getContentType(), responseHeader.getCharacterEncoding(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

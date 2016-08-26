@@ -151,7 +151,9 @@ public class Transactions {
         // GET METADATA FROM DOC
         final String urls = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
         final Date date = (Date) doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-        final int depth = (Integer) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName());
+        final Integer o_depth = (Integer) doc.getFieldValue(CollectionSchema.crawldepth_i.getSolrFieldName()); // may return null
+        final int depth = o_depth == null ? 0 : o_depth.intValue();
+
         DigestURL url;
         try {
             url = new DigestURL(urls);

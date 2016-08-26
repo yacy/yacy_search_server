@@ -26,6 +26,7 @@
 
 package net.yacy.crawler.retrieval;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import net.yacy.cora.document.analysis.Classification;
@@ -69,6 +70,9 @@ public class Response {
     private        byte[]             content;
     private        int                status;          // tracker indexing status, see status defs below
     private final  boolean            fromCache;
+    
+    /** Maximum file size to put in cache for crawler */
+    public static final long CRAWLER_MAX_SIZE_TO_CACHE = 10 * 1024L * 1024L;
 
     /**
      * doctype calculation by file extension
@@ -251,12 +255,16 @@ public class Response {
         return doctype;
     }
 
+    /**
+     * Get respons header last modified date
+     * if missing the first seen date or current date
+     * @return valid date always != null
+     */
     public Date lastModified() {
         Date docDate = null;
 
         if (this.responseHeader != null) {
-            docDate = this.responseHeader.lastModified();
-            if (docDate == null) docDate = this.responseHeader.date();
+            docDate = this.responseHeader.lastModified(); // is always != null
         }
         if (docDate == null && this.request != null) docDate = this.request.appdate();
         if (docDate == null) docDate = new Date();
@@ -387,7 +395,7 @@ public class Response {
     public String shallStoreCacheForCrawler() {
         // check storage size: all files will be handled in RAM before storage, so they must not exceed
         // a given size, which we consider as 1MB
-        if (size() > 10 * 1024L * 1024L) return "too_large_for_caching_" + size();
+        if (size() > CRAWLER_MAX_SIZE_TO_CACHE) return "too_large_for_caching_" + size();
 
         // check status code
         if (!validResponseStatus()) {
@@ -591,13 +599,6 @@ public class Response {
         // -ranges in request
         // we checked that in shallStoreCache
 
-        // a picture cannot be indexed
-        /*
-        if (Classification.isMediaExtension(url().getFileExtension())) {
-            return "Media_Content_(forbidden)";
-        }
-         */
-
         // -cookies in request
         // unfortunately, we cannot index pages which have been requested with a cookie
         // because the returned content may be special for the client
@@ -611,14 +612,7 @@ public class Response {
             // the set-cookie from the server does not indicate that the content is special
             // thus we do not care about it here for indexing
 
-            // a picture cannot be indexed
-            final String mimeType = this.responseHeader.mime();
-            /*
-            if (Classification.isPictureMime(mimeType)) {
-                return "Media_Content_(Picture)";
-            }
-            */
-            final String parserError = TextParser.supportsMime(mimeType);
+            final String parserError = TextParser.supportsMime(this.responseHeader.getContentType());
             if (parserError != null) {
                 return "Media_Content, no parser: " + parserError;
             }
@@ -733,16 +727,10 @@ public class Response {
 
         // check if document can be indexed
         if (this.responseHeader != null) {
-            final String mimeType = this.responseHeader.mime();
+            final String mimeType = this.responseHeader.getContentType();
             final String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null && TextParser.supportsExtension(url()) != null)  return "no parser available: " + parserError;
         }
-        /*
-        if (Classification.isMediaExtension(url().getFileExtension()) &&
-           !Classification.isImageExtension((url().getFileExtension()))) {
-            return "Media_Content_(forbidden)";
-        }
-         */
 
         // -if-modified-since in request
         // if the page is fresh at the very moment we can index it
@@ -780,14 +768,21 @@ public class Response {
         return null;
     }
 
+    /**
+     * Get Mime type from http header or null if unknown (not included in response header)
+     * @return mime (trimmed and lowercase) or null
+     */
     public String getMimeType() {
         if (this.responseHeader == null) return null;
 
-        String mimeType = this.responseHeader.mime();
-        mimeType = mimeType.trim().toLowerCase();
+        String mimeType = this.responseHeader.getContentType();
+        if (mimeType != null) {
+            mimeType = mimeType.trim().toLowerCase();
 
-        final int pos = mimeType.indexOf(';');
-        return ((pos < 0) ? mimeType : mimeType.substring(0, pos));
+            final int pos = mimeType.indexOf(';');
+            return ((pos < 0) ? mimeType : mimeType.substring(0, pos));
+        }
+        return null;
     }
 
     public String getCharacterEncoding() {
@@ -861,10 +856,10 @@ public class Response {
     }
 
     public Document[] parse() throws Parser.Failure {
-        final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
+        final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.getContentType());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(new AnchorURL(url()), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
+            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.getContentType(), this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(), new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
         } catch (final Exception e) {
             return null;
         }

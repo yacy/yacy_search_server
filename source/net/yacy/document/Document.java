@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -83,21 +84,21 @@ public class Document {
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks;
+    private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
-    private Map<String, String> emaillinks;
+    private Set<AnchorURL> emaillinks; // mailto: links
     private MultiProtocolURL favicon;
     private boolean resorted;
     private final Set<String> languages;
     private boolean indexingDenied;
     private final double lon, lat;
-    private final Object parserObject; // the source object that was used to create the Document
+    private final Parser parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date lastModified;
     private int crawldepth;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
-                    final Object parserObject,
+                    final Parser parserObject,
                     final Set<String> languages,
                     final String[] keywords,
                     final List<String> titles,
@@ -159,11 +160,29 @@ public class Document {
         if (contentDomain != ContentDomain.ALL) return contentDomain;
         return this.dc_source().getContentDomainFromExt();
     }
-    
-    public Object getParserObject() {
+
+    /**
+     * The parser used to generate the document
+     * @return Parser
+     */
+    public Parser getParserObject() {
         return this.parserObject;
     }
 
+    /**
+     * Confinient call to get the source/scraper object of the underlaying parser
+     * if the parser uses a scraper, like htmlParser
+     * @return scraper object typically of type ContentScraper but may also of type DCEntry
+     */
+    public Object getScraperObject() {
+        if (this.parserObject instanceof AbstractParser) {
+            if (((AbstractParser) this.parserObject).scraperObject != null) {
+                return ((AbstractParser) this.parserObject).scraperObject;
+            }
+        }
+        return null;
+    }
+    
     public Set<String> getContentLanguages() {
         return this.languages;
     }
@@ -430,6 +449,11 @@ dc_rights
         return sentences;
     }
 
+    /**
+     * All anchor links of the document
+     * (this includes mailto links)
+     * @return all links embedded as anchors (clickeable entities)
+     */
     public Collection<AnchorURL> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
@@ -445,6 +469,11 @@ dc_rights
 
     // the next three methods provide a calculated view on the getAnchors/getImages:
 
+    /**
+     * List of links to resources (pages, images, files, media ...)
+     * (Hyperlinks do not include mailto: links)
+     * @return a subset of the getAnchor-set: only links to other hyperrefs
+     */
     public Map<AnchorURL, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!this.resorted) resortLinks();
@@ -473,7 +502,10 @@ dc_rights
         return this.applinks;
     }
 
-    public Map<String, String> getEmaillinks() {
+    /**
+     * @return mailto links
+     */
+    public Set<AnchorURL> getEmaillinks() {
         // this is part of the getAnchor-set: only links to email addresses
         if (!this.resorted) resortLinks();
         return this.emaillinks;
@@ -491,6 +523,9 @@ dc_rights
         return this.lat;
     }
 
+    /**
+     * sorts all links (anchors) into individual collections
+     */
     private void resortLinks() {
         if (this.resorted) return;
         synchronized (this) {
@@ -506,13 +541,21 @@ dc_rights
             this.videolinks = new LinkedHashMap<AnchorURL, String>();
             this.audiolinks = new LinkedHashMap<AnchorURL, String>();
             this.applinks   = new LinkedHashMap<AnchorURL, String>();
-            this.emaillinks = new LinkedHashMap<String, String>();
+            this.emaillinks = new LinkedHashSet<AnchorURL>();
             final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
             for (final Map.Entry<DigestURL, ImageEntry> entry: this.images.entrySet()) {
                 if (entry.getKey() != null && entry.getKey().getHost() != null && entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
             for (final AnchorURL url: this.anchors) {
                 if (url == null) continue;
+                u = url.toNormalform(true);
+                final String name = url.getNameProperty();
+                // check mailto scheme first (not suppose to get into in/outboundlinks or hyperlinks -> crawler can't process)
+                if (url.getProtocol().equals("mailto")) {
+                    this.emaillinks.add(url);
+                    continue;
+                }
+
                 final boolean noindex = url.getRelProperty().toLowerCase().indexOf("noindex",0) >= 0;
                 final boolean nofollow = url.getRelProperty().toLowerCase().indexOf("nofollow",0) >= 0;
                 if ((thishost == null && url.getHost() == null) ||
@@ -523,31 +566,24 @@ dc_rights
                 } else {
                     this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
-                u = url.toNormalform(true);
-                final String name = url.getNameProperty();
-                if (u.startsWith("mailto:")) {
-                    this.emaillinks.put(u.substring(7), name);
-                } else {
-                    extpos = u.lastIndexOf('.');
-                    if (extpos > 0) {
-                        if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
-                            ext = u.substring(extpos + 1, qpos).toLowerCase();
-                        } else {
-                            ext = u.substring(extpos + 1).toLowerCase();
-                        }
-                        if (Classification.isMediaExtension(ext)) {
-                            // this is not a normal anchor, its a media link
-                            if (Classification.isImageExtension(ext)) {
-                                collectedImages.put(url, new ImageEntry(url, name, -1, -1, -1));
-                            }
-                            else if (Classification.isAudioExtension(ext)) this.audiolinks.put(url, name);
-                            else if (Classification.isVideoExtension(ext)) this.videolinks.put(url, name);
-                            else if (Classification.isApplicationExtension(ext)) this.applinks.put(url, name);
-                        }
+                extpos = u.lastIndexOf('.');
+                if (extpos > 0) {
+                    if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
+                        ext = u.substring(extpos + 1, qpos).toLowerCase();
+                    } else {
+                        ext = u.substring(extpos + 1).toLowerCase();
                     }
-                    // in any case we consider this as a link and let the parser decide if that link can be followed
-                    this.hyperlinks.put(url, name);
+                    if (Classification.isMediaExtension(ext)) {
+                        // this is not a normal anchor, its a media link
+                        if (Classification.isImageExtension(ext)) { // TODO: guess on a-tag href extension (may not be correct)
+                            collectedImages.put(url, new ImageEntry(url, name, -1, -1, -1));
+                        } else if (Classification.isAudioExtension(ext)) this.audiolinks.put(url, name);
+                          else if (Classification.isVideoExtension(ext)) this.videolinks.put(url, name);
+                          else if (Classification.isApplicationExtension(ext)) this.applinks.put(url, name);
+                    }
                 }
+                // in any case we consider this as a link and let the parser decide if that link can be followed
+                this.hyperlinks.put(url, name);
             }
 
             // add image links that we collected from the anchors to the image map
@@ -620,10 +656,13 @@ dc_rights
         return v;
     }
 
+    /**
+     * We find all links that are part of a reference inside a url
+     *
+     * @param links links is either a Set of AnchorURL, Strings (with urls) or htmlFilterImageEntries
+     * @return map with contained urls as key and "ref" as value
+     */
     private static Map<AnchorURL, String> allReflinks(final Collection<?> links) {
-        // links is either a Set of Strings (with urls) or
-        // htmlFilterImageEntries
-        // we find all links that are part of a reference inside a url
         final Map<AnchorURL, String> v = new HashMap<AnchorURL, String>();
         final Iterator<?> i = links.iterator();
         Object o;
@@ -645,7 +684,9 @@ dc_rights
                     continue loop;
                 }
                 u = url.toNormalform(true);
-                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
+
+                // find start of a referenced http url
+                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
@@ -655,14 +696,28 @@ dc_rights
                         v.put(url, "ref");
                     continue loop;
                 }
-                if ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0) {
+
+                // find start of a referenced https url
+                if ((pos = u.toLowerCase().indexOf("https://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
-                    u = "http:/" + u.substring(pos);
-                    while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
-                        u = "http:/" + u.substring(pos);
+                    u = u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("https://", 7)) > 0)
+                        u = u.substring(pos);
                     url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
+                    continue loop;
+                }
+                
+                if ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0) { // 11 = skip protocol part + www of source url "http://www."
+                    i.remove();
+                    u = url.getProtocol()+":/" + u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0)
+                        u = url.getProtocol()+":/" + u.substring(pos);
+
+                    AnchorURL addurl = new AnchorURL(u);
+                    if (!(v.containsKey(addurl)))
+                        v.put(addurl, "ref");
                     continue loop;
                 }
             } catch (final MalformedURLException e) {
@@ -761,7 +816,7 @@ dc_rights
         return this.crawldepth;
     }
     
-    public void writeXML(final Writer os, final Date date) throws IOException {
+    public void writeXML(final Writer os) throws IOException {
         os.write("<record>\n");
         final String title = dc_title();
         if (title != null && title.length() > 0) os.write("<dc:title><![CDATA[" + title + "]]></dc:title>\n");
@@ -779,7 +834,7 @@ dc_rights
         }
         final String language = dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + dc_language() + "</dc:language>\n");
-        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
+        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(getLastModified()) + "</dc:date>\n");
         if (this.lon != 0.0 && this.lat != 0.0) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
         os.write("</record>\n");
     }
@@ -788,8 +843,8 @@ dc_rights
     public String toString() {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            final Writer osw = new OutputStreamWriter(baos, "UTF-8");
-            writeXML(osw, this.lastModified);
+            final Writer osw = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
+            writeXML(osw);
             osw.close();
             return UTF8.String(baos.toByteArray());
         } catch (final UnsupportedEncodingException e1) {
@@ -894,9 +949,9 @@ dc_rights
 
         // clean up parser data
         for (final Document doc: docs) {
-            Object parserObject = doc.getParserObject();
-            if (parserObject instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parserObject;
+            Object scraper = doc.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 html.close();
             }
         }
@@ -942,9 +997,9 @@ dc_rights
                     if (!entry.getKey().attachedNofollow()) result.put(entry.getKey(), entry.getValue());
                 }
             }
-            final Object parser = d.getParserObject();
-            if (parser instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parser;
+            final Object scraper = d.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) try {result.put(new AnchorURL(refresh), "refresh");} catch (final MalformedURLException e) {}
                 AnchorURL canonical = html.getCanonical();

@@ -389,7 +389,7 @@ h4.linktitle {
   padding-left: 20px;
 }
 
-img.favicon{
+img.favicon, object.favicon {
   margin: 0px 4px 0px -20px;
   width: 16px;
   height: 16px;
@@ -869,10 +869,6 @@ body#Wiki form fieldset p.help{
 body#watchCrawler table.watchCrawler {float:left; margin: 0px 5px 5px 0px;}
 body#watchCrawler p.watchCrawler {clear:both;}
 body#watchCrawler p#crawlingQueues{clear:both; margin: 20px 0px 0px 0px;}
-
-/* CacheAdmin_p.html */
-div.CacheAdminInfo {margin-top:1em;}
-div.CacheAdminTree{}
 
 /* BlogComments.html */
 div.BlogCommentPost {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -145,7 +146,7 @@ public class SMWListSyncThread {
 							InputStreamReader reader = null;
 							try {
 								reader = new InputStreamReader(
-										urlImport.openStream(), "UTF-8");
+										urlImport.openStream(), StandardCharsets.UTF_8);
 							} catch (final Exception e) {
 								ConcurrentLog.logException(e);
 								this.runningjob = false;

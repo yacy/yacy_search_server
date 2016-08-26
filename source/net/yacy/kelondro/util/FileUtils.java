@@ -44,6 +44,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,14 +53,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
+
+import org.apache.commons.lang.StringUtils;
 
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsPSMDetector;
@@ -268,8 +269,24 @@ public final class FileUtils {
         copy(new ByteArrayInputStream(source), dest);
     }
 
+    /**
+     * Read fully source stream and close it.
+     * @param source must not be null
+     * @return source content as a byte array.
+     * @throws IOException when a read/write error occured
+     */
     public static byte[] read(final InputStream source) throws IOException {
-        return read(source, -1);
+    	byte[] content;
+    	try {
+    		content = read(source, -1);
+    	} finally {
+    		/* source input stream must be closed here in all cases */
+    		try {
+    			source.close();
+    		} catch(IOException ignoredException) {
+    		}
+    	}
+    	return content;
     }
 
     public static byte[] read(final InputStream source, final int count) throws IOException {
@@ -403,33 +420,29 @@ public final class FileUtils {
         return mb;
     }
 
-    private final static Pattern backslashbackslash = Pattern.compile("\\\\");
-    private final static Pattern unescaped_equal = Pattern.compile("=");
-    private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
-    private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
-    private final static Pattern escaped_backslash = Pattern.compile(Pattern.quote("\\"), Pattern.LITERAL);
+    private final static String[] unescaped_strings_in = {"\r\n", "\r", "\n", "=", "\\"};
+    private final static String[] escaped_strings_out = {"\\n", "\\n", "\\n", "\\=", "\\\\"};
+    private final static String[] escaped_strings_in = {"\\\\", "\\n", "\\="};
+    private final static String[] unescaped_strings_out = {"\\", "\n", "="};
 
     public static void saveMap(final File file, final Map<String, String> props, final String comment) {
     	boolean err = false;
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
         try {
-            pw = new PrintWriter(tf, "UTF-8");
+            pw = new PrintWriter(tf, StandardCharsets.UTF_8.name());
             pw.println("# " + comment);
             String key, value;
             for ( final Map.Entry<String, String> entry : props.entrySet() ) {
                 key = entry.getKey();
                 if ( key != null ) {
-                    key = backslashbackslash.matcher(key).replaceAll("\\\\");
-                    key = escaped_newline.matcher(key).replaceAll("\\n");
-                    key = unescaped_equal.matcher(key).replaceAll("\\=");
+                    key = StringUtils.replaceEach(key, unescaped_strings_in, escaped_strings_out);
                 }
                 if ( entry.getValue() == null ) {
                     value = "";
                 } else {
                     value = entry.getValue();
-                    value = backslashbackslash.matcher(value).replaceAll("\\\\");
-                    value = escaped_newline.matcher(value).replaceAll("\\n");
+                    value = StringUtils.replaceEach(value, unescaped_strings_in, escaped_strings_out);
                 }
                 pw.println(key + "=" + value);
             }
@@ -478,11 +491,8 @@ public final class FileUtils {
                 pos = line.indexOf('=', pos + 1);
             } while ( pos > 0 && line.charAt(pos - 1) == '\\' );
             if ( pos > 0 ) try {
-                String key = escaped_equal.matcher(line.substring(0, pos).trim()).replaceAll("=");
-                key = escaped_newline.matcher(key).replaceAll("\n");
-                key = escaped_backslash.matcher(key).replaceAll("\\");
-                String value = escaped_newline.matcher(line.substring(pos + 1).trim()).replaceAll("\n");
-                value = value.replace("\\\\", "\\"); // does not work: escaped_backslashbackslash.matcher(value).replaceAll("\\");
+                String key = StringUtils.replaceEach(line.substring(0, pos).trim(), escaped_strings_in, unescaped_strings_out);
+                String value = StringUtils.replaceEach(line.substring(pos + 1).trim(), escaped_strings_in, unescaped_strings_out);
                 //System.out.println("key = " + key + ", value = " + value);
                 props.put(key, value);
             } catch (final IndexOutOfBoundsException e) {
@@ -502,15 +512,12 @@ public final class FileUtils {
         if ( a == null ) {
             return new ArrayList<String>().iterator();
         }
-        try {
-            return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
-        } catch (final UnsupportedEncodingException e ) {
-            return null;
-        }
+        return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), StandardCharsets.UTF_8)));
     }
 
     /**
      * Read lines of a file into an ArrayList.
+     * Empty lines in the file are ignored.
      *
      * @param listFile the file
      * @return the resulting array as an ArrayList
@@ -520,10 +527,10 @@ public final class FileUtils {
         final ArrayList<String> list = new ArrayList<String>();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile), "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile), StandardCharsets.UTF_8));
 
             while ( (line = br.readLine()) != null ) {
-                list.add(line);
+                if (!line.isEmpty()) list.add(line);
             }
             br.close();
         } catch (final IOException e ) {
@@ -570,6 +577,7 @@ public final class FileUtils {
 
     /**
      * Read lines of a text file into a String, optionally ignoring comments.
+     * Empty lines are always ignored.
      *
      * @param listFile the File to read from.
      * @param withcomments If <code>false</code> ignore lines starting with '#'.
@@ -922,31 +930,29 @@ public final class FileUtils {
      * used code from http://jchardet.sourceforge.net/;
      * see also: http://www-archive.mozilla.org/projects/intl/chardet.html
      * @param file
-     * @return a set of probable charsets
+     * @return a list of probable charsets
      * @throws IOException
      */
-    public static Set<String> detectCharset(File file) throws IOException {
+    public static List<String> detectCharset(File file) throws IOException {
         // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
-        nsDetector det = new nsDetector(nsPSMDetector.ALL);
-        BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file));
-
-        byte[] buf = new byte[1024] ;
-        int len;
-        boolean done = false ;
-        boolean isAscii = true ;
-
-        while ((len = imp.read(buf,0,buf.length)) != -1) {
-            if (isAscii) isAscii = det.isAscii(buf,len);
-            if (!isAscii && !done) done = det.DoIt(buf,len, false);
+        List<String> result;
+        try (BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file))) { // try-with-resource to close inputstream
+            nsDetector det = new nsDetector(nsPSMDetector.ALL);
+            byte[] buf = new byte[1024] ;
+            int len;
+            boolean done = false ;
+            boolean isAscii = true ;
+            while ((len = imp.read(buf,0,buf.length)) != -1) {
+                if (isAscii) isAscii = det.isAscii(buf,len);
+                if (!isAscii && !done) done = det.DoIt(buf,len, false);
+            }   det.DataEnd();
+            result = new ArrayList<>();
+            if (isAscii) {
+                result.add(StandardCharsets.US_ASCII.name());
+            } else {
+                for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
+            }
         }
-        det.DataEnd();
-        Set<String> result = new HashSet<>();
-        if (isAscii) {
-            result.add("ASCII");
-        } else {
-            for (String c: det.getProbableCharsets()) result.add(c);
-        }
-
         return result;
     }
     
@@ -963,7 +969,7 @@ public final class FileUtils {
             @Override
             public void run() {
                 try {
-                    Set<String> charsets = FileUtils.detectCharset(file);
+                    List<String> charsets = FileUtils.detectCharset(file);
                     if (charsets.contains(givenCharset)) {
                         ConcurrentLog.info("checkCharset", "appropriate charset '" + givenCharset + "' for import of " + file + ", is part one detected " + charsets);
                     } else {

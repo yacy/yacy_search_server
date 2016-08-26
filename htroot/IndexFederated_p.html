@@ -74,7 +74,7 @@
       <dt class="TableCellDark"></dt>
       <dd><input type="checkbox" name="solr.indexing.solrremote.writeenabled" id="solr_indexing_solrremote_writeenabled" #(solr.indexing.solrremote.writeenabled.checked)#:: checked="checked"#(/solr.indexing.solrremote.writeenabled.checked)#/> write-enabled (if unchecked, the remote server(s) will only be used as search peers)</dd>
 
-      <dt><input type="submit" name="setsolr" value="Set" /></dt><dd></dd>
+      <dt><input type="submit" name="setsolr" class="btn btn-primary" value="Set" /></dt><dd></dd>
 
       </dd>
       </dl>
@@ -95,7 +95,7 @@
       <dt><input type="checkbox" name="core.service.webgraph.tmp" id="core_service_webgraph" #(core.service.webgraph.tmp.checked)#:: checked="checked"#(/core.service.webgraph.tmp.checked)# /></dt>
       <dd>use webgraph search index (rich information in second Solr core)</dd>
       
-      <dt><input type="submit" name="setcitation" value="Set" /></dt><dd></dd>
+      <dt><input type="submit" name="setcitation" class="btn btn-primary" value="Set" /></dt><dd></dd>
       </dl>
       </fieldset>
     </form>
@@ -111,7 +111,7 @@
       <dt><input type="checkbox" name="core.service.rwi" id="core_service_rwi" #(core.service.rwi.checked)#:: checked="checked"#(/core.service.rwi.checked)# /></dt>
       <dd>support peer-to-peer index transmission (DHT RWI index)</dd>
       
-      <dt><input type="submit" name="setrwi" value="Set" /></dt><dd></dd>
+      <dt><input type="submit" name="setrwi" class="btn btn-primary" value="Set" /></dt><dd></dd>
       </dl>
       </fieldset>
     </form>

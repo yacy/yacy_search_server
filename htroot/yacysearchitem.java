@@ -143,7 +143,7 @@ public class yacysearchitem {
             if (authenticated) { // only needed if authorized
                 boolean bookmarkexists;
                 // check url exists in bookkmarks
-                bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
+                    bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
                 prop.put("content_authorized_bookmark", !bookmarkexists);
                 // bookmark icon check for YMarks
                 //prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
@@ -188,7 +188,6 @@ public class yacysearchitem {
                 prop.putXML("content_link", resultUrlstring); // putXML for rss
             }
             
-//            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
 // END interaction
 
             boolean isAtomFeed = header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("atom");
@@ -303,7 +302,7 @@ public class yacysearchitem {
             boolean stealthmode = p2pmode && theSearch.query.isLocal();
             if ((sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ||
                 (sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) && sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ENABLED, false) && Memory.load() < 1.0)) &&
-                !stealthmode) sb.heuristicSearchResults(resultUrlstring);
+                !stealthmode) sb.heuristicSearchResults(result);
             theSearch.query.transmitcount = item + 1;
             return prop;
         }

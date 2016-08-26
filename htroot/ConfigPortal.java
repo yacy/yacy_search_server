@@ -33,6 +33,8 @@ import java.net.MalformedURLException;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
@@ -93,6 +95,7 @@ public class ConfigPortal {
                 
                 final boolean storeresult = post.getBoolean(SwitchboardConstants.REMOTESEARCH_RESULT_STORE);
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, storeresult);
+                sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, post.getLong(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, -1));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete"));
@@ -148,6 +151,7 @@ public class ConfigPortal {
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, config.getProperty(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE));
+                sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, config.getProperty(SwitchboardConstants.SEARCH_VERIFY,"iffresh"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, config.getProperty(SwitchboardConstants.SEARCH_VERIFY_DELETE,"true"));
                 sb.setConfig("about.headline", config.getProperty("about.headline",""));
@@ -170,12 +174,12 @@ public class ConfigPortal {
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));
         
         prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, true) ? 1 : 0);
-
-        prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.collections", sb.getConfig("search.navigation", "").indexOf("collections",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics",0) >= 0 ? 1 : 0);
+        long resultStoredMaxSize = sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, -1);
+        if(resultStoredMaxSize > 0) {
+        	prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, resultStoredMaxSize);
+    	} else {
+    		prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, "");
+    	}
 
         prop.put("search.verify.nocache", sb.getConfig("search.verify", "").equals("nocache") ? 1 : 0);
         prop.put("search.verify.iffresh", sb.getConfig("search.verify", "").equals("iffresh") ? 1 : 0);
@@ -222,11 +226,30 @@ public class ConfigPortal {
         prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
+        /* Address used in code template */
         String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getLocalPort();
         }
         prop.put("myaddress", myaddress);
+        
+        /* Address used to generate the preview frames : let's use the adress and port as requested. (Same behavior as opensearchdescription.java) */
+        String myPreviewAddress = header.get(HeaderFramework.HOST); // returns host:port (if not default http/https ports)
+        String myPreviewProtocol = "http";
+        if (myPreviewAddress == null) {
+        	myPreviewAddress = Domains.LOCALHOST + ":" + sb.getConfig("port", "8090");
+        } else {
+            final String sslport = ":" + sb.getConfig("port.ssl", "8443");
+            if (myPreviewAddress.endsWith(sslport)) { // connection on ssl port, use https protocol
+                myPreviewProtocol = "https";
+            }
+        }
+        /* YaCyDefaultServelt should have filled this custom header, making sure we know here wether original request is http or https
+         *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
+        myPreviewProtocol = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, myPreviewProtocol);
+        
+        prop.put("myPreviewAddress", myPreviewAddress);
+        prop.put("myPreviewProtocol", myPreviewProtocol);
         return prop;
     }
 

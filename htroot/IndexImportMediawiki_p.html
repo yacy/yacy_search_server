@@ -24,8 +24,13 @@
           <br />
           Dumps must be stored in the local file system in XML format and may be compressed in gz or bz2.
           <br />
-          <input name="file" type="text" value="" size="80" />
-          <input name="submit" type="submit" value="Import MediaWiki Dump" />
+          <div class="input-group">
+             <span style="display: inline-block">
+                <input name="file" style="" type="file" value="" size="75" /></span>
+             <div class="btn-group">
+                <input name="submit" class="btn btn-primary" type="submit" value="Import MediaWiki Dump" />
+             </div>
+          </div>
         </fieldset>
     </form>
     <p>

@@ -67,7 +67,7 @@ public class zipParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -118,7 +118,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());
                     final DigestURL virtualURL = DigestURL.newURL(location, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    final Document[] docs = TextParser.parseSource(new AnchorURL(virtualURL), mime, null, scraper, timezoneOffset, 999, tmp);
+                    final Document[] docs = TextParser.parseSource(virtualURL, mime, null, scraper, timezoneOffset, 999, tmp);
                     if (docs == null) continue;
                     maindoc.addSubDocuments(docs);
                 } catch (final Parser.Failure e) {

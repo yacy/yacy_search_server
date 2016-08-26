@@ -141,7 +141,6 @@ public final class QueryParams {
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public final String userAgent;
-    protected boolean filterfailurls, filterscannerfail;
     protected double lat, lon, radius;
     public LinkedHashSet<String> facetfields;
     private SolrQuery cachedQuery;
@@ -173,8 +172,6 @@ public final class QueryParams {
         final Segment indexSegment,
         final RankingProfile ranking,
         final String userAgent,
-        final boolean filterfailurls,
-        final boolean filterscannerfail,
         final double lat,
         final double lon,
         final double radius,
@@ -241,8 +238,6 @@ public final class QueryParams {
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;
-        this.filterfailurls = filterfailurls;
-        this.filterscannerfail = filterscannerfail;
         // we normalize here the location and radius because that should cause a better caching
         // and as surplus it will increase privacy
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;
@@ -391,7 +386,7 @@ public final class QueryParams {
         if (!qf.isEmpty()) params.setParam(DisMaxParams.QF, qf);
         if (this.queryGoal.getIncludeSize() > 1) {
             // add boost on combined words
-            if (bq.length() > 0) bq += " ";
+            if (bq.length() > 0) bq += "\n";
             bq += CollectionSchema.text_t.getSolrFieldName() + ":\"" + this.queryGoal.getIncludeString() + "\"^10";
         }
         if (fq.length() > 0) {
@@ -401,7 +396,7 @@ public final class QueryParams {
             newfq.add(fq);
             params.setFilterQueries(newfq.toArray(new String[newfq.size()]));
         }
-        if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq);
+        if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq.split("[\\r\\n]+")); // split on any sequence consisting of CR and/or LF
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         
         // prepare result

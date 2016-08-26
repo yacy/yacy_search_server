@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import net.yacy.cora.util.ConcurrentLog;
@@ -88,36 +89,30 @@ public class Browser {
     }
 
     public static void openBrowser(final String url) {
-        boolean head = System.getProperty("java.awt.headless", "").equals("false");
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().browse(new URI(url));
+            } catch (IOException | URISyntaxException e) {
+                openBrowserClassic(url);
+            }
+        } else {
+            openBrowserClassic(url);
+        }
+    }
+    
+    public static void openBrowserClassic(final String url) {
         try {
             if (systemOS == systemMacOSX) {
                 openBrowserMac(url);
             } else if (systemOS == systemUnix) {
-                //try {
-                //    openBrowserUnixGeneric(url);
-                //} catch (final Exception e) {
-                    openBrowserUnixFirefox(url);
-                //}
+                openBrowserUnixFirefox(url);
             } else if (systemOS == systemWindows) {
                 openBrowserWin(url);
             } else {
                 throw new RuntimeException("System unknown");
             }
         } catch (final Throwable e) {
-            if (head) {
-                try {
-                    openBrowserJava(url);
-                } catch (final Exception ee) {
-                    logBrowserFail(url);
-                }
-            } else {
-                logBrowserFail(url);
-            }
         }
-    }
-
-    private static void openBrowserJava(final String url) throws Exception {
-        Desktop.getDesktop().browse(new URI(url));
     }
 
     private static void openBrowserMac(final String url) throws Exception {
@@ -129,21 +124,14 @@ public class Browser {
     }
 
     private static void openBrowserUnixFirefox(final String url) throws Exception {
-        String cmd = "firefox -remote openURL(" + url + ")";
+        String cmd = "firefox " + url;
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         if (p.exitValue() != 0) {
             throw new RuntimeException("Unix Exec Error/Firefox: " + errorResponse(p));
         }
     }
-    /*
-    private static void openBrowserUnixGeneric(final String url) throws Exception {
-        String cmd = "/etc/alternatives/www-browser "  + url;
-        Process p = Runtime.getRuntime().exec(cmd);
-        p.waitFor();
-        if (p.exitValue() != 0) throw new RuntimeException("Unix Exec Error/generic: " + errorResponse(p));
-    }
-    */
+
     private static void openBrowserWin(final String url) throws Exception {
         // see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
         String cmd;
@@ -158,11 +146,6 @@ public class Browser {
         if (p.exitValue() != 0) {
             throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
         }
-    }
-
-    private static void logBrowserFail(final String url) {
-        //if (e != null) Log.logException(e);
-        ConcurrentLog.info("Browser", "please start your browser and open the following location: " + url);
     }
 
     private static String errorResponse(final Process p) {

@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
@@ -78,7 +79,7 @@ public class Files {
 	public static BlockingQueue<String> concurentLineReader(final File f) throws IOException {
 		final BlockingQueue<String> q = new LinkedBlockingQueue<String>();
 		final InputStream is = read(f);
-		final BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		final BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 		Thread t = new Thread() {
 			@Override
             public void run() {

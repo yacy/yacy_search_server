@@ -72,12 +72,10 @@ public class BlacklistImpExp_p {
                     if (seed != null) hostList.put(seed.get(Seed.NAME, "nameless"),seed.hash);
                 }
 
-                String peername;
-                while ((peername = hostList.firstKey()) != null) {
+                for (String peername : hostList.keySet()) {
                     final String Hash = hostList.get(peername);
                     prop.putHTML(DISABLED + "otherHosts_" + peerCount + "_hash", Hash);
                     prop.putXML(DISABLED + "otherHosts_" + peerCount + "_name", peername);
-                    hostList.remove(peername);
                     peerCount++;
                 }
             } catch (final Exception e) {

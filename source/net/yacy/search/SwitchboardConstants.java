@@ -106,6 +106,17 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_LOADPREREQ                  = "50_localcrawl_loadprereq";    
+    // 55_autocrawl
+    /**
+     * <p><code>public static final String <string>CRAWLJOB_AUTOCRAWL</strong> = "55_autocrawl"</code></p>
+     * <p>Name of the autocrawl thread</p>
+     */
+    public static final String CRAWLJOB_AUTOCRAWL                               = "55_autocrawl";
+    public static final String CRAWLJOB_AUTOCRAWL_METHOD_START                  = "autocrawlJob";
+    public static final String CRAWLJOB_AUTOCRAWL_METHOD_JOBCOUNT               = null;
+    public static final String CRAWLJOB_AUTOCRAWL_METHOD_FREEMEM                = null;
+    public static final String CRAWLJOB_AUTOCRAWL_IDLESLEEP                     = "55_autocrawl_idlesleep";
+    public static final String CRAWLJOB_AUTOCRAWL_BUSYSLEEP                     = "55_autocrawl_busysleep";
     // 60_remotecrawlloader
     /**
      * <p><code>public static final String <strong>CRAWLJOB_REMOTE_CRAWL_LOADER</strong> = "60_remotecrawlloader"</code></p>
@@ -144,19 +155,6 @@ public final class SwitchboardConstants {
     public static final String SURROGATES_METHOD_START         = "surrogateProcess";
     public static final String SURROGATES_METHOD_JOBCOUNT      = "surrogateQueueSize";
     public static final String SURROGATES_METHOD_FREEMEM       = "surrogateFreeMem";
-    // 80_search_result_processing
-    /**
-     * <p><code>public static final String <strong>SEARCHRESULT</strong> = "80_searchresult"</code></p>
-     * <p>A thread that stores search results from other peers into the own index.</p>
-     */
-    public static final String SEARCHRESULT                      = "80_searchresult";
-    public static final String SEARCHRESULT_MEMPREREQ            = "80_searchresult_memprereq";
-    public static final String SEARCHRESULT_LOADPREREQ           = "80_searchresult_loadprereq";
-    public static final String SEARCHRESULT_IDLESLEEP            = "80_searchresult_idlesleep";
-    public static final String SEARCHRESULT_BUSYSLEEP            = "80_searchresult_busysleep";
-    public static final String SEARCHRESULT_METHOD_START         = "searchresultProcess";
-    public static final String SEARCHRESULT_METHOD_JOBCOUNT      = "searchresultQueueSize";
-    public static final String SEARCHRESULT_METHOD_FREEMEM       = "searchresultFreeMem";
     // 85_scheduler
     /**
      * <p><code>public static final String <strong>SCHEDULER</strong> = "85_scheduler"</code></p>
@@ -179,61 +177,6 @@ public final class SwitchboardConstants {
     public static final String CLEANUP_METHOD_FREEMEM       = null;
     public static final String CLEANUP_IDLESLEEP            = "90_cleanup_idlesleep";
     public static final String CLEANUP_BUSYSLEEP            = "90_cleanup_busysleep";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_LURL</strong> = "ramCacheLURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Loaded URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_LURL_TIME      = "ramCacheLURL_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_NURL</strong> = "ramCacheNURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Noticed URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_NURL_TIME      = "ramCacheNURL_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_EURL</strong> = "ramCacheEURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Erroneous URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_EURL_TIME      = "ramCacheEURL_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_RWI</strong> = "ramCacheRWI"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the RWIs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_RWI_TIME       = "ramCacheRWI_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_HTTP</strong> = "ramCacheHTTP"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the HTTP Headers DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_HTTP_TIME      = "ramCacheHTTP_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_MESSAGE</strong> = "ramCacheMessage"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Message DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_MESSAGE_TIME   = "ramCacheMessage_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_ROBOTS</strong> = "ramCacheRobots"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the robots.txts DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_ROBOTS_TIME    = "ramCacheRobots_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_PROFILES</strong> = "ramCacheProfiles"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Crawl Profiles DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_PROFILES_TIME  = "ramCacheProfiles_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_PRE_NURL</strong> = "ramCachePreNURL"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Pre-Noticed URLs DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_PRE_NURL_TIME  = "ramCachePreNURL_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_WIKI</strong> = "ramCacheWiki"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Wiki DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_WIKI_TIME      = "ramCacheWiki_time";
-    /**
-     * <p><code>public static final String <strong>RAM_CACHE_BLOG</strong> = "ramCacheBlog"</code></p>
-     * <p>Name of the setting how much memory in bytes should be assigned to the Blog DB for caching purposes</p>
-     */
-    public static final String RAM_CACHE_BLOG_TIME      = "ramCacheBlog_time";
     /**
      * <p><code>public static final String <strong>INDEX_DIST_CHUNK_SIZE_START</strong> = "indexDistribution.startChunkSize"</code></p>
      * <p>Name of the setting specifying how many words the very first chunk will contain when the DHT-thread starts</p>
@@ -313,6 +256,18 @@ public final class SwitchboardConstants {
      * @see Switchboard#PROXY_CACHE_LAYOUT_HASH
      */
     public static final String PROXY_YACY_ONLY                 = "proxyYacyOnly";
+    public static final String PROXY_TRANSPARENT_PROXY         = "isTransparentProxy";
+
+    public static final String AUTOCRAWL                       = "autocrawl";
+    public static final String AUTOCRAWL_INDEX_TEXT            = "autocrawl.index.text";
+    public static final String AUTOCRAWL_INDEX_MEDIA           = "autocrawl.index.media";
+    public static final String AUTOCRAWL_RATIO                 = "autocrawl.ratio";
+    public static final String AUTOCRAWL_ROWS                  = "autocrawl.rows";
+    public static final String AUTOCRAWL_DAYS                  = "autocrawl.days";
+    public static final String AUTOCRAWL_QUERY                 = "autocrawl.query";
+    public static final String AUTOCRAWL_DEEP_DEPTH            = "autocrawl.deep.depth";
+    public static final String AUTOCRAWL_SHALLOW_DEPTH         = "autocrawl.shallow.depth";
+    
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Cluster settings
@@ -332,6 +287,8 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
     public static final String REMOTESEARCH_RESULT_STORE        = "remotesearch.result.store"; // add remote results to local index
+    /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
+    public static final String REMOTESEARCH_RESULT_STORE_MAXSIZE= "remotesearch.result.store.maxsize";
     public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
     public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
 
@@ -479,7 +436,7 @@ public final class SwitchboardConstants {
     public static final String RESOURCE_DISK_USED_MAX_STEADYSTATE = "resource.disk.used.max.steadystate";
     public static final String RESOURCE_DISK_USED_MAX_OVERSHOT    = "resource.disk.used.max.overshot";    
     
-    public static final String MEMORY_ACCEPTDHT = "memory.acceptDHTabove";
+    public static final String MEMORY_ACCEPTDHT = "memory.acceptDHTabove"; // minimum memory to accept dht-in (MiB)
     public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT"; // set if DHT was disabled by ResourceObserver
     public static final String CRAWLJOB_LOCAL_AUTODISABLED = "memory.disabledLocalCrawler"; // set if local crawl was disabled by ResourceObserver
     public static final String CRAWLJOB_REMOTE_AUTODISABLED = "memory.disabledRemoteCrawler"; // set if remote crawl was disabled by ResourceObserver
@@ -582,5 +539,5 @@ public final class SwitchboardConstants {
      */
     public static final String DECORATION_AUDIO                    = "decoration.audio";
     public static final String DECORATION_GRAFICS_LINKSTRUCTURE    = "decoration.grafics.linkstructure";
-    
+
 }

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
@@ -96,7 +96,7 @@ public class GSAsearchServlet extends HttpServlet {
     public static void respond(final HttpServletRequest header, final Switchboard sb, final OutputStream out) {
 
         // remember the peer contact for peer statistics
-        String clientip = header.getHeader(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        String clientip = header.getRemoteAddr();
         if (clientip == null) clientip = "<unknown>"; // read an artificial header addendum
         String userAgent = header.getHeader(HeaderFramework.USER_AGENT);
         if (userAgent == null) userAgent = "<unknown>";
@@ -236,7 +236,7 @@ public class GSAsearchServlet extends HttpServlet {
         */
         
         // write the result directly to the output stream
-        Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
+        Writer ow = new FastWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
         try {
             responseWriter.write(ow, req, response);
             ow.flush();

@@ -116,7 +116,7 @@ public final class transferRWI {
         final int wordc       = post.getInt("wordc", 0);                  // number of different words
         final int entryc      = post.getInt("entryc", 0);                 // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
-        boolean granted       = sb.getConfigBool("allowReceiveIndex", false);
+        boolean granted       = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
         final boolean blockBlacklist = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_BLOCK_BLACKLIST, false);
         final long cachelimit = sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
         final Seed otherPeer = sb.peers.get(iam);
@@ -184,7 +184,6 @@ public final class transferRWI {
             byte[] urlHash;
             WordReferenceRow iEntry;
             final HandleSet unknownURL = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
-            final HandleSet knownURL = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
             final ArrayList<String> wordhashes = new ArrayList<String>();
             int received = 0;
             int blocked = 0;
@@ -236,9 +235,7 @@ public final class transferRWI {
             for (String id: testids) {
                 try {
                     try {
-                        if (sb.index.fulltext().getLoadTime(id) >= 0) {
-                            knownURL.put(ASCII.getBytes(id));
-                        } else {
+                        if (sb.index.fulltext().getLoadTime(id) < 0) {
                             unknownURL.put(ASCII.getBytes(id));
                         }
                     } catch (IOException e) {

@@ -106,35 +106,49 @@ public class ErrorCache {
         }
     }
 
+    /**
+     * Adds a error document to the Solr index (marked as failed by httpstatus_i <> 200)
+     * and caches recently added failed docs (up to maxStackSize = 1000)
+     *
+     * @param url  failed url
+     * @param crawldepth info crawldepth
+     * @param profile info of collection
+     * @param failCategory .store to index otherwise cache only
+     * @param anycause info cause-string
+     * @param httpcode http response code
+     */
     public void push(final DigestURL url, final int crawldepth, final CrawlProfile profile, final FailCategory failCategory, String anycause, final int httpcode) {
         // assert executor != null; // null == proxy !
         assert failCategory.store || httpcode == -1 : "failCategory=" + failCategory.name();
         if (anycause == null) anycause = "unknown";
         final String reason = anycause + ((httpcode >= 0) ? " (http return code = " + httpcode + ")" : "");
         if (!reason.startsWith("double")) log.info(url.toNormalform(true) + " - " + reason);
-        CollectionConfiguration.FailDoc failDoc = new CollectionConfiguration.FailDoc(
-                url, profile == null ? null : profile.collections(),
-                failCategory.name() + " " + reason, failCategory.failType,
-                httpcode, crawldepth);
-        if (this.fulltext.getDefaultConnector() != null && failCategory.store && !RobotsTxt.isRobotsURL(url)) {
-            // send the error to solr
-            try {
-                // do not overwrite error reports with error reports
-                SolrDocument olddoc = this.fulltext.getDefaultConnector().getDocumentById(ASCII.String(failDoc.getDigestURL().hash()), CollectionSchema.httpstatus_i.getSolrFieldName());
-                if (olddoc == null ||
-                    olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) == null ||
-                    ((Integer) olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName())) == 200) {
-                    SolrInputDocument errorDoc = failDoc.toSolr(this.fulltext.getDefaultConfiguration());
-                    this.fulltext.getDefaultConnector().add(errorDoc);
+
+        if (!this.cache.containsKey(ASCII.String(url.hash()))) { // no further action if in error-cache
+            CollectionConfiguration.FailDoc failDoc = new CollectionConfiguration.FailDoc(
+                    url, profile == null ? null : profile.collections(),
+                    failCategory.name() + " " + reason, failCategory.failType,
+                    httpcode, crawldepth);
+            if (this.fulltext.getDefaultConnector() != null && failCategory.store && !RobotsTxt.isRobotsURL(url)) {
+                // send the error to solr
+                try {
+                    // do not overwrite error reports with error reports
+                    SolrDocument olddoc = this.fulltext.getDefaultConnector().getDocumentById(ASCII.String(failDoc.getDigestURL().hash()), CollectionSchema.httpstatus_i.getSolrFieldName());
+                    if (olddoc == null ||
+                        olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) == null ||
+                        ((Integer) olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName())) == 200) {
+                        SolrInputDocument errorDoc = failDoc.toSolr(this.fulltext.getDefaultConfiguration());
+                        this.fulltext.getDefaultConnector().add(errorDoc);
+                    }
+                } catch (final IOException e) {
+                    ConcurrentLog.warn("SOLR", "failed to send error " + url.toNormalform(true) + " to solr: " + e.getMessage());
                 }
-            } catch (final IOException e) {
-                ConcurrentLog.warn("SOLR", "failed to send error " + url.toNormalform(true) + " to solr: " + e.getMessage());
             }
+            synchronized (this.cache) {
+                this.cache.put(ASCII.String(url.hash()), failDoc);
+            }
+            checkStackSize();
         }
-        synchronized (this.cache) {
-            this.cache.put(ASCII.String(url.hash()), failDoc);
-        }
-        checkStackSize();
     }
     
     private void checkStackSize() {

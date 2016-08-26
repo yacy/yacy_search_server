@@ -99,7 +99,7 @@ public class SMBLoader {
             StringBuilder content = FTPClient.dirhtml(u, null, null, null, list, true);
 
             ResponseHeader responseHeader = new ResponseHeader(200);
-            responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
+            responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
             final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
             Response response = new Response(
@@ -155,7 +155,6 @@ public class SMBLoader {
         // load the resource
         InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null);
         byte[] b = FileUtils.read(is);
-        is.close();
 
         // create response with loaded content
         final CrawlProfile profile = this.sb.crawler.get(request.profileHandle().getBytes());

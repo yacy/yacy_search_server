@@ -28,11 +28,12 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -68,7 +69,7 @@ public class vsdParser extends AbstractParser implements Parser {
      */
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -112,7 +113,7 @@ public class vsdParser extends AbstractParser implements Parser {
             return new Document[]{new Document(
                     location,     // url of the source document
                     mimeType,     // the documents mime type
-                    "UTF-8",      // charset of the document text
+                    StandardCharsets.UTF_8.name(),      // charset of the document text
                     this,
                     null,         // language
                     keywords,

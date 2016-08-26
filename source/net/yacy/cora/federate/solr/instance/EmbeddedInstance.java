@@ -79,10 +79,9 @@ public class EmbeddedInstance implements SolrInstance {
         }
         
         // initialize the coreContainer
-        String containerDir = this.containerPath.getAbsolutePath(); // the home directory of all cores
         File configFile = new File(solr_config, "solr.xml"); //  the configuration file for all cores
-        this.coreContainer = CoreContainer.createAndLoad(containerDir, configFile); // this may take indefinitely long if solr files are broken
-        if (this.coreContainer == null) throw new IOException("cannot create core container dir = " + containerDir + ", configFile = " + configFile);
+        this.coreContainer = CoreContainer.createAndLoad(containerPath.toPath(), configFile.toPath()); // this may take indefinitely long if solr files are broken
+        if (this.coreContainer == null) throw new IOException("cannot create core container dir = " + containerPath + ", configFile = " + configFile);
 
         // get the default core from the coreContainer
         this.defaultCoreName = givenDefaultCoreName;

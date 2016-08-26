@@ -42,7 +42,7 @@
           #{/blackLists}#
         </select>
         <input type="hidden" name="selectList" value="select" />
-        <input type="submit" />
+        <input type="submit" class="btn btn-primary" />
       </fieldset></form>
         ::
       #(/disabled)#
@@ -60,7 +60,7 @@
       #(/error)#
         <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8"><fieldset>
           <input type="text" id="newListName" size ="50" name="newListName" />
-          <input type="submit" name="createNewList" value="create" />
+          <input type="submit" name="createNewList" class="btn btn-primary" value="create" />
         </fieldset></form>
     </fieldset>  
     <br /><br />
@@ -75,7 +75,7 @@
         <div>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
           <input type="text" name="newEntry" size="50" />
-          <input type="submit" name="addBlacklistEntry" value="Add URL pattern" />
+          <input type="submit" name="addBlacklistEntry" class="btn btn-primary" value="Add URL pattern" />
         </div>
         <p>The right '*', after the '/', can be replaced by a <a href="http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.</p>
         <ul>
@@ -119,7 +119,7 @@
             #{/blackListsMove}#
           </select>
           &nbsp;
-          <input type="submit" />
+          <input type="submit" class="btn btn-primary" />
           </div>
       </form>
 
@@ -129,18 +129,18 @@
           <p>Show entries:
             <table><tr>
               #{subListOffset}#
-              <td  style="padding: 5px;"><button type="submit"  name="offset" style="padding:3px" value="#[fvalue]#" #(selected)#:: disabled="true"#(/selected)# />#[fvalue]# - #[tvalue]#</button></td>
+              <td  style="padding: 5px;"><button type="submit"  name="offset" class="btn btn-sm btn-default" style="padding:3px" value="#[fvalue]#" #(selected)#:: disabled="true"#(/selected)# />#[fvalue]# - #[tvalue]#</button></td>
               #{/subListOffset}#
             </tr></table>
           &nbsp;
           Entries per page:
-          <select name="size" size="1" onchange="document.selectRange.submit();">
+          <select name="size" size="1" onchange="submit();">
                 #{subListSize}#
                 <option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[text]#</option>
                 #{/subListSize}#
           </select>
           &nbsp;
-          <input type="submit" value="set" />
+          <input type="submit" class="btn btn-sm btn-default" value="set" />
           </p>
       </fieldset></form>
 
@@ -155,7 +155,7 @@
           <input type="hidden" name="selectedBlacklistEntry.#[count]#" value="#[item]#"/>
           #{/editList}#
           <br /><br />
-          <input type="submit" value="Save URL pattern(s)" />
+          <input type="submit" class="btn btn-primary" value="Save URL pattern(s)" />
         </div>
       </form>
       #(/edit)#
@@ -163,12 +163,12 @@
     </fieldset>
     
     <fieldset class="listSettings">
-      <legend>Settings for this list</legend>
+      <legend>Settings for this list <b><em>#[currentBlacklist]#</em></b></legend>
       <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <div>
           <input type="hidden" name="selectedListName" value="#[currentBlacklist]#" />
-          <input type="submit" name="shareList" value="Share/don't share this list" />
-          <input type="submit" name="deleteList" value="Delete this list" />
+          <input type="submit" name="shareList" class="btn btn-default" value="Share/don't share this list" />
+          <input type="submit" name="deleteList" class="btn btn-danger" value="Delete this list" />
         </div>
       </form>
       <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
@@ -183,23 +183,11 @@
           #{/currentActiveFor}#
           </dl>
           <input type="hidden" name="selectedListName" value="#[currentBlacklist]#" />
-          <input type="submit" name="activateList" value="Save" />
+          <dl><dt></dt><dd><input type="submit" name="activateList" class="btn btn-primary" value="Save" /></dd></dl>
         </fieldset>
       </form>
     </fieldset>    
     ::#(/disabled)#
-    <!--
-    <div>
-      <p>
-        #(status)#
-        ::
-        <strong>#[item]#</strong> was removed from blacklist
-        ::
-        <strong>#[item]#</strong> was added to the blacklist
-        #(/status)#
-      </p>
-    </div>
-    -->
     #%env/templates/footer.template%#
   </body>
 </html>

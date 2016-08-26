@@ -36,7 +36,6 @@ import org.apache.solr.search.SolrCache;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.RAMIndex;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.Formatter;
@@ -64,7 +63,7 @@ public class PerformanceMemory_p {
                 System.gc();
                 prop.put("gc", "1");
                 prop.put("autoreload.checked", "1");
-            } else {
+            } else if (post.containsKey("dummy")) {
                 boolean simulatedshortmemory = post.containsKey("simulatedshortmemory");
                 MemoryControl.setSimulatedShortStatus(simulatedshortmemory);
                 if (simulatedshortmemory) prop.put("autoreload.checked", "1");
@@ -183,67 +182,51 @@ public class PerformanceMemory_p {
         prop.put("indexcache", c);
         prop.putNum("indexcacheTotalMem", totalhitmem / (1024d * 1024d));
 
-        // write object cache table
-        i = Cache.filenames();
-        c = 0;
-        long missmem, totalmissmem = 0;
-        totalhitmem = 0;
-        Map<Cache.StatKeys, String> mapy;
-        while (i.hasNext()) {
-            filename = i.next();
-            mapy = Cache.memoryStats(filename);
-            prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
-
-            // hit cache
-            hitmem = Long.parseLong(mapy.get(Cache.StatKeys.objectHitMem));
-            totalhitmem += hitmem;
-            prop.put("ObjectList_" + c + "_objectHitChunkSize", mapy.get(Cache.StatKeys.objectHitChunkSize));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheCount", mapy.get(Cache.StatKeys.objectHitCacheCount));
-            prop.put("ObjectList_" + c + "_objectHitCacheMem", Formatter.bytesToString(hitmem));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", mapy.get(Cache.StatKeys.objectHitCacheReadHit));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", mapy.get(Cache.StatKeys.objectHitCacheReadMiss));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", mapy.get(Cache.StatKeys.objectHitCacheWriteUnique));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteDouble", mapy.get(Cache.StatKeys.objectHitCacheWriteDouble));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheDeletes", mapy.get(Cache.StatKeys.objectHitCacheDeletes));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheFlushes", mapy.get(Cache.StatKeys.objectHitCacheFlushes));
-
-            // miss cache
-            missmem = Long.parseLong(mapy.get(Cache.StatKeys.objectMissMem));
-            totalmissmem += missmem;
-            prop.put("ObjectList_" + c + "_objectMissChunkSize", mapy.get(Cache.StatKeys.objectMissChunkSize));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheCount", mapy.get(Cache.StatKeys.objectMissCacheCount));
-            prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", Formatter.bytesToString(missmem));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", mapy.get(Cache.StatKeys.objectMissCacheReadHit));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", mapy.get(Cache.StatKeys.objectMissCacheReadMiss));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", mapy.get(Cache.StatKeys.objectMissCacheWriteUnique));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteDouble", mapy.get(Cache.StatKeys.objectMissCacheWriteDouble));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheDeletes", mapy.get(Cache.StatKeys.objectMissCacheDeletes));
-            //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", mapy.get(Cache.StatKeys.objectMissCacheFlushes));
-
-            c++;
-        }
-        prop.put("ObjectList", c);
-        prop.putNum("objectCacheStopGrow", Cache.getMemStopGrow() / (1024d * 1024d));
-        prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024d * 1024d));
-        prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024d * 1024d));
-        prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024d * 1024d));
-
-        // other caching structures
-//        final CachedSolrConnector solr = (CachedSolrConnector) Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
-//        prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
-//        prop.putNum("solrcacheHit.Hit", solr.hitCache_Hit);
-//        prop.putNum("solrcacheHit.Miss", solr.hitCache_Miss);
-//        prop.putNum("solrcacheHit.Insert", solr.hitCache_Insert);
-//        
-//        prop.putNum("solrcacheMiss.size", solr.nameCacheMissSize());
-//        prop.putNum("solrcacheMiss.Hit", solr.missCache_Hit);
-//        prop.putNum("solrcacheMiss.Miss", solr.missCache_Miss);
-//        prop.putNum("solrcacheMiss.Insert", solr.missCache_Insert);
-//        
-//        prop.putNum("solrcacheDocument.size", solr.nameCacheDocumentSize());
-//        prop.putNum("solrcacheDocument.Hit", solr.documentCache_Hit);
-//        prop.putNum("solrcacheDocument.Miss", solr.documentCache_Miss);
-//        prop.putNum("solrcacheDocument.Insert", solr.documentCache_Insert);
+//        this cache table wasn't used for years
+//        // write object cache table
+//        i = Cache.filenames();
+//        c = 0;
+//        long missmem, totalmissmem = 0;
+//        totalhitmem = 0;
+//        Map<Cache.StatKeys, String> mapy;
+//        while (i.hasNext()) {
+//            filename = i.next();
+//            mapy = Cache.memoryStats(filename);
+//            prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
+//
+//            // hit cache
+//            hitmem = Long.parseLong(mapy.get(Cache.StatKeys.objectHitMem));
+//            totalhitmem += hitmem;
+//            prop.put("ObjectList_" + c + "_objectHitChunkSize", mapy.get(Cache.StatKeys.objectHitChunkSize));
+//            prop.putNum("ObjectList_" + c + "_objectHitCacheCount", mapy.get(Cache.StatKeys.objectHitCacheCount));
+//            prop.put("ObjectList_" + c + "_objectHitCacheMem", Formatter.bytesToString(hitmem));
+//            prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", mapy.get(Cache.StatKeys.objectHitCacheReadHit));
+//            prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", mapy.get(Cache.StatKeys.objectHitCacheReadMiss));
+//            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", mapy.get(Cache.StatKeys.objectHitCacheWriteUnique));
+//            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteDouble", mapy.get(Cache.StatKeys.objectHitCacheWriteDouble));
+//            prop.putNum("ObjectList_" + c + "_objectHitCacheDeletes", mapy.get(Cache.StatKeys.objectHitCacheDeletes));
+//            prop.putNum("ObjectList_" + c + "_objectHitCacheFlushes", mapy.get(Cache.StatKeys.objectHitCacheFlushes));
+//
+//            // miss cache
+//            missmem = Long.parseLong(mapy.get(Cache.StatKeys.objectMissMem));
+//            totalmissmem += missmem;
+//            prop.put("ObjectList_" + c + "_objectMissChunkSize", mapy.get(Cache.StatKeys.objectMissChunkSize));
+//            prop.putNum("ObjectList_" + c + "_objectMissCacheCount", mapy.get(Cache.StatKeys.objectMissCacheCount));
+//            prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", Formatter.bytesToString(missmem));
+//            prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", mapy.get(Cache.StatKeys.objectMissCacheReadHit));
+//            prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", mapy.get(Cache.StatKeys.objectMissCacheReadMiss));
+//            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", mapy.get(Cache.StatKeys.objectMissCacheWriteUnique));
+//            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteDouble", mapy.get(Cache.StatKeys.objectMissCacheWriteDouble));
+//            prop.putNum("ObjectList_" + c + "_objectMissCacheDeletes", mapy.get(Cache.StatKeys.objectMissCacheDeletes));
+//            //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", mapy.get(Cache.StatKeys.objectMissCacheFlushes));
+//
+//            c++;
+//        }
+//        prop.put("ObjectList", c);
+//        prop.putNum("objectCacheStopGrow", Cache.getMemStopGrow() / (1024d * 1024d));
+//        prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024d * 1024d));
+//        prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024d * 1024d));
+//        prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024d * 1024d));
         
         prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());
         prop.putNum("namecacheHit.Hit", Domains.cacheHit_Hit);

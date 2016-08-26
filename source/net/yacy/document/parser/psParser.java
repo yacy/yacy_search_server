@@ -34,9 +34,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -104,12 +104,12 @@ public class psParser extends AbstractParser implements Parser {
             final Document[] docs = new Document[]{new Document(
                     location, // url
                     mimeType, // mime
-                    "UTF-8",  // charset
+                    StandardCharsets.UTF_8.name(),  // charset
                     this,
                     null,     // languages
                     null,     // keywords
                     null,     // title
-                    "",       // author
+                    null,       // author
                     "",       // publisher
                     null,     // sections
                     null,     // abstract
@@ -258,7 +258,7 @@ public class psParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 

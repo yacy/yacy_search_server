@@ -25,9 +25,8 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-import java.util.Date;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -45,9 +44,20 @@ public class genericParser extends AbstractParser implements Parser {
         // this parser is used if no other fits. This parser fits all
     }
 
+    /**
+     * Constructor to allow to set a scraperObject
+     * because it is desired to keep the scraper/source object protected
+     * This is used for surrogate parsers to set a other source/scraper then ContentScraper
+     * @param scraper
+     */
+    public genericParser(Object scraper) {
+        super("Generic Parser");
+        this.scraperObject = scraper;
+    }
+
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -63,17 +73,17 @@ public class genericParser extends AbstractParser implements Parser {
                 null,
                 null,
                 singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title
-                "", // author
+                null, // author
                 location.getHost(),
                 null,
                 null,
-                0.0f, 0.0f,
+                0.0d, 0.0d,
                 location.toTokens(),
                 null,
                 null,
                 null,
                 false,
-                new Date())};
+                null)};
         return docs;
     }
 }

@@ -76,6 +76,9 @@ public class Bookmarks {
 	final static boolean TAGS = false;
 	final static boolean FOLDERS = true;
 
+        final static float TAGCLOUD_FONTSIZE_MIN = 0.75f; // min font-size in em
+        final static float TAGCLOUD_FONTSIZE_MAX = 2.0f; // max font-size in em
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
     	int max_count = 10;
@@ -455,7 +458,7 @@ public class Bookmarks {
                     }
                 } else {
                     // font-size is pseudo-rounded to 2 decimals
-                    prop.put("display_"+id+"_"+count+"_size", Math.round((1.1f+Math.log(tag.size())/4f)*100.0f)/100.0f);
+                    prop.put("display_"+id+"_"+count+"_size", Math.min(TAGCLOUD_FONTSIZE_MAX, Math.round((TAGCLOUD_FONTSIZE_MIN + Math.log(tag.size())/4f)*100.0f)/100.0f));
                 }
                 count++;
             }

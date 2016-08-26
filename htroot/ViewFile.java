@@ -325,6 +325,24 @@ public class ViewFile {
                 prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
                 boolean dark = true;
                 int i = 0;
+
+                if (document.getEmaillinks() != null) {
+                    Iterator<AnchorURL> emailit = document.getEmaillinks().iterator();
+                    while (emailit.hasNext()) {
+                        AnchorURL eentry = emailit.next();
+                        prop.put("viewMode_links_" + i + "_nr", i);
+                        prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
+                        prop.put("viewMode_links_" + i + "_type", "email");
+                        prop.put("viewMode_links_" + i + "_text", (eentry.getTextProperty().isEmpty()) ? "&nbsp;" : eentry.getTextProperty());
+                        prop.put("viewMode_links_" + i + "_url", "#");
+                        prop.put("viewMode_links_" + i + "_link", eentry.toNormalform(true));
+                        prop.put("viewMode_links_" + i + "_rel", "");
+                        prop.put("viewMode_links_" + i + "_name", eentry.getNameProperty());
+                        dark = !dark;
+                        i++;
+                    }
+                }
+
                 i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);

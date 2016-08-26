@@ -28,9 +28,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +43,12 @@ import java.util.TreeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -57,12 +63,6 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.FileUtils;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 
 public class BookmarkHelper {
@@ -117,16 +117,12 @@ public class BookmarkHelper {
     // --------------------------------------
 
     public static int importFromBookmarks(final BookmarksDB db, final DigestURL baseURL, final String input, final String tag, final boolean importPublic){
-        try {
-            // convert string to input stream
-            final ByteArrayInputStream byteIn = new ByteArrayInputStream(UTF8.getBytes(input));
-            final InputStreamReader reader = new InputStreamReader(byteIn,"UTF-8");
+		// convert string to input stream
+		final ByteArrayInputStream byteIn = new ByteArrayInputStream(UTF8.getBytes(input));
+		final InputStreamReader reader = new InputStreamReader(byteIn, StandardCharsets.UTF_8);
 
-            // import stream
-            return importFromBookmarks(db, baseURL, reader, tag, importPublic);
-        } catch (final UnsupportedEncodingException e) {
-            return 0;
-        }
+		// import stream
+		return importFromBookmarks(db, baseURL, reader, tag, importPublic);
     }
 
     private static int importFromBookmarks(final BookmarksDB db, final DigestURL baseURL, final InputStreamReader input, final String tag, final boolean importPublic){

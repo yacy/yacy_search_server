@@ -37,7 +37,6 @@ import java.util.Set;
 import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSReader;
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -60,7 +59,7 @@ public class rssParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -77,11 +76,11 @@ public class rssParser extends AbstractParser implements Parser {
         final RSSFeed feed = rssReader.getFeed();
         //RSSMessage channel = feed.getChannel();
         final List<Document> docs = new ArrayList<Document>();
-        AnchorURL itemuri;
+        DigestURL itemuri;
         Set<String> languages;
         Document doc;
         for (final Hit item: feed) try {
-            itemuri = new AnchorURL(item.getLink());
+            itemuri = new DigestURL(item.getLink());
             languages = new HashSet<String>();
             languages.add(item.getLanguage());
             doc = new Document(

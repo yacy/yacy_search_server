@@ -5,12 +5,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+
+import org.xml.sax.SAXException;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -35,8 +37,6 @@ import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-
-import org.xml.sax.SAXException;
 
 public class import_ymark {
 
@@ -106,15 +106,7 @@ public class import_ymark {
                     prop.put("status", "1");
                     */
                 } else {
-                    MonitoredReader reader = null;
-                    try {
-                        reader = new MonitoredReader(new InputStreamReader(stream,"UTF-8"), 1024*16, bytes.length);
-                    } catch (final UnsupportedEncodingException e1) {
-                        //TODO: display an error message
-                        ConcurrentLog.logException(e1);
-                        prop.put("status", "0");
-                        return prop;
-                    }
+                    MonitoredReader reader = new MonitoredReader(new InputStreamReader(stream, StandardCharsets.UTF_8), 1024*16, bytes.length);
                     if(post.get("importer").equals("html") && reader != null) {
                         final YMarkHTMLImporter htmlImporter = new YMarkHTMLImporter(reader, queueSize, root);
                         InstantBusyThread.oneTimeJob(htmlImporter, 0);
@@ -206,7 +198,7 @@ public class import_ymark {
         			final File in = new File(sb.workPath, "content.rdf.u8.gz");
         			final InputStream gzip = new FileInputStream(in);
         			final InputStream content = new GZIPInputStream(gzip);
-        			final InputStreamReader reader = new InputStreamReader(content, "UTF-8");
+        			final InputStreamReader reader = new InputStreamReader(content, StandardCharsets.UTF_8);
         			final BufferedReader breader = new BufferedReader(reader);
         			final MonitoredReader mreader = new MonitoredReader(breader, 1024*1024, in.length());
 

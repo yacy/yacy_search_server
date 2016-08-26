@@ -34,6 +34,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -67,7 +68,6 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
-import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.Seed;
@@ -87,18 +87,9 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
-import static org.eclipse.jetty.http.HttpHeader.CONTENT_RANGE;
-import static org.eclipse.jetty.http.HttpHeader.IF_MODIFIED_SINCE;
-import static org.eclipse.jetty.http.HttpHeader.IF_UNMODIFIED_SINCE;
-import static org.eclipse.jetty.http.HttpHeader.REQUEST_RANGE;
-import static org.eclipse.jetty.http.HttpMethod.HEAD;
-
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
-
-import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML;
-import static org.eclipse.jetty.http.MimeTypes.Type.TEXT_HTML_UTF_8;
-
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.util.MultiPartOutputStream;
@@ -155,7 +146,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
     // settings for multipart/form-data
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
-    protected static final int SIZE_FILE_THRESHOLD = 100 * 1024 * 1024; // 100 MB is a lot but appropriate for multi-document pushed using the push_p.json servlet
+    protected static final int SIZE_FILE_THRESHOLD = 1024 * 1024 * 1024; // 1GB is a lot but appropriate for multi-document pushed using the push_p.json servlet
     protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
     private final static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool());
     /* ------------------------------------------------------------ */
@@ -197,8 +188,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
         templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
     }
-
-
+    
     /* ------------------------------------------------------------ */
     protected boolean getInitBoolean(String name, boolean dft) {
         String value = getInitParameter(name);
@@ -246,7 +236,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
     
-    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -299,7 +289,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
-                resource = Resource.newResource(new File(HTTPDFileHandler.htDocsPath, pathInContext));
+                resource = Resource.newResource(new File(_htDocsPath, pathInContext));
             }
             
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -431,12 +421,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
             throws IOException {
         try {
-            if (!request.getMethod().equals(HEAD.asString())) {
+            if (!request.getMethod().equals(HttpMethod.HEAD.asString())) {
 
-                String ifms = request.getHeader(IF_MODIFIED_SINCE.asString());
+                String ifms = request.getHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
                 if (ifms != null) {
 
-                    long ifmsl = request.getDateHeader(IF_MODIFIED_SINCE.asString());
+                    long ifmsl = request.getDateHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
                     if (ifmsl != -1) {
                         if (resource.lastModified() / 1000 <= ifmsl / 1000) {
                             response.reset();
@@ -448,7 +438,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
 
                 // Parse the if[un]modified dates and compare to resource
-                long date = request.getDateHeader(IF_UNMODIFIED_SINCE.asString());
+                long date = request.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE.asString());
 
                 if (date != -1) {
                     if (resource.lastModified() / 1000 > date / 1000) {
@@ -486,8 +476,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
             return;
         }
 
-        byte[] data = dir.getBytes("UTF-8");
-        response.setContentType(TEXT_HTML_UTF_8.asString());
+        byte[] data = dir.getBytes(StandardCharsets.UTF_8);
+        response.setContentType(MimeTypes.Type.TEXT_HTML_UTF_8.asString());
         response.setContentLength(data.length);
         response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
         response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 10000); // consider that directories are not modified that often
@@ -523,8 +513,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
             out = new WriterOutputStream(response.getWriter());
         }
 
-        response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 600000); // expires ten minutes in the future
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, resource.lastModified());
+        // remove the last-modified field since caching otherwise does not work
+        /*
+           https://www.ietf.org/rfc/rfc2616.txt
+           "if the response does have a Last-Modified time, the heuristic
+           expiration value SHOULD be no more than some fraction of the interval
+           since that time. A typical setting of this fraction might be 10%."
+        */
+        if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+            response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+        }
+
+        // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+        response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
         
         if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
             //  if there were no ranges, send entire entity
@@ -542,7 +543,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (ranges == null || ranges.isEmpty()) {
                 writeHeaders(response, resource, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                response.setHeader(CONTENT_RANGE.asString(),
+                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
                         InclusiveByteRange.to416HeaderRangeString(content_length));
                 resource.writeTo(out, 0, content_length);
                 out.close();
@@ -557,7 +558,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 long singleLength = singleSatisfiableRange.getSize(content_length);
                 writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                response.setHeader(CONTENT_RANGE.asString(),
+                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
                         singleSatisfiableRange.toHeaderRangeString(content_length));
                 resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
                 out.close();
@@ -580,7 +581,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             // send an old style multipart/x-byteranges Content-Type. This
             // keeps Netscape and acrobat happy. This is what Apache does.
             String ctp;
-            if (request.getHeader(REQUEST_RANGE.asString()) != null) {
+            if (request.getHeader(HttpHeader.REQUEST_RANGE.asString()) != null) {
                 ctp = "multipart/x-byteranges; boundary=";
             } else {
                 ctp = "multipart/byteranges; boundary=";
@@ -646,12 +647,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setContentType(extensionmime);
             }
         }
-
+        /*
+         * DO NOT enable this again, removal of the LAST_MODIFIED field enables caching
         long lml = resource.lastModified();
         if (lml >= 0) {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
         }
-
+        */
+        
         if (count != -1) {
             if (count < Integer.MAX_VALUE) {
                 response.setContentLength((int) count);
@@ -670,12 +673,34 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
 
+    /**
+     * Convert ServletRequest header to YaCy RequestHeader
+     * @param request ServletRequest
+     * @return RequestHeader created from ServletRequest
+     */
+    public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
+        RequestHeader result = new RequestHeader();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            Enumeration<String> headers = request.getHeaders(headerName);
+            while (headers.hasMoreElements()) {
+                String header = headers.nextElement();
+                result.add(headerName, header);
+            }
+        }
+        return result;
+    }
+
     protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
+        RequestHeader legacyRequestHeader = convertHeaderFromJetty(request);
 
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
+        /* Add request scheme (http or https) to allow templates to know wether original request is http or https 
+         * (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
+        legacyRequestHeader.put(HeaderFramework.X_YACY_REQUEST_SCHEME, request.getScheme());
         Switchboard sb = Switchboard.getSwitchboard();
         if (legacyRequestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(request.getAuthType())) {
@@ -786,18 +811,31 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected void handleTemplate(String target,  HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
-        String localeSelection = sb.getConfig("locale.language", "default");
+        String localeSelection = sb.getConfig("locale.language", "browser");
+        if (localeSelection.endsWith("browser")) {
+            String lng = request.getLocale().getLanguage();
+            if (lng.equalsIgnoreCase("en")) { // because en is handled as "default" in localizer
+                localeSelection = "default";
+            } else {
+                localeSelection = lng;
+            }
+        }
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(_resourceBase.addPath(target).getFile());
         String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
         long now = System.currentTimeMillis();
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
         if (target.endsWith(".css")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 4000); // expires in 4 seconds (which is still too often)
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
+            response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour (which is still often, others use 1 week, month or year)
         } else if (target.endsWith(".png")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 1000); // expires in 1 seconds (reduce heavy image creation load)
+            // expires in 1 minute (reduce heavy image creation load)
+            if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                response.getHeaders(HeaderFramework.LAST_MODIFIED).clear();
+            }
+            response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(60));
         } else {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
         }
         
@@ -851,8 +889,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else if (tmp instanceof EncodedImage) {
                     final EncodedImage yp = (EncodedImage) tmp;
                     result = yp.getImage();
-                    if (yp.isStatic()) {
-                        response.setDateHeader(HeaderFramework.EXPIRES, now + 600000); // expires in ten minutes
+                    /** When encodedImage is empty, return a code 500 rather than only an empty response 
+                     * as it is better handled across different browsers */
+                    if(result == null || result.length() == 0) {
+                    	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    	result.close();
+                    	return;
+                    }
+                    if (yp.isStatic()) { // static image never expires
+                        response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour
                     }
                 } else if (tmp instanceof Image) {
                     final Image i = (Image) tmp;
@@ -866,12 +911,22 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     if (height < 0) {
                         height = 96; // bad hack
                     }
-                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                     bi.createGraphics().drawImage(i, 0, 0, width, height, null);
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
-                final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+                boolean staticImage = target.equals("/ViewImage.png");
+               
+                if (staticImage) {
+                    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+                    }
+
+                    // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+                    response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+                }
+                final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -882,15 +937,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             if (tmp instanceof InputStream) {
-                final InputStream is = (InputStream) tmp;
-                final String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
-                response.setContentType(mimeType);
-                response.setStatus(HttpServletResponse.SC_OK);
-                byte[] buffer = new byte[4096];
-                int l, size = 0;
-                while ((l = is.read(buffer)) > 0) {response.getOutputStream().write(buffer, 0, l); size += l;}
-                response.setContentLength(size);
-                is.close();
+                writeInputStream(response, targetExt, (InputStream)tmp);
                 return;
             }
 
@@ -965,8 +1012,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                templatePatterns.put("clientlanguage", localeSelection);
                 
-                String mimeType = Classification.ext2mime(targetExt, TEXT_HTML.asString());
+                String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 
                 InputStream fis;
                 long fileSize = targetFile.length();
@@ -990,8 +1038,49 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
     }
-    
-    private static String appendPath(String proplist, String path) {
+
+
+    /**
+     * Write input stream content to response and close input stream.
+     * @param response servlet response. Must not be null.
+     * @param targetExt response file format
+     * @param tmp
+     * @throws IOException when a read/write error occured.
+     */
+	private void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)
+			throws IOException {
+		final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
+		response.setContentType(mimeType);
+		response.setStatus(HttpServletResponse.SC_OK);
+		byte[] buffer = new byte[4096];
+		int l, size = 0;
+		try {
+			while ((l = inStream.read(buffer)) > 0) {
+				response.getOutputStream().write(buffer, 0, l);
+				size += l;
+			}
+			response.setContentLength(size);
+		} catch(IOException e){
+			/** No need to log full stack trace (in most cases resource is not available because of a network error) */
+			ConcurrentLog.fine("FILEHANDLER", "YaCyDefaultServlet: resource content stream could not be written to response.");
+        	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	return;
+		} finally {
+			try {
+				inStream.close();
+			} catch(IOException ignored) {
+			}
+		}
+	}
+
+    /**
+     * Append a path string to comma separated string of pathes if not already
+     * contained in the proplist string
+     * @param proplist comma separated string of pathes
+     * @param path path to be appended
+     * @return comma separated string of pathes including param path
+     */
+    private String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;
         if (proplist.contains(path)) return proplist;
         return proplist + "," + path;
@@ -1035,8 +1124,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /**
      * TODO: add same functionality & checks as in HTTPDemon.parseMultipart
      *
-     * parse multi-part form data for formfields (only), see also original
+     * parse multi-part form data for formfields, see also original
      * implementation in HTTPDemon.parseMultipart
+     *
+     * For file data the parameter for the formfield contains the filename and a
+     * additional parameter with appendix [fieldname]$file conteins the upload content
+     * (e.g. <input type="file" name="upload">  upload="local/filename" upload$file=[content])
      *
      * @param request
      * @param args found fields/values are added to the map
@@ -1064,13 +1157,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     // simple text
                     if (item.getContentType() == null || !item.getContentType().contains("charset")) {
                         // old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
-                        args.add(item.getFieldName(), item.getString("UTF-8"));
+                        args.add(item.getFieldName(), item.getString(StandardCharsets.UTF_8.name()));
                     } else {
                         // use default encoding (given as header or ISO-8859-1)
                         args.add(item.getFieldName(), item.getString());
                     }
                 } else {
                     // read file upload
+                    args.add(item.getFieldName(), item.getName()); // add the filename to the parameters
                     InputStream filecontent = null;
                     try {
                         filecontent = item.getInputStream();
@@ -1082,10 +1176,20 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                 }
             }
-            if (files.size() <= 1) {
-                for (Map.Entry<String, byte[]> fe: files) {
-                    // the file is written in base64 encoded form to a string
-                    args.put(fe.getKey(), Base64Order.standardCoder.encode(fe.getValue()));
+            if (files.size() <= 1) { // TODO: should include additonal checks to limit parameter.size below rel. large SIZE_FILE_THRESHOLD
+                for (Map.Entry<String, byte[]> job: files) { // add the file content to parameter fieldname$file
+                    String n = job.getKey();
+                    byte[] v = job.getValue();
+                    String filename = args.get(n);
+                    if (filename != null && filename.endsWith(".gz")) {
+                        // transform this value into base64
+                        String b64 = Base64Order.standardCoder.encode(v);
+                        args.put(n + "$file", b64);
+                        args.remove(n);
+                        args.put(n, filename + ".base64");
+                    } else {
+                        args.put(n + "$file", v); // the byte[] is transformed into UTF8. You cannot push binaries here
+                    }
                 }
             } else {
                 // do this concurrently (this would all be superfluous if serverObjects could store byte[] instead only String)
@@ -1099,8 +1203,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         public void run() {
                             Map.Entry<String, byte[]> job;
                             try {while ((job = files.take()) != POISON) {
-                                String b64 = Base64Order.standardCoder.encode(job.getValue());
-                                synchronized (args) {args.put(job.getKey(), b64);}
+                                String n = job.getKey();
+                                byte[] v = job.getValue();
+                                String filename = args.get(n);
+                                String b64 = Base64Order.standardCoder.encode(v);
+                                synchronized (args) {
+                                    args.put(n + "$file", b64);
+                                    args.remove(n);
+                                    args.put(n, filename + ".base64");
+                                }
                             }} catch (InterruptedException e) {}
                         }
                     };

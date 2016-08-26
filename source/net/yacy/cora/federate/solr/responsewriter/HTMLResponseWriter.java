@@ -67,6 +67,39 @@ public class HTMLResponseWriter implements QueryResponseWriter {
     @Override
     public void init(@SuppressWarnings("rawtypes") NamedList n) {
     }
+    
+    /**
+     * Append YaCy JavaScript license information to writer
+     * @param writer must be non null
+     * @throws IOException when a write error occured
+     */
+	private void writeJSLicence(final Writer writer) throws IOException {
+		writer.write("<script>");
+		writer.write("/*");
+		writer.write("@licstart  The following is the entire license notice for the");
+		writer.write("JavaScript code in this page.");
+		writer.write("");
+		writer.write("Copyright (C) 2013-2015 by Michael Peter Christen and reger");
+		writer.write("");
+		writer.write("The JavaScript code in this page is free software: you can redistribute it and/or");
+		writer.write("modify it under the terms of the GNU General Public License");
+		writer.write("as published by the Free Software Foundation; either version 2");
+		writer.write("of the License, or (at your option) any later version.");
+		writer.write("");
+		writer.write("This program is distributed in the hope that it will be useful,");
+		writer.write("but WITHOUT ANY WARRANTY; without even the implied warranty of");
+		writer.write("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
+		writer.write("GNU General Public License for more details.");
+		writer.write("");
+		writer.write("You should have received a copy of the GNU General Public License");
+		writer.write("along with this program; if not, write to the Free Software");
+		writer.write("Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.");
+		writer.write("");
+		writer.write("@licend  The above is the entire license notice");
+		writer.write("for the JavaScript code in this page.");
+		writer.write("*/");
+		writer.write("</script>");
+	}
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
@@ -84,6 +117,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("      xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n");
         writer.write("      xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n");
         writer.write("<head profile=\"http://www.w3.org/2003/g/data-view\">\n");
+        this.writeJSLicence(writer);
         //writer.write("<link rel=\"transformation\" href=\"http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl\"/>\n");
 
         writer.write("<!-- Bootstrap core CSS -->\n");

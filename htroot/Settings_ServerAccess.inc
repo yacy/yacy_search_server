@@ -55,7 +55,7 @@
 			for the preconfigured value 'localpeer', the URL is: http://localpeer/.</td>
   </tr>
   <tr valign="top">
-    <td colspan="3"><input type="submit" name="serveraccount" value="Submit" /></td>
+    <td colspan="3"><input type="submit" name="serveraccount" class="btn btn-primary" value="Submit" /></td>
   </tr>
 </table>
 </fieldset>

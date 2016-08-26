@@ -24,6 +24,7 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -204,10 +205,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String threadname = Thread.currentThread().getName();
-        String ql = ""; try {ql = URLDecoder.decode(req.getParams().toString(), "UTF-8");} catch (UnsupportedEncodingException e) {}
+        String ql = ""; try {ql = URLDecoder.decode(req.getParams().toString(), StandardCharsets.UTF_8.name());} catch (UnsupportedEncodingException e) {}
         Thread.currentThread().setName("solr query: " + ql); // for debugging in Threaddump
-        ConcurrentLog.info("EmbeddedSolrConnector.query", "QUERY: " + ql);
-        //System.out.println("EmbeddedSolrConnector.query * QUERY: " + ql); System.out.println("STACKTRACE: " + ConcurrentLog.stackTrace());
+        ConcurrentLog.fine("EmbeddedSolrConnector.query", "QUERY: " + ql);
         
         SolrQueryResponse rsp = new SolrQueryResponse();
         NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
@@ -330,7 +330,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String threadname = Thread.currentThread().getName();
-        String ql = ""; try {ql = URLDecoder.decode(params.toString(), "UTF-8");} catch (UnsupportedEncodingException e) {}
+        String ql = ""; try {ql = URLDecoder.decode(params.toString(), StandardCharsets.UTF_8.name());} catch (UnsupportedEncodingException e) {}
         Thread.currentThread().setName("solr query: q=" + ql);
         ConcurrentLog.info("EmbeddedSolrConnector.getResponseByParams", "QUERY: " + ql);
         //System.out.println("EmbeddedSolrConnector.getResponseByParams * QUERY: " + ql); System.out.println("STACKTRACE: " + ConcurrentLog.stackTrace());

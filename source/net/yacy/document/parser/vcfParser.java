@@ -43,6 +43,7 @@ import java.util.List;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
@@ -69,7 +70,7 @@ public class vcfParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -235,11 +236,11 @@ public class vcfParser extends AbstractParser implements Parser {
                     null,                       // set of languages
                     null,                       // a list of extracted keywords
                     singleList(parsedTitle.toString()), // a long document title
-                    "",                         // TODO: AUTHOR
+                    null,                       // TODO: AUTHOR
                     "",                         // the publisher
                     sections,                   // an array of section headlines
                     descriptions,               // an abstract
-                    0.0f, 0.0f,
+                    0.0d, 0.0d,
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors
                     null,

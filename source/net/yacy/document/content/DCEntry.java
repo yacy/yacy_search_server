@@ -28,6 +28,7 @@ package net.yacy.document.content;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.text.Collator;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -44,6 +45,8 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
+import net.yacy.document.parser.genericParser;
+import net.yacy.search.schema.CollectionSchema;
 
 public class DCEntry extends MultiMapSolrParams {
 
@@ -329,11 +332,15 @@ public class DCEntry extends MultiMapSolrParams {
         languages.add(getLanguage());
         List<String> t = new ArrayList<String>(1);
         t.add(getTitle());
+        
+        // for processing during indexing, embed entry as source scraperObject in a standard parserobj object
+        genericParser parserobj = new genericParser(this); // init the simplest parser with DCEntry as source/scraperObject used during indexing
+
         return new Document(
             getIdentifier(true),
             "text/html",
-            "UTF-8",
-            this,
+            StandardCharsets.UTF_8.name(),
+            parserobj,
             languages,
             getSubject(), // might be null
             t,
@@ -342,7 +349,7 @@ public class DCEntry extends MultiMapSolrParams {
             null,
             getDescriptions(),
             getLon(), getLat(),
-            get("text_t", ""),
+            get(CollectionSchema.text_t.name(), ""),
             null,
             null,
             null,
@@ -353,7 +360,7 @@ public class DCEntry extends MultiMapSolrParams {
     public void writeXML(OutputStreamWriter os) throws IOException {
         Document doc = document();
         if (doc != null) {
-            doc.writeXML(os, this.getDate());
+            doc.writeXML(os);
         }
     }
 }

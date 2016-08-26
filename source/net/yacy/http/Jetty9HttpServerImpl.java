@@ -163,9 +163,13 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] 
-           {new MonitorHandler(), domainHandler, new ProxyCacheHandler(), new ProxyHandler()}); 
-
+        if (sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false)) {
+            // Proxyhandlers are only needed if feature activated (save resources if not used)
+            ConcurrentLog.info("SERVER", "load Jetty handler for transparent proxy");
+            handlers.setHandlers(new Handler[]{new MonitorHandler(), domainHandler, new ProxyCacheHandler(), new ProxyHandler()});
+        } else {
+            handlers.setHandlers(new Handler[]{new MonitorHandler(), domainHandler});
+        }
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         ContextHandler context = new ContextHandler();
         context.setServer(server);

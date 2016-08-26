@@ -28,7 +28,7 @@
       </fieldset>
     </form>
     <hr />
-    <p>Cookies at this browser:</p>
+    <h3>Cookies at this browser:</h3>
     <p>
     <script type="text/javascript">
        <!--
@@ -39,16 +39,16 @@
     #(cookiesout)#
     ::
     <hr />
-    <p>Cookies coming to server:</p>
+    <h3>Cookies coming to server:</h3>
     #(/cookiesout)#
     <p>#{cookiesout}#
-    #[string]#
+    #[string]#<br />
     #{/cookiesout}#</p>
 
     #(cookiesin)#
     ::
     <hr />
-    <p>Cookies server sent:</p>
+    <h3>Cookies server sent:</h3>
     #(/cookiesin)#
     <p>#{cookiesin}#
     #[name]# = #[value]#
@@ -57,7 +57,6 @@
     <p class="info">YaCy is a GPL'ed project
       with the target of implementing a P2P-based global search engine.<br />
       Architecture (C) by Michael Peter Christen,
-      <img src="env/grafics/mcemailh.gif" alt="Mail-Adresse von Michael Peter Christen" />
     </p>
     #%env/templates/footer.template%#
   </body>

@@ -7,13 +7,15 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.util.regex.PatternSyntaxException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.document.encoding.UTF8;
@@ -24,14 +26,12 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
 import net.yacy.server.http.HTTPDProxyHandler;
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
-import org.eclipse.jetty.proxy.ProxyServlet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -74,7 +74,7 @@ import org.jsoup.select.Elements;
  * 
  * This class is linked to YaCy within jetty using the defaults/web.xml configuration
  */
-public class UrlProxyServlet extends ProxyServlet implements Servlet {
+public class UrlProxyServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = 4900000000000001121L;
     private String _stopProxyText = null;
 
@@ -122,22 +122,18 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         }
         // 2 -  get target url
         URL proxyurl = null;
-        String strARGS = request.getQueryString();
-        if (strARGS == null) {
+        final String strUrl = request.getParameter("url");
+        if (strUrl == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
             return;
         }
 
-        if (strARGS.startsWith("url=")) {
-            final String strUrl = strARGS.substring(4); // strip "url="
-
-            try {
-                proxyurl = new URL(strUrl);
-            } catch (final MalformedURLException e) {
-                proxyurl = new URL(URLDecoder.decode(strUrl, UTF8.charset.name()));
-
-            }
+        try {
+            proxyurl = new URL(strUrl);
+        } catch (final MalformedURLException e) {
+            proxyurl = new URL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
         }
+        
         if (proxyurl == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
             return;
@@ -148,7 +144,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             hostwithport += ":" + proxyurl.getPort();
         }
         // 4 - get target url
-        RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
+        RequestHeader yacyRequestHeader = YaCyDefaultServlet.convertHeaderFromJetty(request);
         yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
         yacyRequestHeader.remove(HeaderFramework.CONTENT_LENGTH);
         
@@ -160,6 +156,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         prop.put(HeaderFramework.CONNECTION_PROP_METHOD, request.getMethod()); // only needed for HTTPDeamon errormsg in case of blacklisted url
         if (proxyurl.getQuery() != null) prop.put(HeaderFramework.CONNECTION_PROP_ARGS, proxyurl.getQuery());
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
+        prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 
         yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
         yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());
@@ -272,7 +269,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
             byte[] sbb;
             if (doc.charset() == null) {
                 sbb = UTF8.getBytes(doc.toString());
-                response.setCharacterEncoding(UTF8.charset.name());
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             } else { // keep orig charset
                 sbb = doc.toString().getBytes(doc.charset());
                 response.setCharacterEncoding(doc.charset().name());
@@ -325,7 +322,7 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
         if (b == -1) {
             return null;
         }
-        return buf.toString("UTF-8");
+        return buf.toString(StandardCharsets.UTF_8.name());
     }
 
     /**
@@ -334,16 +331,17 @@ public class UrlProxyServlet extends ProxyServlet implements Servlet {
     private boolean proxyippatternmatch(final String key) {
         // the cfgippattern is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
-        final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyURL.access", "*");
-        if (cfgippattern.equals("*")) {
+        final String[] cfgippattern = Switchboard.getSwitchboard().getConfigArray("proxyURL.access", "*");
+        if (cfgippattern[0].equals("*")) {
             return true;
         }
-        final StringTokenizer st = new StringTokenizer(cfgippattern, ",");
-        String pattern;
-        while (st.hasMoreTokens()) {
-            pattern = st.nextToken();
-            if (key.matches(pattern)) {
-                return true;
+        for (String pattern : cfgippattern) {
+            try {
+                if (key.matches(pattern)) {
+                    return true;
+                }
+            } catch (PatternSyntaxException ex) {
+                ConcurrentLog.warn("PROXY", "wrong ip pattern in url proxy config " + ex.getMessage() );
             }
         }
         return false;

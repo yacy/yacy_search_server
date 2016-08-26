@@ -29,6 +29,7 @@ package net.yacy.crawler.data;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,12 +40,18 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrException;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.FailCategory;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ConnectionInfo;
@@ -546,6 +553,78 @@ public class CrawlQueues {
                 CrawlQueues.log.warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
             }
         }
+        return true;
+    }
+    
+    public boolean autocrawlJob() {
+        if (!this.sb.getConfigBool(SwitchboardConstants.AUTOCRAWL, false)) {
+            return false;
+        }
+        
+        if (isPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+            return false;
+        }
+        
+        if (coreCrawlJobSize() > 200) {
+            return false;
+        }
+        
+        String rows = this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_ROWS, "100");
+        
+        String dateQuery = String.format("load_date_dt:[* TO NOW-%sDAY]", this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"));
+        
+        final SolrQuery query = new SolrQuery();
+        query.add("group", "true");
+        query.add("group.field", "host_s");
+        query.add("group.limit", "1");
+        query.add("group.main", "true");
+        query.add("rows", rows);
+        query.setQuery(this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_QUERY, "*:*"));
+        query.setFields("host_s,url_protocol_s");
+        query.addSort("load_date_dt", SolrQuery.ORDER.asc);
+        query.addFilterQuery(dateQuery);
+        
+        try {
+            QueryResponse resp = sb.index.fulltext().getDefaultConnector().getResponseByParams(query);
+            
+            int i = 0;
+            int deepRatio = Integer.parseInt(this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_RATIO, "50"));
+            for (SolrDocument doc: resp.getResults()) {
+                boolean deep = false;
+                i++;
+                if( i % deepRatio == 0 ){
+                    deep = true;
+                }
+                DigestURL url;
+                final String u = doc.getFieldValue("url_protocol_s").toString() + "://" + doc.getFieldValue("host_s").toString();
+                try {
+                    url = new DigestURL(u);
+                } catch (final MalformedURLException e) {
+                    continue;
+                }
+                final String urlRejectReason = this.sb.crawlStacker.urlInAcceptedDomain(url);
+                if (urlRejectReason == null) {
+                    this.sb.crawlStacker.enqueueEntry(new Request(
+                            ASCII.getBytes(this.sb.peers.mySeed().hash),
+                            url,
+                            null,
+                            "CRAWLING-ROOT",
+                            new Date(),
+                            deep ? this.sb.crawler.defaultAutocrawlDeepProfile.handle() : this.sb.crawler.defaultAutocrawlShallowProfile.handle(),
+                            0,
+                            deep ? this.sb.crawler.defaultAutocrawlDeepProfile.timezoneOffset() : this.sb.crawler.defaultAutocrawlShallowProfile.timezoneOffset()
+                    ));
+                } else {
+                    CrawlQueues.log.warn("autocrawl: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
+                }
+            }
+            
+        } catch (SolrException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
         return true;
     }
 

@@ -1,6 +1,6 @@
     "navigation": [#(nav-dates)#::{
       "facetname": "dates",
-      "displayname": "Filetype",
+      "displayname": "Date",
       "type": "String",
       "min": "0",
       "max": "0",

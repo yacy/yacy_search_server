@@ -9,6 +9,39 @@
     }
     </style>
 
+  <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+  <body id="Network">
+
+    #(menu)#
+    #%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#    
+    <div class="SubMenu">
+      <h3>YaCy Network</h3>
+      <ul class="SubMenu">
+        <li><a href="Network.html" class="MenuItemLink">Network Overview</a></li>
+        <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Senior&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Junior&nbsp;(fragment)&nbsp;Peers</a></li>
+        <li><a href="Network.html?page=5" class="MenuItemLink">Network History</a></li>
+      </ul>
+    </div>
+    #(/menu)#
+    
+<div id="api"><a href="Network.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML.
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
+</div>
+<script type="text/javascript">
+document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.location.search.substring(1));
+</script>
+
+    #(page)#
+    <h2>YaCy Search Network '#[networkName]#'</h2>
   <script type="text/javascript">
   <!--
     imagestub = "NetworkPicture.png?width=1024&height=720&bgcolor=FFFFFF&ct=15000&coronaangle=";
@@ -45,39 +78,6 @@
     }
   -->
   </script>
-  <script type="text/javascript" src="js/sorttable.js"></script>
-  </head>
-  <body id="Network">
-
-    #(menu)#
-    #%env/templates/embeddedheader.template%#
-    ::
-    #%env/templates/simpleheader.template%#
-    ::
-    #%env/templates/header.template%#    
-    <div class="SubMenu">
-      <h3>YaCy Network</h3>
-      <ul class="SubMenu">
-        <li><a href="Network.html" class="MenuItemLink">Network Overview</a></li>
-        <li><a href="Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Senior&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=3&maxCount=1000" class="MenuItemLink">Junior&nbsp;(fragment)&nbsp;Peers</a></li>
-        <li><a href="Network.html?page=5" class="MenuItemLink">Network History</a></li>
-      </ul>
-    </div>
-    #(/menu)#
-    
-<div id="api"><a href="Network.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
-<span>The information that is presented on this page can also be retrieved as XML.
-Click the API icon to see the XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.</span>
-</div>
-<script type="text/javascript">
-document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.location.search.substring(1));
-</script>
-
-    #(page)#
-    <h2>YaCy Search Network '#[networkName]#'</h2>
     ::
     <h2>Active Principal and Senior Peers in '#[networkName]#' Network</h2>
     ::
@@ -102,7 +102,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
         <label for="match">Search for a peername (RegExp allowed)</label>:
         <input type="text" id="match" name="match" value="#[searchpattern]#" />
         <input type="hidden" name="page" value="#[page]#" />
-        <input type="submit" name="search" value="Search" />
+        <input type="submit" name="search" class="btn btn-default" value="Search" />
       </fieldset>
     </form>
     <table class="sortable" border="0">
@@ -127,6 +127,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
         <td><strong>Received DHT<br/>Word Chunks</strong></td>
         <td><strong>Received<br/>URLs</strong></td>
         <td><strong>Location</strong><br/></td>
+        <td><strong>JRE</strong><br/></td>
         #(c)#::<td><strong>user agent<br/></strong></td>#(/c)#
         <td>send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log</td>
       </tr>
@@ -153,6 +154,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
         <td align="right">#[rI]#</td>
         <td align="right">#[rU]#</td>
         <td align="right">#[location]#</td>
+        <td align="right">#[jre]#</td>
         #(c)#::<td align="right">#[userAgent]#</td>#(/c)#
         <td><nobr>
           <a href="MessageSend_p.html?hash=#[hash]#" title="Send message to peer #[fullname]#">m</a>&nbsp;
@@ -354,7 +356,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
         </tr>
         <tr>
           <td>&nbsp;<input name="page" type="hidden" value="4" /></td>
-          <td><input type="submit" name="addPeer" value="add Peer" /></td>
+          <td><input type="submit" name="addPeer" class="btn btn-primary" value="add Peer" /></td>
         </tr>
       </table>
     </form>
@@ -388,7 +390,7 @@ document.getElementById("apilink").setAttribute("href", "Network.xml?" + window.
       scale: number of hours per scale unit in the bottom line
      -->
     <h3><b>Count of Connected Senior Peers</b> in the last two days, scale = 1h</h3>
-    <img src="/NetworkHistory.png?columns=cC&scale=1&maxtime=48" />
+    <img src="/NetworkHistory.png?columns=cC&scale=1&maxtime=48&width=809" />
     <h3><b>Count of all Active Peers Per Day</b> in the last week, scale = 1d</h3>
     <img src="/NetworkHistory.png?columns=aD&scale=24&maxtime=168" />
     <h3><b>Count of all Active Peers Per Week</b> in the last 30d, scale = 7d</h3>

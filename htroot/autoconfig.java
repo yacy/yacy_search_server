@@ -52,7 +52,7 @@ public class autoconfig {
         final boolean yacyonly = env.getConfigBool(SwitchboardConstants.PROXY_YACY_ONLY, false);
 
         // get the http host header
-        final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
+        final String hostSocket = header.get(HeaderFramework.HOST);
 
         String host = hostSocket;
         int port = 80;

@@ -29,10 +29,11 @@ package net.yacy.document.parser;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -64,7 +65,7 @@ public class pptParser extends AbstractParser implements Parser {
      */
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -104,7 +105,7 @@ public class pptParser extends AbstractParser implements Parser {
             final Document[] docs = new Document[]{new Document(
                 location,
                 mimeType,
-                "UTF-8",
+                StandardCharsets.UTF_8.name(),
                 this,
                 null,
                 keywlist,
@@ -113,7 +114,7 @@ public class pptParser extends AbstractParser implements Parser {
                 pptExtractor.getDocSummaryInformation().getCompany(),
                 null,
                 descriptions,
-                0.0f, 0.0f,
+                0.0d, 0.0d,
                 contents,
                 null,
                 null,

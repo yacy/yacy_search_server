@@ -24,7 +24,7 @@
 
 package net.yacy.cora.document.encoding;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 
 import org.apache.http.entity.ContentType;
@@ -41,11 +41,7 @@ import org.apache.http.entity.mime.content.StringBody;
  */
 public class UTF8 implements Comparator<String> {
 
-    public final static Charset charset;
-    static {
-        charset = Charset.forName("UTF-8");
-    }
-    private final static ContentType contentType = ContentType.TEXT_PLAIN.withCharset(charset);
+    private final static ContentType contentType = ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8);
 
     public static final UTF8 insensitiveUTF8Comparator = new UTF8(true);
     public static final UTF8 identityUTF8Comparator = new UTF8(false);
@@ -114,11 +110,11 @@ public class UTF8 implements Comparator<String> {
      * @return
      */
     public final static String String(final byte[] bytes) {
-        return new String(bytes, 0, bytes.length, charset);
+        return new String(bytes, 0, bytes.length, StandardCharsets.UTF_8);
     }
 
     public final static String String(final byte[] bytes, final int offset, final int length) {
-        return new String(bytes, offset, length, charset);
+        return new String(bytes, offset, length, StandardCharsets.UTF_8);
     }
 
     /**
@@ -200,12 +196,12 @@ public class UTF8 implements Comparator<String> {
      */
     public final static byte[] getBytes(final String s) {
         if (s == null) return null;
-        return s.getBytes(charset);
+        return s.getBytes(StandardCharsets.UTF_8);
     }
 
     public final static byte[] getBytes(final StringBuilder s) {
         if (s == null) return null;
-        return s.toString().getBytes(charset);
+        return s.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     /**
@@ -256,7 +252,7 @@ public class UTF8 implements Comparator<String> {
                         return s;
                         //throw new IllegalArgumentException("URLDecoder: Incomplete trailing escape (%) pattern");
                     }
-                    sb.append(new String(bytes, 0, pos, charset));
+                    sb.append(new String(bytes, 0, pos, StandardCharsets.UTF_8));
                 } catch (final NumberFormatException e) {
                     return s;
                     //throw new IllegalArgumentException("URLDecoder: Illegal hex characters in escape (%) pattern - " + e.getMessage());

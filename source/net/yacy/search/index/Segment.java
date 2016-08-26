@@ -502,15 +502,19 @@ public class Segment {
             language = (bymetadata == null) ? url.language() : bymetadata;
         } else {
             if (bymetadata == null) {
-                // two possible results: compare and report conflicts
-                if (!language.equals(url.language())) {
-                    // see if we have a hint in the url that the statistic was right
-                    final String u = urlNormalform.toLowerCase();
-                    if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
-                        // no confirmation using the url, use the TLD
-                        language = url.language();
-                    } else {
-                        // this is a strong hint that the statistics was in fact correct
+                if (condenser.languageProbability() < 0.9) { // if probability of statistic is not very high, examine url
+                    // two possible results: compare and report conflicts
+                    if (!language.equals(url.language())) {
+                        // see if we have a hint in the url that the statistic was right
+                        final String u = urlNormalform.toLowerCase();
+                        String ISO639_country = ISO639.country(language);
+                        if (u.contains("/" + language + "/") ||
+                            (ISO639_country != null && u.contains("/" + ISO639.country(language).toLowerCase() + "/"))) {
+                            // this is a strong hint that the statistics was in fact correct
+                        } else {
+                            // no confirmation using the url, use the TLD
+                            language = url.language();
+                        }
                     }
                 }
             } else {
@@ -597,11 +601,14 @@ public class Segment {
                 crawlProfile != null && document.getDepth() <= crawlProfile.snapshotMaxdepth() &&
                 !crawlProfile.snapshotsMustnotmatch().matcher(urlNormalform).matches()) {
             // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
-            String ext = MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase();
-            if (ext.length() == 0 || url.getFile().length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext)) {
+            Parser p = document.getParserObject();
+            boolean mimesupported = false;
+            if (p instanceof htmlParser)
+                    mimesupported = ((htmlParser)p).supportedMimeTypes().contains(document.dc_format());
+
+            if (mimesupported)
                 // STORE IMAGE AND METADATA
                 Transactions.store(vector, true, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, acceptLanguage);
-            }
         }
         
         // STORE TO SOLR
@@ -680,13 +687,12 @@ public class Segment {
         final long storageEndTime = System.currentTimeMillis();
 
         // STORE PAGE INDEX INTO WORD INDEX DB
-        int outlinksSame = document.inboundLinks().size();
-        int outlinksOther = document.outboundLinks().size();
-        final int urlLength = urlNormalform.length();
-        final int urlComps = MultiProtocolURL.urlComps(url.toNormalform(false)).length;
-
         // create a word prototype which is re-used for all entries
         if ((this.termIndex != null && storeToRWI) || searchEvent != null) {
+            final int outlinksSame = document.inboundLinks().size();
+            final int outlinksOther = document.outboundLinks().size();
+            final int urlLength = urlNormalform.length();
+            final int urlComps = MultiProtocolURL.urlComps(url.toNormalform(false)).length;
             final int wordsintitle = CommonPattern.SPACES.split(dc_title).length; // same calculation as for CollectionSchema.title_words_val
             final WordReferenceRow ientry = new WordReferenceRow(
                             url.hash(),

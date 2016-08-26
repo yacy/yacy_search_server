@@ -21,10 +21,10 @@ package net.yacy.cora.federate.opensearch;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.feed.RSSReader;
@@ -63,8 +63,8 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
         tmps = tmps.replace("{startPage}", "");
         tmps = tmps.replace("{count}", Integer.toString(rows));
         tmps = tmps.replace("{language}", "");
-        tmps = tmps.replace("{inputEncoding}", "UTF-8");
-        tmps = tmps.replace("{outputEncoding}", "UTF-8");
+        tmps = tmps.replace("{inputEncoding}", StandardCharsets.UTF_8.name());
+        tmps = tmps.replace("{outputEncoding}", StandardCharsets.UTF_8.name());
         return tmps.replace("{searchTerms}", query);
     }
 
@@ -97,7 +97,7 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
                                 DigestURL uri = new DigestURL(item.getLink());
 
                                 URIMetadataNode doc = new URIMetadataNode(uri);
-                                doc.setField(CollectionSchema.charset_s.getSolrFieldName(), UTF8.charset.name());
+                                doc.setField(CollectionSchema.charset_s.getSolrFieldName(), StandardCharsets.UTF_8.name());
                                 doc.setField(CollectionSchema.author.getSolrFieldName(), item.getAuthor());
                                 doc.setField(CollectionSchema.title.getSolrFieldName(), item.getTitle());
                                 doc.setField(CollectionSchema.language_s.getSolrFieldName(), item.getLanguage());

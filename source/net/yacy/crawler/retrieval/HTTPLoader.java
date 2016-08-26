@@ -24,7 +24,11 @@
 
 package net.yacy.crawler.retrieval;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.http.StatusLine;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.FailCategory;
@@ -34,7 +38,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.HTTPInputStream;
 import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.kelondro.io.ByteCount;
@@ -75,6 +81,213 @@ public final class HTTPLoader {
         Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
+    
+    /**
+     * Open input stream on a requested HTTP resource. When resource is small, fully load it and returns a ByteArrayInputStream instance.
+     * @param request
+     * @param profile crawl profile
+     * @param retryCount remaining redirect retries count
+     * @param maxFileSize max file size to load. -1 means no limit.
+     * @param blacklistType blacklist type to use
+     * @param agent agent identifier
+     * @return an open input stream. Don't forget to close it.
+     * @throws IOException when an error occured
+     */
+	public InputStream openInputStream(final Request request, CrawlProfile profile, final int retryCount,
+			final int maxFileSize, final BlacklistType blacklistType, final ClientIdentification.Agent agent)
+					throws IOException {
+		if (retryCount < 0) {
+			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+					FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
+			throw new IOException(
+					"retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.$");
+		}
+		DigestURL url = request.url();
+
+		final String host = url.getHost();
+		if (host == null || host.length() < 2) {
+			throw new IOException("host is not well-formed: '" + host + "'");
+		}
+		final String path = url.getFile();
+		int port = url.getPort();
+		final boolean ssl = url.getProtocol().equals("https");
+		if (port < 0)
+			port = (ssl) ? 443 : 80;
+
+		// check if url is in blacklist
+		final String hostlow = host.toLowerCase();
+		if (blacklistType != null && Switchboard.urlBlacklist.isListed(blacklistType, hostlow, path)) {
+			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT,
+					"url in blacklist", -1);
+			throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
+		}
+
+		// resolve yacy and yacyh domains
+		final AlternativeDomainNames yacyResolver = this.sb.peers;
+		if (yacyResolver != null) {
+			final String yAddress = yacyResolver.resolve(host);
+			if (yAddress != null) {
+				url = new DigestURL(url.getProtocol() + "://" + yAddress + path);
+			}
+		}
+
+		// create a request header
+		final RequestHeader requestHeader = createRequestheader(request, agent);
+
+		// HTTP-Client
+		final HTTPClient client = new HTTPClient(agent);
+		client.setRedirecting(false); // we want to handle redirection
+										// ourselves, so we don't index pages
+										// twice
+		client.setTimout(this.socketTimeout);
+		client.setHeader(requestHeader.entrySet());
+
+		// send request
+		client.GET(url, false);
+		final StatusLine statusline = client.getHttpResponse().getStatusLine();
+		final int statusCode = statusline.getStatusCode();
+		final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
+		String requestURLString = request.url().toNormalform(true);
+
+		// check redirection
+		if (statusCode > 299 && statusCode < 310) {
+			client.finish();
+			
+			final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, statusline,
+					responseHeader, requestURLString);
+
+			if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
+				// we have two use cases here: loading from a crawl or just
+				// loading the url. Check this:
+				if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
+					// put redirect url on the crawler queue to repeat a
+					// double-check
+					request.redirectURL(redirectionUrl);
+					this.sb.crawlStacker.stackCrawl(request);
+					// in the end we must throw an exception (even if this is
+					// not an error, just to abort the current process
+					throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to "
+							+ redirectionUrl.toNormalform(false) + " placed on crawler queue for double-check");
+				}
+
+				// if we are already doing a shutdown we don't need to retry
+				// crawling
+				if (Thread.currentThread().isInterrupted()) {
+					this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+							FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
+					throw new IOException(
+							"CRAWLER Redirect of URL=" + requestURLString + " aborted because of server shutdown.$");
+				}
+
+				// retry crawling with new url
+				request.redirectURL(redirectionUrl);
+				return openInputStream(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
+			}
+			// we don't want to follow redirects
+			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+					FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
+			throw new IOException("REJECTED UNWANTED REDIRECTION '" + statusline
+					+ "' for URL '" + requestURLString + "'$");
+		} else if (statusCode == 200 || statusCode == 203) {
+			// the transfer is ok
+
+			/*
+			 * When content is not large (less than 1MB), we have better cache it if cache is enabled and url is not local
+			 */
+			long contentLength = client.getHttpResponse().getEntity().getContentLength();
+			if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (Response.CRAWLER_MAX_SIZE_TO_CACHE) && !url.isLocal()) {
+				byte[] content = null;
+				try {
+					content = HTTPClient.getByteArray(client.getHttpResponse().getEntity(), maxFileSize);
+					Cache.store(url, responseHeader, content);
+				} catch (final IOException e) {
+					this.log.warn("cannot write " + url + " to Cache (3): " + e.getMessage(), e);
+				} finally {
+					client.finish();
+				}
+
+				return new ByteArrayInputStream(content);
+			}
+			/*
+			 * Returns a HTTPInputStream delegating to
+			 * client.getContentstream(). Close method will ensure client is
+			 * properly closed.
+			 */
+			return new HTTPInputStream(client);
+		} else {
+			client.finish();
+			// if the response has not the right response type then reject file
+			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+					FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
+			throw new IOException("REJECTED WRONG STATUS TYPE '" + statusline
+					+ "' for URL '" + requestURLString + "'$");
+		}
+	}
+
+	/**
+	 * Extract redirect URL from response header. Status code is supposed to be between 299 and 310. Parameters must not be null.
+	 * @return redirect URL
+	 * @throws IOException when an error occured
+	 */
+	private DigestURL extractRedirectURL(final Request request, CrawlProfile profile, DigestURL url,
+			final StatusLine statusline, final ResponseHeader responseHeader, String requestURLString)
+					throws IOException {
+		// read redirection URL
+		String redirectionUrlString = responseHeader.get(HeaderFramework.LOCATION);
+		redirectionUrlString = redirectionUrlString == null ? "" : redirectionUrlString.trim();
+
+		if (redirectionUrlString.isEmpty()) {
+			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+					FailCategory.TEMPORARY_NETWORK_FAILURE,
+					"no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusline.getStatusCode());
+			throw new IOException("REJECTED EMTPY REDIRECTION '" + statusline
+					+ "' for URL '" + requestURLString + "'$");
+		}
+
+		// normalize URL
+		final DigestURL redirectionUrl = DigestURL.newURL(request.url(), redirectionUrlString);
+
+		// restart crawling with new url
+		this.log.info("CRAWLER Redirection detected ('" + statusline + "') for URL "
+				+ requestURLString);
+		this.log.info("CRAWLER ..Redirecting request to: " + redirectionUrl.toNormalform(false));
+
+		this.sb.webStructure.generateCitationReference(url, redirectionUrl);
+
+		if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_RECORD_REDIRECTS, true)) {
+			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+					FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusline.getStatusCode());
+		}
+		return redirectionUrl;
+	}
+
+	/**
+	 * Create request header for loading content.
+	 * @param request search request
+	 * @param agent agent identification information
+	 * @return a request header
+	 * @throws IOException when an error occured
+	 */
+	private RequestHeader createRequestheader(final Request request, final ClientIdentification.Agent agent)
+			throws IOException {
+		final RequestHeader requestHeader = new RequestHeader();
+		requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
+		DigestURL refererURL = null;
+		if (request.referrerhash() != null) {
+			refererURL = this.sb.getURL(request.referrerhash());
+		}
+		if (refererURL != null) {
+			requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
+		}
+		requestHeader.put(HeaderFramework.ACCEPT, this.sb.getConfig("crawler.http.accept", DEFAULT_ACCEPT));
+		requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE,
+				this.sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
+		requestHeader.put(HeaderFramework.ACCEPT_CHARSET,
+				this.sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
+		requestHeader.put(HeaderFramework.ACCEPT_ENCODING,
+				this.sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
+		return requestHeader;
+	}
 
     private Response load(final Request request, CrawlProfile profile, final int retryCount, final int maxFileSize, final BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
 
@@ -112,15 +325,7 @@ public final class HTTPLoader {
         Response response = null;
 
         // create a request header
-        final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
-        DigestURL refererURL = null;
-        if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
-        if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
-        requestHeader.put(HeaderFramework.ACCEPT, this.sb.getConfig("crawler.http.accept", DEFAULT_ACCEPT));
-        requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, this.sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
-        requestHeader.put(HeaderFramework.ACCEPT_CHARSET, this.sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
-        requestHeader.put(HeaderFramework.ACCEPT_ENCODING, this.sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
+        final RequestHeader requestHeader = createRequestheader(request, agent);
 
         // HTTP-Client
         final HTTPClient client = new HTTPClient(agent);
@@ -137,27 +342,8 @@ public final class HTTPLoader {
         // check redirection
     	if (statusCode > 299 && statusCode < 310) {
 
-    	    // read redirection URL
-            String redirectionUrlString = responseHeader.get(HeaderFramework.LOCATION);
-            redirectionUrlString = redirectionUrlString == null ? "" : redirectionUrlString.trim();
-
-            if (redirectionUrlString.isEmpty()) {
-                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
-                throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
-            }
-
-            // normalize URL
-            final DigestURL redirectionUrl = DigestURL.newURL(request.url(), redirectionUrlString);
-
-            // restart crawling with new url
-            this.log.info("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
-            this.log.info("CRAWLER ..Redirecting request to: " + redirectionUrl.toNormalform(false));
-
-            this.sb.webStructure.generateCitationReference(url, redirectionUrl);
-            
-            if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_RECORD_REDIRECTS, true)) {
-                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusCode);
-            }
+    	    final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, client.getHttpResponse().getStatusLine(),
+					responseHeader, requestURLString);
 
     	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
     	        // we have two use cases here: loading from a crawl or just loading the url. Check this:

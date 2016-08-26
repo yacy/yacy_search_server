@@ -28,6 +28,7 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,7 +66,7 @@ import net.yacy.kelondro.util.ISO639;
 public class ContentScraper extends AbstractScraper implements Scraper {
 
     private final static int MAX_TAGSIZE = 1024 * 1024;
-	public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
+    public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
 
     private final char degree = '\u00B0';
     private final char[] minuteCharsHTML = "&#039;".toCharArray();
@@ -388,16 +389,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // itemprop
         String itemprop = tag.opts.getProperty("itemprop");
         if (itemprop != null) {
-            String content = tag.opts.getProperty("content");
-            if (content != null) {
+            String propval = tag.opts.getProperty("content");
+            if (propval == null) propval = tag.opts.getProperty("datetime"); // html5 example: <time itemprop="startDate" datetime="2016-01-26">today</time> while each prop is optional
+            if (propval != null) {
                 if ("startDate".equals(itemprop)) try {
                     // parse ISO 8601 date
-                    Date startDate = ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();
+                    Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
                     this.startDates.add(startDate);
                 } catch (ParseException e) {}
                 if ("endDate".equals(itemprop)) try {
                     // parse ISO 8601 date
-                    Date endDate = ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();
+                    Date endDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
                     this.endDates.add(endDate);
                 } catch (ParseException e) {}
             }
@@ -475,7 +477,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 final String type = tag.opts.getProperty("type", EMPTY_STRING);
                 final String hreflang = tag.opts.getProperty("hreflang", EMPTY_STRING);
 
-                if (rel.equalsIgnoreCase("shortcut icon")) {
+                if (rel.equalsIgnoreCase("shortcut icon") || rel.equalsIgnoreCase("icon")) { // html5 -> rel="icon")
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
                     this.images.add(ie);
                     this.favicon = newLink;
@@ -1095,10 +1097,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.embeds.clear();
         this.images.clear();
         this.metas.clear();
+        this.hreflang.clear();
+        this.navigation.clear();
         this.titles.clear();
+        this.articles.clear();
+        this.startDates.clear();
+        this.endDates.clear();
         this.headlines = null;
         this.bold.clear();
         this.italic.clear();
+        this.underline.clear();
+        this.li.clear();
+        this.dt.clear();
+        this.dd.clear();
         this.content.clear();
         this.root = null;
     }
@@ -1154,7 +1165,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), "UTF-8", new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), StandardCharsets.UTF_8.name(), new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();

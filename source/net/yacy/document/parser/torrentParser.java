@@ -28,12 +28,13 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Condenser;
@@ -58,7 +59,7 @@ public class torrentParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final AnchorURL location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final VocabularyScraper scraper, 
@@ -113,7 +114,7 @@ public class torrentParser extends AbstractParser implements Parser {
 		        location.getHost(),
 		        null,
 		        null,
-		        0.0f, 0.0f,
+		        0.0d, 0.0d,
 		        filenames.toString(),
 		        null,
 		        null,
@@ -126,7 +127,7 @@ public class torrentParser extends AbstractParser implements Parser {
         try {
             byte[] b = FileUtils.read(new File(args[0]));
             torrentParser parser = new torrentParser();
-            Document[] d = parser.parse(new AnchorURL("http://localhost/test.torrent"), null, "UTF-8", new VocabularyScraper(), 0, new ByteArrayInputStream(b));
+            Document[] d = parser.parse(new DigestURL("http://localhost/test.torrent"), null, StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, new ByteArrayInputStream(b));
             Condenser c = new Condenser(d[0], null, true, true, LibraryProvider.dymLib, false, false, 0);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);
