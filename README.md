@@ -1,4 +1,10 @@
-== WHAT IS THIS? ==
+# YaCy
+
+[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/yacy/yacy_search_server/tree/master/docker)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+## What is this?
+
 YaCy is a search engine software. It takes a new approach to search
 because it does not use a central server. Instead, its search results
 come from a network of independent peers. In such a distributed network,
@@ -34,24 +40,27 @@ set up their own node. More users are leading to higher index capacity
 and better distributed indexing performance.
 
 
-== LICENSE ==
+## License
+
 YaCy is published under the GPL v2
 The source code is inside the release package (see /source and /htroot).
 
 
-== WHERE IS THE DOCUMENTATION? ==
+## Where is the documentation?
+
 Documentation can be found at:
-(Home Page)        http://yacy.net/
-(German Forum)     http://forum.yacy.de/
-(Wiki:de)          http://www.yacy-websuche.de/wiki/index.php/De:Start
-(Wiki:en)          http://www.yacy-websearch.net/wiki/index.php/En:Start
-(Tutorial Videos)  http://yacy.net/en/Tutorials.html and http://yacy.net/de/Lehrfilme.html
+- (Home Page)        http://yacy.net/
+- (German Forum)     http://forum.yacy.de/
+- (Wiki:de)          http://www.yacy-websuche.de/wiki/index.php/De:Start
+- (Wiki:en)          http://www.yacy-websearch.net/wiki/index.php/En:Start
+- (Tutorial Videos)  http://yacy.net/en/Tutorials.html and http://yacy.net/de/Lehrfilme.html
 
 Every of these locations has a (YaCy) search functionality which combines
 all these locations into one search result.
 
 
-== DEPENDENCIES? WHAT OTHER SOFTWARE DO I NEED? ==
+## Dependencies? What other software do I need?
+
 You need java 1.7 or later to run YaCy, nothing else.
 Please download it from http://www.java.com
 
@@ -62,7 +71,8 @@ NO OTHER SOFTWARE IS REQUIRED!
 (you don't need apache, tomcat or mysql or whatever)
 
 
-== HOW DO I START THIS SOFTWARE? ==
+## How do I start this software?
+
 Startup and Shutdown of YaCy:
 
 - on GNU/Linux and OpenBSD:
@@ -78,7 +88,8 @@ please use the Mac Application and start or stop it like any
 other Mac Application (doubleclick to start)
 
 
-== HOW DO I USE THIS SOFTWARE, WHERE IS THE ADMINISTRATION INTERFACE? ==
+## How do I use this software, where is the administration interface?
+
 YaCy is a build on a web server. After you started YaCy,
 start your browser and open
 
@@ -87,7 +98,8 @@ start your browser and open
 There you can see your personal search and administration interface.
 
 
-== WHAT IF I INSTALL YACY (HEADLESS) ON A SERVER ==
+## What if I install YaCy (headless) on a server?
+
 You can do that but YaCy authorizes users automatically if they
 access the server from the localhost. After about 10 minutes a random
 password is generated and then it is not possible to log in from
@@ -99,22 +111,37 @@ http://<remote-server-address>:8090/ConfigAccounts_p.html
 
 and set an administration account.
 
-== CAN I RUN YACY IN A VIRTUAL MACHINE OR A CONTAINER ==
+## Can I run YaCy in a virtual machine or a container?
+
 YaCy runs fine in virtual machines managed by software such as VirtualBox or VMware. 
 
 Container technology may be more flexible and lightweight and also works fine with YaCy.
 
-More details for YaCy with Docker [[docker/Readme.md|here]].
+These technologies can either be deployed locally, on remote machines you own, or in the 'cloud'. Decide what fits the most your privacy requirements.
+
+### Docker
+
+Deploy easily YaCy on a Docker cloud provider of your choice (can be a machine you own) with the deploy button at the top of this page.
+
+More details for YaCy with Docker in [docker/Readme.md](docker/Readme.md).
+
+### Heroku
+
+Deploy easily on [Heroku](https://www.heroku.com/) PaaS (Platform as a service) provider using the deploy button at the top.
+
+More details for YaCy on Heroku in [Heroku.md](Heroku.md).
 
 
-== PORT 8090 IS BAD, PEOPLE ARE NOT ALLOWED TO ACCESS THAT PORT ==
+## Port 8090 is bad, people are not allowed to access that port
+
 You can forward port 80 to 8090 with iptables:
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8090
 On some operation systems, you must first enable access to the ports you are using like:
 iptables -I INPUT -m tcp -p tcp --dport 8090 -j ACCEPT
 
 
-== HOW CAN I SCALE THIS; HOW MUCH RAM IS NEEDED; DISK SPACE? ==
+## How can I scale this; how much ram is needed; disk space?
+
 YaCy can scale up to many millions of web pages in your own search index.
 The default assignment of RAM is 600MB which is assigned to the java
 process but not permanently used by it. The GC process will free the memory
@@ -129,14 +156,15 @@ space i.e. setting the htcache space to a different size; to do that
 open http://localhost:8090/ConfigHTCache_p.html and set a new size.
 
 
+## Join the development!
 
-== JOIN THE DEVELOPMENT! ==
 YaCy was created with the help of many. About 30 programmers have helped,
 a list of some of them can be seen here: http://yacy.net/en/Join.html
 Please join us!
 
 
-== HOW TO GET THE SOURCE CODE AND HOW TO COMPILE YACY YOURSELF? ==
+## How to get the source code and how to compile YaCy yourself?
+
 The source code is inside every YaCy release. You can also get YaCy
 from https://github.com/yacy/yacy_search_server
 Please clone our code and help with development!
@@ -152,8 +180,8 @@ Compiling YaCy:
   because the servlet pages are not compiled by the eclipse build process
 after the dist prodecure, the release can be found in the RELEASE subdirectory
 
+## Are there any APIs or how can I attach software at YaCy?
 
-== ARE THERE ANY APIs OR HOW CAN I ATTACH SOFTWARE AT YACY? ==
 There are many interfaces build-in in YaCy and they are all based on http/xml and
 http/json. You can discover these interfaces if you notice the orange "API" icon in
 the upper right of some web pages in the YaCy web interface. Just click on it and
@@ -163,8 +191,8 @@ A different approach is the usage of the shell script provided in the /bin
 subdirectory. The just call also the web interface pages. By cloning some of those
 scripts you can create more shell api access methods yourself easily.
 
+## Contact
 
-== CONTACT ==
 Our primary point of contact is the german forum at http://forum.yacy.net
 There is also an english forum at http://www.yacy-forum.org
 We encourage you to start a YaCy forum in your own language.

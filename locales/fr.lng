@@ -329,6 +329,7 @@ However: if you fail to open a router port, you can nevertheless use YaCy with f
 the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==l'unique fonction manquante se situera du c&ocirc;t&eacute; des autres utilisateurs de YaCy car ils ne pourront pas voir votre noeud.
 Your peer can be reached by other peers==Votre noeud est joignable par les autres noeuds du r&eacute;seau
 Peer Port:==Port logiciel du noeud:
+Set by system property==Configuré via la propriété système
 with SSL==avec SSL
 (https enabled#==(https activ&eacute;#
 on port==sur le port
