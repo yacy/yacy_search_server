@@ -29,7 +29,7 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
-import net.yacy.utils.translation.CreateTranslationMasters;
+import net.yacy.utils.translation.TranslationManager;
 
 public class Translator_p {
 
@@ -48,13 +48,13 @@ public class Translator_p {
             }
 
             File lngfile = new File(sb.getAppPath("locale.source", "locales"), langcfg + ".lng");
-            CreateTranslationMasters ctm = new CreateTranslationMasters(/*new File ("locales","master.lng.xlf")*/);
+            TranslationManager localTransMgr = new TranslationManager(/*new File ("locales","master.lng.xlf")*/);
 
             File masterxlf = new File(sb.getAppPath("locale.source", "locales"), "master.lng.xlf");
-            if (!masterxlf.exists()) ctm.createMasterTranslationLists(masterxlf);
-            Map<String, Map<String, String>> origTrans = ctm.joinMasterTranslationLists(masterxlf, lngfile);
-            final File locallngfile = ctm.getScratchFile(lngfile);
-            Map<String, Map<String, String>> localTrans = ctm.loadTranslationsLists(locallngfile); // TODO: this will read file twice
+            if (!masterxlf.exists()) localTransMgr.createMasterTranslationLists(masterxlf);
+            Map<String, Map<String, String>> origTrans = localTransMgr.joinMasterTranslationLists(masterxlf, lngfile);
+            final File locallngfile = localTransMgr.getScratchFile(lngfile);
+            Map<String, Map<String, String>> localTrans = localTransMgr.loadTranslationsLists(locallngfile); // TODO: this will read file twice
             int i = 0;
             if (origTrans.size() > 0) {
                 String filename = origTrans.keySet().iterator().next();
@@ -114,7 +114,7 @@ public class Translator_p {
                     if (i == textlistid && post != null) {
                         if (editapproved) { // switch already translated in edit mode by copying to local translation
                             // not saved here as not yet modified/approved
-                            ctm.addTranslation(localTrans, filename, sourcetext, targettxt);
+                            localTransMgr.addTranslation(localTrans, filename, sourcetext, targettxt);
                         } else {
                             String t = post.get("targettxt" + Integer.toString(textlistid));
                             // correct common partial html markup (part of text identification for words also used as html parameter)
@@ -125,7 +125,7 @@ public class Translator_p {
                             targettxt = t;
                             // add changes to original (for display) and local (for save)
                             origTextList.put(sourcetext, targettxt);
-                            changed = ctm.addTranslation(localTrans, filename, sourcetext, targettxt);
+                            changed = localTransMgr.addTranslation(localTrans, filename, sourcetext, targettxt);
                         }
                     }
                     prop.putHTML("textlist_" + i + "_sourcetxt", sourcetext);
@@ -138,7 +138,7 @@ public class Translator_p {
                     changed = true;
                 }
                 if (changed) {
-                    ctm.saveAsLngFile(langcfg, locallngfile, localTrans);
+                    localTransMgr.saveAsLngFile(langcfg, locallngfile, localTrans);
                     // adhoc translate this file
                     // 1. get/calc the path
                     final String htRootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
@@ -147,7 +147,7 @@ public class Translator_p {
                     // get absolute file by adding relative filename from translationlist
                     final File sourceFile = new File(sourceDir, filename);
                     final File destFile = new File(destDir, filename);
-                    ctm.translateFile(sourceFile, destFile, origTextList); // do the translation
+                    localTransMgr.translateFile(sourceFile, destFile, origTextList); // do the translation
                 }
             }
             prop.put("textlist", i);
