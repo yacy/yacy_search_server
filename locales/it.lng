@@ -118,8 +118,8 @@ Waiting for new request nr.==In attesa della nuova richiesta Nr.
 
 #File: CookieMonitorIncoming_p.html
 #---------------------------
-Incoming Cookies Monitor==Incoming Cookies Monitor
-Cookie Monitor: Incoming Cookies==Cookie Monitor: Incoming Cookies
+#Incoming Cookies Monitor==Incoming Cookies Monitor
+#Cookie Monitor: Incoming Cookies==Cookie Monitor: Incoming Cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Questa &egrave; una lista di Cookies che il server ha mnadato hai client dello YaCy Proxy:
 Showing==Mostra
 entries from a total of==le entrate per un totale di
