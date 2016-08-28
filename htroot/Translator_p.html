@@ -17,7 +17,7 @@
         <legend>
           <label>UI Translation</label>
         </legend>
-        <p>Target Language: <b>#[targetlang]#</b></p><p class="error">#[errmsg]#</p>
+        <p>Target Language: <b>#[targetlang]#</b></p> #(errmsg)#::<p class="error">activate a different language <a href='ConfigBasic.html'>here</a></p>#(/errmsg)#
         <label for="sourcefile">Source File</label>
         <select name="sourcefile" onchange="submit();">
           #{filelist}#

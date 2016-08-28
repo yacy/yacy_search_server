@@ -8638,6 +8638,9 @@
     <trans-unit id="7752d013" xml:space="preserve" approved="no" translate="yes">
        <source>Target Language:</source>
     </trans-unit>
+    <trans-unit id="67dd468b" xml:space="preserve" approved="no" translate="yes">
+        <source>activate a different language</source>
+    </trans-unit>
     <trans-unit id="5ad17261" xml:space="preserve" approved="no" translate="yes">
        <source>Source File</source>
     </trans-unit>

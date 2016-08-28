@@ -41,10 +41,10 @@ public class Translator_p {
             String langcfg = sb.getConfig("locale.language", "default");
             prop.put("targetlang", langcfg);
             if ("default".equals(langcfg) || "browser".equals(langcfg)) {
-                prop.put("errmsg", "activate a different language");
+                prop.put("errmsg", 1); // msg: activate diff lng
                 return prop;
             } else {
-                prop.put("errmsg", "");
+                prop.put("errmsg", 0);
             }
 
             File lngfile = new File(sb.getAppPath("locale.source", "locales"), langcfg + ".lng");
