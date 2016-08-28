@@ -242,7 +242,6 @@
     	<pathelement location="${lib}/weupnp-0.1.4.jar" />
     	<pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
-        <pathelement location="${lib}/xliff-core-1.2-1.1.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
         <pathelement location="${lib}/xmpcore-5.1.2.jar" />
     	<pathelement location="${lib}/zookeeper-3.4.6.jar" />
