@@ -52,15 +52,28 @@ public class TransNews_p {
 
         String currentlang = sb.getConfig("locale.language", "default");
         prop.put("currentlang", currentlang);
-        TranslatorXliff transx = new TranslatorXliff();
 
-        File langFile = transx.getScratchFile(new File(currentlang + ".lng"));
-        TranslationManager trans = new TranslationManager(langFile);
-        prop.put("transsize", trans.size());
+        if ("default".equals(currentlang) || "browser".equals(currentlang)) {
+            prop.put("errmsg", 1); // msg: activate diff lng
+            prop.put("transsize", 0);
+            return prop;
+        } else {
+            prop.put("errmsg", 0);
+        }
+
+        TranslationManager transMgr = new TranslationManager();
+        File locallangFile = transMgr.getScratchFile(new File(currentlang + ".lng"));
+        Map<String, Map<String, String>> localTrans = transMgr.loadTranslationsLists(locallangFile);
+        // calculate size of local translations list
+        int size = 0;
+        for (Map<String, String> lst : localTrans.values()) {
+            size += lst.size();
+        }
+        prop.put("transsize", size);
+        
 
         // read voting
         if ((post != null) && post.containsKey("publishtranslation")) {
-            Map<String, Map<String, String>> localTrans = trans.loadTranslationsLists(langFile);
             Iterator<String> filenameit = localTrans.keySet().iterator();
             while (filenameit.hasNext()) {
                 String file = filenameit.next();
@@ -77,7 +90,7 @@ public class TransNews_p {
                                 continue;
                             }
                             if (NewsPool.CATEGORY_TRANSLATION_ADD.equals(rtmp.category())) {
-                                String tmplng = rtmp.attribute("language", null);
+                                //String tmplng = rtmp.attribute("language", null);
                                 String tmpfile = rtmp.attribute("file", null);
                                 String tmpsource = rtmp.attribute("source", null);
                                 String tmptarget = rtmp.attribute("target", null);
@@ -143,22 +156,22 @@ public class TransNews_p {
         }
         
         if ((post != null) && ((refid = post.get("votePositive", null)) != null)) {
-            if (!sb.verifyAuthentication(header)) {
-                prop.authenticationRequired();
-                return prop;
-            }
-            // add to local translation extension
-            if (trans.addTranslation(post.get("filename"), post.get("source"), post.get("target"))) {
-                File f = new File(currentlang + ".lng");
-                f = trans.getScratchFile(f);
-                trans.saveLng(currentlang, f);
-            }
+
+            final String filename = post.get("filename");
+
+            File lngfile = new File(sb.getAppPath("locale.source", "locales"), currentlang + ".lng");
+            transMgr = new TranslationManager(lngfile); // load full language for check if entry is new (globally)
+            if (transMgr.addTranslation(filename, post.get("source"), post.get("target"))) {
+                // add to local translation extension
+                transMgr.addTranslation(localTrans, filename, post.get("source"), post.get("target"));
+                transMgr.saveAsLngFile(currentlang, locallangFile, localTrans); // save local-trans to local-file
+                transMgr.translateFile(filename); // ad-hoc translate file with new/added text
+            } // TODO: shall we post voting if translation is not new ?
 
             // make new news message with voting
             final HashMap<String, String> map = new HashMap<String, String>();
-
             map.put("language", currentlang);
-            map.put("file", crypt.simpleDecode(post.get("filename", "")));
+            map.put("file", crypt.simpleDecode(filename));
             map.put("source", crypt.simpleDecode(post.get("source", "")));
             map.put("target", crypt.simpleDecode(post.get("target", "")));
             map.put("vote", "positive");
@@ -168,6 +181,7 @@ public class TransNews_p {
                 sb.peers.newsPool.moveOff(NewsPool.INCOMING_DB, refid);
             } catch (IOException | SpaceExceededException ex) {
             }
+            
         }
 
         // create Translation voting list
@@ -187,7 +201,7 @@ public class TransNews_p {
         String target;
 
         while (k.hasNext()) {
-            String existingtarget = null;
+            
             refid = k.next();
             if (refid == null) {
                 continue;
@@ -206,7 +220,12 @@ public class TransNews_p {
                 continue;
             }
 
-            existingtarget = trans.getTranslation(filename, source);
+            
+            String existingtarget = null; //transMgr.getTranslation(filename, source);
+            Map<String, String> tmpMap = localTrans.get(filename);
+            if (tmpMap != null) {
+                existingtarget = tmpMap.get(source);
+            }
 
             boolean altexist = existingtarget != null && !target.isEmpty() && !existingtarget.isEmpty() && !existingtarget.equals(target);
 

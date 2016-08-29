@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 /**
  * Utility to create a translation master file from all existing translation
@@ -50,6 +52,7 @@ import net.yacy.data.Translator;
 public class TranslationManager extends TranslatorXliff {
 
     protected Map<String, Map<String, String>> mainTransLists; // current translation entries for one language
+    protected String loadedLng; // language loaded in mainTransLists (2-letter code)
 
     public TranslationManager() {
         super();
@@ -57,6 +60,10 @@ public class TranslationManager extends TranslatorXliff {
 
     public TranslationManager(final File langfile) {
         mainTransLists = loadTranslationsLists(langfile);
+        int pos = langfile.getName().indexOf('.');
+        if (pos >= 0) {
+            loadedLng = langfile.getName().substring(0, pos);
+        }
     }
 
     /**
@@ -123,6 +130,35 @@ public class TranslationManager extends TranslatorXliff {
            return tmp.get(source);
        else
            return null;
+    }
+
+    /**
+     * Translates one file. The relFilepath is the file name as given in the
+     * translation source lists. The source (english) file is expected under
+     * htroot path. The destination file is under DATA/LOCALE and calculated
+     * using the language of loaded data.
+     *
+     * @param relFilepath file name releative to htroot
+     * @return true on success
+     */
+    public boolean translateFile(String relFilepath) {
+        assert loadedLng != null;
+        assert mainTransLists != null;
+
+        boolean result = false;
+        if (mainTransLists.containsKey(relFilepath)) {
+            Switchboard sb = Switchboard.getSwitchboard();
+            if (sb != null) {
+                final String htRootPath = sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+                final File sourceDir = new File(sb.getAppPath(), htRootPath);
+                final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), loadedLng);
+                // get absolute file by adding relative filename
+                final File sourceFile = new File(sourceDir, relFilepath);
+                final File destFile = new File(destDir, relFilepath);
+                result = translateFile(sourceFile, destFile, mainTransLists.get(relFilepath)); // do the translation
+            }
+        }
+        return result;
     }
 
     /**
@@ -255,34 +291,5 @@ public class TranslationManager extends TranslatorXliff {
             i += trans.size();
         }
         return i;
-    }
-
-    /**
-     * for testing to create on master and joined translation results for all lang's
-     *
-     * @param args
-     */
-    public static void main(String args[]) {
-        File outputdirectory = new File("test/DATA");
-        if (!outputdirectory.exists()) {
-            outputdirectory.mkdir();
-        }
-        File xlfmaster = new File(outputdirectory, "master.lng.xlf");
-        TranslationManager ctm = new TranslationManager(xlfmaster);
-        try {
-            ctm.createMasterTranslationLists(xlfmaster); // write the language neutral translation master as xliff
-
-            List<String> lngFiles = Translator.langFiles(new File("locales"));
-            for (String filename : lngFiles) {
-                Map<String, Map<String, String>> lngmaster = ctm.joinMasterTranslationLists(xlfmaster, new File("locales", filename)); // create individual language translation files from master
-                File xlftmp = new File(outputdirectory, filename + ".xlf");
-                System.out.println("output new master translation file " + xlftmp.toString() + " and " + filename);
-                ctm.saveAsXliff(filename.substring(0, 2), xlftmp, lngmaster);
-                ctm.saveAsLngFile(filename.substring(0, 2), new File(outputdirectory, filename), lngmaster);
-            }
-        } catch (IOException ex) {
-            ConcurrentLog.logException(ex);
-        }
-        ConcurrentLog.shutdown();
     }
 }
