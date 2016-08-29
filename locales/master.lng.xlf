@@ -8621,6 +8621,65 @@
   </body>
 </file>
 
+<file original="TransNews_p.html"  source-language="en"  target-language="aa"  datatype="html">
+  <body>
+    <trans-unit id="d0ae4d2d" xml:space="preserve" approved="no" translate="yes">
+       <source>Translation News for Language</source>
+    </trans-unit>
+    <trans-unit id="65d34722" xml:space="preserve" approved="no" translate="yes">
+       <source>Translation News</source>
+    </trans-unit>
+    <trans-unit id="a8b87046" xml:space="preserve" approved="no" translate="yes">
+       <source>You can share your local addition to translations and distribute it to other peers.</source>
+    </trans-unit>
+    <trans-unit id="cc5facc1" xml:space="preserve" approved="no" translate="yes">
+       <source>The remote peer can vote on your translation and add it to the own local translation.</source>
+    </trans-unit>
+    <trans-unit id="28e1bf39" xml:space="preserve" approved="no" translate="yes">
+       <source>entries available</source>
+    </trans-unit>
+    <trans-unit id="20c2735" xml:space="preserve" approved="no" translate="yes">
+       <source>"Publish"</source>
+    </trans-unit>
+    <trans-unit id="929c113c" xml:space="preserve" approved="no" translate="yes">
+       <source>You can check your outgoing messages</source>
+    </trans-unit>
+    <trans-unit id="6fb5a4ce" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;here&lt;</source>
+    </trans-unit>
+    <trans-unit id="40bca1e" xml:space="preserve" approved="no" translate="yes">
+       <source>File:</source>
+    </trans-unit>
+    <trans-unit id="a7a8df22" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Originator&lt;</source>
+    </trans-unit>
+    <trans-unit id="708517ea" xml:space="preserve" approved="no" translate="yes">
+       <source>English:</source>
+    </trans-unit>
+    <trans-unit id="d795e193" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;existing&lt;</source>
+    </trans-unit>
+    <trans-unit id="c0bfb7c9" xml:space="preserve" approved="no" translate="yes">
+       <source>Translation:</source>
+    </trans-unit>
+    <trans-unit id="704fb514" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;score</source>
+    </trans-unit>
+    <trans-unit id="d80b8ff5" xml:space="preserve" approved="no" translate="yes">
+       <source>negative vote</source>
+    </trans-unit>
+    <trans-unit id="9f05fcb1" xml:space="preserve" approved="no" translate="yes">
+       <source>positive vote</source>
+    </trans-unit>
+    <trans-unit id="5b0fe134" xml:space="preserve" approved="no" translate="yes">
+       <source>Vote on this translation.</source>
+    </trans-unit>
+    <trans-unit id="4dca5801" xml:space="preserve" approved="no" translate="yes">
+       <source>If you vote positive the translation is added to your local translation list.</source>
+    </trans-unit>
+  </body>
+</file>
+
 <file original="Translator_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="2eae05fc" xml:space="preserve" approved="no" translate="yes">
