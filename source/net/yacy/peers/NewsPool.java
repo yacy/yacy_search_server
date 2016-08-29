@@ -206,6 +206,18 @@ public class NewsPool {
 	 */
 	private static final String CATEGORY_BLOG_DEL = "blog_del";
 
+    /* ------------------------------------------------------------------------
+     * TRANSLATION related CATEGORIES
+     * ------------------------------------------------------------------------ */
+        /**
+        * a translation was added
+        */
+        public static final String CATEGORY_TRANSLATION_ADD = "transadd";
+        /**
+        * a vote on a translation
+        */
+        public static final String CATEGORY_TRANSLATION_VOTE_ADD = "transavt";
+
     /* ========================================================================
      * ARRAY of valid CATEGORIES
      * ======================================================================== */
@@ -250,7 +262,11 @@ public class NewsPool {
 
     	// BLOG related CATEGORIES
     	CATEGORY_BLOG_ADD,
-    	CATEGORY_BLOG_DEL
+    	CATEGORY_BLOG_DEL,
+
+        // TRANSLATION related CATEGORIES
+        CATEGORY_TRANSLATION_ADD,
+        CATEGORY_TRANSLATION_VOTE_ADD
     };
     private static final Set<String> categories = new HashSet<String>();
     static {
@@ -398,28 +414,35 @@ public class NewsPool {
         return pc;
     }
 
+    /**
+     * Check max keep duration depending on news category and return true if duration
+     * is exceeded
+     *
+     * @param seedDB
+     * @param record
+     * @return true if news should be removed
+     */
     private static boolean automaticProcessP(final SeedDB seedDB, final NewsDB.Record record) {
         if (record == null) return false;
         if (record.category() == null) return true;
+        
         final long created = record.created().getTime();
-        if ((System.currentTimeMillis() - created) > (6L * MILLISECONDS_PER_HOUR)) {
-            // remove everything after 1 day
-            return true;
-        }
+        final long duration = System.currentTimeMillis() - created;
+
         if ((record.category().equals(CATEGORY_WIKI_UPDATE)) &&
-                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
+                (duration > (3L * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_BLOG_ADD)) &&
-                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
+                (duration > (3L * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_PROFILE_UPDATE)) &&
-                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
+                (duration > (3L * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_CRAWL_START)) &&
-            ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
+            (duration > (3L * MILLISECONDS_PER_DAY))) {
             final Seed seed = seedDB.get(record.originator());
             if (seed == null) return true;
             try {
@@ -427,6 +450,14 @@ public class NewsPool {
             } catch (final NumberFormatException ee) {
                 return true;
             }
+        }
+        if ((record.category().equals(CATEGORY_TRANSLATION_ADD) || record.category().equals(CATEGORY_TRANSLATION_VOTE_ADD))
+                && (duration > (7L * MILLISECONDS_PER_DAY))) {
+            return true;
+        }
+        if (duration > MILLISECONDS_PER_DAY) {
+            // remove everything else after 1 day
+            return true;
         }
         return false;
     }

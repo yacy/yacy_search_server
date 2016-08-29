@@ -1,0 +1,323 @@
+// TransNews_p.java
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
+// published on http://yacy.net
+//
+// This file is contributed by Burkhard Buelte
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
+// LICENSE
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.peers.NewsDB;
+import net.yacy.peers.NewsPool;
+import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
+import net.yacy.utils.translation.TranslationManager;
+import net.yacy.utils.translation.TranslatorXliff;
+
+public class TransNews_p {
+
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
+        final serverObjects prop = new serverObjects();
+
+        String currentlang = sb.getConfig("locale.language", "default");
+        prop.put("currentlang", currentlang);
+        TranslatorXliff transx = new TranslatorXliff();
+
+        File langFile = transx.getScratchFile(new File(currentlang + ".lng"));
+        TranslationManager trans = new TranslationManager(langFile);
+        prop.put("transsize", trans.size());
+
+        // read voting
+        if ((post != null) && post.containsKey("publishtranslation")) {
+            Map<String, Map<String, String>> localTrans = trans.loadTranslationsLists(langFile);
+            Iterator<String> filenameit = localTrans.keySet().iterator();
+            while (filenameit.hasNext()) {
+                String file = filenameit.next();
+                Map<String, String> tmptrans = localTrans.get(file);
+                for (String sourcetxt : tmptrans.keySet()) {
+                    String targettxt = tmptrans.get(sourcetxt);
+                    if (targettxt != null && !targettxt.isEmpty()) {
+                        boolean sendit = true;
+                        // check if already published (in newsPool)
+                        Iterator<NewsDB.Record> it = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB);
+                        while (it.hasNext()) {
+                            NewsDB.Record rtmp = it.next();
+                            if (rtmp == null) {
+                                continue;
+                            }
+                            if (NewsPool.CATEGORY_TRANSLATION_ADD.equals(rtmp.category())) {
+                                String tmplng = rtmp.attribute("language", null);
+                                String tmpfile = rtmp.attribute("file", null);
+                                String tmpsource = rtmp.attribute("source", null);
+                                String tmptarget = rtmp.attribute("target", null);
+
+                                if (sb.peers.mySeed().hash.equals(rtmp.originator())) {
+                                    /*
+                                        if (tmplng != null && tmplng.equals(currentlang)) {
+                                            sendit = false;
+                                            break;
+                                        }*/
+                                    if (tmpfile != null && tmpfile.equals(file)) {
+                                        sendit = false;
+                                        break;
+                                    }
+                                    if (tmpsource != null && tmpsource.equals(sourcetxt)) {
+                                        sendit = false;
+                                        break;
+                                    }
+                                    if (tmptarget != null && tmptarget.equals(targettxt)) {
+                                        sendit = false;
+                                        break;
+                                    }
+                                }
+                                // if news with file and source exist (maybe from other peer) - skip sending another msg (to avoid confusion)
+                                if ((tmpfile != null && tmpfile.equals(file))
+                                        && (tmpsource != null && tmpsource.equals(sourcetxt))) {
+                                    sendit = false;
+                                    break;
+                                }
+
+                            }
+                        }
+                        if (sendit) {
+                            final HashMap<String, String> map = new HashMap<String, String>();
+                            map.put("language", currentlang);
+                            map.put("file", file);
+                            map.put("source", sourcetxt);
+                            map.put("target", targettxt);
+                            sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_TRANSLATION_ADD, map);
+                        }
+                    }
+                }
+            }
+        }
+        String refid;
+        if ((post != null) && ((refid = post.get("voteNegative", null)) != null)) {
+
+            // make new news message with voting
+            if (!sb.isRobinsonMode()) {
+                final HashMap<String, String> map = new HashMap<String, String>();
+                map.put("language", currentlang);
+                map.put("file", crypt.simpleDecode(post.get("filename", "")));
+                map.put("source", crypt.simpleDecode(post.get("source", "")));
+                map.put("target", crypt.simpleDecode(post.get("target", "")));
+                map.put("vote", "negative");
+                map.put("refid", refid);
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_TRANSLATION_VOTE_ADD, map);
+                try {
+                    sb.peers.newsPool.moveOff(NewsPool.INCOMING_DB, refid);
+                } catch (IOException | SpaceExceededException ex) {
+                }
+            }
+        }
+        
+        if ((post != null) && ((refid = post.get("votePositive", null)) != null)) {
+            if (!sb.verifyAuthentication(header)) {
+                prop.authenticationRequired();
+                return prop;
+            }
+            // add to local translation extension
+            if (trans.addTranslation(post.get("filename"), post.get("source"), post.get("target"))) {
+                File f = new File(currentlang + ".lng");
+                f = trans.getScratchFile(f);
+                trans.saveLng(currentlang, f);
+            }
+
+            // make new news message with voting
+            final HashMap<String, String> map = new HashMap<String, String>();
+
+            map.put("language", currentlang);
+            map.put("file", crypt.simpleDecode(post.get("filename", "")));
+            map.put("source", crypt.simpleDecode(post.get("source", "")));
+            map.put("target", crypt.simpleDecode(post.get("target", "")));
+            map.put("vote", "positive");
+            map.put("refid", refid);
+            sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_TRANSLATION_VOTE_ADD, map);
+            try {
+                sb.peers.newsPool.moveOff(NewsPool.INCOMING_DB, refid);
+            } catch (IOException | SpaceExceededException ex) {
+            }
+        }
+
+        // create Translation voting list
+        final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
+        final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
+        accumulateVotes(sb, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
+        final ScoreMap<String> ranking = new ConcurrentScoreMap<String>(); // score cluster for url hashes
+        final HashMap<String, NewsDB.Record> Translation = new HashMap<String, NewsDB.Record>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+        accumulateTranslations(sb, Translation, ranking, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
+
+        // read out translation-news array and create property entries
+        final Iterator<String> k = ranking.keys(false);
+        int i = 0;
+        NewsDB.Record row;
+        String filename;
+        String source;
+        String target;
+
+        while (k.hasNext()) {
+            String existingtarget = null;
+            refid = k.next();
+            if (refid == null) {
+                continue;
+            }
+
+            row = Translation.get(refid);
+            if (row == null) {
+                continue;
+            }
+
+            String lang = row.attribute("language", null);
+            filename = row.attribute("file", null);
+            source = row.attribute("source", null);
+            target = row.attribute("target", null);
+            if ((lang == null) || (filename == null) || (source == null) || (target == null)) {
+                continue;
+            }
+
+            existingtarget = trans.getTranslation(filename, source);
+
+            boolean altexist = existingtarget != null && !target.isEmpty() && !existingtarget.isEmpty() && !existingtarget.equals(target);
+
+            prop.put("results_" + i + "_refid", refid);
+            prop.put("results_" + i + "_url", filename); // url to local file
+            prop.put("results_" + i + "_targetlanguage", lang);
+            prop.put("results_" + i + "_filename", filename);
+            prop.putHTML("results_" + i + "_source", source);
+            prop.putHTML("results_" + i + "_target", target);
+            prop.put("results_" + i + "_existing", altexist);
+            prop.putHTML("results_" + i + "_existing_target", existingtarget);
+            prop.put("results_" + i + "_score", ranking.get(refid));
+            prop.put("results_" + i + "_peername", sb.peers.get(row.originator()).getName());
+            i++;
+
+            if (i >= 50) {
+                break;
+            }
+        }
+        prop.put("results", i);
+
+        return prop;
+    }
+
+    private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
+        final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
+        NewsDB.Record newsrecord;
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype);
+        int j = 0;
+        while ((recordIterator.hasNext()) && (j++ < maxCount)) {
+            newsrecord = recordIterator.next();
+            if (newsrecord == null) {
+                continue;
+            }
+
+            if (newsrecord.category().equals(NewsPool.CATEGORY_TRANSLATION_VOTE_ADD)) {
+                final String refid = newsrecord.attribute("refid", "");
+                final String vote = newsrecord.attribute("vote", "");
+                final int factor = ((dbtype == NewsPool.OUTGOING_DB) || (dbtype == NewsPool.PUBLISHED_DB)) ? 2 : 1;
+                if (vote.equals("negative")) {
+                    final Integer i = negativeHashes.get(refid);
+                    if (i == null) {
+                        negativeHashes.put(refid, Integer.valueOf(factor));
+                    } else {
+                        negativeHashes.put(refid, Integer.valueOf(i.intValue() + factor));
+                    }
+                }
+                if (vote.equals("positive")) {
+                    final Integer i = positiveHashes.get(refid);
+                    if (i == null) {
+                        positiveHashes.put(refid, Integer.valueOf(factor));
+                    } else {
+                        positiveHashes.put(refid, Integer.valueOf(i.intValue() + factor));
+                    }
+                }
+            }
+        }
+    }
+
+    private static void accumulateTranslations(
+            final Switchboard sb,
+            final HashMap<String, NewsDB.Record> translationmsg, final ScoreMap<String> ranking,
+            final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
+        final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
+        NewsDB.Record newsrecord;
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype);
+        int j = 0;
+        String refid = "";
+        String targetlanguage ="";
+        String filename="";
+        String source="";
+        String target="";
+ 
+        int score = 0;
+        Integer vote;
+
+        while ((recordIterator.hasNext()) && (j++ < maxCount)) {
+            newsrecord = recordIterator.next();
+            if (newsrecord == null) {
+                continue;
+            }
+
+            if ((newsrecord.category().equals(NewsPool.CATEGORY_TRANSLATION_ADD))
+                    && ((sb.peers.get(newsrecord.originator())) != null)) {
+                refid = newsrecord.id();
+                targetlanguage = newsrecord.attribute("language", "");
+                filename = newsrecord.attribute("file", "");
+                source = newsrecord.attribute("source", "");
+                target = newsrecord.attribute("target", "");
+                if (refid.isEmpty() || targetlanguage.isEmpty() || filename.isEmpty() || source.isEmpty() || target.isEmpty()) {
+                    continue;
+                }
+                score = 0;
+            }
+
+            // add/subtract votes and write record
+   
+            if ((vote = negativeHashes.get(refid)) != null) {
+                score -= vote.intValue();
+            }
+            if ((vote = positiveHashes.get(refid)) != null) {
+                score += vote.intValue();
+            }
+            // consider double-entries
+            if (translationmsg.containsKey(refid)) {
+                ranking.inc(refid, score);
+            } else {
+                ranking.set(refid, score);
+                translationmsg.put(refid, newsrecord);
+            }
+
+        }
+    }
+}
