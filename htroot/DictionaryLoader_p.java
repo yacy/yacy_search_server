@@ -45,11 +45,11 @@ public class DictionaryLoader_p {
         final serverObjects prop = new serverObjects(); // return variable that accumulates replacements
 
         final File synonyms_path = new File(sb.dictionariesPath, LibraryProvider.path_to_synonym_dictionaries);
-        final File synonym_de_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "openthesaurus_de_yacy");
+        final File synonym_de_default = new File(sb.appPath, "addon/synonyms/openthesaurus_de_yacy");
         final File synonym_de_production = new File(synonyms_path, synonym_de_default.getName());
-        final File synonym_en_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "mobythesaurus_en_yacy");
+        final File synonym_en_default = new File(sb.appPath, "addon/synonyms/mobythesaurus_en_yacy");
         final File synonym_en_production = new File(synonyms_path, synonym_en_default.getName());
-        final File synonym_ru_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "thesaurus_ru_yacy");
+        final File synonym_ru_default = new File(sb.appPath, "addon/synonyms/thesaurus_ru_yacy");
         final File synonym_ru_production = new File(synonyms_path, synonym_ru_default.getName());
         /*
          * distinguish the following cases:
@@ -325,8 +325,8 @@ public class DictionaryLoader_p {
             SynonymLibrary.init(synonyms_path);
         }
 
-        if (post.containsKey("syn0Deactivate")) {
-            synonym_de_production.delete();
+        if (post.containsKey("syn2Deactivate")) {
+            synonym_ru_production.delete();
             SynonymLibrary.init(synonyms_path);
         }
 
