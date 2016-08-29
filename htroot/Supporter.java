@@ -38,6 +38,7 @@ import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.peers.NewsDB;
@@ -258,7 +259,7 @@ public class Supporter {
                         urlhash = null;
                     }
                         if (urlhash==null) {
-                            System.out.println("Supporter: bad url '" + url + "' from news record " + record.toString());
+                            ConcurrentLog.info("Supporter", "bad url '" + url + "' from news record " + record.toString());
                             continue;
                         }
                 if ((vote = negativeHashes.get(urlhash)) != null) {
