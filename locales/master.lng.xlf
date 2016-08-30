@@ -1069,6 +1069,27 @@
     <trans-unit id="33f6ce0e" xml:space="preserve" approved="no" translate="yes">
        <source>Select a language for the interface</source>
     </trans-unit>
+    <trans-unit id="c0286918" xml:space="preserve" approved="no" translate="yes">
+       <source>Deutsch</source>
+    </trans-unit>
+    <trans-unit id="1c8e797f" xml:space="preserve" approved="no" translate="yes">
+       <source>Fran&amp;ccedil;ais</source>
+    </trans-unit>
+    <trans-unit id="66bbf57f" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#27721;&amp;#35821;/&amp;#28450;&amp;#35486</source>
+    </trans-unit>
+    <trans-unit id="cde4355b" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#1056;&amp;#1091;&amp;#1089;&amp;#1089;&amp;#1082;&amp;#1080;&amp;#1081;</source>
+    </trans-unit>
+    <trans-unit id="3b7bf732" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#1059;&amp;#1082;&amp;#1088;&amp;#1072;&amp;#1111;&amp;#1085;&amp;#1089;&amp;#1100;&amp;#1082;&amp;#1072;</source>
+    </trans-unit>
+    <trans-unit id="bb2f569d" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#2361;&amp;#2367;&amp;#2344;&amp;#2381;&amp;#2342;&amp;#2368;</source>
+    </trans-unit>
+    <trans-unit id="54e2ea5e" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#26085;&amp;#26412;&amp;#35486;</source>
+    </trans-unit>   
     <trans-unit id="9a6fa219" xml:space="preserve" approved="no" translate="yes">
        <source>Use Case: what do you want to do with YaCy:</source>
     </trans-unit>
