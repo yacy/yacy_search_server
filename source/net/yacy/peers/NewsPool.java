@@ -423,41 +423,47 @@ public class NewsPool {
      * @return true if news should be removed
      */
     private static boolean automaticProcessP(final SeedDB seedDB, final NewsDB.Record record) {
-        if (record == null) return false;
-        if (record.category() == null) return true;
-        
+        if (record == null) {
+            return false;
+        }
+        if (record.category() == null) {
+            return true;
+        }
+
         final long created = record.created().getTime();
         final long duration = System.currentTimeMillis() - created;
 
-        if ((record.category().equals(CATEGORY_WIKI_UPDATE)) &&
-                (duration > (3L * MILLISECONDS_PER_DAY))) {
-                return true;
-            }
-        if ((record.category().equals(CATEGORY_BLOG_ADD)) &&
-                (duration > (3L * MILLISECONDS_PER_DAY))) {
-                return true;
-            }
-        if ((record.category().equals(CATEGORY_PROFILE_UPDATE)) &&
-                (duration > (3L * MILLISECONDS_PER_DAY))) {
-                return true;
-            }
-        if ((record.category().equals(CATEGORY_CRAWL_START)) &&
-            (duration > (3L * MILLISECONDS_PER_DAY))) {
-            final Seed seed = seedDB.get(record.originator());
-            if (seed == null) return true;
-            try {
-                return (Integer.parseInt(seed.get(Seed.ISPEED, "-")) < 10);
-            } catch (final NumberFormatException ee) {
-                return true;
-            }
-        }
-        if ((record.category().equals(CATEGORY_TRANSLATION_ADD) || record.category().equals(CATEGORY_TRANSLATION_VOTE_ADD))
-                && (duration > (7L * MILLISECONDS_PER_DAY))) {
-            return true;
-        }
-        if (duration > MILLISECONDS_PER_DAY) {
-            // remove everything else after 1 day
-            return true;
+        String cat = record.category();
+        switch (cat) {
+            case CATEGORY_WIKI_UPDATE:
+            case CATEGORY_BLOG_ADD:
+            case CATEGORY_PROFILE_UPDATE:
+                if (duration > (3L * MILLISECONDS_PER_DAY)) {
+                    return true;
+                }
+                break;
+            case CATEGORY_CRAWL_START:
+                if (duration > (3L * MILLISECONDS_PER_DAY)) {
+                    final Seed seed = seedDB.get(record.originator());
+                    if (seed == null) return true; // TODO: shall we keep for 3 days without sender ?
+                    try {
+                        return (Integer.parseInt(seed.get(Seed.ISPEED, "-")) < 10); // TODO: should we keep longer as 3 days if peer is still/currently crawling (after 3 days) ?
+                    } catch (final NumberFormatException ee) {
+                        return true;
+                    }
+                }
+                break;
+            case CATEGORY_TRANSLATION_ADD:
+            case CATEGORY_TRANSLATION_VOTE_ADD:
+                if (duration > (7L * MILLISECONDS_PER_DAY)) {
+                    return true;
+                }
+                break;
+            default:
+                if (duration > MILLISECONDS_PER_DAY) {
+                    // remove everything else after 1 day
+                    return true;
+                }
         }
         return false;
     }
