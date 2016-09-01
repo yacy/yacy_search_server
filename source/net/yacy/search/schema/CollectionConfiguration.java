@@ -1081,10 +1081,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     /**
-     * post-processing steps for all entries that have a process tag assigned
-     * @param connector
-     * @param urlCitation
-     * @return
+     * Performs post-processing steps for all entries that have a process tag assigned
+     * @param segment Solr segment. Must not be null.
+     * @param rrCache reference report cache for the segment.
+     * @param harvestkey key from a harvest process, used to mark documents needing post-processing
+     * @param byPartialUpdate when true, perform partial updates on documents
+     * @return the number of post processed documents
      */
     public int postprocessing(final Segment segment, final ReferenceReportCache rrCache, final String harvestkey, final boolean byPartialUpdate) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
@@ -1109,18 +1111,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             postprocessingCollection1Count = -1;
             postprocessingWebgraphCount = -1;
         }
-        
-        // collect hosts from index which shall take part in citation computation
-        postprocessingActivity = "collecting host facets for collection";
-        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-        ReversibleScoreMap<String> collection1hosts;
-        try {
-            Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 10000000, CollectionSchema.host_s.getSolrFieldName());
-            collection1hosts = hostfacet.get(CollectionSchema.host_s.getSolrFieldName());
-        } catch (final IOException e2) {
-            ConcurrentLog.logException(e2);
-            collection1hosts = new ClusteredScoreMap<String>(true);
-        }
 
         postprocessingActivity = "create ranking map";
         ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
@@ -1131,8 +1121,24 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                        collection.contains(CollectionSchema.cr_host_chance_d) &&
                        collection.contains(CollectionSchema.cr_host_norm_i)));
         // create the ranking map
-        final Map<String, CRV> rankings = createRankingMap(segment, rrCache, collectionConnector, collection1hosts,
-				shallComputeCR);
+        final Map<String, CRV> rankings;
+        if(shallComputeCR) {
+            // collect hosts from index which shall take part in citation computation
+            postprocessingActivity = "collecting host facets for collection";
+            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+            ReversibleScoreMap<String> collection1hosts;
+            try {
+                Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 10000000, CollectionSchema.host_s.getSolrFieldName());
+                collection1hosts = hostfacet.get(CollectionSchema.host_s.getSolrFieldName());
+            } catch (final IOException e2) {
+                ConcurrentLog.logException(e2);
+                collection1hosts = new ClusteredScoreMap<String>(true);
+            }
+        	
+        	rankings = createRankingMap(segment, rrCache, collectionConnector, collection1hosts);
+        } else {
+        	rankings = new ConcurrentHashMap<String, CRV>();
+        }
         
         // process all documents at the webgraph for the outgoing links of this document
         final AtomicInteger allcount = new AtomicInteger(0);
@@ -1153,6 +1159,18 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return allcount.get();
     }
 
+    /**
+     * Performs postprocessing steps on the main documents dollection.
+     * @param segment Solr segment.
+     * @param rrCache reference report cache for the segment.
+     * @param harvestkey key from a harvest process, used to mark documents needing post-processing
+     * @param byPartialUpdate when true, perform partial updates on documents
+     * @param collectionConnector connector to the main Solr collection
+     * @param collection schema configuration for the collection
+     * @param collection1query query used to harvest items to postprocess in the main collection
+     * @param rankings postprocessed rankings
+     * @param allcount global postprocessed documents count
+     */
 	private void postprocessDocuments(final Segment segment, final ReferenceReportCache rrCache,
 			final String harvestkey, final boolean byPartialUpdate, final SolrConnector collectionConnector,
 			final CollectionConfiguration collection, final String collection1query, final Map<String, CRV> rankings,
@@ -1344,6 +1362,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         collectionConnector.commit(true); // make changes available directly to prevent that the process repeats again
 	}
 
+	/**
+	 * Perform postprocessing steps on the webgraph core.
+	 * @param segment Solr segment.
+	 * @param webgraph webgraph schema configuration
+	 * @param webgraphquery query used to harvest items to postprocess in the webgraph collection
+	 * @param rankings postprocessed rankings
+	 * @param allcount global postprocessed documents count
+	 */
 	private void postprocessWebgraph(final Segment segment, final WebgraphConfiguration webgraph, String webgraphquery,
 			final Map<String, CRV> rankings, final AtomicInteger allcount) {
 		postprocessingActivity = "collecting host facets for webgraph cr calculation";
@@ -1461,11 +1487,18 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 		}
 	}
 
+	/**
+	 * Patches the citation index for links with canonical tags and perform the citation rank computation
+	 * @param segment Solr segment
+	 * @param rrCache reference report cache for the segment
+	 * @param collectionConnector default connector to the Solr segment
+	 * @param collection1hosts hosts from index which shall take part in citation computation
+	 * @return the ranking map 
+	 */
 	private Map<String, CRV> createRankingMap(final Segment segment, final ReferenceReportCache rrCache,
-			final SolrConnector collectionConnector, ReversibleScoreMap<String> collection1hosts,
-			boolean shallComputeCR) {
+			final SolrConnector collectionConnector, ReversibleScoreMap<String> collection1hosts) {
 		final Map<String, CRV> rankings = new ConcurrentHashMap<String, CRV>();
-        if (shallComputeCR) try {
+        try {
             int concurrency = Math.min(collection1hosts.size(), Runtime.getRuntime().availableProcessors());
             postprocessingActivity = "collecting cr for " + collection1hosts.size() + " hosts, concurrency = " + concurrency;
             ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
@@ -1545,6 +1578,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 		return rankings;
 	}
 
+	/**
+	 * Search in the segment any document having the same url as doc but with the opposite secure/unsecure (https or http) version of the protocol.
+	 * Then updates accordingly the document http_unique_b field.
+	 * @param segment Solr segment
+	 * @param doc document to process
+	 * @param sid updatable version of the document
+	 * @param url document's url
+	 */
     public void postprocessing_http_unique(final Segment segment, final SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         if (!this.contains(CollectionSchema.http_unique_b)) return;
         if (!url.isHTTPS() && !url.isHTTP()) return;
@@ -1552,9 +1593,19 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             DigestURL u = new DigestURL((url.isHTTP() ? "https://" : "http://") + url.urlstub(true, true));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.http_unique_b.getSolrFieldName());
             set_unique_flag(CollectionSchema.http_unique_b, doc, sid, d);
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+        	ConcurrentLog.warn("CollectionConfiguration", "Failed to postProcess http_unique_b field" + e.getMessage() != null ? " : " + e.getMessage() : ".");
+        }
     }
     
+	/**
+	 * Search in the segment any document having the same url as doc but with or without the www prefix.
+	 * Then updates accordingly the document www_unique_b field.
+	 * @param segment Solr segment
+	 * @param doc document to process
+	 * @param sid updatable version of the document
+	 * @param url document's url
+	 */
     public void postprocessing_www_unique(final Segment segment, final SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         if (!this.contains(CollectionSchema.www_unique_b)) return;
         final String us = url.urlstub(true, true);
@@ -1562,7 +1613,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             DigestURL u = new DigestURL(url.getProtocol() + (us.startsWith("www.") ? "://" + us.substring(4) : "://www." + us));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.www_unique_b.getSolrFieldName());
             set_unique_flag(CollectionSchema.www_unique_b, doc, sid, d);
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+        	ConcurrentLog.warn("CollectionConfiguration", "Failed to postProcess www_unique_b field" + e.getMessage() != null ? " : " + e.getMessage() : ".");
+        }
     }
     
     private void set_unique_flag(CollectionSchema field, final SolrDocument doc, final SolrInputDocument sid, final SolrDocument d) {
