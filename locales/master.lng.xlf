@@ -6821,6 +6821,30 @@
     <trans-unit id="1ba97b50" xml:space="preserve" approved="no" translate="yes">
        <source>"Re-Set to default"</source>
     </trans-unit>
+    <trans-unit id="8410369e" xml:space="preserve" approved="no"  translate="yes">
+       <source>&gt;Filter Query&lt;</source>
+    </trans-unit>
+    <trans-unit id="78033f39" xml:space="preserve" approved="no" translate="yes">
+       <source>The Filter Query is attached to every query.</source>
+    </trans-unit>
+    <trans-unit id="70b334ee" xml:space="preserve" approved="no" translate="yes">
+       <source>Use this to statically add a selection criteria to reduce the set of results.</source>
+    </trans-unit>
+    <trans-unit id="c227ca00" xml:space="preserve" approved="no" translate="yes">
+       <source>Example: "http_unique_b:true AND www_unique_b:true" will filter out all results where urls appear also with/without http(s) and/or with/without 'www.' prefix.</source>
+    </trans-unit>
+    <trans-unit id="4112ab05" xml:space="preserve" approved="no" translate="yes">
+       <source>To find appropriate fields for this query, see the</source>
+    </trans-unit>
+    <trans-unit id="7838433d" xml:space="preserve" approved="no" translate="yes">
+       <source>YaCy Solr Schema</source>
+    </trans-unit>
+    <trans-unit id="849166a5" xml:space="preserve" approved="no" translate="yes">
+       <source>Warning: bad expressions here will cause that you don't have any search result!</source>
+    </trans-unit>
+    <trans-unit id="47e46c2" xml:space="preserve" approved="no" translate="yes">
+       <source>"Set Filter Query"</source>
+    </trans-unit>    
     <trans-unit id="14f04b0f" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Boost Query&lt;</source>
     </trans-unit>
