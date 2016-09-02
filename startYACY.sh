@@ -40,7 +40,7 @@ Options
   -l, --logging		save the output of YaCy to yacy.log
   -d, --debug		show the output of YaCy on the console
   -p, --print-out	only print the command, which would be executed to start YaCy
-  -start, -startup [data-path] start YaCy using the specified data folder path, relative to the current user home
+  --start, --startup [data-path] start YaCy using the specified data folder path, relative to the current user home
   -g, --gui		start a gui for YaCy
 USAGE
 }
@@ -57,7 +57,7 @@ then
 		
         options="`getopt hdlptg: $*`"
 else
-        options="`getopt -n YaCy -o h,d,l,p,t,g -l help,debug,logging,print-out,tail-log,gui -- $@`"
+        options="`getopt -n YaCy -o h,d,l,p,t,g -l help,debug,logging,print-out,tail-log,gui,start,startup -- $@`"
 fi
 
 if [ $? -ne 0 ];then
@@ -72,6 +72,7 @@ LOGGING=0
 DEBUG=0
 PRINTONLY=0
 TAILLOG=0
+STARTUP=0
 GUI=0
 for option in $options;do
 	if [ $isparameter -ne 1 ];then #option
@@ -202,8 +203,7 @@ cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
 if [ $STARTUP -eq 1 ] #startup
 then
 	cmdline="$cmdline -startup $parameter"
-elif [ $GUI -eq 1 ] #gui
-then
+elif [ $GUI -eq 1 ];then #gui
 	cmdline="$cmdline -gui $parameter"
 fi
 if [ $DEBUG -eq 1 ] #debug
