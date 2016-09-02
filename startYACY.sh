@@ -40,6 +40,7 @@ Options
   -l, --logging		save the output of YaCy to yacy.log
   -d, --debug		show the output of YaCy on the console
   -p, --print-out	only print the command, which would be executed to start YaCy
+  -start, -startup [data-path] start YaCy using the specified data folder path, relative to the current user home
   -g, --gui		start a gui for YaCy
 USAGE
 }
@@ -101,6 +102,10 @@ for option in $options;do
 			-t|--tail-log)
 				TAILLOG=1
 				;;
+			-start|-startup)
+				STARTUP=1
+				isparameter=1
+				;;
 			-g|--gui)
 				GUI=1
 				isparameter=1
@@ -111,7 +116,11 @@ for option in $options;do
 			isparameter=1;
 			continue
 		else
-			parameter="$parameter $option"
+			if [ $parameter ];then
+				parameter="$parameter $option"
+			else
+				parameter="$option"
+			fi
 		fi
 	fi #parameter or option?
 done
@@ -189,7 +198,11 @@ for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH=".:$CLASSPATH"
 
 cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
-if [ $GUI -eq 1 ] #gui
+
+if [ $STARTUP -eq 1 ] #startup
+then
+	cmdline="$cmdline -startup $parameter"
+elif [ $GUI -eq 1 ] #gui
 then
 	cmdline="$cmdline -gui $parameter"
 fi

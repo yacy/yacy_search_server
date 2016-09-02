@@ -19,7 +19,7 @@
 <key>CFBundleAllowMixedLocalizations</key>
 <string>true</string>
 <key>CFBundleExecutable</key>
-<string>startYACY.sh</string>
+<string>startYACYMacOS.sh</string>
 <key>CFBundleDevelopmentRegion</key>
 <string>English</string>
 <key>CFBundlePackageType</key>
