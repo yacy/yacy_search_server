@@ -713,13 +713,17 @@ public final class yacy {
 	        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
 	        if ((args.length >= 1) && (args[0].toLowerCase().equals("-startup") || args[0].equals("-start"))) {
 	            // normal start-up of yacy
-	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-                    preReadSavedConfigandInit(dataRoot);
+	            if (args.length > 1) {
+	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            }
+                preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
 	            // start-up of yacy with gui
-	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-                    preReadSavedConfigandInit(dataRoot);
+	            if (args.length > 1) {
+	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            }
+                preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
 	        } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
 	            // normal shutdown of yacy
@@ -732,7 +736,7 @@ public final class yacy {
 	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
 	            // show yacy version
 	            System.out.println(copyright);
-                } else if ((args.length > 1) && (args[0].toLowerCase().equals("-config"))) {
+            } else if ((args.length > 1) && (args[0].toLowerCase().equals("-config"))) {
                     // set config parameter. Special handling of adminAccount=user:pwd (generates md5 encoded password)
                     // on Windows parameter should be enclosed in doublequotes to accept = sign (e.g. -config "port=8090" "port.ssl=8043")
                     File f = new File (dataRoot,"DATA/SETTINGS/");
@@ -778,9 +782,11 @@ public final class yacy {
                         }
                         System.out.println();
                     }
-                } else {
-	            if (args.length == 1) applicationRoot= new File(args[0]);
-                    preReadSavedConfigandInit(dataRoot);
+            } else {
+	            if (args.length == 1) {
+	            	applicationRoot= new File(args[0]);
+	            }
+                preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        }
     	} finally {
