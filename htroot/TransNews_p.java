@@ -42,7 +42,6 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
 import net.yacy.utils.translation.TranslationManager;
-import net.yacy.utils.translation.TranslatorXliff;
 
 public class TransNews_p {
 
@@ -90,32 +89,13 @@ public class TransNews_p {
                                 continue;
                             }
                             if (NewsPool.CATEGORY_TRANSLATION_ADD.equals(rtmp.category())) {
-                                //String tmplng = rtmp.attribute("language", null);
+                                String tmplng = rtmp.attribute("language", null);
                                 String tmpfile = rtmp.attribute("file", null);
                                 String tmpsource = rtmp.attribute("source", null);
-                                String tmptarget = rtmp.attribute("target", null);
+                                //String tmptarget = rtmp.attribute("target", null);
 
-                                if (sb.peers.mySeed().hash.equals(rtmp.originator())) {
-                                    /*
-                                        if (tmplng != null && tmplng.equals(currentlang)) {
-                                            sendit = false;
-                                            break;
-                                        }*/
-                                    if (tmpfile != null && tmpfile.equals(file)) {
-                                        sendit = false;
-                                        break;
-                                    }
-                                    if (tmpsource != null && tmpsource.equals(sourcetxt)) {
-                                        sendit = false;
-                                        break;
-                                    }
-                                    if (tmptarget != null && tmptarget.equals(targettxt)) {
-                                        sendit = false;
-                                        break;
-                                    }
-                                }
                                 // if news with file and source exist (maybe from other peer) - skip sending another msg (to avoid confusion)
-                                if ((tmpfile != null && tmpfile.equals(file))
+                                if ((tmplng != null && tmplng.equals(currentlang)) && (tmpfile != null && tmpfile.equals(file))
                                         && (tmpsource != null && tmpsource.equals(sourcetxt))) {
                                     sendit = false;
                                     break;
