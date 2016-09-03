@@ -1439,10 +1439,19 @@ public final class SearchEvent {
         long r = 0;
 
         // for media search: prefer pages with many links
-        r += rentry.limage() << this.query.ranking.coeff_cathasimage;
-        r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
-        r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
-        r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
+        switch (this.query.contentdom) {
+            case IMAGE:
+                r += rentry.limage() << this.query.ranking.coeff_cathasimage;
+                break;
+            case AUDIO:
+                r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
+                break;
+            case VIDEO:
+                r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
+                break;
+            case APP:
+                r += rentry.lapp() << this.query.ranking.coeff_cathasapp;
+        }
 
         // apply citation count
         //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
