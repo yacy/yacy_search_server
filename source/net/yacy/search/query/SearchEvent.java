@@ -1329,10 +1329,32 @@ public final class SearchEvent {
     public long getSnippetComputationTime() {
         return this.snippetComputationAllTime;
     }
-    
-    public ScoreMap<String> getTopicNavigator(final int count ) {
+
+    /**
+     * Get topics in a ScoreMap if config allows topic navigator
+     * (the topics are filtered by badwords, stopwords and words included in the query)
+     *
+     * @param count max number of topics returned
+     * @return ScoreMap with max number of topics or null if
+     */
+    public ScoreMap<String> getTopicNavigator(final int count) {
         if (this.topicNavigatorCount > 0 && count >= 0) { //topicNavigatorCount set during init, 0=no nav
-            return this.getTopics(count != 0 ? count : this.topicNavigatorCount, 500);
+            if (!this.ref.sizeSmaller(2)) {
+                ScoreMap<String> result;
+                int ic = count != 0 ? count : this.topicNavigatorCount;
+
+                if (this.ref.size() <= ic) { // size matches return map directly
+                    result = this.getTopics(/*ic, 500*/);
+                } else { // collect top most count topics
+                    result = new ConcurrentScoreMap<String>();
+                    Iterator<String> it = this.getTopics(/*ic, 500*/).keys(false);
+                    while (ic-- > 0 && it.hasNext()) {
+                        String word = it.next();
+                        result.set(word, this.ref.get(word));
+                    }
+                }
+                return result;
+            }
         }
         return null;
     }
@@ -1836,21 +1858,20 @@ public final class SearchEvent {
     }
 
     /**
-     * create a list of words that had been computed by statistics over all
+     * Return the list of words that had been computed by statistics over all
      * words that appeared in the url or the description of all urls
      *
-     * @param maxcount max number of topwords to return
-     * @param maxtime max time allowed to use
-     * @return
+     * @return ScoreMap
      */
-    public ScoreMap<String> getTopics(final int maxcount, final long maxtime) {
+    public ScoreMap<String> getTopics(/* final int maxcount, final long maxtime */) {
+        /* ---------------------------------- start of rem (2016-09-03)
+        // TODO: result map is not used currently, verify if it should and use or delete this code block
+        // TODO: as it is not used now - in favour of performance this code block is rem'ed (2016-09-03)
+
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
         if ( this.ref.sizeSmaller(2) ) {
             this.ref.clear(); // navigators with one entry are not useful
         }
-        /* ---------------------------------- start of rem (2016-09-03)
-        // TODO: result map is not used currently, verify if it should and use or delete this code block
-        // TODO: as it is not used now - in favour of performance this code block is rem'ed (2016-09-03)
 
         final Map<String, Float> counts = new HashMap<String, Float>();
         final Iterator<String> i = this.ref.keys(false);
@@ -1883,6 +1904,11 @@ public final class SearchEvent {
 
     private final static Pattern lettermatch = Pattern.compile("[a-z]+");
 
+    /**
+     * Collects topics in a ScoreMap for words not included in the query words.
+     * Words are also filtered by badword blacklist and stopword list.
+     * @param words
+     */
     public void addTopic(final String[] words) {
         String word;
         for ( final String w : words ) {
@@ -1899,6 +1925,10 @@ public final class SearchEvent {
         }
     }
 
+    /**
+     * Ad title words to this searchEvent's topic score map
+     * @param resultEntry
+     */
     protected void addTopics(final URIMetadataNode resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
