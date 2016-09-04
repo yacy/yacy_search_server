@@ -200,6 +200,7 @@ public class TransNews_p {
                 continue;
             }
 
+            if (!lang.equals(currentlang)) continue;
             
             String existingtarget = null; //transMgr.getTranslation(filename, source);
             Map<String, String> tmpMap = localTrans.get(filename);

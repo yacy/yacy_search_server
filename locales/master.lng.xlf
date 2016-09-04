@@ -5966,6 +5966,21 @@
     <trans-unit id="49006831" xml:space="preserve" approved="no" translate="yes">
        <source>profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.</source>
     </trans-unit>
+    <trans-unit id="80e8551f" xml:space="preserve" approved="no" translate="yes">
+       <source>Publishing of added or modified translation for the user interface.</source>
+    </trans-unit>
+    <trans-unit id="aff2f3ce" xml:space="preserve" approved="no" translate="yes">
+       <source>Other peers may include it in their local translation list.</source>
+    </trans-unit>
+    <trans-unit id="304f12eb" xml:space="preserve" approved="no" translate="yes">
+       <source>To publish a translation, use the integrated</source>
+    </trans-unit>
+    <trans-unit id="f7855dbc" xml:space="preserve" approved="no" translate="yes">
+       <source>translation editor</source>
+    </trans-unit>    
+    <trans-unit id="7e95942a" xml:space="preserve" approved="no" translate="yes">
+       <source>to add a translation and publish it afterwards.</source>
+    </trans-unit>    
     <trans-unit id="ac7ecc34" xml:space="preserve" approved="no" translate="yes">
        <source>Above you can see four menues:</source>
     </trans-unit>
@@ -10124,6 +10139,9 @@
     <trans-unit id="a66de681" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Local Peer Wiki&lt;</source>
     </trans-unit>
+    <trans-unit id="cf394e0e" xml:space="preserve" approved="no" translate="yes">
+       <source>UI Translations</source>
+    </trans-unit>    
   </body>
 </file>
 
