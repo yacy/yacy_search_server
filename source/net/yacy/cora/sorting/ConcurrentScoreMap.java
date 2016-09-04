@@ -133,7 +133,10 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         if (obj == null) return;
 
         // use atomic operations
-        this.map.putIfAbsent(obj, new AtomicLong(0));
+        final AtomicLong old = this.map.putIfAbsent(obj, new AtomicLong(0));
+        // adjust overall counter if value replaced
+        if (old != null) this.gcount -= old.longValue(); // must use old befor setting a new value (it's a object reference)
+
         this.map.get(obj).set(newScore);
 
         // increase overall counter
