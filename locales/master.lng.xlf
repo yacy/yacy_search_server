@@ -6023,6 +6023,24 @@
     <trans-unit id="8eff8577" xml:space="preserve" approved="no" translate="yes">
        <source>Attributes</source>
     </trans-unit>
+    <trans-unit id="8ae5c927" xml:space="preserve" approved="no" translate="yes">
+       <source>Process Selected News</source>
+    </trans-unit>
+    <trans-unit id="d40fbba3" xml:space="preserve" approved="no" translate="yes">
+       <source>Delete Selected News</source>
+    </trans-unit>
+    <trans-unit id="43ac9953" xml:space="preserve" approved="no" translate="yes">
+       <source>Abort Publication of Selected News</source>
+    </trans-unit>
+    <trans-unit id="49ff88e3" xml:space="preserve" approved="no" translate="yes">
+       <source>Process All News</source>
+    </trans-unit>
+    <trans-unit id="6fcef8e7" xml:space="preserve" approved="no" translate="yes">
+       <source>Delete All News</source>
+    </trans-unit>
+    <trans-unit id="30aa4d37" xml:space="preserve" approved="no" translate="yes">
+       <source>Abort Publication of All News</source>
+    </trans-unit>    
     <trans-unit id="8c39153f" xml:space="preserve" approved="no" translate="yes">
        <source>"#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#"</source>
     </trans-unit>
