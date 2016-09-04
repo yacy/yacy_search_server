@@ -169,8 +169,8 @@ public class TransNews_p {
         final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
         accumulateVotes(sb, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
         final ScoreMap<String> ranking = new ConcurrentScoreMap<String>(); // score cluster for url hashes
-        final HashMap<String, NewsDB.Record> Translation = new HashMap<String, NewsDB.Record>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
-        accumulateTranslations(sb, Translation, ranking, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
+        final HashMap<String, NewsDB.Record> translation = new HashMap<String, NewsDB.Record>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+        accumulateTranslations(sb, translation, ranking, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
 
         // read out translation-news array and create property entries
         final Iterator<String> k = ranking.keys(false);
@@ -187,7 +187,7 @@ public class TransNews_p {
                 continue;
             }
 
-            row = Translation.get(refid);
+            row = translation.get(refid);
             if (row == null) {
                 continue;
             }
