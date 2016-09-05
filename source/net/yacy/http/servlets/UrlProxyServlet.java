@@ -156,6 +156,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         prop.put(HeaderFramework.CONNECTION_PROP_METHOD, request.getMethod()); // only needed for HTTPDeamon errormsg in case of blacklisted url
         if (proxyurl.getQuery() != null) prop.put(HeaderFramework.CONNECTION_PROP_ARGS, proxyurl.getQuery());
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
+        prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 
         yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
         yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());

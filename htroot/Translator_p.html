@@ -17,7 +17,7 @@
         <legend>
           <label>UI Translation</label>
         </legend>
-        <p>Target Language: <b>#[targetlang]#</b></p><p class="error">#[errmsg]#</p>
+        <p>Target Language: <b>#[targetlang]#</b></p> #(errmsg)#::<p class="error">activate a different language <a href='ConfigBasic.html'>here</a></p>#(/errmsg)#
         <label for="sourcefile">Source File</label>
         <select name="sourcefile" onchange="submit();">
           #{filelist}#
@@ -46,7 +46,7 @@
      
       </fieldset>
     </form>
-
+    <p>Check for remote translation proposals and/or share your own added translations <a href="TransNews_p.html">Translation News</a></p>
     #%env/templates/footer.template%#
   </body>
 </html>

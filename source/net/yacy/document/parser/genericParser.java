@@ -44,6 +44,17 @@ public class genericParser extends AbstractParser implements Parser {
         // this parser is used if no other fits. This parser fits all
     }
 
+    /**
+     * Constructor to allow to set a scraperObject
+     * because it is desired to keep the scraper/source object protected
+     * This is used for surrogate parsers to set a other source/scraper then ContentScraper
+     * @param scraper
+     */
+    public genericParser(Object scraper) {
+        super("Generic Parser");
+        this.scraperObject = scraper;
+    }
+
     @Override
     public Document[] parse(
             final DigestURL location,

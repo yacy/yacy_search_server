@@ -70,7 +70,7 @@ public class QuickCrawlLink_p {
             prop.put("mode", "0");
 
             // get the http host header
-            final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
+            final String hostSocket = header.get(HeaderFramework.HOST);
 
             //String host = hostSocket;
             int port = 80;

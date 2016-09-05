@@ -113,6 +113,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
     public static final String X_YACY_MEDIA_TITLE = "X-YaCy-Media-Title"; // can be attached to media files which do not have metadata; this will be used as title
     public static final String X_YACY_MEDIA_KEYWORDS = "X-YaCy-Media-Keywords"; // can be attached to media files which do not have metadata; this will be used as keywords (space-separared list of words)
+    /** Added when generating legacy request header to allow template servlets to know the original request scheme : "http" or "https" */
+    public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme";
 
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";
@@ -194,6 +196,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     }
 
     /* PROPERTIES: General properties */
+    // Properties are used to internally store or remember header values and additional connection information
+    // One of the usages is in proxy operation to prepare header values to be set as header values upon connection
+    //  * use of properties as header values is discouraged (e.g. as proxy transmits it as arbitrary headers) [2016-8-21]
     public static final String CONNECTION_PROP_HTTP_VER = "HTTP";
     public static final String CONNECTION_PROP_PROTOCOL = "PROTOCOL";
     public static final String CONNECTION_PROP_HOST = "HOST";
@@ -205,16 +210,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_ARGS = "ARGS";
     public static final String CONNECTION_PROP_CLIENTIP = "CLIENTIP";
     public static final String CONNECTION_PROP_PERSISTENT = "PERSISTENT";
-    //public static final String CONNECTION_PROP_KEEP_ALIVE_COUNT = "KEEP-ALIVE_COUNT";
-    //public static final String CONNECTION_PROP_REQUESTLINE = "REQUESTLINE";
-    //public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
     public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
-    //public static final String CONNECTION_PROP_INPUTSTREAM = "INPUTSTREAM";
-    //public static final String CONNECTION_PROP_OUTPUTSTREAM = "OUTPUTSTREAM";
 
     /* PROPERTIES: Client -> Proxy */
-    public static final String CONNECTION_PROP_CLIENT_REQUEST_HEADER = "CLIENT_REQUEST_HEADER";
+    public static final String CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST = "CLIENT_HTTPSERVLETREQUEST";
 
     /* PROPERTIES: Proxy -> Client */
     public static final String CONNECTION_PROP_PROXY_RESPOND_CODE = "PROXY_RESPOND_CODE";
@@ -544,7 +544,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if (theHeader == null) throw new IllegalArgumentException();
 
         // setting the http version if it was not already set
-        if (httpVersion == null) httpVersion = "HTTP/1.0";
+        if (httpVersion == null) httpVersion = HTTP_VERSION_1_0;
 
         // setting the status text if it was not already set
         if ((httpStatusText == null)||(httpStatusText.length()==0)) {
@@ -748,6 +748,12 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     {
         setCookie( name,  value,  null,  null,  null, false);
     }
+
+    /**
+     * Gets the header entry "Cookie"
+     * 
+     * @return String with cookies separated by ';'
+     */
     public String getHeaderCookies(){
         final Iterator<Map.Entry<String, String>> it = entrySet().iterator();
         while(it.hasNext())

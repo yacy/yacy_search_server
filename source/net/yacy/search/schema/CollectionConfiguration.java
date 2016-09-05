@@ -335,27 +335,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.audiolinkscount_i)) add(doc, CollectionSchema.audiolinkscount_i, md.laudio());
         if (allAttr || contains(CollectionSchema.videolinkscount_i)) add(doc, CollectionSchema.videolinkscount_i, md.lvideo());
         if (allAttr || contains(CollectionSchema.applinkscount_i)) add(doc, CollectionSchema.applinkscount_i, md.lapp());
-        if (allAttr || contains(CollectionSchema.text_t)) {
-        	// construct the text from other metadata parts.
-        	// This is necessary here since that is used to search the link when no other data (parsed text body) is available
-        	StringBuilder sb = new StringBuilder(120);
-        	// accText(sb, md.dc_title()); // default search field via getQueryFields(), not needed for snippet (always displayed)
-        	// accText(sb, md.dc_creator()); // author is in Default ranking/getQueryFields
-        	// accText(sb, md.dc_publisher()); // has it's own metadata field publisher_t (not part of default queryfields) and mostly N/A
-        	// accText(sb, md.snippet()); // above added to description_txt, default search field via getQueryFields(), description_txt incl. in snippet calculation
-        	accText(sb, md.url().toTokens());
-        	// accText(sb, keywords); // default search field via getQueryFields(), keywords not incl. in snippet calculation
-        	add(doc, CollectionSchema.text_t, sb.toString());
-        }
 
         return doc;
-    }
-
-    private static void accText(final StringBuilder sb, String text) {
-    	if (text == null || text.length() == 0) return;
-    	if (sb.length() != 0) sb.append(' ');
-    	text = text.trim();
-    	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
     public static class Subgraph {
@@ -541,11 +522,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
         int c = 0;
-        final Object parser = document.getParserObject();
+        final Object scraper = document.getScraperObject();
         boolean containsCanonical = false;
         DigestURL canonical = null;
-        if (parser instanceof ContentScraper) {
-            final ContentScraper html = (ContentScraper) parser;
+        if (scraper instanceof ContentScraper) {
+            final ContentScraper html = (ContentScraper) scraper;
             List<ImageEntry> images = html.getImages();
 
             // header tags
@@ -885,9 +866,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
         }
 
-        if (parser instanceof DCEntry) {
+        if (scraper instanceof DCEntry) {
             // the document was created with a surrogate parsing; overwrite all md: -entries to Solr
-            DCEntry dcentry = (DCEntry) parser;
+            DCEntry dcentry = (DCEntry) scraper;
             for (Map.Entry<String, String[]> entry: dcentry.getMap().entrySet()) {
                 String tag = entry.getKey();
                 if (!tag.startsWith("md:") || tag.length() < 4) continue;

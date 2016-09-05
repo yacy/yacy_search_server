@@ -37,15 +37,27 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
+
+import com.google.common.io.Files;
+
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.data.Translator;
+import net.yacy.document.Document;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.http.Jetty9HttpServerImpl;
@@ -54,17 +66,11 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
+import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import com.google.common.io.Files;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.order.Digest;
-import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.crawler.retrieval.Response;
-import net.yacy.peers.Seed;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.translation.TranslatorXliff;
 
@@ -265,22 +271,7 @@ public final class yacy {
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // copy the donate iframe (better to copy this once here instead of doing this in an actual iframe in the search result)
-            final File wwwEnvPath = new File(htDocsPath, "env");
-            mkdirIfNeseccary(wwwEnvPath);
-            final String iframesource = sb.getConfig("donation.iframesource", "");
-            final String iframetarget = sb.getConfig("donation.iframetarget", "");
-            final File iframefile = new File(htDocsPath, iframetarget);
-            if (!iframefile.exists()) new Thread() {
-                @Override
-                public void run() {
-                    final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
-                    Response response;
-                    try {
-                        response = sb.loader == null ? null : sb.loader.load(sb.loader.request(new DigestURL(iframesource), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
-                        if (response != null) FileUtils.copy(response.getContent(), iframefile);
-                    } catch (Throwable e) {}
-                }
-            }.start();
+            importDonationIFrame(sb, htDocsPath);
             
             // create default notifier picture
             File notifierFile = new File(htDocsPath, "notifier.gif");
@@ -349,29 +340,43 @@ public final class yacy {
                 //regenerate Locales from Translationlist, if needed
                 final File locale_source = sb.getAppPath("locale.source", "locales");
                 final String lang = sb.getConfig("locale.language", "");
-                if (!lang.equals("") && !lang.equals("default")) { //locale is used
-                    String currentRev = null;
-                    try{
-                        final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
-                        currentRev = br.readLine(); // may return null
-                        br.close();
-                    }catch(final IOException e){
-                        //Error
-                    }
-
-                    if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) try { //is this another version?!
-                        final File sourceDir = new File(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
-                        final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
-                        if (new TranslatorXliff().translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
-                            //write the new Versionnumber
-                            final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                            bw.write(sb.getConfig(Seed.VERSION, "Error getting Version"));
-                            bw.close();
+                // on lang=browser all active translation should be checked (because any could be requested by client)
+                List<String> langlist;
+                if (lang.endsWith("browser"))
+                    langlist = Translator.activeTranslations(); // get all translated languages
+                else {
+                    langlist = new ArrayList<String>();
+                    langlist.add(lang);
+                }
+                for (String tmplang : langlist) {
+                    if (!tmplang.equals("") && !tmplang.equals("default") && !tmplang.equals("browser")) { //locale is used
+                        String currentRev = null;
+                        try {
+                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), tmplang + "/version"))));
+                            currentRev = br.readLine(); // may return null
+                            br.close();
+                        } catch (final IOException e) {
+                            //Error
                         }
-                    } catch (final IOException e) {}
+
+                        if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) {
+                            try { //is this another version?!
+                                final File sourceDir = new File(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
+                                final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), tmplang);
+                                if (new TranslatorXliff().translateFilesRecursive(sourceDir, destDir, new File(locale_source, tmplang + ".lng"), "html,template,inc", "locale")) { //translate it
+                                    //write the new Versionnumber
+                                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                                    bw.write(sb.getConfig(Seed.VERSION, "Error getting Version"));
+                                    bw.close();
+                                }
+                            } catch (final IOException e) {
+                            }
+                        }
+                    }
                 }
                 // initialize number formatter with this locale
-                Formatter.setLocale(lang);
+                if (!lang.equals("browser")) // "default" is handled by .setLocale()
+                    Formatter.setLocale(lang);
 
                 // registering shutdown hook
                 ConcurrentLog.config("STARTUP", "Registering Shutdown Hook");
@@ -420,6 +425,59 @@ public final class yacy {
             System.exit(0);
         } catch (final Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
+
+    /**
+     * Concurrently import the donation iframe content to serve it directly from this peer.
+     * @param switchBoard the SwitchBoard instance. Must not be null.
+     * @param htDocsDirectory the custom htdocs directory. Must not be null.
+     */
+	private static void importDonationIFrame(final Switchboard switchBoard, final File htDocsDirectory) {
+		final File wwwEnvPath = new File(htDocsDirectory, "env");
+		mkdirIfNeseccary(wwwEnvPath);
+		final String iframesource = switchBoard.getConfig("donation.iframesource", "");
+		final String iframetarget = switchBoard.getConfig("donation.iframetarget", "");
+		final File iframefile = new File(htDocsDirectory, iframetarget);
+		if (!iframefile.exists()) new Thread() {
+		    @Override
+		    public void run() {
+		        final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
+		        Response documentResponse;
+		        try {
+		        	/* Load the donation html frame content */
+		        	documentResponse = switchBoard.loader == null ? null : switchBoard.loader.load(switchBoard.loader.request(new DigestURL(iframesource), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
+		            if (documentResponse != null) {
+		            	Document[] documents = documentResponse.parse();
+		            	if(documents != null && documents.length > 0 && documents[0] != null) {
+		            		Document donateDocument = documents[0];
+		            		String donateDocContent = new String(documentResponse.getContent(), donateDocument.getCharset());
+		            		/* Load image resources contained in the page */
+		            		if(donateDocument.getImages() != null) {
+		            			for(DigestURL imgURL : donateDocument.getImages().keySet()) {
+		            				try {
+		            					Response response = switchBoard.loader.load(switchBoard.loader.request(imgURL, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
+		            					if (response != null) {
+		            						String imgFileName = imgURL.getFileName();
+		            						/* Store each image in the same directory as the iframe target file */
+		            						FileUtils.copy(response.getContent(), new File(iframefile.getParentFile(), imgFileName));
+		                        	
+		            						/* Transform the original image URL to a relative one */
+		            						donateDocContent = donateDocContent.replace(imgURL.getURL().toString(), imgFileName);
+		            					}
+		            				} catch(IOException e) {
+		            					/* Failing to load one image should not stop the whole task */
+		            					ConcurrentLog.warn("STARTUP", "Donation frame retrieval : could not get an image resource.", e);
+		            				}
+		            			}
+		            		}
+			            	FileUtils.copy(donateDocContent.getBytes(donateDocument.getCharset()), iframefile);
+		            	}
+		            }
+		        } catch (Exception e) {
+		        	ConcurrentLog.warn("STARTUP", "Could not retrieve donation frame content.", e);
+		        }
+		    }
+		}.start();
+	}
 
 	/**
 	 * @param f
@@ -655,13 +713,17 @@ public final class yacy {
 	        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
 	        if ((args.length >= 1) && (args[0].toLowerCase().equals("-startup") || args[0].equals("-start"))) {
 	            // normal start-up of yacy
-	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-                    preReadSavedConfigandInit(dataRoot);
+	            if (args.length > 1) {
+	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            }
+                preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
 	            // start-up of yacy with gui
-	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-                    preReadSavedConfigandInit(dataRoot);
+	            if (args.length > 1) {
+	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            }
+                preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
 	        } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
 	            // normal shutdown of yacy
@@ -674,7 +736,7 @@ public final class yacy {
 	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
 	            // show yacy version
 	            System.out.println(copyright);
-                } else if ((args.length > 1) && (args[0].toLowerCase().equals("-config"))) {
+            } else if ((args.length > 1) && (args[0].toLowerCase().equals("-config"))) {
                     // set config parameter. Special handling of adminAccount=user:pwd (generates md5 encoded password)
                     // on Windows parameter should be enclosed in doublequotes to accept = sign (e.g. -config "port=8090" "port.ssl=8043")
                     File f = new File (dataRoot,"DATA/SETTINGS/");
@@ -720,9 +782,11 @@ public final class yacy {
                         }
                         System.out.println();
                     }
-                } else {
-	            if (args.length == 1) applicationRoot= new File(args[0]);
-                    preReadSavedConfigandInit(dataRoot);
+            } else {
+	            if (args.length == 1) {
+	            	applicationRoot= new File(args[0]);
+	            }
+                preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        }
     	} finally {

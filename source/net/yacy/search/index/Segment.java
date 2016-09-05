@@ -601,11 +601,14 @@ public class Segment {
                 crawlProfile != null && document.getDepth() <= crawlProfile.snapshotMaxdepth() &&
                 !crawlProfile.snapshotsMustnotmatch().matcher(urlNormalform).matches()) {
             // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
-            String ext = MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase();
-            if (ext.length() == 0 || url.getFile().length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext)) {
+            Parser p = document.getParserObject();
+            boolean mimesupported = false;
+            if (p instanceof htmlParser)
+                    mimesupported = ((htmlParser)p).supportedMimeTypes().contains(document.dc_format());
+
+            if (mimesupported)
                 // STORE IMAGE AND METADATA
                 Transactions.store(vector, true, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, acceptLanguage);
-            }
         }
         
         // STORE TO SOLR

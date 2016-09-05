@@ -58,6 +58,9 @@ import net.yacy.peers.Seed;
 import net.yacy.search.SwitchboardConstants;
 
 public class serverSwitch {
+	
+	/** Key of system property defining locally open http port */
+	public static final String LOCAL_PORT_SYSTEM_PROPERTY = "net.yacy.server.localPort";
 
 	// configuration management
 	private final File configFile;
@@ -217,18 +220,40 @@ public class serverSwitch {
 
 		return getConfigInt(key, dflt);
 	}
+	
+	/**
+	 * @return local http server port or null if system property is not defined
+	 */
+	public Integer getLocalPortSystemProperty() {
+		String systemDefinedPort = System.getProperty(LOCAL_PORT_SYSTEM_PROPERTY);
+		Integer localPort = null;
+		if(systemDefinedPort != null) {
+			try {
+				localPort = Integer.parseInt(systemDefinedPort);
+			} catch(NumberFormatException e) {
+				log.warn("System property " + LOCAL_PORT_SYSTEM_PROPERTY + " is not valid : it should be a integer.");
+			}
+		}
+		return localPort;
+	}
 
 	/**
 	 * Wrapper for {@link #getConfigInt(String, int)} to have a more consistent
 	 * API.
 	 * 
-	 * Default value 8090 will be used if no value is found
-         * 
-	 * @return the local port of this system
+	 * Default value 8090 will be used if no value is found in system properties and in configuration.
+     * 
+	 * @return the local http port of this system
 	 * @see #getPublicPort(String, int)
 	 */
 	public int getLocalPort() {
 
+		/* A system property "net.yacy.server.localPort" may override configuration 
+		 * This is useful when running YaCy inside a container manager such as Heroku which decide which http port to use */
+		Integer localPort = getLocalPortSystemProperty();
+		if(localPort != null) {
+			return localPort;
+		}
 		return getConfigInt("port", 8090);
 	}
 

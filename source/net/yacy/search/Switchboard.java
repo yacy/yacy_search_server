@@ -2568,6 +2568,7 @@ public final class Switchboard extends serverSwitch {
                 this.crawlQueues.noticeURL.clear();
                 
                 // do solr optimization
+                /*
                 long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
                 long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
                 long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
@@ -2577,7 +2578,6 @@ public final class Switchboard extends serverSwitch {
                     opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
                     optimizeRequired = true;
                 }
-                
                 log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
                 if (optimizeRequired) {
                     if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
@@ -2585,6 +2585,7 @@ public final class Switchboard extends serverSwitch {
                     fulltext.optimize(opts);
                     this.optimizeLastRun = System.currentTimeMillis();
                 }
+                */
             }
             
             // write statistics

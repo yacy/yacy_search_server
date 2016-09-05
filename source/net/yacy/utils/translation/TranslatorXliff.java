@@ -29,27 +29,22 @@ package net.yacy.utils.translation;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.XMLEvent;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
 import net.yacy.search.Switchboard;
 
-import org.oasis.xliff.core_12.Body;
-import org.oasis.xliff.core_12.Target;
-import org.oasis.xliff.core_12.TransUnit;
-import org.oasis.xliff.core_12.Xliff;
 
 /**
  * Wordlist based translator
@@ -88,55 +83,70 @@ public class TranslatorXliff extends Translator {
          * <file>.....
          * </xliff>
          */
-        Xliff xliffTranslation;
-        try (FileInputStream fis = new FileInputStream(xliffFile)){ // try-with-resource to close inputstream
-            JAXBContext ctx = JAXBContext.newInstance(org.oasis.xliff.core_12.Xliff.class);
-            Unmarshaller un = ctx.createUnmarshaller();
-            Object obj = un.unmarshal(fis);
-            if (obj instanceof org.oasis.xliff.core_12.Xliff) {
-                xliffTranslation = (org.oasis.xliff.core_12.Xliff) obj;
-            } else {
-                return null;
-            }
 
-            List<Object> xlfFileList = xliffTranslation.getAnyAndFile();
-            for (Object xlfobj : xlfFileList) {
-                org.oasis.xliff.core_12.File xlfFileNode = (org.oasis.xliff.core_12.File) xlfobj;
-                Map<String, String> translationList; //current Translation Table (maintaining input order)
-                String forFile = xlfFileNode.getOriginal();
-                if (lngLists.containsKey(forFile)) {
-                    translationList = lngLists.get(forFile);
-                } else {
-                    translationList = new LinkedHashMap<String, String>(); //current Translation Table (maintaining input order)
-                    lngLists.put(forFile, translationList);
-                }
+        try (FileInputStream fis = new FileInputStream(xliffFile)) { // try-with-resource to close inputstream
 
-                Body xlfBody = xlfFileNode.getBody();
-                List<Object> xlfTransunitList = xlfBody.getGroupOrTransUnitOrBinUnit();
-                for (Object xlfTransunit : xlfTransunitList) {
-                    if (xlfTransunit instanceof TransUnit) {
-                        String source = ((TransUnit) xlfTransunit).getSource().getContent().get(0).toString();
-                        Target target = ((TransUnit) xlfTransunit).getTarget();
-                        if (target != null) {
-                           if ("translated".equals(target.getState())) {
-                                List<Object> targetContentList = target.getContent();
-                                String targetContent = targetContentList.get(0).toString();
-                                translationList.put(source, targetContent);
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            XMLStreamReader xmlreader = factory.createXMLStreamReader(fis);
+
+            Map<String, String> translationList = null; //current Translation Table (maintaining input order)
+            String source = null;
+            String target = null;
+            String state = null;
+            while (xmlreader.hasNext()) {
+                int eventtype = xmlreader.next();
+
+                if (eventtype == XMLEvent.START_ELEMENT) {
+                    String ename = xmlreader.getLocalName();
+
+                    // setup for 'file' section (get or add translationlist for this file)
+                    if (ename.equalsIgnoreCase("file")) {
+                        String forFile = xmlreader.getAttributeValue(null, "original");
+                        if (lngLists.containsKey(forFile)) {
+                            translationList = lngLists.get(forFile);
+                        } else {
+                            translationList = new LinkedHashMap<String, String>(); //current Translation Table (maintaining input order)
+                            lngLists.put(forFile, translationList);
+                        }
+                        source = null;
+                        target = null;
+                    } else if (ename.equalsIgnoreCase("trans-unit")) { // prepare for trans-unit
+                        source = null;
+                        target = null;
+                    } else if (ename.equalsIgnoreCase("source")) { // get source text
+                        source = xmlreader.getElementText();
+                    } else if (ename.equalsIgnoreCase("target")) { // get target text
+                        state = xmlreader.getAttributeValue(null, "state");
+                        target = xmlreader.getElementText(); // TODO: in full blown xliff, target may contain sub-xml elements (but we use only text)
+                    }
+                } else if (eventtype == XMLEvent.END_ELEMENT) {
+                    String ename = xmlreader.getLocalName();
+
+                    // store source/target on finish of trans-unit
+                    if (ename.equalsIgnoreCase("trans-unit") && translationList != null) {
+                        if (source != null) {
+                            if (target != null) {
+                                if ("translated".equals(state)) {
+                                    translationList.put(source, target);
+                                } else {
+                                    translationList.put(source, null);
+                                }
                             } else {
                                 translationList.put(source, null);
                             }
-                        } else {
-                            translationList.put(source, null);
+                            source = null;
                         }
+                        target = null;
+                    }
+                    // on file end-tag make sure nothing is added (on error in xml)
+                    if (ename.equalsIgnoreCase("file")) {
+                        translationList = null;
                     }
                 }
             }
-        } catch (JAXBException je) {
-            ConcurrentLog.warn("TRANSLATOR", je.getMessage());
-        } catch (FileNotFoundException ex) {
-            ConcurrentLog.warn("TRANSLATOR", "File not found: " + xliffFile.getAbsolutePath());
-        } catch (IOException ex) {
-            ConcurrentLog.warn("TRANSLATOR", ex.getMessage());
+            xmlreader.close();
+        } catch (IOException | XMLStreamException ex) {
+            ConcurrentLog.warn("TRANSLATOR", "error reading " + xliffFile.getAbsolutePath() + " -> " + ex.getMessage());
         }
         return lngLists;
     }

@@ -1,4 +1,4 @@
-// CreateTranslationMasters.java
+// TranslationManager.java
 // -------------------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 /**
  * Utility to create a translation master file from all existing translation
@@ -47,7 +49,35 @@ import net.yacy.data.Translator;
  * Also can join existing translation with master (currently ristrictive,
  * means only translation text exist in master are included in resultin Map
  */
-public class CreateTranslationMasters extends TranslatorXliff {
+public class TranslationManager extends TranslatorXliff {
+
+    protected Map<String, Map<String, String>> mainTransLists; // current translation entries for one language
+    protected String loadedLng; // language loaded in mainTransLists (2-letter code)
+
+    public TranslationManager() {
+        super();
+    }
+
+    public TranslationManager(final File langfile) {
+        mainTransLists = loadTranslationsLists(langfile);
+        int pos = langfile.getName().indexOf('.');
+        if (pos >= 0) {
+            loadedLng = langfile.getName().substring(0, pos);
+        }
+    }
+
+    /**
+     * Add a translation text to the current map map
+     *
+     * @param relFileName relative filename the translation belongs to
+     * @param sourceLngTxt the english source text
+     * @param targetLngTxt the translated text
+     * @return true = if map was modified, otherwise false
+     */
+    public boolean addTranslation(final String relFileName, final String sourceLngTxt, final String targetLngTxt) {
+        assert mainTransLists != null;
+        return addTranslation (mainTransLists, relFileName, sourceLngTxt, targetLngTxt);
+    }
 
     /**
      * Helper to add a translation text to the map
@@ -80,6 +110,58 @@ public class CreateTranslationMasters extends TranslatorXliff {
     }
 
     /**
+     * Get the translation list for a ui/html file
+     * @param filename relative path to htroot
+     * @return translation map or null
+     */
+    public Map<String, String> getTranslationForFile(String filename) {
+        return mainTransLists.get(filename);
+    }
+
+    /**
+     * Get a translation target text
+     * @param filename of the translation
+     * @param source english source text
+     * @return translated text or null
+     */
+    public String getTranslation (String filename, String source) {
+       Map<String, String> tmp = mainTransLists.get(filename);
+       if (tmp != null)
+           return tmp.get(source);
+       else
+           return null;
+    }
+
+    /**
+     * Translates one file. The relFilepath is the file name as given in the
+     * translation source lists. The source (english) file is expected under
+     * htroot path. The destination file is under DATA/LOCALE and calculated
+     * using the language of loaded data.
+     *
+     * @param relFilepath file name releative to htroot
+     * @return true on success
+     */
+    public boolean translateFile(String relFilepath) {
+        assert loadedLng != null;
+        assert mainTransLists != null;
+
+        boolean result = false;
+        if (mainTransLists.containsKey(relFilepath)) {
+            Switchboard sb = Switchboard.getSwitchboard();
+            if (sb != null) {
+                final String htRootPath = sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+                final File sourceDir = new File(sb.getAppPath(), htRootPath);
+                final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), loadedLng);
+                // get absolute file by adding relative filename
+                final File sourceFile = new File(sourceDir, relFilepath);
+                final File destFile = new File(destDir, relFilepath);
+                result = translateFile(sourceFile, destFile, mainTransLists.get(relFilepath)); // do the translation
+            }
+        }
+        return result;
+    }
+
+    /**
      * Create a master translation list by reading all translation files
      * If a masterOutputFile exists, content is preserved (loaded first)
      *
@@ -87,11 +169,10 @@ public class CreateTranslationMasters extends TranslatorXliff {
      * @throws IOException
      */
     public void createMasterTranslationLists(File masterOutputFile) throws IOException {
-        Map<String, Map<String, String>> xliffTrans;
         if (masterOutputFile.exists()) // if file exists, conserve existing master content (may be updated by external tool)
-            xliffTrans = loadTranslationsListsFromXliff(masterOutputFile);
+            mainTransLists = loadTranslationsListsFromXliff(masterOutputFile);
         else
-            xliffTrans = new TreeMap<String, Map<String, String>>();
+            mainTransLists = new TreeMap<String, Map<String, String>>();
 
         List<String> lngFiles = Translator.langFiles(new File("locales"));
         for (String filename : lngFiles) {
@@ -130,7 +211,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
                             // it is possible that intentionally empty translation is given
                             // in this case xliff target is missing (=null)
                             if (origVal != null && !origVal.isEmpty()) { // if translation exists
-                                addTranslation(xliffTrans, transfilename, sourcetxt, null); // add to master, set target text null
+                                addTranslation(transfilename, sourcetxt, null); // add to master, set target text null
                             }
                         }
                     }
@@ -140,11 +221,14 @@ public class CreateTranslationMasters extends TranslatorXliff {
             }
         }
         // save as xliff file w/o language code
-        saveAsXliff(null, masterOutputFile, xliffTrans);
+        saveAsXliff(null, masterOutputFile, mainTransLists);
     }
 
     /**
-     * Joins translation master (xliff) and existing translation (lng)
+     * Joins translation master (xliff) and existing translation (lng).
+     * Only texts existing in master are included from the lngfile,
+     * the resulting map includes all keys from master with the matching translation
+     * from lngfile.
      *
      * @param xlifmaster master (with en text to be translated)
      * @param lngfile existing translation
@@ -154,7 +238,7 @@ public class CreateTranslationMasters extends TranslatorXliff {
     public Map<String, Map<String, String>> joinMasterTranslationLists(File xlifmaster, File lngfile) throws IOException {
 
         final String filename = lngfile.getName();
-        Map<String, Map<String, String>> xliffTrans = loadTranslationsListsFromXliff(xlifmaster);
+        mainTransLists = loadTranslationsListsFromXliff(xlifmaster);
         // load translation list
         ConcurrentLog.info("TRANSLATOR", "join into master translation file " + filename);
         Map<String, Map<String, String>> origTrans = loadTranslationsLists(lngfile);
@@ -162,46 +246,50 @@ public class CreateTranslationMasters extends TranslatorXliff {
         for (String transfilename : origTrans.keySet()) { // get translation filename
             // compare translation list
             Map<String, String> origList = origTrans.get(transfilename);
-            Map<String, String> masterList = xliffTrans.get(transfilename);
+            Map<String, String> masterList = mainTransLists.get(transfilename);
             for (String sourcetxt : origList.keySet()) {
                 if ((masterList != null) && (masterList.isEmpty() || masterList.containsKey(sourcetxt))) { // only if included in master (as all languages are in there but checked for occuance
                     String origVal = origList.get(sourcetxt);
                     // it is possible that intentionally empty translation is given
                     // in this case xliff target is missing (=null)
                     if (origVal != null && !origVal.isEmpty()) {
-                        addTranslation(xliffTrans, transfilename, sourcetxt, origVal);
+                        addTranslation(transfilename, sourcetxt, origVal);
                     }
                 }
             }
         }
-        return xliffTrans;
+        return mainTransLists;
     }
 
     /**
-     * for testing to create on master and joined translation results for all lang's
-     *
-     * @param args
+     * Stores the loaded translations to a .lng file
+     * @param lng
+     * @param f
+     * @return
      */
-    public static void main(String args[]) {
-        File outputdirectory = new File ("test/DATA");
+    public boolean saveXliff(final String lng, File f) {
+        return this.saveAsXliff(lng, f, mainTransLists);
+    }
 
-        CreateTranslationMasters ctm = new CreateTranslationMasters();
-        try {
-            if (!outputdirectory.exists()) outputdirectory.mkdir();
-            File xlfmaster = new File(outputdirectory, "master.lng.xlf");
-            ctm.createMasterTranslationLists(xlfmaster); // write the language neutral translation master as xliff
+    /**
+     * Stores the loaded translations to a .xlf file
+     * @param lng
+     * @param f
+     * @return
+     */
+    public boolean saveLng(final String lng, File f) {
+        return this.saveAsLngFile(lng, f, mainTransLists);
+    }
 
-            List<String> lngFiles = Translator.langFiles(new File("locales"));
-            for (String filename : lngFiles) {
-                Map<String, Map<String, String>> lngmaster = ctm.joinMasterTranslationLists(xlfmaster, new File("locales", filename)); // create individual language translation files from master
-                File xlftmp = new File(outputdirectory, filename + ".xlf");
-                System.out.println("output new master translation file " + xlftmp.toString() + " and " + filename);
-                ctm.saveAsXliff(filename.substring(0, 2), xlftmp, lngmaster);
-                ctm.saveAsLngFile(filename.substring(0, 2), new File(outputdirectory, filename), lngmaster);
-            }
-        } catch (IOException ex) {
-            ConcurrentLog.logException(ex);
+    /**
+     * Total number of loaded translation entries
+     * @return
+     */
+    public int size() {
+        int i = 0;
+        for (Map<String, String> trans : mainTransLists.values()) {
+            i += trans.size();
         }
-        ConcurrentLog.shutdown();
+        return i;
     }
 }

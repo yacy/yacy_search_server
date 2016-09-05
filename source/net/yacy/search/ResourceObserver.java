@@ -164,7 +164,7 @@ public class ResourceObserver {
                 
                 // run a solr optimize
                 this.sb.index.fulltext().commit(false);
-                this.sb.index.fulltext().optimize(1);
+                //this.sb.index.fulltext().optimize(1);
                 if (getNormalizedDiskFree() == Space.AMPLE && getNormalizedDiskUsed(false) == Space.AMPLE) break shrinkmethods;
                 
                 /*
