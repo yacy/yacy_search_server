@@ -170,7 +170,7 @@ public class Tokenizer {
                         wsp.inc();
                     } else {
                         // word does not yet exist, create new word entry
-                        wordHandle = wordHandleCount++;
+                        wordHandle = ++wordHandleCount; // let start pos with 1
                         wsp = new Word(wordHandle, wordInSentenceCounter, /* sentences.size() + */ 100);
                         wsp.flags = this.RESULT_FLAGS.clone();
                         this.words.put(word.toLowerCase(), wsp);
