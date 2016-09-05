@@ -1212,8 +1212,14 @@ Category==Categorie
 Received==Reçu
 Distributed==Distribu&eacute;
 Attributes==Attributs
-"#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#"==#(page)#::Traiter les nouvelles s&eacute;lectionn&eacute;es::Supprimer les nouvelles s&eacute;lectionn&eacute;es::Annuler la publication des nouvelles s&eacute;lectionn&eacute;es::Supprimer les nouvelles s&eacute;lection&eacute;es#(/page)#
-"#(page)#::Process All News::Delete All News::Abort Publication of All News::Delete All News#(/page)#"==#(page)#::Traiter toutes les nouvelles::Supprimer toutes les nouvelles::Annuler la publication de toutes les nouvelles::Supprimer toutes les nouvelles#(/page)#
+Process Selected News==Traiter les nouvelles s&eacute;lectionn&eacute;es
+Delete Selected News==Supprimer les nouvelles s&eacute;lectionn&eacute;es
+Abort Publication of Selected News==Annuler la publication des nouvelles s&eacute;lectionn&eacute;es
+Delete Selected News==Supprimer les nouvelles s&eacute;lection&eacute;es
+Process All News==Traiter toutes les nouvelles
+Delete All News==Supprimer toutes les nouvelles
+Abort Publication of All News==Annuler la publication de toutes les nouvelles
+Delete All News==Supprimer toutes les nouvelles
 #-----------------------------
 
 #File: Performance_p.html

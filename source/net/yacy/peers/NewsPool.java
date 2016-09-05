@@ -325,6 +325,8 @@ public class NewsPool {
             if (this.newsDB.get(record.id()) == null) {
                 this.incomingNews.push(record); // we want to see our own news..
                 this.outgoingNews.push(record); // .. and put it on the publishing list
+            } else {
+                ConcurrentLog.info("NewsPool", "publishing of news aborted, news with same id (time + originator) exists id=" + record.id());
             }
         } catch (final Exception e) {
             ConcurrentLog.logException(e);
