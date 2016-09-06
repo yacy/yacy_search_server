@@ -203,7 +203,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             
             // compute snippet from texts            
             solitaireTag(writer, "path", path.toString());
-            solitaireTag(writer, "title", title.length() == 0 ? path.toString() : title);
+            solitaireTag(writer, "title", title.length() == 0 ? path.toString() : title.replaceAll("\"", "'"));
             LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             if (snippet == null) {snippet = new LinkedHashSet<>(); snippet.addAll(descriptions);}
             OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
@@ -293,7 +293,8 @@ public class YJsonResponseWriter implements QueryResponseWriter {
         writer.write('"'); writer.write(tagname); writer.write("\":\""); writer.write(serverObjects.toJSON(value)); writer.write("\","); writer.write('\n');
     }
 
-    private static void facetEntry(final Writer writer, final String modifier, final String propname, String value) throws IOException {
+    private static void facetEntry(final Writer writer, final String modifier, String propname, String value) throws IOException {
+        propname = propname.replaceAll("\"", "'");
         writer.write("{\"name\": \""); writer.write(propname);
         writer.write("\", \"count\": \""); writer.write(value); 
         writer.write("\", \"modifier\": \""); writer.write(modifier); writer.write("%3A"); writer.write(propname);
