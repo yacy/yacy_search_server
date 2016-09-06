@@ -54,6 +54,9 @@ import org.apache.solr.search.SolrIndexSearcher;
 /**
  * write the opensearch result in YaCys special way to include as much as in opensearch is included.
  * This will also include YaCy facets.
+ * 
+ * example:
+ * http://localhost:8090/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt&facet.field=collection_sxt&start=0&rows=10&query=www
  */
 public class YJsonResponseWriter implements QueryResponseWriter {
 
@@ -135,7 +138,6 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             Document doc = searcher.doc(id, OpensearchResponseWriter.SOLR_FIELDS);
             List<IndexableField> fields = doc.getFields();
             int fieldc = fields.size();
-            List<String> texts = new ArrayList<String>();
             MultiProtocolURL url = null;
             String urlhash = null;
             List<String> descriptions = new ArrayList<String>();
@@ -166,13 +168,11 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                 }
                 if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
                     title = value.stringValue();
-                    texts.add(title);
                     continue;
                 }
                 if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
                     String description = value.stringValue();
                     descriptions.add(description);
-                    texts.add(description);
                     continue;
                 }
                 if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
@@ -197,25 +197,15 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "sizename", sizemb > 0 ? (Integer.toString(sizemb) + " mbyte") : sizekb > 0 ? (Integer.toString(sizekb) + " kbyte") : (Integer.toString(size) + " byte"));
                     continue;
                 }
-                if (CollectionSchema.text_t.getSolrFieldName().equals(fieldName)) {
-                    texts.add(value.stringValue());
-                    continue;
-                }
-                if (CollectionSchema.h1_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h2_txt.getSolrFieldName().equals(fieldName) ||
-                    CollectionSchema.h3_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h4_txt.getSolrFieldName().equals(fieldName) ||
-                    CollectionSchema.h5_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h6_txt.getSolrFieldName().equals(fieldName)) {
-                    // because these are multi-valued fields, there can be several of each
-                    texts.add(value.stringValue());
-                    continue;
-                }
 
                 //missing: "code","faviconCode"
             }
             
             // compute snippet from texts            
             solitaireTag(writer, "path", path.toString());
-            solitaireTag(writer, "title", title.length() == 0 ? (texts.size() == 0 ? path.toString() : texts.get(0)) : title);
+            solitaireTag(writer, "title", title.length() == 0 ? path.toString() : title);
             LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+            if (snippet == null) {snippet = new LinkedHashSet<>(); snippet.addAll(descriptions);}
             OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
             writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet))); writer.write("\"\n}\n");
             if (i < responseCount - 1) {
