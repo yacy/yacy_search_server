@@ -1069,6 +1069,27 @@
     <trans-unit id="33f6ce0e" xml:space="preserve" approved="no" translate="yes">
        <source>Select a language for the interface</source>
     </trans-unit>
+    <trans-unit id="c0286918" xml:space="preserve" approved="no" translate="yes">
+       <source>Deutsch</source>
+    </trans-unit>
+    <trans-unit id="1c8e797f" xml:space="preserve" approved="no" translate="yes">
+       <source>Fran&amp;ccedil;ais</source>
+    </trans-unit>
+    <trans-unit id="66bbf57f" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#27721;&amp;#35821;/&amp;#28450;&amp;#35486</source>
+    </trans-unit>
+    <trans-unit id="cde4355b" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#1056;&amp;#1091;&amp;#1089;&amp;#1089;&amp;#1082;&amp;#1080;&amp;#1081;</source>
+    </trans-unit>
+    <trans-unit id="3b7bf732" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#1059;&amp;#1082;&amp;#1088;&amp;#1072;&amp;#1111;&amp;#1085;&amp;#1089;&amp;#1100;&amp;#1082;&amp;#1072;</source>
+    </trans-unit>
+    <trans-unit id="bb2f569d" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#2361;&amp;#2367;&amp;#2344;&amp;#2381;&amp;#2342;&amp;#2368;</source>
+    </trans-unit>
+    <trans-unit id="54e2ea5e" xml:space="preserve" approved="no" translate="yes">
+       <source>&amp;#26085;&amp;#26412;&amp;#35486;</source>
+    </trans-unit>   
     <trans-unit id="9a6fa219" xml:space="preserve" approved="no" translate="yes">
        <source>Use Case: what do you want to do with YaCy:</source>
     </trans-unit>
@@ -5945,6 +5966,21 @@
     <trans-unit id="49006831" xml:space="preserve" approved="no" translate="yes">
        <source>profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.</source>
     </trans-unit>
+    <trans-unit id="80e8551f" xml:space="preserve" approved="no" translate="yes">
+       <source>Publishing of added or modified translation for the user interface.</source>
+    </trans-unit>
+    <trans-unit id="aff2f3ce" xml:space="preserve" approved="no" translate="yes">
+       <source>Other peers may include it in their local translation list.</source>
+    </trans-unit>
+    <trans-unit id="304f12eb" xml:space="preserve" approved="no" translate="yes">
+       <source>To publish a translation, use the integrated</source>
+    </trans-unit>
+    <trans-unit id="f7855dbc" xml:space="preserve" approved="no" translate="yes">
+       <source>translation editor</source>
+    </trans-unit>    
+    <trans-unit id="7e95942a" xml:space="preserve" approved="no" translate="yes">
+       <source>to add a translation and publish it afterwards.</source>
+    </trans-unit>    
     <trans-unit id="ac7ecc34" xml:space="preserve" approved="no" translate="yes">
        <source>Above you can see four menues:</source>
     </trans-unit>
@@ -5987,6 +6023,24 @@
     <trans-unit id="8eff8577" xml:space="preserve" approved="no" translate="yes">
        <source>Attributes</source>
     </trans-unit>
+    <trans-unit id="8ae5c927" xml:space="preserve" approved="no" translate="yes">
+       <source>Process Selected News</source>
+    </trans-unit>
+    <trans-unit id="d40fbba3" xml:space="preserve" approved="no" translate="yes">
+       <source>Delete Selected News</source>
+    </trans-unit>
+    <trans-unit id="43ac9953" xml:space="preserve" approved="no" translate="yes">
+       <source>Abort Publication of Selected News</source>
+    </trans-unit>
+    <trans-unit id="49ff88e3" xml:space="preserve" approved="no" translate="yes">
+       <source>Process All News</source>
+    </trans-unit>
+    <trans-unit id="6fcef8e7" xml:space="preserve" approved="no" translate="yes">
+       <source>Delete All News</source>
+    </trans-unit>
+    <trans-unit id="30aa4d37" xml:space="preserve" approved="no" translate="yes">
+       <source>Abort Publication of All News</source>
+    </trans-unit>    
     <trans-unit id="8c39153f" xml:space="preserve" approved="no" translate="yes">
        <source>"#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#"</source>
     </trans-unit>
@@ -6800,6 +6854,30 @@
     <trans-unit id="1ba97b50" xml:space="preserve" approved="no" translate="yes">
        <source>"Re-Set to default"</source>
     </trans-unit>
+    <trans-unit id="8410369e" xml:space="preserve" approved="no"  translate="yes">
+       <source>&gt;Filter Query&lt;</source>
+    </trans-unit>
+    <trans-unit id="78033f39" xml:space="preserve" approved="no" translate="yes">
+       <source>The Filter Query is attached to every query.</source>
+    </trans-unit>
+    <trans-unit id="70b334ee" xml:space="preserve" approved="no" translate="yes">
+       <source>Use this to statically add a selection criteria to reduce the set of results.</source>
+    </trans-unit>
+    <trans-unit id="c227ca00" xml:space="preserve" approved="no" translate="yes">
+       <source>Example: "http_unique_b:true AND www_unique_b:true" will filter out all results where urls appear also with/without http(s) and/or with/without 'www.' prefix.</source>
+    </trans-unit>
+    <trans-unit id="4112ab05" xml:space="preserve" approved="no" translate="yes">
+       <source>To find appropriate fields for this query, see the</source>
+    </trans-unit>
+    <trans-unit id="7838433d" xml:space="preserve" approved="no" translate="yes">
+       <source>YaCy Solr Schema</source>
+    </trans-unit>
+    <trans-unit id="849166a5" xml:space="preserve" approved="no" translate="yes">
+       <source>Warning: bad expressions here will cause that you don't have any search result!</source>
+    </trans-unit>
+    <trans-unit id="47e46c2" xml:space="preserve" approved="no" translate="yes">
+       <source>"Set Filter Query"</source>
+    </trans-unit>    
     <trans-unit id="14f04b0f" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Boost Query&lt;</source>
     </trans-unit>
@@ -8621,6 +8699,65 @@
   </body>
 </file>
 
+<file original="TransNews_p.html"  source-language="en"  target-language="aa"  datatype="html">
+  <body>
+    <trans-unit id="d0ae4d2d" xml:space="preserve" approved="no" translate="yes">
+       <source>Translation News for Language</source>
+    </trans-unit>
+    <trans-unit id="65d34722" xml:space="preserve" approved="no" translate="yes">
+       <source>Translation News</source>
+    </trans-unit>
+    <trans-unit id="a8b87046" xml:space="preserve" approved="no" translate="yes">
+       <source>You can share your local addition to translations and distribute it to other peers.</source>
+    </trans-unit>
+    <trans-unit id="cc5facc1" xml:space="preserve" approved="no" translate="yes">
+       <source>The remote peer can vote on your translation and add it to the own local translation.</source>
+    </trans-unit>
+    <trans-unit id="28e1bf39" xml:space="preserve" approved="no" translate="yes">
+       <source>entries available</source>
+    </trans-unit>
+    <trans-unit id="20c2735" xml:space="preserve" approved="no" translate="yes">
+       <source>"Publish"</source>
+    </trans-unit>
+    <trans-unit id="929c113c" xml:space="preserve" approved="no" translate="yes">
+       <source>You can check your outgoing messages</source>
+    </trans-unit>
+    <trans-unit id="6fb5a4ce" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;here&lt;</source>
+    </trans-unit>
+    <trans-unit id="40bca1e" xml:space="preserve" approved="no" translate="yes">
+       <source>File:</source>
+    </trans-unit>
+    <trans-unit id="a7a8df22" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Originator&lt;</source>
+    </trans-unit>
+    <trans-unit id="708517ea" xml:space="preserve" approved="no" translate="yes">
+       <source>English:</source>
+    </trans-unit>
+    <trans-unit id="d795e193" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;existing&lt;</source>
+    </trans-unit>
+    <trans-unit id="c0bfb7c9" xml:space="preserve" approved="no" translate="yes">
+       <source>Translation:</source>
+    </trans-unit>
+    <trans-unit id="704fb514" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;score</source>
+    </trans-unit>
+    <trans-unit id="d80b8ff5" xml:space="preserve" approved="no" translate="yes">
+       <source>negative vote</source>
+    </trans-unit>
+    <trans-unit id="9f05fcb1" xml:space="preserve" approved="no" translate="yes">
+       <source>positive vote</source>
+    </trans-unit>
+    <trans-unit id="5b0fe134" xml:space="preserve" approved="no" translate="yes">
+       <source>Vote on this translation.</source>
+    </trans-unit>
+    <trans-unit id="4dca5801" xml:space="preserve" approved="no" translate="yes">
+       <source>If you vote positive the translation is added to your local translation list.</source>
+    </trans-unit>
+  </body>
+</file>
+
 <file original="Translator_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="2eae05fc" xml:space="preserve" approved="no" translate="yes">
@@ -8637,6 +8774,9 @@
     </trans-unit>
     <trans-unit id="7752d013" xml:space="preserve" approved="no" translate="yes">
        <source>Target Language:</source>
+    </trans-unit>
+    <trans-unit id="67dd468b" xml:space="preserve" approved="no" translate="yes">
+        <source>activate a different language</source>
     </trans-unit>
     <trans-unit id="5ad17261" xml:space="preserve" approved="no" translate="yes">
        <source>Source File</source>
@@ -10017,6 +10157,9 @@
     <trans-unit id="a66de681" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Local Peer Wiki&lt;</source>
     </trans-unit>
+    <trans-unit id="cf394e0e" xml:space="preserve" approved="no" translate="yes">
+       <source>UI Translations</source>
+    </trans-unit>    
   </body>
 </file>
 

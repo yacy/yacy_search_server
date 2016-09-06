@@ -242,7 +242,6 @@
     	<pathelement location="${lib}/weupnp-0.1.4.jar" />
     	<pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
-        <pathelement location="${lib}/xliff-core-1.2-1.1.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
         <pathelement location="${lib}/xmpcore-5.1.2.jar" />
     	<pathelement location="${lib}/zookeeper-3.4.6.jar" />
@@ -765,7 +764,8 @@
   	</copy>
   	<copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
   	<move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/MacOS" verbose="false" />
-  	<!-- startYACY.sh will be the main entry point : we set permissions to make it an executable file -->
+  	<!-- startYACY.sh and startYACYMacOS.sh will be the main entry points : we set permissions to make it executable files -->
+  	<chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACYMacOS.sh" perm="755"/>
   	<chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACY.sh" perm="755"/>
   	<exec executable="hdiutil">
   	  	<arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>

@@ -64,7 +64,7 @@ public final class serverClassLoader extends ClassLoader {
     @Override
     protected Class<?> findClass(String classname) throws ClassNotFoundException {
         // construct path to htroot for a servletname
-        File cpath = new File (Switchboard.getSwitchboard().getDataPath(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT),classname+".class");
+        File cpath = new File (Switchboard.getSwitchboard().getAppPath(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT),classname+".class");
         return loadClass(cpath);
     }
 

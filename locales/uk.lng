@@ -86,9 +86,9 @@ Add new pattern:==Додати новий шаблон:
 "Add URL pattern"=="Додати шаблон URL"
 The right '*', after the '/', can be replaced by a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a>.==Права "*", після "/", може бути замінена на <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a>.
 domain.net/fullpath<==domain.de/повний шлях<
->domain.net/*<==>domain.de/*<
-*.domain.net/*<==*.domain.de/*<
-*.sub.domain.net/*<==*.sub.domain.de/*<
+#>domain.net/*<==>domain.de/*<
+#*.domain.net/*<==*.domain.de/*<
+#*.sub.domain.net/*<==*.sub.domain.de/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
 a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a> (slow)==повний <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a> (повільний)
@@ -1747,7 +1747,7 @@ The assortment directory containing parts of the word index.==Каталог н�
 The words directory containing parts of the word index.==Каталог слів містить частини індексу слів.
 The assortment file that should be imported.==Файл набору, що повинен бути імпортований.
 The assortment file must have the postfix==Файл набору повинен мати закінчення
-.db".==.db".
+#.db".==.db".
 If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>==Якщо ви хочете імпортувати файл набору з <tt>PLASMADBACLUSTERABKP</tt>,
 you have to rename it first.==ви повинні спочатку його перейменувати.
 >Notes:==>Примітки:
@@ -2505,7 +2505,7 @@ Crawl results will appear in the==Показ результатів знаход
 Peers offering remote crawl URLs==Вузли, що пропонують URL для віддаленого сканування
 If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==Якщо віддалене сканування увімкнене, то цей вузол скануватиме URL-адреси з таких віддалених вузлів:
 >Name<==>Ім’я<
->Remote<br/>Crawl<==>Remote<br/>Crawl<
+#>Remote<br/>Crawl<==>Remote<br/>Crawl<
 >Release/<br/>SVN<==>Випуск/SVN<
 >PPM<==>Сторінок За Хвилину (PPM)<
 >QPH<==>Запитів За Годину (QPH)<

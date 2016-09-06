@@ -380,7 +380,9 @@ public final class search {
 
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopics(5, 100) : new ConcurrentScoreMap<String>();
+            //final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopics(5, 100) : new ConcurrentScoreMap<String>();
+            final ScoreMap<String> topicNavigator = theSearch.getTopics(); // as there is currently no index interaction in getTopics(), we can use it by default
+            
             final StringBuilder refstr = new StringBuilder(6000);
             final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;

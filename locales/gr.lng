@@ -67,8 +67,8 @@ File:==Αρχείο:
 
 #File: Bookmarks.html
 #---------------------------
-YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
-<h2>Bookmarks==<h2>Bookmarks
+#YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
+#<h2>Bookmarks==<h2>Bookmarks
 Add Bookmark==Προσθήκη Σελειδοδείκτη (Bookmark)
 Edit Bookmark==Τροποποίηση Σελειδοδείκτη (Bookmark)
 #URL:==URL:

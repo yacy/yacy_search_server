@@ -45,10 +45,12 @@ public class DictionaryLoader_p {
         final serverObjects prop = new serverObjects(); // return variable that accumulates replacements
 
         final File synonyms_path = new File(sb.dictionariesPath, LibraryProvider.path_to_synonym_dictionaries);
-        final File synonym_de_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "openthesaurus_de_yacy");
+        final File synonym_de_default = new File(sb.appPath, "addon/synonyms/openthesaurus_de_yacy");
         final File synonym_de_production = new File(synonyms_path, synonym_de_default.getName());
-        final File synonym_en_default = new File(new File(new File(sb.appPath, "addon"), "synonyms"), "mobythesaurus_en_yacy");
+        final File synonym_en_default = new File(sb.appPath, "addon/synonyms/mobythesaurus_en_yacy");
         final File synonym_en_production = new File(synonyms_path, synonym_en_default.getName());
+        final File synonym_ru_default = new File(sb.appPath, "addon/synonyms/thesaurus_ru_yacy");
+        final File synonym_ru_production = new File(synonyms_path, synonym_ru_default.getName());
         /*
          * distinguish the following cases:
          * - dictionary file was not loaded -> actions: load the file
@@ -70,7 +72,7 @@ public class DictionaryLoader_p {
         	// check here only if there is no possibility synonym libraries have been activated/deactivated
             prop.put("syn0Status", synonym_de_production.exists() ? 1 : 0);
             prop.put("syn1Status", synonym_en_production.exists() ? 1 : 0);
-            
+            prop.put("syn2Status", synonym_ru_production.exists() ? 1 : 0);
             return prop;
         }
 
@@ -322,11 +324,25 @@ public class DictionaryLoader_p {
             }
             SynonymLibrary.init(synonyms_path);
         }
-        
+
+        if (post.containsKey("syn2Deactivate")) {
+            synonym_ru_production.delete();
+            SynonymLibrary.init(synonyms_path);
+        }
+
+        if (post.containsKey("syn2Activate")) {
+            try {
+                FileUtils.copy(new FileInputStream(synonym_ru_default), synonym_ru_production);
+            } catch (IOException e) {
+                ConcurrentLog.logException(e);
+            }
+            SynonymLibrary.init(synonyms_path);
+        }        
         if (post != null) {
         	// check here if there is a possibility synonym libraries have been activated/deactivated
             prop.put("syn0Status", synonym_de_production.exists() ? 1 : 0);
             prop.put("syn1Status", synonym_en_production.exists() ? 1 : 0);
+            prop.put("syn2Status", synonym_ru_production.exists() ? 1 : 0);
         }
         
         // check status again
