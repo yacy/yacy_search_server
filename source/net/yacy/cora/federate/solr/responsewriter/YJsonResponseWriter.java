@@ -230,16 +230,20 @@ public class YJsonResponseWriter implements QueryResponseWriter {
         @SuppressWarnings("unchecked")
         NamedList<Integer> collections = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.collection_sxt.getSolrFieldName());
 
+        int facetcount = 0;
         if (domains != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"domains\",\"displayname\":\"Provider\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < domains.size(); i++) {
                 facetEntry(writer, "site", domains.getName(i), Integer.toString(domains.getVal(i)));
                 if (i < domains.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (filetypes != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             List<Map.Entry<String, Integer>> l = new ArrayList<Map.Entry<String,Integer>>();
             for (Map.Entry<String, Integer> e: filetypes) {
@@ -252,36 +256,43 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                 if (i < l.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (protocols != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"protocols\",\"displayname\":\"Protocol\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < protocols.size(); i++) {
                 facetEntry(writer, "protocol", protocols.getName(i), Integer.toString(protocols.getVal(i)));
                 if (i < protocols.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (authors != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"authors\",\"displayname\":\"Authors\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < authors.size(); i++) {
                 facetEntry(writer, "author", authors.getName(i), Integer.toString(authors.getVal(i)));
                 if (i < authors.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (collections != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"collections\",\"displayname\":\"Collections\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < collections.size(); i++) {
                 facetEntry(writer, "collection", collections.getName(i), Integer.toString(collections.getVal(i)));
                 if (i < collections.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
-        writer.write("]}]}\n".toCharArray());
+        writer.write("\n]}]}\n".toCharArray());
         
         if (jsonp != null) {
             writer.write("])".toCharArray());
