@@ -310,8 +310,9 @@ public class YJsonResponseWriter implements QueryResponseWriter {
         writer.write('"'); writer.write(tagname); writer.write("\":\""); writer.write(serverObjects.toJSON(value)); writer.write("\","); writer.write('\n');
     }
 
-    private static void facetEntry(final Writer writer, final String modifier, String propname, String value) throws IOException {
-        propname = propname.replaceAll("\"", "'");
+    private static void facetEntry(final Writer writer, String modifier, String propname, String value) throws IOException {
+        modifier = modifier.replaceAll("\"", "'").trim();
+        propname = propname.replaceAll("\"", "'").trim();
         writer.write("{\"name\": \""); writer.write(propname);
         writer.write("\", \"count\": \""); writer.write(value); 
         writer.write("\", \"modifier\": \""); writer.write(modifier); writer.write("%3A"); writer.write(propname);
