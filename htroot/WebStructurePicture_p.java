@@ -39,7 +39,6 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
