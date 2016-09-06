@@ -207,7 +207,13 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             if (snippet == null) {snippet = new LinkedHashSet<>(); snippet.addAll(descriptions);}
             OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
-            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet))); writer.write("\"\n}\n");
+            String snippetstring = snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet);
+            if (snippetstring.length() > 140) {
+                snippetstring = snippetstring.substring(0, 140);
+                int sp = snippetstring.lastIndexOf(' ');
+                if (sp >= 0) snippetstring = snippetstring.substring(0, sp) + " ..."; else snippetstring = snippetstring + "...";
+            }
+            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippetstring)); writer.write("\"\n}\n");
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }
