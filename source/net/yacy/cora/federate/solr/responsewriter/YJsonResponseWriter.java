@@ -34,9 +34,9 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.JSONObject;
 import net.yacy.data.URLLicense;
 import net.yacy.search.schema.CollectionSchema;
-import net.yacy.server.serverObjects;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
@@ -213,7 +213,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                 int sp = snippetstring.lastIndexOf(' ');
                 if (sp >= 0) snippetstring = snippetstring.substring(0, sp) + " ..."; else snippetstring = snippetstring + "...";
             }
-            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippetstring)); writer.write("\"\n}\n");
+            writer.write("\"description\":"); writer.write(JSONObject.quote(snippetstring)); writer.write("\n}\n");
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }
@@ -307,16 +307,16 @@ public class YJsonResponseWriter implements QueryResponseWriter {
 
     public static void solitaireTag(final Writer writer, final String tagname, String value) throws IOException {
         if (value == null) return;
-        writer.write('"'); writer.write(tagname); writer.write("\":\""); writer.write(serverObjects.toJSON(value)); writer.write("\","); writer.write('\n');
+        writer.write('"'); writer.write(tagname); writer.write("\":"); writer.write(JSONObject.quote(value)); writer.write(','); writer.write('\n');
     }
 
-    private static void facetEntry(final Writer writer, String modifier, String propname, String value) throws IOException {
+    private static void facetEntry(final Writer writer, String modifier, String propname, final String value) throws IOException {
         modifier = modifier.replaceAll("\"", "'").trim();
         propname = propname.replaceAll("\"", "'").trim();
-        writer.write("{\"name\": \""); writer.write(propname);
-        writer.write("\", \"count\": \""); writer.write(value); 
-        writer.write("\", \"modifier\": \""); writer.write(modifier); writer.write("%3A"); writer.write(propname);
-        writer.write("\"}");
+        writer.write("{\"name\":"); writer.write(JSONObject.quote(propname));
+        writer.write(",\"count\":"); writer.write(JSONObject.quote(value.replaceAll("\"", "'").trim())); 
+        writer.write(",\"modifier\":"); writer.write(JSONObject.quote(modifier+"%3A"+propname));
+        writer.write("}");
     }
 }
 /**
