@@ -343,13 +343,20 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         return;
     }
 
+    /**
+     * @param snippets snippets list eventually empty
+     * @return the largest snippet containing at least a space character among the list, or null
+     */
     public static String getLargestSnippet(LinkedHashSet<String> snippets) {
         if (snippets == null || snippets.size() == 0) return null;
         String l = null;
         for (String s: snippets) {
             if ((l == null || s.length() > l.length()) && s.indexOf(' ') > 0) l = s;
         }
-        return l.replaceAll("\"", "'");
+        if(l != null) {
+        	l = l.replaceAll("\"", "'");
+        }
+        return l;
     }
     
     public static void openTag(final Writer writer, final String tag) throws IOException {
