@@ -34,6 +34,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.JSONObject;
 import net.yacy.data.URLLicense;
 import net.yacy.search.schema.CollectionSchema;
@@ -217,7 +218,13 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }
-            } catch (final Throwable ee) {}
+            } catch (final Throwable ee) {
+                ConcurrentLog.logException(ee);
+                writer.write("\"description\":\"\"\n}\n");
+                if (i < responseCount - 1) {
+                    writer.write(",\n".toCharArray());
+                }
+            }
         }
         writer.write("],\n".toCharArray());
         
