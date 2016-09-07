@@ -40,6 +40,7 @@ Options
   -l, --logging		save the output of YaCy to yacy.log
   -d, --debug		show the output of YaCy on the console
   -p, --print-out	only print the command, which would be executed to start YaCy
+  -s, --startup [data-path] start YaCy using the specified data folder path, relative to the current user home
   -g, --gui		start a gui for YaCy
 USAGE
 }
@@ -47,16 +48,16 @@ USAGE
 #startup YaCy
 cd "`dirname $0`"
 
-if [ $OS = "OpenBSD" ]
+if [ $OS = "OpenBSD" ] || [ $OS = "Darwin" ]
 then
 		if [ $(echo $@ | grep -o "\-\-" | wc -l) -ne 0  ]
 		then
 			echo "WARNING: Unfortunately this script does not support long options in $OS."
 		fi
 		
-        options="`getopt hdlptg: $*`"
+        options="`getopt hdlptsg: $*`"
 else
-        options="`getopt -n YaCy -o h,d,l,p,t,g -l help,debug,logging,print-out,tail-log,gui -- $@`"
+        options="`getopt -n YaCy -o h,d,l,p,t,s,g -l help,debug,logging,print-out,tail-log,startup,gui -- $@`"
 fi
 
 if [ $? -ne 0 ];then
@@ -71,6 +72,7 @@ LOGGING=0
 DEBUG=0
 PRINTONLY=0
 TAILLOG=0
+STARTUP=0
 GUI=0
 for option in $options;do
 	if [ $isparameter -ne 1 ];then #option
@@ -101,17 +103,25 @@ for option in $options;do
 			-t|--tail-log)
 				TAILLOG=1
 				;;
+			-s|-startup)
+				STARTUP=1
+				isparameter=1
+				;;
 			-g|--gui)
 				GUI=1
 				isparameter=1
 				;;
 		esac #case option 
 	else #parameter
-		if [ x$option = "--" ];then #option / parameter separator
+		if [ $option = "--" ];then #option / parameter separator
 			isparameter=1;
 			continue
 		else
-			parameter="$parameter $option"
+			if [ $parameter ];then
+				parameter="$parameter $option"
+			else
+				parameter="$option"
+			fi
 		fi
 	fi #parameter or option?
 done
@@ -189,8 +199,11 @@ for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH=".:$CLASSPATH"
 
 cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
-if [ $GUI -eq 1 ] #gui
+
+if [ $STARTUP -eq 1 ] #startup
 then
+	cmdline="$cmdline -startup $parameter"
+elif [ $GUI -eq 1 ];then #gui
 	cmdline="$cmdline -gui $parameter"
 fi
 if [ $DEBUG -eq 1 ] #debug

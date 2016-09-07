@@ -60,10 +60,11 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public final byte[] urlHash;
     private String hostHash = null;
     private final char type;
-    private int hitcount, llocal, lother, phrasesintext,
-               posinphrase, posofphrase,
-               urlcomps, urllength,
-               wordsintext, wordsintitle;
+    private int hitcount, // how often appears this word in the text
+            llocal, lother, phrasesintext,
+            posinphrase, posofphrase,
+            urlcomps, urllength,
+            wordsintext, wordsintitle;
     private int virtualAge;
     private final Queue<Integer> positions;
     private double termFrequency;
@@ -210,6 +211,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.type;
     }
 
+    /**
+     * How often appears this word in the text
+     * @return
+     */
     @Override
     public int hitcount() {
         return this.hitcount;
@@ -259,7 +264,9 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.hitcount,      // how often appears this word in the text
                 this.wordsintext,   // total number of words
                 this.phrasesintext, // total number of phrases
-                this.positions.isEmpty() ? 1 : this.positions.iterator().next(), // position of word in all words
+
+                // TODO: positon 1 on empty positions may give high ranking scores for unknown pos (needs to be checked if 0 would be appropriate)
+                this.positions.isEmpty() ? -1 : this.positions.iterator().next(), // position of word in all words
                 this.posinphrase,   // position of word in its phrase
                 this.posofphrase,   // number of the phrase where word appears
                 this.lastModified,  // last-modified time of the document where word appears

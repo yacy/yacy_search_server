@@ -1329,10 +1329,32 @@ public final class SearchEvent {
     public long getSnippetComputationTime() {
         return this.snippetComputationAllTime;
     }
-    
-    public ScoreMap<String> getTopicNavigator(final int count ) {
+
+    /**
+     * Get topics in a ScoreMap if config allows topic navigator
+     * (the topics are filtered by badwords, stopwords and words included in the query)
+     *
+     * @param count max number of topics returned
+     * @return ScoreMap with max number of topics or null if
+     */
+    public ScoreMap<String> getTopicNavigator(final int count) {
         if (this.topicNavigatorCount > 0 && count >= 0) { //topicNavigatorCount set during init, 0=no nav
-            return this.getTopics(count != 0 ? count : this.topicNavigatorCount, 500);
+            if (!this.ref.sizeSmaller(2)) {
+                ScoreMap<String> result;
+                int ic = count != 0 ? count : this.topicNavigatorCount;
+
+                if (this.ref.size() <= ic) { // size matches return map directly
+                    result = this.getTopics(/*ic, 500*/);
+                } else { // collect top most count topics
+                    result = new ConcurrentScoreMap<String>();
+                    Iterator<String> it = this.getTopics(/*ic, 500*/).keys(false);
+                    while (ic-- > 0 && it.hasNext()) {
+                        String word = it.next();
+                        result.set(word, this.ref.get(word));
+                    }
+                }
+                return result;
+            }
         }
         return null;
     }
@@ -1428,7 +1450,11 @@ public final class SearchEvent {
      */
     public void addResult(URIMetadataNode resultEntry, final float score) {
         if (resultEntry == null) return;
-        final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
+        final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.ref /*this.getTopicNavigator(MAX_TOPWORDS)*/);
+        // TODO: above was originally using (see below), but getTopicNavigator returns this.ref and possibliy alters this.ref on first call (this.ref.size < 2 -> this.ref.clear)
+        // TODO: verify and straighten the use of addTopic, getTopic and getTopicNavigator and related score calculation
+        // final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.getTopicNavigator(MAX_TOPWORDS));
+
         resultEntry.setScore(ranking); // update the score of resultEntry for access by search interface / api
         this.resultList.put(new ReverseElement<URIMetadataNode>(resultEntry, ranking)); // remove smallest in case of overflow
         if (pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
@@ -1439,10 +1465,19 @@ public final class SearchEvent {
         long r = 0;
 
         // for media search: prefer pages with many links
-        r += rentry.limage() << this.query.ranking.coeff_cathasimage;
-        r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
-        r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
-        r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
+        switch (this.query.contentdom) {
+            case IMAGE:
+                r += rentry.limage() << this.query.ranking.coeff_cathasimage;
+                break;
+            case AUDIO:
+                r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
+                break;
+            case VIDEO:
+                r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
+                break;
+            case APP:
+                r += rentry.lapp() << this.query.ranking.coeff_cathasapp;
+        }
 
         // apply citation count
         //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
@@ -1458,24 +1493,27 @@ public final class SearchEvent {
         final String urlstring = rentry.url().toNormalform(true);
         final String[] urlcomps = MultiProtocolURL.urlComps(urlstring);
         final String[] descrcomps = MultiProtocolURL.splitpattern.split(rentry.title().toLowerCase());
-        for (final String urlcomp : urlcomps) {
+
+        // apply query-in-result matching
+        final QueryGoal.NormalizedWords urlcompmap = new QueryGoal.NormalizedWords(urlcomps);
+        final QueryGoal.NormalizedWords descrcompmap = new QueryGoal.NormalizedWords(descrcomps);
+        // the token map is used (instead of urlcomps/descrcomps) to determine appearance in url/title and eliminate double occurances
+        // (example Title="News News News News News News - today is party -- News News News News News News" to add one score instead of 12 * score !)
+        for (final String urlcomp : urlcompmap) {
             int tc = topwords.get(urlcomp);
             if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_urlcompintoplist;
         }
-        for (final String descrcomp : descrcomps) {
+        for (final String descrcomp : descrcompmap) {
             int tc = topwords.get(descrcomp);
             if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_descrcompintoplist;
         }
 
-        // apply query-in-result matching
-        final QueryGoal.NormalizedWords urlcomph = new QueryGoal.NormalizedWords(urlcomps);
-        final QueryGoal.NormalizedWords descrcomph = new QueryGoal.NormalizedWords(descrcomps);
         final Iterator<String> shi = this.query.getQueryGoal().getIncludeWords();
         String queryword;
         while (shi.hasNext()) {
             queryword = shi.next();
-            if (urlcomph.contains(queryword)) r += 256 << this.query.ranking.coeff_appurl;
-            if (descrcomph.contains(queryword)) r += 256 << this.query.ranking.coeff_app_dc_title;
+            if (urlcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_appurl;
+            if (descrcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_app_dc_title;
         }
         return r;
     }
@@ -1818,14 +1856,23 @@ public final class SearchEvent {
         // this is only available if execQuery() was called before
         return this.localSearchInclusion;
     }
-    
-    public ScoreMap<String> getTopics(final int maxcount, final long maxtime) {
-        // create a list of words that had been computed by statistics over all
-        // words that appeared in the url or the description of all urls
+
+    /**
+     * Return the list of words that had been computed by statistics over all
+     * words that appeared in the url or the description of all urls
+     *
+     * @return ScoreMap
+     */
+    public ScoreMap<String> getTopics(/* final int maxcount, final long maxtime */) {
+        /* ---------------------------------- start of rem (2016-09-03)
+        // TODO: result map is not used currently, verify if it should and use or delete this code block
+        // TODO: as it is not used now - in favour of performance this code block is rem'ed (2016-09-03)
+
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
         if ( this.ref.sizeSmaller(2) ) {
             this.ref.clear(); // navigators with one entry are not useful
         }
+
         final Map<String, Float> counts = new HashMap<String, Float>();
         final Iterator<String> i = this.ref.keys(false);
         String word;
@@ -1851,11 +1898,17 @@ public final class SearchEvent {
                 result.set(ce.getKey(), (int) (((double) maxcount) * (ce.getValue() - min) / (max - min)));
             }
         }
+        /* ------------------------------------ end of rem (2016-09-03) */
         return this.ref;
     }
 
     private final static Pattern lettermatch = Pattern.compile("[a-z]+");
 
+    /**
+     * Collects topics in a ScoreMap for words not included in the query words.
+     * Words are also filtered by badword blacklist and stopword list.
+     * @param words
+     */
     public void addTopic(final String[] words) {
         String word;
         for ( final String w : words ) {
@@ -1872,6 +1925,10 @@ public final class SearchEvent {
         }
     }
 
+    /**
+     * Ad title words to this searchEvent's topic score map
+     * @param resultEntry
+     */
     protected void addTopics(final URIMetadataNode resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;

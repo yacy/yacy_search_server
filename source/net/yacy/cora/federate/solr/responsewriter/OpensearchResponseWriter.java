@@ -349,7 +349,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         for (String s: snippets) {
             if ((l == null || s.length() > l.length()) && s.indexOf(' ') > 0) l = s;
         }
-        return l;
+        return l.replaceAll("\"", "'");
     }
     
     public static void openTag(final Writer writer, final String tag) throws IOException {

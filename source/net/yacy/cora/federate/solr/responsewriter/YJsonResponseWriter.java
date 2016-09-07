@@ -34,9 +34,10 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.JSONObject;
 import net.yacy.data.URLLicense;
 import net.yacy.search.schema.CollectionSchema;
-import net.yacy.server.serverObjects;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
@@ -54,6 +55,9 @@ import org.apache.solr.search.SolrIndexSearcher;
 /**
  * write the opensearch result in YaCys special way to include as much as in opensearch is included.
  * This will also include YaCy facets.
+ * 
+ * example:
+ * http://localhost:8090/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt&facet.field=collection_sxt&start=0&rows=10&query=www
  */
 public class YJsonResponseWriter implements QueryResponseWriter {
 
@@ -135,7 +139,6 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             Document doc = searcher.doc(id, OpensearchResponseWriter.SOLR_FIELDS);
             List<IndexableField> fields = doc.getFields();
             int fieldc = fields.size();
-            List<String> texts = new ArrayList<String>();
             MultiProtocolURL url = null;
             String urlhash = null;
             List<String> descriptions = new ArrayList<String>();
@@ -166,13 +169,11 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                 }
                 if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
                     title = value.stringValue();
-                    texts.add(title);
                     continue;
                 }
                 if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
                     String description = value.stringValue();
                     descriptions.add(description);
-                    texts.add(description);
                     continue;
                 }
                 if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
@@ -197,31 +198,33 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "sizename", sizemb > 0 ? (Integer.toString(sizemb) + " mbyte") : sizekb > 0 ? (Integer.toString(sizekb) + " kbyte") : (Integer.toString(size) + " byte"));
                     continue;
                 }
-                if (CollectionSchema.text_t.getSolrFieldName().equals(fieldName)) {
-                    texts.add(value.stringValue());
-                    continue;
-                }
-                if (CollectionSchema.h1_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h2_txt.getSolrFieldName().equals(fieldName) ||
-                    CollectionSchema.h3_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h4_txt.getSolrFieldName().equals(fieldName) ||
-                    CollectionSchema.h5_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h6_txt.getSolrFieldName().equals(fieldName)) {
-                    // because these are multi-valued fields, there can be several of each
-                    texts.add(value.stringValue());
-                    continue;
-                }
 
                 //missing: "code","faviconCode"
             }
             
             // compute snippet from texts            
             solitaireTag(writer, "path", path.toString());
-            solitaireTag(writer, "title", title.length() == 0 ? (texts.size() == 0 ? path.toString() : texts.get(0)) : title);
+            solitaireTag(writer, "title", title.length() == 0 ? path.toString() : title.replaceAll("\"", "'"));
             LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+            if (snippet == null) {snippet = new LinkedHashSet<>(); snippet.addAll(descriptions);}
             OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
-            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet))); writer.write("\"\n}\n");
+            String snippetstring = snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet);
+            if (snippetstring.length() > 140) {
+                snippetstring = snippetstring.substring(0, 140);
+                int sp = snippetstring.lastIndexOf(' ');
+                if (sp >= 0) snippetstring = snippetstring.substring(0, sp) + " ..."; else snippetstring = snippetstring + "...";
+            }
+            writer.write("\"description\":"); writer.write(JSONObject.quote(snippetstring)); writer.write("\n}\n");
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }
-            } catch (final Throwable ee) {}
+            } catch (final Throwable ee) {
+                ConcurrentLog.logException(ee);
+                writer.write("\"description\":\"\"\n}\n");
+                if (i < responseCount - 1) {
+                    writer.write(",\n".toCharArray());
+                }
+            }
         }
         writer.write("],\n".toCharArray());
         
@@ -240,16 +243,20 @@ public class YJsonResponseWriter implements QueryResponseWriter {
         @SuppressWarnings("unchecked")
         NamedList<Integer> collections = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.collection_sxt.getSolrFieldName());
 
+        int facetcount = 0;
         if (domains != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"domains\",\"displayname\":\"Provider\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < domains.size(); i++) {
                 facetEntry(writer, "site", domains.getName(i), Integer.toString(domains.getVal(i)));
                 if (i < domains.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (filetypes != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             List<Map.Entry<String, Integer>> l = new ArrayList<Map.Entry<String,Integer>>();
             for (Map.Entry<String, Integer> e: filetypes) {
@@ -262,36 +269,43 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                 if (i < l.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (protocols != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"protocols\",\"displayname\":\"Protocol\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < protocols.size(); i++) {
                 facetEntry(writer, "protocol", protocols.getName(i), Integer.toString(protocols.getVal(i)));
                 if (i < protocols.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (authors != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"authors\",\"displayname\":\"Authors\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < authors.size(); i++) {
                 facetEntry(writer, "author", authors.getName(i), Integer.toString(authors.getVal(i)));
                 if (i < authors.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
         if (collections != null) {
+            writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"collections\",\"displayname\":\"Collections\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < collections.size(); i++) {
                 facetEntry(writer, "collection", collections.getName(i), Integer.toString(collections.getVal(i)));
                 if (i < collections.size() - 1) writer.write(',');
                 writer.write("\n");
             }
-            writer.write("]},\n".toCharArray());
+            writer.write("]}".toCharArray());
+            facetcount++;
         }
-        writer.write("]}]}\n".toCharArray());
+        writer.write("\n]}]}\n".toCharArray());
         
         if (jsonp != null) {
             writer.write("])".toCharArray());
@@ -300,14 +314,16 @@ public class YJsonResponseWriter implements QueryResponseWriter {
 
     public static void solitaireTag(final Writer writer, final String tagname, String value) throws IOException {
         if (value == null) return;
-        writer.write('"'); writer.write(tagname); writer.write("\":\""); writer.write(serverObjects.toJSON(value)); writer.write("\","); writer.write('\n');
+        writer.write('"'); writer.write(tagname); writer.write("\":"); writer.write(JSONObject.quote(value)); writer.write(','); writer.write('\n');
     }
 
-    private static void facetEntry(final Writer writer, final String modifier, final String propname, String value) throws IOException {
-        writer.write("{\"name\": \""); writer.write(propname);
-        writer.write("\", \"count\": \""); writer.write(value); 
-        writer.write("\", \"modifier\": \""); writer.write(modifier); writer.write("%3A"); writer.write(propname);
-        writer.write("\"}");
+    private static void facetEntry(final Writer writer, String modifier, String propname, final String value) throws IOException {
+        modifier = modifier.replaceAll("\"", "'").trim();
+        propname = propname.replaceAll("\"", "'").trim();
+        writer.write("{\"name\":"); writer.write(JSONObject.quote(propname));
+        writer.write(",\"count\":"); writer.write(JSONObject.quote(value.replaceAll("\"", "'").trim())); 
+        writer.write(",\"modifier\":"); writer.write(JSONObject.quote(modifier+"%3A"+propname));
+        writer.write("}");
     }
 }
 /**

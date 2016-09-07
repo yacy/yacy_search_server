@@ -252,9 +252,16 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return (0xff & this.entry.getColByte(col_hitcount));
     }
 
+    /**
+     * First position of word in text
+     * @return Collection with one element
+     */
     @Override
     public Collection<Integer> positions() {
-        return new ArrayList<Integer>(0);
+        int pos = (int) this.entry.getColLong(col_posintext);
+        ArrayList arr = new ArrayList<Integer>(1);
+        arr.add(pos);
+        return arr;
     }
 
     @Override

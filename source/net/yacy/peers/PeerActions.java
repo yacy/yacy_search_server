@@ -30,7 +30,6 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MapTools;
-import net.yacy.peers.operation.yacyVersion;
 
 
 public class PeerActions {
@@ -261,7 +260,7 @@ public class PeerActions {
             final String cre1 = MapTools.string2map(decodedString, ",").get("cre");
             final String cre2 = MapTools.string2map(record.toString(), ",").get("cre");
             if ((cre1 == null) || (cre2 == null) || (!(cre1.equals(cre2)))) {
-                System.out.println("### ERROR - cre are not equal: cre1=" + cre1 + ", cre2=" + cre2);
+                Network.log.warn("processPeerArrival: ### ERROR - message creation date verification not equal: cre1=" + cre1 + ", cre2=" + cre2);
                 return;
             }
             try {

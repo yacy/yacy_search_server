@@ -124,7 +124,7 @@ public class SolrSelectServlet extends HttpServlet {
 
             Switchboard sb = Switchboard.getSwitchboard();
             // TODO: isUserInRole needs a login to jetty container (not done automatically on admin from localhost)
-            boolean authenticated = hrequest.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString());;
+            boolean authenticated = hrequest.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString());
             
             // count remote searches if this was part of a p2p search
             if (mmsp.getMap().containsKey("partitions")) {
@@ -190,11 +190,21 @@ public class SolrSelectServlet extends HttpServlet {
             if ((responseWriter instanceof YJsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(mmsp.get("hl", "true"))) {
                 // add options for snippet generation
                 if (!mmsp.getMap().containsKey("hl.q")) mmsp.getMap().put("hl.q", new String[]{q});
-                if (!mmsp.getMap().containsKey("hl.fl")) mmsp.getMap().put("hl.fl", new String[]{CollectionSchema.description_txt + "," + CollectionSchema.h4_txt.getSolrFieldName() + "," + CollectionSchema.h3_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName()});
+                if (!mmsp.getMap().containsKey("hl.fl")) mmsp.getMap().put("hl.fl", new String[]{CollectionSchema.description_txt.getSolrFieldName() + "," + CollectionSchema.h4_txt.getSolrFieldName() + "," + CollectionSchema.h3_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName()});
                 if (!mmsp.getMap().containsKey("hl.alternateField")) mmsp.getMap().put("hl.alternateField", new String[]{CollectionSchema.description_txt.getSolrFieldName()});
                 if (!mmsp.getMap().containsKey("hl.simple.pre")) mmsp.getMap().put("hl.simple.pre", new String[]{"<b>"});
                 if (!mmsp.getMap().containsKey("hl.simple.post")) mmsp.getMap().put("hl.simple.post", new String[]{"</b>"});
                 if (!mmsp.getMap().containsKey("hl.fragsize")) mmsp.getMap().put("hl.fragsize", new String[]{Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH)});
+                if (!mmsp.getMap().containsKey("fl")) mmsp.getMap().put("fl", new String[]{
+                    CollectionSchema.sku.getSolrFieldName() + "," +
+                    CollectionSchema.title + "," +
+                    CollectionSchema.description_txt.getSolrFieldName() + "," +
+                    CollectionSchema.id.getSolrFieldName() + "," +
+                    CollectionSchema.url_paths_sxt.getSolrFieldName() + "," +
+                    CollectionSchema.last_modified.getSolrFieldName() + "," +
+                    CollectionSchema.size_i.getSolrFieldName() + "," +
+                    CollectionSchema.url_protocol_s.getSolrFieldName() + "," +
+                    CollectionSchema.url_file_ext_s.getSolrFieldName()});
             }
 
             // get the embedded connector
