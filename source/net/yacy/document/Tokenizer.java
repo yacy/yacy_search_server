@@ -78,7 +78,7 @@ public class Tokenizer {
         int wordHandleCount = 0;
         //final int sentenceHandleCount = 0;
         int allwordcounter = 0;
-        final int allsentencecounter = 0;
+        int allsentencecounter = 0;
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
         //final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
@@ -89,6 +89,14 @@ public class Tokenizer {
         try {
             while (wordenum.hasMoreElements()) {
                 String word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
+                // handle punktuation (start new sentence)
+                if (word.length() == 1 && SentenceReader.punctuation(word.charAt(0))) {
+                    // store sentence
+                    currsentwords.clear();
+                    wordInSentenceCounter = 1;
+                    allsentencecounter++;
+                    continue;
+                }
                 if (word.length() < wordminsize) continue;
 
                 // get tags from autotagging
@@ -144,40 +152,32 @@ public class Tokenizer {
                 System.arraycopy(wordcache, 1, wordcache, 0, wordcache.length - 1);
                 wordcache[wordcache.length - 1] = word;
 
-                // distinguish punctuation and words
-                wordlen = word.length();
-                if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) { // TODO: wordlen == 1 never true (see earlier if < wordminsize )
-                    // store sentence
-                    currsentwords.clear();
-                    wordInSentenceCounter = 1;
-                } else {
-                    // check index.of detection
-                    if (last_last && comb_indexof && word.equals("modified")) {
-                        this.RESULT_FLAGS.set(flag_cat_indexof, true);
-                        wordenum.pre(true); // parse lines as they come with CRLF
-                    }
-                    if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
-                    last_last = word.equals("last");
-                    last_index = word.equals("index");
-
-                    // store word
-                    allwordcounter++;
-                    currsentwords.add(word);
-                    Word wsp = this.words.get(word);
-                    if (wsp != null) {
-                        // word already exists
-                        wordHandle = wsp.posInText;
-                        wsp.inc();
-                    } else {
-                        // word does not yet exist, create new word entry
-                        wordHandle = ++wordHandleCount; // let start pos with 1
-                        wsp = new Word(wordHandle, wordInSentenceCounter, /* sentences.size() + */ 100);
-                        wsp.flags = this.RESULT_FLAGS.clone();
-                        this.words.put(word.toLowerCase(), wsp);
-                    }
-                    // we now have the unique handle of the word, put it into the sentence:
-                    wordInSentenceCounter++;
+                // check index.of detection
+                if (last_last && comb_indexof && word.equals("modified")) {
+                    this.RESULT_FLAGS.set(flag_cat_indexof, true);
+                    wordenum.pre(true); // parse lines as they come with CRLF
                 }
+                if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
+                last_last = word.equals("last");
+                last_index = word.equals("index");
+
+                // store word
+                allwordcounter++;
+                currsentwords.add(word);
+                Word wsp = this.words.get(word);
+                if (wsp != null) {
+                    // word already exists
+                    wordHandle = wsp.posInText;
+                    wsp.inc();
+                } else {
+                    // word does not yet exist, create new word entry
+                    wordHandle = ++wordHandleCount; // let start pos with 1
+                    wsp = new Word(wordHandle, wordInSentenceCounter, allsentencecounter + 100); // nomal sentence start at 100 !
+                    wsp.flags = this.RESULT_FLAGS.clone();
+                    this.words.put(word.toLowerCase(), wsp);
+                }
+                // we now have the unique handle of the word, put it into the sentence:
+                wordInSentenceCounter++;
             }
         } finally {
             wordenum.close();

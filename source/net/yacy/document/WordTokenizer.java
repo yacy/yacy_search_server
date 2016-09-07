@@ -56,7 +56,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
     private StringBuilder nextElement0() {
         StringBuilder s;
         while (this.e.hasMoreElements()) {
-            s = this.e.nextElement(); // next word (punctuation and invisible chars filtered)
+            s = this.e.nextElement(); // next word (invisible chars filtered)
             return s;
         }
         return null;
@@ -118,7 +118,13 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
                 for (int i = 0; i < r.length(); i++) { // tokenize one sentence
                     c = r.charAt(i);
                     if (SentenceReader.punctuation(c)) { // punctuation check is simple/quick, do it before invisible
-                        if (sb.length() > 0) {this.s.add(sb); sb = new StringBuilder(20);}
+                        if (sb.length() > 0) {
+                            this.s.add(sb);
+                            sb = new StringBuilder(1);
+                        }
+                        sb.append(c);
+                        this.s.add(sb);
+                        sb = new StringBuilder(20);
                     } else if (SentenceReader.invisible(c)) { // ! currently punctuation again checked by invisible()
                         if (sb.length() > 0) {this.s.add(sb); sb = new StringBuilder(20);}
                     } else {
