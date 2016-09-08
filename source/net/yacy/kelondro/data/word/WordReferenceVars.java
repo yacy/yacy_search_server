@@ -185,17 +185,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return c;
     }
 
-    public void join(final WordReferenceVars v) {
-        // combine the distance
-        this.positions.addAll(v.positions);
-        this.posinphrase = (this.posofphrase == v.posofphrase) ? Math.min(this.posinphrase, v.posinphrase) : 0;
-        this.posofphrase = Math.min(this.posofphrase, v.posofphrase);
-
-        // combine term frequency
-        this.wordsintext = this.wordsintext + v.wordsintext;
-        this.termFrequency = this.termFrequency + v.termFrequency;
-    }
-
     @Override
     public Bitfield flags() {
         return this.flags;
@@ -382,19 +371,30 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
+    /**
+     * joins two entries into one entry
+     *
+     * Main usage is on multi word searches to combine the position values for distance ranking,
+     * A Join is valid for the same url.
+     * @param r WordReference
+     */
     @Override
     public void join(final Reference r) {
-        // joins two entries into one entry
 
         // combine the distance
         final WordReference oe = (WordReference) r;
-        for (final Integer i: r.positions()) this.positions.add(i);
+
+        this.positions.addAll(oe.positions());
         this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
         this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
 
         // combine term frequency
         this.termFrequency = this.termFrequency + oe.termFrequency();
-        this.wordsintext = this.wordsintext + oe.wordsintext();
+
+        this.wordsintext = Math.max(this.wordsintext, oe.wordsintext()); // as it is same url asume the word count to be the max
+        this.wordsintitle = Math.max(this.wordsintitle, oe.wordsintitle());
+        this.phrasesintext = Math.max(this.phrasesintext, oe.phrasesintext());
+        this.hitcount = Math.max(this.hitcount, oe.hitcount());
     }
 
     @Override
