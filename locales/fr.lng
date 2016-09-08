@@ -518,7 +518,6 @@ YaCy: Help==YaCy: Aide
 #---------------------------
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Page de recherche
 Search for #[former]#==Recherche pour  #[former]#
-YaCy Search on '#[clientname]#'==Recherche YaCy sur '#[clientname]#'
 Search</button>==Rechercher</button>
 Text==Texte
 Images==Images
