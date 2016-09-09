@@ -23,7 +23,7 @@
 
 #File: AccessGrid_p.html
 #---------------------------
-YaCy Network Access==Accès réseau
+YaCy Network Access==Accès au réseau YaCY
 Server Access Grid==Grille d'accès au serveur
 This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Cette image montre les connexions entrant vers votre instance YaCy et les connexions sortant de votre instance vers les autres pairs et serveurs web
 #-----------------------------
@@ -146,9 +146,30 @@ Define URL substitution rules which allow navigating in proxy environment. Possi
 "Submit"=="Enregistrer"
 #-----------------------------
 
+#File: Autocrawl_p.html
+#---------------------------
+>Autocrawler<==>Indexation automatique<
+This will work best when there are already quite a few domains in the index.==Cela fonctionne mieux lorsqu'il y a déjà quelques domaines dans l'index local.
+Autocrawler automatically selects and adds tasks to the local crawl queue.==L'indexation automatique sélectionne et ajoute automatiquement des tâches à la file d'attente d'indexation locale.
+Autocralwer Configuration==Configuration
+You need to restart for some settings to be applied==Vous devrez redémarrer pour que certains paramètres soient pris en compte.
+Enable Autocrawler:==Activer :
+Deep crawl every:==Indexation profonde tous les :
+Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==Avertissement : si cette valeur est supérieure au nombre de lignes à récupérer en une fois, seuls les crawls superficiels seront exécutées.
+Rows to fetch at once:==Lignes à récupérer en une fois :
+Recrawl only older than # days:==Ré-indexer juste les documents plus anciens de # jours :
+Get hosts by query:==Récupérer les noms d'hôtes par requête :
+Can be any valid Solr query.==Peut être une requête Solr valide.
+Shallow crawl depth (0 to 2):==Profondeur d'une indexation superficielle (de 0 à 2) :
+Deep crawl depth (1 to 5):==Profondeur d'une indexation profonde (de 1 à 5) :
+Index text:==Indexer le texte :
+Index media:==Indexer les médias :
+"Save"=="Enregistrer"
+#-----------------------------
+
 #File: Blog.html
 #---------------------------
-Comments</a>==Commentaires</a>
+Comments</a>==Commentaire(s)</a>
 Edit<==Modifier<
 previous entries==Entrées précédentes
 next entries==Entrées suivantes
@@ -165,8 +186,8 @@ Confirm deletion==Confirmation
 Yes, delete it.==Oui, supprimer.
 No, leave it.==Non, conserver.
 by==par
->edit==>&eacute;diter
->delete==>supprimer
+>edit==>Editer
+>delete==>Supprimer
 Blog-Home==Accueil du blog
 Author:==Auteur:
 Subject:==Titre:
@@ -185,6 +206,24 @@ To edit or create blog-entries you need to be logged in as Admin or User who has
 Import was successful!==L'importation a r&eacute;ussi !
 Import failed, maybe the supplied file was no valid blog-backup?==L'importation a &eacute;chou&eacute;, peut-&ecirc;tre que le fichier import&eacute; n'&eacute;tait pas une archive de blog valide?
 Please select the XML-file you want to import:==S&eacute;lectionnez le fichier XML que vous souhaitez importer :
+#-----------------------------
+
+#File: BlogComments.html
+#---------------------------
+by==par
+Comments</a>==Commentaire(s)</a>
+Login==Se connecter
+Blog-Home==Accueil du Blog
+delete</a>==Supprimer</a>
+allow</a>==Autoriser</a>
+Author:==Auteur:
+Subject:==Sujet:
+You can use==Vous pouvez utiliser du
+Yacy-Wiki Code==code YaCy-Wiki
+here.==.
+"Submit"=="Valider"
+"Preview"=="Aperçu"
+"Discard"=='Annuler'
 #-----------------------------
 
 #File: BlacklistCleaner_p.html
@@ -252,24 +291,24 @@ Bookmarks per page.==Marque-pages par page.
 
 #File: ConfigAccounts_p.html
 #---------------------------
-User Accounts==Comptes des utilisateurs
+User Accounts==Comptes utilisateurs
 User Administration==Gestion des utilisateurs
 User created:==Utilisateur cr&eacute;&eacute;:
 User changed:==Utilisateur modifi&eacute;:
 Generic error.==Erreur g&eacute;n&eacute;rique.
 Passwords do not match.==Les mots de passe ne correspondent pas.
-Username too short. Username must be >= 4 Characters.==Nom d'utilisateur trop court. Un nom d'utilisateur doit comporter plus de 4 caract&egrave;res.
+Username too short. Username must be &gt;= 4 Characters.==Nom d'utilisateur trop court. Un nom d'utilisateur doit comporter plus de 4 caract&egrave;res.
 No password is set for the administration account.==Aucun mot de passe n'est d&eacute;fini pour le compte administrateur.
 Please define a password for the admin account.==Veuillez d&eacute;finir un mot de passe pour le compte admin.
 Admin Account==Compte admin
-Access from localhost without account==Acc&egrave;s sans compte &agrave; partir de localhost
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre noeud depuis votre ordinateur (acc&egrave;s via localhost) est garanti. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+Access from localhost without account==Acc&egrave;s sans compte &agrave; partir d'un navigateur local
+Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre noeud depuis votre ordinateur (acc&egrave;s local) est autorisé. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
 Access only with qualified account==Acc&egrave;s avec un compte autoris&eacute; uniquement
 You need this only if you want a remote access to your peer.==N&eacute;cessaire uniquement si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud.
 Peer User:==Utilisateur du noeud:
 New Peer Password:==Nouveau mot de passe du noeud:
 Repeat Peer Password:==Entrer &agrave; nouveau le mot de passe du noeud:
-"Define Administrator"=="D&eacute;finir un administrateur"
+"Define Administrator"=="D&eacute;finir l'administrateur"
 Select user==Choisir un utilisateur
 New user==Nouvel utilisateur
 Edit User==Modifier l'utilisateur
@@ -285,6 +324,49 @@ Rights==Droits
 Timelimit==Limite de temps
 Time used==Temps utilis&eacute;
 Save User==Sauvegarder l'utilisateur
+>Access Rules<==>Règles d'accès<
+Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Protection de toutes les pages: lorsqu'activé, l'accès à n'importe quelle page nécessite une authentification; lorsque désactivé, seules les pages avec l'extension "_p" sont protégées.
+Set Access Rules==Définir les règles d'accès
+#-----------------------------
+
+#File: ConfigAppearance_p.html
+#---------------------------
+Appearance and Integration==Apparence et intégration
+You can change the appearance of the YaCy interface with skins.==Vous pouvez personnaliser l'interface YaCy avec des thèmes.
+The selected skin and language also affects the appearance of the search page.==Le thème et la langue sélectionnés affectent aussi l'aspect de la page de recherche.
+If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Si vous utilisez YaCy pour créer un <a href="ConfigPortal.html">portail de recherche</a> vous pouvez alors
+change the appearance of the search page here.==modifier l'aspect de la page de recherche ici.
+Skin Selection==Sélection du thème
+Select one of the default skins, download new skins, or create your own skin.==Sélectionnez l'un des thèmes par défaut, téléchargez de nouveaux thèmes ou créez le votre.
+Current skin==Thème actuel
+Available Skins==Thèmes disponibles
+"Use"=="Utiliser"
+"Delete"=="Supprimer"
+>Skin Color Definition<==>Définition des couleurs du thème<
+The generic skin 'generic_pd' can be configured here with custom colors:==Le thème générique 'generic_pd' peut être configuré avec des couleurs personnalisées :
+>Background<==>Arrière-plan<
+>Text<==>Texte<
+>Legend<==>Légende<
+>Table&nbsp;Header<==>En-tête de tableau<
+>Table&nbsp;Item<==>Élément de tableau<
+>Table&nbsp;Item&nbsp;2<==>Élément de tableau bis<
+>Table&nbsp;Bottom<==>Bas de tableau<
+>Border&nbsp;Line<==>Bordure<
+>Sign&nbsp;'bad'<==>Symbole 'mauvais'<
+>Sign&nbsp;'good'<==>Symbole 'bon'<
+>Sign&nbsp;'other'<==>Symbole 'autre'<
+>Search&nbsp;Headline<==>Manchette de la recherche<
+>Search&nbsp;URL==>URL de recherche
+"Set Colors"=="Appliquer"
+>Skin Download<==>Téléchargement de thème<
+Skins can be installed from download locations==Les thèmes peuvent être installés depuis des URLs de téléchargement
+Install new skin from URL==Installer un thème depuis l'URL
+Use this skin==Utiliser ce thème
+"Install"=="Installer"
+Make sure that you only download data from trustworthy sources. The new Skin file==Assurez-vous de télécharger uniquement depuis des sources de confiance. Le nouveau fichier de thème
+might overwrite existing data if a file of the same name exists already.==pourrait écraser des données si un fichier du même nom existe déjà.
+>Unable to get URL:==>Impossible d'ouvrir l'URL :
+Error saving the skin.==Erreur lors de la sauvegarde du thème
 #-----------------------------
 
 #File: ConfigBasic.html
@@ -292,17 +374,19 @@ Save User==Sauvegarder l'utilisateur
 Access Configuration==Configuration de l'acc&egrave;s
 Basic Configuration==Configuration de base
 Your port has changed. Please wait 10 seconds.== Votre port a &eacute;t&eacute; modifi&eacute;. Veuillez patienter 10 secondes.
+Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==Votre navigateur va être redirigé vers la nouvelle new <a href="http://#[host]#:#[port]#/ConfigBasic.html">adresse</a> dans 5 secondes.
+The peer port was changed successfully.==Le port de votre noeud a été modifié avec succès.
 Your YaCy Peer needs some basic information to operate properly==Votre noeud YaCy n&eacute;cessite quelques informations de base afin de fonctionner correctement.
 Select a language for the interface==S&eacute;lectionnez une langue pour l'interface
 Use Case: what do you want to do with YaCy:==Mode d'utilisation: que voulez-vous faire avec YaCy?
 Community-based web search==Recherche communautaire sur le Web
 Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==Rejoignez et soutenez le r&eacute;seau global 'freeworld', effectuez des recherches sur le Web &agrave; l'aide d'un r&eacute;seau de recherche non censur&eacute; appartenant aux utilisateurs.
 Search portal for your own web pages==Portail de recherche pour vos propres pages web
-Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Votre installation YaCy se comporte ind&eacute;pendemment des autres pairs et vous pouvez d&eacute;finir votre propre index lan&ccedil;ant votre propre balayage du Web. Cela peut servir &agrave; rechercher vos propres pages web ou &agrave; construire un portail de recherche th&eacute;matique.
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Votre installation YaCy se comporte ind&eacute;pendamment des autres pairs et vous pouvez d&eacute;finir votre propre index en lan&ccedil;ant votre propre balayage du Web. Cela peut servir &agrave; rechercher vos propres pages web ou &agrave; construire un portail de recherche th&eacute;matique.
 Files may also be shared with the YaCy server, assign a path here:==Le serveur YaCy peut aussi &ecirc;tre utilis&eacute; pour le partage de fichiers. D&eacute;finissez un chemin ici:
 This path can be accessed at ==Ce chemin est accessible sous 
 Use that path as crawl start point.== Utilisez ce chemin comme point de d&eacute;marrage du balayage.
-Intranet Indexing==Indexage d'intranet
+Intranet Indexing==Indexation d'intranet
 Create a search portal for your intranet or web pages or your (shared) file system.==Cr&eacute;er un portail de recherche pour votre intranet, vos pages web ou votre syst&egrave;me de fichiers (partag&eacute;s).
 URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==Les URL peuvent &ecirc;tre utilis&eacute;es avec les protocoles http/https/ftp et un nom de domaine local, ou avec une URL de la forme
 or smb:==ou smb:
@@ -310,51 +394,110 @@ Your peer name has not been customized; please set your own peer name==Le nom de
 You have a nice peer name==Vous avez un joli nom de noeud
 You may change your peer name==Vous pouvez modifier le nom de votre noeud
 Peer Name:==Nom du noeud:
-#Please set a password for your peer to protect your settings==Veuillez choisir un mot de passe pour prot&eacute;ger votre configuration
-#> 3 characters==sup&eacute;rieur &agrave; 3 caract&egrave;res
-#if this is successful you will be asked to log in with these values immediately==Si le changement est op&eacute;r&eacute; avec succ&egrave;s, il vous sera demand&eacute; de vous identifier imm&eacute;diatement avec ces valeurs.
-#Password is set==Le mot de passe est activ&eacute;
-#Peer User:==Utilisateur du noeud:
-#Peer Password:==Mot de passe du noeud :
-#repeat same password==R&eacute;p&eacute;ter le m&ecirc;me mot de passe
-Your peer cannot be reached from outside ==Votre noeud est inaccessible de l'ext&eacute;rieur  
-which is not fatal, but would be good for the YaCy network); ==ce qui n'est pas trop grave, mais qu'il soit accessible serait mieux pour le r&eacute;seau YaCy).  
+Your peer cannot be reached from outside==Votre noeud ne peut être atteint depuis l'extérieur
+which is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais qu'il soit accessible serait mieux pour le r&eacute;seau YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurer votre pare-feu pour ouvrir ce port et/ou mettre en place un serveur virtuel sur votre routeur pour autoriser les connexions &agrave; ce port
 Opening a router port is <i>not</i> a YaCy-specific task;==Ouvrir un port sur un routeur n'est <i>pas</i> une op&eacute;ration sp&eacute;cifique &agrave; YaCy.
+you can see instruction videos everywhere in the internet, just search for <a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router">Open Ports on a &lt;our-router-type&gt; Router</a> and add your router type as search term.==Des vid&eacute;os montrant la marche &agrave; suivre sont disponibles partout sur le web, cherchez par exemple <a href="http://www.youtube.com/results?search_query=Ouvrir des ports sur un routeur">Ouvrir des ports sur un routeur &lt;type_de_routeur&gt;</a> en ajoutant votre type de routeur comme mot-clé recherché.
 you can see instruction videos everywhere in the internet, just search for ==Des vid&eacute;os montrant la marche &agrave; suivre sont disponibles partout sur le web, cherchez par exemple 
-Open+Ports+on+a+Router==Ouvrir+ports+routeur
-Open Ports on a &lt;our-router-type&gt; Router==Ouvrir des ports sur un  routeur &lt;mod&egrave;le-de-votre-routeur&gt; 
-and add your router type as search term. == et ajoutez le mod&egrave;le de votre routeur dans les termes de la recherche. 
-However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, ==Cependant, vous pourrez profiter de toutes les fonctionnalit&eacute;s de YaCy m&ecirc;me si vous ne parvenez pas &agrave; ouvrir un port sur votre routeur, 
-the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==l'unique fonction manquante se situera du c&ocirc;t&eacute; des autres utilisateurs de YaCy car ils ne pourront pas voir votre noeud.
+However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==Cependant, vous pourrez profiter de toutes les fonctionnalit&eacute;s de YaCy m&ecirc;me si vous ne parvenez pas &agrave; ouvrir un port sur votre routeur. L'unique fonction manquante se situera du c&ocirc;t&eacute; des autres utilisateurs de YaCy car ils ne pourront pas voir votre noeud.
 Your peer can be reached by other peers==Votre noeud est joignable par les autres noeuds du r&eacute;seau
 Peer Port:==Port logiciel du noeud:
 Set by system property==Configuré via la propriété système
 with SSL==avec SSL
-(https enabled#==(https activ&eacute;#
+https enabled==https activé
 on port==sur le port
 Configure your router for YaCy using UPnP:==Configurer votre routeur pour YaCy en utilisant UPnP:
 Configuration was not successful. This may take a moment.== &Eacute;chec de la configuration. Cela peut prendre un moment.
 Set Configuration==Sauver la configuration
 What you should do next:==Ce que vous devriez faire ensuite:
 Your basic configuration is complete! You can now (for example)==Votre configuration de base est compl&egrave;te! Vous pouvez maintenant (par exemple)
->just <==>simplement <
+just <==simplement <
 start an uncensored search==commencer une recherche non censur&eacute;e
 start your own crawl</a> and contribute to the global index, or create your own private web index==d&eacute;marrer votre propre balayage</a> et contribuer &agrave; l'index global, ou construire votre propre index du web
 set a personal peer profile</a> (optional settings)==remplir un profil de noeud personnel</a> (optionnel)
 monitor at the network page</a> what the other peers are doing==consulter la page r&eacute;seau</a> et ce que font les autres pairs
-
 You did not set a user name and/or a password.==Vous n'avez pas saisi de nom d'utilisateur et/ou de mot de passe.
 Some pages are protected by passwords.==Certaines pages sont prot&eacute;g&eacute;es par mot de passe.
-You should set a password at the ==Vous devez d&eacute;finir un mot de passe dans le 
->Accounts Menu< ==>menu des comptes< 
-to secure your YaCy peer.==afin de s&eacute;curiser votre noeud YaCy.
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Vous devriez définir un mot de passe via le menu <a href="ConfigAccounts_p.html">Comptes</a> pour sécuriser votre noeud YaCy.</p>::
 Your Peer name is a default name; please set an individual peer name.== Le nom de votre noeud est un nom par d&eacute;faut. veuillez lui donner un nom individuel.
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Vous n'avez pas ouvert de port sur votre pare-feu ou votre routeur ne fournit pas le port serveur &agrave; votre pair.
 This is needed if you want to fully participate in the YaCy network.==Cela est n&eacute;cessaire pour participer pleinement au r&eacute;seau YaCy.
 You can also use your peer without opening it, but this is not recomended.==Vous pouvez aussi utiliser votre pair sans l'ouvrir, mais cela n'est pas recommand&eacute;.
-The peer port was changed successfully. Your browser will be redirected to the new ==Le port logiciel du noeud a &eacute;t&eacute; correctement modifi&eacute;. Votre navigateur sera redirig&eacute; vers la nouvelle 
-in 5 seconds.==dans 5 secondes.
+Deutsch==Allemand
+#-----------------------------
+
+#File: Collage.html
+#---------------------------
+Private Queue==File d'attente privée
+Public Queue==File d'attente publique
+#-----------------------------
+
+#File: ConfigHeuristics_p.html
+#---------------------------
+Heuristics Configuration==Configuration des heuristiques
+A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==Une <a href="https://fr.wikipedia.org/wiki/Heuristique" target="_blank">heuristique</a> est une 'méthode de calcul qui fournit rapidement une solution réalisable, pas nécessairement optimale ou exacte, pour un problème d'optimisation difficile' (wikipedia).
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Les heuristiques de recherche qui peuvent être activées sont des techniques qui aident à obtenir des résultats de recherche supplémentaires en se basant sur la découverte de liens, l'indexation sur les recherches et les requêtes vers d'autres moteurs de recherche.
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Lorsqu'une heuristique de recherche est utilisée, les liens obtenus ne sont pas utilisés directement comme résultats de recherche mais les pages chargées sont indexées et stockées comme les autres.
+This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Cela permet de s'assurer que les listes noires peuvent être appliquées et que le mot recherché apparaît bien sur la page qui a été découverte par l'heuristique.
+The success of heuristics are marked with an image==Les résultats d'heuristiques sont marqués avec une image
+(new link)==(nouveau lien)
+below the favicon left from the search result entry:==en-dessous de l'icône située à gauche de chaque résultat de recherche:
+The search result was discovered by a heuristic, but the link was already known by YaCy==Résultat de recherche trouvé par une heuristique; lien déjà connu de YaCy
+The search result was discovered by a heuristic, not previously known by YaCy==Résultat de recherche trouvé par une heuristique, inconnu auparavant de YaCy
+'site'-operator: instant shallow crawl==Opérateur 'site' : indexation superficielle immédiate
+When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Lorsqu'une recherche est faite avec l'opérateur 'site' (exemple : 'download site:yacy.net'), alors l'hôte indiqué à droite de l'opérateur est immédiatement indexé avec une restriction sur l'hôte et une profondeur de -1.
+That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Explication : juste après exécution de la requête de recherche, la page d'accueil de l'hôte est indexée ainsi que tous les liens pointant vers des pages sur ce même hôte.
+Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==Parceque cette indexation immédiate doit obéir aux règles des robots.txt et qu'il y a un délai minimal entre deux chargements de pages consécutifs, cette heuristique est assez lente, mais peut permettre de trouver tous les résultats souhaités lors d'une seconde recherche (après une pause de quelques sedondes).
+search-result: shallow crawl on all displayed search results==Résultat de recherche : indexation superficielle sur tous les résultats affichés
+When a search is made then all displayed result links are crawled with a depth-1 crawl.==Lorsqu'une recherche est effectuée, tous les résultats affichés sont indexés avec une profondeur de -1.
+This means: right after the search request every page is loaded and every page that is linked on this page.==Explication : juste après exécution de la requête de recherche, toutes les pages de résultats sont indexées ainsi que tous les liens qu'elle contiennent.
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==Si vous cochez 'Ajouter en tant que tâche d'indexation globale', les pages à indexer sont ajoutées à la file d'attente d'indexation globale (les noeuds distants peuvent piocher dans cette liste).
+Default is to add the links to the local crawl queue (your peer crawls the linked pages).==Par défaut les liens sont ajoutés à la file d'attente d'indexation locale (votre noeud indexe lui-même les liens).
+add as global crawl job==Ajouter en tant que tâche d'indexation globale
+opensearch load external search result list from active systems below==Rechercher sur les hôtes OpenSearch actifs ci-dessous
+When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==Lorsque vous utilisez cette heuristique, toute nouvelle requête de recherche est également transmise aux hôtes OpenSearch actifs.
+20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 résultats sont récupérés depuis les machines distantes et simultanément chargés, analysés et immédiatement indexés.
+To find out more about OpenSearch see==Pour en savoir plus sur OpenSearch, voir
+Available/Active Opensearch System==Systèmes OpenSearch disponibles/actifs
+>Active<==>Actif<
+>Title<==>Titre<
+>Comment<==>Commentaire<
+Url <small>(format opensearch==URL <small>(format OpenSearch
+Url template syntax==Syntaxe de modèle d'URL
+>delete<==>Supprimer<
+>new<==>Nouveau<
+"add"=="Ajouter"
+"Save"=="Enregistrer"
+"reset to default list"=="Réinitialiser (liste par défaut)"
+"discover from index" class=="Découvrir depuis l'index" class
+start background task, depending on index size this may run a long time==Démarre une tâche de fond, pouvant durer longtemps suivant la taille de l'index
+With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.==Grâce au bouton "Découvrir depuis l'index", vous pouvez rechercher dans les méta-données de votre index (index Web Structure) pour trouver des hôtes supportant la norme OpenSearch.
+The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).==La tâche est démarrée en arrière-plan. Cela peut prendre quelques minutes avant que de nouvelles entrées apparaissent (après rafraîchissement de cette page).
+Alternatively you may==Vous pouvez également
+>copy &amp; paste a example config file<==>copier/coller un exemple de fichier de configuration<
+located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==de <i>defaults/heuristicopensearch.conf</i> vers le dossier DATA/SETTINGS.
+For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==La fonction de découverte depuis l'index nécessite l'activation de l'index <i>web graph</i> et des champs <i>target_rel_s, target_protocol_s, target_urlstub_s</i> dans le schéma Solr <a href="IndexSchema_p.html?core=webgraph">webgraph</a>. 
+"switch Solr fields on"=="Activer les champs Solr"
+('modify Solr Schema')==('Modifier le schéma Solr')
+#-----------------------------
+
+#File: ConfigHTCache_p.html
+#---------------------------
+Hypertext Cache Configuration==Configuration du Cache HyperTexte
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Le Cache HT stocke les contenus obtenus par les protocoles HTTP et FTP. Les documents d'URLs smb:// et file:// ne sont pas mis en cache.
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Le cache est de type rotatif : lorsqu'il est plein, les entrées les plus anciennes sont supprimées et de nouvelles peuvent prendre la place.
+HTCache Configuration==Configuration du Cache HT
+The path where the cache is stored==Chemin de sotckage du cache
+The current size of the cache==Taille actuelle du cache
+>#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==>#[actualCacheSize]# Mo pour #[actualCacheDocCount]# fichiers, #[docSizeAverage]# Ko par fichier en moyenne
+The maximum size of the cache==Taille maximale du cache
+"Set"=="Appliquer"
+Cleanup==Nettoyage
+Cache Deletion==Nettoyage de cache
+Delete HTTP &amp; FTP Cache==Vider le cache HTTP &amp; FTP
+Delete robots.txt Cache==Vider le cache robots.txt
+"Delete"=="Vider"
 #-----------------------------
 
 #File: ConfigLanguage_p.html
