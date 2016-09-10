@@ -74,9 +74,6 @@ public class Tokenizer {
         String k;
         Tagging.Metatag tag;
         int wordlen;
-        int wordHandle;
-        int wordHandleCount = 0;
-        //final int sentenceHandleCount = 0;
         int allwordcounter = 0;
         int allsentencecounter = 0;
         int wordInSentenceCounter = 1;
@@ -167,12 +164,10 @@ public class Tokenizer {
                 Word wsp = this.words.get(word);
                 if (wsp != null) {
                     // word already exists
-                    wordHandle = wsp.posInText;
                     wsp.inc();
                 } else {
                     // word does not yet exist, create new word entry
-                    wordHandle = ++wordHandleCount; // let start pos with 1
-                    wsp = new Word(wordHandle, wordInSentenceCounter, allsentencecounter + 100); // nomal sentence start at 100 !
+                    wsp = new Word(allwordcounter, wordInSentenceCounter, allsentencecounter + 100); // nomal sentence start at 100 !
                     wsp.flags = this.RESULT_FLAGS.clone();
                     this.words.put(word.toLowerCase(), wsp);
                 }
