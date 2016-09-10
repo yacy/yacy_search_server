@@ -2356,7 +2356,6 @@ kiosk mode==Mode Kiosque
 #---------------------------
 Search Page==Page de recherche
 Search for==Recherche de
-YaCy Search on==Recherche YaCy sur
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==Le r&eacute;sultat de cette recherche peut &eacute;galement &ecirc;tre charg&eacute; en tant que flux RSS /<a href="http://www.opensearch.org" target="_blank">opensearch</a>.
 Click the RSS icon to see this search result as RSS message stream==Cliquer sur l'ic&ocirc;ne RSS pour voir le flux RSS correspondant &agrave; cette recherche
 Use the RSS search result format to add static searches to your RSS reader, if you use one.==Utilisez les r&eacute;sultats au format RSS pour ajouter des recherches statiques &agrave; votre lecteur de flux RSS, si vous en utilisez un.
