@@ -56,7 +56,6 @@ import net.yacy.document.parser.rssParser;
 import net.yacy.document.parser.rtfParser;
 import net.yacy.document.parser.sevenzipParser;
 import net.yacy.document.parser.sidAudioParser;
-import net.yacy.document.parser.swfParser;
 import net.yacy.document.parser.tarParser;
 import net.yacy.document.parser.torrentParser;
 import net.yacy.document.parser.vcfParser;
@@ -106,7 +105,6 @@ public final class TextParser {
         initParser(new sevenzipParser());
         initParser(new sidAudioParser());
         initParser(new svgParser());
-        initParser(new swfParser());
         initParser(new tarParser());
         initParser(new torrentParser());
         initParser(new vcfParser());
