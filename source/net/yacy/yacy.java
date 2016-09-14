@@ -153,9 +153,10 @@ public final class yacy {
                 final String javaVersion = System.getProperty("java.version");
                 if (javaVersion != null) { // unknown property !?
                     int pos = javaVersion.indexOf('.');
+                    if (pos < 0) pos = javaVersion.indexOf('-'); // i.e. "9-ea"
                     int count = 1;
-                    for (; pos < javaVersion.length() && count < 2; pos++) {
-                        if (javaVersion.charAt(pos + 1) == '.') count++;
+                    for (; pos >= 0 && pos < javaVersion.length() && count < 2; pos++) {
+                        if (javaVersion.charAt(pos + 1) == '.' || javaVersion.charAt(pos + 1) == '-') count++;
                     }
                     Double dVersion = Double.parseDouble(javaVersion.substring(0, pos));
                     if (dVersion < 1.7) { // required min java 1.7
