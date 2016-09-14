@@ -145,30 +145,6 @@ public final class yacy {
             System.out.println(copyright);
             System.out.println(hline);
 
-            // check java version
-            try {
-                "a".isEmpty(); // needs at least Java 1.6
-
-                // check java version string (required min 1.7)
-                final String javaVersion = System.getProperty("java.version");
-                if (javaVersion != null) { // unknown property !?
-                    int pos = javaVersion.indexOf('.');
-                    if (pos < 0) pos = javaVersion.indexOf('-'); // i.e. "9-ea"
-                    int count = 1;
-                    for (; pos >= 0 && pos < javaVersion.length() && count < 2; pos++) {
-                        if (javaVersion.charAt(pos + 1) == '.' || javaVersion.charAt(pos + 1) == '-') count++;
-                    }
-                    Double dVersion = Double.parseDouble(javaVersion.substring(0, pos));
-                    if (dVersion < 1.7) { // required min java 1.7
-                        System.err.println("STARTUP: Java Version too low. You need at least Java 1.7 to run YaCy");
-                        System.exit(-1);
-                    }
-                }
-            } catch (final NoSuchMethodError e) {
-                System.err.println("STARTUP: Java Version too low. You need at least Java 1.7 to run YaCy");
-                System.exit(-1);
-            }
-
             // ensure that there is a DATA directory, if not, create one and if that fails warn and die
             mkdirsIfNeseccary(dataHome);
             mkdirsIfNeseccary(appHome);
