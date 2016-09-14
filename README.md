@@ -171,8 +171,8 @@ Please clone our code and help with development!
 The code is licensed under the GPL v2.
 
 Compiling YaCy:
-- you need java 1.7 and ant
-- just compile: "ant clean all" - then you can "./startYACY.sh"
+- you need Java 1.7 or later and [Apache Ant](http://ant.apache.org/)
+- just compile: "ant clean all" - then you can "./startYACY.sh" or "./startYACY.bat"
 - create a release tarball: "ant dist"
 - create a Mac OS release: "ant distMacApp" (works only on a Mac)
 - create a debian release: "ant deb"

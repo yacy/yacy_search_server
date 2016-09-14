@@ -98,17 +98,29 @@ public abstract class AbstractReference implements Reference {
         }
         return r;
     }
-    
+
+   /**
+     * max position of search query words for multi word queries
+     * @return
+     */
     @Override
     public int maxposition() {
         return max(positions());
     }
-    
+
+    /**
+     * min word position of search query words for multi word queries
+     * @return
+     */
     @Override
     public int minposition() {
         return min(positions());
     }
-    
+
+    /**
+     * The average distance (in words) between search query terms for multi word searches.
+     * @return word distance
+     */
     @Override
     public int distance() {
         if (positions().size() < 2) return 0;
