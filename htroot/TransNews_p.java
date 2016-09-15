@@ -74,6 +74,7 @@ public class TransNews_p {
         // read voting
         if ((post != null) && post.containsKey("publishtranslation")) {
             Iterator<String> filenameit = localTrans.keySet().iterator();
+            int msgcounter = 0;
             while (filenameit.hasNext()) {
                 String file = filenameit.next();
                 Map<String, String> tmptrans = localTrans.get(file);
@@ -109,6 +110,7 @@ public class TransNews_p {
                             map.put("file", file);
                             map.put("source", sourcetxt);
                             map.put("target", targettxt);
+                            map.put("#", Integer.toString(msgcounter++));
                             sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_TRANSLATION_ADD, map);
                         }
                     }
