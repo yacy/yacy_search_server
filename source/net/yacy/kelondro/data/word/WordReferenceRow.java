@@ -160,6 +160,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_reserve2, 0);
     }
 
+    /**
+     * Constructor for WordReferences from title words or as template for content
+     * words (with reduced number of input parameters, skipping the parameter
+     * later set by setWord() for a WordReferenceRow template or not relevant if
+     * used for words from title).
+     */
     public WordReferenceRow(final byte[]   urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components

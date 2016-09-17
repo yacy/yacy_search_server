@@ -3,15 +3,28 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Iterator;
+import java.util.Map;
+import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.document.Tokenizer;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.ReferenceFactory;
+import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
+import static net.yacy.search.index.Segment.catchallWord;
+import net.yacy.search.query.QueryGoal;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
@@ -23,6 +36,7 @@ public class SegmentTest {
 
     /**
      * Setup RWI index
+     *
      * @throws IOException
      */
     @BeforeClass
@@ -74,6 +88,111 @@ public class SegmentTest {
         // check index count after clear
         cnt = index.RWICount();
         assertTrue(cnt == 0);
+    }
+
+    /**
+     * Helper to store a text to the rwi index. This was derived from the
+     * Segment.storeDocument() procedure.
+     *
+     * @param text of the document
+     * @throws IOException
+     * @throws SpaceExceededException
+     */
+    private void storeTestDocTextToTermIndex(DigestURL url, String text) throws IOException, SpaceExceededException {
+
+        // set a pseudo url for the simulated test document
+        final String urlNormalform = url.toNormalform(true);
+        String dc_title = "Test Document";
+        // STORE PAGE INDEX INTO WORD INDEX DB
+        // create a word prototype which is re-used for all entries
+        if (index.termIndex != null) {
+            final int outlinksSame = 0;
+            final int outlinksOther = 0;
+            final int urlLength = urlNormalform.length();
+            final int urlComps = MultiProtocolURL.urlComps(url.toNormalform(false)).length;
+            final int wordsintitle = CommonPattern.SPACES.split(dc_title).length; // same calculation as for CollectionSchema.title_words_val
+
+            WordCache meaningLib = new WordCache(null);
+            boolean doAutotagging = false;
+            VocabularyScraper scraper = null;
+
+            Tokenizer t = new Tokenizer(url, text, meaningLib, doAutotagging, scraper);
+
+            // create a WordReference template
+            final WordReferenceRow ientry = new WordReferenceRow(
+                    url.hash(), urlLength, urlComps, wordsintitle,
+                    t.RESULT_NUMB_WORDS, t.RESULT_NUMB_SENTENCES,
+                    System.currentTimeMillis(), System.currentTimeMillis(),
+                    UTF8.getBytes("en"), Response.DT_TEXT,
+                    outlinksSame, outlinksOther);
+
+            // add the words to rwi index
+            Word wprop = null;
+            byte[] wordhash;
+            String word;
+            for (Map.Entry<String, Word> wentry : t.words().entrySet()) {
+                word = wentry.getKey();
+                wprop = wentry.getValue();
+                assert (wprop.flags != null);
+                ientry.setWord(wprop);
+                wordhash = Word.word2hash(word);
+                if (this.index != null) {
+                    index.termIndex.add(wordhash, ientry);
+                }
+
+            }
+        }
+    }
+
+    /**
+     * Simulates a multi word query for the rwi termIndex
+     *
+     * @throws SpaceExceededException
+     * @throws MalformedURLException
+     * @throws IOException
+     */
+    @Test
+    public void testQuery_MultiWordQuery() throws SpaceExceededException, MalformedURLException, IOException {
+
+        // creates one test url with this text in the rwi index
+        DigestURL url = new DigestURL("http://test.org/test.html");
+        storeTestDocTextToTermIndex(url, "One Two Three Four Five. This is a test text. One two three for five");
+
+        // create a query to get the search word hashsets
+        QueryGoal qg = new QueryGoal("five test ");
+        HandleSet queryHashes = qg.getIncludeHashes();
+        HandleSet excludeHashes = qg.getExcludeHashes();
+        HandleSet urlselection = null;
+        ReferenceFactory<WordReference> termFactory = Segment.wordReferenceFactory;
+
+        // do the search
+        TermSearch<WordReference> result = index.termIndex.query(queryHashes, excludeHashes, urlselection, termFactory, Integer.MAX_VALUE);
+
+        // get the joined resutls
+        ReferenceContainer<WordReference> wc = result.joined();
+
+        // we should have now one result (stored to index above)
+        assertTrue("test url hash in result set", wc.has(url.hash()));
+
+        // the returned WordReference is expected to be a joined Reference with properties set used in ranking
+        Iterator<WordReference> it = wc.entries();
+        System.out.println("-----------------");
+
+        // currently the results are not as expected for a multi-word query
+        while (it.hasNext()) {
+            WordReference r = it.next();
+            // expected to be 1st in text
+            System.out.println("posintext=" + r.positions() + " (expected=5)");
+            // min position of search word in text
+            System.out.println("minposition=" + r.minposition() + " (expected=5)");
+            // max position of search word in text
+            System.out.println("maxposition=" + r.maxposition() + " (expected=8)");
+            // for a multiword query distance expected to be the avg of search word positions in text
+            System.out.println("distance=" + r.distance() + " (expected=3)");
+            // occurence of search words in text
+            System.out.println("hitcount=" + r.hitcount() + " (expected=2)");
+        }
+        System.out.println("-----------------");
     }
 
 }
