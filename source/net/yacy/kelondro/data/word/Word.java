@@ -66,7 +66,7 @@ public class Word {
 
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences
-    public  int      posInText;   // unique handle, is initialized with word position (excluding double occurring words)
+    public  int      posInText;   // unique handle, is initialized with first word position in text
     public  int      posInPhrase; // position of word in phrase
     public  int      numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
     public  Bitfield flags;       // the flag bits for each word

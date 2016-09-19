@@ -238,7 +238,6 @@
         <pathelement location="${lib}/solr-solrj-5.5.2.jar" />
     	<pathelement location="${lib}/spatial4j-0.5.jar" />
         <pathelement location="${lib}/stax2-api_3.1.4.jar" />        
-    	<pathelement location="${lib}/webcat-swf-0.1.jar" />
     	<pathelement location="${lib}/weupnp-0.1.4.jar" />
     	<pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />

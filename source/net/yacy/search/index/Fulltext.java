@@ -226,8 +226,8 @@ public final class Fulltext {
                 for (String name: instance.getCoreNames()) {
                     this.solrInstances.getEmbeddedConnector(name).clear();
                 }
+                this.commit(false);
             }
-            this.commit(false);
             this.solrInstances.clearCaches();
         }
     }

@@ -66,7 +66,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
             new Column("t", Column.celltype_cardinal,  Column.encoder_b256,  2, "posintext"),
             new Column("r", Column.celltype_cardinal,  Column.encoder_b256,  1, "posinphrase"),
             new Column("o", Column.celltype_cardinal,  Column.encoder_b256,  1, "posofphrase"),
-            new Column("i", Column.celltype_cardinal,  Column.encoder_b256,  1, "worddistance"),
+            new Column("i", Column.celltype_cardinal,  Column.encoder_b256,  1, "worddistance"), // arbitrary column for avg distance of search query words
             new Column("k", Column.celltype_cardinal,  Column.encoder_b256,  1, "reserve")
         },
         Base64Order.enhancedCoder
@@ -160,6 +160,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_reserve2, 0);
     }
 
+    /**
+     * Constructor for WordReferences from title words or as template for content
+     * words (with reduced number of input parameters, skipping the parameter
+     * later set by setWord() for a WordReferenceRow template or not relevant if
+     * used for words from title).
+     */
     public WordReferenceRow(final byte[]   urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components
@@ -253,7 +259,10 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     }
 
     /**
-     * First position of word in text
+     * First position of word in text.
+     * positions() is used to remember word positions for each query word of an
+     * multi word search query. As we currently don't include a separate posintext()
+     * function, we use positions to make the posintext value available.
      * @return Collection with one element
      */
     @Override

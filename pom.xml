@@ -591,12 +591,7 @@
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.7.21</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>pt.tumba</groupId>
-            <artifactId>webcat-swf</artifactId>
-            <version>0.1</version>
-        </dependency>        
+        </dependency>       
         <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
