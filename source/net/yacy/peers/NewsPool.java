@@ -333,6 +333,16 @@ public class NewsPool {
         }
     }
 
+    /**
+     * Gets the last news in the outgoing queue, increases the distribution
+     * counter of the message and put's it back into the outgoingNews queue or
+     * if distribution count is above maxDistribution (default = 30) into the
+     * publishedNews queue.
+     *
+     * @return current news Record or null if outgoingNews queue is empty
+     * @throws IOException
+     * @throws SpaceExceededException
+     */
     public NewsDB.Record myPublication() throws IOException, SpaceExceededException {
         // generate a record for next peer-ping
         if (this.outgoingNews.isEmpty()) return null;
