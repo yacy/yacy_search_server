@@ -125,7 +125,6 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("<link href=\"/env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
         //writer.write("<script src=\"/env/bootstrap/js/jquery.min.js\"></script>\n");
         //writer.write("<script src=\"/env/bootstrap/js/bootstrap.min.js\"></script>\n");
-        //writer.write("<script src=\"/env/bootstrap/js/docs.min.js\"></script>\n");
         //writer.write("<script src=\"/env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
         writer.write("<!-- Custom styles for this template, i.e. navigation (move this to base.css) -->\n");
         writer.write("<link href=\"/env/bootstrap-base.css\" rel=\"stylesheet\">\n");
