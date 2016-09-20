@@ -3,6 +3,7 @@
   version 2
   7th April 2007
   Stuart Langridge, http://www.kryogenix.org/code/browser/sorttable/
+  fixed for YaCy 20th September 2016
   
   Instructions:
   Download this file
@@ -17,7 +18,7 @@
   @licstart  The following is the entire license notice for the 
   JavaScript code in this file.
  
-  Copyright (c) 1997-2007 Stuart Langridge
+  Copyright (c) 1997-2007, 2016 Stuart Langridge, luccioman
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -172,7 +173,7 @@ sorttable = {
 	        col = this.sorttable_columnindex;
 	        rows = this.sorttable_tbody.rows;
 	        for (var j=0; j<rows.length; j++) {
-	          row_array[row_array.length] = [sorttable.getInnerText(rows[j].cells[col]), rows[j]];
+	          row_array[row_array.length] = [sorttable.getCellText(rows[j], col), rows[j]];
 	        }
 	        /* If you want a stable sort, uncomment the following line */
 	        //sorttable.shaker_sort(row_array, this.sorttable_sortfunction);
@@ -190,11 +191,38 @@ sorttable = {
     }
   },
   
+  /**
+   * Get text from cell at specified header column index. This handles correctly colspan values over 1 in data cells,
+   * but colspan values over 1 in header cells are not supported.
+   * @param tableRow {HTMLTableRowElement} a table row
+   * @param column {number} the column index : value between 0 and header row cells number
+   * @return {String} the cell text from the tableRow and column specified
+   */
+  getCellText: function(tableRow, column) {
+      var cellsNb = tableRow.cells.length;
+      var cellText = '';
+      /* Current data cell index */
+      var cellIndex = 0;
+      /* Current header cell index */
+      var columnIndex = 0;
+      var colspan;
+      for(var cellIndex = 0; cellIndex < cellsNb && columnIndex < column; cellIndex++) {
+    	  colspan = tableRow.cells[cellIndex].colspan > 0 ? tableRow.cells[cellIndex].colspan : 1;
+    	  columnIndex += colspan;
+      }
+      /* This final test ensure we do not use an index out of bounds */
+      if(cellIndex < cellsNb) {
+    	  cellText = sorttable.getInnerText(tableRow.cells[cellIndex]);
+      }
+      return cellText;
+  },
+  
   guessType: function(table, column) {
     // guess the type of a column based on its first non-blank row
     sortfn = sorttable.sort_alpha;
     for (var i=0; i<table.tBodies[0].rows.length; i++) {
-      text = sorttable.getInnerText(table.tBodies[0].rows[i].cells[column]);
+      var tableRow = table.tBodies[0].rows[i];
+      text = sorttable.getCellText(tableRow, column);
       if (text != '') {
         if (text.match(/^-?[�$�]?[\d,.]+%?$/)) {
           return sorttable.sort_numeric;
