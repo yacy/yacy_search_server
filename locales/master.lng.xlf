@@ -8699,7 +8699,7 @@
   </body>
 </file>
 
-<file original="TransNews_p.html"  source-language="en"  target-language="aa"  datatype="html">
+<file original="TransNews_p.html" source-language="en" datatype="html">
   <body>
     <trans-unit id="d0ae4d2d" xml:space="preserve" approved="no" translate="yes">
        <source>Translation News for Language</source>
@@ -9734,6 +9734,12 @@
     <trans-unit id="cee5ec51" xml:space="preserve" approved="no" translate="yes">
        <source>List of other web pages with citations</source>
     </trans-unit>
+    <trans-unit id="74cccb8f" xml:space="preserve" approved="no" translate="yes">
+       <source>Similar documents from different hosts:</source>
+    </trans-unit>   
+    <trans-unit id="cee5ec51" xml:space="preserve" approved="no" translate="yes">
+       <source>List of other web pages with citations</source>
+    </trans-unit> 
   </body>
 </file>
 
