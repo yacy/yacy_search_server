@@ -577,7 +577,7 @@ public final class Fulltext {
         EmbeddedInstance esc = this.solrInstances.getEmbedded();
         File storagePath = esc.getContainerPath();
         synchronized (this.solrInstances) {
-            this.disconnectLocalSolr();
+            // this.disconnectLocalSolr(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances.close();
             try {
                 ZIPReader.unzip(solrDumpZipFile, storagePath);
@@ -610,7 +610,7 @@ public final class Fulltext {
     public void rebootSolr() {
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
-            this.solrInstances.close();
+            // this.solrInstances.close(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances = new InstanceMirror();
             try {
                 this.connectLocalSolr();

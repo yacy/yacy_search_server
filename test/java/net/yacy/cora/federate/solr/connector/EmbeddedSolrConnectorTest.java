@@ -20,7 +20,7 @@ import org.junit.BeforeClass;
 public class EmbeddedSolrConnectorTest {
 
     static EmbeddedSolrConnector solr;
-
+    static EmbeddedInstance localCollectionInstance;
     public EmbeddedSolrConnectorTest() {
     }
 
@@ -35,7 +35,7 @@ public class EmbeddedSolrConnectorTest {
         storage.mkdirs();
         System.out.println("setup EmeddedSolrConnector using config dir: " + solr_config.getAbsolutePath());
         try {
-            EmbeddedInstance localCollectionInstance = new EmbeddedInstance(solr_config, storage, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
+             localCollectionInstance = new EmbeddedInstance(solr_config, storage, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
             solr = new EmbeddedSolrConnector(localCollectionInstance);
             solr.clear(); // delete all documents in index (for clean testing)
         } catch (final IOException ex) {
@@ -45,7 +45,7 @@ public class EmbeddedSolrConnectorTest {
 
     @AfterClass
     public static void finalizeTesting() {
-        solr.close();
+        localCollectionInstance.close();
     }
 
     /**
@@ -179,9 +179,11 @@ public class EmbeddedSolrConnectorTest {
      * and debug option for EmbeddedSolrConnector.close() (cause this.core.close())
      */
     @Test
-    public void testClose() {
+    public void testClose() throws Throwable {
         System.out.println("-close "+solr.toString());
-        solr.close();
+        // we must close the instance to free all resources instead of only closing the connector
+        // solr.close();
+        localCollectionInstance.close();
 
         System.out.println("+reopen "+solr.toString());
         initTesting();
