@@ -172,4 +172,20 @@ public class EmbeddedSolrConnectorTest {
         }
         assertEquals(id, foundid);
     }
+
+    /**
+     * Test of close and reopen embedded Solr
+     * test for issue http://mantis.tokeek.de/view.php?id=686
+     * and debug option for EmbeddedSolrConnector.close() (cause this.core.close())
+     */
+    @Test
+    public void testClose() {
+        System.out.println("-close "+solr.toString());
+        solr.close();
+
+        System.out.println("+reopen "+solr.toString());
+        initTesting();
+        
+        assertTrue(!solr.isClosed());
+    }
 }
