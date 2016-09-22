@@ -28,12 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.params.CommonParams;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
@@ -42,6 +38,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.robots.RobotsTxt;
+import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -52,51 +49,27 @@ public class ErrorCache {
 
     // the class object
     private final Map<String, CollectionConfiguration.FailDoc> cache;
-    private final Fulltext fulltext;
+    private final Switchboard sb;
 
-    public ErrorCache(final Fulltext fulltext) {
-        this.fulltext = fulltext;
+    public ErrorCache(final Switchboard sb) {
+        this.sb = sb;
         this.cache = new LinkedHashMap<String, CollectionConfiguration.FailDoc>();
         // concurrently fill stack with latest values
-        new Thread() {
-            @Override
-            public void run() {
-                final SolrQuery params = new SolrQuery();
-                params.setParam("defType", "edismax");
-                params.setStart(0);
-                params.setRows(1000);
-                params.setFacet(false);
-                params.setSort(new SortClause(CollectionSchema.load_date_dt.getSolrFieldName(), SolrQuery.ORDER.desc)); // load_date_dt = faildate
-                params.setFields(CollectionSchema.id.getSolrFieldName());
-                params.setQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
-                params.set(CommonParams.DF, CollectionSchema.id.getSolrFieldName()); // DisMaxParams.QF or CommonParams.DF must be given
-                SolrDocumentList docList;
-                try {
-                    docList = fulltext.getDefaultConnector().getDocumentListByParams(params);
-                    if (docList != null) for (int i = docList.size() - 1; i >= 0; i--) {
-                        SolrDocument doc = docList.get(i);
-                        String hash = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                        cache.put(hash, null);
-                    }
-                } catch (IOException e) {
-                    ConcurrentLog.logException(e);
-                }
-            }
-        }.start();
+        new ErrorCacheFiller(sb, this).start();
     }
-
+    
     public void clearCache() {
         if (this.cache != null) synchronized (this.cache) {this.cache.clear();}
     }
 
     public void clear() throws IOException {
         clearCache();
-        this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
+        this.sb.index.fulltext().getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
     }
 
     public void removeHosts(final Set<String> hosthashes) {
         if (hosthashes == null || hosthashes.size() == 0) return;
-        this.fulltext.deleteDomainErrors(hosthashes);
+        this.sb.index.fulltext().deleteDomainErrors(hosthashes);
         synchronized (this.cache) {
             Iterator<String> i = ErrorCache.this.cache.keySet().iterator();
             while (i.hasNext()) {
@@ -104,6 +77,14 @@ public class ErrorCache {
                 if (hosthashes.contains(b)) i.remove();
             }
         }
+    }
+    
+    /**
+     * Put a document hash to the internal cache.
+     * @param hash document hash.
+     */
+    public void putHashOnly(String hash) {
+    	this.cache.put(hash, null);
     }
 
     /**
@@ -129,16 +110,16 @@ public class ErrorCache {
                     url, profile == null ? null : profile.collections(),
                     failCategory.name() + " " + reason, failCategory.failType,
                     httpcode, crawldepth);
-            if (this.fulltext.getDefaultConnector() != null && failCategory.store && !RobotsTxt.isRobotsURL(url)) {
+            if (this.sb.index.fulltext().getDefaultConnector() != null && failCategory.store && !RobotsTxt.isRobotsURL(url)) {
                 // send the error to solr
                 try {
                     // do not overwrite error reports with error reports
-                    SolrDocument olddoc = this.fulltext.getDefaultConnector().getDocumentById(ASCII.String(failDoc.getDigestURL().hash()), CollectionSchema.httpstatus_i.getSolrFieldName());
+                    SolrDocument olddoc = this.sb.index.fulltext().getDefaultConnector().getDocumentById(ASCII.String(failDoc.getDigestURL().hash()), CollectionSchema.httpstatus_i.getSolrFieldName());
                     if (olddoc == null ||
                         olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName()) == null ||
                         ((Integer) olddoc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName())) == 200) {
-                        SolrInputDocument errorDoc = failDoc.toSolr(this.fulltext.getDefaultConfiguration());
-                        this.fulltext.getDefaultConnector().add(errorDoc);
+                        SolrInputDocument errorDoc = failDoc.toSolr(this.sb.index.fulltext().getDefaultConfiguration());
+                        this.sb.index.fulltext().getDefaultConnector().add(errorDoc);
                     }
                 } catch (final IOException e) {
                     ConcurrentLog.warn("SOLR", "failed to send error " + url.toNormalform(true) + " to solr: " + e.getMessage());
@@ -174,7 +155,7 @@ public class ErrorCache {
                     String hash = entry.getKey();
                     CollectionConfiguration.FailDoc failDoc = entry.getValue();
                     if (failDoc == null) {
-                        SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(hash);
+                        SolrDocument doc = this.sb.index.fulltext().getDefaultConnector().getDocumentById(hash);
                         if (doc != null) failDoc = new CollectionConfiguration.FailDoc(doc);
                     }
                     if (failDoc != null) l.add(failDoc);
@@ -193,7 +174,7 @@ public class ErrorCache {
         }
         if (failDoc != null) return failDoc;
         try {
-            final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlhash);
+            final SolrDocument doc = this.sb.index.fulltext().getDefaultConnector().getDocumentById(urlhash);
             if (doc == null) return null;
             Object failreason = doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
             if (failreason == null || failreason.toString().length() == 0) return null;
@@ -207,7 +188,7 @@ public class ErrorCache {
         String urlHashString = ASCII.String(urlHash);
         try {
             // load the fail reason, if exists
-            final SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlHashString, CollectionSchema.failreason_s.getSolrFieldName());
+            final SolrDocument doc = this.sb.index.fulltext().getDefaultConnector().getDocumentById(urlHashString, CollectionSchema.failreason_s.getSolrFieldName());
             if (doc == null) return false;
 
             // check if the document contains a value in the field CollectionSchema.failreason_s

@@ -68,6 +68,7 @@ import net.yacy.search.IndexingQueueEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.ErrorCache;
+import net.yacy.search.index.ErrorCacheFiller;
 
 public class CrawlQueues {
     
@@ -95,7 +96,7 @@ public class CrawlQueues {
         log.config("Opening noticeURL..");
         this.noticeURL = new NoticedURL(queuePath, sb.getConfigInt("crawler.onDemandLimit", 1000), sb.exceed134217727);
         log.config("Opening errorURL..");
-        this.errorURL = new ErrorCache(sb.index.fulltext());
+        this.errorURL = new ErrorCache(sb);
         log.config("Opening delegatedURL..");
         this.delegatedURL = null;
     }
@@ -117,6 +118,9 @@ public class CrawlQueues {
         // removed pending requests
         this.workerQueue.clear();
         this.errorURL.clearCache();
+        /* Concurrently refill the error cache with recent errors from the index */
+        new ErrorCacheFiller(this.sb, this.errorURL).start();
+        
         if (this.remoteCrawlProviderHashes != null) this.remoteCrawlProviderHashes.clear();
         this.noticeURL.close();
         this.noticeURL = new NoticedURL(newQueuePath, sb.getConfigInt("crawler.onDemandLimit", 1000), this.sb.exceed134217727);
