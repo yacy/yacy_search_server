@@ -397,7 +397,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
         return new MultiProtocolURL(baseURL, relPath);
     }
-
+    
     public MultiProtocolURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
@@ -425,9 +425,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         } else if (relPath.length() > 0 && relPath.charAt(0) == '/') {
             this.path = relPath;
         } else if (baseURL.path.endsWith("/")) {
-            if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
-                throw new MalformedURLException("relative path malformed: " + relPath);
-            }
+        	/* According to RFC 3986 example in Appendix B. (https://tools.ietf.org/html/rfc3986) 
+        	   such an URL is valid : http://www.ics.uci.edu/pub/ietf/uri/#Related
+        	   
+        	   We also find similar usages in the 2016 URL living standard (https://url.spec.whatwg.org/),  
+        	   for example : https://url.spec.whatwg.org/#syntax-url-absolute-with-fragment 
+        	   
+        	   java.lang.URL constructor also accepts this form.*/
             if (relPath.startsWith("/")) this.path = baseURL.path + relPath.substring(1); else this.path = baseURL.path + relPath;
         } else {
             if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
