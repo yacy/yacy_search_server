@@ -272,7 +272,9 @@ public final class Fulltext {
     public void close() {
         try {
             this.solrInstances.close();
-        } catch (Throwable e) {}
+        } catch (Throwable e) {
+        	ConcurrentLog.logException(e);
+        }
     }
     
     private long lastCommit = 0;
