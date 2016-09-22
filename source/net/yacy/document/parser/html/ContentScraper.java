@@ -373,6 +373,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return (p < 0) ? Integer.MAX_VALUE : p;
     }
 
+    /**
+     * @param relativePath relative path to this document base URL
+     * @return the absolute URL (concatenation of this document root with the relative path) or null when malformed
+     */
     private AnchorURL absolutePath(final String relativePath) {
         try {
             return AnchorURL.newAnchor(this.root, relativePath);
@@ -430,11 +434,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final MalformedURLException e) {}
         } else if (tag.name.equalsIgnoreCase("frame")) {
             final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
-            tag.opts.put("src", src.toNormalform(true));
-            src.setAll(tag.opts);
-            //this.anchors.add(src); // don't add the frame to the anchors because the webgraph should not contain such links (by definition)
-            this.frames.add(src);
-            this.evaluationScores.match(Element.framepath, src.toNormalform(true));
+            if(src != null) {
+            	tag.opts.put("src", src.toNormalform(true));
+            	src.setAll(tag.opts);
+            	//this.anchors.add(src); // don't add the frame to the anchors because the webgraph should not contain such links (by definition)
+            	this.frames.add(src);
+            	this.evaluationScores.match(Element.framepath, src.toNormalform(true));
+            }
         } else if (tag.name.equalsIgnoreCase("body")) {
             final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
             this.evaluationScores.match(Element.bodyclass, classprop);
@@ -462,9 +468,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (href.length() > 0) {
                 tag.opts.put("name", areatitle);
                 AnchorURL url = absolutePath(href);
-                tag.opts.put("href", url.toNormalform(true));
-                url.setAll(tag.opts);
-                this.anchors.add(url);
+                if(url != null) {
+                	tag.opts.put("href", url.toNormalform(true));
+                	url.setAll(tag.opts);
+                	this.anchors.add(url);
+                }
             }
         } else if (tag.name.equalsIgnoreCase("link")) {
             final String href = tag.opts.getProperty("href", EMPTY_STRING);
@@ -623,7 +631,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if (tag.name.equalsIgnoreCase("script")) {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
             if (src.length() > 0) {
-                this.script.add(absolutePath(src));
+            	AnchorURL absoluteSrc = absolutePath(src);
+            	if(absoluteSrc != null) {
+            		this.script.add(absoluteSrc);
+            	}
                 this.evaluationScores.match(Element.scriptpath, src);
             } else {
                 this.evaluationScores.match(Element.scriptcode, LB.matcher(new String(tag.content.getChars())).replaceAll(" "));
