@@ -467,6 +467,7 @@ public final class SwitchboardConstants {
     public static final String GREETING_HOMEPAGE     = "promoteSearchPageGreeting.homepage";
     public static final String GREETING_LARGE_IMAGE  = "promoteSearchPageGreeting.largeImage";
     public static final String GREETING_SMALL_IMAGE  = "promoteSearchPageGreeting.smallImage";
+    public static final String GREETING_IMAGE_ALT    = "promoteSearchPageGreeting.imageAlt";
 
     /**
      * browser pop up

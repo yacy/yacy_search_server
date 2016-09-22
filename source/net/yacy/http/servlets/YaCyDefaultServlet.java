@@ -1012,6 +1012,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                templatePatterns.put(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
                 templatePatterns.put("clientlanguage", localeSelection);
                 
                 String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());

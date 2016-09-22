@@ -81,6 +81,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, post.get(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                sb.setConfig(SwitchboardConstants.GREETING_IMAGE_ALT, post.get(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_DEFAULT, post.get("target", "_self"));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, post.get("target_special", "_self"));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, post.get("target_special_pattern", "_self"));
@@ -139,6 +140,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"http://yacy.net"));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, config.getProperty(SwitchboardConstants.GREETING_LARGE_IMAGE,"env/grafics/YaCyLogo_120ppi.png"));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, config.getProperty(SwitchboardConstants.GREETING_SMALL_IMAGE,"env/grafics/YaCyLogo_60ppi.png"));
+                sb.setConfig(SwitchboardConstants.GREETING_IMAGE_ALT, config.getProperty(SwitchboardConstants.GREETING_IMAGE_ALT,"YaCy project web site"));
                 sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, config.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE,"Status.html"));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, config.getProperty(SwitchboardConstants.INDEX_FORWARD,""));
                 HTTPDFileHandler.indexForward = "";
@@ -165,6 +167,7 @@ public class ConfigPortal {
         prop.putHTML(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        prop.putHTML(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
         prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);

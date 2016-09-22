@@ -286,8 +286,9 @@ parser.pdf.individualpages.key=page
 promoteSearchPageGreeting = Web Search by the People, for the People
 # if the following property is set to true, the network name is used as greeting
 promoteSearchPageGreeting.useNetworkName = false
-# the following attributes can be used to define a custom image and home page on the search page
+# the following attributes can be used to define a custom image, alternative text and home page on the search page
 promoteSearchPageGreeting.homepage = http://yacy.net
+promoteSearchPageGreeting.imageAlt = YaCy project web site
 promoteSearchPageGreeting.largeImage = /env/grafics/YaCyLogo_120ppi.png
 promoteSearchPageGreeting.smallImage = /env/grafics/YaCyLogo_60ppi.png
 
