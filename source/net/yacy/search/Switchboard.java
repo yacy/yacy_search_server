@@ -1298,6 +1298,12 @@ public final class Switchboard extends serverSwitch {
         ClientIdentification.generateYaCyBot(sysinfo);
     }
 
+    /**
+     * Switch network configuration to the new specified one
+     * @param networkDefinition YaCy network definition file path (relative to the app path) or absolute URL
+     * @throws FileNotFoundException when the file was not found
+     * @throws IOException when an error occured
+     */
     public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
         this.log.info("SWITCH NETWORK: switching to '" + networkDefinition + "'");
         // pause crawls
@@ -1327,11 +1333,13 @@ public final class Switchboard extends serverSwitch {
             if ( this.dhtDispatcher != null ) {
                 this.dhtDispatcher.close();
             }
+            /* Crawlstacker is eventually triggering write operations on this.index : we must therefore close it before closing this.index */
+            this.crawlStacker.announceClose();
+            this.crawlStacker.close();
+            
             synchronized ( this.index ) {
                 this.index.close();
             }
-            this.crawlStacker.announceClose();
-            this.crawlStacker.close();
             this.webStructure.close();
 
             this.log.info("SWITCH NETWORK: START UP OF NEW INDEX DATABASE...");
