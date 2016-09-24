@@ -8222,6 +8222,12 @@
     <trans-unit id="523a9f20" xml:space="preserve" approved="no" translate="yes">
        <source>Supporter&lt;</source>
     </trans-unit>
+    <trans-unit id="3fcf2cf5" xml:space="preserve" approved="no" translate="yes">
+       <source>Please enter a comment to your link recommendation.</source>
+    </trans-unit>
+    <trans-unit id="853ccb62" xml:space="preserve" approved="no" translate="yes">
+       <source>Your Vote is also considered without a comment.</source>
+    </trans-unit>    
     <trans-unit id="9a640c04" xml:space="preserve" approved="no" translate="yes">
        <source>Supporter are switched off for users without authorization</source>
     </trans-unit>
