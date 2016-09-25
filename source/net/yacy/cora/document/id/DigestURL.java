@@ -242,17 +242,24 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         }
 
         // find rootpath
+        final String normalizedPath;
+        if (this.isFile() && this.path.indexOf('\\') > -1) // for file protocol normalize path to java notation
+            normalizedPath = this.path.replace('\\','/'); // replace possible Windows pathseparator
+        else
+            normalizedPath = this.path;
+
         int rootpathStart = 0;
-        int rootpathEnd = this.path.length() - 1;
-        if (!this.path.isEmpty() && (this.path.charAt(0) == '/' || this.path.charAt(0) == '\\'))
+        int rootpathEnd = normalizedPath.length() - 1;
+        if (!normalizedPath.isEmpty() && (normalizedPath.charAt(0) == '/'))
             rootpathStart = 1;
-        if (this.path.endsWith("/"))
-            rootpathEnd = this.path.length() - 2;
-        p = this.path.indexOf('/', rootpathStart);
-        if (this.isFile() && p < 0) p = this.path.indexOf('\\', rootpathStart); // double-check for windows path (if it's a file url)
+        if (normalizedPath.endsWith("/"))
+            rootpathEnd = normalizedPath.length() - 2;
+        p = normalizedPath.indexOf('/', rootpathStart);
+        // following doesn't recognize mixed notation e.g. c:\\tmp/test.html correct -> solved by using normalized path
+        //if (this.isFile() && p < 0) p = this.path.indexOf('\\', rootpathStart); // double-check for windows path (if it's a file url)
         String rootpath = "";
         if (p > 0 && p < rootpathEnd) {
-            rootpath = this.path.substring(rootpathStart, p);
+            rootpath = normalizedPath.substring(rootpathStart, p);
         }
 
         // we collected enough information to compute the fragments that are

@@ -1,7 +1,10 @@
 package net.yacy.cora.document.id;
 
 import java.net.MalformedURLException;
+import java.util.HashSet;
+import java.util.Set;
 import junit.framework.TestCase;
+import static junit.framework.TestCase.assertEquals;
 import net.yacy.cora.document.encoding.ASCII;
 import org.junit.Test;
 
@@ -37,16 +40,24 @@ public class DigestURLTest extends TestCase {
      */
     @Test
     public void testHash_ForFile() throws MalformedURLException {
-        String winUrlStr = "file:///C:\\tmp\\test.html"; // allowed Windows notation
         String javaUrlStr = "file:///C:/tmp/test.html"; // allowed Java notation for Windows file system
 
-        DigestURL winUrl = new DigestURL(winUrlStr);
-        DigestURL javaUrl = new DigestURL(javaUrlStr);
+        // allowed Windows notation
+        Set<String> testUrls = new HashSet();
+        testUrls.add("file:///C:\\tmp\\test.html");
+        testUrls.add("file:///C:/tmp\\test.html");
+        testUrls.add("file:///C:\\tmp/test.html");
+        testUrls.add("file:///C:/tmp/test.html");
 
-        String winHashResult = ASCII.String(winUrl.hash());
+        DigestURL javaUrl = new DigestURL(javaUrlStr);
         String javaHashResult = ASCII.String(javaUrl.hash());
-        
-        assertEquals("hash for same file url", javaHashResult, winHashResult);
+
+        // compare test url hash to default java Url notation
+        for (String str : testUrls) {
+            DigestURL winUrl = new DigestURL(str);
+            String winHashResult = ASCII.String(winUrl.hash());
+            assertEquals("hash for same file url "+str, javaHashResult, winHashResult);
+        }
 
     }
 
