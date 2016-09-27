@@ -28,7 +28,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
