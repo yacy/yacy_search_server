@@ -284,12 +284,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     this.path = h.substring(2); // "/path"  or "/c:/path"
                 } else if (h.startsWith("//")) { // "//host/path" or "//host/c:/path"
                     if (h.length() > 4 && h.charAt(3) == ':' && h.charAt(4) != '/' && h.charAt(4) != '\\') {
-                        // wrong windows path, after the doublepoint there should be a backslash
-                        h = h.substring(0, 4) + '\\' + h.substring(4);
+                        // wrong windows path, after the doublepoint there should be a backslash. Let's add a slash, as it will be slash in the normal form
+                        h = h.substring(0, 4) + '/' + h.substring(4);
                     }
                     int q = h.indexOf('/', 2);
                     if (q < 0 || h.length() > 3 && h.charAt(3) == ':') {
-                        this.path = h.substring(2); // "path"  or "c:/path"
+                    	// Missing root slash such as "path" or "c:/path" accepted, but the path attribute must by after all start with it
+                        this.path = "/" + h.substring(2); 
                     } else {
                         this.host = h.substring(2, q ); // TODO: handle "c:"  ?
                         if (this.host.equalsIgnoreCase(Domains.LOCALHOST)) this.host = null;

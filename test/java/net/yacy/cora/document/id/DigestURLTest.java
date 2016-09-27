@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
 import junit.framework.TestCase;
-import static junit.framework.TestCase.assertEquals;
 import net.yacy.cora.document.encoding.ASCII;
 import org.junit.Test;
 
@@ -43,11 +42,18 @@ public class DigestURLTest extends TestCase {
         String javaUrlStr = "file:///C:/tmp/test.html"; // allowed Java notation for Windows file system
 
         // allowed Windows notation
-        Set<String> testUrls = new HashSet();
+        Set<String> testUrls = new HashSet<String>();
+        /* URLs mixing slashes and backslashes */
         testUrls.add("file:///C:\\tmp\\test.html");
         testUrls.add("file:///C:/tmp\\test.html");
         testUrls.add("file:///C:\\tmp/test.html");
         testUrls.add("file:///C:/tmp/test.html");
+        
+        /* Wrong URLs missing slashes, however accepted by DigestURL and MultiProtocolURL constructors */
+        testUrls.add("file://C:/tmp/test.html");
+        testUrls.add("file://C:\\tmp\\test.html");
+        testUrls.add("file://C:tmp/test.html");
+        testUrls.add("file://C:tmp\\test.html");
 
         DigestURL javaUrl = new DigestURL(javaUrlStr);
         String javaHashResult = ASCII.String(javaUrl.hash());
