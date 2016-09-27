@@ -181,7 +181,6 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         this.contentDomain = null;
 
         // identify protocol
-        assert (url != null);
         url = url.trim();
         
         if (url.startsWith("//")) {
@@ -192,8 +191,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "smb://" + CommonPattern.BACKSLASH.matcher(url.substring(2)).replaceAll("/");
         }
 
-        if (url.length() > 1 && url.charAt(1) == ':') {
-            // maybe a DOS drive path
+        if (url.length() > 1 && (url.charAt(1) == ':' && Character.isLetter(url.charAt(0)))) {
+            // maybe a DOS drive path ( A: to z: )
             url = "file://" + url;
         }
 
@@ -896,15 +895,20 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     /**
      * return the file object to a local file
-     * this patches also 'strange' windows file paths
+     * this patches also 'strange' windows file paths (like /c|/tmp)
      * @return the file as absolute path
      */
     public File getLocalFile() {
+        // path always starts with '/' ( https://github.com/yacy/yacy_search_server/commit/1bb0b135ac5dab0adab423d89612f7b1e13f2e61 )
+        // e.g. /C:/tmp , charAt(1) == ':' never true, but keep it anyway
         char c = this.path.charAt(1);
-        if (c == ':') return new File(this.path.replace('/', '\\'));
-        if (c == '|') return new File(this.path.charAt(0) + ":" + this.path.substring(2).replace('/', '\\'));
-        c = this.path.charAt(2);
-        if (c == ':' || c == '|') return new File(this.path.charAt(1) + ":" + this.path.substring(3).replace('/', '\\'));
+        if (c == ':') return new File(this.path);
+        if (c == '|') return new File(this.path.charAt(0) + ":" + this.path.substring(2));
+        
+        if (this.path.length() > 1) { // prevent StringIndexOutOfBoundsException
+            c = this.path.charAt(2);
+            if (c == ':' || c == '|') return new File(this.path.charAt(1) + ":" + this.path.substring(3));
+        }
         return new File(this.path);
     }
 
