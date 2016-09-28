@@ -105,13 +105,14 @@ public class Browser {
             if (systemOS == systemMacOSX) {
                 openBrowserMac(url);
             } else if (systemOS == systemUnix) {
-                openBrowserUnixFirefox(url);
+                openDefaultUnixBrowser(url);
             } else if (systemOS == systemWindows) {
                 openBrowserWin(url);
             } else {
                 throw new RuntimeException("System unknown");
             }
         } catch (final Throwable e) {
+        	ConcurrentLog.warn("BROWSER", "Could not open browser : " + e.getMessage() != null ? e.getMessage() : e.toString());
         }
     }
 
@@ -123,12 +124,21 @@ public class Browser {
         }
     }
 
-    private static void openBrowserUnixFirefox(final String url) throws Exception {
-        String cmd = "firefox " + url;
+    /**
+     * Tries to open the default browser on Unix platform.
+     * @param url the url to open. Must not be null.
+     * @throws Exception when an error occured
+     */
+    private static void openDefaultUnixBrowser(final String url) throws Exception {
+    	/* Use the freedesktop xdg-open to open url with the default browser.
+    	 * xdg-open is included in xdg-utils tools set (https://www.freedesktop.org/wiki/Software/xdg-utils/)
+    	 * It is part of the LSB (Linux Standard Base) and therefore included in all recent Linux Distributions supporting it
+    	 * (see https://www.linuxbase.org/navigator/browse/cmd_single.php?cmd=list-by-name&Section=ABI&Cname=xdg-open) */
+        String cmd = "xdg-open " + url;
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         if (p.exitValue() != 0) {
-            throw new RuntimeException("Unix Exec Error/Firefox: " + errorResponse(p));
+            throw new RuntimeException("Unix Exec Error/xdg-open: " + errorResponse(p));
         }
     }
 
@@ -167,9 +177,20 @@ public class Browser {
         }
     }
 
+    /**
+     * Test platform specific browser opening.
+     * @param args
+     */
     public static void main(final String[] args) {
-        if ("-u".equals(args[0])) {
-            openBrowser(args[1]);
-        }
-    }
+		try {
+			if (args.length > 0 && "-u".equals(args[0])) {
+				openBrowser(args[1]);
+			} else {
+				System.out.println("Usage java " + Browser.class.getCanonicalName() + " -u [URL]");
+			}
+		} finally {
+			ConcurrentLog.shutdown();
+		}
+		System.out.println("The End!");
+	}
 }

@@ -304,7 +304,14 @@ public final class yacy {
                     final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
                     //boolean properPW = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT, "").isEmpty()) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                    Browser.openBrowser(("http://localhost:"+port) + "/" + browserPopUpPage);
+                    /* YaCy main startup process must not hang because browser opening is long or fails. 
+                     * Let's open try opening the browser in a separate thread */
+                    new Thread("Browser opening") {
+                    	@Override
+                    	public void run() {
+                            Browser.openBrowser(("http://localhost:"+port) + "/" + browserPopUpPage);
+                    	}
+                    }.start();
                    // Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
                 } catch (final Throwable e) {
                     // cannot open browser. This may be normal in headless environments
