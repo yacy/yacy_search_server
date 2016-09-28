@@ -280,7 +280,7 @@ public class ConfigBasic {
         prop.put("lang_ru", "0");
         prop.put("lang_uk", "0");
         prop.put("lang_en", "0");
-        prop.put("lang_jp", "0");
+        prop.put("lang_ja", "0");
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {
@@ -293,7 +293,7 @@ public class ConfigBasic {
             prop.put("active_de", l.contains("de") ? "label-success" : "");
             prop.put("active_fr", l.contains("fr") ? "label-success" : "");
             prop.put("active_hi", l.contains("hi") ? "label-success" : "");
-            prop.put("active_jp", l.contains("jp") ? "label-success" : "");
+            prop.put("active_ja", l.contains("ja") ? "label-success" : "");
             prop.put("active_ru", l.contains("ru") ? "label-success" : "");
             prop.put("active_uk", l.contains("uk") ? "label-success" : "");
             prop.put("active_en", "label-success");
@@ -306,7 +306,7 @@ public class ConfigBasic {
             prop.put("active_ru", "");
             prop.put("active_uk", "");
             prop.put("active_en", "");
-            prop.put("active_jp", "");
+            prop.put("active_ja", "");
         }
         return prop;
     }
