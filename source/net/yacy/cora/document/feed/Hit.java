@@ -77,7 +77,7 @@ public interface Hit {
     
     public String getGuid();
     
-    public String getDocs();
+    public String getDocs(); // A URL that points to the documentation for the format used in the RSS file.
 
     public String[] getSubject();
     

@@ -337,7 +337,7 @@ public class Load_RSS_p {
             prop.putHTML("showitems_language", channel == null ? "" : channel.getLanguage());
             prop.putHTML("showitems_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
             prop.putHTML("showitems_ttl", channel == null ? "" : channel.getTTL());
-            prop.putHTML("showitems_docs", channel == null ? "" : channel.getDocs());
+            prop.put("showitems_docs", feed.size()); // number of documents
 
             Map<String, DigestURL> urls = new HashMap<String, DigestURL>();
             for (final Hit item: feed) {

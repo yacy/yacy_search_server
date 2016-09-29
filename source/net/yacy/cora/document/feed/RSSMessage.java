@@ -58,7 +58,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         language(new String[]{"language",DublinCore.Language.getURIref()}),
         guid(new String[]{"guid"}),
         ttl(new String[]{"ttl"}),
-        docs(new String[]{"docs"}),
+        docs(new String[]{"docs"}), // url to the documentation for the format used in the RSS file
         size(new String[]{"size","length","yacy:size"}),
         lon(new String[]{"geo:lon", Geo.Long.getURIref()}),
         lat(new String[]{"geo:lat", Geo.Lat.getURIref()});
@@ -249,6 +249,10 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return Token.ttl.valueFrom(this.map, "");
     }
 
+    /**
+     * A URL that points to the documentation for the format used in the RSS file.
+     * @return url string
+     */
     @Override
     public String getDocs() {
         return Token.docs.valueFrom(this.map, "");
