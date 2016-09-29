@@ -23,14 +23,14 @@
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
         <li id="header_restart">
-          <form action="/Steering.html" method="get" role="form">
+          <form action="/Steering.html" method="get">
             <input type="hidden" name="restart" value="" />
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="return confirm('Confirm Re-Start')"><span class="glyphicon glyphicon-fire"></span> Re-Start</button>
           </form>
         </li>
         <li>&nbsp;</li>
         <li id="header_shutdown">
-          <form action="/Steering.html" method="get" role="form">
+          <form action="/Steering.html" method="get">
             <input type="hidden" name="shutdown" value="" />
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')"><span class="glyphicon glyphicon-off"></span> Shutdown</button>
           </form>
@@ -50,7 +50,7 @@
         </ul>
         </li>
         <li id="header_administration">
-          <form action="/index.html" method="get" role="form">
+          <form action="/index.html" method="get">
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary"><span class="glyphicon glyphicon-search"></span> Search Interface &raquo;</button>
           </form>
         </li>

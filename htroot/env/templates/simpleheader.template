@@ -49,7 +49,7 @@
         </ul>
       </li>
       <li id="header_administration">
-        <form action="/Status.html" method="get" role="form">
+        <form action="/Status.html" method="get">
           <button accesskey="s" type="submit" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
         </form>
       </li>
