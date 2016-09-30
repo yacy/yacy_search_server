@@ -26,6 +26,9 @@
 
 package net.yacy.search.query;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -702,7 +705,7 @@ public final class QueryParams {
             if (!newModifier.isEmpty()) {
                 if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
                 if (newModifierReplacesOld) {
-                    int nmpi = newModifier.indexOf("%3A");
+                    int nmpi = newModifier.indexOf(":");
                     if (nmpi > 0) {
                         String nmp = newModifier.substring(0, nmpi) + ":";
                         int i = sb.indexOf(nmp);
@@ -710,7 +713,11 @@ public final class QueryParams {
                         if (sb.charAt(sb.length() - 1) == '+') sb.setLength(sb.length() - 1);
                     }
                 }
-                sb.append("+" + newModifier);
+                try {
+                	sb.append("+" + URLEncoder.encode(newModifier, StandardCharsets.UTF_8.name()));
+                } catch (final UnsupportedEncodingException e) {
+                	sb.append("+" + newModifier);
+                }
             }
         }
 

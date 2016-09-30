@@ -110,7 +110,8 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next();
                 count = theSearch.namespaceNavigator.get(name);
                 if (count == 0) break;
-                nav = "inurl%3A" + name;
+                /* We use ':' character here, it will be percent encoded later, in QueryParams.navurl() function*/
+                nav = "inurl:" + name;
                 if (!theSearch.query.modifier.toString().contains("inurl:"+name)) {
                     pos++;
                     prop.put("nav-namespace_element_" + i + "_on", 1);
@@ -317,7 +318,7 @@ public class yacysearchtrailer {
                 prop.put("nav-topics_element_" + i + "_on", 1);
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
+                prop.put("nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
                 int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (1 + maxcount - mincount);
                 fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
