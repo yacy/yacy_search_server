@@ -36,7 +36,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public static final int DEFAULT_MAXSIZE = 10000;
 
     // class variables
-    private RSSMessage channel = null;
+    private RSSMessage channel = null; // single required element  see http://www.rssboard.org/rss-profile#element-channel
     private final Map<String, RSSMessage> messages; // a guid:Item map
     private final int maxsize;
 
@@ -91,7 +91,15 @@ public class RSSFeed implements Iterable<RSSMessage> {
         this.channel = channelItem;
     }
 
+    /**
+     * Return Channel element
+     * (This element is required and must contain three child elements: description, link and title)
+     * see http://www.rssboard.org/rss-profile#element-channel
+     * @return RSSMessage with channel elements or empty RSSMessage
+     */
     public RSSMessage getChannel() {
+        // This element is required and must contain three child elements: description, link and title.
+        if (this.channel==null) this.channel = new RSSMessage();
         return this.channel;
     }
 

@@ -325,6 +325,10 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         setValue(Token.description, description);
     }
 
+    /**
+     * set a URL that points to the documentation for the format used in the RSS file.
+     * @param docs e.g. "http://www.rssboard.org/rss-specification"
+     */
     @Override
     public void setDocs(final String docs) {
         setValue(Token.docs, docs);
