@@ -185,7 +185,7 @@ public class DateDetection {
             Holidays.put("2. Advent",                 new Date[]{CONFORM.parse("2014/12/07"), CONFORM.parse("2015/12/06"), CONFORM.parse("2016/12/04")});
             Holidays.put("3. Advent",                 new Date[]{CONFORM.parse("2014/12/14"), CONFORM.parse("2015/12/13"), CONFORM.parse("2016/12/11")});
             Holidays.put("4. Advent",                 new Date[]{CONFORM.parse("2014/12/21"), CONFORM.parse("2015/12/20"), CONFORM.parse("2016/12/18")});
-            Holidays.put("Silvester",                 sameDayEveryYear(12, 26));
+            Holidays.put("Silvester",                 sameDayEveryYear(12, 31));
             
             // English
             Holidays.put("Eastern",                   Holidays.get("Ostern"));
@@ -197,6 +197,7 @@ public class DateDetection {
             Holidays.put("April Fools' Day",          sameDayEveryYear(4, 1));
             Holidays.put("Independence Day",          sameDayEveryYear(7, 4));
             Holidays.put("Halloween",                 Holidays.get("Reformationstag"));
+            Holidays.put("Thanksgiving",              new Date[]{CONFORM.parse("2015/11/26"), CONFORM.parse("2016/11/24"), CONFORM.parse("2017/11/23")});
             Holidays.put("Immaculate Conception of the Virgin Mary", sameDayEveryYear(12, 8));
             Holidays.put("Christmas Eve",             Holidays.get("Heiligabend"));
             Holidays.put("Christmas Day",             Holidays.get("1. Weihnachtsfeiertag"));
@@ -502,7 +503,7 @@ public class DateDetection {
      */
     public static LinkedHashSet<Date> parse(String text, int timezoneOffset) {
         Long offset;
-        if ((offset = specialDayOffset.get(text)) != null) {
+        if ((offset = specialDayOffset.get(text)) != null) { // this is mainly for the query-parser called via parseLine() (were text is just the expression)
             LinkedHashSet<Date> dates = new LinkedHashSet<>(); dates.add(new Date((System.currentTimeMillis() / AbstractFormatter.dayMillis) * AbstractFormatter.dayMillis + offset.longValue())); return dates;
         }
         LinkedHashSet<Date> dates = parseRawDate(text);
@@ -569,7 +570,7 @@ public class DateDetection {
     public static void main(String[] args) {
         String fill = ""; for (int i = 0; i < 1000; i++) fill += 'x';
         String[] test = new String[]{
-                "\n laden die Stadtwerke \n X am Rosenmontag und am \n Faschingsdienstag zur Disko auf die \n",
+               "\n laden die Stadtwerke \n X am Rosenmontag und am \n Faschingsdienstag zur Disko auf die \n",
                 "kein Datum im Text",
                 " Fastnacht am 4. März noch",
                 " Fastnacht am 4. April noch­",
