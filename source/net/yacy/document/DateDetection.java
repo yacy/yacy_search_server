@@ -20,8 +20,13 @@
 
 package net.yacy.document;
 
+import com.ibm.icu.util.DateRule;
+import com.ibm.icu.util.EasterHoliday;
+import com.ibm.icu.util.SimpleDateRule;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -121,7 +126,6 @@ public class DateDetection {
 
     private final static Date TODAY = new Date();
     private final static int CURRENT_YEAR  = Integer.parseInt(CONFORM.format(TODAY).substring(0, 4)); // we need that to parse dates without given years, see the ShortStyle class
-    private final static int CURRENT_MONTH = Integer.parseInt(CONFORM.format(TODAY).substring(5, 7)); // wee need that to generate recurring dates, see RecurringStyle class
 
     private final static String BODNCG = "(?:\\b|^)"; // begin of date non-capturing group
     private final static String EODNCG = "(?:[).:;! ]|$)"; // end of date non-capturing group
@@ -143,62 +147,62 @@ public class DateDetection {
     static {
         try {
             // German
-            Holidays.put("Neujahr",                   sameDayEveryYear(1, 1));
-            Holidays.put("Heilige Drei Könige",       sameDayEveryYear(1, 6));
-            Holidays.put("Valentinstag",              sameDayEveryYear(2, 14));
+            Holidays.put("Neujahr",                   sameDayEveryYear(Calendar.JANUARY, 1));
+            Holidays.put("Heilige Drei Könige",       sameDayEveryYear(Calendar.JANUARY, 6));
+            Holidays.put("Valentinstag",              sameDayEveryYear(Calendar.FEBRUARY, 14));
             Holidays.put("Weiberfastnacht",           new Date[]{CONFORM.parse("2014/02/27"), CONFORM.parse("2015/02/12"), CONFORM.parse("2016/02/04")});
             Holidays.put("Weiberfasching",            Holidays.get("Weiberfastnacht"));
             Holidays.put("Rosenmontag",               new Date[]{CONFORM.parse("2014/03/03"), CONFORM.parse("2015/03/16"), CONFORM.parse("2016/02/08")});
-            Holidays.put("Faschingsdienstag",         new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
-            Holidays.put("Fastnacht",                 new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
-            Holidays.put("Aschermittwoch",            new Date[]{CONFORM.parse("2014/03/05"), CONFORM.parse("2015/03/18"), CONFORM.parse("2016/02/10")});
-            Holidays.put("Palmsonntag",               new Date[]{CONFORM.parse("2014/04/13"), CONFORM.parse("2015/03/29"), CONFORM.parse("2016/04/20")});
-            Holidays.put("Gründonnerstag",            new Date[]{CONFORM.parse("2014/04/17"), CONFORM.parse("2015/04/02"), CONFORM.parse("2016/04/24")});
-            Holidays.put("Karfreitag",                new Date[]{CONFORM.parse("2014/04/18"), CONFORM.parse("2015/04/03"), CONFORM.parse("2016/04/25")});
+            Holidays.put("Faschingsdienstag",         holiDayEventRule(EasterHoliday.SHROVE_TUESDAY.getRule()));// new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
+            Holidays.put("Fastnacht",                 Holidays.get("Faschingsdienstag")); // new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
+            Holidays.put("Aschermittwoch",            holiDayEventRule(EasterHoliday.ASH_WEDNESDAY.getRule()));// new Date[]{CONFORM.parse("2014/03/05"), CONFORM.parse("2015/03/18"), CONFORM.parse("2016/02/10")});
+            Holidays.put("Palmsonntag",               holiDayEventRule(EasterHoliday.PALM_SUNDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/13"), CONFORM.parse("2015/03/29"), CONFORM.parse("2016/04/20")});
+            Holidays.put("Gründonnerstag",            holiDayEventRule(EasterHoliday.MAUNDY_THURSDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/17"), CONFORM.parse("2015/04/02"), CONFORM.parse("2016/04/24")});
+            Holidays.put("Karfreitag",                holiDayEventRule(EasterHoliday.GOOD_FRIDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/18"), CONFORM.parse("2015/04/03"), CONFORM.parse("2016/04/25")});
             Holidays.put("Karsamstag",                new Date[]{CONFORM.parse("2014/04/19"), CONFORM.parse("2015/04/04"), CONFORM.parse("2016/04/26")});
-            Holidays.put("Ostersonntag",              new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27")});
-            Holidays.put("Ostermontag",               new Date[]{CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
+            Holidays.put("Ostersonntag",              holiDayEventRule(EasterHoliday.EASTER_SUNDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27")});
+            Holidays.put("Ostermontag",               holiDayEventRule(EasterHoliday.EASTER_MONDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
             Holidays.put("Ostern",                    new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27"),
                                                                  CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
-            Holidays.put("Walpurgisnacht",            sameDayEveryYear(4, 30));
-            Holidays.put("Tag der Arbeit",            sameDayEveryYear(5, 1));
+            Holidays.put("Walpurgisnacht",            sameDayEveryYear(Calendar.APRIL, 30));
+            Holidays.put("Tag der Arbeit",            sameDayEveryYear(Calendar.MAY, 1));
             Holidays.put("Muttertag",                 new Date[]{CONFORM.parse("2014/05/11"), CONFORM.parse("2015/05/10"), CONFORM.parse("2016/05/08")});
-            Holidays.put("Christi Himmelfahrt",       new Date[]{CONFORM.parse("2014/05/29"), CONFORM.parse("2015/05/14"), CONFORM.parse("2016/05/05")});
-            Holidays.put("Pfingstsonntag",            new Date[]{CONFORM.parse("2014/06/08"), CONFORM.parse("2015/05/24"), CONFORM.parse("2016/05/15")});
-            Holidays.put("Pfingstmontag",             new Date[]{CONFORM.parse("2014/06/09"), CONFORM.parse("2015/05/25"), CONFORM.parse("2016/05/16")});
-            Holidays.put("Fronleichnam",              new Date[]{CONFORM.parse("2014/06/19"), CONFORM.parse("2015/06/04"), CONFORM.parse("2016/05/25")});
-            Holidays.put("Mariä Himmelfahrt",         sameDayEveryYear(8, 15));
-            Holidays.put("Tag der Deutschen Einheit", sameDayEveryYear(10, 3));
-            Holidays.put("Reformationstag",           sameDayEveryYear(10, 31));
-            Holidays.put("Allerheiligen",             sameDayEveryYear(11, 1));
-            Holidays.put("Allerseelen",               sameDayEveryYear(11, 2));
-            Holidays.put("Martinstag",                sameDayEveryYear(11, 11));
+            Holidays.put("Christi Himmelfahrt",       holiDayEventRule(EasterHoliday.ASCENSION.getRule()));// new Date[]{CONFORM.parse("2014/05/29"), CONFORM.parse("2015/05/14"), CONFORM.parse("2016/05/05")});
+            Holidays.put("Pfingstsonntag",            holiDayEventRule(EasterHoliday.WHIT_SUNDAY.getRule()));// new Date[]{CONFORM.parse("2014/06/08"), CONFORM.parse("2015/05/24"), CONFORM.parse("2016/05/15")});
+            Holidays.put("Pfingstmontag",             holiDayEventRule(EasterHoliday.WHIT_MONDAY.getRule()));// new Date[]{CONFORM.parse("2014/06/09"), CONFORM.parse("2015/05/25"), CONFORM.parse("2016/05/16")});
+            Holidays.put("Fronleichnam",              holiDayEventRule(EasterHoliday.CORPUS_CHRISTI.getRule()));// new Date[]{CONFORM.parse("2014/06/19"), CONFORM.parse("2015/06/04"), CONFORM.parse("2016/05/25")});
+            Holidays.put("Mariä Himmelfahrt",         sameDayEveryYear(Calendar.AUGUST, 15));
+            Holidays.put("Tag der Deutschen Einheit", sameDayEveryYear(Calendar.OCTOBER, 3));
+            Holidays.put("Reformationstag",           sameDayEveryYear(Calendar.OCTOBER, 31));
+            Holidays.put("Allerheiligen",             sameDayEveryYear(Calendar.NOVEMBER, 1));
+            Holidays.put("Allerseelen",               sameDayEveryYear(Calendar.NOVEMBER, 2));
+            Holidays.put("Martinstag",                sameDayEveryYear(Calendar.NOVEMBER, 11));
             Holidays.put("St. Martin",                Holidays.get("Martinstag"));
             Holidays.put("Volkstrauertag",            new Date[]{CONFORM.parse("2014/11/16"), CONFORM.parse("2015/11/15"), CONFORM.parse("2016/11/13")});
-            Holidays.put("Buß- und Bettag",           new Date[]{CONFORM.parse("2014/11/19"), CONFORM.parse("2015/11/18"), CONFORM.parse("2016/11/16")});
+            Holidays.put("Buß- und Bettag",           holiDayEventRule(new SimpleDateRule(Calendar.NOVEMBER, 22, Calendar.WEDNESDAY, true))); // new Date[]{CONFORM.parse("2014/11/19"), CONFORM.parse("2015/11/18"), CONFORM.parse("2016/11/16")});
             Holidays.put("Totensonntag",              new Date[]{CONFORM.parse("2014/11/23"), CONFORM.parse("2015/11/22"), CONFORM.parse("2016/11/20")});
-            Holidays.put("Nikolaus",                  sameDayEveryYear(12, 6));
-            Holidays.put("Heiligabend",               sameDayEveryYear(12, 24));
-            Holidays.put("1. Weihnachtsfeiertag",     sameDayEveryYear(12, 25));
-            Holidays.put("2. Weihnachtsfeiertag",     sameDayEveryYear(12, 26));
+            Holidays.put("Nikolaus",                  sameDayEveryYear(Calendar.DECEMBER, 6));
+            Holidays.put("Heiligabend",               sameDayEveryYear(Calendar.DECEMBER, 24));
+            Holidays.put("1. Weihnachtsfeiertag",     sameDayEveryYear(Calendar.DECEMBER, 25));
+            Holidays.put("2. Weihnachtsfeiertag",     sameDayEveryYear(Calendar.DECEMBER, 26));
             Holidays.put("1. Advent",                 new Date[]{CONFORM.parse("2014/11/30"), CONFORM.parse("2015/11/29"), CONFORM.parse("2016/11/27")});
             Holidays.put("2. Advent",                 new Date[]{CONFORM.parse("2014/12/07"), CONFORM.parse("2015/12/06"), CONFORM.parse("2016/12/04")});
             Holidays.put("3. Advent",                 new Date[]{CONFORM.parse("2014/12/14"), CONFORM.parse("2015/12/13"), CONFORM.parse("2016/12/11")});
             Holidays.put("4. Advent",                 new Date[]{CONFORM.parse("2014/12/21"), CONFORM.parse("2015/12/20"), CONFORM.parse("2016/12/18")});
-            Holidays.put("Silvester",                 sameDayEveryYear(12, 31));
+            Holidays.put("Silvester",                 sameDayEveryYear(Calendar.DECEMBER, 31));
             
             // English
             Holidays.put("Eastern",                   Holidays.get("Ostern"));
             Holidays.put("New Year's Day",            Holidays.get("Neujahr"));
             Holidays.put("Epiphany",                  Holidays.get("Heilige Drei Könige"));
             Holidays.put("Valentine's Day",           Holidays.get("Valentinstag"));
-            Holidays.put("Orthodox Christmas",        sameDayEveryYear(1, 7));
-            Holidays.put("St. Patrick's Day",         sameDayEveryYear(3, 17));
-            Holidays.put("April Fools' Day",          sameDayEveryYear(4, 1));
-            Holidays.put("Independence Day",          sameDayEveryYear(7, 4));
+            Holidays.put("Orthodox Christmas",        sameDayEveryYear(Calendar.JANUARY, 7));
+            Holidays.put("St. Patrick's Day",         sameDayEveryYear(Calendar.MARCH, 17));
+            Holidays.put("April Fools' Day",          sameDayEveryYear(Calendar.APRIL, 1));
+            Holidays.put("Independence Day",          sameDayEveryYear(Calendar.JULY, 4));
             Holidays.put("Halloween",                 Holidays.get("Reformationstag"));
-            Holidays.put("Thanksgiving",              new Date[]{CONFORM.parse("2015/11/26"), CONFORM.parse("2016/11/24"), CONFORM.parse("2017/11/23")});
-            Holidays.put("Immaculate Conception of the Virgin Mary", sameDayEveryYear(12, 8));
+            Holidays.put("Thanksgiving",              holiDayEventRule(new SimpleDateRule(Calendar.NOVEMBER, 22, Calendar.THURSDAY, true)));
+            Holidays.put("Immaculate Conception of the Virgin Mary", sameDayEveryYear(Calendar.DECEMBER, 8));
             Holidays.put("Christmas Eve",             Holidays.get("Heiligabend"));
             Holidays.put("Christmas Day",             Holidays.get("1. Weihnachtsfeiertag"));
             Holidays.put("Boxing Day",                Holidays.get("2. Weihnachtsfeiertag"));
@@ -210,14 +214,41 @@ public class DateDetection {
             HolidayPattern.put(Pattern.compile(BODNCG + holiday.getKey() + EODNCG), holiday.getValue());
         }
     }
-    
+
+    /**
+     * @param month value of month (Calendar.month is 0 based)
+     * @param day
+     * @return four years of same date starting in last year
+     */
     private static Date[] sameDayEveryYear(int month, int day) {
         Date[] r = new Date[4];
-        String d = "/" + (month < 10 ? "0" + month : month) + "/ "+ (day < 10 ? "0" + day : day);
-        for (int y = 0; y < 4; y++) try {r[y] = CONFORM.parse((CURRENT_YEAR + y - 1) + d);} catch (ParseException e) {}
+        Calendar cal = CONFORM.getCalendar();
+        cal.clear();
+        cal.set(CURRENT_YEAR - 1, month, day); // set start in previous year
+        r[0] = cal.getTime();
+        for (int y = 1; y < 4; y++) {
+            cal.add(Calendar.YEAR, 1);
+            r[y] = cal.getTime();
+        }
         return r;
     }
-    
+
+    /**
+     * @param holidayrule
+     * @return 3 years of same holiday starting in last year
+     */
+    private static Date[] holiDayEventRule(DateRule holidayrule) {
+        Date[] r = new Date[3];
+        Calendar cal = CONFORM.getCalendar();
+        cal.set(CURRENT_YEAR - 1, 1, 1); // set previous year as start year
+        r[0] = holidayrule.firstAfter(cal.getTime());
+        for (int y = 1; y < 3; y++) {
+            cal.add(Calendar.YEAR, 1);
+            r[y] = holidayrule.firstAfter(cal.getTime());
+        }
+        return r;
+    }
+
     /**
      * The language recognition subclass understands date description parts in different languages.
      * It can also be used to identify the language of a text, if that text uses words from a date vocabulary.
@@ -502,29 +533,57 @@ public class DateDetection {
      * @return a set of dates, ordered by time. first date in the ordered set is the oldest time.
      */
     public static LinkedHashSet<Date> parse(String text, int timezoneOffset) {
-        Long offset;
-        if ((offset = specialDayOffset.get(text)) != null) { // this is mainly for the query-parser called via parseLine() (were text is just the expression)
-            LinkedHashSet<Date> dates = new LinkedHashSet<>(); dates.add(new Date((System.currentTimeMillis() / AbstractFormatter.dayMillis) * AbstractFormatter.dayMillis + offset.longValue())); return dates;
-        }
+
         LinkedHashSet<Date> dates = parseRawDate(text);
+        
         for (Map.Entry<Pattern, Date[]> entry: HolidayPattern.entrySet()) {
-            if (entry.getKey().matcher(text).matches()) {
+            if (entry.getKey().matcher(text).find()) {
                 for (Date d: entry.getValue()) dates.add(d);
             }
         }
         return dates;
     }
-    
+
+    /**
+     * Parse a line expected to contain one date expression only.
+     * This is used by the query parser for query date modifier on:, from: or to:
+     *
+     * @param text
+     * @param timezoneOffset
+     * @return determined date or null
+     */
     public static Date parseLine(final String text, final int timezoneOffset) {
         Date d = null;
+        // check standard date formats
         try {d = CONFORM.parse(text);} catch (ParseException e) {}
         //if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {} // did not work well and fired for wrong formats; do not use
         if (d == null) try {d = GenericFormatter.FORMAT_RFC1123_SHORT.parse(text);} catch (ParseException e) {}
         if (d == null) try {d = GenericFormatter.FORMAT_ANSIC.parse(text);} catch (ParseException e) {}
             
         if (d == null) {
-            Set<Date> dd = parse(text, timezoneOffset);
-            if (dd.size() >= 1) d = dd.iterator().next();
+            // check other date formats
+            Set<Date> dd = parseRawDate(text);
+            if (dd.size() >= 1) d = dd.iterator().next(); // this returns the oldest/earliest date from the set (as set is typically ordered by date)
+        }
+
+        if (d == null) {
+            Long offset;
+            if ((offset = specialDayOffset.get(text)) != null) {
+                d = new Date((System.currentTimeMillis() / AbstractFormatter.dayMillis) * AbstractFormatter.dayMillis + offset.longValue());
+            }
+        }
+
+        if (d == null) {
+            // check holidays
+            Date[] dd = Holidays.get(text); // as we expect single expression, we can get directly (w/o matcher)
+            // TODO: consider user enters expression like "Silvester 2016" or "Eastern/2017" -> needs a special matcher
+            if (dd != null) {
+                if (dd.length > 1) {
+                    d = dd[1]; // this is usually date in current year (as array is initialized [year-1, year, year+1, year+2]
+                } else {
+                    d = dd[0];
+                }
+            }
         }
         return d;
     }
