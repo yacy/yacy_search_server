@@ -33,6 +33,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -65,9 +66,11 @@ public class index {
         int searchoptions = (post == null) ? 0 : Math.min(1, post.getInt("searchoptions", 0));
         if (!sb.getConfigBool("search.options", true)) {
             searchoptions = 0;
-        } else { // show heuristic hint on search option screen
-            // (only if heuristic is ON by config)
+        } else { 
+            // show heuristic hint on search option screen (only if heuristic is ON by config)
             prop.put("searchoptions_heuristic", sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false));
+            // show date search options (only if dates_in_content_dts search target field is active)
+            prop.put("searchoptions_datesincontent", sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.dates_in_content_dts));
         }
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));

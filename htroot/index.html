@@ -149,6 +149,12 @@
           <dd>only pages with as-author-anotated &lt;author&gt;</dd>
           <dt>tld:&lt;tld&gt;</dt>
           <dd>only pages from top-level-domains &lt;tld&gt;</dd>
+          #(datesincontent)#::
+            <dt>on:&lt;date&gt;</dt>
+            <dd>only pages with &lt;date&gt; in content</dd>
+            <dt>from:&lt;date1&gt; to:&lt;date2&gt;</dt>
+            <dd>only pages with a date between &lt;date1&gt; and &lt;date2&gt; in content</dd>
+          #(/datesincontent)#
           <dt>/http</dt>
           <dd>only resources from http or https servers</dd>
           <dt>/ftp</dt>

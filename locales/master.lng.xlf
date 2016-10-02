@@ -10600,6 +10600,12 @@
     <trans-unit id="e5eb9948" xml:space="preserve" approved="no" translate="yes">
        <source>only pages from top-level-domains</source>
     </trans-unit>
+    <trans-unit id="6b8b308b" xml:space="preserve" approved="no" translate="yes">
+       <source>only pages with a date between &amp;lt;date1&amp;gt; and &amp;lt;date2&amp;gt; in content</source>
+    </trans-unit>
+    <trans-unit id="7fae2eb1" xml:space="preserve" approved="no" translate="yes">
+       <source>only pages with &amp;lt;date&amp;gt; in content</source>
+    </trans-unit>    
     <trans-unit id="f0ec5b4f" xml:space="preserve" approved="no" translate="yes">
        <source>only resources from http or https servers</source>
     </trans-unit>
