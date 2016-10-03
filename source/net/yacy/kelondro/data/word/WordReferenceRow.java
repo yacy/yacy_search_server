@@ -268,7 +268,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     @Override
     public Collection<Integer> positions() {
         int pos = (int) this.entry.getColLong(col_posintext);
-        ArrayList arr = new ArrayList<Integer>(1);
+        ArrayList<Integer> arr = new ArrayList<Integer>(1);
         arr.add(pos);
         return arr;
     }

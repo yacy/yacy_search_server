@@ -253,7 +253,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.hitcount,      // how often appears this word in the text
                 this.wordsintext,   // total number of words
                 this.phrasesintext, // total number of phrases
-                this.positions.isEmpty() ? 0 : this.positions.iterator().next(), // position of word in all words (
+                this.positions.isEmpty() ? 0 : minposition(), // position of word in all words (WordReferenceRow stores first position in text, minpos also important for joined references)
                 this.posinphrase,   // position of word in its phrase
                 this.posofphrase,   // number of the phrase where word appears
                 this.lastModified,  // last-modified time of the document where word appears
@@ -383,8 +383,17 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         final WordReference oe = (WordReference) r;
 
         this.positions.addAll(oe.positions());
-        this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
-        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
+        
+        // join phrase
+        // this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
+        // this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
+        final int oePosofphrase = oe.posofphrase();
+        if (this.posofphrase == oePosofphrase) {
+            this.posinphrase = Math.min(this.posinphrase, oe.posinphrase());
+        } else if (this.posofphrase > oePosofphrase) {
+            this.posofphrase = oePosofphrase; // choose min posofphrase
+            this.posinphrase = oe.posinphrase(); // with corresponding posinphrase
+        }
 
         // combine term frequency
         this.termFrequency = this.termFrequency + oe.termFrequency();
