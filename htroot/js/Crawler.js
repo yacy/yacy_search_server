@@ -84,9 +84,9 @@ function handleStatus(){
 		return;
 	}
 	var statusResponse = statusRPC.responseXML;
-	statusTag=getFirstChild(statusResponse, "status");
+	var statusTag = getFirstChild(statusResponse, "status");
 	
-	ppm=getValue(getFirstChild(statusTag, "ppm"));
+	var ppm = getValue(getFirstChild(statusTag, "ppm"));
 	
 	var ppmNum = document.getElementById("ppmNum");
 	removeAllChildren(ppmNum);
@@ -102,21 +102,21 @@ function handleStatus(){
 	// ppmBar end
 	
 	// traffic output (no bar up to now)
-    traffic = getFirstChild(statusTag, "traffic");
-    trafficCrawlerValue = getValue(getFirstChild(traffic, "crawler"));
-    trafCrawlerSpan = document.getElementById("trafficCrawler");
+    var traffic = getFirstChild(statusTag, "traffic");
+    var trafficCrawlerValue = getValue(getFirstChild(traffic, "crawler"));
+    var trafCrawlerSpan = document.getElementById("trafficCrawler");
     removeAllChildren(trafCrawlerSpan);
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawlerValue) / 1024 / 10.24) / 100));
 	
-	dbsize=getFirstChild(statusTag, "dbsize");
-	urlpublictext=getValue(getFirstChild(dbsize, "urlpublictext"));
-	urlpublictextSegmentCount=getValue(getFirstChild(dbsize, "urlpublictextSegmentCount"));
-	webgraph=getValue(getFirstChild(dbsize, "webgraph"));
-	webgraphSegmentCount=getValue(getFirstChild(dbsize, "webgraphSegmentCount"));
-	citation=getValue(getFirstChild(dbsize, "citation"));
-	citationSegmentCount=getValue(getFirstChild(dbsize, "citationSegmentCount"));
-	rwipublictext=getValue(getFirstChild(dbsize, "rwipublictext"));
-	rwipublictextSegmentCount=getValue(getFirstChild(dbsize, "rwipublictextSegmentCount"));
+	var dbsize = getFirstChild(statusTag, "dbsize");
+	var urlpublictext = getValue(getFirstChild(dbsize, "urlpublictext"));
+	var urlpublictextSegmentCount = getValue(getFirstChild(dbsize, "urlpublictextSegmentCount"));
+	var webgraph = getValue(getFirstChild(dbsize, "webgraph"));
+	var webgraphSegmentCount = getValue(getFirstChild(dbsize, "webgraphSegmentCount"));
+	var citation = getValue(getFirstChild(dbsize, "citation"));
+	var citationSegmentCount = getValue(getFirstChild(dbsize, "citationSegmentCount"));
+	var rwipublictext = getValue(getFirstChild(dbsize, "rwipublictext"));
+	var rwipublictextSegmentCount = getValue(getFirstChild(dbsize, "rwipublictextSegmentCount"));
 	document.getElementById("urlpublictextSize").firstChild.nodeValue=urlpublictext;
 	document.getElementById("urlpublictextSegmentCount").firstChild.nodeValue=urlpublictextSegmentCount;
 	document.getElementById("webgraphSize").firstChild.nodeValue=webgraph;
@@ -126,48 +126,48 @@ function handleStatus(){
 	document.getElementById("rwipublictextSize").firstChild.nodeValue=rwipublictext;
 	document.getElementById("rwipublictextSegmentCount").firstChild.nodeValue=rwipublictextSegmentCount;
 
-	postprocessing=getFirstChild(statusTag, "postprocessing");
+	var postprocessing = getFirstChild(statusTag, "postprocessing");
 	document.getElementById("postprocessing_status").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "status"));
 	document.getElementById("postprocessing_collection").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "collectionRemainingCount"));
 	document.getElementById("postprocessing_webgraph").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "webgraphRemainingCount"));
 	document.getElementById("postprocessing_remainingTimeMinutes").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "remainingTimeMinutes"));
 	document.getElementById("postprocessing_remainingTimeSeconds").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "remainingTimeSeconds"));
-	postprocessingElapsedTime=parseInt(getValue(getFirstChild(postprocessing, "ElapsedTime")));
-	postprocessingRemainingTime=parseInt(getValue(getFirstChild(postprocessing, "RemainingTime")));
-	p = 100 * postprocessingElapsedTime / (postprocessingElapsedTime + postprocessingRemainingTime) || 0;
+	var postprocessingElapsedTime = parseInt(getValue(getFirstChild(postprocessing, "ElapsedTime")));
+	var postprocessingRemainingTime = parseInt(getValue(getFirstChild(postprocessing, "RemainingTime")));
+	var p = 100 * postprocessingElapsedTime / (postprocessingElapsedTime + postprocessingRemainingTime) || 0;
 	document.getElementById("postprocessing_bar").firstChild.setAttribute("value",  p);
 	//document.getElementById("postprocessing_speed").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "speed"));
 	
-	load=getFirstChild(statusTag, "load");
+	var load = getFirstChild(statusTag, "load");
 	document.getElementById("load").firstChild.nodeValue=getValue(load);
 	
-	loaderqueue=getFirstChild(statusTag, "loaderqueue");	
-	loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
-	loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
+	var loaderqueue = getFirstChild(statusTag, "loaderqueue");	
+	var loaderqueue_size = getValue(getFirstChild(loaderqueue, "size"));
+	var loaderqueue_max = getValue(getFirstChild(loaderqueue, "max"));
 	document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
 	document.getElementById("loaderqueuemax").firstChild.nodeValue=loaderqueue_max;
 	
-	localcrawlerqueue=getFirstChild(statusTag, "localcrawlerqueue");
-	localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
-	localcrawlerqueue_state=getValue(getFirstChild(localcrawlerqueue, "state"));
+	var localcrawlerqueue = getFirstChild(statusTag, "localcrawlerqueue");
+	var localcrawlerqueue_size = getValue(getFirstChild(localcrawlerqueue, "size"));
+	var localcrawlerqueue_state = getValue(getFirstChild(localcrawlerqueue, "state"));
 	document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
 	putQueueState("localcrawler", localcrawlerqueue_state);
 	
-	limitcrawlerqueue=getFirstChild(statusTag, "limitcrawlerqueue");
-	limitcrawlerqueue_size=getValue(getFirstChild(limitcrawlerqueue, "size"));
-	limitcrawlerqueue_state=getValue(getFirstChild(limitcrawlerqueue, "state"));
+	var limitcrawlerqueue = getFirstChild(statusTag, "limitcrawlerqueue");
+	var limitcrawlerqueue_size = getValue(getFirstChild(limitcrawlerqueue, "size"));
+	var limitcrawlerqueue_state = getValue(getFirstChild(limitcrawlerqueue, "state"));
 	document.getElementById("limitcrawlerqueuesize").firstChild.nodeValue=limitcrawlerqueue_size;
 	putQueueState("limitcrawler", limitcrawlerqueue_state);
 	
-	remotecrawlerqueue=getFirstChild(statusTag, "remotecrawlerqueue");
-	remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
-	remotecrawlerqueue_state=getValue(getFirstChild(remotecrawlerqueue, "state"));
+	var remotecrawlerqueue = getFirstChild(statusTag, "remotecrawlerqueue");
+	var remotecrawlerqueue_size = getValue(getFirstChild(remotecrawlerqueue, "size"));
+	var remotecrawlerqueue_state = getValue(getFirstChild(remotecrawlerqueue, "state"));
 	document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
 	putQueueState("remotecrawler", remotecrawlerqueue_state);
 	
-	noloadcrawlerqueue=getFirstChild(statusTag, "noloadcrawlerqueue");
-	noloadcrawlerqueue_size=getValue(getFirstChild(noloadcrawlerqueue, "size"));
-	noloadcrawlerqueue_state=getValue(getFirstChild(noloadcrawlerqueue, "state"));
+	var noloadcrawlerqueue = getFirstChild(statusTag, "noloadcrawlerqueue");
+	var noloadcrawlerqueue_size = getValue(getFirstChild(noloadcrawlerqueue, "size"));
+	var noloadcrawlerqueue_state = getValue(getFirstChild(noloadcrawlerqueue, "state"));
 	document.getElementById("noloadcrawlerqueuesize").firstChild.nodeValue=noloadcrawlerqueue_size;
 	putQueueState("noloadcrawler", noloadcrawlerqueue_state);
 
