@@ -224,7 +224,7 @@ window.setInterval("setTableSize()", 1000);
 <!-- crawl profile list -->
 #(crawlProfilesShow)#::
 <fieldset>
-    <legend>Running Crawls (#[count]#)</legend> 
+    <legend id="runningCrawlsLegend">Running Crawls (#[count]#)</legend> 
 <table width="96%">
 <tr><td>
   <table border="0" summary="A list of crawl profiles and their current settings." id="crawlProfiles">
@@ -235,18 +235,18 @@ window.setInterval("setTableSize()", 1000);
     <thead>
     	<tr class="TableHeader">
       		<th><strong>Name</strong></th>
-      		#(debug)#::<th><strong>Count</strong></th>#(/debug)#
+      		#(debug)#::<th id="headerDebug"><strong>Count</strong></th>#(/debug)#
       		<th><strong>Status</strong></th>
     	</tr>
     </thead>
     <tbody>
     #{list}# 
-    	<tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+    	<tr class="TableCell#(dark)#Light::Dark#(/dark)#" id="#[handle]#">
       		<td>#[name]#</td>
       		#(debug)#::<td>#[count]#</td>#(/debug)#
-      		<td>#(terminateButton)#::
-        		<div style="text-decoration:blink;float:left;">Running</div>
-        		<form style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+      		<td id="#[handle]#_status_cell">#(terminateButton)#::
+        		<div id="#[handle]#_status" style="text-decoration:blink;float:left;">Running</div>
+        		<form id="#[handle]#_terminate" style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
         			<div>
         				<input type="hidden" name="handle" value="#[handle]#" />
         				<input type="submit" name="terminate" value="Terminate" class="btn btn-danger btn-xs"/>
