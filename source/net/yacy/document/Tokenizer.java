@@ -213,7 +213,8 @@ public class Tokenizer {
         
         // store result
         this.RESULT_NUMB_WORDS = allwordcounter;
-        this.RESULT_NUMB_SENTENCES = allsentencecounter;
+        // if text doesn't end with punktuation but has words after last found sentence, inc sentence count for trailing text.
+        this.RESULT_NUMB_SENTENCES = allsentencecounter + (currsentwords.size() > 0 ? 1 : 0);
     }
     
     public Map<String, Word> words() {

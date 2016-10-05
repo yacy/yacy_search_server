@@ -3,7 +3,6 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Iterator;
 import java.util.Map;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.encoding.UTF8;
@@ -23,9 +22,9 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
-import static net.yacy.search.index.Segment.catchallWord;
 import net.yacy.search.query.QueryGoal;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -156,7 +155,11 @@ public class SegmentTest {
 
         // creates one test url with this text in the rwi index
         DigestURL url = new DigestURL("http://test.org/test.html");
-        storeTestDocTextToTermIndex(url, "One Two Three Four Five. This is a test text. One two three for five");
+        storeTestDocTextToTermIndex(url, "One Two Three Four Five. This is a test text. One two three for five.");
+        // posintext                       1   2    3    4    5     6    7    8    9
+        // hitcount ("five")                                  1               1                             2
+        // posofphrase                    |-------100------------| |------101---------| |--------102----------|
+        // posinphrase                     1   2    3    4    5     1    2    3    4     1   2    3    4    5
 
         // create a query to get the search word hashsets
         QueryGoal qg = new QueryGoal("five test ");
@@ -175,23 +178,26 @@ public class SegmentTest {
         assertTrue("test url hash in result set", wc.has(url.hash()));
 
         // the returned WordReference is expected to be a joined Reference with properties set used in ranking
-        Iterator<WordReference> it = wc.entries();
-        System.out.println("-----------------");
+        WordReference r = wc.getReference(url.hash());
+
+        // min position of search word in text (posintext)
+        assertEquals("minposition('five')", 5, r.minposition());
+        // occurence of search words in text
+        assertEquals("hitcount('five')", 2, r.hitcount());
+
+        // phrase counts
+        assertEquals("phrasesintext", 3, r.phrasesintext());
+        assertEquals("posofphrase", 100, r.posofphrase());
+        assertEquals("posinphrase", 5, r.posinphrase());
 
         // currently the results are not as expected for a multi-word query
-        while (it.hasNext()) {
-            WordReference r = it.next();
-            // expected to be 1st in text
-            System.out.println("posintext=" + r.positions() + " (expected=5)");
-            // min position of search word in text
-            System.out.println("minposition=" + r.minposition() + " (expected=5)");
-            // max position of search word in text
-            System.out.println("maxposition=" + r.maxposition() + " (expected=8)");
-            // for a multiword query distance expected to be the avg of search word positions in text
-            System.out.println("distance=" + r.distance() + " (expected=3)");
-            // occurence of search words in text
-            System.out.println("hitcount=" + r.hitcount() + " (expected=2)");
-        }
+        // (reason: Reference container is backed by ReferenceRow (which doen't hold positions of joined references) ergo can't return related results
+        System.out.println("-----------------");
+        System.out.println("positions=" + r.positions() + " (expected=5,8)");
+        // max position of search word in text
+        System.out.println("maxposition=" + r.maxposition() + " (expected=8)");
+        // for a multiword query distance expected to be the avg of search word positions in text
+        System.out.println("distance=" + r.distance() + " (expected=3)");
         System.out.println("-----------------");
     }
 
