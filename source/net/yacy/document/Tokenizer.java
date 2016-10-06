@@ -68,7 +68,6 @@ public class Tokenizer {
         this.words = new TreeMap<String, Word>(NaturalOrder.naturalComparator);
         this.synonyms = new LinkedHashSet<String>();
         assert text != null;
-        final Set<String> currsentwords = new HashSet<String>();
         String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
         for (int i = 0; i < wordcache.length; i++) wordcache[i] = "";
         String k;
@@ -89,9 +88,9 @@ public class Tokenizer {
                 // handle punktuation (start new sentence)
                 if (word.length() == 1 && SentenceReader.punctuation(word.charAt(0))) {
                     // store sentence
-                    currsentwords.clear();
+                    if (wordInSentenceCounter > 1) // if no word in sentence repeated punktuation ".....", don't count as sentence
+                        allsentencecounter++;
                     wordInSentenceCounter = 1;
-                    allsentencecounter++;
                     continue;
                 }
                 if (word.length() < wordminsize) continue;
@@ -160,7 +159,6 @@ public class Tokenizer {
 
                 // store word
                 allwordcounter++;
-                currsentwords.add(word);
                 Word wsp = this.words.get(word);
                 if (wsp != null) {
                     // word already exists
@@ -214,7 +212,7 @@ public class Tokenizer {
         // store result
         this.RESULT_NUMB_WORDS = allwordcounter;
         // if text doesn't end with punktuation but has words after last found sentence, inc sentence count for trailing text.
-        this.RESULT_NUMB_SENTENCES = allsentencecounter + (currsentwords.size() > 0 ? 1 : 0);
+        this.RESULT_NUMB_SENTENCES = allsentencecounter + (wordInSentenceCounter > 1 ? 1 : 0);
     }
     
     public Map<String, Word> words() {
