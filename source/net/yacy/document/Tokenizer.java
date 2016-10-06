@@ -56,7 +56,7 @@ public class Tokenizer {
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
 
     //private Properties analysis;
-    protected final Map<String, Word> words; // a string (the words) to (indexWord) - relation
+    protected final Map<String, Word> words; // a string (the words) to (indexWord) - relation (key: words are lowercase)
     private final Set<String> synonyms; // a set of synonyms to the words
     protected final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
     
@@ -167,7 +167,7 @@ public class Tokenizer {
                     // word does not yet exist, create new word entry
                     wsp = new Word(allwordcounter, wordInSentenceCounter, allsentencecounter + 100); // nomal sentence start at 100 !
                     wsp.flags = this.RESULT_FLAGS.clone();
-                    this.words.put(word.toLowerCase(), wsp);
+                    this.words.put(word, wsp);
                 }
                 // we now have the unique handle of the word, put it into the sentence:
                 wordInSentenceCounter++;
@@ -214,7 +214,10 @@ public class Tokenizer {
         // if text doesn't end with punktuation but has words after last found sentence, inc sentence count for trailing text.
         this.RESULT_NUMB_SENTENCES = allsentencecounter + (wordInSentenceCounter > 1 ? 1 : 0);
     }
-    
+
+    /**
+     * @return returns the words as word/indexWord relation map. All words are lowercase.
+     */
     public Map<String, Word> words() {
         // returns the words as word/indexWord relation map
         return this.words;

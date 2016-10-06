@@ -54,7 +54,6 @@ public class TokenizerTest {
         VocabularyScraper scraper = null;
         for (String text : testText) {
             Tokenizer t = new Tokenizer(null, text, meaningLib, doAutotagging, scraper);
-            System.out.println(t.RESULT_NUMB_WORDS);
             assertEquals("Tokenizer.RESULT_NUMB_SENTENCES", 5, t.RESULT_NUMB_SENTENCES);
         }
     }
