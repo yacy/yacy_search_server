@@ -127,7 +127,7 @@ public class DateDetection {
     private final static Date TODAY = new Date();
     private final static int CURRENT_YEAR  = Integer.parseInt(CONFORM.format(TODAY).substring(0, 4)); // we need that to parse dates without given years, see the ShortStyle class
 
-    private final static String BODNCG = "(?:\\b|^)"; // begin of date non-capturing group
+    private final static String BODNCG = "(?:\\s|^)"; // begin of date non-capturing group
     private final static String EODNCG = "(?:[).:;! ]|$)"; // end of date non-capturing group
     private final static String SEPARATORNCG = "(?:/|-| - |\\.\\s|,\\s|\\.|,|\\s)"; // separator non-capturing group
     private final static String DAYCAPTURE = "(\\d{1,2})";
