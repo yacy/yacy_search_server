@@ -28,6 +28,9 @@ public class DateDetectionTest {
         testtext.add("1.1.2016");
         testtext.add("1. Januar 2016");
         testtext.add("2016, January 1.");
+
+        testtext.add("beginning text 1.1.2016");
+        testtext.add("line break\n1.1.2016");
         for (String text : testtext) {
             Date d = DateDetection.parseLine(text, 0);
 
@@ -82,4 +85,23 @@ public class DateDetectionTest {
         }
     }
 
+    /**
+     * Negative test of parseLine method, of class DateDetection
+     * with cases that represent NOT a date
+     */
+    @Test
+    public void testParseLineNoDate() {
+
+        // test input representations
+        Set<String> testtext = new LinkedHashSet();
+        testtext.add("3.1.2.0102"); // example of a program version string
+        // testtext.add("3.1.20.0102"); // date end-capture not working (on modification conflict with YMD parser)
+        testtext.add("v3.1.21");
+        testtext.add("v3.1.22.");
+
+        for (String text : testtext) {
+            Date d = DateDetection.parseLine(text, 0);
+            assertNull("not a date: " + text, d);
+        }
+    }
 }

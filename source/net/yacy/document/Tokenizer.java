@@ -56,7 +56,7 @@ public class Tokenizer {
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
 
     //private Properties analysis;
-    protected final Map<String, Word> words; // a string (the words) to (indexWord) - relation
+    protected final Map<String, Word> words; // a string (the words) to (indexWord) - relation (key: words are lowercase)
     private final Set<String> synonyms; // a set of synonyms to the words
     protected final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
     
@@ -68,7 +68,6 @@ public class Tokenizer {
         this.words = new TreeMap<String, Word>(NaturalOrder.naturalComparator);
         this.synonyms = new LinkedHashSet<String>();
         assert text != null;
-        final Set<String> currsentwords = new HashSet<String>();
         String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
         for (int i = 0; i < wordcache.length; i++) wordcache[i] = "";
         String k;
@@ -89,9 +88,9 @@ public class Tokenizer {
                 // handle punktuation (start new sentence)
                 if (word.length() == 1 && SentenceReader.punctuation(word.charAt(0))) {
                     // store sentence
-                    currsentwords.clear();
+                    if (wordInSentenceCounter > 1) // if no word in sentence repeated punktuation ".....", don't count as sentence
+                        allsentencecounter++;
                     wordInSentenceCounter = 1;
-                    allsentencecounter++;
                     continue;
                 }
                 if (word.length() < wordminsize) continue;
@@ -160,7 +159,6 @@ public class Tokenizer {
 
                 // store word
                 allwordcounter++;
-                currsentwords.add(word);
                 Word wsp = this.words.get(word);
                 if (wsp != null) {
                     // word already exists
@@ -169,7 +167,7 @@ public class Tokenizer {
                     // word does not yet exist, create new word entry
                     wsp = new Word(allwordcounter, wordInSentenceCounter, allsentencecounter + 100); // nomal sentence start at 100 !
                     wsp.flags = this.RESULT_FLAGS.clone();
-                    this.words.put(word.toLowerCase(), wsp);
+                    this.words.put(word, wsp);
                 }
                 // we now have the unique handle of the word, put it into the sentence:
                 wordInSentenceCounter++;
@@ -214,9 +212,12 @@ public class Tokenizer {
         // store result
         this.RESULT_NUMB_WORDS = allwordcounter;
         // if text doesn't end with punktuation but has words after last found sentence, inc sentence count for trailing text.
-        this.RESULT_NUMB_SENTENCES = allsentencecounter + (currsentwords.size() > 0 ? 1 : 0);
+        this.RESULT_NUMB_SENTENCES = allsentencecounter + (wordInSentenceCounter > 1 ? 1 : 0);
     }
-    
+
+    /**
+     * @return returns the words as word/indexWord relation map. All words are lowercase.
+     */
     public Map<String, Word> words() {
         // returns the words as word/indexWord relation map
         return this.words;
