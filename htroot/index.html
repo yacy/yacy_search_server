@@ -87,27 +87,33 @@
        
       <table>
         <tr>
-          <td><label for="count">Results per page</label>:</td>
+          <td><label id="maxResultsLabel">Results per page</label>:</td>
           <td>
-            <input type="radio" name="maximumRecords" id="mr10" value="10" #(count-10)#::checked="checked"#(/count-10)#/><label for="mr10">10</label>
-            <input type="radio" name="maximumRecords" id="mr50" value="50" #(count-50)#::checked="checked"#(/count-50)#/><label for="mr50">50</label>
-            <input type="radio" name="maximumRecords" id="mr100" value="100" #(count-100)#::checked="checked"#(/count-100)#/><label for="mr100">100</label>
+          	<fieldset aria-labelledby="maxResultsLabel">
+            	<input type="radio" name="maximumRecords" id="mr10" value="10" #(count-10)#::checked="checked"#(/count-10)#/><label for="mr10">10</label>
+            	<input type="radio" name="maximumRecords" id="mr50" value="50" #(count-50)#::checked="checked"#(/count-50)#/><label for="mr50">50</label>
+            	<input type="radio" name="maximumRecords" id="mr100" value="100" #(count-100)#::checked="checked"#(/count-100)#/><label for="mr100">100</label>
+            </fieldset>
           </td>
         </tr>
+        #(resource-select)#::
         <tr>
-          #(resource-select)#::
-          <td><label for="resource">Resource</label>:</td>
+          <td><label id="resourceLabel">Resource</label>:</td>
           <td>
-            <input type="radio" name="resource" id="rglobal" value="global" checked="checked" /><label for="rglobal">the peer-to-peer network</label>
-            <input type="radio" name="resource" id="rlocal" value="local"><label for="rlocal">only the local index</label>
+          	<fieldset aria-labelledby="resourceLabel">
+            	<input type="radio" name="resource" id="rglobal" value="global" checked="checked" /><label for="rglobal">the peer-to-peer network</label>
+            	<input type="radio" name="resource" id="rlocal" value="local"><label for="rlocal">only the local index</label>
+            </fieldset>
           </td>::
-          <td><label for="resource">Resource</label>:</td>
+          <td><label id="resourceLabel">Resource</label>:</td>
           <td>
-            <input type="radio" name="resource" id="rglobal" value="global"/><label for="rglobal">the peer-to-peer network</label>
-            <input type="radio" name="resource" id="rlocal" value="local" checked="checked"/><label for="rlocal">only the local index</label>
+          	<fieldset aria-labelledby="resourceLabel">
+            	<input type="radio" name="resource" id="rglobal" value="global"/><label for="rglobal">the peer-to-peer network</label>
+            	<input type="radio" name="resource" id="rlocal" value="local" checked="checked"/><label for="rlocal">only the local index</label>
+            </fieldset>
           </td>
-          #(/resource-select)#
         </tr>
+        #(/resource-select)#
         <tr>
           <td>
             <label for="prefermaskfilter">Prefer mask</label>:
