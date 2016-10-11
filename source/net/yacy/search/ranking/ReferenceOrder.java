@@ -221,11 +221,11 @@ public class ReferenceOrder {
     public long cardinal(final WordReference t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
-        final Bitfield flags = t.flags();
         assert this.min != null;
         assert this.max != null;
         assert t != null;
         assert this.ranking != null;
+        final Bitfield flags = t.flags();
         final long tf = ((this.max.termFrequency() == this.min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-this.min.termFrequency())*256.0)/(this.max.termFrequency() - this.min.termFrequency())))) << this.ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
         final int maxmaxpos = this.max.maxposition(); // returns Integer.MIN_VALUE if positions empty
@@ -266,19 +266,20 @@ public class ReferenceOrder {
     }
     
     public long cardinal(final URIMetadataNode t) {
-        //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
-        final Bitfield flags = t.flags();
         assert t != null;
         assert this.ranking != null;
-        final long r =
+        final Bitfield flags = t.flags();
+        long r =
              ((256 - DigestURL.domLengthNormalized(t.hash())) << this.ranking.coeff_domlength)
-           + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength)
+           // TODO: here we score currently absolute numbers (e.g. t.urllength() : (35 << coeff), in contrast rwi calculation is ((between min=0, max=255) << coeff) for each of the score factors
+           // + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength) // TODO: this is for valid url always NEGATIVE
            + (t.virtualAge()  << this.ranking.coeff_date)
            + (t.wordsintitle()<< this.ranking.coeff_wordsintitle)
            + (t.wordCount()   << this.ranking.coeff_wordsintext)
            + (t.llocal()      << this.ranking.coeff_llocal)
            + (t.lother()      << this.ranking.coeff_lother)
+           //
            + ((this.ranking.coeff_authority > 12) ? (authority(t.hosthash()) << this.ranking.coeff_authority) : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << this.ranking.coeff_appurl             : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << this.ranking.coeff_app_dc_title       : 0)
