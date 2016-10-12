@@ -147,10 +147,33 @@ public class yacysearchitem {
                 prop.put("content_authorized_bookmark", !bookmarkexists);
                 // bookmark icon check for YMarks
                 //prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
-                prop.putHTML("content_authorized_bookmark_bookmarklink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&resource=" + resource + "&time=3&bookmarkref=" + urlhash + "&bookmarkurl=" + crypt.simpleEncode(resultUrlstring) + "&urlmaskfilter=.*");
+                StringBuilder linkBuilder = new StringBuilder();
+                /* Bookmark, delete and recommend action links share the same URL prefix */
+				String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
+						.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
+						.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
+						.append(resource).append("&time=3").toString();
+				linkBuilder.setLength(0);
+				
+				String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
+						.append("&bookmarkurl=").append(crypt.simpleEncode(resultUrlstring)).append("&urlmaskfilter=.*")
+						.toString();
+				linkBuilder.setLength(0);
+				
+				String actionSuffix = linkBuilder.append(urlhash)
+						.append("&urlmaskfilter=.*").append("&order=").append(crypt.simpleEncode(theSearch.query.ranking.toExternalString())).toString();
+				linkBuilder.setLength(0);
+				
+				String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionSuffix).toString();
+				linkBuilder.setLength(0);
+				String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionSuffix).toString();
+				linkBuilder.setLength(0);
+				
+				prop.putHTML("content_authorized_bookmark_bookmarklink", bookmarkLink);
+	            prop.putHTML("content_authorized_recommend_deletelink", deleteLink);
+	            prop.putHTML("content_authorized_recommend_recommendlink", recommendLink);
+	            
                 prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-                prop.putHTML("content_authorized_recommend_deletelink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
-                prop.putHTML("content_authorized_recommend_recommendlink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
                 prop.put("content_authorized_urlhash", urlhash);
             }
             prop.putHTML("content_title", result.title());
