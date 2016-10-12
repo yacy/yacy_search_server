@@ -144,56 +144,7 @@ public class yacysearchitem {
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             if (authenticated) { // only needed if authorized
-                boolean bookmarkexists;
-                // check url exists in bookkmarks
-                    bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
-                prop.put("content_authorized_bookmark", !bookmarkexists);
-                // bookmark icon check for YMarks
-                //prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
-                
-                /* Bookmark, delete and recommend action links share the same URL prefix */
-                StringBuilder linkBuilder = new StringBuilder();
-				String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
-						.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
-						.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
-						.append(resource).append("&time=3").toString();
-				linkBuilder.setLength(0);
-				
-				String encodedURLString;
-				try {
-					encodedURLString = URLEncoder.encode(crypt.simpleEncode(resultUrlstring), StandardCharsets.UTF_8.name());
-				} catch (UnsupportedEncodingException e1) {
-					ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
-					encodedURLString = crypt.simpleEncode(resultUrlstring);
-				}
-				String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
-						.append("&bookmarkurl=").append(encodedURLString).append("&urlmaskfilter=.*")
-						.toString();
-				linkBuilder.setLength(0);
-				
-				/* Delete and recommend action links share the same URL suffix */
-				String encodedRanking;
-				try {
-					encodedRanking = URLEncoder.encode(crypt.simpleEncode(theSearch.query.ranking.toExternalString()), StandardCharsets.UTF_8.name());
-				} catch (UnsupportedEncodingException e1) {
-					ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
-					encodedRanking = crypt.simpleEncode(resultUrlstring);
-				}
-				String actionLinkSuffix = linkBuilder.append(urlhash)
-						.append("&urlmaskfilter=.*").append("&order=").append(encodedRanking).toString();
-				linkBuilder.setLength(0);
-				
-				String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionLinkSuffix).toString();
-				linkBuilder.setLength(0);
-				String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionLinkSuffix).toString();
-				linkBuilder.setLength(0);
-				
-				prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
-	            prop.put("content_authorized_recommend_deletelink", deleteLink);
-	            prop.put("content_authorized_recommend_recommendlink", recommendLink);
-	            
-                prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-                prop.put("content_authorized_urlhash", urlhash);
+                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash);
             }
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
@@ -383,6 +334,71 @@ public class yacysearchitem {
 
         return prop;
     }
+
+
+    /**
+     * Add action links reserved to authorized users. All parameters must be non null.
+     * @param sb the main Switchboard instance
+     * @param prop properties map to feed
+     * @param theSearch search event
+     * @param resultUrlstring URL of the result item
+     * @param resource resource scope ("local" or "global")
+     * @param origQ origin query terms
+     * @param urlhash URL hash of the result item
+     */
+	private static void addAuthorizedActions(final Switchboard sb, final serverObjects prop,
+			final SearchEvent theSearch, final String resultUrlstring, final String resource, final String origQ,
+			final String urlhash) {
+		// check if url exists in bookmarks
+		boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
+		prop.put("content_authorized_bookmark", !bookmarkexists);
+		// bookmark icon check for YMarks
+		//prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
+		
+		/* Bookmark, delete and recommend action links share the same URL prefix */
+		StringBuilder linkBuilder = new StringBuilder();
+		String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
+				.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
+				.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
+				.append(resource).append("&time=3").toString();
+		linkBuilder.setLength(0);
+		
+		String encodedURLString;
+		try {
+			encodedURLString = URLEncoder.encode(crypt.simpleEncode(resultUrlstring), StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e1) {
+			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
+			encodedURLString = crypt.simpleEncode(resultUrlstring);
+		}
+		String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
+				.append("&bookmarkurl=").append(encodedURLString).append("&urlmaskfilter=.*")
+				.toString();
+		linkBuilder.setLength(0);
+		
+		/* Delete and recommend action links share the same URL suffix */
+		String encodedRanking;
+		try {
+			encodedRanking = URLEncoder.encode(crypt.simpleEncode(theSearch.query.ranking.toExternalString()), StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e1) {
+			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
+			encodedRanking = crypt.simpleEncode(resultUrlstring);
+		}
+		String actionLinkSuffix = linkBuilder.append(urlhash)
+				.append("&urlmaskfilter=.*").append("&order=").append(encodedRanking).toString();
+		linkBuilder.setLength(0);
+		
+		String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionLinkSuffix).toString();
+		linkBuilder.setLength(0);
+		String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionLinkSuffix).toString();
+		linkBuilder.setLength(0);
+		
+		prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
+		prop.put("content_authorized_recommend_deletelink", deleteLink);
+		prop.put("content_authorized_recommend_recommendlink", recommendLink);
+		
+		prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
+		prop.put("content_authorized_urlhash", urlhash);
+	}
     
 
     /**
