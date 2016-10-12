@@ -393,13 +393,18 @@ public class RobotsTxt {
                             // try to load the robots
                             RobotsTxtEntry robotsEntry = getEntry(u, userAgent);
                             boolean robotsAllowed = robotsEntry == null ? true : !robotsEntry.isDisallowed(u);
-                            if (robotsAllowed) try {
-                                Request request = loader.request(u, true, false);
-                                Response response = loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, userAgent);
-                                out.put(new CheckEntry(u, robotsEntry, response, null));
-                            } catch (final IOException e) {
-                                out.put(new CheckEntry(u, robotsEntry, null, "error response: " + e.getMessage()));
-                            }
+							if (robotsAllowed) {
+								try {
+									Request request = loader.request(u, true, false);
+									Response response = loader.load(request, CacheStrategy.NOCACHE,
+											BlacklistType.CRAWLER, userAgent);
+									out.put(new CheckEntry(u, robotsEntry, response, null));
+								} catch (final IOException e) {
+									out.put(new CheckEntry(u, robotsEntry, null, "error response: " + e.getMessage()));
+								}
+							} else {
+								out.put(new CheckEntry(u, robotsEntry, null, null));
+							}
                         }
                     } catch (InterruptedException e) {}
                 }
