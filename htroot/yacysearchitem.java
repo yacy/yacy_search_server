@@ -25,7 +25,10 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -147,31 +150,47 @@ public class yacysearchitem {
                 prop.put("content_authorized_bookmark", !bookmarkexists);
                 // bookmark icon check for YMarks
                 //prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
-                StringBuilder linkBuilder = new StringBuilder();
+                
                 /* Bookmark, delete and recommend action links share the same URL prefix */
+                StringBuilder linkBuilder = new StringBuilder();
 				String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
 						.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
 						.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
 						.append(resource).append("&time=3").toString();
 				linkBuilder.setLength(0);
 				
+				String encodedURLString;
+				try {
+					encodedURLString = URLEncoder.encode(crypt.simpleEncode(resultUrlstring), StandardCharsets.UTF_8.name());
+				} catch (UnsupportedEncodingException e1) {
+					ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
+					encodedURLString = crypt.simpleEncode(resultUrlstring);
+				}
 				String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
-						.append("&bookmarkurl=").append(crypt.simpleEncode(resultUrlstring)).append("&urlmaskfilter=.*")
+						.append("&bookmarkurl=").append(encodedURLString).append("&urlmaskfilter=.*")
 						.toString();
 				linkBuilder.setLength(0);
 				
-				String actionSuffix = linkBuilder.append(urlhash)
-						.append("&urlmaskfilter=.*").append("&order=").append(crypt.simpleEncode(theSearch.query.ranking.toExternalString())).toString();
+				/* Delete and recommend action links share the same URL suffix */
+				String encodedRanking;
+				try {
+					encodedRanking = URLEncoder.encode(crypt.simpleEncode(theSearch.query.ranking.toExternalString()), StandardCharsets.UTF_8.name());
+				} catch (UnsupportedEncodingException e1) {
+					ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
+					encodedRanking = crypt.simpleEncode(resultUrlstring);
+				}
+				String actionLinkSuffix = linkBuilder.append(urlhash)
+						.append("&urlmaskfilter=.*").append("&order=").append(encodedRanking).toString();
 				linkBuilder.setLength(0);
 				
-				String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionSuffix).toString();
+				String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionLinkSuffix).toString();
 				linkBuilder.setLength(0);
-				String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionSuffix).toString();
+				String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionLinkSuffix).toString();
 				linkBuilder.setLength(0);
 				
-				prop.putHTML("content_authorized_bookmark_bookmarklink", bookmarkLink);
-	            prop.putHTML("content_authorized_recommend_deletelink", deleteLink);
-	            prop.putHTML("content_authorized_recommend_recommendlink", recommendLink);
+				prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
+	            prop.put("content_authorized_recommend_deletelink", deleteLink);
+	            prop.put("content_authorized_recommend_recommendlink", recommendLink);
 	            
                 prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
                 prop.put("content_authorized_urlhash", urlhash);
