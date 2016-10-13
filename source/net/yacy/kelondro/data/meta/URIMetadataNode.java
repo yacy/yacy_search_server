@@ -81,7 +81,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     protected Bitfield flags = null;
     protected int imagec = -1, audioc = -1, videoc = -1, appc = -1;
     protected double lat = Double.NaN, lon = Double.NaN;
-    protected float score = 0; // during generation of a search result this value is set
+    protected long score = 0; // during generation of a search result this value is set
     protected String snippet = null;
     protected WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
 
@@ -151,7 +151,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         this.videoc = Integer.parseInt(prop.getProperty("lvideo", "0"));
         this.appc = Integer.parseInt(prop.getProperty("lapp", "0"));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
-        this.score = Float.parseFloat(prop.getProperty("score", "0.0")); // we don't use the remote rwi ranking but the local rwi ranking profile
+        // this.score = Float.parseFloat(prop.getProperty("score", "0.0")); // we don't use the remote rwi ranking but the local rwi ranking profile
         List<String> cs = new ArrayList<String>();
         cs.add(collection);
         this.setField(CollectionSchema.collection_sxt.name(), cs);
@@ -188,10 +188,16 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
     }
 
-    public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final float scorex) throws MalformedURLException {
+    /**
+     * @param doc metadata from (embedded) Solr index
+     * @param searchedWord rwi WordReference the metadata belong to
+     * @param scorex rwi score
+     * @throws MalformedURLException
+     */
+    public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final long scorex) throws MalformedURLException {
         this(doc);
-        this.word = searchedWord;
-        this.score = scorex;
+        this.word = searchedWord; // rwi index WordReference this document (metadata) belong to
+        this.score = scorex; // rwi/YaCy score
     }
 
     public URIMetadataNode(DigestURL theurl) {
@@ -334,7 +340,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
      * (the value is updated while adding to the result queue where score calc takes place)
      * @return YaCy calculated score (number > 0)
      */
-    public float score() {
+    public long score() {
         return this.score;
     }
 
@@ -343,7 +349,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
      * (should be set to the effective value of result queues getWeight)
      * @param theScore YaCy ranking of search results
      */
-    public void setScore(float theScore) {
+    public void setScore(long theScore) {
         this.score = theScore;
     }
 
@@ -472,8 +478,8 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     }
 
     public int urllength() {
-        return getInt(CollectionSchema.url_chars_i);
-    }
+            return getInt(CollectionSchema.url_chars_i);
+        }
 
     public String snippet() {
         return this.snippet;
@@ -589,7 +595,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             s.append(",laudio=").append(this.laudio());
             s.append(",lvideo=").append(this.lvideo());
             s.append(",lapp=").append(this.lapp());
-            s.append(",score=").append(Float.toString(this.score()));
+            s.append(",score=").append(Long.toString(this.score()));
             if (this.word() != null) {
                 // append also word properties
                 final String wprop = this.word().toPropertyForm();

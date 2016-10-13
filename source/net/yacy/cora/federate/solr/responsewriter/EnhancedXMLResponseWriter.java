@@ -172,7 +172,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         startTagOpen(writer, "doc", name);
 
         if (includeScore) {
-            writeTag(writer, "float", "score", Float.toString(score), false);
+            writeTag(writer, "float", "score", Float.toString(score), false); // this is the special Solr "score" pseudo-field
         }
 
         int sz = fields.size();
