@@ -474,7 +474,17 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         escape();
     }
 
-    //  resolve '..'
+    /**
+     * Resolve '..' segments in the path.
+     * For standard pseudo algorithms, see :
+     * <ul>
+     * <li>https://tools.ietf.org/html/rfc3986#section-5.2.4</li>
+     * <li>https://url.spec.whatwg.org/#path-state</li>
+     * <li>https://www.w3.org/TR/url/#relative-path-state</li>
+     * </ul>
+     * @param path URL path part : must not be null
+     * @return the path with '..' segments resolved
+     */
     private static final String resolveBackpath(final String path) {
         String p = path;
         if (p.isEmpty() || p.charAt(0) != '/') { p = "/" + p; }
@@ -485,6 +495,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if (matcher.start() > end) break;
             p = matcher.replaceAll("");
             matcher.reset(p);
+        }
+        /* Let's remove any eventual remaining but inappropriate '..' segments at the beginning. 
+         * See https://tools.ietf.org/html/rfc3986#section-5.2.4 -> parts 2.C and 2.D */
+        while(p.startsWith("/../")) {
+        	p = p.substring(3);
+        }
+        if(p.equals("/..")) {
+        	p = "/";
         }
         return p.equals("") ? "/" : p;
     }
