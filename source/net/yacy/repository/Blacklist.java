@@ -547,6 +547,13 @@ public class Blacklist {
         return "Default YaCy Blacklist Engine";
     }
 
+    /**
+     * Check if the URL made of the specified host and path is blacklisted. All parameters must not be null.
+     * @param blacklistType type of blacklist (DHT, CRAWLER ...)
+     * @param hostlow host part
+     * @param path path on the host
+     * @return true when host/path is blacklisted
+     */
     public final boolean isListed(final BlacklistType blacklistType, final String hostlow, final String path) {
         if (hostlow == null) {
             throw new IllegalArgumentException("hostlow may not be null");
@@ -555,10 +562,26 @@ public class Blacklist {
             throw new IllegalArgumentException("path may not be null");
         }
 
-        // getting the proper blacklist
+        // getting the proper blacklists
         final Map<String, Set<Pattern>> blacklistMapMatched = getBlacklistMap(blacklistType, true);
+        
+        final Map<String, Set<Pattern>> blacklistMapNotMatched = getBlacklistMap(blacklistType, false);
 
-        final String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
+        return Blacklist.isListed(hostlow, path, blacklistMapMatched, blacklistMapNotMatched);
+    }
+
+    /**
+     * Check if the URL made of the specified host and path is blacklisted. All parameters must not be null.
+     * @param hostlow host part
+     * @param path path on the host
+     * @param blacklistMapMatched blacklist patterns indexed by matched hosts
+     * @param blacklistMapNotMatched blacklist patterns indexed by not matched hosts
+     * @return true when host/path is blacklisted
+     */
+	protected final static boolean isListed(final String hostlow, final String path,
+			final Map<String, Set<Pattern>> blacklistMapMatched,
+			final Map<String, Set<Pattern>> blacklistMapNotMatched) {
+		final String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
 
         Pattern[] app;
         boolean matched = false;
@@ -612,7 +635,6 @@ public class Blacklist {
 
         // loop over all Regex-entries
         if (!matched) {
-            final Map<String, Set<Pattern>> blacklistMapNotMatched = getBlacklistMap(blacklistType, false);
             String key;
             for (final Entry<String, Set<Pattern>> entry : blacklistMapNotMatched.entrySet()) {
                 key = entry.getKey();
@@ -631,7 +653,7 @@ public class Blacklist {
             }
         }
         return matched;
-    }
+	}
 
     public static BlacklistError checkError(final String element, final Map<String, String> properties) {
 
