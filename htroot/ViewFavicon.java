@@ -2,10 +2,7 @@
 // ViewFavicon.java
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2006
-// created 03.04.2006
+// Copyright 2016 by luccioman; https://github.com/luccioman
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

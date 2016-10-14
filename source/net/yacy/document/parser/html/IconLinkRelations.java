@@ -1,11 +1,6 @@
 /**
  *  IconLinkRelations
- *  Copyright 2011 by Michael Peter Christen
- *  First released 28.04.2011 at http://yacy.net
- *
- *  $LastChangedDate: 2011-03-08 02:51:51 +0100 (Di, 08 Mrz 2011) $
- *  $LastChangedRevision: 7567 $
- *  $LastChangedBy: low012 $
+ *  Copyright 2016 by luccioman; https://github.com/luccioman
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

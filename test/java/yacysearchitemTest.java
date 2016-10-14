@@ -1,9 +1,8 @@
 
 /**
- *  URIMetadataNodeTest
- *  Copyright 2011 by Michael Peter Christen
- *  First released 28.04.2011 at http://yacy.net
-*
+ *  yacysearchitemTest
+ *  Copyright 2016 by luccioman; https://github.com/luccioman
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -41,7 +40,7 @@ import net.yacy.search.schema.CollectionSchema;
 public class yacysearchitemTest {
 
 	/**
-	 * Three standard icons with diferrent sizes, one non-standard with a larger
+	 * Three standard icons with different sizes, one non-standard with a larger
 	 * size
 	 * 
 	 * @throws MalformedURLException

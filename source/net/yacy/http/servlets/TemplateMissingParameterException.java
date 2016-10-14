@@ -1,12 +1,7 @@
 // TemplateMissingParameterException.java
-// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 03.07.2007 on http://yacy.net
+// Copyright 2016 by luccioman; https://github.com/luccioman
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
 //
 // LICENSE
 //
